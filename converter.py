@@ -2,7 +2,7 @@ import subprocess
 import time
 from typing import Dict, List, Tuple
 import openai
-from example import LLM
+from chatgptapi import LLM
 from logger import create_logger
 import re
 import os
@@ -76,7 +76,7 @@ def query_fortran_script(file_name):
         },
         {
             "role": "user",
-            "content": f"Please convert the following Fortan f90 code which is in string format into usuable python code.  Please encapsulate the code into a main function and use __main__.  Here is the code {fortran_code}"
+            "content": f"Please convert the following Fortan f90 code which is in string format into usuable python code.  Please encapsulate the code into a main function and use __main__.  Here is the code {fortran_code}.  For any variable that is defined out side of that function please explain that variable"
         }
     ]
     
@@ -91,6 +91,12 @@ def query_fortran_script(file_name):
     res =  parse_gpt_python_input(response)
 
     while res[0] == True:
+        val = input('Statement encountered an error, continue? 1: yes, 2: no\n')
+        if (val == str(1) or val == 'no'):
+            res[0] = False
+            continue
+
+
         # Requery ChatGPT to fix its life mistakes
         prompt = [
             {
@@ -109,6 +115,10 @@ def query_fortran_script(file_name):
         except Exception:
             log.warning(f"Could not find prompt in output:\n\n{output}")
         res =  parse_gpt_python_input(response)
+
+    
+
+      
     
 def parse_gpt_python_input(python_script) -> Tuple[bool, str]:
     print(python_script)
@@ -134,10 +144,13 @@ def parse_gpt_python_input(python_script) -> Tuple[bool, str]:
     if error_code:
         return True, result
     
+    with open('final_script.py', 'w') as script_file:
+        script_file.write(python_script)
     return False, result
 
 def main():
-    file_name = 'test.f90'
+
+    file_name = 'elmfire_centroidfcn.f90'
     query_fortran_script(file_name)
     # python_script = test_python_script2
     # out = parse_gpt_python_input(python_script)
