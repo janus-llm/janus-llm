@@ -1,65 +1,15 @@
 import subprocess
-import time
-from typing import Dict, List, Tuple
-import openai
-from chatgptapi import LLM
-from logger import create_logger
+from typing import Tuple
+from janus.llm import LLM
+from janus.utils.logger import create_logger
 import re
 import os
 
 
 log = create_logger(__name__)
 
-
-
-
-test_python_script = '''
-def main():
-    a = 5
-    b = 1
-    result = a / b  # This line will cause an error
-    print(result)
-if __name__ == '__main__':
-    main()
-'''
-
-test_python_script2 = '''
-from math import sqrt
-def main():
-        # Compute the area of a triangle using Heron's formula
-
-        a, b, c = map(float, input().split())
-
-        print('a =', a)
-        print('b =', b)
-        print('c =', c)
-        print()
-
-        Cond_1 = (a > 0.) and (b > 0.) and (c > 0.0)
-        Cond_2 = (a + b > c) and (a + c > b) and (b + c > a)
-
-        if Cond_1 and Cond_2:
-                s = (a + b + c) / 2.0
-                Area = sqrt(s * (s - a) * (s - b) * (s - c))
-                print('Triangle area =', Area)
-        else:
-                print('ERROR: this is not a triangle!')
-
-
-if __name__ == '__main__':
-        main()
-'''
-
-MODEL_TYPES: Dict[str, str] = {
-    "gpt-3.5-turbo": "chat-gpt",
-    "text-davinci-003": "gpt-3",
-    "text-curie-001": "gpt-3",
-    "text-babbage-001": "gpt-3",
-    "text-ada-001": "gpt-3",
-}
-
-# openai_key = os.environ['OPENAI_API_KEY']
-openai_key = "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"
+openai_key = os.getenv("OPENAI_API_KEY")
+openai_org = os.getenv("OPENAI_ORG")
 
 def query_fortran_script(file_name):
     with open(file_name, "r") as file:
@@ -67,7 +17,7 @@ def query_fortran_script(file_name):
 
     print(fortran_code)
 
-    llm = LLM('gpt-3.5-turbo', openai_key)
+    llm = LLM('gpt-3.5-turbo', openai_key, openai_org)
 
     prompt = [
         {

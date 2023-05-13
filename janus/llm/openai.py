@@ -1,9 +1,9 @@
 import time
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import openai
 
-from logger import create_logger
+from ..utils.logger import create_logger
 
 
 log = create_logger(__name__)
@@ -18,24 +18,26 @@ MODEL_TYPES: Dict[str, str] = {
 }
 
 
-class LLM:
+class OpenAI:
     """A class to interact with the OpenAI LLMs."""
 
     def __init__(
         self,
         model: str,
         open_ai_api_key: str,
-        temperature: float = 1.0,
-        top_p: float = 1.0,
-        max_tokens: int = 1024,
-        presence_penalty: float = 0.0,
-        frequency_penalty: float = 0.0,
+        organization: Optional[str] = None,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        presence_penalty: Optional[float] = None,
+        frequency_penalty: Optional[float] = None,
     ) -> None:
-        """Initialize the LLM.
+        """Initialize the LLM
 
         Arguments:
             model: The model to use for the LLM.
             open_ai_api_key: The OpenAI API key to use for the LLM.
+            organization: The OpenAI API organization.
 
         Chat GPT Arguments:
             temperature: The temperature to use for the LLM.
@@ -51,21 +53,6 @@ class LLM:
         See [here](https://platform.openai.com/docs/api-reference/chat/create) for more
         documentation on each variable.
 
-        GPT-3 Arguments:
-            suffix: The suffix to use for the LLM.
-            max_tokens: The maximum number of tokens to generate.
-            temperature: The temperature to use for the LLM.
-            top_p: The top p to use for the LLM.
-            n: The number of outputs to generate.
-            stream: Whether to stream the output.
-            logprobs: The number of logprobs to return.
-            echo: Whether to echo the prompt.
-            stop: A list of strings to stop the LLM from generating.
-            presence_penalty: The presence penalty to use for the LLM.
-            frequency_penalty: The frequency penalty to use for the LLM.
-            best_of: The number of best outputs to return.
-            logit_bias: A dictionary of tokens to bias the output towards.
-
         Raises:
             ValueError: If the model is not supported.
         """
@@ -78,6 +65,7 @@ class LLM:
         self.model_type = MODEL_TYPES[model]
         self.open_ai_api_key = open_ai_api_key
         openai.api_key = open_ai_api_key
+        openai.organization = organization
 
         # Set these to null if None so that they are not passed to the API
         self.temperature = temperature
@@ -101,14 +89,14 @@ class LLM:
             else:
                 return self._get_output_gpt_3(prompt)
         except openai.error.RateLimitError:
-            log.error(
+            log.warn(
                 "OpenAI API rate limit exceeded. Waiting 1 minute and trying again."
             )
             time.sleep(60)
             output = self.get_output(prompt)
             return output
         except openai.error.Timeout:
-            log.error("OpenAI API timeout. Waiting 1 minute and trying again.")
+            log.warn("OpenAI API timeout. Waiting 1 minute and trying again.")
             time.sleep(60)
             output = self.get_output(prompt)
             return output
