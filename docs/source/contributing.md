@@ -157,7 +157,9 @@ Where your file is located in that `toctree` (Table of Contents Tree) is where t
 
 ### Pushing Doc Changes to MRs
 
-Every time changes are pushed to a merge request, artifacts will be created that will allow you to view the hosted version of the GitLab Pages documentation, seen if you click on _HTML Documentation_ and navigate to `public/index.html`.
+Every time changes are pushed to a merge request, artifacts will be created that will allow you to view the hosted version of the GitLab Pages documentation, seen if you click on _HTML Documentation_ (see below) and navigate to `public/index.html`.
+
+![view_artifacts](_static/html_documentation.png)
 
 ### Testing Documentation Locally
 
