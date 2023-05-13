@@ -1,0 +1,52 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: check-docstring-first
+      - id: check-json
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+  - repo: https://gitlab.com/smop/pre-commit-hooks
+    rev: v1.0.0
+    hooks:
+      - id: check-poetry
+        name: check Poetry TOML
+        description: Validates the structure of the pyproject.toml file
+        entry: poetry check
+        language: system
+        pass_filenames: false
+        files: pyproject.toml
+  - repo: local
+    hooks:
+      - id: black
+        name: black
+        language: python
+        entry: black
+        args: ["--preview"]
+        types: [python]
+      - id: isort
+        name: isort
+        language: python
+        entry: isort
+        args: [--trailing-comma, -m=3]
+        types: [python]
+      - id: flake8
+        name: flake8
+        language: python
+        entry: flake8
+        args: [--config=.flake8]
+        types: [python]
+      # - id: bandit
+      #   name: bandit
+      #   language: python
+      #   entry: bandit
+      #   args: [-r, .]
+      #   types: [python]
+      # - id: pydocstyle
+      #   name: pydocstyle
+      #   language: python
+      #   entry: pydocstyle
+      #   args: [--ignore=D100,D101,D102,D103,D104,D105,D107]
+      #   types: [python]

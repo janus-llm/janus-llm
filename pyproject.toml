@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "janus"
+version = "0.1.0"
+description = "A transcoding library using LLMs."
+authors = ["Michael Doyle <mdoyle@mitre.org>"]
+license = "Apache 2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+rich = "^13.3.5"
+openai = "^0.27.6"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+flake8 = "^6.0.0"
+isort = "^5.12.0"
+pre-commit = "^3.3.1"
+pydocstyle = "^6.3.0"
+bandit = "^1.7.5"
+
+[tool.poetry.group.docs.dependencies]
+Sphinx = "^6.0.2"
+sphinx-autoapi = "^1.8.4"
+sphinx-rtd-theme = "^1.0.0"
+myst-parser = "^1.0.0"
+furo = "^2023.3.27"
+
+[tool.black]
+line-length = 90
+target-version = ['py310']
+
+[tool.pydocstyle]
+convention = "google"
+# match '*.py' files that don't start with 'test_' or '__init'
+match = '(?![test_|__init]).*\.py'
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
