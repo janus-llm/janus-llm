@@ -23,11 +23,20 @@ def query_fortran_script(file_name):
     prompt = [
         {
             "role": "system",
-            "content": "Your purpose is to convert Fortran f90 file code into runnable Python code (python version 3.9)",
+            "content": (
+                "Your purpose is to convert Fortran f90 file code into runnable Python"
+                " code (python version 3.9)"
+            ),
         },
         {
             "role": "user",
-            "content": f"Please convert the following Fortan f90 code which is in string format into usuable python code.  Please encapsulate the code into a main function and use __main__.  Here is the code {fortran_code}.  For any variable that is defined out side of that function please explain that variable",
+            "content": (
+                "Please convert the following Fortan f90 code which is in string format"
+                " into usuable python code.  Please encapsulate the code into a main"
+                f" function and use __main__.  Here is the code {fortran_code}.  For any"
+                " variable that is defined out side of that function please explain that"
+                " variable"
+            ),
         },
     ]
 
@@ -51,11 +60,18 @@ def query_fortran_script(file_name):
         prompt = [
             {
                 "role": "system",
-                "content": "Your purpose is to convert Fortran f90 file code into runnable Python code (python version 3.9) and you messed up the output of your last query",
+                "content": (
+                    "Your purpose is to convert Fortran f90 file code into runnable"
+                    " Python code (python version 3.9) and you messed up the output of"
+                    " your last query"
+                ),
             },
             {
                 "role": "user",
-                "content": f"From this original code we gave you seen here {fortran_code} it returned the following error {res[1]}.  Please fix this.",
+                "content": (
+                    f"From this original code we gave you seen here {fortran_code} it"
+                    f" returned the following error {res[1]}.  Please fix this."
+                ),
             },
         ]
 
