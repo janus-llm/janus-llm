@@ -1,0 +1,130 @@
+image: "python:3.10"
+
+before_script:
+  - python --version
+  # Adding this because furo gets a wheel validation error for the 1.4.1 install
+  - export POETRY_VERSION=1.4.0
+  - curl -sSkL https://install.python-poetry.org | python -
+  - export PATH=$PATH:$HOME/.local/bin
+  - poetry --version
+  - DEBIAN_FRONTEND=noninteractive apt update
+  - DEBIAN_FRONTEND=noninteractive apt -y install libgl1-mesa-dev
+
+.install_dev:
+  script:
+    - poetry install --without docs
+
+stages:
+  - Static Analysis
+  - Documentation
+  - Release
+
+###################
+# Static Analysis #
+###################
+flake8:
+  stage: Static Analysis
+  tags:
+    - lslab2
+  script:
+    - poetry install --only dev
+    - poetry run flake8 .
+  needs: []
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - "**/*.py"
+      - poetry.lock
+      - .flake8
+
+black:
+  stage: Static Analysis
+  tags:
+    - lslab2
+  script:
+    - poetry install --only dev
+    - poetry run black --check ./
+  needs: []
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - "**/*.py"
+      - poetry.lock
+
+isort:
+  stage: Static Analysis
+  tags:
+    - lslab2
+  script:
+    - poetry install --only dev
+    - poetry run isort --check --trailing-comma -m=3 .
+  needs: []
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - "**/*.py"
+      - poetry.lock
+
+################
+# GitLab Pages #
+################
+.pages:
+  script:
+    - poetry install --only docs
+    - poetry run sphinx-build -d docs/build/doctrees docs/source docs/build/html
+    - mv docs/build/html public/
+
+test-pages:
+  stage: Documentation
+  tags:
+    - lslab2
+  extends: .pages
+  needs: []
+  artifacts:
+    expose_as: 'HTML Documentation'
+    paths:
+      - public/
+    expire_in: 1 week
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - "**/*.py"
+      - docs/**/*
+      - poetry.lock
+
+pages:
+  stage: Documentation
+  tags:
+    - lslab2
+  extends: .pages
+  artifacts:
+    paths:
+      - public
+  only:
+    - tags
+
+###########################
+# Packaging and Releasing #
+###########################
+test_release:
+  stage: Release
+  tags:
+    - lslab2
+  script:
+    - poetry build
+    - poetry run pip install -U dist/*.whl
+    # Remove the directory so that it's not using the directory to run the code and it uses the installed package
+    - rm -rf simfire
+    - poetry run python tests/package.py
+    - SDL_VIDEODRIVER=dummy poetry run python tests/sim.py
+  needs: []
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - "**/*.py"
+      - poetry.lock
