@@ -1,10 +1,10 @@
+"""A module that defines..."""
 import time
 from typing import Dict, List, Optional
 
 import openai
 
 from ..utils.logger import create_logger
-
 
 log = create_logger(__name__)
 
@@ -32,7 +32,7 @@ class OpenAI:
         presence_penalty: Optional[float] = None,
         frequency_penalty: Optional[float] = None,
     ) -> None:
-        """Initialize the LLM
+        """Initialize the LLM.
 
         Arguments:
             model: The model to use for the LLM.
@@ -89,9 +89,7 @@ class OpenAI:
             else:
                 return self._get_output_gpt_3(prompt)
         except openai.error.RateLimitError:
-            log.warn(
-                "OpenAI API rate limit exceeded. Waiting 1 minute and trying again."
-            )
+            log.warn("OpenAI API rate limit exceeded. Waiting 1 minute and trying again.")
             time.sleep(60)
             output = self.get_output(prompt)
             return output
