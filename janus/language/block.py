@@ -14,6 +14,7 @@ class CodeBlock:
         segment_id: The ID of the segment within the code block (if applicable).
         language: The language of the code block.
         type: The type of the code block ('function', 'module', etc.).
+        tokens: The number of tokens in the code block.
     """
 
     code: str
@@ -23,3 +24,4 @@ class CodeBlock:
     segment_id: int
     language: str
     type: str
+    tokens: int

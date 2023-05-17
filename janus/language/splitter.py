@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 from typing import List, Optional, Tuple
 
 from .pattern import Pattern
@@ -21,6 +22,7 @@ class Splitter:
         self.patterns: Tuple[Pattern, ...] = patterns
         self.max_tokens: int = max_tokens
         self.language: Optional[str] = None
+        self.comment: Optional[str] = None
 
     def split(self, file: Path | str) -> Tuple[CodeBlock, ...]:
         path = Path(file)
@@ -48,9 +50,10 @@ class Splitter:
         lines = code.splitlines()
 
         for line in lines:
-            tokens = line.strip().split()
-            line_token_count = len(tokens)
-            total_token_count = token_count + line_token_count
+            line = line.strip()
+
+            if not line or line.startswith(self.comment):
+                continue
 
             if in_block:
                 current_component += line + "\n"
@@ -61,12 +64,13 @@ class Splitter:
                         components.append(
                             CodeBlock(
                                 code=current_component.strip(),
-                                path="",
+                                path=path,
                                 complete=True,
                                 block_id=block_id,
                                 segment_id=segment_id,
-                                language="Fortran",
+                                language=self.language,
                                 type="",
+                                tokens=self._count_tokens(current_component.strip()),
                             )
                         )
                         current_component = ""
@@ -75,17 +79,18 @@ class Splitter:
                         in_block = False
                 continue
 
-            if total_token_count > self.max_tokens:
+            if self._count_tokens(current_component) > self.max_tokens:
                 if token_count > 0:
                     components.append(
                         CodeBlock(
                             code=current_component.strip(),
-                            path="",
+                            path=path,
                             complete=False,
                             block_id=block_id,
                             segment_id=segment_id,
-                            language="Fortran",
+                            language=self.language,
                             type="",
+                            tokens=self._count_tokens(current_component.strip()),
                         )
                     )
                     current_component = ""
@@ -93,29 +98,62 @@ class Splitter:
                     segment_id += 1
 
             if not in_block:
+                match_start = False
                 for pattern in self.patterns:
-                    match_start = pattern.start.search(line)
-                    if match_start:
-                        in_block = True
-                        current_component += line + "\n"
-                        token_count += line_token_count
-                        block_id += 1
-                        block_stack.append(pattern.end)
-                        break
-
-            token_count += line_token_count
+                    if pattern.start.search(line) is not None:
+                        match_start = True
+                        block_pattern = pattern
+                if match_start:
+                    if current_component:
+                        components.append(
+                            CodeBlock(
+                                code=current_component.strip(),
+                                path=path,
+                                complete=False,
+                                block_id=block_id,
+                                segment_id=segment_id,
+                                language=self.language,
+                                type="",
+                                tokens=self._count_tokens(current_component.strip()),
+                            )
+                        )
+                        current_component = ""
+                        token_count = 0
+                        segment_id += 1
+                    in_block = True
+                    current_component += line + "\n"
+                    block_id += 1
+                    block_stack.append(block_pattern.end)
+                else:
+                    current_component += line + "\n"
 
         if current_component:
             components.append(
                 CodeBlock(
                     code=current_component.strip(),
-                    path="",
+                    path=path,
                     complete=False,
                     block_id=block_id,
                     segment_id=segment_id,
-                    language="Fortran",
+                    language=self.language,
                     type="",
+                    tokens=self._count_tokens(current_component.strip()),
                 )
             )
 
         return components
+
+    def _count_tokens(self, code: str) -> int:
+        """Count the number of tokens in the given code.
+
+        Arguments:
+            code: The code to count the number of tokens in.
+
+        Returns:
+            The number of tokens in the given code.
+        """
+
+        code = re.sub(r'("(?:""|[^"])*")', "", code)  # Remove string literals
+        tokens = re.split(r"[^\w]+", code)  # Split by non-word characters
+        tokens = [token for token in tokens if token]  # Remove empty tokens
+        return len(tokens)

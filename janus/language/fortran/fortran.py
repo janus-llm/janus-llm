@@ -40,3 +40,4 @@ class FortranSplitter(Splitter):
 
         super().__init__(patterns, max_tokens)
         self.language: str = "fortran"
+        self.comment: str = "!"
