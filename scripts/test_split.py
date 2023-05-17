@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import List
 
-from janus.language.fortran import FortranSplitter
 from janus.language.block import File
+from janus.language.fortran import FortranSplitter
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
