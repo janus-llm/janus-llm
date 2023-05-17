@@ -54,8 +54,8 @@ class FortranIfPattern(Pattern):
         type: The type of the functional code block ('if', 'do', etc.).
     """
 
-    start: re.Pattern = re.compile(r"IF", re.IGNORECASE)
-    end: re.Pattern = re.compile(r"ENDIF", re.IGNORECASE)
+    start: re.Pattern = re.compile(r"^\s*IF", re.IGNORECASE)
+    end: re.Pattern = re.compile(r"^\s*ENDIF", re.IGNORECASE)
     type: str = "if"
 
 
@@ -71,8 +71,8 @@ class FortranDoPattern(Pattern):
         type: The type of the functional code block ('if', 'do', etc.).
     """
 
-    start: re.Pattern = re.compile(r"DO", re.IGNORECASE)
-    end: re.Pattern = re.compile(r"ENDDO", re.IGNORECASE)
+    start: re.Pattern = re.compile(r"^\s*DO", re.IGNORECASE)
+    end: re.Pattern = re.compile(r"^\s*ENDDO", re.IGNORECASE)
     type: str = "do"
 
 

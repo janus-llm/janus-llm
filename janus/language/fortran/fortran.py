@@ -2,12 +2,7 @@ from typing import Tuple
 
 from ..pattern import Pattern
 from ..splitter import Splitter
-from .patterns import (
-    FortranDoPattern,
-    FortranFunctionPattern,
-    FortranIfPattern,
-    FortranSubroutinePattern,
-)
+from .patterns import FortranFunctionPattern, FortranSubroutinePattern
 
 
 class FortranSplitter(Splitter):
@@ -23,8 +18,8 @@ class FortranSplitter(Splitter):
         self,
         patterns: Tuple[Pattern, ...] = (
             FortranFunctionPattern(),
-            FortranIfPattern(),
-            FortranDoPattern(),
+            # FortranIfPattern(),
+            # FortranDoPattern(),
             # FortranModulePattern(),
             # FortranProgramPattern(),
             FortranSubroutinePattern(),
