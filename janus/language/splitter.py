@@ -1,8 +1,9 @@
-import re
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-from .block import CodeBlock
+import tiktoken
+
+from .block import CodeBlock, File
 from .pattern import Pattern
 
 
@@ -11,7 +12,12 @@ class Splitter:
     transcoding.
     """
 
-    def __init__(self, patterns: Tuple[Pattern, ...], max_tokens: int = 4096) -> None:
+    def __init__(
+        self,
+        patterns: Tuple[Pattern, ...],
+        max_tokens: int = 4096,
+        model: str = "gpt-3.5-turbo",
+    ) -> None:
         """Initialize a Splitter instance.
 
         Arguments:
@@ -23,13 +29,11 @@ class Splitter:
         self.max_tokens: int = max_tokens
         self.language: Optional[str] = None
         self.comment: Optional[str] = None
+        # Using tiktoken as the tokenizer because that's what's recommended for OpenAI
+        # models.
+        self._tokenizer = tiktoken.encoding_for_model(model)
 
-    def split(self, file: Path | str) -> Tuple[CodeBlock, ...]:
-        path = Path(file)
-        code = path.read_text()
-        return self._split(code, path)
-
-    def _split(self, code: str, path: Path) -> Tuple[CodeBlock, ...]:
+    def split(self, file: Path | str) -> File:
         """Split the given file into functional code blocks.
 
         Arguments:
@@ -38,7 +42,19 @@ class Splitter:
         Returns:
             A tuple of functional blocks.
         """
+        path = Path(file)
+        code = path.read_text()
+        return self._split(code, path)
 
+    def _split(self, code: str, path: Path) -> File:
+        """Split the given file into functional code blocks.
+
+        Arguments:
+            file: The file to split into functional blocks.
+
+        Returns:
+            A tuple of functional blocks.
+        """
         components: List[CodeBlock] = []
         current_component: str = ""
         token_count: int = 0
@@ -141,7 +157,9 @@ class Splitter:
                 )
             )
 
-        return components
+        file = File(path, components)
+
+        return file
 
     def _count_tokens(self, code: str) -> int:
         """Count the number of tokens in the given code.
@@ -152,8 +170,5 @@ class Splitter:
         Returns:
             The number of tokens in the given code.
         """
-
-        code = re.sub(r'("(?:""|[^"])*")', "", code)  # Remove string literals
-        tokens = re.split(r"[^\w]+", code)  # Split by non-word characters
-        tokens = [token for token in tokens if token]  # Remove empty tokens
+        tokens = self._tokenizer.encode(code)
         return len(tokens)

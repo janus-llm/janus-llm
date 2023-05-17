@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Tuple
 
 
 @dataclass
 class CodeBlock:
-    """A base class for all language code blocks.
+    """A class that represents a functional block of code.
 
     Attributes:
         code: The code block.
@@ -25,3 +26,16 @@ class CodeBlock:
     language: str
     type: str
     tokens: int
+
+
+@dataclass
+class File:
+    """A class that represents a file made up of functional blocks of code.
+
+    Attributes:
+        path: The path to the file.
+        blocks: The functional blocks of code in the file.
+    """
+
+    path: Path
+    blocks: Tuple[CodeBlock, ...]
