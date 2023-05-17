@@ -170,14 +170,12 @@ class OpenAI:
             if self.model_type == "chat-gpt":
                 if not isinstance(prompt, list):
                     raise ValueError(
-                        "Prompts must be a list of messages for " "chat-gpt models."
+                        "Prompts must be a list of messages for chat-gpt models."
                     )
                 outputs.append(self._get_output_chat_gpt(prompt))
             else:
                 if not isinstance(prompt, str):
-                    raise ValueError(
-                        "Prompts must be a string for non-chat-gpt " "models."
-                    )
+                    raise ValueError("Prompts must be a string for non-chat-gpt models.")
                 outputs.append(self._get_output_gpt_3(prompt))
 
         return outputs

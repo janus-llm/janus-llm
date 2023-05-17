@@ -3,9 +3,9 @@ from typing import Tuple
 from ..pattern import Pattern
 from ..splitter import Splitter
 from .patterns import (
+    FortranDoPattern,
     FortranFunctionPattern,
     FortranIfPattern,
-    FortranDoPattern,
     FortranSubroutinePattern,
 )
 

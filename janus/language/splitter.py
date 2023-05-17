@@ -1,9 +1,9 @@
-from pathlib import Path
 import re
+from pathlib import Path
 from typing import List, Optional, Tuple
 
-from .pattern import Pattern
 from .block import CodeBlock
+from .pattern import Pattern
 
 
 class Splitter:
