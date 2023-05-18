@@ -34,7 +34,7 @@ class Translator:
             source_language: The source programming language.
             target_language: The target programming language.
         """
-        self.model = model
+        self.model = model.lower()
         self.source_language = source_language.lower()
         self.target_language = target_language.lower()
         self._check_languages()

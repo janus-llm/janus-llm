@@ -65,10 +65,10 @@ class PromptEngine:
         Arguments:
             model: The LLM to use for translation.
         """
-        self.model = model
-        self.source_language = source_language
-        self.target_language = target_language
-        self.prompt_template = prompt_template
+        self.model = model.lower()
+        self.source_language = source_language.lower()
+        self.target_language = target_language.lower()
+        self.prompt_template = prompt_template.lower()
         self._check_prompt_templates()
 
     def create(self, code: CodeBlock) -> Prompt:
