@@ -101,13 +101,15 @@ class OpenAI:
             else:
                 return self._get_output_gpt_3(prompt)
         except openai.error.RateLimitError:
-            log.warn("OpenAI API rate limit exceeded. Waiting 1 minute and trying again.")
-            time.sleep(60)
+            log.warn(
+                "OpenAI API rate limit exceeded. Waiting 30 seconds and trying again."
+            )
+            time.sleep(30)
             output = self.get_output(prompt)
             return output
         except openai.error.Timeout:
-            log.warn("OpenAI API timeout. Waiting 1 minute and trying again.")
-            time.sleep(60)
+            log.warn("OpenAI API timeout. Waiting 30 seconds and trying again.")
+            time.sleep(30)
             output = self.get_output(prompt)
             return output
 
@@ -148,8 +150,10 @@ class OpenAI:
         )
 
         output = response["choices"][0]["message"]["content"]
+        tokens = response["usage"]
+        cost = COST_PER_MODEL[self.model] * (tokens["total_tokens"] / 1000)
 
-        return output
+        return output, tokens, cost
 
     def _get_output_gpt_3(self, prompt: str) -> str:
         """Generate a single output from the LLM.

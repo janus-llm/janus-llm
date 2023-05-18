@@ -1,5 +1,5 @@
 import os
-from dataclasses import asdict
+import re
 from pathlib import Path
 from typing import List, Tuple
 
@@ -62,12 +62,20 @@ class Translator:
             blocks: List[TranslatedCodeBlock] = []
             for code in file.blocks:
                 prompt = self._prompt_engine.create(code)
-                output = self._llm.get_output(prompt.prompt)
-                blocks.append(self._output_to_block(output, code))
+                output, tokens, cost = self._llm.get_output(prompt.prompt)
+                output = self._parse_llm_output(output)
+                new_filename = file.path.name.replace(".f90", ".py")
+                outpath = Path(output_directory) / new_filename
+                blocks.append(self._output_to_block(output, outpath, code, tokens, cost))
             translated_files.append(File(file.path, blocks))
 
     def _output_to_block(
-        self, output: str, original_block: CodeBlock
+        self,
+        output: str,
+        outpath: Path,
+        original_block: CodeBlock,
+        tokens: int,
+        cost: float,
     ) -> TranslatedCodeBlock:
         """Convert the output of an LLM to a `TranslatedCodeBlock`.
 
@@ -77,9 +85,19 @@ class Translator:
         Returns:
             A `TranslatedCodeBlock` instance.
         """
-        original_dict = asdict(original_block)
-        del original_dict["code"]
-        return TranslatedCodeBlock(output, **original_dict)
+        block = TranslatedCodeBlock(
+            output,
+            outpath,
+            original_block.complete,
+            original_block.block_id,
+            original_block.segment_id,
+            self.target_language,
+            "",
+            tokens["completion_tokens"],
+            original_block,
+            cost,
+        )
+        return block
 
     def _get_files(self, directory: Path) -> List[File]:
         """Get the files in the given directory and split them into functional blocks.
@@ -104,6 +122,25 @@ class Translator:
             files.append(splitter.split(file))
 
         return files
+
+    def _parse_llm_output(self, output: str) -> str:
+        """Parse the output of an LLM.
+
+        Arguments:
+            output: The output of the LLM.
+
+        Returns:
+            The parsed output.
+        """
+        try:
+            # response = re.findall(r"\{.*?\}", output)[0].strip("{}")
+            pattern = r"```(.*?)```"
+            response = re.search(pattern, output, re.DOTALL)
+            response = response.group(1).strip("python\n")
+        except Exception:
+            log.warning(f"Could not find code in output:\n\n{output}")
+
+        return response
 
     def _load_model(self) -> None:
         """Check that the model is valid."""

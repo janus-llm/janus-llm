@@ -62,7 +62,6 @@ class Splitter:
         """
         components: List[CodeBlock] = []
         current_component: str = ""
-        token_count: int = 0
         in_block: bool = False
         segment_id: int = 0
         block_id: int = 0
@@ -95,28 +94,25 @@ class Splitter:
                             )
                         )
                         current_component = ""
-                        token_count = 0
                         segment_id = 0
                         in_block = False
                 continue
 
             if self._count_tokens(current_component) > self.max_tokens:
-                if token_count > 0:
-                    components.append(
-                        CodeBlock(
-                            code=current_component.strip(),
-                            path=path,
-                            complete=False,
-                            block_id=block_id,
-                            segment_id=segment_id,
-                            language=self.language,
-                            type="",
-                            tokens=self._count_tokens(current_component.strip()),
-                        )
+                components.append(
+                    CodeBlock(
+                        code=current_component.strip(),
+                        path=path,
+                        complete=False,
+                        block_id=block_id,
+                        segment_id=segment_id,
+                        language=self.language,
+                        type="",
+                        tokens=self._count_tokens(current_component.strip()),
                     )
-                    current_component = ""
-                    token_count = 0
-                    segment_id += 1
+                )
+                current_component = ""
+                segment_id += 1
 
             if not in_block:
                 match_start = False
@@ -139,7 +135,6 @@ class Splitter:
                             )
                         )
                         current_component = ""
-                        token_count = 0
                         segment_id += 1
                     in_block = True
                     current_component += line + "\n"

@@ -46,6 +46,7 @@ class TranslatedCodeBlock:
         type: The type of the code block ('function', 'module', etc.).
         tokens: The number of tokens in the code block.
         original: The original code block.
+        cost: The total cost to translate the original code block.
     """
 
     code: str
@@ -57,6 +58,7 @@ class TranslatedCodeBlock:
     type: str
     tokens: int
     original: CodeBlock
+    cost: float
 
 
 @dataclass

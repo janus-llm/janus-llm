@@ -48,7 +48,16 @@ class PromptTemplate:
             "content": (
                 "Please convert the following <SOURCE LANGUAGE> <FILE SUFFIX> code found "
                 "in between triple backticks and is in string format into useable "
-                "<TARGET LANGUAGE> code. \n\n```<SOURCE CODE>```"
+                "<TARGET LANGUAGE> code. If the given code is incomplete, assume it will "
+                "is translated elsewhere. If the given code is missing variable "
+                "definitions, assume they are assigned elsewhere. If there is are "
+                "incomplete statements that haven't been closed out, assume they are "
+                "closed out in other translations. "
+                "Some more things to remember: (1) follow standard styling practice for "
+                "the target language, (2) make sure the language is typed correctly, and "
+                "(3) make sure its well-documented."
+                "Make sure your result also fits within three backticks."
+                "\n\n```<SOURCE CODE>```"
             ),
         },
     )
