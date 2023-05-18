@@ -63,10 +63,13 @@ class Translator:
             for code in file.blocks:
                 prompt = self._prompt_engine.create(code)
                 output, tokens, cost = self._llm.get_output(prompt.prompt)
-                output = self._parse_llm_output(output)
+                parsed_output = self._parse_llm_output(output)
+                # TODO: Where I'm currently devving
                 new_filename = file.path.name.replace(".f90", ".py")
                 outpath = Path(output_directory) / new_filename
-                blocks.append(self._output_to_block(output, outpath, code, tokens, cost))
+                blocks.append(
+                    self._output_to_block(parsed_output, outpath, code, tokens, cost)
+                )
             translated_files.append(File(file.path, blocks))
 
     def _output_to_block(
