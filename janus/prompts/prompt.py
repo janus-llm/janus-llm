@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import asdict, dataclass
 from typing import Dict, List, Tuple
 
@@ -112,8 +113,11 @@ class PromptEngine:
             The converted prompt.
         """
         prompt: List[Dict[str, str]] = []
+        # Need to deepcopy to we get original template each time. Otherwise last prompt
+        # and code remains
+        prompt_template = deepcopy(self.prompt_template)
 
-        for message in self.prompt_template:
+        for message in prompt_template:
             log.debug(f"Message: {message}")
             message["content"] = message["content"].replace(
                 "<SOURCE LANGUAGE>", self.source_language

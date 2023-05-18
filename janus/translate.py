@@ -52,6 +52,16 @@ class Translator:
             input_directory: The directory containing the code to translate.
             output_directory: The directory to write the translated code to.
         """
+        # Convert paths to pathlib Paths if needed
+        if isinstance(input_directory, str):
+            input_directory = Path(input_directory)
+        if isinstance(output_directory, str):
+            output_directory = Path(output_directory)
+
+        # Make sure the output directory exists
+        if not output_directory.exists():
+            output_directory.mkdir(parents=True)
+
         # First, get the files in the input directory and split them into CodeBlocks
         files = self._get_files(input_directory)
 
@@ -59,18 +69,24 @@ class Translator:
 
         # Now, loop through every code block in every file and translate it with an LLM
         for file in files:
-            blocks: List[TranslatedCodeBlock] = []
+            out_blocks: List[TranslatedCodeBlock] = []
+            # Create the output file
+            out_filename = file.path.name.replace(".f90", ".py")
+            outpath = Path(output_directory) / out_filename
+            # Loop through all code blocks in the file
             for code in file.blocks:
                 prompt = self._prompt_engine.create(code)
                 output, tokens, cost = self._llm.get_output(prompt.prompt)
                 parsed_output = self._parse_llm_output(output)
                 # TODO: Where I'm currently devving
-                new_filename = file.path.name.replace(".f90", ".py")
-                outpath = Path(output_directory) / new_filename
-                blocks.append(
+                out_blocks.append(
                     self._output_to_block(parsed_output, outpath, code, tokens, cost)
                 )
-            translated_files.append(File(file.path, blocks))
+            # Write the code blocks to the output file
+            with open(outpath, "w") as f:
+                f.writelines([f"{b.code}\n" for b in out_blocks])
+            # Add the translated file to the list of translated files
+            translated_files.append(File(file.path, out_blocks))
 
     def _output_to_block(
         self,
