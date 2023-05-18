@@ -1,19 +1,19 @@
 import os
+from dataclasses import asdict
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
-from .language.block import File
+from .language.block import CodeBlock, File, TranslatedCodeBlock
 from .language.fortran import FortranSplitter
 from .llm.openai import TOKEN_LIMITS, OpenAI
+from .prompts.prompt import PromptEngine
+from .utils.logger import create_logger
+
+log = create_logger(__name__)
 
 VALID_SOURCE_LANGUAGES: Tuple[str, ...] = ("fortran",)
 VALID_TARGET_LANGUAGES: Tuple[str, ...] = ("python",)
 VALID_MODELS: Tuple[str, ...] = tuple(TOKEN_LIMITS.keys())
-
-LANGUAGE_SUFFIXES: Dict[str, str] = {
-    "fortran": "f90",
-    "python": "py",
-}
 
 
 class Translator:
@@ -24,6 +24,7 @@ class Translator:
         model: str = "gpt-3.5-turbo",
         source_language: str = "fortran",
         target_language: str = "python",
+        target_version: str = "3.10",
     ) -> None:
         """Initialize a Translator instance.
 
@@ -37,8 +38,10 @@ class Translator:
         self.model = model.lower()
         self.source_language = source_language.lower()
         self.target_language = target_language.lower()
+        self.target_version = target_version
         self._check_languages()
         self._load_model()
+        self._load_prompt_engine()
 
     def translate(
         self, input_directory: str | Path, output_directory: str | Path
@@ -52,9 +55,31 @@ class Translator:
         # First, get the files in the input directory and split them into CodeBlocks
         files = self._get_files(input_directory)
 
+        translated_files: List[File] = []
+
         # Now, loop through every code block in every file and translate it with an LLM
         for file in files:
-            pass
+            blocks: List[TranslatedCodeBlock] = []
+            for code in file.blocks:
+                prompt = self._prompt_engine.create(code)
+                output = self._llm.get_output(prompt.prompt)
+                blocks.append(self._output_to_block(output, code))
+            translated_files.append(File(file.path, blocks))
+
+    def _output_to_block(
+        self, output: str, original_block: CodeBlock
+    ) -> TranslatedCodeBlock:
+        """Convert the output of an LLM to a `TranslatedCodeBlock`.
+
+        Arguments:
+            output: The output of the LLM.
+
+        Returns:
+            A `TranslatedCodeBlock` instance.
+        """
+        original_dict = asdict(original_block)
+        del original_dict["code"]
+        return TranslatedCodeBlock(output, **original_dict)
 
     def _get_files(self, directory: Path) -> List[File]:
         """Get the files in the given directory and split them into functional blocks.
@@ -66,7 +91,7 @@ class Translator:
             A list of `File`s.
         """
         if self.source_language == "fortran":
-            splitter = FortranSplitter()
+            splitter = FortranSplitter(max_tokens=self._llm.model_max_tokens)
             glob = "**/*.f90"
         else:
             raise NotImplementedError(
@@ -91,6 +116,16 @@ class Translator:
             self._max_tokens = TOKEN_LIMITS[self.model]
         self._llm = OpenAI(
             self.model, os.getenv("OPENAI_API_KEY"), os.getenv("OPENAI_ORG_ID")
+        )
+
+    def _load_prompt_engine(self) -> None:
+        """Load the prompt engine."""
+        self._prompt_engine = PromptEngine(
+            self.model,
+            self.source_language,
+            self.target_language,
+            self.target_version,
+            "simple",
         )
 
     def _check_languages(self) -> None:

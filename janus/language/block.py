@@ -2,6 +2,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Tuple
 
+from ..utils.logger import create_logger
+
+log = create_logger(__name__)
+
 
 @dataclass
 class CodeBlock:

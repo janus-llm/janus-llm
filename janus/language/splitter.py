@@ -3,8 +3,11 @@ from typing import List, Optional, Tuple
 
 import tiktoken
 
+from ..utils.logger import create_logger
 from .block import CodeBlock, File
 from .pattern import Pattern
+
+log = create_logger(__name__)
 
 
 class Splitter:
@@ -26,7 +29,9 @@ class Splitter:
         """
 
         self.patterns: Tuple[Pattern, ...] = patterns
-        self.max_tokens: int = max_tokens
+        # Divide max_tokens by 2 because we want to leave just as much space for the
+        # prompt as for the translated code.
+        self.max_tokens: int = max_tokens // 2
         self.language: Optional[str] = None
         self.comment: Optional[str] = None
         # Using tiktoken as the tokenizer because that's what's recommended for OpenAI

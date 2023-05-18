@@ -73,6 +73,7 @@ class OpenAI:
                 f"Model {model} not supported. Select from one of the "
                 f"following: {list(MODEL_TYPES.keys())}"
             )
+        self.model_max_tokens = TOKEN_LIMITS[model]
         self.model_type = MODEL_TYPES[model]
         self.open_ai_api_key = open_ai_api_key
         openai.api_key = open_ai_api_key
@@ -119,15 +120,31 @@ class OpenAI:
         Returns:
             The output of the 'chat-gpt' LLM.
         """
+        args = [
+            self.temperature,
+            self.top_p,
+            self.max_tokens,
+            self.presence_penalty,
+            self.frequency_penalty,
+        ]
+        names = [
+            "temperature",
+            "top_p",
+            "max_tokens",
+            "presence_penalty",
+            "frequency_penalty",
+        ]
+
+        kwargs: Dict[str, int | float] = {}
+
+        for name, arg in zip(names, args):
+            if arg is not None:
+                kwargs[name] = arg
 
         response = openai.ChatCompletion.create(
             model=self.model,
             messages=messages,
-            temperature=self.temperature,
-            top_p=self.top_p,
-            max_tokens=self.max_tokens,
-            presence_penalty=self.presence_penalty,
-            frequency_penalty=self.frequency_penalty,
+            **kwargs,
         )
 
         output = response["choices"][0]["message"]["content"]

@@ -1,6 +1,10 @@
 import re
 from dataclasses import dataclass
 
+from ..utils.logger import create_logger
+
+log = create_logger(__name__)
+
 
 @dataclass
 class Pattern:

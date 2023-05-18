@@ -1,8 +1,11 @@
 from typing import Tuple
 
+from ...utils.logger import create_logger
 from ..pattern import Pattern
 from ..splitter import Splitter
 from .patterns import FortranFunctionPattern, FortranSubroutinePattern
+
+log = create_logger(__name__)
 
 
 class FortranSplitter(Splitter):
