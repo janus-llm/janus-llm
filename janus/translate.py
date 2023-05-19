@@ -158,6 +158,7 @@ class Translator:
             response = response.group(1).strip("python\n")
         except Exception:
             log.warning(f"Could not find code in output:\n\n{output}")
+            response = output
 
         return response
 

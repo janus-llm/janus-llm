@@ -3,7 +3,7 @@ from typing import Tuple
 from ...utils.logger import create_logger
 from ..pattern import Pattern
 from ..splitter import Splitter
-from .patterns import FortranFunctionPattern, FortranSubroutinePattern
+from .patterns import FortranSubroutinePattern
 
 log = create_logger(__name__)
 
@@ -20,12 +20,12 @@ class FortranSplitter(Splitter):
     def __init__(
         self,
         patterns: Tuple[Pattern, ...] = (
-            FortranFunctionPattern(),
+            FortranSubroutinePattern(),
+            # FortranFunctionPattern(),
             # FortranIfPattern(),
             # FortranDoPattern(),
             # FortranModulePattern(),
             # FortranProgramPattern(),
-            FortranSubroutinePattern(),
         ),
         max_tokens: int = 4096,
     ) -> None:

@@ -19,9 +19,7 @@ class FortranSubroutinePattern(Pattern):
         type: The type of the functional code block ('module', 'function', etc.).
     """
 
-    start: re.Pattern = re.compile(
-        r"SUBROUTINE\s+(\w+)(?!\s*END\s+SUBROUTINE)", re.IGNORECASE
-    )
+    start: re.Pattern = re.compile(r"(?<!\n)\n(?= *SUBROUTINE)", re.IGNORECASE)
     end: re.Pattern = re.compile(r"END\s+SUBROUTINE", re.IGNORECASE)
     type: str = "subroutine"
 

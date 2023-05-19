@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -31,7 +32,7 @@ class Splitter:
         self.patterns: Tuple[Pattern, ...] = patterns
         # Divide max_tokens by 2 because we want to leave just as much space for the
         # prompt as for the translated code.
-        self.max_tokens: int = max_tokens // 2
+        self.max_tokens: int = max_tokens // 3
         self.language: Optional[str] = None
         self.comment: Optional[str] = None
         # Using tiktoken as the tokenizer because that's what's recommended for OpenAI
@@ -55,111 +56,83 @@ class Splitter:
         """Split the given file into functional code blocks.
 
         Arguments:
-            file: The file to split into functional blocks.
+            code: A string containing the code of the entire file to split
+            path: The path to the code
 
         Returns:
-            A tuple of functional blocks.
+            A File dataclass containing the path to the file and all of its code blocks
         """
         components: List[CodeBlock] = []
-        current_component: str = ""
-        in_block: bool = False
-        segment_id: int = 0
-        block_id: int = 0
-        block_stack: List[CodeBlock] = []
 
-        lines = code.splitlines()
+        total_tokens = self._count_tokens(code)
 
-        for line in lines:
-            line = line.strip()
+        # The whole file is one block
+        if total_tokens <= self.max_tokens:
+            block = CodeBlock(
+                code=code,
+                path=path,
+                complete=True,
+                block_id=0,
+                segment_id=0,
+                language=self.language,
+                type="",
+                tokens=total_tokens,
+            )
+            return File(path, [block])
 
-            if not line or line.startswith(self.comment):
-                continue
-
-            if in_block:
-                current_component += line + "\n"
-                match_end = block_stack[-1].search(line)
-                if match_end:
-                    block_stack.pop()
-                    if not block_stack:
-                        components.append(
-                            CodeBlock(
-                                code=current_component.strip(),
-                                path=path,
-                                complete=True,
-                                block_id=block_id,
-                                segment_id=segment_id,
-                                language=self.language,
-                                type="",
-                                tokens=self._count_tokens(current_component.strip()),
-                            )
-                        )
-                        current_component = ""
-                        segment_id = 0
-                        in_block = False
-                continue
-
-            if self._count_tokens(current_component) > self.max_tokens:
-                components.append(
-                    CodeBlock(
-                        code=current_component.strip(),
+        # The whole file is too large, split into blocks based on self.patterns
+        blocks = re.split(self.patterns[0].start, code)
+        block_id = 0
+        for block in blocks:
+            block_token_len = self._count_tokens(block)
+            # The entire block is under the token length
+            if block_token_len <= self.max_tokens:
+                code_block = CodeBlock(
+                    code=block,
+                    path=path,
+                    complete=True,
+                    block_id=block_id,
+                    segment_id=0,
+                    language=self.language,
+                    type="",
+                    tokens=block_token_len,
+                )
+                components.append(code_block)
+            # The whole block is too long, split into segments
+            else:
+                segments = self._split_block_into_segs(block)
+                for segment_id, segment in enumerate(segments):
+                    code_block = CodeBlock(
+                        code=segment,
                         path=path,
                         complete=False,
                         block_id=block_id,
                         segment_id=segment_id,
                         language=self.language,
                         type="",
-                        tokens=self._count_tokens(current_component.strip()),
+                        tokens=self._count_tokens(segment),
                     )
-                )
-                current_component = ""
-                segment_id += 1
+                    components.append(code_block)
+            block_id += 1
+        return File(path, components)
 
-            if not in_block:
-                match_start = False
-                for pattern in self.patterns:
-                    if pattern.start.search(line) is not None:
-                        match_start = True
-                        block_pattern = pattern
-                if match_start:
-                    if current_component:
-                        components.append(
-                            CodeBlock(
-                                code=current_component.strip(),
-                                path=path,
-                                complete=False,
-                                block_id=block_id,
-                                segment_id=segment_id,
-                                language=self.language,
-                                type="",
-                                tokens=self._count_tokens(current_component.strip()),
-                            )
-                        )
-                        current_component = ""
-                        segment_id += 1
-                    in_block = True
-                    current_component += line + "\n"
-                    block_id += 1
-                    block_stack.append(block_pattern.end)
-                else:
-                    current_component += line + "\n"
+    def _split_block_into_segs(self, block: str) -> Tuple[str]:
+        """Recursively splt the block string in half until each segment is smaller than
+        the token limit.
 
-        if current_component:
-            components.append(
-                CodeBlock(
-                    code=current_component.strip(),
-                    path=path,
-                    complete=False,
-                    block_id=block_id,
-                    segment_id=segment_id,
-                    language=self.language,
-                    type="",
-                    tokens=self._count_tokens(current_component.strip()),
-                )
-            )
+        Arguments:
+            block: The block to split into segments.
 
-        file = File(path, components)
-
-        return file
+        Returns:
+            A tuple of segments.
+        """
+        if self._count_tokens(block) <= self.max_tokens:
+            return (block,)
+        else:
+            split_idx = len(block) // 2
+            return self._split_block_into_segs(
+                block[:split_idx]
+            ) + self._split_block_into_segs(block[split_idx:])
 
     def _count_tokens(self, code: str) -> int:
         """Count the number of tokens in the given code.

@@ -9,10 +9,10 @@ class TestFortranSplitter(unittest.TestCase):
 
     def setUp(self):
         """Set up the tests."""
-        self.splitter = FortranSplitter()
+        self.splitter = FortranSplitter(max_tokens=4096)
         self.test_file = Path("janus/language/fortran/_tests/test_fortran.f90")
 
     def test_split(self):
         """Test the split method."""
         file = self.splitter.split(self.test_file)
-        self.assertEqual(len(file.blocks), 1)
+        self.assertEqual(len(file.blocks), 7)
