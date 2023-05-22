@@ -20,7 +20,7 @@ Do your best to make sure that all docstrings adhere to the Google docstring for
 If you are editing a file and see that a docstring doesn't adhere to the Python3 Google Style Guide, please be a good steward and fix it so that it does.
 
 ## Issue & Merge Request Creation
-Create or assign an issue to yourself at the [Group Issue Board Page](https://gitlab.mitre.org/groups/fireline/-/boards), add the label `SimFire`, and move it to “Doing”.
+Create or assign an issue to yourself at the [Group Issue Board Page](https://gitlab.mitre.org/groups/fireline/-/boards), add the label `janus`, and move it to “Doing”.
 
 Create a merge request based on that issue using the "Create Merge Request" button on the issue page.
 
