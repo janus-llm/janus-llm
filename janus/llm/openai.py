@@ -10,11 +10,22 @@ log = create_logger(__name__)
 
 
 MODEL_TYPES: Dict[str, str] = {
+    "gpt-4": "chat-gpt",
+    "gpt-4-32k": "chat-gpt",
     "gpt-3.5-turbo": "chat-gpt",
-    "text-davinci-003": "gpt-3",
-    "text-curie-001": "gpt-3",
-    "text-babbage-001": "gpt-3",
-    "text-ada-001": "gpt-3",
+}
+
+# From the OpenAI Docs:
+# https://platform.openai.com/docs/models/gpt-4
+# https://platform.openai.com/docs/models/gpt-3-5
+TOKEN_LIMITS: Dict[str, int] = {"gpt-4": 8192, "gpt-4-32k": 32768, "gpt-3.5-turbo": 4096}
+
+# The cost per 1k tokens for each model at the input:
+# https://openai.com/pricing
+COST_PER_MODEL: Dict[str, float] = {
+    "gpt-4": 0.03,
+    "gpt-4-32k": 0.06,
+    "gpt-3.5-turbo": 0.002,
 }
 
 
@@ -62,6 +73,7 @@ class OpenAI:
                 f"Model {model} not supported. Select from one of the "
                 f"following: {list(MODEL_TYPES.keys())}"
             )
+        self.model_max_tokens = TOKEN_LIMITS[model]
         self.model_type = MODEL_TYPES[model]
         self.open_ai_api_key = open_ai_api_key
         openai.api_key = open_ai_api_key
@@ -89,13 +101,15 @@ class OpenAI:
             else:
                 return self._get_output_gpt_3(prompt)
         except openai.error.RateLimitError:
-            log.warn("OpenAI API rate limit exceeded. Waiting 1 minute and trying again.")
-            time.sleep(60)
+            log.warn(
+                "OpenAI API rate limit exceeded. Waiting 30 seconds and trying again."
+            )
+            time.sleep(30)
             output = self.get_output(prompt)
             return output
         except openai.error.Timeout:
-            log.warn("OpenAI API timeout. Waiting 1 minute and trying again.")
-            time.sleep(60)
+            log.warn("OpenAI API timeout. Waiting 30 seconds and trying again.")
+            time.sleep(30)
             output = self.get_output(prompt)
             return output
 
@@ -108,20 +122,38 @@ class OpenAI:
         Returns:
             The output of the 'chat-gpt' LLM.
         """
+        args = [
+            self.temperature,
+            self.top_p,
+            self.max_tokens,
+            self.presence_penalty,
+            self.frequency_penalty,
+        ]
+        names = [
+            "temperature",
+            "top_p",
+            "max_tokens",
+            "presence_penalty",
+            "frequency_penalty",
+        ]
+
+        kwargs: Dict[str, int | float] = {}
+
+        for name, arg in zip(names, args):
+            if arg is not None:
+                kwargs[name] = arg
 
         response = openai.ChatCompletion.create(
             model=self.model,
             messages=messages,
-            temperature=self.temperature,
-            top_p=self.top_p,
-            max_tokens=self.max_tokens,
-            presence_penalty=self.presence_penalty,
-            frequency_penalty=self.frequency_penalty,
+            **kwargs,
         )
 
         output = response["choices"][0]["message"]["content"]
+        tokens = response["usage"]
+        cost = COST_PER_MODEL[self.model] * (tokens["total_tokens"] / 1000)
 
-        return output
+        return output, tokens, cost
 
     def _get_output_gpt_3(self, prompt: str) -> str:
         """Generate a single output from the LLM.
@@ -170,14 +202,12 @@ class OpenAI:
             if self.model_type == "chat-gpt":
                 if not isinstance(prompt, list):
                     raise ValueError(
-                        "Prompts must be a list of messages for " "chat-gpt models."
+                        "Prompts must be a list of messages for chat-gpt models."
                     )
                 outputs.append(self._get_output_chat_gpt(prompt))
             else:
                 if not isinstance(prompt, str):
-                    raise ValueError(
-                        "Prompts must be a string for non-chat-gpt " "models."
-                    )
+                    raise ValueError("Prompts must be a string for non-chat-gpt models.")
                 outputs.append(self._get_output_gpt_3(prompt))
 
         return outputs
