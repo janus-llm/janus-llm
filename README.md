@@ -1,8 +1,10 @@
 # Introduction
 
-Janus (`janus-llm`) uses LLMs to transcode libraries from some language to Python.
+<p align="center">
+    <img src="assets/icons/logo_horizontal.png">
+</p>
 
-## Running the Simulation
+Janus (`janus-llm`) uses LLMs to transcode libraries from some language to Python.
 
 ### Installing via Pip
 
@@ -31,7 +33,6 @@ poetry install --no-dev
 ### Using as a Python Module
 
 TODO
-
 
 ### Contributing
 
