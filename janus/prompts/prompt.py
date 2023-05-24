@@ -6,7 +6,7 @@ import tiktoken
 
 from ..language.block import CodeBlock
 from ..llm.openai import MODEL_TYPES
-from ..utils.language import LANGUAGE_SUFFIXES
+from ..utils.enums import LANGUAGE_SUFFIXES
 from ..utils.logger import create_logger
 
 log = create_logger(__name__)
