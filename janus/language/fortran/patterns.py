@@ -12,9 +12,9 @@ class FortranSubroutinePattern(Pattern):
     """A pattern for matching Fortran subroutines.
 
     Attributes:
-        start_pattern: A regular expression pattern that matches the start of a
+        start: A regular expression pattern that matches the start of a
                        Fortran subroutine.
-        end_pattern: A regular expression pattern that matches the end of a
+        end: A regular expression pattern that matches the end of a
                      Fortran subroutine.
         type: The type of the functional code block ('module', 'function', etc.).
     """
@@ -29,9 +29,9 @@ class FortranFunctionPattern(Pattern):
     """A pattern for matching Fortran functions.
 
     Attributes:
-        start_pattern: A regular expression pattern that matches the start of a
+        start: A regular expression pattern that matches the start of a
                        Fortran function, excluding the 'END FUNCTION' line.
-        end_pattern: A regular expression pattern that matches the end of a
+        end: A regular expression pattern that matches the end of a
                      Fortran function.
         type: The type of the functional code block ('module', 'function', etc.).
     """
@@ -48,9 +48,9 @@ class FortranIfPattern(Pattern):
     """A pattern for matching Fortran IF blocks.
 
     Attributes:
-        start_pattern: A regular expression pattern that matches the start of a
+        start: A regular expression pattern that matches the start of a
                        Fortran IF block.
-        end_pattern: A regular expression pattern that matches the end of a
+        end: A regular expression pattern that matches the end of a
                      Fortran IF block.
         type: The type of the functional code block ('if', 'do', etc.).
     """
@@ -65,9 +65,9 @@ class FortranDoPattern(Pattern):
     """A pattern for matching Fortran DO blocks.
 
     Attributes:
-        start_pattern: A regular expression pattern that matches the start of a
+        start: A regular expression pattern that matches the start of a
                        Fortran DO block.
-        end_pattern: A regular expression pattern that matches the end of a
+        end: A regular expression pattern that matches the end of a
                      Fortran DO block.
         type: The type of the functional code block ('if', 'do', etc.).
     """
@@ -82,9 +82,9 @@ class FortranModulePattern(Pattern):
     """A pattern for matching Fortran modules.
 
     Attributes:
-        start_pattern: A regular expression pattern that matches the start of a
+        start: A regular expression pattern that matches the start of a
                        Fortran module, excluding the 'END MODULE' line.
-        end_pattern: A regular expression pattern that matches the end of a
+        end: A regular expression pattern that matches the end of a
                      Fortran module.
         type: The type of the functional code block ('module', 'function', etc.).
     """
@@ -99,9 +99,9 @@ class FortranProgramPattern(Pattern):
     """A pattern for matching Fortran programs.
 
     Attributes:
-        start_pattern: A regular expression pattern that matches the start of a
+        start: A regular expression pattern that matches the start of a
                        Fortran program, excluding the 'END PROGRAM' line.
-        end_pattern: A regular expression pattern that matches the end of a
+        end: A regular expression pattern that matches the end of a
                      Fortran program.
         type: The type of the functional code block ('module', 'function', etc.).
     """
@@ -116,9 +116,9 @@ class FortranBlockDataPattern(Pattern):
     """A pattern for matching Fortran block data.
 
     Attributes:
-        start_pattern: A regular expression pattern that matches the start of a
+        start: A regular expression pattern that matches the start of a
                        Fortran block data, excluding the 'END BLOCK DATA' line.
-        end_pattern: A regular expression pattern that matches the end of a
+        end: A regular expression pattern that matches the end of a
                      Fortran block data.
         type: The type of the functional code block ('module', 'function', etc.).
     """
@@ -135,9 +135,9 @@ class FortranInterfacePattern(Pattern):
     """A pattern for matching Fortran interfaces.
 
     Attributes:
-        start_pattern: A regular expression pattern that matches the start of a
+        start: A regular expression pattern that matches the start of a
                        Fortran interface, excluding the 'END INTERFACE' line.
-        end_pattern: A regular expression pattern that matches the end of a
+        end: A regular expression pattern that matches the end of a
                      Fortran interface.
         type: The type of the functional code block ('module', 'function', etc.).
     """
