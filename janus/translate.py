@@ -77,7 +77,13 @@ class Translator:
             for code in file.blocks:
                 prompt = self._prompt_engine.create(code)
                 output, tokens, cost = self._llm.get_output(prompt.prompt)
-                parsed_output = self._parse_llm_output(output)
+                parsed_output, parsed = self._parse_llm_output(output)
+                if not parsed:
+                    log.warning(
+                        f"Failed to parse output for block {code.block_id} in file "
+                        f"{file.path.name}"
+                    )
+
                 # Create the output file
                 source_suffix = LANGUAGE_SUFFIXES[self.source_language]
                 target_suffix = LANGUAGE_SUFFIXES[self.target_language]
@@ -160,7 +166,7 @@ class Translator:
 
         return files
 
-    def _parse_llm_output(self, output: str) -> str:
+    def _parse_llm_output(self, output: str) -> Tuple[str, bool]:
         """Parse the output of an LLM.
 
         Arguments:
@@ -174,11 +180,13 @@ class Translator:
             pattern = r"```(.*?)```"
             response = re.search(pattern, output, re.DOTALL)
             response = response.group(1).strip("python\n")
+            parsed = True
         except Exception:
             log.warning(f"Could not find code in output:\n\n{output}")
             response = output
+            parsed = False
 
-        return response
+        return response, parsed
 
     def _load_model(self) -> None:
         """Check that the model is valid."""
