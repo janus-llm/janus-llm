@@ -108,7 +108,7 @@ class Translator:
         Arguments:
             file: The file to save.
         """
-        file.path.mkdir(parents=True, exist_ok=True)
+        file.path.parent.mkdir(parents=True, exist_ok=True)
         with open(file.path, "w") as f:
             f.writelines([f"{b.code}\n" for b in file.blocks])
 
