@@ -2,8 +2,6 @@ image: "python:3.10"
 
 before_script:
   - python --version
-  # Adding this because furo gets a wheel validation error for the 1.4.1 install
-  - export POETRY_VERSION=1.4.0
   - curl -sSkL https://install.python-poetry.org | python -
   - export PATH=$PATH:$HOME/.local/bin
   - poetry --version
@@ -25,7 +23,7 @@ stages:
 flake8:
   stage: Static Analysis
   tags:
-    - lslab2
+    - lslab
   script:
     - poetry install --only dev
     - poetry run flake8 --config=.flake8 .
@@ -41,7 +39,7 @@ flake8:
 black:
   stage: Static Analysis
   tags:
-    - lslab2
+    - lslab
   script:
     - poetry install --only dev
     - poetry run black --check ./
@@ -56,7 +54,7 @@ black:
 isort:
   stage: Static Analysis
   tags:
-    - lslab2
+    - lslab
   script:
     - poetry install --only dev
     - poetry run isort --check --trailing-comma -m=3 .
@@ -80,7 +78,7 @@ isort:
 test-pages:
   stage: Documentation
   tags:
-    - lslab2
+    - lslab
   extends: .pages
   needs: []
   artifacts:
@@ -99,7 +97,7 @@ test-pages:
 pages:
   stage: Documentation
   tags:
-    - lslab2
+    - lslab
   extends: .pages
   artifacts:
     paths:
@@ -110,15 +108,31 @@ pages:
 ###########################
 # Packaging and Releasing #
 ###########################
-test_release:
+.check_version_and_commit:
+  script:
+    - POETRY_VERSION=$(poetry version -s)
+    - >
+      if [ $POETRY_VERSION != $CI_COMMIT_TAG ]; then
+        VERSION=$CI_COMMIT_TAG
+        poetry version $VERSION
+        git remote remove origin
+        git remote add origin https://oauth2:${CI_TAG_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
+        git config --global user.email "janus-ci-bot@mitre.org"
+        git config --global user.name "Janus CI Bot"
+        git add pyproject.toml
+        git commit -m "Change pyproject.toml version to $VERSION"
+        git push -o ci.skip origin HEAD:main
+      fi
+
+test-release:
   stage: Release
   tags:
-    - lslab2
+    - lslab
   script:
     - poetry build
     - poetry run pip install -U dist/*.whl
     # Remove the directory so that it's not using the directory to run the code and it uses the installed package
-    - rm -rf simfire
+    - rm -rf janus
     - poetry run python tests/package.py
   needs: []
   only:
@@ -127,3 +141,15 @@ test_release:
     changes:
       - "**/*.py"
       - poetry.lock
+
+release-artifactory:
+  stage: Release
+  tags:
+    - lslab
+  script:
+    - !reference [.check_version_and_commit, script]
+    - poetry build
+    - poetry config repositories.mitre-artifactory https://artifacts.mitre.org/artifactory/api/pypi/python
+    - poetry publish --repository mitre-artifactory -u janus-ci-bot -p ${CI_ARTIFACTORY_TOKEN}
+  only:
+    - tags
