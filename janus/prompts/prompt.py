@@ -6,7 +6,7 @@ import tiktoken
 
 from ..language.block import CodeBlock
 from ..llm.openai import MODEL_TYPES
-from ..utils.language import LANGUAGE_SUFFIXES
+from ..utils.enums import LANGUAGE_SUFFIXES
 from ..utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -45,15 +45,30 @@ class PromptTemplate:
             ),
         },
         {
+            "role": "system",
+            "content": (
+                "Do not include anything around the resultant code. Only report back the "
+                "code itself in between triple backticks."
+            ),
+        },
+        {
+            "role": "system",
+            "content": (
+                "If the given code is incomplete, assume it is translated elsewhere. "
+                "If the given code is missing variable definitions, assume they are "
+                "assigned elsewhere. Give an attempt even if it is incomplete."
+            ),
+        },
+        {
             "role": "user",
             "content": (
                 "Please convert the following <SOURCE LANGUAGE> <FILE SUFFIX> code found "
                 "in between triple backticks and is in string format into useable "
                 "<TARGET LANGUAGE> code. If the given code is incomplete, assume it "
                 "is translated elsewhere. If the given code is missing variable "
-                "definitions, assume they are assigned elsewhere. If there is are "
+                "definitions, assume they are assigned elsewhere. If there are "
                 "incomplete statements that haven't been closed out, assume they are "
-                "closed out in other translations. If there are mssing sections, make "
+                "closed out in other translations. If there are missing sections, make "
                 "your best effort to fill them in and do not skip them. "
                 "Some more things to remember: (1) follow standard styling practice for "
                 "the target language, (2) make sure the language is typed correctly. "

@@ -20,7 +20,10 @@ from datetime import date
 
 project = "Janus"
 copyright = f"{date.today().year}, MITRE"
-author = "Michael Doyle, Tim Welsh"
+author = (
+    "Michael Doyle <mdoyle@mitre.org>, Tim Welsh <twelsh@mitre.org>, "
+    "Michael Threet <mthreet@mitre.org>, Chris Kempis <ckempis@mitre.org>"
+)
 
 # The full version, including alpha/beta/rc tags
 if os.environ.get("CI_COMMIT_TAG"):

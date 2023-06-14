@@ -7,12 +7,15 @@ from .language.block import CodeBlock, File, TranslatedCodeBlock
 from .language.fortran import FortranSplitter
 from .llm.openai import TOKEN_LIMITS, OpenAI
 from .prompts.prompt import PromptEngine
+from .utils.enums import (
+    LANGUAGE_SUFFIXES,
+    VALID_SOURCE_LANGUAGES,
+    VALID_TARGET_LANGUAGES,
+)
 from .utils.logger import create_logger
 
 log = create_logger(__name__)
 
-VALID_SOURCE_LANGUAGES: Tuple[str, ...] = ("fortran",)
-VALID_TARGET_LANGUAGES: Tuple[str, ...] = ("python",)
 VALID_MODELS: Tuple[str, ...] = tuple(TOKEN_LIMITS.keys())
 
 
@@ -70,23 +73,44 @@ class Translator:
         # Now, loop through every code block in every file and translate it with an LLM
         for file in files:
             out_blocks: List[TranslatedCodeBlock] = []
-            # Create the output file
-            out_filename = file.path.name.replace(".f90", ".py")
-            outpath = Path(output_directory) / out_filename
             # Loop through all code blocks in the file
             for code in file.blocks:
                 prompt = self._prompt_engine.create(code)
                 output, tokens, cost = self._llm.get_output(prompt.prompt)
-                parsed_output = self._parse_llm_output(output)
-                # TODO: Where I'm currently devving
+                parsed_output, parsed = self._parse_llm_output(output)
+                if not parsed:
+                    log.warning(
+                        f"Failed to parse output for block {code.block_id} in file "
+                        f"{file.path.name}"
+                    )
+
+                # Create the output file
+                source_suffix = LANGUAGE_SUFFIXES[self.source_language]
+                target_suffix = LANGUAGE_SUFFIXES[self.target_language]
+                out_filename = file.path.name.replace(
+                    f".{source_suffix}", f".{target_suffix}"
+                )
+                outpath = output_directory / out_filename
                 out_blocks.append(
                     self._output_to_block(parsed_output, outpath, code, tokens, cost)
                 )
             # Write the code blocks to the output file
-            with open(outpath, "w") as f:
-                f.writelines([f"{b.code}\n" for b in out_blocks])
+            outfile = File(outpath, out_blocks)
+            self._save_to_file(outfile)
             # Add the translated file to the list of translated files
-            translated_files.append(File(file.path, out_blocks))
+            translated_files.append(outfile)
+
+        self.output_files = translated_files
+
+    def _save_to_file(self, file: File) -> None:
+        """Save a file to disk.
+
+        Arguments:
+            file: The file to save.
+        """
+        file.path.parent.mkdir(parents=True, exist_ok=True)
+        with open(file.path, "w") as f:
+            f.writelines([f"{b.code}\n" for b in file.blocks])
 
     def _output_to_block(
         self,
@@ -142,7 +166,7 @@ class Translator:
 
         return files
 
-    def _parse_llm_output(self, output: str) -> str:
+    def _parse_llm_output(self, output: str) -> Tuple[str, bool]:
         """Parse the output of an LLM.
 
         Arguments:
@@ -156,11 +180,13 @@ class Translator:
             pattern = r"```(.*?)```"
             response = re.search(pattern, output, re.DOTALL)
             response = response.group(1).strip("python\n")
+            parsed = True
         except Exception:
             log.warning(f"Could not find code in output:\n\n{output}")
             response = output
+            parsed = False
 
-        return response
+        return response, parsed
 
     def _load_model(self) -> None:
         """Check that the model is valid."""
