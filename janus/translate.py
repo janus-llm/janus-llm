@@ -5,13 +5,14 @@ from typing import List, Tuple
 
 from .language.block import CodeBlock, File, TranslatedCodeBlock
 from .language.fortran import FortranSplitter
+from .language.mumps import MumpsSplitter
 from .llm.openai import TOKEN_LIMITS, OpenAI
 from .prompts.prompt import PromptEngine
 from .utils.logger import create_logger
 
 log = create_logger(__name__)
 
-VALID_SOURCE_LANGUAGES: Tuple[str, ...] = ("fortran",)
+VALID_SOURCE_LANGUAGES: Tuple[str, ...] = ("fortran", "mumps")
 VALID_TARGET_LANGUAGES: Tuple[str, ...] = ("python",)
 VALID_MODELS: Tuple[str, ...] = tuple(TOKEN_LIMITS.keys())
 
@@ -71,7 +72,7 @@ class Translator:
         for file in files:
             out_blocks: List[TranslatedCodeBlock] = []
             # Create the output file
-            out_filename = file.path.name.replace(".f90", ".py")
+            out_filename = file.path.name.replace(file.path.suffix, ".py")
             outpath = Path(output_directory) / out_filename
             # Loop through all code blocks in the file
             for code in file.blocks:
@@ -130,6 +131,9 @@ class Translator:
         if self.source_language == "fortran":
             splitter = FortranSplitter(max_tokens=self._llm.model_max_tokens)
             glob = "**/*.f90"
+        elif self.source_language == 'mumps':
+            splitter = MumpsSplitter(max_tokens=self._llm.model_max_tokens)
+            glob = "**/*.m"
         else:
             raise NotImplementedError(
                 f"Source language '{self.source_language}' not implemented."
