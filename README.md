@@ -37,5 +37,5 @@ TODO
 ### Contributing
 
 See our contributing pages:
-* [For MITRE Employees](https://fireline.pages.mitre.org/pyregence/janus/contributing.html)
+* [For MITRE Employees](https://cem-llm.pages.mitre.org/janus)
 * [Open Source](https://mitrefireline.github.io/janus/contributing.html)
