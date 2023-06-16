@@ -6,9 +6,17 @@ import tiktoken
 
 from ..utils.logger import create_logger
 from .block import CodeBlock, File
-from .pattern import Pattern
+from .node import NodeTypes
 
 log = create_logger(__name__)
+
+
+class TokenLimitError(Exception):
+    """An exception raised when the token limit is exceeded and the code cannot be
+    split into smaller blocks.
+    """
+
+    pass
 
 
 class Splitter:
@@ -18,18 +26,20 @@ class Splitter:
 
     def __init__(
         self,
-        patterns: Tuple[Pattern, ...],
+        node_types: NodeTypes,
         max_tokens: int = 4096,
         model: str = "gpt-3.5-turbo",
     ) -> None:
         """Initialize a Splitter instance.
 
         Arguments:
-            patterns: A tuple of `Pattern`s to use for splitting code into
-                      functional blocks.
+            node_types: A tuple of node types to use for splitting code into functional
+                        blocks.
+            max_tokens: The maximum number of tokens to use for each functional block.
+            model: The name of the model to use for translation.
         """
 
-        self.patterns: Tuple[Pattern, ...] = patterns
+        self.node_types: NodeTypes = node_types
         # Divide max_tokens by 2 because we want to leave just as much space for the
         # prompt as for the translated code.
         self.max_tokens: int = max_tokens // 3
