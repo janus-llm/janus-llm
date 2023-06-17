@@ -1,6 +1,7 @@
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
+import numpy as np
 import tree_sitter
 
 from ...utils.logger import create_logger
@@ -76,7 +77,7 @@ class FortranSplitter(Splitter):
                 parent_id=None,
                 start_line=0,
                 end_line=len(text.splitlines()),
-                children=None,
+                children=[],
                 language=self.language,
                 type="file",
                 tokens=self._count_tokens(text),
@@ -85,7 +86,7 @@ class FortranSplitter(Splitter):
         else:
             node = cursor.node
             out_block = self._recurse_split(node, path)
-        # self._blocks_to_file(out_block, "test.f90")
+        self._blocks_to_file(out_block, "test.f90")
         return out_block
 
     def _recurse_split(self, node: tree_sitter.Node, path: Path) -> CodeBlock:
@@ -99,7 +100,7 @@ class FortranSplitter(Splitter):
         """
         # First get the text for all the siblings at this level
         text = node.text.decode()
-        _, text = self._sibling_text(node, text)
+        # _, text = self._sibling_text(node, text)
 
         if self._count_tokens(text) < self.max_tokens:
             return CodeBlock(
@@ -109,27 +110,40 @@ class FortranSplitter(Splitter):
                 parent_id=None,
                 start_line=node.start_point[0],
                 end_line=node.end_point[0],
-                children=None,
+                children=[],
                 language=self.language,
                 type=node.type,
                 tokens=self._count_tokens(text),
             )
         else:
             idxs = []
+            child_idx = 0
+            new_text = ""
+            max_idx = np.argmax(
+                [self._count_tokens(c.text.decode()) for c in node.children]
+            )
             for i, child in enumerate(node.children):
                 child_text = child.text.decode()
-
-                if self._count_tokens(child_text) > self.max_tokens:
+                if i == max_idx:
                     idxs.append(i)
+                    new_text += f"<<<child_{child_idx}>>>\n"
+                    child_idx += 1
+                elif self._count_tokens(child_text) > self.max_tokens:
+                    idxs.append(i)
+                    new_text += f"<<<child_{child_idx}>>>\n"
+                    child_idx += 1
+                else:
+                    new_text += f"{child_text}\n"
+
+            if max_idx not in idxs:
+                idxs.append(max_idx)
 
             children = []
             for i in idxs:
                 children.append(self._recurse_split(node.children[i], path))
 
-            replaced_text = self._replace_children(node, text, idxs)
-
             return CodeBlock(
-                code=replaced_text,
+                code=new_text,
                 path=path,
                 complete=False,
                 parent_id=None,
@@ -160,104 +174,6 @@ class FortranSplitter(Splitter):
             text += "\n" + text
         return node, text
 
-    def _replace_children(
-        self, node: tree_sitter.Node, text: str, idxs: List[int]
-    ) -> str:
-        """Replace the text of the children with a placeholder.
-
-        Arguments:
-            node: The tree-sitter node to replace the children of.
-            text: The text of the node.
-            idxs: The indices of the children to replace.
-
-        Returns:
-            The text with the children replaced.
-        """
-        split_lines = text.splitlines()
-        modified_lines: List[str] = []
-        replacements: List[Tuple[int, int, str]] = []
-        for i in idxs:
-            start = node.children[i].start_point[0]
-            end = node.children[i].end_point[0]
-            replacements.append([start, end, f"<child_{i}>"])
-
-        for current_line_idx, line in enumerate(split_lines):
-            skip_line: bool = False
-            for start, end, replacement in replacements:
-                if current_line_idx == start:
-                    modified_lines.append(replacement)
-                    skip_line = True
-                elif current_line_idx > start and current_line_idx < end:
-                    skip_line = True
-
-            if not skip_line:
-                modified_lines.append(line)
-        return "\n".join(modified_lines)
-
-    def __recurse_split(self, node: tree_sitter.Node, path: Path) -> CodeBlock:
-        """Recursively split the code into functional blocks.
-
-        Arguments:
-            cursor: A tree-sitter cursor to walk through the code.
-
-        Returns:
-            A CodeBlock object.
-        """
-        text = node.text.decode()
-        if self._count_tokens(text) < self.max_tokens:
-            return CodeBlock(
-                code=text,
-                path=path,
-                complete=True,
-                parent_id=None,
-                start_line=node.start_point[0],
-                end_line=node.end_point[0],
-                children=None,
-                language=self.language,
-                type=node.type,
-                tokens=self._count_tokens(text),
-            )
-        else:
-            node = node.children[0]
-            children = []
-            new_text = node.text.decode()
-            while self._count_tokens(new_text) < self.max_tokens:
-                if node.next_sibling is None:
-                    break
-                else:
-                    node = node.next_sibling
-                    new_text += "\n" + node.text.decode()
-            if new_text != text:
-                children.append(
-                    CodeBlock(
-                        code=new_text,
-                        path=path,
-                        complete=False,
-                        parent_id=None,
-                        start_line=node.start_point[0],
-                        end_line=node.end_point[0],
-                        children=children,
-                        language=self.language,
-                        type=node.type,
-                        tokens=self._count_tokens(text),
-                    )
-                )
-
-            for child in node.children:
-                children.append(self._recurse_split(child, path))
-            return CodeBlock(
-                code=text,
-                path=path,
-                complete=False,
-                parent_id=None,
-                start_line=node.start_point[0],
-                end_line=node.end_point[0],
-                children=children,
-                language=self.language,
-                type=node.type,
-                tokens=self._count_tokens(text),
-            )
-
     def _blocks_to_file(self, block: CodeBlock, path: Path) -> None:
         """Save the CodeBlock to a path.
 
@@ -266,18 +182,22 @@ class FortranSplitter(Splitter):
             path: The path to save the functional code block to.
         """
         with open(path, "w") as f:
-            f.write(self._blocks_to_str(block))
+            f.write(self._blocks_to_str(block.code, block))
 
-    def _blocks_to_str(self, block: CodeBlock) -> None:
+    def _blocks_to_str(self, input: str, block: CodeBlock) -> None:
         """Convert a functional code block to a string.
 
         Arguments:
             block: The functional code block to convert to a string.
         """
         if len(block.children) == 0:
-            return block.code
+            return input
         else:
-            output = ""
-            for child in block.children:
-                output += self._blocks_to_str(child)
+            for i, child in enumerate(block.children):
+                if f"<<<child_{i}>>>" in child.code:
+                    output = self._blocks_to_str(
+                        input.replace(f"<<<child_{i}>>>", child.code), child
+                    )
+                else:
+                    return input
             return output
