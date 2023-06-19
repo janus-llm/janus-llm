@@ -2,7 +2,6 @@ import unittest
 from pathlib import Path
 
 from ..fortran import FortranSplitter
-from ..node import NODE_TYPES
 
 
 class TestFortranSplitter(unittest.TestCase):
@@ -10,7 +9,7 @@ class TestFortranSplitter(unittest.TestCase):
 
     def setUp(self):
         """Set up the tests."""
-        self.splitter = FortranSplitter(NODE_TYPES)
+        self.splitter = FortranSplitter()
         self.test_file = Path("janus/language/fortran/_tests/test_fortran.f90")
 
     def test_split(self):

@@ -18,7 +18,6 @@ class CodeBlock:
         complete: Whether or not the code block is complete. If it isn't complete, it
                   should have children compoenents. This means that this code block has
                   missing sections inside of it that are in its children.
-        parent_id: The ID of the parent code block (if applicable).
         start_line: The line number of the first line of the code block.
         end_line: The line number of the last line of the code block.
         children: A tuple of child code blocks.
@@ -31,7 +30,6 @@ class CodeBlock:
     code: str
     path: Path
     complete: bool
-    parent_id: int
     start_line: int
     end_line: int
     language: str
