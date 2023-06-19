@@ -15,4 +15,9 @@ class TestFortranSplitter(unittest.TestCase):
     def test_split(self):
         """Test the split method."""
         split_code = self.splitter.split(self.test_file)
-        self.assertEqual(len(split_code), 7)
+        flat_split_text = self.splitter._blocks_to_str(split_code.code, split_code)
+        # The newlines and spaces aren't the same but that doesn't matter for fortran
+        # (to an extent)
+        flat_split_text = flat_split_text.replace("\n", "").replace(" ", "")
+        test_file_replaced = self.test_file.read_text().replace("\n", "").replace(" ", "")
+        self.assertEqual(flat_split_text, test_file_replaced)
