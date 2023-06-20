@@ -4,9 +4,9 @@ import numpy as np
 import tiktoken
 import tree_sitter
 
-from ..utils.enums import LANGUAGE_COMMENTS, LANGUAGE_SUFFIXES
 from ..utils.logger import create_logger
-from .block import CodeBlock, File
+from .block import CodeBlock
+from .file import FileManager
 
 log = create_logger(__name__)
 
@@ -19,7 +19,7 @@ class TokenLimitError(Exception):
     pass
 
 
-class Splitter:
+class Splitter(FileManager):
     """A class for splitting code into functional blocks to prompt with for
     transcoding.
     """
@@ -31,18 +31,18 @@ class Splitter:
             max_tokens: The maximum number of tokens to use for each functional block.
             model: The name of the model to use for translation.
         """
-
+        # Make sure `self.language` is set before calling `super().__init__` in
+        # subclasses of `Splitter`
+        super().__init__(language=self.language)
         # Divide max_tokens by 2 because we want to leave just as much space for the
         # prompt as for the translated code.
         self.max_tokens: int = max_tokens // 3
-        self.comment: str = LANGUAGE_COMMENTS[self.language]
-        self.suffix: str = LANGUAGE_SUFFIXES[self.language]
         self.parser: tree_sitter.Parser = tree_sitter.Parser()
         # Using tiktoken as the tokenizer because that's what's recommended for OpenAI
         # models.
         self._tokenizer = tiktoken.encoding_for_model(model)
 
-    def split(self, file: Path | str) -> File:
+    def split(self, file: Path | str) -> CodeBlock:
         """Split the given file into functional code blocks.
 
         Arguments:
@@ -81,6 +81,8 @@ class Splitter:
                 complete=True,
                 start_line=0,
                 end_line=len(text.splitlines()),
+                depth=0,
+                id=0,
                 children=[],
                 language=self.language,
                 type="file",
@@ -89,14 +91,19 @@ class Splitter:
             out_block = block
         else:
             node = cursor.node
-            out_block = self._recurse_split(node, path)
+            out_block = self._recurse_split(node, path, 0, 0)
         return out_block
 
-    def _recurse_split(self, node: tree_sitter.Node, path: Path) -> CodeBlock:
+    def _recurse_split(
+        self, node: tree_sitter.Node, path: Path, depth: int, id: int
+    ) -> CodeBlock:
         """Recursively split the code into functional blocks.
 
         Arguments:
-            cursor: A tree-sitter cursor to walk through the code.
+            node: The current node in the tree.
+            path: The path to the file containing the code.
+            depth: The current depth of the recursion.
+            id: The current id of the child block at depth `N`.
 
         Returns:
             A CodeBlock object.
@@ -111,6 +118,8 @@ class Splitter:
                 complete=True,
                 start_line=node.start_point[0],
                 end_line=node.end_point[0],
+                depth=depth,
+                id=id,
                 children=[],
                 language=self.language,
                 type=node.type,
@@ -140,8 +149,10 @@ class Splitter:
                 idxs.append(max_idx)
 
             children = []
-            for i in idxs:
-                children.append(self._recurse_split(node.children[i], path))
+            for child_idx, i in enumerate(idxs):
+                children.append(
+                    self._recurse_split(node.children[i], path, depth + 1, child_idx)
+                )
 
             return CodeBlock(
                 code=new_text,
@@ -149,52 +160,13 @@ class Splitter:
                 complete=False,
                 start_line=node.start_point[0],
                 end_line=node.end_point[0],
+                depth=depth,
+                id=id,
                 children=children,
                 language=self.language,
                 type=node.type,
                 tokens=self._count_tokens(text),
             )
-
-    def _blocks_to_file(self, block: CodeBlock, path: Path) -> None:
-        """Save the CodeBlock to a path.
-
-        Arguments:
-            block: The functional code block to save.
-            path: The path to save the functional code block to.
-        """
-        code_str = self._blocks_to_str(block.code, block)
-        with open(path, "w") as f:
-            f.write(code_str)
-
-    def _blocks_to_str(self, input: str, block: CodeBlock) -> str:
-        """Recursively convert a functional code block to a string.
-
-        # TODO: Fix the formatting issues with this method. It currently doesn't get
-        the indentation or number of newlines correct. But I feel that it would have
-        to be done differently to keep track of that sort of thing within the
-        `CodeBlock` when originally splitting.
-
-        Arguments:
-            input: The input string to replace with the children of `block`.
-            block: The functional code block to recursively replace children.
-
-        Returns:
-            The string with the children of `block` inserted. It should replace the
-            whole tree of CodeBlocks to get the original code (with some formatting
-            issues)
-        """
-        if len(block.children) == 0:
-            return input
-        else:
-            for i, child in enumerate(block.children):
-                if f"{self.comment} <<<child_{i}>>>" in block.code:
-                    output = self._blocks_to_str(
-                        input.replace(f"{self.comment} <<<child_{i}>>>", child.code),
-                        child,
-                    )
-                else:
-                    return input
-            return output
 
     def _count_tokens(self, code: str) -> int:
         """Count the number of tokens in the given code.

@@ -158,7 +158,10 @@ class OpenAI:
 
         output = response["choices"][0]["message"]["content"]
         tokens = response["usage"]
-        cost = COST_PER_MODEL[self.model]["input"] * (tokens["total_tokens"] / 1000)
+        cost = COST_PER_MODEL[self.model]["input"] * (tokens["prompt_tokens"] / 1000)
+        cost += COST_PER_MODEL[self.model]["output"] * (
+            tokens["completion_tokens"] / 1000
+        )
 
         return output, tokens, cost
 
