@@ -3,7 +3,7 @@ from typing import Tuple
 from ...utils.logger import create_logger
 from ..pattern import Pattern
 from ..splitter import Splitter
-from .patterns import MumpsSubroutinePattern
+from .patterns import MumpsLabeledBlockPattern
 
 log = create_logger(__name__)
 
@@ -14,26 +14,21 @@ class MumpsSplitter(Splitter):
 
     Attributes:
         patterns: A tuple of `Pattern`s to use for splitting Mumps code into
-                  functional blocks.
+            functional blocks.
     """
 
     def __init__(
         self,
         patterns: Tuple[Pattern, ...] = (
-            MumpsSubroutinePattern(),
-            # FortranFunctionPattern(),
-            # FortranIfPattern(),
-            # FortranDoPattern(),
-            # FortranModulePattern(),
-            # FortranProgramPattern(),
+            MumpsLabeledBlockPattern()
         ),
         max_tokens: int = 4096,
     ) -> None:
-        """Initialize a Fortran instance.
+        """Initialize a MumpsSplitter instance.
 
         Arguments:
-            patterns: A tuple of `Pattern`s to use for splitting Fortran code into
-                      functional blocks.
+            patterns: A tuple of `Pattern`s to use for splitting MUMPS code into
+                functional blocks.
         """
 
         super().__init__(patterns, max_tokens)

@@ -65,16 +65,15 @@ routine_end = fr'[ \t](?:Q(?:UIT)?|H(?:ALT)?){optional_inline_comment}'
 
 
 @dataclass
-class MumpsSubroutinePattern(Pattern):
-    """A pattern for matching Fortran subroutines.
+class MumpsLabeledBlockPattern(Pattern):
+    """A pattern for matching MUMPS labeled blocks.
 
     Attributes:
-        start_pattern: A regular expression pattern that matches the start of a
-                       Fortran subroutine.
-        end_pattern: A regular expression pattern that matches the end of a
-                     Fortran subroutine.
+        start: A regular expression pattern that matches the label at the
+            beginning of a MUMPS block (typically a routine).
+        end: A regular expression pattern that matches the end of a MUMPS block.
         type: The type of the functional code block ('module', 'function', etc.).
     """
     start: re.Pattern = re.compile(routine_start)
     end: re.Pattern = re.compile(fr"(?<!\n)\n(?={routine_end})", re.IGNORECASE)
-    type: str = "routine"
+    type: str = "labeled_block"
