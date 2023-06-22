@@ -156,7 +156,7 @@ class Translator:
         if self.source_language == "fortran":
             splitter = FortranSplitter(max_tokens=self._llm.model_max_tokens)
             glob = "**/*.f90"
-        elif self.source_language == 'mumps':
+        elif self.source_language == "mumps":
             splitter = MumpsSplitter(max_tokens=self._llm.model_max_tokens)
             glob = "**/*.m"
         else:
