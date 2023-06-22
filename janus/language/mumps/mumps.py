@@ -20,7 +20,7 @@ class MumpsSplitter(Splitter):
     def __init__(
         self,
         patterns: Tuple[Pattern, ...] = (
-            MumpsLabeledBlockPattern()
+            MumpsLabeledBlockPattern(),
         ),
         max_tokens: int = 4096,
     ) -> None:
