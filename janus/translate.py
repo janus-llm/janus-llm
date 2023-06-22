@@ -78,6 +78,7 @@ class Translator:
             for code in file.blocks:
                 prompt = self._prompt_engine.create(code)
                 output, tokens, cost = self._llm.get_output(prompt.prompt)
+                log.debug(f"Block {code.block_id} in {file.path.name}: {output}")
                 parsed_output, parsed = self._parse_llm_output(output)
                 if not parsed:
                     log.warning(
@@ -179,11 +180,9 @@ class Translator:
         Returns:
             The parsed output.
         """
+        pattern = rf"```[^\S\r\n]*(?:{self.target_language}[^\S\r\n]*)?\n?(.*?)\n*```"
         try:
-            # response = re.findall(r"\{.*?\}", output)[0].strip("{}")
-            pattern = r"```(.*?)```"
-            response = re.search(pattern, output, re.DOTALL)
-            response = response.group(1).strip("python\n")
+            response = re.search(pattern, output, re.DOTALL).group(1)
             parsed = True
         except Exception:
             log.warning(f"Could not find code in output:\n\n{output}")
