@@ -44,9 +44,8 @@ MUMPS_COMMANDS = [
 ]
 
 # Regex definitions
-comment_line = r'[\t ]*;.*\n'
-optional_comment_block = fr'(?:{comment_line})*'
-optional_inline_comment = f'[\t ]+(?:;.*)?\n|[\t ]*\n'
+comment = r'[\t ]*;.*\n'
+optional_inline_comment = '[\t ]+(?:;.*)?\n|[\t ]*\n'
 
 # Labels start on column 1
 label_start = r'[^ \t;$]'
@@ -60,8 +59,8 @@ routine_end = fr'[ \t](?:Q(?:UIT)?|H(?:ALT)?){optional_inline_comment}'
 #    ++++++++++++++++
 #  r'(?<![\t ]*;.*\n)\n(?=(?:[\t ]*;.*\n)*[^ \t;$])'
 # But this doesn't work because it's not fixed-width
-# negative_look_behind = fr'(?<!{comment_line})'
-# routine_start_including_comments = fr"{negative_look_behind}\n(?={optional_comment_block}{label_start})"
+# neg_lookback = fr'(?<!{comment_line})'
+# routine_start_including_comments = fr"{neg_lookback}\n(?=(?:{comment})*{label_start})"
 
 
 @dataclass
