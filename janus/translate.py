@@ -5,6 +5,7 @@ from typing import List, Tuple
 
 from .language.block import CodeBlock, File, TranslatedCodeBlock
 from .language.fortran import FortranSplitter
+from .language.mumps import MumpsSplitter
 from .llm.openai import TOKEN_LIMITS, OpenAI
 from .prompts.prompt import PromptEngine
 from .utils.enums import (
@@ -155,6 +156,9 @@ class Translator:
         if self.source_language == "fortran":
             splitter = FortranSplitter(max_tokens=self._llm.model_max_tokens)
             glob = "**/*.f90"
+        elif self.source_language == "mumps":
+            splitter = MumpsSplitter(max_tokens=self._llm.model_max_tokens)
+            glob = "**/*.m"
         else:
             raise NotImplementedError(
                 f"Source language '{self.source_language}' not implemented."
