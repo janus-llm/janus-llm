@@ -192,9 +192,12 @@ class Splitter(FileManager):
             self.parser.set_language(tree_sitter.Language(so_file, self.language))
         except OSError:
             log.warning(f"Could not load {so_file}, trying mac version.")
-            self.parser.set_language(
-                tree_sitter.Language(
-                    so_file.parent / f"{so_file.stem}_mac.so",
-                    self.language,
+            try:
+                self.parser.set_language(
+                    tree_sitter.Language(
+                        so_file.parent / f"{so_file.stem}_mac.so",
+                        self.language,
+                    )
                 )
-            )
+            except OSError:
+                log.error(f"Could not load {so_file} or {so_file.stem}_mac.so")
