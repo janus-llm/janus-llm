@@ -56,6 +56,7 @@ class MumpsSplitter(Splitter):
         patterns: Tuple[MumpsLabeledBlockPattern, ...] = (MumpsLabeledBlockPattern(),),
         max_tokens: int = 4096,
         model: str = "gpt-3.5-turbo",
+        maximize_block_length: bool = False,
     ) -> None:
         """Initialize a MumpsSplitter instance.
 
@@ -68,6 +69,8 @@ class MumpsSplitter(Splitter):
         # Divide max_tokens by 3 because we want to leave just as much space for the
         # prompt as for the translated code.
         self.max_tokens: int = max_tokens // 3
+        self.maximize_block_length = maximize_block_length
+
         # Using tiktoken as the tokenizer because that's what's recommended for OpenAI
         # models.
         self._tokenizer = tiktoken.encoding_for_model(model)

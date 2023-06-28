@@ -28,7 +28,6 @@ class Splitter(FileManager):
         self,
         max_tokens: int = 4096,
         model: str = "gpt-3.5-turbo",
-        maximize_block_length: bool = False,
     ) -> None:
         """Initialize a Splitter instance.
 
@@ -42,7 +41,6 @@ class Splitter(FileManager):
         # Divide max_tokens by 2 because we want to leave just as much space for the
         # prompt as for the translated code.
         self.max_tokens: int = max_tokens // 3
-        self.maximize_block_length = maximize_block_length
 
         self.parser: tree_sitter.Parser = tree_sitter.Parser()
 
