@@ -13,19 +13,26 @@ MODEL_TYPES: Dict[str, str] = {
     "gpt-4": "chat-gpt",
     "gpt-4-32k": "chat-gpt",
     "gpt-3.5-turbo": "chat-gpt",
+    "gpt-3.5-turbo-16k": "chat-gpt",
 }
 
 # From the OpenAI Docs:
 # https://platform.openai.com/docs/models/gpt-4
 # https://platform.openai.com/docs/models/gpt-3-5
-TOKEN_LIMITS: Dict[str, int] = {"gpt-4": 8192, "gpt-4-32k": 32768, "gpt-3.5-turbo": 4096}
+TOKEN_LIMITS: Dict[str, int] = {
+    "gpt-4": 8192,
+    "gpt-4-32k": 32768,
+    "gpt-3.5-turbo": 4096,
+    "gpt-3.5-turbo-16k": 16384,
+}
 
-# The cost per 1k tokens for each model at the input:
+# The cost per 1k tokens for each model at the input and output:
 # https://openai.com/pricing
 COST_PER_MODEL: Dict[str, float] = {
-    "gpt-4": 0.03,
-    "gpt-4-32k": 0.06,
-    "gpt-3.5-turbo": 0.002,
+    "gpt-4": {"input": 0.03, "output": 0.06},
+    "gpt-4-32k": {"input": 0.6, "output": 0.12},
+    "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
+    "gpt-3.5-turbo-16k": {"input": 0.003, "output": 0.004},
 }
 
 
@@ -151,7 +158,10 @@ class OpenAI:
 
         output = response["choices"][0]["message"]["content"]
         tokens = response["usage"]
-        cost = COST_PER_MODEL[self.model] * (tokens["total_tokens"] / 1000)
+        cost = COST_PER_MODEL[self.model]["input"] * (tokens["prompt_tokens"] / 1000)
+        cost += COST_PER_MODEL[self.model]["output"] * (
+            tokens["completion_tokens"] / 1000
+        )
 
         return output, tokens, cost
 

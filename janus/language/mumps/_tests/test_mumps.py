@@ -14,5 +14,5 @@ class TestMumpsSplitter(unittest.TestCase):
 
     def test_split(self):
         """Test the split method."""
-        file = self.splitter.split(self.test_file)
-        self.assertEqual(len(file.blocks), 7)
+        block = self.splitter.split(self.test_file)
+        self.assertEqual(len(block.children), 23)
