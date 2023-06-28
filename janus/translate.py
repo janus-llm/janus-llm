@@ -158,7 +158,7 @@ class Translator:
             directory: The directory to get the files from.
 
         Returns:
-            A list of `File`s.
+            A list of code blocks.
         """
         files: List[CodeBlock] = []
 
