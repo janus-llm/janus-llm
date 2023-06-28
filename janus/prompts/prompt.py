@@ -45,31 +45,60 @@ class PromptTemplate:
             ),
         },
         {
-            "role": "system",
+            "role": "user",
             "content": (
                 "Do not include anything around the resultant code. Only report back the "
                 "code itself in between triple backticks."
             ),
         },
         {
-            "role": "system",
+            "role": "user",
             "content": (
                 "If the given code is incomplete, assume it is translated elsewhere. "
+                "Translate it anyway."
+            ),
+        },
+        {
+            "role": "user",
+            "content": (
                 "If the given code is missing variable definitions, assume they are "
-                "assigned elsewhere. Give an attempt even if it is incomplete."
+                "assigned elsewhere. "
+                "Translate it anyway."
+            ),
+        },
+        {
+            "role": "user",
+            "content": (
+                "Give an attempt even if it is incomplete."
+                "If the code only consists of comments, assume the code that is "
+                "represented by that comment is translated elsewhere. "
+                "Translate it anyway."
+            ),
+        },
+        {
+            "role": "user",
+            "content": "If the code has comments, keep ALL of them",
+        },
+        {
+            "role": "user",
+            "content": (
+                "If the code only consists of ONLY comments, assume the code that is "
+                "represented by those comments is translated elsewhere. "
+                "Translate it anyway."
             ),
         },
         {
             "role": "user",
             "content": (
                 "Please convert the following <SOURCE LANGUAGE> <FILE SUFFIX> code found "
-                "in between triple backticks and is in string format into useable "
+                "in between triple backticks and is in string format into "
                 "<TARGET LANGUAGE> code. If the given code is incomplete, assume it "
                 "is translated elsewhere. If the given code is missing variable "
                 "definitions, assume they are assigned elsewhere. If there are "
                 "incomplete statements that haven't been closed out, assume they are "
-                "closed out in other translations. If there are missing sections, make "
-                "your best effort to fill them in and do not skip them. "
+                "closed out in other translations. If it only consists of comments, "
+                "assume the code that is represented by that comment is translated "
+                "elsewhere. If it only consists of ONLY comments, assume the code that "
                 "Some more things to remember: (1) follow standard styling practice for "
                 "the target language, (2) make sure the language is typed correctly. "
                 "Make sure your result also fits within three backticks."
