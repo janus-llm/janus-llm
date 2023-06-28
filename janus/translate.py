@@ -5,6 +5,7 @@ from typing import List, Tuple
 
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.fortran import FortranSplitter
+from .language.mumps import MumpsSplitter
 from .language.python import PythonCombiner
 from .llm.openai import TOKEN_LIMITS, OpenAI
 from .prompts.prompt import PromptEngine
@@ -230,11 +231,9 @@ class Translator:
         Returns:
             The parsed output.
         """
+        pattern = rf"```[^\S\r\n]*(?:{self.target_language}[^\S\r\n]*)?\n?(.*?)\n*```"
         try:
-            # response = re.findall(r"\{.*?\}", output)[0].strip("{}")
-            pattern = r"```(.*?)```"
-            response = re.search(pattern, output, re.DOTALL)
-            response = response.group(1).strip("python\n")
+            response = re.search(pattern, output, re.DOTALL).group(1)
             parsed = True
         except Exception:
             log.warning(f"Could not find code in output:\n\n{output}")
@@ -282,6 +281,9 @@ class Translator:
                 max_tokens=self._llm.model_max_tokens, model=self._llm.model
             )
             self._glob = "**/*.f90"
+        elif self.source_language == "mumps":
+            self.splitter = MumpsSplitter(max_tokens=self._llm.model_max_tokens)
+            self._glob = "**/*.m"
         else:
             raise NotImplementedError(
                 f"Source language '{self.source_language}' not implemented."
