@@ -1,7 +1,7 @@
 import re
+from itertools import count, groupby
 from pathlib import Path
 from typing import List, Tuple
-from itertools import count, groupby
 
 import tiktoken
 
@@ -16,11 +16,13 @@ log = create_logger(__name__)
 class CumulativeLengthGrouper:
     """A helper class for merging code up to a maximum token length.
     Expected usage:
-        grouper = CumulativeLengthGrouper(2048, tiktoken.encoding_for_model("gpt-3.5-turbo"))
+        grouper = CumulativeLengthGrouper(2048, tiktoken.encoding_for_model(model))
         groups = itertools.groupby(blocks, key=grouper)
         blocks = ['\n'.join(g) for _, g in groups]
     """
+
     tokenizer = None
+
     def __init__(self, max_tokens, tokenizer):
         self.max_tokens = max_tokens
         self.tokenizer = tokenizer
@@ -103,9 +105,7 @@ class MumpsSplitter(Splitter):
         if self.maximize_block_length:
             # Merge adjacent blocks back together to meet self.max_tokens
             grouper = CumulativeLengthGrouper(self.max_tokens, self._tokenizer)
-            blocks = [
-                '\n'.join(grp) for _, grp in groupby(blocks, key=grouper)
-            ]
+            blocks = ["\n".join(grp) for _, grp in groupby(blocks, key=grouper)]
 
         components: List[CodeBlock] = []
         start_line = 0

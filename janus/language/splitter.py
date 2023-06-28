@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import numpy as np
 import tiktoken
 import tree_sitter
@@ -27,7 +28,7 @@ class Splitter(FileManager):
         self,
         max_tokens: int = 4096,
         model: str = "gpt-3.5-turbo",
-        maximize_block_length: bool = False
+        maximize_block_length: bool = False,
     ) -> None:
         """Initialize a Splitter instance.
 
@@ -100,7 +101,6 @@ class Splitter(FileManager):
             node = cursor.node
             out_block = self._recurse_split(node, path, 0, 0)
         return out_block
-
 
     def _recurse_split(
         self, node: tree_sitter.Node, path: Path, depth: int, id: int
