@@ -74,46 +74,53 @@ class MumpsSplitter(Splitter):
             out_block = block
         else:
             blocks = re.split(self.patterns[0].start, code)
+            start_line = 0
             for block in blocks:
-                block_token_len = self._count_tokens(block)
                 # The entire block is under the token length
-                if block_token_len <= self.max_tokens:
+                if self._count_tokens(block) <= self.max_tokens:
+                    end_line = start_line + len(block.splitlines())
                     code_block = CodeBlock(
-                        code=code,
+                        code=block,
                         path=path,
                         complete=True,
-                        start_line=0,
-                        end_line=len(code.splitlines()),
+                        start_line=start_line,
+                        end_line=end_line,
                         depth=0,
                         id=0,
                         children=[],
                         language=self.language,
                         type="file",
-                        tokens=self._count_tokens(code),
+                        tokens=self._count_tokens(block),
                     )
+                    start_line = end_line
                     components.append(code_block)
                 # The whole block is too long, split into segments
                 else:
                     segments = self._split_block_into_segs(block)
                     for segment_id, segment in enumerate(segments):
+                        end_line = start_line + len(segment.splitlines())
                         code_block = CodeBlock(
                             code=segment,
                             path=path,
                             complete=True,
-                            start_line=0,
-                            end_line=len(code.splitlines()),
+                            start_line=start_line,
+                            end_line=end_line,
                             depth=1,
                             id=segment_id,
                             children=[],
                             language=self.language,
-                            type="file",
-                            tokens=self._count_tokens(code),
+                            type="",
+                            tokens=self._count_tokens(segment),
                         )
+                        start_line = end_line
                         components.append(code_block)
+            main_block = ""
+            for i in range(len(components)):
+                main_block += f"{self.comment} <<<child_{i}>>>\n"
             out_block = CodeBlock(
-                code=f"{self.comment} <<<child_0>>>\n",
+                code=main_block,
                 path=path,
-                complete=True,
+                complete=False,
                 start_line=0,
                 end_line=len(code.splitlines()),
                 depth=0,

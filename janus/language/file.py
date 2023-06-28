@@ -39,12 +39,15 @@ class FileManager:
         if len(block.children) == 0:
             return input
         else:
+            output = input
             for i, child in enumerate(block.children):
                 if f"{self.comment} <<<child_{i}>>>" in block.code:
-                    output = self._blocks_to_str(
-                        input.replace(f"{self.comment} <<<child_{i}>>>", child.code),
-                        child,
-                    )
+                    output = output.replace(f"{self.comment} <<<child_{i}>>>", child.code)
+                    if len(child.children) > 0:
+                        output = self._blocks_to_str(
+                            output,
+                            child,
+                        )
                 else:
                     return input
             return output
