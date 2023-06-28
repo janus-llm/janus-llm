@@ -17,7 +17,7 @@ class TestTranslator(unittest.TestCase):
         # Delete a file if it's already there
         python_file = self.test_file.parent / "python" / f"{self.test_file.stem}.py"
         python_file.unlink(missing_ok=True)
-        python_file.parent.rmdir()
+        python_file.parent.rmdir() if python_file.parent.is_dir() else None
         self.translator.translate(self.test_file.parent, self.test_file.parent / "python")
         # Only check the top-most level functionality, since it should be handled by other
         # unit tests anyway
