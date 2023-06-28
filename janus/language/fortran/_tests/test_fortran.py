@@ -9,10 +9,15 @@ class TestFortranSplitter(unittest.TestCase):
 
     def setUp(self):
         """Set up the tests."""
-        self.splitter = FortranSplitter(max_tokens=4096)
-        self.test_file = Path("janus/language/fortran/_tests/test_fortran.f90")
+        self.splitter = FortranSplitter()
+        self.test_file = Path("janus/language/fortran/_tests/fortran.f90")
 
     def test_split(self):
         """Test the split method."""
-        file = self.splitter.split(self.test_file)
-        self.assertEqual(len(file.blocks), 7)
+        split_code = self.splitter.split(self.test_file)
+        flat_split_text = self.splitter._blocks_to_str(split_code.code, split_code)
+        # The newlines and spaces aren't the same but that doesn't matter for fortran
+        # (to an extent)
+        flat_split_text = flat_split_text.replace("\n", "").replace(" ", "")
+        test_file_replaced = self.test_file.read_text().replace("\n", "").replace(" ", "")
+        self.assertEqual(flat_split_text, test_file_replaced)

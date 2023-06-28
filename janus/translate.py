@@ -3,9 +3,10 @@ import re
 from pathlib import Path
 from typing import List, Tuple
 
-from .language.block import CodeBlock, File, TranslatedCodeBlock
+from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.fortran import FortranSplitter
 from .language.mumps import MumpsSplitter
+from .language.python import PythonCombiner
 from .llm.openai import TOKEN_LIMITS, OpenAI
 from .prompts.prompt import PromptEngine
 from .utils.enums import (
@@ -45,6 +46,8 @@ class Translator:
         self.target_version = target_version
         self._check_languages()
         self._load_model()
+        self._load_splitter()
+        self._load_combiner()
         self._load_prompt_engine()
 
     def translate(
@@ -69,21 +72,21 @@ class Translator:
         # First, get the files in the input directory and split them into CodeBlocks
         files = self._get_files(input_directory)
 
-        translated_files: List[File] = []
+        translated_files: List[TranslatedCodeBlock] = []
 
         # Now, loop through every code block in every file and translate it with an LLM
         for file in files:
+            # out_blocks is flat, whereas `translated_files` is nested
             out_blocks: List[TranslatedCodeBlock] = []
             # Loop through all code blocks in the file
-            for code in file.blocks:
-                prompt = self._prompt_engine.create(code)
+            blocks = self._unpack_code_blocks(file)
+            for block in blocks:
+                prompt = self._prompt_engine.create(block)
                 output, tokens, cost = self._llm.get_output(prompt.prompt)
-                log.debug(f"Block {code.block_id} in {file.path.name}: {output}")
                 parsed_output, parsed = self._parse_llm_output(output)
                 if not parsed:
                     log.warning(
-                        f"Failed to parse output for block {code.block_id} in file "
-                        f"{file.path.name}"
+                        f"Failed to parse output for block in file {block.path.name}"
                     )
 
                 # Create the output file
@@ -93,26 +96,28 @@ class Translator:
                     f".{source_suffix}", f".{target_suffix}"
                 )
                 outpath = output_directory / out_filename
-                out_blocks.append(
-                    self._output_to_block(parsed_output, outpath, code, tokens, cost)
+                out_block = self._output_to_block(
+                    parsed_output, outpath, block, tokens, cost
                 )
+                out_blocks.append(out_block)
+
+            out_file = self._nest_code_blocks(out_blocks)
+
             # Write the code blocks to the output file
-            outfile = File(outpath, out_blocks)
-            self._save_to_file(outfile)
+            self._save_to_file(out_file)
             # Add the translated file to the list of translated files
-            translated_files.append(outfile)
+            translated_files.append(out_file)
 
         self.output_files = translated_files
 
-    def _save_to_file(self, file: File) -> None:
+    def _save_to_file(self, file: CodeBlock) -> None:
         """Save a file to disk.
 
         Arguments:
             file: The file to save.
         """
         file.path.parent.mkdir(parents=True, exist_ok=True)
-        with open(file.path, "w") as f:
-            f.writelines([f"{b.code}\n" for b in file.blocks])
+        self.combiner.blocks_to_file(file)
 
     def _output_to_block(
         self,
@@ -131,45 +136,91 @@ class Translator:
             A `TranslatedCodeBlock` instance.
         """
         block = TranslatedCodeBlock(
-            output,
-            outpath,
-            original_block.complete,
-            original_block.block_id,
-            original_block.segment_id,
-            self.target_language,
-            "",
-            tokens["completion_tokens"],
-            original_block,
-            cost,
+            code=output,
+            path=outpath,
+            complete=original_block.complete,
+            start_line=original_block.start_line,
+            end_line=original_block.end_line,
+            depth=original_block.depth,
+            id=original_block.id,
+            language=self.target_language,
+            type=original_block.type,
+            tokens=tokens["completion_tokens"],
+            children=[],
+            original=original_block,
+            cost=cost,
         )
         return block
 
-    def _get_files(self, directory: Path) -> List[File]:
+    def _get_files(self, directory: Path) -> List[CodeBlock]:
         """Get the files in the given directory and split them into functional blocks.
 
         Arguments:
             directory: The directory to get the files from.
 
         Returns:
-            A list of `File`s.
+            A list of code blocks.
         """
-        if self.source_language == "fortran":
-            splitter = FortranSplitter(max_tokens=self._llm.model_max_tokens)
-            glob = "**/*.f90"
-        elif self.source_language == "mumps":
-            splitter = MumpsSplitter(max_tokens=self._llm.model_max_tokens)
-            glob = "**/*.m"
-        else:
-            raise NotImplementedError(
-                f"Source language '{self.source_language}' not implemented."
-            )
+        files: List[CodeBlock] = []
 
-        files: List[File] = []
-
-        for file in Path(directory).glob(glob):
-            files.append(splitter.split(file))
+        for file in Path(directory).glob(self._glob):
+            files.append(self.splitter.split(file))
 
         return files
+
+    def _unpack_code_blocks(self, block: CodeBlock) -> List[CodeBlock]:
+        """Unpack a code block into a list of `CodeBlocks`.
+
+        Arguments:
+            block: The code block to unpack.
+
+        Returns:
+            A list of code blocks.
+        """
+        blocks = [block]
+
+        if block not in blocks:
+            blocks.append(block)
+
+        for child in block.children:
+            blocks.extend(self._unpack_code_blocks(child))
+
+        return blocks
+
+    def _nest_code_blocks(self, blocks: List[CodeBlock]) -> CodeBlock:
+        """Nest a list of code blocks.
+
+        Arguments:
+            blocks: The code blocks to nest.
+
+        Returns:
+            The top level code block.
+        """
+        return self._recurse_nest(blocks)[0]
+
+    def _recurse_nest(self, blocks: List[CodeBlock]) -> List[CodeBlock]:
+        """Recursively nest a list of code blocks.
+
+        Arguments:
+            blocks: The code blocks to nest.
+
+        Returns:
+            The nested code blocks.
+        """
+        result = []
+
+        for code_block in blocks:
+            depth = code_block.depth
+            id = code_block.id
+
+            children = [
+                block for block in blocks if block.depth == depth + 1 and block.id == id
+            ]
+
+            code_block.children = self._recurse_nest(children)
+            result.append(code_block)
+
+        return result
 
     def _parse_llm_output(self, output: str) -> Tuple[str, bool]:
         """Parse the output of an LLM.
@@ -213,6 +264,30 @@ class Translator:
             self.target_version,
             "simple",
         )
+
+    def _load_combiner(self) -> None:
+        """Load the Combiner object."""
+        if self.target_language == "python":
+            self.combiner = PythonCombiner()
+        else:
+            raise NotImplementedError(
+                f"Target language '{self.target_language}' not implemented."
+            )
+
+    def _load_splitter(self) -> None:
+        """Load the Splitter object."""
+        if self.source_language == "fortran":
+            self.splitter = FortranSplitter(
+                max_tokens=self._llm.model_max_tokens, model=self._llm.model
+            )
+            self._glob = "**/*.f90"
+        elif self.source_language == "mumps":
+            self.splitter = MumpsSplitter(max_tokens=self._llm.model_max_tokens)
+            self._glob = "**/*.m"
+        else:
+            raise NotImplementedError(
+                f"Source language '{self.source_language}' not implemented."
+            )
 
     def _check_languages(self) -> None:
         """Check that the source and target languages are valid."""

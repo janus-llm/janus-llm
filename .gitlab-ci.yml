@@ -16,6 +16,7 @@ stages:
   - Static Analysis
   - Documentation
   - Release
+  - Tests
 
 ###################
 # Static Analysis #
@@ -65,6 +66,35 @@ isort:
     changes:
       - "**/*.py"
       - poetry.lock
+
+##############
+# Unit Tests #
+##############
+coverage:
+  stage: Tests
+  tags:
+  - lslab
+  script:
+    - poetry install --with coverage
+    - poetry run python -m coverage run -m pytest janus
+    - poetry run python -m coverage report -i
+    - poetry run python -m coverage xml -i
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+  needs: []
+  timeout: 20m
+  only:
+    refs:
+      - merge_requests
+      - main
+    changes:
+      - "**/*.py"
+      - poetry.lock
+
 
 ################
 # GitLab Pages #

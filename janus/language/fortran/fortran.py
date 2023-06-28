@@ -1,41 +1,30 @@
-from typing import Tuple
+from pathlib import Path
 
 from ...utils.logger import create_logger
-from ..pattern import Pattern
 from ..splitter import Splitter
-from .patterns import FortranSubroutinePattern
+
+TREE_SITTER_FORTRAN_SO: Path = Path("janus/language/fortran/build_files/parser.so")
 
 log = create_logger(__name__)
 
 
 class FortranSplitter(Splitter):
-    """A class for splitting Fortran code into functional blocks to prompt with for
-    transcoding.
+    """A class for splitting Fortran code into functional blocks to prompt for
+       transcoding.
 
     Attributes:
         patterns: A tuple of `Pattern`s to use for splitting Fortran code into
                   functional blocks.
+        max_tokens: The maximum number of tokens to use for each functional block.
     """
 
-    def __init__(
-        self,
-        patterns: Tuple[Pattern, ...] = (
-            FortranSubroutinePattern(),
-            # FortranFunctionPattern(),
-            # FortranIfPattern(),
-            # FortranDoPattern(),
-            # FortranModulePattern(),
-            # FortranProgramPattern(),
-        ),
-        max_tokens: int = 4096,
-    ) -> None:
-        """Initialize a Fortran instance.
+    def __init__(self, max_tokens: int = 4096, model: str = "gpt-3.5-turbo") -> None:
+        """Initialize a FortranSplitter instance.
 
         Arguments:
-            patterns: A tuple of `Pattern`s to use for splitting Fortran code into
-                      functional blocks.
+            max_tokens: The maximum number of tokens to use for each functional block.
+            model: The name of the model to use for translation.
         """
-
-        super().__init__(patterns, max_tokens)
         self.language: str = "fortran"
-        self.comment: str = "!"
+        super().__init__(max_tokens, model)
+        self._load_parser(TREE_SITTER_FORTRAN_SO)
