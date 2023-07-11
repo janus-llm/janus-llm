@@ -282,7 +282,11 @@ class Translator:
             )
             self._glob = "**/*.f90"
         elif self.source_language == "mumps":
-            self.splitter = MumpsSplitter(max_tokens=self._llm.model_max_tokens)
+            self.splitter = MumpsSplitter(
+                max_tokens=self._llm.model_max_tokens,
+                model=self._llm.model,
+                maximize_block_length=True,
+            )
             self._glob = "**/*.m"
         else:
             raise NotImplementedError(

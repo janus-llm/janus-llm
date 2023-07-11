@@ -51,31 +51,23 @@ class MumpsSplitter(Splitter):
             functional blocks.
     """
 
-    def __init__(
-        self,
-        patterns: Tuple[MumpsLabeledBlockPattern, ...] = (MumpsLabeledBlockPattern(),),
-        max_tokens: int = 4096,
-        model: str = "gpt-3.5-turbo",
-        maximize_block_length: bool = False,
-    ) -> None:
+    def __init__(self, max_tokens: int = 4096, model: str = "gpt-3.5-turbo",
+                 maximize_block_length: bool = False) -> None:
         """Initialize a MumpsSplitter instance.
 
         Arguments:
             patterns: A tuple of `Pattern`s to use for splitting MUMPS code into
                 functional blocks.
         """
-
-        self.patterns: Tuple[MumpsLabeledBlockPattern, ...] = patterns
-        # Divide max_tokens by 3 because we want to leave just as much space for the
-        # prompt as for the translated code.
-        self.max_tokens: int = max_tokens // 3
-        self.maximize_block_length = maximize_block_length
-
-        # Using tiktoken as the tokenizer because that's what's recommended for OpenAI
-        # models.
-        self._tokenizer = tiktoken.encoding_for_model(model)
         self.language: str = "mumps"
         self.comment: str = ";"
+        super().__init__(max_tokens=max_tokens, model=model)
+
+        self.patterns: Tuple[MumpsLabeledBlockPattern, ...] = (MumpsLabeledBlockPattern(),)
+        # MUMPS code tends to take about 2/3 the space of Python
+        self.max_tokens: int = int(max_tokens * 2/5)
+        self.maximize_block_length = maximize_block_length
+
 
     def _split(self, code: str, path: Path) -> CodeBlock:
         """Split the given file into functional code blocks.
