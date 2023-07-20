@@ -1,3 +1,4 @@
+import platform
 from pathlib import Path
 
 import numpy as np
@@ -189,15 +190,13 @@ class Splitter(FileManager):
             so_file: The path to the so file for the language.
         """
         try:
-            self.parser.set_language(tree_sitter.Language(so_file, self.language))
+            os_suffix = ""
+            match platform.system():
+                case "Darwin":
+                    os_suffix = "_mac"
+                case "Windows":
+                    os_suffix = "_windows"
+            os_so_file = (so_file.parent / f"{so_file.stem}{os_suffix}.so").__str__()
+            self.parser.set_language(tree_sitter.Language(os_so_file, self.language))
         except OSError:
-            log.warning(f"Could not load {so_file}, trying mac version.")
-            try:
-                self.parser.set_language(
-                    tree_sitter.Language(
-                        so_file.parent / f"{so_file.stem}_mac.so",
-                        self.language,
-                    )
-                )
-            except OSError:
-                log.error(f"Could not load {so_file} or {so_file.stem}_mac.so")
+            log.warning(f"Could not load {os_so_file}")
