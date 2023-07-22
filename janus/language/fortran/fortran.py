@@ -3,7 +3,8 @@ from pathlib import Path
 from ...utils.logger import create_logger
 from ..splitter import Splitter
 
-TREE_SITTER_FORTRAN_SO: Path = Path("janus/language/fortran/build_files/parser.so")
+TREE_SITTER_FORTRAN_BUILD_DIR: Path = Path("janus/language/fortran/build_files")
+TREE_SITTER_GITHUB_LINK: str = "https://github.com/stadelmanma/tree-sitter-fortran.git"
 
 log = create_logger(__name__)
 
@@ -27,4 +28,4 @@ class FortranSplitter(Splitter):
         """
         self.language: str = "fortran"
         super().__init__(max_tokens, model)
-        self._load_parser(TREE_SITTER_FORTRAN_SO)
+        self._load_parser(TREE_SITTER_FORTRAN_BUILD_DIR, TREE_SITTER_GITHUB_LINK)
