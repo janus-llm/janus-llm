@@ -73,7 +73,9 @@ isort:
 coverage:
   stage: Tests
   tags:
-  - lslab
+    - lslab
+  variables:
+    GIT_SSL_NO_VERIFY: '1'
   script:
     - poetry install --with coverage
     - poetry run python -m coverage run -m pytest janus
