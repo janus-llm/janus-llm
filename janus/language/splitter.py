@@ -184,7 +184,12 @@ class Splitter(FileManager):
 
     def _git_clone(self, repository_url: str, destination_folder: Path | str) -> None:
         try:
-            Repo.clone_from(repository_url, destination_folder)
+            Repo.clone_from(
+                repository_url,
+                destination_folder,
+                allow_unsafe_protocols=True,
+                allow_unsafe_options=True,
+            )
             log.debug(f"{repository_url} cloned to {destination_folder}")
         except Exception as e:
             log.error(f"Error: {e}")
