@@ -82,12 +82,23 @@ class Translator:
             blocks = self._unpack_code_blocks(file)
             for block in blocks:
                 prompt = self._prompt_engine.create(block)
-                output, tokens, cost = self._llm.get_output(prompt.prompt)
-                parsed_output, parsed = self._parse_llm_output(output)
-                if not parsed:
-                    log.warning(
-                        f"Failed to parse output for block in file {block.path.name}"
-                    )
+                parsed = False
+                num_tries = 0
+                while not parsed:
+                    output, tokens, cost = self._llm.get_output(prompt.prompt)
+                    parsed_output, parsed = self._parse_llm_output(output)
+                    if not parsed:
+                        log.warning(
+                            f"Failed to parse output for block in file {block.path.name}"
+                        )
+                    if num_tries > 10:
+                        log.error(
+                            f"Failed to parse output after {num_tries} tries. Exiting."
+                        )
+                        raise RuntimeError(
+                            f"Failed to parse output after {num_tries} tries. Exiting."
+                        )
+                    num_tries += 1
 
                 # Create the output file
                 source_suffix = LANGUAGE_SUFFIXES[self.source_language]
