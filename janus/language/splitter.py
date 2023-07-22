@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 import tiktoken
 import tree_sitter
+from git import Repo
 
 from ..utils.logger import create_logger
 from .block import CodeBlock
@@ -181,7 +182,36 @@ class Splitter(FileManager):
         tokens = self._tokenizer.encode(code)
         return len(tokens)
 
-    def _load_parser(self, so_file: Path | str) -> None:
+    def _git_clone(self, repository_url: str, destination_folder: Path | str) -> None:
+        try:
+            Repo.clone_from(repository_url, destination_folder)
+            log.debug(f"{repository_url} cloned to {destination_folder}")
+        except Exception as e:
+            log.error(f"Error: {e}")
+            raise e
+
+    def _create_parser(
+        self, so_file: Path | str, github_url: str, tree_sitter_lang_dir: str
+    ) -> None:
+        """Create the parser for the given language.
+
+        Arguments:
+            so_file: The path to the so file for the language.
+        """
+        tree_sitter_dir = Path.home() / ".tree-sitter"
+        tree_sitter_dir.mkdir(exist_ok=True)
+        lang_dir = tree_sitter_dir / tree_sitter_lang_dir
+
+        if not lang_dir.exists():
+            self._git_clone(github_url, lang_dir)
+
+        tree_sitter.Language.build_library(
+            # Store the library in the `build` directory
+            str(so_file),
+            [str(lang_dir)],
+        )
+
+    def _load_parser(self, build_dir: Path, github_url: str) -> None:
         """Load the parser for the given language.
 
         Sets `self.parser`'s language to the one specified in `self.language`.
@@ -189,14 +219,14 @@ class Splitter(FileManager):
         Arguments:
             so_file: The path to the so file for the language.
         """
+        so_filename = f"parser_{platform.system()}_{platform.processor()}.so"
+        so_file = build_dir / so_filename
         try:
-            os_suffix = ""
-            match platform.system():
-                case "Darwin":
-                    os_suffix = "_mac"
-                case "Windows":
-                    os_suffix = "_windows"
-            os_so_file = (so_file.parent / f"{so_file.stem}{os_suffix}.so").__str__()
-            self.parser.set_language(tree_sitter.Language(os_so_file, self.language))
+            self.parser.set_language(tree_sitter.Language(so_file, self.language))
         except OSError:
-            log.warning(f"Could not load {os_so_file}")
+            log.warning(
+                f"Could not load {so_file}, building one for {platform.system()} "
+                f"system, with {platform.processor()} processor"
+            )
+            self._create_parser(so_file, github_url, f"tree-sitter-{self.language}")
+            self._load_parser(build_dir, github_url)

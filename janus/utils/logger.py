@@ -24,6 +24,14 @@ class LogFilter(logging.Filter):
             return False
         elif "Use pytorch device" in str(getattr(record, "msg")):
             return False
+        elif "creating" in str(getattr(record, "msg")):
+            return False
+        elif "cc -f" in str(getattr(record, "msg")):
+            return False
+        elif "c++" in str(getattr(record, "msg")):
+            return False
+        elif "error_code=context_length_exceeded" in str(getattr(record, "msg")):
+            return False
         return True
 
     def __repr__(self):
