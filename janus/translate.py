@@ -30,20 +30,25 @@ class Translator:
         source_language: str = "fortran",
         target_language: str = "python",
         target_version: str = "3.10",
+        max_prompts: int = 10,
     ) -> None:
         """Initialize a Translator instance.
 
         Arguments:
             model: The LLM to use for translation. If an OpenAI model, the
-                   `OPENAI_API_KEY` environment variable must be set and the
-                   `OPENAI_ORG_ID` environment variable should be set if needed.
+                `OPENAI_API_KEY` environment variable must be set and the
+                `OPENAI_ORG_ID` environment variable should be set if needed.
             source_language: The source programming language.
             target_language: The target programming language.
+            target_version: The target version of the target programming language.
+            max_prompts: The maximum number of times to prompt a model on one functional
+                block.
         """
         self.model = model.lower()
         self.source_language = source_language.lower()
         self.target_language = target_language.lower()
         self.target_version = target_version
+        self.max_prompts = max_prompts
         self._check_languages()
         self._load_model()
         self._load_splitter()
@@ -82,12 +87,23 @@ class Translator:
             blocks = self._unpack_code_blocks(file)
             for block in blocks:
                 prompt = self._prompt_engine.create(block)
-                output, tokens, cost = self._llm.get_output(prompt.prompt)
-                parsed_output, parsed = self._parse_llm_output(output)
-                if not parsed:
-                    log.warning(
-                        f"Failed to parse output for block in file {block.path.name}"
-                    )
+                parsed = False
+                num_tries = 0
+                while not parsed:
+                    output, tokens, cost = self._llm.get_output(prompt.prompt)
+                    parsed_output, parsed = self._parse_llm_output(output)
+                    if not parsed:
+                        log.warning(
+                            f"Failed to parse output for block in file {block.path.name}"
+                        )
+                    if num_tries > self.max_prompts:
+                        log.error(
+                            f"Failed to parse output after {num_tries} tries. Exiting."
+                        )
+                        raise RuntimeError(
+                            f"Failed to parse output after {num_tries} tries. Exiting."
+                        )
+                    num_tries += 1
 
                 # Create the output file
                 source_suffix = LANGUAGE_SUFFIXES[self.source_language]
