@@ -251,7 +251,7 @@ class Splitter(FileManager):
             so_file: The path to the so file for the language.
         """
         so_filename = f"parser_{platform.system()}_{platform.processor()}.so"
-        so_file = build_dir / so_filename
+        so_file = (build_dir / so_filename).__str__()
         try:
             self.parser.set_language(tree_sitter.Language(so_file, self.language))
         except OSError:
