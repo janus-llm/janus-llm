@@ -150,11 +150,19 @@ class OpenAI:
             if arg is not None:
                 kwargs[name] = arg
 
-        response = openai.ChatCompletion.create(
-            model=self.model,
-            messages=messages,
-            **kwargs,
-        )
+        try:
+            response = openai.ChatCompletion.create(
+                model=self.model,
+                messages=messages,
+                **kwargs,
+            )
+        except openai.error.InvalidRequestError as e:
+            if e.code == "context_length_exceeded":
+                log.error(e.user_message)
+                log.error(f"Messages: {messages}")
+                raise e
+            else:
+                raise e
 
         output = response["choices"][0]["message"]["content"]
         tokens = response["usage"]
