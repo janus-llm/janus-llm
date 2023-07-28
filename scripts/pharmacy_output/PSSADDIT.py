@@ -1,0 +1,243 @@
+# BIR/RTR/WRT-Manual match Additives to Orderable Items; 09/01/98 7:06
+# 1.0;PHARMACY DATA MANAGEMENT;**15,32,41,125**;9/30/97;Build 2
+
+# Reference to $$PSJDF^PSNAPIS(P1,P3) supported by DBIA #2531
+
+PSSADDIT = """
+PSSITE=+^PS(59.7,0)
+IF +$P($G(^PS(59.7,PSSITE,80)),"^",2)<2 DO
+. WRITE !!,"Orderable Item Auto-Create has not been completed yet!",!
+. K PSSITE,DIR
+. SET DIR(0)="E"
+. SET DIR("A")="Press RETURN to continue"
+. DO ^DIR
+. K DIR
+QUIT
+K PSSITE
+WRITE !!,"This option enables you to match IV Additives or IV Solutions to the Pharmacy",!
+WRITE "Orderable Item File."
+DO END
+SEL DO
+. K DIR
+. SET PSSSSS=0
+. SET DIR(0)="S^A:ADDITIVES;S:SOLUTIONS"
+. SET DIR("A")="Match Additives or Solutions"
+. DO ^DIR
+. K DIR
+. QUIT:Y["^"!($DATA(DTOUT))!($DATA(DUOUT))
+. IF Y="S" DO ^PSSSOLIT
+EN DO
+. LOCK ^PS(52.6,PSAIEN)
+. DO:$DATA(PSDELFLG) REMAT^PSSSOLIT
+. DO:$DATA(PSMASTER) END
+. QUIT:$DATA(PSSSSS)!($DATA(PSMASTER))
+. DO END
+. WRITE !
+. SET DIC="^PS(52.6,"
+. SET DIC(0)="QEAMZ"
+. SET DIC("A")="Select IV ADDITIVE: "
+. DO ^DIC
+. K DIC
+. QUIT:Y<0!($DATA(DTOUT))!($DATA(DUOUT))
+MAS ; Entry point for Master Enter/Edit
+SET PSAIEN=+Y
+SET PSANAME=$P(Y,"^",2)
+SET PSDISP=+$P($G(^PS(52.6,PSAIEN,0)),"^",2)
+SET PSPOI=$P($G(^(0)),"^",11)
+LOCK ^PS(52.6,PSAIEN):$S($G(DILOCKTM)>0:DILOCKTM,1:3)
+IF '$T DO
+. WRITE !,$C(7),"Another person is editing this additive."
+QUIT
+IF 'PSDISP DO
+. WRITE $C(7),!!?5,"This IV Additive does not point to the Dispense Drug File (#50)",!?5,"it cannot be matched to an Orderable Item!",!
+. DO EN
+ENTER IF 'PSPOI DO ADD
+SET PSOINAME=$P($G(^PS(50.7,PSPOI,0)),"^")
+SET PSOIDOSE=+$P($G(^(0)),"^",2)
+WRITE !!,"IV ADDITIVE ->  ",PSANAME,!,"  is already matched to:",!,PSOINAME,"    ",$P($G(^PS(50.606,PSOIDOSE,0)),"^")
+WRITE !
+SET DIR(0)="Y"
+SET DIR("A")="Do you want to re-match this IV Additive"
+SET DIR("B")="NO"
+DO ^DIR
+K DIR
+IF Y'=1 DO SELIV^PSSSOLIT DO  G @$S($G(PSSJI)&('$G(PSSIVOUT)):"ENA^PSSVIDRG",1:"EN")
+. SET PSDELADD=PSAIEN
+. SET PSDELOIT=PSPOI
+. SET PSDELFLG=1
+K DIE
+SET DA=PSAIEN
+SET DIE="^PS(52.6,"
+SET DR="15////"_"@"
+DO ^DIE
+DO EN^PSSPOIDT(PSPOI)
+DO EN2^PSSHL1(PSPOI,"MUP")
+K PSPOI,PSOINAME,PSOIDOSE
+GOTO ADD
+INACT DO
+. K DIE
+. SET PSBEFORE=$P(^PS(50.7,PSPOI,0),"^",4)
+. SET PSAFTER=0
+. SET PSINORDE=""
+. SET DIE="^PS(50.7,"
+. SET DR=".04;.05;.06;.07;.08"
+. SET DA=PSPOI
+. DO ^DIE
+. SET PSAFTER=$P(^PS(50.7,PSPOI,0),"^",4)
+. K DIE
+. SET:PSBEFORE&('PSAFTER) PSINORDE="D"
+. SET:PSAFTER PSINORDE="I"
+. IF PSINORDE'="" DO REST^PSSPOIDT(PSPOI)
+. K PSBEFORE,PSAFTER,PSINORDE
+SYN DO
+. K DIC
+. IF '$D(^PS(50.7,PSPOI,2,0)) SET ^PS(50.7,PSPOI,2,0)="^50.72^0^0"
+. SET DIC="^PS(50.7,"_PSPOI_",2,"
+. SET DA(1)=PSPOI
+. SET DIC(0)="QEAMZL"
+. SET DIC("A")="Select SYNONYM: "
+. SET DLAYGO=50.7
+. DO ^DIC
+. K DIC
+QUIT:Y<0!($DATA(DTOUT))!($DATA(DUOUT))
+WRITE !
+SET DA=+Y
+SET DIE="^PS(50.7,"_PSPOI_",2,"
+SET DA(1)=PSPOI
+SET DR=.01
+DO ^DIE
+K DIE
+GOTO SYN
+QUIT:$DATA(NEWFLAG)
+DO EN2^PSSHL1(PSPOI,"MUP")
+DO END
+GOTO EN
+CHECK DO
+. SET (ZZFLAG,ZZXFLAG)=0
+. FOR VV=0:0 SET VV=$O(^PS(50.7,"ADF",XXX,PSOIDOSE,VV)) Q:'VV  DO
+. . IF VV&($P($G(^PS(50.7,VV,0)),"^",3)) SET ZZFLAG=VV
+. . IF VV&($P($G(^(0)),"^",3))&($D(^PS(52.6,"AOI",VV))) SET ZZXFLAG=VV
+QUIT
+DO END
+K PSDELADD,PSDELFLG,PSDELOIT,PSSSSS
+K DA,DIC,DR,DTOUT,LL,QQ,HOLDOI,INFLAG,NEWFLAG,PSAIEN,PSANAME,PSDISP,PSDOSNM,PSDOSPTR,PSND,PSND1,PSND3,PSONEW,PSNDOSE,PSNEWOI,PSOIDOSE,PSOINAME,PSPOI,SCOUNT,SS,SYN,SYN1,VV,PFLAG,PFLAGOI,WW,X,XXX,Y,ZZFLAG,PANS,ZZXFLAG,SYNNAM,VV,VVV,TT,SCLAST
+ADD DO
+. K PSDOSPTR
+. SET PSND=$G(^PSDRUG(PSDISP,"ND"))
+. SET PSND1=$P(PSND,"^")
+. SET PSND3=$P(PSND,"^",3)
+. SET DA=PSND1
+. SET K=PSND3
+. IF PSND1,PSND3 DO
+. . SET X=$$PSJDF^PSNAPIS(DA,K)
+. . SET PSDOSPTR=$P(X,"^")
+IF $G(PSDOSPTR),$D(^PS(50.606,PSDOSPTR,0)) DO
+. WRITE !?3,"*** Dose Form from NDF:  ",$P($G(^PS(50.606,PSDOSPTR,0)),"^"),!
+ELSE  DO
+. WRITE !
+. SET DIC="^PS(50.606,"
+. SET DIC(0)="QEAMZ"
+. SET DIC("A")="Select Dose Form: "
+. DO ^DIC
+. K DIC
+. QUIT:Y<1!($DATA(DTOUT))!($DATA(DUOUT))
+. SET PSDOSPTR=+Y
+PASS SET PSDOSNM=$P($G(^PS(50.606,PSDOSPTR,0)),"^")
+SET PSOIDOSE=PSDOSPTR
+SET XXX=PSANAME
+DO CHECK
+IF $G(ZZFLAG),'$G(ZZXFLAG) DO
+. WRITE $C(7),!!,"There is already an Orderable Item named:",!?5,$P($G(^PS(50.7,ZZFLAG,0)),"^"),"   ",$P($G(^PS(50.606,+$P($G(^(0)),"^",2),0)),"^"),!
+. K DIR
+. SET DIR(0)="Y"
+. SET DIR("B")="YES"
+. SET DIR("A")="Match to this Orderable Item"
+. DO ^DIR
+. K DIR
+. QUIT:Y["^"!($DATA(DTOUT))
+. IF Y=0 DO EN
+. IF Y=1 DO MAT^PSSSUTIL
+IF $G(ZZXFLAG) DO
+. WRITE $C(7),!!?5,"You must create a new Orderable Item Name for this IV Additive, since a",!?5,"duplicate already exists with another IV Additive matched to it!",!
+XDIR WRITE !!,"Additive Name ->  ",$G(PSANAME),!,"Dose Form ->      ",$G(PSDOSNM),!
+SET X=PSANAME
+DO INPUT
+K DIR
+SET DIR(0)="F^3:40"
+SET DIR("A")="Enter Orderable Item Name"
+IF '$G(ZZXFLAG),'$G(INFLAG),$L(PSANAME)>2,$L(PSANAME)<41 SET DIR("B")=PSANAME
+DO ^DIR
+K DIR
+IF Y["^"!(Y="")!($DATA(DTOUT))!($DATA(DUOUT)) DO EN
+SET HOLDOI=X
+DO INPUT
+IF INFLAG SET X=PSANAME GOTO XDIR
+SET (PFLAG,PFLAGOI)=0
+FOR QQ=0:0 SET QQ=$O(^PS(50.7,"ADF",X,PSOIDOSE,QQ)) Q:'QQ!(PFLAG)  DO
+. IF QQ,$P($G(^PS(50.7,QQ,0)),"^",3)'="" SET PFLAG=1,PFLAGOI=QQ
+IF PFLAG,$D(^PS(52.6,"AOI",PFLAGOI)) DO
+. WRITE $C(7),!!,?2,"A duplicate Name and Dose Form entry already exists in the Orderable Item",!,?2,"File, with a corresponding matched IV Additive. You must select another name!"
+GOTO XDIR
+IF PFLAG,'$D(^PS(52.6,"AOI",PFLAGOI)) DO
+. WRITE !!,"Matching: ",PSANAME,!,"   to",!,$P($G(^PS(50.7,PFLAGOI,0)),"^")_"   "_$G(PSDOSNM)
+. WRITE !
+. SET DIR(0)="Y"
+. SET DIR("B")="YES"
+. SET DIR("A")="Is this OK"
+. DO ^DIR
+. K DIR
+. QUIT:Y["^"!($DATA(DTOUT))
+. GOTO:Y=0 XDIR
+. IF Y=1 SET ZZFLAG=PFLAGOI DO MAT^PSSSUTIL
+NEW ; create new entry in 50.7 and match to it
+WRITE !!,"Matching: ",PSANAME,!,"  to",!,HOLDOI_"  "_$G(PSDOSNM)
+WRITE !
+SET DIR(0)="Y"
+SET DIR("B")="YES"
+SET DIR("A")="Is this OK"
+DO ^DIR
+K DIR
+WRITE !
+IF Y'=1 SET X=PSANAME GOTO XDIR
+K DIC,DD,DO
+SET DIC="^PS(50.7,"
+SET DIC(0)="L"
+SET X=HOLDOI
+SET DIC("DR")=".02////"_PSOIDOSE_";.03////"_1
+DO FILE^DICN
+IF Y<1 DO
+. WRITE !!?5,"UNABLE TO CREATE ENTRY, TRY AGAIN!",!
+GOTO XDIR
+SET PSNEWOI=+Y
+SET SCOUNT=0
+FOR SS=0:0 SET SS=$O(^PS(52.6,PSAIEN,3,SS)) Q:'SS  DO
+. SET SCOUNT=SCOUNT+1
+. SET SYN(SCOUNT)=^(SS,0)
+K DIE
+SET DIE="^PS(52.6,"
+SET DA=PSAIEN
+SET DR="15////"_PSNEWOI
+DO ^DIE
+IF SCOUNT DO
+. SET ^PS(50.7,PSNEWOI,2,0)="^50.72^"_SCOUNT_"^"_SCOUNT
+. FOR WW=0:0 SET WW=$O(SYN(WW)) Q:'WW  SET ^PS(50.7,PSNEWOI,2,WW,0)=SYN(WW)
+FOR LL=0:0 SET LL=$O(^PS(50.7,PSNEWOI,2,LL)) Q:'LL  DO
+. SET SYNNAM=$P(^(LL,0),"^")
+. SET ^PS(50.7,PSNEWOI,2,"B",SYNNAM,LL)=""
+SET NEWFLAG=1
+SET PSPOI=PSNEWOI
+DO DIR^PSSPOIM3
+IF $G(PSSDIR) DO
+. WRITE !!?3,"Now editing Orderable Item:",!?3,$P(^PS(50.7,PSNEWOI,0),"^"),"   ",$P($G(^PS(50.606,+$P(^(0),"^",2),0)),"^")
+. DO INACT
+. K NEWFLAG
+K NEWFLAG,PSSDIR
+DO EN^PSSPOIDT(PSPOI)
+DO:'$G(PSSSSS) EN2^PSSHL1(PSNEWOI,"MAD")
+GOTO EN
+INPUT DO
+. SET INFLAG=0
+. IF X[""""!($A(X)=45)!('(X'?1P.E))!(X?2"z".E) DO
+. . WRITE $C(7),!?5,"??",!
+. . SET INFLAG=1
+QUIT
