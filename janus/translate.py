@@ -56,7 +56,10 @@ class Translator:
         self._load_prompt_engine()
 
     def translate(
-        self, input_directory: str | Path, output_directory: str | Path
+            self,
+            input_directory: str | Path,
+            output_directory: str | Path,
+            overwrite: bool = False
     ) -> None:
         """Translate code from the source language to the target language.
 
@@ -64,6 +67,9 @@ class Translator:
             input_directory: The directory containing the code to translate.
             output_directory: The directory to write the translated code to.
         """
+        source_suffix = LANGUAGE_SUFFIXES[self.source_language]
+        target_suffix = LANGUAGE_SUFFIXES[self.target_language]
+
         # Convert paths to pathlib Paths if needed
         if isinstance(input_directory, str):
             input_directory = Path(input_directory)
@@ -81,39 +87,37 @@ class Translator:
 
         # Now, loop through every code block in every file and translate it with an LLM
         for file in files:
+            # Create the output file
+            out_filename = file.path.name.replace(f".{source_suffix}", f".{target_suffix}")
+            out_path = output_directory / out_filename
+            if out_path.exists() and not overwrite:
+                continue
+
             # out_blocks is flat, whereas `translated_files` is nested
             out_blocks: List[TranslatedCodeBlock] = []
             # Loop through all code blocks in the file
             blocks = self._unpack_code_blocks(file)
             for block in blocks:
+                log.debug(f"Input code:\n'''\n{block.code}\n```")
                 prompt = self._prompt_engine.create(block)
-                parsed = False
-                num_tries = 0
-                while not parsed:
+
+                # Attempt the request up to max_prompts times before failing
+                for _ in range(self.max_prompts + 1):
                     output, tokens, cost = self._llm.get_output(prompt.prompt)
                     parsed_output, parsed = self._parse_llm_output(output)
-                    if not parsed:
-                        log.warning(
-                            f"Failed to parse output for block in file {block.path.name}"
-                        )
-                    if num_tries > self.max_prompts:
-                        log.error(
-                            f"Failed to parse output after {num_tries} tries. Exiting."
-                        )
-                        raise RuntimeError(
-                            f"Failed to parse output after {num_tries} tries. Exiting."
-                        )
-                    num_tries += 1
+                    if parsed:
+                        log.debug(f"Output code:\n'''\n{parsed_output}\n```")
+                        break
+                else:
+                    error_msg = (
+                        f"Failed to parse output for block in file "
+                        f"{block.path.name} after {self.max_prompts} retries."
+                    )
+                    log.error(error_msg)
+                    raise RuntimeError(error_msg)
 
-                # Create the output file
-                source_suffix = LANGUAGE_SUFFIXES[self.source_language]
-                target_suffix = LANGUAGE_SUFFIXES[self.target_language]
-                out_filename = file.path.name.replace(
-                    f".{source_suffix}", f".{target_suffix}"
-                )
-                outpath = output_directory / out_filename
                 out_block = self._output_to_block(
-                    parsed_output, outpath, block, tokens, cost
+                    parsed_output, out_path, block, tokens, cost
                 )
                 out_blocks.append(out_block)
 
