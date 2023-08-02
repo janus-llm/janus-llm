@@ -50,6 +50,7 @@ class MumpsSplitter(Splitter):
         patterns: A tuple of `Pattern`s to use for splitting Mumps code into
             functional blocks.
     """
+    patterns: Tuple[MumpsLabeledBlockPattern, ...] = (MumpsLabeledBlockPattern(),)
 
     def __init__(self, max_tokens: int = 4096, model: str = "gpt-3.5-turbo",
                  maximize_block_length: bool = False) -> None:
@@ -63,11 +64,13 @@ class MumpsSplitter(Splitter):
         self.comment: str = ";"
         super().__init__(max_tokens=max_tokens, model=model)
 
-        self.patterns: Tuple[MumpsLabeledBlockPattern, ...] = (MumpsLabeledBlockPattern(),)
         # MUMPS code tends to take about 2/3 the space of Python
         self.max_tokens: int = int(max_tokens * 2/5)
         self.maximize_block_length = maximize_block_length
 
+    @classmethod
+    def _regex_split(cls, code: str):
+        return re.split(cls.patterns[0].start, code)
 
     def _split(self, code: str, path: Path) -> CodeBlock:
         """Split the given file into functional code blocks.
@@ -96,7 +99,7 @@ class MumpsSplitter(Splitter):
                 tokens=self._count_tokens(code),
             )
 
-        blocks = re.split(self.patterns[0].start, code)
+        blocks = self._regex_split(code)
         if self.maximize_block_length:
             # Merge adjacent blocks back together to meet self.max_tokens
             grouper = CumulativeLengthGrouper(self.max_tokens, self._tokenizer)
