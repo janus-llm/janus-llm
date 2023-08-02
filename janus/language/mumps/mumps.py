@@ -117,7 +117,7 @@ class MumpsSplitter(Splitter):
                     complete=True,
                     start_line=start_line,
                     end_line=end_line,
-                    depth=0,
+                    depth=1,
                     id=0,
                     children=[],
                     language=self.language,
