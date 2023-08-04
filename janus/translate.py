@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import List, Tuple
 
 from .language.block import CodeBlock, TranslatedCodeBlock
+from .language.combine import TextCombiner
 from .language.fortran import FortranSplitter
-from .language.mumps import MumpsSplitter
+from .language.mumps import MumpsCombiner, MumpsSplitter
 from .language.python import PythonCombiner
 from .llm.openai import TOKEN_LIMITS, OpenAI
 from .prompts.prompt import PromptEngine
@@ -31,6 +32,7 @@ class Translator:
         target_language: str = "python",
         target_version: str = "3.10",
         max_prompts: int = 10,
+        prompt_template: str = "simple",
     ) -> None:
         """Initialize a Translator instance.
 
@@ -43,12 +45,14 @@ class Translator:
             target_version: The target version of the target programming language.
             max_prompts: The maximum number of times to prompt a model on one functional
                 block.
+            prompt_template: name of prompt template (see PromptTemplate)
         """
         self.model = model.lower()
         self.source_language = source_language.lower()
         self.target_language = target_language.lower()
         self.target_version = target_version
         self.max_prompts = max_prompts
+        self.prompt_template = prompt_template
         self._check_languages()
         self._load_model()
         self._load_splitter()
@@ -91,7 +95,11 @@ class Translator:
                 num_tries = 0
                 while not parsed:
                     output, tokens, cost = self._llm.get_output(prompt.prompt)
-                    parsed_output, parsed = self._parse_llm_output(output)
+                    if "text" == self.target_language:
+                        parsed_output = output
+                        parsed = True
+                    else:
+                        parsed_output, parsed = self._parse_llm_output(output)
                     if not parsed:
                         log.warning(
                             f"Failed to parse output for block in file {block.path.name}"
@@ -278,13 +286,17 @@ class Translator:
             self.source_language,
             self.target_language,
             self.target_version,
-            "simple",
+            self.prompt_template,
         )
 
     def _load_combiner(self) -> None:
         """Load the Combiner object."""
         if self.target_language == "python":
             self.combiner = PythonCombiner()
+        elif self.target_language == "mumps":
+            self.combiner = MumpsCombiner()
+        elif self.target_language == "text":
+            self.combiner = TextCombiner()
         else:
             raise NotImplementedError(
                 f"Target language '{self.target_language}' not implemented."
