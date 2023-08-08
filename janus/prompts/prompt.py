@@ -1,16 +1,11 @@
-from copy import deepcopy
-from dataclasses import asdict, dataclass
-from typing import Dict, List, Tuple
-
-import tiktoken
-
+from dataclasses import dataclass
+from typing import List
 from ..language.block import CodeBlock
-from ..llm.openai import MODEL_TYPES
-from ..utils.enums import LANGUAGE_SUFFIXES
 from ..utils.logger import create_logger
-from langchain.prompts import ChatPromptTemplate
+from langchain.prompts import ChatPromptTemplate, 
 from langchain.prompts.chat import ChatMessagePromptTemplate
 from langchain.schema.messages import BaseMessage
+from langchain.schema.language_model import BaseLanguageModel
 from langchain import PromptTemplate
 
 log = create_logger(__name__)
@@ -35,24 +30,26 @@ class PromptEngine:
 
     def __init__(
         self,
-        model: str,
+        model: BaseLanguageModel,
         source_language: str,
         target_language: str,
         target_version: str,
-        prompt_template: str,
     ) -> None:
         """Initialize a PromptEngine instance.
 
         Arguments:
             model: The LLM to use for translation.
+            source_language: The language to translate from
+            target_language: The language to translate to
+            target_version: The version of the target language
         """
-        self.model = model.lower()
+        self.model = model
         self.source_language = source_language.lower()
         self.target_language = target_language.lower()
         self.target_version = str(target_version)
+        self.message_templates = message_templates
         self.prompt_template: ChatPromptTemplate
         self._create_prompt_template()
-        #self._check_prompt_templates()
 
     def create(self, code: CodeBlock) -> Prompt:
         """Create a prompt for the given code block.
@@ -65,8 +62,7 @@ class PromptEngine:
         """
         prompt = self._code_to_chat_prompt(code)
 
-        #return Prompt(prompt, code, self._count_tokens(prompt))
-        return Prompt(prompt, code, 0)
+        return Prompt(prompt, code, self._count_tokens(prompt))
 
 
     def _code_to_chat_prompt(self, code: CodeBlock) -> List[BaseMessage]:
@@ -78,27 +74,6 @@ class PromptEngine:
         Returns:
             The converted prompt.
         """
-        # Need to deepcopy to we get original template each time. Otherwise last prompt
-        # and code remains
-        #prompt_template = deepcopy(self.prompt_template)
-        """
-        for message in prompt_template:
-            log.debug(f"Message: {message}")
-            message["content"] = message["content"].replace(
-                "<SOURCE LANGUAGE>", self.source_language
-            )
-            message["content"] = message["content"].replace(
-                "<TARGET LANGUAGE>", self.target_language
-            )
-            message["content"] = message["content"].replace(
-                "<TARGET LANGUAGE VERSION>", self.target_version
-            )
-            message["content"] = message["content"].replace("<SOURCE CODE>", code.code)
-            message["content"] = message["content"].replace(
-                "<FILE SUFFIX>", LANGUAGE_SUFFIXES[code.language]
-            )
-            prompt.append(message)
-        """
         prompt = self.prompt_template.format_messages(
             SOURCE_LANGUAGE=self.source_language,
             TARGET_LANGUAGE=self.target_language,
@@ -106,24 +81,10 @@ class PromptEngine:
             SOURCE_CODE=code.code,
             FILE_SUFFIX=code.language,
         )
-        print(prompt)
 
         return prompt
 
-    def _str_to_chat_prompt(self, prompt: str) -> List[Dict[str, str]]:
-        """Convert a string to a Chat GPT prompt.
-
-        Arguments:
-            prompt: The prompt to convert.
-
-        Returns:
-            The converted prompt.
-        """
-        return [
-            {"role": "user", "content": prompt},
-        ]
-
-    def _count_tokens(self, prompt: str | List[Dict[str, str]]) -> int:
+    def _count_tokens(self, prompt: str | List[BaseMessage]) -> int:
         """Count the number of tokens in the given prompt.
 
         Arguments:
@@ -132,37 +93,12 @@ class PromptEngine:
         Returns:
             The number of tokens in the prompt.
         """
-        try:
-            encoding = tiktoken.encoding_for_model(self.model)
-        except KeyError:
-            encoding = tiktoken.get_encoding("cl100k_base")
-            log.debug(
-                f"Using default encoding for token counting with model '{self.model}'"
-            )
-
-        if isinstance(prompt, str):
-            messages = self._str_to_chat_prompt(prompt)
-        elif isinstance(prompt, list):
-            messages = prompt
-        else:
-            log.error(f"Prompt type '{type(prompt)}' not recognized")
-            raise ValueError(f"Prompt type '{type(prompt)}' not recognized")
-
-        num_tokens = 0
-        for message in messages:
-            num_tokens += (
-                4  # every message follows <im_start>{role/name}\n{content}<im_end>\n
-            )
-            for key, value in message.items():
-                num_tokens += len(encoding.encode(value))
-                if key == "name":  # if there's a name, the role is omitted
-                    num_tokens += -1  # role is always required and always 1 token
-        num_tokens += 2  # every reply is primed with <im_start>assistant
-        log.debug(f"Number of tokens in prompt: {num_tokens}")
-        return num_tokens
+        if isinstance(prompt, list):
+            return self.model.get_num_tokens_from_messages(prompt)
+        return self.model.get_num_tokens(prompt)
     
     def _create_prompt_template(self) -> None:
-
+        """Create the prompt template to be used for generating messages"""
         messages = [
             ChatMessagePromptTemplate(
                 role="system",
