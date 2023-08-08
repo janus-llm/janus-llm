@@ -1,13 +1,13 @@
-import os
+from copy import deepcopy
 import re
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Any
 
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.fortran import FortranSplitter
 from .language.mumps import MumpsSplitter
 from .language.python import PythonCombiner
-from .llm.openai import TOKEN_LIMITS, OpenAI
+from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS, COST_PER_MODEL
 from .prompts.prompt import PromptEngine
 from .utils.enums import (
     LANGUAGE_SUFFIXES,
@@ -18,7 +18,7 @@ from .utils.logger import create_logger
 
 log = create_logger(__name__)
 
-VALID_MODELS: Tuple[str, ...] = tuple(TOKEN_LIMITS.keys())
+VALID_MODELS: Tuple[str, ...] = tuple(MODEL_CONSTRUCTORS.keys())
 
 
 class Translator:
@@ -27,6 +27,7 @@ class Translator:
     def __init__(
         self,
         model: str = "gpt-3.5-turbo",
+        model_arguments: Dict[str, Any] = {},
         source_language: str = "fortran",
         target_language: str = "python",
         target_version: str = "3.10",
@@ -45,6 +46,7 @@ class Translator:
                 block.
         """
         self.model = model.lower()
+        self.model_arguments = model_arguments
         self.source_language = source_language.lower()
         self.target_language = target_language.lower()
         self.target_version = target_version
@@ -89,13 +91,16 @@ class Translator:
                 prompt = self._prompt_engine.create(block)
                 parsed = False
                 num_tries = 0
+                cost = COST_PER_MODEL[self.model]["input"] * prompt.tokens
                 while not parsed:
-                    output, tokens, cost = self._llm.get_output(prompt.prompt)
-                    parsed_output, parsed = self._parse_llm_output(output)
+                    #output, tokens, cost = self._llm.get_output(prompt.prompt)
+                    output = self._llm.predict_messages(prompt.prompt)
+                    parsed_output, parsed = self._parse_llm_output(output.content)
                     if not parsed:
                         log.warning(
                             f"Failed to parse output for block in file {block.path.name}"
                         )
+                        
                     if num_tries > self.max_prompts:
                         log.error(
                             f"Failed to parse output after {num_tries} tries. Exiting."
@@ -104,6 +109,8 @@ class Translator:
                             f"Failed to parse output after {num_tries} tries. Exiting."
                         )
                     num_tries += 1
+                tokens = self._llm.get_num_tokens(output.content)
+                cost += COST_PER_MODEL[self.model][output] * tokens
 
                 # Create the output file
                 source_suffix = LANGUAGE_SUFFIXES[self.source_language]
@@ -264,21 +271,23 @@ class Translator:
             raise ValueError(
                 f"Invalid model: {self.model}. Valid models are: {VALID_MODELS}"
             )
-
         if self.model in tuple(TOKEN_LIMITS.keys()):
             self._max_tokens = TOKEN_LIMITS[self.model]
-        self._llm = OpenAI(
-            self.model, os.getenv("OPENAI_API_KEY"), os.getenv("OPENAI_ORG_ID")
+        else:
+            self._max_tokens = 4096
+        arguments = deepcopy(MODEL_DEFAULT_ARGUMENTS[self.model])
+        arguments.update(self.model_arguments)
+        self._llm = MODEL_CONSTRUCTORS[self.model](
+            **arguments
         )
 
     def _load_prompt_engine(self) -> None:
         """Load the prompt engine."""
         self._prompt_engine = PromptEngine(
-            self.model,
+            self._llm,
             self.source_language,
             self.target_language,
-            self.target_version,
-            "simple",
+            self.target_version
         )
 
     def _load_combiner(self) -> None:
@@ -294,11 +303,11 @@ class Translator:
         """Load the Splitter object."""
         if self.source_language == "fortran":
             self.splitter = FortranSplitter(
-                max_tokens=self._llm.model_max_tokens, model=self._llm.model
+                max_tokens=self._max_tokens, model=self._llm
             )
             self._glob = "**/*.f90"
         elif self.source_language == "mumps":
-            self.splitter = MumpsSplitter(max_tokens=self._llm.model_max_tokens)
+            self.splitter = MumpsSplitter(max_tokens=self._max_tokens, model=self._llm)
             self._glob = "**/*.m"
         else:
             raise NotImplementedError(

@@ -8,6 +8,7 @@ from ...utils.logger import create_logger
 from ..block import CodeBlock
 from ..splitter import Splitter
 from .patterns import MumpsLabeledBlockPattern
+from langchain.schema.language_model import BaseLanguageModel
 
 log = create_logger(__name__)
 
@@ -23,9 +24,9 @@ class MumpsSplitter(Splitter):
 
     def __init__(
         self,
+        model: BaseLanguageModel,
         patterns: Tuple[MumpsLabeledBlockPattern, ...] = (MumpsLabeledBlockPattern(),),
-        max_tokens: int = 4096,
-        model: str = "gpt-3.5-turbo",
+        max_tokens: int = 4096
     ) -> None:
         """Initialize a MumpsSplitter instance.
 
@@ -40,7 +41,7 @@ class MumpsSplitter(Splitter):
         self.max_tokens: int = max_tokens // 3
         # Using tiktoken as the tokenizer because that's what's recommended for OpenAI
         # models.
-        self._tokenizer = tiktoken.encoding_for_model(model)
+        self.model = model
         self.language: str = "mumps"
         self.comment: str = ";"
 

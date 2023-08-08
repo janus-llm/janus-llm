@@ -66,10 +66,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     output_lang_name, output_lang_version = args.output_lang.split("-")
     translator = Translator(
-        args.llm_name,
-        args.input_lang,
-        output_lang_name,
-        output_lang_version,
-        args.max_prompts,
+        model=args.llm_name,
+        source_language=args.input_lang,
+        target_language=output_lang_name,
+        target_version=output_lang_version,
+        max_prompts=args.max_prompts,
     )
     translator.translate(args.input_dir, args.output_dir)
