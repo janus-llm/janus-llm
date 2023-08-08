@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List
 from ..language.block import CodeBlock
 from ..utils.logger import create_logger
-from langchain.prompts import ChatPromptTemplate, 
+from langchain.prompts import ChatPromptTemplate
 from langchain.prompts.chat import ChatMessagePromptTemplate
 from langchain.schema.messages import BaseMessage
 from langchain.schema.language_model import BaseLanguageModel
@@ -47,7 +47,6 @@ class PromptEngine:
         self.source_language = source_language.lower()
         self.target_language = target_language.lower()
         self.target_version = str(target_version)
-        self.message_templates = message_templates
         self.prompt_template: ChatPromptTemplate
         self._create_prompt_template()
 
