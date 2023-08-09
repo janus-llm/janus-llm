@@ -2,8 +2,6 @@ import re
 from pathlib import Path
 from typing import List, Tuple
 
-import tiktoken
-
 from ...utils.logger import create_logger
 from ..block import CodeBlock
 from ..splitter import Splitter
@@ -26,7 +24,7 @@ class MumpsSplitter(Splitter):
         self,
         model: BaseLanguageModel,
         patterns: Tuple[MumpsLabeledBlockPattern, ...] = (MumpsLabeledBlockPattern(),),
-        max_tokens: int = 4096
+        max_tokens: int = 4096,
     ) -> None:
         """Initialize a MumpsSplitter instance.
 

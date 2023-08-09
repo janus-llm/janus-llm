@@ -10,6 +10,7 @@ from langchain import PromptTemplate
 
 log = create_logger(__name__)
 
+
 @dataclass
 class Prompt:
     """The prompt for a code block.
@@ -63,7 +64,6 @@ class PromptEngine:
 
         return Prompt(prompt, code, self._count_tokens(prompt))
 
-
     def _code_to_chat_prompt(self, code: CodeBlock) -> List[BaseMessage]:
         """Convert a code block to a Chat GPT prompt.
 
@@ -95,80 +95,80 @@ class PromptEngine:
         if isinstance(prompt, list):
             return self.model.get_num_tokens_from_messages(prompt)
         return self.model.get_num_tokens(prompt)
-    
+
     def _create_prompt_template(self) -> None:
         """Create the prompt template to be used for generating messages"""
         messages = [
             ChatMessagePromptTemplate(
                 role="system",
                 prompt=PromptTemplate.from_template(
-                            "Your purpose is to convert {SOURCE_LANGUAGE} {FILE_SUFFIX} code "
-                            "into runnable {TARGET_LANGUAGE} code ({TARGET_LANGUAGE} version "
-                            "{TARGET_LANGUAGE_VERSION})"
-                )
+                    "Your purpose is to convert {SOURCE_LANGUAGE} {FILE_SUFFIX} code "
+                    "into runnable {TARGET_LANGUAGE} code ({TARGET_LANGUAGE} version "
+                    "{TARGET_LANGUAGE_VERSION})"
+                ),
             ),
             ChatMessagePromptTemplate(
                 role="human",
                 prompt=PromptTemplate.from_template(
-                            "Do not include anything around the resultant code. Only report back the "
-                            "code itself in between triple backticks."
-                            )
+                    "Do not include anything around the resultant code. Only report back the "
+                    "code itself in between triple backticks."
+                ),
             ),
             ChatMessagePromptTemplate(
                 role="human",
                 prompt=PromptTemplate.from_template(
-                            "If the given code is incomplete, assume it is translated elsewhere. "
-                            "Translate it anyway."
-                )
+                    "If the given code is incomplete, assume it is translated elsewhere. "
+                    "Translate it anyway."
+                ),
             ),
             ChatMessagePromptTemplate(
                 role="human",
                 prompt=PromptTemplate.from_template(
-                            "If the given code is missing variable definitions, assume they are "
-                            "assigned elsewhere. "
-                            "Translate it anyway."
-                )
+                    "If the given code is missing variable definitions, assume they are "
+                    "assigned elsewhere. "
+                    "Translate it anyway."
+                ),
             ),
             ChatMessagePromptTemplate(
                 role="human",
                 prompt=PromptTemplate.from_template(
-                            "Give an attempt even if it is incomplete."
-                            "If the code only consists of comments, assume the code that is "
-                            "represented by that comment is translated elsewhere. "
-                            "Translate it anyway."
-                )
+                    "Give an attempt even if it is incomplete."
+                    "If the code only consists of comments, assume the code that is "
+                    "represented by that comment is translated elsewhere. "
+                    "Translate it anyway."
+                ),
             ),
             ChatMessagePromptTemplate(
                 role="human",
                 prompt=PromptTemplate.from_template(
-                            "If the code has comments, keep ALL of them"
-                )
+                    "If the code has comments, keep ALL of them"
+                ),
             ),
             ChatMessagePromptTemplate(
                 role="human",
                 prompt=PromptTemplate.from_template(
-                            "If the code only consists of ONLY comments, assume the code that is "
-                            "represented by those comments is translated elsewhere. "
-                            "Translate it anyway."
-                )
+                    "If the code only consists of ONLY comments, assume the code that is "
+                    "represented by those comments is translated elsewhere. "
+                    "Translate it anyway."
+                ),
             ),
             ChatMessagePromptTemplate(
                 role="human",
                 prompt=PromptTemplate.from_template(
-                            "Please convert the following {SOURCE_LANGUAGE} {FILE_SUFFIX} code found "
-                            "in between triple backticks and is in string format into "
-                            "{TARGET_LANGUAGE} code. If the given code is incomplete, assume it "
-                            "is translated elsewhere. If the given code is missing variable "
-                            "definitions, assume they are assigned elsewhere. If there are "
-                            "incomplete statements that haven't been closed out, assume they are "
-                            "closed out in other translations. If it only consists of comments, "
-                            "assume the code that is represented by that comment is translated "
-                            "elsewhere. If it only consists of ONLY comments, assume the code that "
-                            "Some more things to remember: (1) follow standard styling practice for "
-                            "the target language, (2) make sure the language is typed correctly. "
-                            "Make sure your result also fits within three backticks."
-                            "\n\n```{SOURCE_CODE}```"
-                )
-            )
+                    "Please convert the following {SOURCE_LANGUAGE} {FILE_SUFFIX} code found "
+                    "in between triple backticks and is in string format into "
+                    "{TARGET_LANGUAGE} code. If the given code is incomplete, assume it "
+                    "is translated elsewhere. If the given code is missing variable "
+                    "definitions, assume they are assigned elsewhere. If there are "
+                    "incomplete statements that haven't been closed out, assume they are "
+                    "closed out in other translations. If it only consists of comments, "
+                    "assume the code that is represented by that comment is translated "
+                    "elsewhere. If it only consists of ONLY comments, assume the code that "
+                    "Some more things to remember: (1) follow standard styling practice for "
+                    "the target language, (2) make sure the language is typed correctly. "
+                    "Make sure your result also fits within three backticks."
+                    "\n\n```{SOURCE_CODE}```"
+                ),
+            ),
         ]
         self.prompt_template = ChatPromptTemplate.from_messages(messages)

@@ -7,12 +7,12 @@ MODEL_CONSTRUCTORS: Dict[str, Any] = {
     "gpt-4-32k": OpenAIChat,
     "gpt-3.5-turbo": OpenAIChat,
     "gpt-3.5-turbo-16k": OpenAIChat,
-    "llama": HuggingFaceTextGenInference
+    "llama": HuggingFaceTextGenInference,
 }
 
 _open_ai_defaults: Dict[str, Any] = {
     "openai_api_key": os.getenv("OPENAI_API_KEY"),
-    #"openai_organization": os.getenv("OPENAI_ORG_ID")
+    # "openai_organization": os.getenv("OPENAI_ORG_ID")
 }
 
 MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
@@ -28,7 +28,7 @@ MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
         typical_p=0.95,
         temperature=0.01,
         repetition_penalty=1.03,
-    )
+    ),
 }
 
 TOKEN_LIMITS: Dict[str, int] = {
@@ -43,6 +43,5 @@ COST_PER_MODEL: Dict[str, Dict[str, float]] = {
     "gpt-4-32k": {"input": 0.6, "output": 0.12},
     "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
     "gpt-3.5-turbo-16k": {"input": 0.003, "output": 0.004},
-    "llama": {"input": 0.0, "output":0.0}
+    "llama": {"input": 0.0, "output": 0.0},
 }
-

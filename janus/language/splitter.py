@@ -2,7 +2,6 @@ import platform
 from pathlib import Path
 
 import numpy as np
-import tiktoken
 import tree_sitter
 from git import Repo
 

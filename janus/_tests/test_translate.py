@@ -9,7 +9,12 @@ class TestTranslator(unittest.TestCase):
 
     def setUp(self):
         """Set up the tests."""
-        self.translator = Translator("gpt-3.5-turbo", "fortran", "python", "3.10")
+        self.translator = Translator(
+            model="gpt-3.5-turbo",
+            source_language="fortran",
+            target_language="python",
+            target_version="3.10",
+        )
         self.test_file = Path("janus/language/fortran/_tests/fortran.f90")
 
     def test_translate(self):

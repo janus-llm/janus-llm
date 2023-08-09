@@ -93,14 +93,14 @@ class Translator:
                 num_tries = 0
                 cost = COST_PER_MODEL[self.model]["input"] * prompt.tokens
                 while not parsed:
-                    #output, tokens, cost = self._llm.get_output(prompt.prompt)
+                    # output, tokens, cost = self._llm.get_output(prompt.prompt)
                     output = self._llm.predict_messages(prompt.prompt)
                     parsed_output, parsed = self._parse_llm_output(output.content)
                     if not parsed:
                         log.warning(
                             f"Failed to parse output for block in file {block.path.name}"
                         )
-                        
+
                     if num_tries > self.max_prompts:
                         log.error(
                             f"Failed to parse output after {num_tries} tries. Exiting."
@@ -277,17 +277,12 @@ class Translator:
             self._max_tokens = 4096
         arguments = deepcopy(MODEL_DEFAULT_ARGUMENTS[self.model])
         arguments.update(self.model_arguments)
-        self._llm = MODEL_CONSTRUCTORS[self.model](
-            **arguments
-        )
+        self._llm = MODEL_CONSTRUCTORS[self.model](**arguments)
 
     def _load_prompt_engine(self) -> None:
         """Load the prompt engine."""
         self._prompt_engine = PromptEngine(
-            self._llm,
-            self.source_language,
-            self.target_language,
-            self.target_version
+            self._llm, self.source_language, self.target_language, self.target_version
         )
 
     def _load_combiner(self) -> None:
@@ -302,9 +297,7 @@ class Translator:
     def _load_splitter(self) -> None:
         """Load the Splitter object."""
         if self.source_language == "fortran":
-            self.splitter = FortranSplitter(
-                max_tokens=self._max_tokens, model=self._llm
-            )
+            self.splitter = FortranSplitter(max_tokens=self._max_tokens, model=self._llm)
             self._glob = "**/*.f90"
         elif self.source_language == "mumps":
             self.splitter = MumpsSplitter(max_tokens=self._max_tokens, model=self._llm)
