@@ -110,7 +110,7 @@ class Translator:
                         )
                     num_tries += 1
                 tokens = self._llm.get_num_tokens(output.content)
-                cost += COST_PER_MODEL[self.model][output] * tokens
+                cost += COST_PER_MODEL[self.model]["output"] * tokens
 
                 # Create the output file
                 source_suffix = LANGUAGE_SUFFIXES[self.source_language]
@@ -168,7 +168,7 @@ class Translator:
             id=original_block.id,
             language=self.target_language,
             type=original_block.type,
-            tokens=tokens["completion_tokens"],
+            tokens=tokens,
             children=[],
             original=original_block,
             cost=cost,

@@ -1,25 +1,25 @@
-from langchain.llms import OpenAI, HuggingFaceTextGenInference
+from langchain.llms import OpenAIChat, HuggingFaceTextGenInference
 import os
 from typing import Dict, Any
 
 MODEL_CONSTRUCTORS: Dict[str, Any] = {
-    "gpt-4": OpenAI,
-    "gpt-4-32k": OpenAI,
-    "gpt-3.5-turbo": OpenAI,
-    "gpt-3.5-turbo-16k": OpenAI,
+    "gpt-4": OpenAIChat,
+    "gpt-4-32k": OpenAIChat,
+    "gpt-3.5-turbo": OpenAIChat,
+    "gpt-3.5-turbo-16k": OpenAIChat,
     "llama": HuggingFaceTextGenInference
 }
 
 _open_ai_defaults: Dict[str, Any] = {
     "openai_api_key": os.getenv("OPENAI_API_KEY"),
-    "openai_organization": os.getenv("OPENAI_ORG_ID")
+    #"openai_organization": os.getenv("OPENAI_ORG_ID")
 }
 
 MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
-    "gpt-4": dict(model="gpt-4", **_open_ai_defaults),
-    "gpt-4-32k": dict(model="gpt-4-32k", **_open_ai_defaults),
-    "gpt-3.5-turbo": dict(model="gpt-3.5-turbo", **_open_ai_defaults),
-    "gpt-3.5-turbo-16k": dict(model="gpt-3.5-turbo-16k", **_open_ai_defaults),
+    "gpt-4": dict(model_name="gpt-4", **_open_ai_defaults),
+    "gpt-4-32k": dict(model_name="gpt-4-32k", **_open_ai_defaults),
+    "gpt-3.5-turbo": dict(model_name="gpt-3.5-turbo", **_open_ai_defaults),
+    "gpt-3.5-turbo-16k": dict(model_name="gpt-3.5-turbo-16k", **_open_ai_defaults),
     "llama": dict(
         inference_server_url="https://llama-aip.lt.mitre.org",
         max_new_tokens=512,
