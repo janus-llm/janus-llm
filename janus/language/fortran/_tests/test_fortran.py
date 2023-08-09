@@ -2,6 +2,7 @@ import unittest
 from pathlib import Path
 
 from ..fortran import FortranSplitter
+from ....llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS
 
 
 class TestFortranSplitter(unittest.TestCase):
@@ -9,7 +10,9 @@ class TestFortranSplitter(unittest.TestCase):
 
     def setUp(self):
         """Set up the tests."""
-        self.splitter = FortranSplitter()
+        model_name = "gpt-3.5-turbo"
+        llm = MODEL_CONSTRUCTORS[model_name](**MODEL_DEFAULT_ARGUMENTS[model_name])
+        self.splitter = FortranSplitter(model=llm)
         self.test_file = Path("janus/language/fortran/_tests/fortran.f90")
 
     def test_split(self):
