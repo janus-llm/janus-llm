@@ -113,14 +113,14 @@ class PromptEngine:
                     ),
                 ),
                 ChatMessagePromptTemplate(
-                    role="human",
+                    role="user",
                     prompt=PromptTemplate.from_template(
                         "Do not include anything around the resultant code. "
                         "Only report back the code itself in between triple backticks."
                     ),
                 ),
                 ChatMessagePromptTemplate(
-                    role="human",
+                    role="user",
                     prompt=PromptTemplate.from_template(
                         "If the given code is incomplete, "
                         "assume it is translated elsewhere. "
@@ -128,7 +128,7 @@ class PromptEngine:
                     ),
                 ),
                 ChatMessagePromptTemplate(
-                    role="human",
+                    role="user",
                     prompt=PromptTemplate.from_template(
                         "If the given code is missing variable definitions, "
                         "assume they are assigned elsewhere. "
@@ -136,7 +136,7 @@ class PromptEngine:
                     ),
                 ),
                 ChatMessagePromptTemplate(
-                    role="human",
+                    role="user",
                     prompt=PromptTemplate.from_template(
                         "Give an attempt even if it is incomplete."
                         "If the code only consists of comments, assume the code that is "
@@ -145,13 +145,13 @@ class PromptEngine:
                     ),
                 ),
                 ChatMessagePromptTemplate(
-                    role="human",
+                    role="user",
                     prompt=PromptTemplate.from_template(
                         "If the code has comments, keep ALL of them"
                     ),
                 ),
                 ChatMessagePromptTemplate(
-                    role="human",
+                    role="user",
                     prompt=PromptTemplate.from_template(
                         "If the code only consists of ONLY comments, "
                         "assume the code that is "
@@ -160,7 +160,7 @@ class PromptEngine:
                     ),
                 ),
                 ChatMessagePromptTemplate(
-                    role="human",
+                    role="user",
                     prompt=PromptTemplate.from_template(
                         "Please convert the following {SOURCE_LANGUAGE} {FILE_SUFFIX} "
                         "code found in between triple backticks "
