@@ -13,6 +13,7 @@ from .llm import (
     MODEL_DEFAULT_ARGUMENTS,
     TOKEN_LIMITS,
 )
+from .parsers.code_parser import CodeParser
 from .prompts.prompt import PromptEngine
 from .utils.enums import (
     LANGUAGE_SUFFIXES,
@@ -61,6 +62,7 @@ class Translator:
         self._load_splitter()
         self._load_combiner()
         self._load_prompt_engine()
+        self._load_parser()
 
     def translate(
         self, input_directory: str | Path, output_directory: str | Path
@@ -259,9 +261,8 @@ class Translator:
         Returns:
             The parsed output.
         """
-        pattern = rf"```[^\S\r\n]*(?:{self.target_language}[^\S\r\n]*)?\n?(.*?)\n*```"
         try:
-            response = re.search(pattern, output, re.DOTALL).group(1)
+            response = self.parser.parse(output)
             parsed = True
         except Exception:
             log.warning(f"Could not find code in output:\n\n{output}")
@@ -315,6 +316,10 @@ class Translator:
             raise NotImplementedError(
                 f"Source language '{self.source_language}' not implemented."
             )
+
+    def _load_parser(self) -> None:
+        """Load the CodeParser Object"""
+        self.parser = CodeParser(target_language=self.target_language)
 
     def _check_languages(self) -> None:
         """Check that the source and target languages are valid."""
