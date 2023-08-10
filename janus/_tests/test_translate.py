@@ -21,6 +21,8 @@ class TestTranslator(unittest.TestCase):
         """Test the split method."""
         # Delete a file if it's already there
         python_file = self.test_file.parent / "python" / f"{self.test_file.stem}.py"
+        costs_file = self.test_file.parent / "python" / "costs.csv"
+        costs_file.unlink(missing_ok=True)
         python_file.unlink(missing_ok=True)
         python_file.parent.rmdir() if python_file.parent.is_dir() else None
         self.translator.translate(self.test_file.parent, self.test_file.parent / "python")

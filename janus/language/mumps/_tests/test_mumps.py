@@ -13,7 +13,7 @@ class TestMumpsSplitter(unittest.TestCase):
         model_name = "gpt-3.5-turbo"
         llm = MODEL_CONSTRUCTORS[model_name](**MODEL_DEFAULT_ARGUMENTS[model_name])
         self.splitter = MumpsSplitter(model=llm, max_tokens=2048)
-        self.test_file = Path("janus/language/mumps/_tests/test_mumps.m")
+        self.test_file = Path("janus/language/mumps/_tests/mumps.m")
 
     def test_split(self):
         """Test the split method."""
