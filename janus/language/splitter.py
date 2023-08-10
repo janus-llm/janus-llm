@@ -4,11 +4,11 @@ from pathlib import Path
 import numpy as np
 import tree_sitter
 from git import Repo
+from langchain.schema.language_model import BaseLanguageModel
 
 from ..utils.logger import create_logger
 from .block import CodeBlock
 from .file import FileManager
-from langchain.schema.language_model import BaseLanguageModel
 
 log = create_logger(__name__)
 

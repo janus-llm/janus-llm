@@ -1,8 +1,8 @@
 import unittest
 from pathlib import Path
 
-from ..fortran import FortranSplitter
 from ....llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS
+from ..fortran import FortranSplitter
 
 
 class TestFortranSplitter(unittest.TestCase):

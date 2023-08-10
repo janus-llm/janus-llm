@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 from typing import List
-from ..language.block import CodeBlock
-from ..utils.logger import create_logger
+
+from langchain import PromptTemplate
 from langchain.prompts import ChatPromptTemplate
 from langchain.prompts.chat import ChatMessagePromptTemplate
-from langchain.schema.messages import BaseMessage
 from langchain.schema.language_model import BaseLanguageModel
-from langchain import PromptTemplate
+from langchain.schema.messages import BaseMessage
+
+from ..language.block import CodeBlock
+from ..utils.logger import create_logger
 
 log = create_logger(__name__)
 

@@ -2,11 +2,12 @@ import re
 from pathlib import Path
 from typing import List, Tuple
 
+from langchain.schema.language_model import BaseLanguageModel
+
 from ...utils.logger import create_logger
 from ..block import CodeBlock
 from ..splitter import Splitter
 from .patterns import MumpsLabeledBlockPattern
-from langchain.schema.language_model import BaseLanguageModel
 
 log = create_logger(__name__)
 

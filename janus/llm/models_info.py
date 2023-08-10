@@ -1,6 +1,7 @@
-from langchain.llms import OpenAIChat, HuggingFaceTextGenInference
 import os
-from typing import Dict, Any
+from typing import Any, Dict
+
+from langchain.llms import HuggingFaceTextGenInference, OpenAIChat
 
 MODEL_CONSTRUCTORS: Dict[str, Any] = {
     "gpt-4": OpenAIChat,
