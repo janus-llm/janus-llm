@@ -32,8 +32,9 @@ parser.add_argument(
     required=True,
     help=(
         "The desired output language to translate the source code to. "
-        "The format should follow a 'language-version' syntax. "
-        "Example: python-3.10, java-10, etc."
+        "The format can follow a 'language-version' syntax. "
+        "Use 'text' to get plaintext results as returned by the LLM. "
+        "Examples: python-3.10, mumps, java-10, text"
     ),
 )
 parser.add_argument(
@@ -60,16 +61,34 @@ parser.add_argument(
         "before exiting the application. This is to prevent wasting too much money."
     ),
 )
+parser.add_argument(
+    "--prompt-template",
+    type=str,
+    default="simple",
+    help="PromptTemplate used for prompt sent to llm",
+)
 
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    output_lang_name, output_lang_version = args.output_lang.split("-")
+    try:
+        output_lang_name, output_lang_version = args.output_lang.split("-")
+    except ValueError:
+        output_lang_name = args.output_lang
+        output_lang_version = None
+    # make sure not overwriting input
+    if (
+        args.input_lang.lower() == output_lang_name.lower()
+        and args.input_dir == args.output_dir
+    ):
+        log.error("Output files would overwrite input! Aborting...")
+        exit(-1)
     translator = Translator(
         model=args.llm_name,
         source_language=args.input_lang,
         target_language=output_lang_name,
         target_version=output_lang_version,
         max_prompts=args.max_prompts,
+        prompt_template=args.prompt_template,
     )
     translator.translate(args.input_dir, args.output_dir)

@@ -38,6 +38,7 @@ class PromptEngine:
         source_language: str,
         target_language: str,
         target_version: str,
+        prompt_template_name: str,
     ) -> None:
         """Initialize a PromptEngine instance.
 
@@ -53,7 +54,10 @@ class PromptEngine:
         self.target_language = target_language.lower()
         self.target_version = str(target_version)
         self.prompt_template: ChatPromptTemplate
+        self.document_inline_prompt_template: ChatPromptTemplate
+        self.document_prompt_template: ChatPromptTemplate
         self._create_prompt_template()
+        self.prompt_template_name = prompt_template_name
 
     def create(self, code: CodeBlock) -> Prompt:
         """Create a prompt for the given code block.
@@ -77,7 +81,7 @@ class PromptEngine:
         Returns:
             The converted prompt.
         """
-        prompt = self.prompt_template.format_messages(
+        prompt = self.template_map[self.prompt_template_name].format_messages(
             SOURCE_LANGUAGE=self.source_language,
             TARGET_LANGUAGE=self.target_language,
             TARGET_LANGUAGE_VERSION=self.target_version,
@@ -186,6 +190,71 @@ class PromptEngine:
                     ),
                 ),
             ]
+            messages_document_inline = [
+                ChatMessagePromptTemplate(
+                    role="system",
+                    prompt=PromptTemplate.from_template(
+                        "Please add inline comments to the {SOURCE_LANGUAGE} file"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Please provide docstrings and inline comments for this code"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Here is the code code found in between triple backticks and is "
+                        "in string format.\n\n```{SOURCE_CODE}```"
+                        "Make sure your result also fits within three backticks."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Keep all source code in the output."
+                    ),
+                ),
+            ]
+            messages_document = [
+                ChatMessagePromptTemplate(
+                    role="system",
+                    prompt=PromptTemplate.from_template(
+                        "Please document the {SOURCE_LANGUAGE} "
+                        "file in a simplified manner"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Here is the code\n\n{SOURCE_CODE}"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "For any variable that is defined outside "
+                        "of that function please explain"
+                        " that variable."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "For any abbreviations, please define them"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Please add a description of the top which "
+                        "includes details why this file"
+                        " was created or modified"
+                    ),
+                ),
+            ]
         else:
             messages = [
                 ChatMessagePromptTemplate(
@@ -266,4 +335,81 @@ class PromptEngine:
                     ),
                 ),
             ]
+            messages_document_inline = [
+                ChatMessagePromptTemplate(
+                    role="system",
+                    prompt=PromptTemplate.from_template(
+                        "Please add inline comments to the {SOURCE_LANGUAGE} file"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Please provide docstrings and inline comments for this code"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Here is the code code found in between triple backticks and is "
+                        "in string format.\n\n```{SOURCE_CODE}```"
+                        "Make sure your result also fits within three backticks."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Keep all source code in the output."
+                    ),
+                ),
+            ]
+            messages_document = [
+                ChatMessagePromptTemplate(
+                    role="system",
+                    prompt=PromptTemplate.from_template(
+                        "Please document the {SOURCE_LANGUAGE} "
+                        "file in a simplified manner"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Here is the code\n\n{SOURCE_CODE}"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "For any variable that is defined outside "
+                        "of that function please explain"
+                        " that variable."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "For any abbreviations, please define them"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Please add a description of the top "
+                        "which includes details why this file"
+                        " was created or modified"
+                    ),
+                ),
+            ]
         self.prompt_template = ChatPromptTemplate.from_messages(messages)
+        self.document_inline_prompt_template = ChatPromptTemplate.from_messages(
+            messages_document_inline
+        )
+        self.document_prompt_template = ChatPromptTemplate.from_messages(
+            messages_document
+        )
+
+        self.template_map = {
+            "simple": self.prompt_template,
+            "document_inline": self.document_inline_prompt_template,
+            "document": self.document_prompt_template,
+        }
