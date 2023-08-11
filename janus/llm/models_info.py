@@ -1,8 +1,8 @@
 import os
 from typing import Any, Dict
 
-from langchain.llms import HuggingFaceTextGenInference
 from langchain.chat_models import ChatOpenAI
+from langchain.llms import HuggingFaceTextGenInference
 
 MODEL_CONSTRUCTORS: Dict[str, Any] = {
     "gpt-4": ChatOpenAI,
