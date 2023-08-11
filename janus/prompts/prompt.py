@@ -33,6 +33,8 @@ class PromptTemplate:
 
     Attributes:
         simple: The simple prompt template.
+        document_inline: Template for adding code documentation inline.
+        document: Template for generating text description.
     """
 
     simple: Tuple[Dict[str, str]] = (
@@ -40,8 +42,7 @@ class PromptTemplate:
             "role": "system",
             "content": (
                 "Your purpose is to convert <SOURCE LANGUAGE> <FILE SUFFIX> code "
-                "into runnable <TARGET LANGUAGE> code (<TARGET LANGUAGE> version "
-                "<TARGET LANGUAGE VERSION>)"
+                "into runnable <TARGET LANGUAGE> code <TARGET LANGUAGE AND VERSION>"
             ),
         },
         {
@@ -107,6 +108,62 @@ class PromptTemplate:
         },
     )
 
+    # "PSSBPSUT Prompt 5.txt"
+    document_inline: Tuple[Dict[str, str]] = (
+        {
+            "role": "system",
+            "content": "Please add inline comments to the <SOURCE LANGUAGE> file",
+        },
+        {
+            "role": "user",
+            "content": "Please provide docstrings and inline comments for this code",
+        },
+        {
+            "role": "user",
+            "content": (
+                "Here is the code code found in between triple backticks and is "
+                "in string format.\n\n```<SOURCE CODE>```"
+                "Make sure your result also fits within three backticks."
+            ),
+        },
+        {
+            "role": "user",
+            "content": "Keep all source code in the output.",
+        },
+    )
+
+    # "PSSBPSUT Prompt 6.txt"
+    document: Tuple[Dict[str, str]] = (
+        {
+            "role": "system",
+            "content": (
+                "Please document the <SOURCE LANGUAGE> file in a simplified manner"
+            ),
+        },
+        {
+            "role": "user",
+            "content": "Here is the code\n\n<SOURCE CODE>",
+        },
+        {
+            "role": "user",
+            "content": (
+                "For any variable that is defined outside of that function please explain"
+                " that variable."
+            ),
+        },
+        {
+            "role": "user",
+            "content": "For any abbreviations, please define them",
+        },
+        {
+            "role": "user",
+            "content": (
+                "Please add a description of the top which includes details why this file"
+                " was created or modified"
+            ),
+        },
+    )
+
 
 class PromptEngine:
     """A class defining prompting schemes for the LLM."""
@@ -127,7 +184,7 @@ class PromptEngine:
         self.model = model.lower()
         self.source_language = source_language.lower()
         self.target_language = target_language.lower()
-        self.target_version = str(target_version)
+        self.target_version = target_version
         self.prompt_template = prompt_template.lower()
         self._check_prompt_templates()
 
@@ -170,8 +227,14 @@ class PromptEngine:
             message["content"] = message["content"].replace(
                 "<TARGET LANGUAGE>", self.target_language
             )
+            if self.target_version is not None:
+                language_with_version_string = (
+                    f"({self.target_language} version {self.target_version})"
+                )
+            else:
+                language_with_version_string = ""
             message["content"] = message["content"].replace(
-                "<TARGET LANGUAGE VERSION>", self.target_version
+                "<TARGET LANGUAGE AND VERSION>", language_with_version_string
             )
             message["content"] = message["content"].replace("<SOURCE CODE>", code.code)
             message["content"] = message["content"].replace(
@@ -233,7 +296,8 @@ class PromptEngine:
         return num_tokens
 
     def _check_prompt_templates(self) -> None:
-        """Check that the prompt template is valid."""
+        """Check that the prompt template is valid.
+        Uses name in self.prompt_template and replaces with value from PromptTemplate."""
         valid_prompt_templates = asdict(PromptTemplate()).keys()
         if self.prompt_template not in valid_prompt_templates:
             log.error(

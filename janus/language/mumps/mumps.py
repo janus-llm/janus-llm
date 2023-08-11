@@ -6,10 +6,19 @@ import tiktoken
 
 from ...utils.logger import create_logger
 from ..block import CodeBlock
+from ..combine import Combiner
 from ..splitter import Splitter
 from .patterns import MumpsLabeledBlockPattern
 
 log = create_logger(__name__)
+
+
+class MumpsCombiner(Combiner):
+    """A class that combines code blocks into mumps files."""
+
+    def __init__(self) -> None:
+        """Initialize a MumpsCombiner instance."""
+        super().__init__("mumps")
 
 
 class MumpsSplitter(Splitter):
@@ -85,7 +94,7 @@ class MumpsSplitter(Splitter):
                         complete=True,
                         start_line=start_line,
                         end_line=end_line,
-                        depth=0,
+                        depth=1,
                         id=0,
                         children=[],
                         language=self.language,

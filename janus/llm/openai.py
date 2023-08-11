@@ -28,7 +28,7 @@ TOKEN_LIMITS: Dict[str, int] = {
 
 # The cost per 1k tokens for each model at the input and output:
 # https://openai.com/pricing
-COST_PER_MODEL: Dict[str, float] = {
+COST_PER_MODEL: Dict[str, Dict[str, float]] = {
     "gpt-4": {"input": 0.03, "output": 0.06},
     "gpt-4-32k": {"input": 0.6, "output": 0.12},
     "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
