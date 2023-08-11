@@ -1,13 +1,14 @@
 import os
 from typing import Any, Dict
 
-from langchain.llms import HuggingFaceTextGenInference, OpenAIChat
+from langchain.llms import HuggingFaceTextGenInference
+from langchain.chat_models import ChatOpenAI
 
 MODEL_CONSTRUCTORS: Dict[str, Any] = {
-    "gpt-4": OpenAIChat,
-    "gpt-4-32k": OpenAIChat,
-    "gpt-3.5-turbo": OpenAIChat,
-    "gpt-3.5-turbo-16k": OpenAIChat,
+    "gpt-4": ChatOpenAI,
+    "gpt-4-32k": ChatOpenAI,
+    "gpt-3.5-turbo": ChatOpenAI,
+    "gpt-3.5-turbo-16k": ChatOpenAI,
     "llama": HuggingFaceTextGenInference,
     "falcon": HuggingFaceTextGenInference,
 }
