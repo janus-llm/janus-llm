@@ -30,20 +30,25 @@ class Translator:
         source_language: str = "fortran",
         target_language: str = "python",
         target_version: str = "3.10",
+        max_prompts: int = 10,
     ) -> None:
         """Initialize a Translator instance.
 
         Arguments:
             model: The LLM to use for translation. If an OpenAI model, the
-                   `OPENAI_API_KEY` environment variable must be set and the
-                   `OPENAI_ORG_ID` environment variable should be set if needed.
+                `OPENAI_API_KEY` environment variable must be set and the
+                `OPENAI_ORG_ID` environment variable should be set if needed.
             source_language: The source programming language.
             target_language: The target programming language.
+            target_version: The target version of the target programming language.
+            max_prompts: The maximum number of times to prompt a model on one functional
+                block.
         """
         self.model = model.lower()
         self.source_language = source_language.lower()
         self.target_language = target_language.lower()
         self.target_version = target_version
+        self.max_prompts = max_prompts
         self._check_languages()
         self._load_model()
         self._load_splitter()
@@ -51,7 +56,10 @@ class Translator:
         self._load_prompt_engine()
 
     def translate(
-        self, input_directory: str | Path, output_directory: str | Path
+            self,
+            input_directory: str | Path,
+            output_directory: str | Path,
+            overwrite: bool = False
     ) -> None:
         """Translate code from the source language to the target language.
 
@@ -59,6 +67,9 @@ class Translator:
             input_directory: The directory containing the code to translate.
             output_directory: The directory to write the translated code to.
         """
+        source_suffix = LANGUAGE_SUFFIXES[self.source_language]
+        target_suffix = LANGUAGE_SUFFIXES[self.target_language]
+
         # Convert paths to pathlib Paths if needed
         if isinstance(input_directory, str):
             input_directory = Path(input_directory)
@@ -76,28 +87,37 @@ class Translator:
 
         # Now, loop through every code block in every file and translate it with an LLM
         for file in files:
+            # Create the output file
+            out_filename = file.path.name.replace(f".{source_suffix}", f".{target_suffix}")
+            out_path = output_directory / out_filename
+            if out_path.exists() and not overwrite:
+                continue
+
             # out_blocks is flat, whereas `translated_files` is nested
             out_blocks: List[TranslatedCodeBlock] = []
             # Loop through all code blocks in the file
             blocks = self._unpack_code_blocks(file)
             for block in blocks:
+                log.debug(f"Input code:\n'''\n{block.code}\n```")
                 prompt = self._prompt_engine.create(block)
-                output, tokens, cost = self._llm.get_output(prompt.prompt)
-                parsed_output, parsed = self._parse_llm_output(output)
-                if not parsed:
-                    log.warning(
-                        f"Failed to parse output for block in file {block.path.name}"
-                    )
 
-                # Create the output file
-                source_suffix = LANGUAGE_SUFFIXES[self.source_language]
-                target_suffix = LANGUAGE_SUFFIXES[self.target_language]
-                out_filename = file.path.name.replace(
-                    f".{source_suffix}", f".{target_suffix}"
-                )
-                outpath = output_directory / out_filename
+                # Attempt the request up to max_prompts times before failing
+                for _ in range(self.max_prompts + 1):
+                    output, tokens, cost = self._llm.get_output(prompt.prompt)
+                    parsed_output, parsed = self._parse_llm_output(output)
+                    if parsed:
+                        log.debug(f"Output code:\n'''\n{parsed_output}\n```")
+                        break
+                else:
+                    error_msg = (
+                        f"Failed to parse output for block in file "
+                        f"{block.path.name} after {self.max_prompts} retries."
+                    )
+                    log.error(error_msg)
+                    raise RuntimeError(error_msg)
+
                 out_block = self._output_to_block(
-                    parsed_output, outpath, block, tokens, cost
+                    parsed_output, out_path, block, tokens, cost
                 )
                 out_blocks.append(out_block)
 

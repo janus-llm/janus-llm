@@ -51,12 +51,29 @@ parser.add_argument(
         "https://platform.openai.com/docs/models/overview"
     ),
 )
-
+parser.add_argument(
+    "--max-prompts",
+    type=int,
+    default=10,
+    help=(
+        "The maximum number of times to prompt a model on one functional block "
+        "before exiting the application. This is to prevent wasting too much money."
+    ),
+)
+parser.add_argument(
+    "--overwrite",
+    action='store_true',
+    help="Whether to overwrite existing files in the output directory",
+)
 
 if __name__ == "__main__":
     args = parser.parse_args()
     output_lang_name, output_lang_version = args.output_lang.split("-")
     translator = Translator(
-        args.llm_name, args.input_lang, output_lang_name, output_lang_version
+        args.llm_name,
+        args.input_lang,
+        output_lang_name,
+        output_lang_version,
+        args.max_prompts,
     )
-    translator.translate(args.input_dir, args.output_dir)
+    translator.translate(args.input_dir, args.output_dir, args.overwrite)

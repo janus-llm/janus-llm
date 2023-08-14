@@ -1,0 +1,9 @@
+# PSS1P23 ;BIR/MAM-DELETE PHARMACISTS SUB-FILE ;03/03/99 13:21
+# ;;1.0;PHARMACY DATA MANAGEMENT;**23**;9/30/97
+#
+#
+DIU = 59.41
+DIU[0] = "DS"
+# Assuming that EN^DIU2 is translated elsewhere
+EN_DIU2()
+del DIU
