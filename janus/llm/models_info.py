@@ -1,8 +1,11 @@
 import os
 from typing import Any, Dict
 
+from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import HuggingFaceTextGenInference
+
+load_dotenv()
 
 MODEL_CONSTRUCTORS: Dict[str, Any] = {
     "gpt-4": ChatOpenAI,
