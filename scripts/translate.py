@@ -84,11 +84,11 @@ if __name__ == "__main__":
         log.error("Output files would overwrite input! Aborting...")
         exit(-1)
     translator = Translator(
-        args.llm_name,
-        args.input_lang,
-        output_lang_name,
-        output_lang_version,
-        args.max_prompts,
-        args.prompt_template,
+        model=args.llm_name,
+        source_language=args.input_lang,
+        target_language=output_lang_name,
+        target_version=output_lang_version,
+        max_prompts=args.max_prompts,
+        prompt_template=args.prompt_template,
     )
     translator.translate(args.input_dir, args.output_dir)

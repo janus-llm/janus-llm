@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 from typing import List, Tuple
 
-import tiktoken
+from langchain.schema.language_model import BaseLanguageModel
 
 from ...utils.logger import create_logger
 from ..block import CodeBlock
@@ -32,9 +32,9 @@ class MumpsSplitter(Splitter):
 
     def __init__(
         self,
+        model: BaseLanguageModel,
         patterns: Tuple[MumpsLabeledBlockPattern, ...] = (MumpsLabeledBlockPattern(),),
         max_tokens: int = 4096,
-        model: str = "gpt-3.5-turbo",
     ) -> None:
         """Initialize a MumpsSplitter instance.
 
@@ -49,7 +49,7 @@ class MumpsSplitter(Splitter):
         self.max_tokens: int = max_tokens // 3
         # Using tiktoken as the tokenizer because that's what's recommended for OpenAI
         # models.
-        self._tokenizer = tiktoken.encoding_for_model(model)
+        self.model = model
         self.language: str = "mumps"
         self.comment: str = ";"
 

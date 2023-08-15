@@ -1,14 +1,19 @@
-import os
-import re
+from copy import deepcopy
 from pathlib import Path
-from typing import List, Tuple
+from typing import Any, Dict, List, Tuple
 
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import TextCombiner
 from .language.fortran import FortranSplitter
 from .language.mumps import MumpsCombiner, MumpsSplitter
 from .language.python import PythonCombiner
-from .llm.openai import TOKEN_LIMITS, OpenAI
+from .llm import (
+    COST_PER_MODEL,
+    MODEL_CONSTRUCTORS,
+    MODEL_DEFAULT_ARGUMENTS,
+    TOKEN_LIMITS,
+)
+from .parsers.code_parser import CodeParser
 from .prompts.prompt import PromptEngine
 from .utils.enums import (
     LANGUAGE_SUFFIXES,
@@ -19,7 +24,7 @@ from .utils.logger import create_logger
 
 log = create_logger(__name__)
 
-VALID_MODELS: Tuple[str, ...] = tuple(TOKEN_LIMITS.keys())
+VALID_MODELS: Tuple[str, ...] = tuple(MODEL_CONSTRUCTORS.keys())
 
 
 class Translator:
@@ -28,6 +33,7 @@ class Translator:
     def __init__(
         self,
         model: str = "gpt-3.5-turbo",
+        model_arguments: Dict[str, Any] = {},
         source_language: str = "fortran",
         target_language: str = "python",
         target_version: str = "3.10",
@@ -48,6 +54,7 @@ class Translator:
             prompt_template: name of prompt template (see PromptTemplate)
         """
         self.model = model.lower()
+        self.model_arguments = model_arguments
         self.source_language = source_language.lower()
         self.target_language = target_language.lower()
         self.target_version = target_version
@@ -58,6 +65,7 @@ class Translator:
         self._load_splitter()
         self._load_combiner()
         self._load_prompt_engine()
+        self._load_parser()
 
     def translate(
         self, input_directory: str | Path, output_directory: str | Path
@@ -93,17 +101,20 @@ class Translator:
                 prompt = self._prompt_engine.create(block)
                 parsed = False
                 num_tries = 0
+                cost = COST_PER_MODEL[self.model]["input"] * prompt.tokens
                 while not parsed:
-                    output, tokens, cost = self._llm.get_output(prompt.prompt)
+                    # output, tokens, cost = self._llm.get_output(prompt.prompt)
+                    output = self._llm.predict_messages(prompt.prompt)
                     if "text" == self.target_language:
-                        parsed_output = output
+                        parsed_output = output.content
                         parsed = True
                     else:
-                        parsed_output, parsed = self._parse_llm_output(output)
+                        parsed_output, parsed = self._parse_llm_output(output.content)
                     if not parsed:
                         log.warning(
                             f"Failed to parse output for block in file {block.path.name}"
                         )
+
                     if num_tries > self.max_prompts:
                         log.error(
                             f"Failed to parse output after {num_tries} tries. Exiting."
@@ -112,6 +123,8 @@ class Translator:
                             f"Failed to parse output after {num_tries} tries. Exiting."
                         )
                     num_tries += 1
+                tokens = self._llm.get_num_tokens(output.content)
+                cost += COST_PER_MODEL[self.model]["output"] * tokens
 
                 # Create the output file
                 source_suffix = LANGUAGE_SUFFIXES[self.source_language]
@@ -169,7 +182,7 @@ class Translator:
             id=original_block.id,
             language=self.target_language,
             type=original_block.type,
-            tokens=tokens["completion_tokens"],
+            tokens=tokens,
             children=[],
             original=original_block,
             cost=cost,
@@ -255,9 +268,8 @@ class Translator:
         Returns:
             The parsed output.
         """
-        pattern = rf"```[^\S\r\n]*(?:{self.target_language}[^\S\r\n]*)?\n?(.*?)\n*```"
         try:
-            response = re.search(pattern, output, re.DOTALL).group(1)
+            response = self.parser.parse(output)
             parsed = True
         except Exception:
             log.warning(f"Could not find code in output:\n\n{output}")
@@ -272,16 +284,18 @@ class Translator:
             raise ValueError(
                 f"Invalid model: {self.model}. Valid models are: {VALID_MODELS}"
             )
-
         if self.model in tuple(TOKEN_LIMITS.keys()):
             self._max_tokens = TOKEN_LIMITS[self.model]
-        self._llm = OpenAI(
-            self.model, os.getenv("OPENAI_API_KEY"), os.getenv("OPENAI_ORG_ID")
-        )
+        else:
+            self._max_tokens = 4096
+        arguments = deepcopy(MODEL_DEFAULT_ARGUMENTS[self.model])
+        arguments.update(self.model_arguments)
+        self._llm = MODEL_CONSTRUCTORS[self.model](**arguments)
 
     def _load_prompt_engine(self) -> None:
         """Load the prompt engine."""
         self._prompt_engine = PromptEngine(
+            self._llm,
             self.model,
             self.source_language,
             self.target_language,
@@ -305,17 +319,19 @@ class Translator:
     def _load_splitter(self) -> None:
         """Load the Splitter object."""
         if self.source_language == "fortran":
-            self.splitter = FortranSplitter(
-                max_tokens=self._llm.model_max_tokens, model=self._llm.model
-            )
+            self.splitter = FortranSplitter(max_tokens=self._max_tokens, model=self._llm)
             self._glob = "**/*.f90"
         elif self.source_language == "mumps":
-            self.splitter = MumpsSplitter(max_tokens=self._llm.model_max_tokens)
+            self.splitter = MumpsSplitter(max_tokens=self._max_tokens, model=self._llm)
             self._glob = "**/*.m"
         else:
             raise NotImplementedError(
                 f"Source language '{self.source_language}' not implemented."
             )
+
+    def _load_parser(self) -> None:
+        """Load the CodeParser Object"""
+        self.parser = CodeParser(target_language=self.target_language)
 
     def _check_languages(self) -> None:
         """Check that the source and target languages are valid."""
