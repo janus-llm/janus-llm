@@ -1,8 +1,8 @@
 import re
-
+import tiktoken
 import openai
 import argparse
-
+from janus.llm.openai import TOKEN_LIMITS
 
 parser = argparse.ArgumentParser(
     prog="Syntax Error Counter",
@@ -32,26 +32,28 @@ parser.add_argument(
 parser.add_argument(
     "--model",
     type=str,
-    default="gpt-3.5-turbo-16k",
+    default="gpt-3.5-turbo-16k-0613",
     help="The OpenAI model to use"
 )
 
 args = parser.parse_args()
+encoding = tiktoken.encoding_for_model(args.model)
+token_limit = TOKEN_LIMITS.get(args.model, 4096)
+
 messages = list()
 
 # The system prompt defines the overall behavior of the agent
-messages.append(dict(
-    role='system',
-    content='Act as a static analysis tool for Python code. Given a '
-            'sample of Python (wrapped in triple backticks), identify '
-            'the syntax errors. Each line of your response should be '
-            'numbered, and include the original code wrapped in backticks, '
-            'followed by a short (1-2 sentence) description of the issue. '
-            'Skip lines that have no syntax errors. '
-            'Do not include formatting issues or logical errors, only '
-            'report syntax errors that would prevent compilation with '
-            'a tool like py_compile.'
-))
+system_prompt = (
+    'Act as a static analysis tool for Python code. Given a sample of Python '
+    '(wrapped in triple backticks), identify the syntax errors. Each line of '
+    'your response should be numbered, and include the original code wrapped in '
+    'backticks, followed by a short (1-2 sentence) description of the issue. '
+    'Skip lines that have no syntax errors. Do not include formatting issues or '
+    'logical errors, only report syntax errors that would prevent compilation '
+    'with a tool like py_compile.'
+)
+input_tokens = len(encoding.encode(system_prompt))
+messages.append(dict(role='system', content=system_prompt))
 
 # If indicated, provide example input and output for GPT to emulate
 if args.give_example:
@@ -94,9 +96,19 @@ def is_prime(num)
         # Otherwise, remove line numbers in output
         example_output = re.sub(r" line \d+:", "", example_output)
 
+    # Delimit code with backticks
+    example_input = f"```{example_input}```"
+
+    # Add to token limit
+    input_tokens += len(encoding.encode(example_input))
+    input_tokens += len(encoding.encode(example_output))
+
+    # Fudge factor, this will usually only be 6-8 depending on the model
+    input_tokens += 10
+
     # Add to messages list
     messages.extend([
-        dict(role='user', content=f"```{example_input}```"),
+        dict(role='user', content=example_input),
         dict(role='assistant', content=example_output)
     ])
 
@@ -109,18 +121,22 @@ if args.number_lines:
         for i, line in enumerate(code.split('\n'))
     )
 
+code = f"```\n{code}\n```"
+
+input_tokens += len(encoding.encode(code))
+
+# Fudge factor, this will usually only be 6-8 depending on the model
+input_tokens += 10
+
 # Add to messages list
-messages.append(dict(
-    role='user',
-    content=f"```\n{code}\n```"
-))
+messages.append(dict(role='user', content=code))
 
 if __name__ == '__main__':
     response = openai.ChatCompletion.create(
         model=args.model,
         messages=messages,
         stream=True,
-        max_tokens=8000,
+        max_tokens=token_limit - input_tokens,
         temperature=args.temp
     )
 
