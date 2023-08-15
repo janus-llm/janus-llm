@@ -3,10 +3,11 @@ from itertools import count, groupby
 from pathlib import Path
 from typing import List, Tuple
 
-import tiktoken
+from langchain.schema.language_model import BaseLanguageModel
 
 from ...utils.logger import create_logger
 from ..block import CodeBlock
+from ..combine import Combiner
 from ..splitter import Splitter
 from .patterns import MumpsLabeledBlockPattern
 
@@ -42,6 +43,14 @@ class CumulativeLengthGrouper:
         return self.cur_grp
 
 
+class MumpsCombiner(Combiner):
+    """A class that combines code blocks into mumps files."""
+
+    def __init__(self) -> None:
+        """Initialize a MumpsCombiner instance."""
+        super().__init__("mumps")
+
+
 class MumpsSplitter(Splitter):
     """A class for splitting MUMPS code into functional blocks to prompt with for
     transcoding.
@@ -52,14 +61,25 @@ class MumpsSplitter(Splitter):
     """
     patterns: Tuple[MumpsLabeledBlockPattern, ...] = (MumpsLabeledBlockPattern(),)
 
-    def __init__(self, max_tokens: int = 4096, model: str = "gpt-3.5-turbo",
-                 maximize_block_length: bool = False) -> None:
+    def __init__(
+            self,
+            model: BaseLanguageModel,
+            max_tokens: int = 4096,
+            maximize_block_length: bool = False,
+        ) -> None:
         """Initialize a MumpsSplitter instance.
 
         Arguments:
-            patterns: A tuple of `Pattern`s to use for splitting MUMPS code into
-                functional blocks.
+            max_tokens: The maximum number of tokens supported by the model
+            maximize_block_length: Whether to greedily merge blocks back together
+                after splitting in order to maximize the context sent to the LLM
         """
+        # Divide max_tokens by 3 because we want to leave just as much space for the
+        # prompt as for the translated code.
+        self.max_tokens: int = max_tokens // 3
+        # Using tiktoken as the tokenizer because that's what's recommended for OpenAI
+        # models.
+        self.model = model
         self.language: str = "mumps"
         self.comment: str = ";"
         super().__init__(max_tokens=max_tokens, model=model)
