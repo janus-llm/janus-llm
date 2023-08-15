@@ -1,0 +1,37 @@
+Requirements:
+
+1. The system shall provide a functionality to print and create pharmacy orderable items.
+2. The system shall support name-spaced variables for different file types, including iv additive file (ADD), iv solution file (SOL), primary drug file (PD), dispense drug file (DD), national drug file (NDF), and NDF dosage form (DF).
+3. The system shall initialize the variables ADDIEN, ADDNAME, CHR, DDIEN, PDIEN, PDNAME, NDF, NDFVA, DF, DDNAME, DFNAME, SPDNAME, X, PGN, PSMATCH, SOLIEN, SOLNAME, SPD, SPDFN, CML, and LIVE.
+4. The system shall set the variable CHR to "~" if the PSCREATE flag is defined, otherwise set it to a space character.
+5. The system shall clear the temporary global storage ^TMP("PSSD",$J), ^TMP("PSS",$J), ^TMP("PSSADD",$J), and ^TMP("PSSOL",$J).
+6. The system shall loop through the dispense drugs for each primary drug and retrieve the corresponding NDF entry.
+7. For each primary drug, the system shall retrieve the PDNAME and set DDIEN to an empty string.
+8. The system shall loop through the dispense drugs for the current primary drug and retrieve the corresponding DDIEN.
+9. The system shall skip the current dispense drug if it does not exist in the dispense drug file or if the name is empty.
+10. The system shall call the DOSE function to retrieve the DFNAME for the current dispense drug.
+11. If the DFNAME is empty and the PSCREATE flag is not defined, the system shall store the error message "NDF link missing or incomplete" in the temporary global storage ^TMP("PSSD",$J,"ZZZZ",DDNAME).
+12. If the DFNAME is not empty, the system shall store the PDNAME, DFNAME, and DDNAME in the temporary global storage ^TMP("PSSD",$J,PDNAME_CHR_DFNAME,DDNAME) and ^TMP("PSS",$J,DDNAME) respectively.
+13. The system shall retrieve the iv additives from the iv additive file.
+14. The system shall loop through the iv additives and retrieve the corresponding DDIEN.
+15. The system shall skip the current iv additive if it does not exist in the dispense drug file or if the name is empty.
+16. The system shall call the DOSE function to retrieve the DFNAME for the current iv additive.
+17. If the DFNAME is empty and the PSCREATE flag is not defined, the system shall store the error message "NDF link missing or incomplete" in the temporary global storage ^TMP("PSSADD",$J,"ZZZZ",DDNAME).
+18. If the DFNAME is not empty, the system shall store the ADDNAME, DDNAME, and DFNAME in the temporary global storage ^TMP("PSSADD",$J,ADDNAME,DDNAME).
+19. The system shall retrieve the iv solutions from the iv solution file.
+20. The system shall loop through the iv solutions and retrieve the corresponding DDIEN.
+21. The system shall skip the current iv solution if it does not exist in the dispense drug file or if the name is empty.
+22. The system shall call the DOSE function to retrieve the DFNAME for the current iv solution.
+23. If the DFNAME is empty and the PSCREATE flag is not defined, the system shall store the error message "NDF link missing or incomplete" in the temporary global storage ^TMP("PSSOL",$J,"ZZZZ",DDNAME).
+24. If the DFNAME is not empty, the system shall store the SOLNAME, DFNAME, and DDNAME in the temporary global storage ^TMP("PSSOL",$J,SOLNAME,DFNAME,DDNAME).
+25. If the PSCREATE flag is defined, the system shall load the Pharmacy Orderable Item file from the ^TMP global.
+26. The system shall define the DOSE function to retrieve the dispense drug name (DDNAME) and NDF dosage form (DFNAME).
+27. The DOSE function shall set the variables DF and DFNAME to empty strings.
+28. The DOSE function shall retrieve the NDF entry for the current dispense drug (DDIEN).
+29. The DOSE function shall set the variables DA, X, GEN, K, NDFVAGN, and PROD based on the retrieved NDF entry.
+30. The DOSE function shall skip the current dispense drug if the NDF entry is empty or if the generic name (GEN) is zero.
+31. The DOSE function shall skip the current dispense drug if the dosage form (DF) or the product name (PROD) is empty.
+32. If the generic name (GEN) is not zero, the DOSE function shall retrieve the pointer to the dosage form file from the VA PRODUCT NAME node.
+33. The DOSE function shall skip the current dispense drug if the dosage form (DF) is zero.
+34. The DOSE function shall set the DFNAME to the second piece of the retrieved NDFVAGN.
+35. The system shall include any external dependencies required for the proper functioning of the code segment.

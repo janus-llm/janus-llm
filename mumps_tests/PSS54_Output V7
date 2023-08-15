@@ -1,0 +1,38 @@
+Requirements:
+
+1. The system shall provide an API for retrieving information from file 54 in the Pharmacy Data Management system.
+2. The system shall accept the following inputs for the API:
+   a. PSSIEN - The IEN (Internal Entry Number) of the entry in the RX CONSULT file (#54).
+   b. PSSFT - The free text name in the RX CONSULT file (#54).
+   c. LIST - The subscript of the ^TMP array where the data will be stored.
+3. The system shall return the following data from the RX CONSULT file (#54) for the given inputs:
+   a. NAME field (#.01)
+   b. TEXT field (#1)
+4. If the LIST input is not provided, the system shall not perform any operations and return no data.
+5. If both PSSIEN and PSSFT inputs are not provided, the system shall set the first element of the ^TMP array to -1^"NO DATA FOUND".
+6. If PSSIEN is provided and its value is less than or equal to 0, the system shall set the first element of the ^TMP array to -1^"NO DATA FOUND".
+7. If PSSIEN is provided and its value is greater than 0, the system shall perform the following operations:
+   a. Find the IEN of the entry in the RX CONSULT file (#54) using the FIND1^DIC function.
+   b. If the IEN is not found, the system shall set the first element of the ^TMP array to -1^"NO DATA FOUND".
+   c. If the IEN is found, the system shall set the first element of the ^TMP array to 1.
+   d. Retrieve the NAME field (#.01) and TEXT field (#1) of the RX CONSULT file (#54) using the GETS^DIQ function.
+   e. Store the retrieved data in the ^TMP array under the appropriate subscripts.
+8. If PSSIEN is not provided and PSSFT is provided, the system shall perform the following operations:
+   a. If PSSFT contains the string "??", the system shall loop through all entries in the RX CONSULT file (#54) and retrieve the NAME field (#.01) and TEXT field (#1) for each entry.
+   b. If PSSFT does not contain the string "??", the system shall find the entries in the RX CONSULT file (#54) that match the PSSFT value using the FIND^DIC function.
+   c. If no matching entries are found, the system shall set the first element of the ^TMP array to -1^"NO DATA FOUND".
+   d. If matching entries are found, the system shall set the first element of the ^TMP array to the number of matching entries.
+   e. Retrieve the NAME field (#.01) of the matching entries using the GETS^DIQ function.
+   f. Store the retrieved data in the ^TMP array under the appropriate subscripts.
+9. The system shall provide an API for looking up entries in the RX CONSULT file (#54) based on the NAME field.
+10. The system shall accept the following inputs for the lookup API:
+    a. PSSSRCH - The IEN of the entry in the RX CONSULT file (#54).
+    b. LIST - The subscript of the ^TMP array where the data will be stored.
+11. The system shall return the NAME field (#.01) of the RX CONSULT file (#54) for the given input.
+12. If the LIST input is not provided, the system shall not perform any operations and return no data.
+13. If the PSSSRCH input is not provided, the system shall set the first element of the ^TMP array to -1^"NO DATA FOUND".
+14. The system shall find the entries in the RX CONSULT file (#54) that match the PSSSRCH value using the FIND^DIC function.
+15. If no matching entries are found, the system shall set the first element of the ^TMP array to -1^"NO DATA FOUND".
+16. If matching entries are found, the system shall set the first element of the ^TMP array to the number of matching entries.
+17. Retrieve the NAME field (#.01) of the matching entries using the GETS^DIQ function.
+18. Store the retrieved data in the ^TMP array under the appropriate subscripts.

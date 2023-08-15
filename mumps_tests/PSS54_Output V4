@@ -1,0 +1,46 @@
+**SRS Requirements**
+
+1. The API "ALL" function shall accept three input parameters:
+    a. PSSIEN: IEN of entry in RX CONSULT file (#54).
+    b. PSSFT: Free Text name in RX CONSULT file (#54).
+    c. LIST: Subscript of ^TMP array in the form ^TMP($J,LIST,Field Number, where Field Number is the Field Number of the data piece being returned.
+
+2. The API "ALL" function shall populate the output ^TMP array with the NAME field (#.01) and TEXT field (#1) of the RX CONSULT file (#54) based on the provided input parameters.
+
+3. The API "ALL" function shall return an error message in the ^TMP array if any of the following conditions are met:
+    a. LIST input parameter is not provided.
+    b. PSSIEN and PSSFT input parameters are not provided.
+    c. PSSIEN is provided but its value is not greater than zero.
+    d. PSSIEN is provided but its value does not correspond to an existing entry in the RX CONSULT file (#54).
+    e. PSSFT is provided but its value does not correspond to any existing entry in the RX CONSULT file (#54).
+    f. PSSIEN is not provided and PSSFT is provided as "??".
+
+4. The API "ALL" function shall use the FIND1^DIC function to find the IEN of the entry in the RX CONSULT file (#54) based on the provided PSSIEN value, if PSSIEN is provided and its value is greater than zero.
+
+5. The API "ALL" function shall use the GETS^DIQ function to retrieve the NAME field (#.01) and TEXT field (#1) of the RX CONSULT file (#54) for the found entry.
+
+6. The API "ALL" function shall populate the ^TMP array with the retrieved data, organizing it by entry IEN and with a "TXT" subscript for the TEXT field.
+
+7. The API "LOOKUP" function shall accept two input parameters:
+    a. PSSSRCH: IEN of entry in RX CONSULT file (#54).
+    b. LIST: Subscript of ^TMP array in the form ^TMP($J,LIST,Field Number, where Field Number is the Field Number of the data piece being returned.
+
+8. The API "LOOKUP" function shall populate the output ^TMP array with the NAME field (#.01) of the RX CONSULT file (#54) based on the provided input parameters.
+
+9. The API "LOOKUP" function shall return an error message in the ^TMP array if the LIST input parameter is not provided.
+
+10. The API "LOOKUP" function shall use the FIND^DIC function to find the entries in the RX CONSULT file (#54) that match the provided PSSSRCH value.
+
+11. The API "LOOKUP" function shall populate the ^TMP array with the found entries, organizing them by entry IEN and with a "B" subscript for the NAME field.
+
+12. The API "SETZRO" function shall set the NAME field value of the current entry in the ^TMP array based on the provided PSS(1) index and the corresponding value in PSS54(54,PSS(1),.01,"I").
+
+13. The API "SETZRO" function shall set the "B" subscript value of the NAME field in the ^TMP array based on the provided PSS(1) index and the corresponding value in PSS54(54,PSS(1),.01,"I").
+
+14. The API "SETTXT" function shall set the TEXT field value of the current entry in the ^TMP array based on the provided PSS(2) index and the corresponding value in PSS54(54.1,PSS(2),.01,"I").
+
+15. The API "LOOKUP" function shall provide a LOOP function to loop through all entries in the RX CONSULT file (#54) and populate the ^TMP array with the NAME and TEXT fields for each entry.
+
+16. The API "LOOKUP" function shall return an error message in the ^TMP array if no entries are found in the RX CONSULT file (#54) during the loop.
+
+17. The API "LOOKUP" function shall update the value of the ^TMP array's "0" node to either the count of found entries or the error message, depending on the loop outcome.

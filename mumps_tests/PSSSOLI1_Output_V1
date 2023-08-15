@@ -1,0 +1,35 @@
+Requirements:
+
+1. The system shall be able to add a new entry to the Pharmacy Drug file (PSDRUG) in the Pharmacy Data Management module.
+2. The system shall retrieve the ND (National Drug) information from the PSDRUG file for a given drug.
+3. The system shall retrieve the ND1 (National Drug 1) and ND3 (National Drug 3) values from the ND information.
+4. The system shall use the PSJDF^PSNAPIS function to get the Dose Form (PSDOSPTR) for the drug based on the ND1 and ND3 values.
+5. The system shall check if the PSDOSPTR exists in the Dose Form file (PS(50.606)).
+6. If the PSDOSPTR exists, the system shall retrieve the Dose Form name (PSDOSNM) from the Dose Form file.
+7. If the PSDOSPTR does not exist, the system shall prompt the user to select a Dose Form from the Dose Form file.
+8. The system shall store the selected Dose Form (PSDOSPTR) and its name (PSDOSNM) for further processing.
+9. The system shall display the Solution Name (PSSNAME), Volume (PSSVOL), and Dose Form (PSDOSNM) to the user.
+10. The system shall check if there is already an Orderable Item with the same name and Dose Form in the Orderable Item file (PS(50.7)).
+11. If there is already a matching Orderable Item, the system shall display a warning message to the user.
+12. The system shall prompt the user to decide if they want to match the drug to the existing Orderable Item.
+13. The system shall allow the user to enter a new Orderable Item name if they choose not to match to the existing one.
+14. The system shall validate the entered Orderable Item name to ensure it meets the length requirements (3-40 characters) and does not contain invalid characters.
+15. If the entered Orderable Item name is invalid, the system shall display an error message and prompt the user to enter a valid name.
+16. The system shall search for any existing Orderable Items with the entered name and Dose Form.
+17. If there is a matching Orderable Item, the system shall display it to the user and prompt them to confirm if it is the correct match.
+18. If the user confirms the match, the system shall proceed to the "SOMAT^PSSSUTIL" function.
+19. If the user does not confirm the match, the system shall go back to prompting for a new Orderable Item name.
+20. If there is no matching Orderable Item, the system shall create a new entry in the Orderable Item file.
+21. The system shall display the entered Orderable Item name, Dose Form, and its associated Solution Name and Volume.
+22. The system shall prompt the user to confirm if the entered information is correct.
+23. If the user confirms, the system shall create a new entry in the Orderable Item file (PS(50.7)) with the entered information.
+24. The system shall store the newly created Orderable Item's ID (PSNEWOI) for further processing.
+25. The system shall retrieve any existing Synonyms for the original drug from the Pharmacy Orderable Item file (PS(52.7)).
+26. The system shall store the Synonyms in an array (SYN) for further processing.
+27. The system shall update the Orderable Item's Synonyms in the Orderable Item file with the values from the array.
+28. The system shall prompt the user to edit the newly created Orderable Item if desired.
+29. The system shall call the "DIR^PSSPOIM3" function to allow the user to edit the Orderable Item.
+30. The system shall call the "INACT^PSSSOLIT" function to check if the Orderable Item needs to be inactivated.
+31. The system shall call the "EN^PSSPOIDT" function to edit the Orderable Item's Dosage Form and other attributes.
+32. The system shall call the "EN2^PSSHL1" function to update the Orderable Item in the HL7 messaging system.
+33. The system shall return to the main program "PSSSOLIT" after completing the functionality.

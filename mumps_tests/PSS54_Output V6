@@ -1,0 +1,35 @@
+Requirements:
+
+1. The system shall provide an API function named ALL that takes three parameters: PSSIEN, PSSFT, and LIST.
+2. The PSSIEN parameter shall be the IEN (Internal Entry Number) of an entry in the RX CONSULT file (#54).
+3. The PSSFT parameter shall be a free text name in the RX CONSULT file (#54).
+4. The LIST parameter shall be a subscript of the ^TMP array in the form ^TMP($J,LIST,Field Number), where Field Number is the field number of the data piece being returned.
+5. If the LIST parameter is not provided, the system shall return without performing any further actions.
+6. The system shall clear the ^TMP($J,LIST) array before processing.
+7. If both PSSIEN and PSSFT parameters are not provided, the system shall set ^TMP($J,LIST,0) to -1^NO DATA FOUND and return.
+8. If PSSIEN is provided and its value is less than or equal to 0, and PSSFT is not provided or its value is empty, the system shall set ^TMP($J,LIST,0) to -1^NO DATA FOUND and return.
+9. If PSSIEN is provided and its value is greater than 0, the system shall find the corresponding entry in the RX CONSULT file (#54) using the FIND1^DIC function.
+10. If the FIND1^DIC function does not return a valid IEN, the system shall set ^TMP($J,LIST,0) to -1^NO DATA FOUND and return.
+11. If the FIND1^DIC function returns a valid IEN, the system shall set ^TMP($J,LIST,0) to 1.
+12. The system shall use the GETS^DIQ function to retrieve the NAME field (#.01) and TEXT field (#1) of the RX CONSULT file (#54) for the given entry.
+13. The system shall store the retrieved data in the ^TMP($J,LIST) array, with the entry's IEN as the subscript.
+14. The system shall set ^TMP($J,LIST,+PSSIEN,"TXT",0) to 0.
+15. The system shall iterate through each record in the TEXT field (#1) of the RX CONSULT file (#54) and store them in the ^TMP($J,LIST,+PSSIEN,"TXT") subarray, with the record number as the subscript.
+16. If PSSIEN is not provided and PSSFT is provided, the system shall perform a lookup in the RX CONSULT file (#54) using the FIND^DIC function.
+17. If the FIND^DIC function does not return any results, the system shall set ^TMP($J,LIST,0) to -1^NO DATA FOUND and return.
+18. If the FIND^DIC function returns results, the system shall set ^TMP($J,LIST,0) to the number of results.
+19. The system shall iterate through each result and retrieve the NAME field (#.01) of the RX CONSULT file (#54) for each result.
+20. The system shall store the retrieved data in the ^TMP($J,LIST) array, with the entry's IEN as the subscript and the NAME field as the value.
+21. The system shall create a "B" index in the ^TMP($J,LIST) array, with the NAME field as the key and the entry's IEN as the value.
+22. The system shall provide an API function named LOOKUP that takes two parameters: PSSSRCH and LIST.
+23. The PSSSRCH parameter shall be the IEN of an entry in the RX CONSULT file (#54).
+24. The LIST parameter shall be a subscript of the ^TMP array in the form ^TMP($J,LIST,Field Number), where Field Number is the field number of the data piece being returned.
+25. If the LIST parameter is not provided, the system shall return without performing any further actions.
+26. The system shall clear the ^TMP($J,LIST) array before processing.
+27. If the PSSSRCH parameter is not provided, the system shall set ^TMP($J,LIST,0) to -1^NO DATA FOUND and return.
+28. The system shall use the FIND^DIC function to perform a lookup in the RX CONSULT file (#54) using the PSSSRCH parameter.
+29. If the FIND^DIC function does not return any results, the system shall set ^TMP($J,LIST,0) to -1^NO DATA FOUND and return.
+30. If the FIND^DIC function returns results, the system shall set ^TMP($J,LIST,0) to the number of results.
+31. The system shall iterate through each result and retrieve the NAME field (#.01) of the RX CONSULT file (#54) for each result.
+32. The system shall store the retrieved data in the ^TMP($J,LIST) array, with the entry's IEN as the subscript and the NAME field as the value.
+33. The system shall create a "B" index in the ^TMP($J,LIST) array, with the NAME field as the key and the entry's IEN as the value.

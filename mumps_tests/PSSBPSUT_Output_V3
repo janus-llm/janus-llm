@@ -1,0 +1,24 @@
+Requirements:
+
+1. The system shall have a function named NCPDPQTY that takes two input parameters: DRUG and RXQTY.
+2. The DRUG parameter shall be an integer representing the DRUG file (#50) IEN.
+3. The RXQTY parameter shall be an integer representing the quantity dispensed from the PRESCRIPTION file (#52).
+4. The function shall return a string in the format "Billing Quantity^NCPDP Dispense Unit".
+5. If the DRUG parameter is invalid or the DRUG is not on file, the function shall return "-1^INVALID DRUG".
+6. If the NCPDP Dispense Unit for the DRUG is invalid, the function shall return the RXQTY parameter.
+7. If the NCPDP Conversion Multiplier for the DRUG is invalid, the function shall return the RXQTY parameter followed by the NCPDP Dispense Unit.
+8. The Billing Quantity shall be calculated as RXQTY multiplied by the NCPDP Conversion Multiplier, rounded to 3 decimal places.
+9. The NCPDP Dispense Unit shall be the value retrieved from the DRUG file (#50) field 82.
+
+10. The system shall have a function named EPHARM that takes one input parameter: PSSDRUG.
+11. The PSSDRUG parameter shall be an integer representing the DRUG file (#50) IEN.
+12. The function shall check if the ePharmacy Billable fields for the PSSDRUG are all nil.
+13. If the INACTIVE DATE for the PSSDRUG is not greater than today, the function shall not check the ePharmacy Billable fields.
+14. The function shall retrieve the existing values for the ePharmacy Billable fields from the DRUG file (#50) and store them in an ARRAY.
+15. The function shall check if any of the ePharmacy Billable fields in the ARRAY have a value defined.
+16. If any of the ePharmacy Billable fields have a value defined, the function shall return.
+17. If all three ePharmacy Billable fields in the ARRAY are nil, the function shall prompt the user to enter values.
+18. If the user does not respond YES to entering ePharmacy Billable fields, the function shall return.
+19. The function shall display the three ePharmacy Billable fields to the user.
+20. The function shall allow the user to enter values for the ePharmacy Billable fields.
+21. The function shall update the ePharmacy Billable fields in the DRUG file (#50) with the user-entered values.
