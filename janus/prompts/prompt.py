@@ -13,6 +13,14 @@ from ..utils.logger import create_logger
 log = create_logger(__name__)
 
 
+# Prompt names (self.template_map keys) that should output text,
+# regardless of the `output-lang` argument.
+TEXT_OUTPUT = ["document", "requirements"]
+# Prompt names (self.template_map keys) that should output the
+# same language as the input, regardless of the `output-lang` argument.
+SAME_OUTPUT = ["document_inline"]
+
+
 @dataclass
 class Prompt:
     """The prompt for a code block.
@@ -30,15 +38,6 @@ class Prompt:
 
 class PromptEngine:
     """A class defining prompting schemes for the LLM."""
-
-    """Prompt names (self.template_map keys) that should output text,
-    regardless of the `output-lang` argument.
-    """
-    TEXT_OUTPUT = ["document", "requirements"]
-    """Prompt names (self.template_map keys) that should output the
-    same language as the input, regardless of the `output-lang` argument.
-    """
-    SAME_OUTPUT = ["document_inline"]
 
     def __init__(
         self,

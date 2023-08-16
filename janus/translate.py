@@ -14,7 +14,7 @@ from .llm import (
     TOKEN_LIMITS,
 )
 from .parsers.code_parser import CodeParser
-from .prompts.prompt import PromptEngine
+from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import (
     LANGUAGE_SUFFIXES,
     VALID_SOURCE_LANGUAGES,
@@ -87,14 +87,11 @@ class Translator:
             output_directory.mkdir(parents=True)
 
         # Ensure that output languages are set to expected values for prompts
-        if (
-            self.prompt_template in PromptEngine.TEXT_OUTPUT
-            and "text" != self.target_language
-        ):
+        if self.prompt_template in TEXT_OUTPUT and "text" != self.target_language:
             # Text outputs for documentation, requirements, etc.
             self.target_language = "text"
         if (
-            self.prompt_template in PromptEngine.SAME_OUTPUT
+            self.prompt_template in SAME_OUTPUT
             and self.target_language != self.source_language
         ):
             # Document inline should output the same as the input
