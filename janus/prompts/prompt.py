@@ -31,15 +31,14 @@ class Prompt:
 class PromptEngine:
     """A class defining prompting schemes for the LLM."""
 
-    """Prompt names (self.template_map keys) that should output text, regardless of the `output-lang` argument."""
-    TEXT_OUTPUT = [
-        'document',
-        'requirements'
-    ]
-    """Prompt names (self.template_map keys) that should output the same language as the input, regardless of the `output-lang` argument."""
-    SAME_OUTPUT = [
-        'document_inline'
-    ]
+    """Prompt names (self.template_map keys) that should output text,
+    regardless of the `output-lang` argument.
+    """
+    TEXT_OUTPUT = ["document", "requirements"]
+    """Prompt names (self.template_map keys) that should output the
+    same language as the input, regardless of the `output-lang` argument.
+    """
+    SAME_OUTPUT = ["document_inline"]
 
     def __init__(
         self,
@@ -300,8 +299,8 @@ class PromptEngine:
                 ChatMessagePromptTemplate(
                     role="user",
                     prompt=PromptTemplate.from_template(
-                       "If you think any section of the code is difficult to "
-                       "understand or has uncertain requirements, state what it is."
+                        "If you think any section of the code is difficult to "
+                        "understand or has uncertain requirements, state what it is."
                     ),
                 ),
                 ChatMessagePromptTemplate(
@@ -490,8 +489,8 @@ class PromptEngine:
                 ChatMessagePromptTemplate(
                     role="user",
                     prompt=PromptTemplate.from_template(
-                       "If you think any section of the code is difficult to "
-                       "understand or has uncertain requirements, state what it is."
+                        "If you think any section of the code is difficult to "
+                        "understand or has uncertain requirements, state what it is."
                     ),
                 ),
                 ChatMessagePromptTemplate(
@@ -516,5 +515,5 @@ class PromptEngine:
             "simple": self.prompt_template,
             "document_inline": self.document_inline_prompt_template,
             "document": self.document_prompt_template,
-            "requirements": self.requirements_prompt_template
+            "requirements": self.requirements_prompt_template,
         }

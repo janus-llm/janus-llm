@@ -87,10 +87,16 @@ class Translator:
             output_directory.mkdir(parents=True)
 
         # Ensure that output languages are set to expected values for prompts
-        if self.prompt_template in PromptEngine.TEXT_OUTPUT and 'text' != self.target_language:
+        if (
+            self.prompt_template in PromptEngine.TEXT_OUTPUT
+            and "text" != self.target_language
+        ):
             # Text outputs for documentation, requirements, etc.
-            self.target_language = 'text'
-        if self.prompt_template in PromptEngine.SAME_OUTPUT and self.target_language != self.source_language:
+            self.target_language = "text"
+        if (
+            self.prompt_template in PromptEngine.SAME_OUTPUT
+            and self.target_language != self.source_language
+        ):
             # Document inline should output the same as the input
             self.target_language = self.source_language
 
