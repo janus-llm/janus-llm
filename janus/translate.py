@@ -86,6 +86,14 @@ class Translator:
         if not output_directory.exists():
             output_directory.mkdir(parents=True)
 
+        # Ensure that output languages are set to expected values for prompts
+        if self.prompt_template in PromptEngine.TEXT_OUTPUT and 'text' != self.target_language:
+            # Text outputs for documentation, requirements, etc.
+            self.target_language = 'text'
+        if self.prompt_template in PromptEngine.SAME_OUTPUT and self.target_language != self.source_language:
+            # Document inline should output the same as the input
+            self.target_language = self.source_language
+
         # First, get the files in the input directory and split them into CodeBlocks
         files = self._get_files(input_directory)
 
@@ -106,9 +114,11 @@ class Translator:
                     # output, tokens, cost = self._llm.get_output(prompt.prompt)
                     output = self._llm.predict_messages(prompt.prompt)
                     if "text" == self.target_language:
+                        # Pass through content if output is expected to be text
                         parsed_output = output.content
                         parsed = True
                     else:
+                        # Otherwise parse for code
                         parsed_output, parsed = self._parse_llm_output(output.content)
                     if not parsed:
                         log.warning(

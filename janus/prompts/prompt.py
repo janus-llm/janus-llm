@@ -31,6 +31,16 @@ class Prompt:
 class PromptEngine:
     """A class defining prompting schemes for the LLM."""
 
+    """Prompt names (self.template_map keys) that should output text, regardless of the `output-lang` argument."""
+    TEXT_OUTPUT = [
+        'document',
+        'requirements'
+    ]
+    """Prompt names (self.template_map keys) that should output the same language as the input, regardless of the `output-lang` argument."""
+    SAME_OUTPUT = [
+        'document_inline'
+    ]
+
     def __init__(
         self,
         model: BaseLanguageModel,
@@ -56,6 +66,7 @@ class PromptEngine:
         self.prompt_template: ChatPromptTemplate
         self.document_inline_prompt_template: ChatPromptTemplate
         self.document_prompt_template: ChatPromptTemplate
+        self.requirements_prompt_template: ChatPromptTemplate
         self._create_prompt_template()
         self.prompt_template_name = prompt_template_name
 
@@ -255,6 +266,51 @@ class PromptEngine:
                     ),
                 ),
             ]
+            messages_requirements = [
+                ChatMessagePromptTemplate(
+                    role="system",
+                    prompt=PromptTemplate.from_template(
+                        "Your purpose is to understand a source code file "
+                        "and generate a software requirements specification "
+                        "document for it."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Please convert the following code into software "
+                        "requirements that can replicate its functionality."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "In addition, describe the capabilities and "
+                        "limitations of the functionality, as well as how "
+                        "to test the functionality."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Please output English sentences in the style of an "
+                        "IEEE Software Requirements Specification document"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                       "If you think any section of the code is difficult to "
+                       "understand or has uncertain requirements, state what it is."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Here is the code\n\n{SOURCE_CODE}"
+                    ),
+                ),
+            ]
         else:
             messages = [
                 ChatMessagePromptTemplate(
@@ -400,6 +456,51 @@ class PromptEngine:
                     ),
                 ),
             ]
+            messages_requirements = [
+                ChatMessagePromptTemplate(
+                    role="system",
+                    prompt=PromptTemplate.from_template(
+                        "Your purpose is to understand a source code file "
+                        "and generate a software requirements specification "
+                        "document for it."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Please convert the following code into software "
+                        "requirements that can replicate its functionality."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "In addition, describe the capabilities and "
+                        "limitations of the functionality, as well as how "
+                        "to test the functionality."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Please output English sentences in the style of an "
+                        "IEEE Software Requirements Specification document"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                       "If you think any section of the code is difficult to "
+                       "understand or has uncertain requirements, state what it is."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Here is the code\n\n{SOURCE_CODE}"
+                    ),
+                ),
+            ]
         self.prompt_template = ChatPromptTemplate.from_messages(messages)
         self.document_inline_prompt_template = ChatPromptTemplate.from_messages(
             messages_document_inline
@@ -407,9 +508,13 @@ class PromptEngine:
         self.document_prompt_template = ChatPromptTemplate.from_messages(
             messages_document
         )
+        self.requirements_prompt_template = ChatPromptTemplate.from_messages(
+            messages_requirements
+        )
 
         self.template_map = {
             "simple": self.prompt_template,
             "document_inline": self.document_inline_prompt_template,
             "document": self.document_prompt_template,
+            "requirements": self.requirements_prompt_template
         }
