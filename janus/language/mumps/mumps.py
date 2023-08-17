@@ -67,6 +67,7 @@ class MumpsSplitter(Splitter):
         model: BaseLanguageModel,
         max_tokens: int = 4096,
         maximize_block_length: bool = False,
+        force_split: bool = False,
     ) -> None:
         """Initialize a MumpsSplitter instance.
 
@@ -86,6 +87,7 @@ class MumpsSplitter(Splitter):
         # MUMPS code tends to take about 2/3 the space of Python
         self.max_tokens: int = int(max_tokens * 2 / 5)
         self.maximize_block_length = maximize_block_length
+        self.force_split = force_split
 
     @classmethod
     def _regex_split(cls, code: str):
@@ -103,7 +105,7 @@ class MumpsSplitter(Splitter):
         """
 
         # The whole file is one block
-        if self._count_tokens(code) < self.max_tokens:
+        if self._count_tokens(code) < self.max_tokens and not self.force_split:
             return CodeBlock(
                 code=code,
                 path=path,
@@ -119,7 +121,7 @@ class MumpsSplitter(Splitter):
             )
 
         blocks = self._regex_split(code)
-        if self.maximize_block_length:
+        if self.maximize_block_length and not self.force_split:
             # Merge adjacent blocks back together to meet self.max_tokens
             grouper = CumulativeLengthGrouper(self.max_tokens, self.model)
             blocks = ["\n".join(grp) for _, grp in groupby(blocks, key=grouper)]

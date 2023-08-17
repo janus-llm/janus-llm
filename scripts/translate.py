@@ -67,6 +67,24 @@ parser.add_argument(
     help="Whether to overwrite existing files in the output directory",
 )
 parser.add_argument(
+    "--maximize-block-length",
+    action='store_true',
+    help="Whether to greedily combine code blocks after splitting to fit within"
+         "the context window. Incompatible with --force-split."
+)
+parser.add_argument(
+    "--force-split",
+    action='store_true',
+    help="Whether to force the input file to be split into subroutines, even if "
+         "the full file would fit in the context window.",
+)
+parser.add_argument(
+    "--temp",
+    type=float,
+    default=0.7,
+    help="Sampling temperature.",
+)
+parser.add_argument(
     "--prompt-template",
     type=str,
     default="simple",
@@ -87,12 +105,19 @@ if __name__ == "__main__":
     ):
         log.error("Output files would overwrite input! Aborting...")
         exit(-1)
+
+    model_arguments = dict(
+        temperature=args.temp
+    )
     translator = Translator(
         model=args.llm_name,
+        model_arguments=model_arguments,
         source_language=args.input_lang,
         target_language=output_lang_name,
         target_version=output_lang_version,
         max_prompts=args.max_prompts,
         prompt_template=args.prompt_template,
+        maximize_block_length=args.maximize_block_length,
+        force_split=args.force_split,
     )
     translator.translate(args.input_dir, args.output_dir, args.overwrite)
