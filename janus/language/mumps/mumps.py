@@ -59,14 +59,15 @@ class MumpsSplitter(Splitter):
         patterns: A tuple of `Pattern`s to use for splitting Mumps code into
             functional blocks.
     """
+
     patterns: Tuple[MumpsLabeledBlockPattern, ...] = (MumpsLabeledBlockPattern(),)
 
     def __init__(
-            self,
-            model: BaseLanguageModel,
-            max_tokens: int = 4096,
-            maximize_block_length: bool = False,
-        ) -> None:
+        self,
+        model: BaseLanguageModel,
+        max_tokens: int = 4096,
+        maximize_block_length: bool = False,
+    ) -> None:
         """Initialize a MumpsSplitter instance.
 
         Arguments:
@@ -83,7 +84,7 @@ class MumpsSplitter(Splitter):
         super().__init__(max_tokens=max_tokens, model=model)
 
         # MUMPS code tends to take about 2/3 the space of Python
-        self.max_tokens: int = int(max_tokens * 2/5)
+        self.max_tokens: int = int(max_tokens * 2 / 5)
         self.maximize_block_length = maximize_block_length
 
     @classmethod
