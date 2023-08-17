@@ -24,16 +24,16 @@ class CumulativeLengthGrouper:
 
     tokenizer = None
 
-    def __init__(self, max_tokens, tokenizer):
+    def __init__(self, max_tokens, model):
         self.max_tokens = max_tokens
-        self.tokenizer = tokenizer
+        self.model: BaseLanguageModel = model
 
         self.group_ctr = count()
         self.cur_grp = next(self.group_ctr)
         self.cum_len = 0
 
     def __call__(self, block):
-        block_length = len(self.tokenizer.encode(block))
+        block_length = self.model.get_num_tokens(block)
         self.cum_len += block_length
         # If accumulated length exceeds block limit...
         if self.cum_len > self.max_tokens:
@@ -59,14 +59,15 @@ class MumpsSplitter(Splitter):
         patterns: A tuple of `Pattern`s to use for splitting Mumps code into
             functional blocks.
     """
+
     patterns: Tuple[MumpsLabeledBlockPattern, ...] = (MumpsLabeledBlockPattern(),)
 
     def __init__(
-            self,
-            model: BaseLanguageModel,
-            max_tokens: int = 4096,
-            maximize_block_length: bool = False,
-        ) -> None:
+        self,
+        model: BaseLanguageModel,
+        max_tokens: int = 4096,
+        maximize_block_length: bool = False,
+    ) -> None:
         """Initialize a MumpsSplitter instance.
 
         Arguments:
@@ -77,15 +78,13 @@ class MumpsSplitter(Splitter):
         # Divide max_tokens by 3 because we want to leave just as much space for the
         # prompt as for the translated code.
         self.max_tokens: int = max_tokens // 3
-        # Using tiktoken as the tokenizer because that's what's recommended for OpenAI
-        # models.
         self.model = model
         self.language: str = "mumps"
         self.comment: str = ";"
         super().__init__(max_tokens=max_tokens, model=model)
 
         # MUMPS code tends to take about 2/3 the space of Python
-        self.max_tokens: int = int(max_tokens * 2/5)
+        self.max_tokens: int = int(max_tokens * 2 / 5)
         self.maximize_block_length = maximize_block_length
 
     @classmethod
@@ -122,7 +121,7 @@ class MumpsSplitter(Splitter):
         blocks = self._regex_split(code)
         if self.maximize_block_length:
             # Merge adjacent blocks back together to meet self.max_tokens
-            grouper = CumulativeLengthGrouper(self.max_tokens, self._tokenizer)
+            grouper = CumulativeLengthGrouper(self.max_tokens, self.model)
             blocks = ["\n".join(grp) for _, grp in groupby(blocks, key=grouper)]
 
         components: List[CodeBlock] = []

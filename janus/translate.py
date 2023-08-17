@@ -68,10 +68,10 @@ class Translator:
         self._load_parser()
 
     def translate(
-            self,
-            input_directory: str | Path,
-            output_directory: str | Path,
-            overwrite: bool = False
+        self,
+        input_directory: str | Path,
+        output_directory: str | Path,
+        overwrite: bool = False,
     ) -> None:
         """Translate code from the source language to the target language.
 
@@ -100,7 +100,9 @@ class Translator:
         # Now, loop through every code block in every file and translate it with an LLM
         for file in files:
             # Create the output file
-            out_filename = file.path.name.replace(f".{source_suffix}", f".{target_suffix}")
+            out_filename = file.path.name.replace(
+                f".{source_suffix}", f".{target_suffix}"
+            )
             out_path = output_directory / out_filename
             if out_path.exists() and not overwrite:
                 continue
