@@ -3,11 +3,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 from .language.block import CodeBlock, TranslatedCodeBlock
-from .language.combine import TextCombiner
+from .language.combine import Combiner
 from .language.examples import CODE_EXAMPLE_FILES
-from .language.fortran import FortranSplitter
-from .language.mumps import MumpsCombiner, MumpsSplitter
-from .language.python import PythonCombiner
+from .language.mumps import MumpsSplitter
+from .language.treesitter import TreeSitterSplitter
 from .llm import (
     COST_PER_MODEL,
     MODEL_CONSTRUCTORS,
@@ -16,11 +15,7 @@ from .llm import (
 )
 from .parsers.code_parser import CodeParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
-from .utils.enums import (
-    LANGUAGE_SUFFIXES,
-    VALID_SOURCE_LANGUAGES,
-    VALID_TARGET_LANGUAGES,
-)
+from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -141,8 +136,8 @@ class Translator:
                 cost += COST_PER_MODEL[self.model]["output"] * tokens
 
                 # Create the output file
-                source_suffix = LANGUAGE_SUFFIXES[self.source_language]
-                target_suffix = LANGUAGE_SUFFIXES[self.target_language]
+                source_suffix = LANGUAGES[self.source_language]["suffix"]
+                target_suffix = LANGUAGES[self.target_language]["suffix"]
                 out_filename = file.path.name.replace(
                     f".{source_suffix}", f".{target_suffix}"
                 )
@@ -325,29 +320,36 @@ class Translator:
 
     def _load_combiner(self) -> None:
         """Load the Combiner object."""
-        if self.target_language == "python":
-            self.combiner = PythonCombiner()
-        elif self.target_language == "mumps":
-            self.combiner = MumpsCombiner()
-        elif self.target_language == "text":
-            self.combiner = TextCombiner()
-        else:
-            raise NotImplementedError(
-                f"Target language '{self.target_language}' not implemented."
+        # Ensure we can actually combine the output
+        # With the current algorithm, combining requires the target language to be
+        # included in LANGUAGES and have a "comment"
+        if self.target_language not in list(LANGUAGES.keys()):
+            message = (
+                f"Target language '{self.target_language}' not implemented. "
+                "Output will not be combined."
             )
+            log.error(message)
+            raise ValueError(message)
+        self.combiner = Combiner(self.target_language)
 
     def _load_splitter(self) -> None:
         """Load the Splitter object."""
-        if self.source_language == "fortran":
-            self.splitter = FortranSplitter(max_tokens=self._max_tokens, model=self._llm)
-            self._glob = "**/*.f90"
-        elif self.source_language == "mumps":
-            self.splitter = MumpsSplitter(max_tokens=self._max_tokens, model=self._llm)
-            self._glob = "**/*.m"
+        if self.source_language in CUSTOM_SPLITTERS:
+            if self.source_language == "mumps":
+                self.splitter = MumpsSplitter(
+                    max_tokens=self._max_tokens, model=self._llm
+                )
+        elif self.source_language in list(LANGUAGES.keys()):
+            self.splitter = TreeSitterSplitter(
+                language=self.source_language,
+                max_tokens=self._max_tokens,
+                model=self._llm,
+            )
         else:
             raise NotImplementedError(
                 f"Source language '{self.source_language}' not implemented."
             )
+        self._glob = f"**/*.{LANGUAGES[self.source_language]['suffix']}"
 
     def _load_parser(self) -> None:
         """Load the CodeParser Object"""
@@ -355,13 +357,13 @@ class Translator:
 
     def _check_languages(self) -> None:
         """Check that the source and target languages are valid."""
-        if self.source_language not in VALID_SOURCE_LANGUAGES:
+        if self.source_language not in list(LANGUAGES.keys()):
             raise ValueError(
                 f"Invalid source language: {self.source_language}. "
-                f"Valid source languages are: {VALID_SOURCE_LANGUAGES}"
+                "Valid source languages are found in `janus.utils.enums.LANGUAGES`."
             )
-        if self.target_language not in VALID_TARGET_LANGUAGES:
+        if self.target_language not in list(LANGUAGES.keys()):
             raise ValueError(
                 f"Invalid target language: {self.target_language}. "
-                f"Valid target languages are: {VALID_TARGET_LANGUAGES}"
+                "Valid source languages are found in `janus.utils.enums.LANGUAGES`."
             )

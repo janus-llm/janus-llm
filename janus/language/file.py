@@ -1,4 +1,4 @@
-from ..utils.enums import LANGUAGE_COMMENTS, LANGUAGE_SUFFIXES
+from ..utils.enums import LANGUAGES
 from .block import CodeBlock
 
 
@@ -7,8 +7,8 @@ class FileManager:
 
     def __init__(self, language: str = "python") -> None:
         self.language: str = language
-        self.comment: str = LANGUAGE_COMMENTS[self.language]
-        self.suffix: str = LANGUAGE_SUFFIXES[self.language]
+        self.comment: str = LANGUAGES[self.language]["comment"]
+        self.suffix: str = LANGUAGES[self.language]["suffix"]
 
     def blocks_to_file(self, block: CodeBlock) -> None:
         """Save the CodeBlock to a path.

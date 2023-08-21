@@ -32,6 +32,10 @@ class LogFilter(logging.Filter):
             return False
         elif "error_code=context_length_exceeded" in str(getattr(record, "msg")):
             return False
+        elif "NumExpr" in str(getattr(record, "msg")):
+            return False
+        elif "cc -shared" in str(getattr(record, "msg")):
+            return False
         return True
 
     def __repr__(self):

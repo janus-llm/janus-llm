@@ -22,7 +22,9 @@ project = "Janus"
 copyright = f"{date.today().year}, MITRE"
 author = (
     "Michael Doyle <mdoyle@mitre.org>, Tim Welsh <twelsh@mitre.org>, "
-    "Michael Threet <mthreet@mitre.org>, Chris Kempis <ckempis@mitre.org>"
+    "Michael Threet <mthreet@mitre.org>, Chris Kempis <ckempis@mitre.org>, "
+    "Lily Wong <lwong@mitre.org>, Chris Tohline <ctohline@mitre.org>,"
+    "William Macke <wmacke@mitre.org>"
 )
 
 # The full version, including alpha/beta/rc tags
@@ -77,10 +79,6 @@ exclude_patterns = ["**/_tests"]
 #
 html_theme = "furo"
 html_logo = "../../assets/icons/janus_logo.png"
-html_theme_options = {
-    "logo_only": False,
-    "display_version": True,
-}
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
