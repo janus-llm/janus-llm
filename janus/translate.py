@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Tuple
 
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import TextCombiner
+from .language.examples import CODE_EXAMPLE_FILES
 from .language.fortran import FortranSplitter
 from .language.mumps import MumpsCombiner, MumpsSplitter
 from .language.python import PythonCombiner
@@ -21,7 +22,6 @@ from .utils.enums import (
     VALID_TARGET_LANGUAGES,
 )
 from .utils.logger import create_logger
-from .language.examples import CODE_EXAMPLE_FILES
 
 log = create_logger(__name__)
 

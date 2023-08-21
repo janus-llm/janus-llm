@@ -347,13 +347,13 @@ class PromptEngine:
                         "(2) make sure the language is typed correctly. "
                         "You must provide your result within three backticks "
                         "\n\n```{EXAMPLE_SOURCE_CODE}```"
-                    )
+                    ),
                 ),
                 ChatMessagePromptTemplate(
                     role="ai",
                     prompt=PromptTemplate.from_template(
                         "```{TARGET_LANGUAGE} {EXAMPLE_TARGET_CODE}```"
-                    )
+                    ),
                 ),
                 ChatMessagePromptTemplate(
                     role="human",
