@@ -47,6 +47,8 @@ class PromptEngine:
         target_language: str,
         target_version: str,
         prompt_template_name: str,
+        example_source_code: str,
+        example_target_code: str,
     ) -> None:
         """Initialize a PromptEngine instance.
 
@@ -67,6 +69,8 @@ class PromptEngine:
         self.requirements_prompt_template: ChatPromptTemplate
         self._create_prompt_template()
         self.prompt_template_name = prompt_template_name
+        self.example_source_code = example_source_code
+        self.example_target_code = example_target_code
 
     def create(self, code: CodeBlock) -> Prompt:
         """Create a prompt for the given code block.
@@ -96,6 +100,8 @@ class PromptEngine:
             TARGET_LANGUAGE_VERSION=self.target_version,
             SOURCE_CODE=code.code,
             FILE_SUFFIX=code.language,
+            EXAMPLE_SOURCE_CODE=self.example_source_code,
+            EXAMPLE_TARGET_CODE=self.example_target_code,
         )
 
         return prompt
@@ -322,49 +328,32 @@ class PromptEngine:
                 ChatMessagePromptTemplate(
                     role="human",
                     prompt=PromptTemplate.from_template(
-                        "Do not include anything around the resultant code. "
-                        "Only report back the code itself in between triple backticks."
-                    ),
+                        "Please convert the following {SOURCE_LANGUAGE} {FILE_SUFFIX} "
+                        "code found in between triple backticks "
+                        "and is in string format into {TARGET_LANGUAGE} code. "
+                        "If the given code is incomplete, assume it "
+                        "is implemented elsewhere. If the given code is missing variable "
+                        "definitions, assume they are assigned elsewhere. If there are "
+                        "incomplete statements that haven't been closed out, "
+                        "assume they are closed out in other conversions. "
+                        "If it only consists of "
+                        "comments, assume the code that is represented by that comment "
+                        "is implemented elsewhere. If the program contains "
+                        "comments, keep ALL of them. "
+                        "If there are any issues, convert the code anyway"
+                        "Some more things to remember: "
+                        "(1) follow standard styling practice for "
+                        "the target language, "
+                        "(2) make sure the language is typed correctly. "
+                        "You must provide your result within three backticks "
+                        "\n\n```{EXAMPLE_SOURCE_CODE}```"
+                    )
                 ),
                 ChatMessagePromptTemplate(
-                    role="human",
+                    role="ai",
                     prompt=PromptTemplate.from_template(
-                        "If the given code is incomplete, "
-                        "assume it is implemented elsewhere. "
-                        "Implement it anyway."
-                    ),
-                ),
-                ChatMessagePromptTemplate(
-                    role="human",
-                    prompt=PromptTemplate.from_template(
-                        "If the given code is missing variable definitions, "
-                        "assume they are assigned elsewhere. "
-                        "Implement it anyway."
-                    ),
-                ),
-                ChatMessagePromptTemplate(
-                    role="human",
-                    prompt=PromptTemplate.from_template(
-                        "Give an attempt even if it is incomplete."
-                        "If the code only consists of comments, assume the code that is "
-                        "represented by that comment is implemnted elsewhere. "
-                        "Implement it anyway."
-                    ),
-                ),
-                ChatMessagePromptTemplate(
-                    role="human",
-                    prompt=PromptTemplate.from_template(
-                        "If the code has comments, keep ALL of them"
-                    ),
-                ),
-                ChatMessagePromptTemplate(
-                    role="human",
-                    prompt=PromptTemplate.from_template(
-                        "If the code only consists of ONLY comments, "
-                        "assume the code that is "
-                        "represented by those comments is implemented elsewhere. "
-                        "Implement it anyway."
-                    ),
+                        "```{TARGET_LANGUAGE} {EXAMPLE_TARGET_CODE}```"
+                    )
                 ),
                 ChatMessagePromptTemplate(
                     role="human",
@@ -380,11 +369,13 @@ class PromptEngine:
                         "If it only consists of "
                         "comments, assume the code that is represented by that comment "
                         "is implemented elsewhere. If the program contains "
-                        "comments, keep ALL of them. Some more things to remember: "
+                        "comments, keep ALL of them. "
+                        "If there are any issues, convert the code anyway"
+                        "Some more things to remember: "
                         "(1) follow standard styling practice for "
                         "the target language, "
                         "(2) make sure the language is typed correctly. "
-                        "Make sure your result also fits within three backticks. "
+                        "You must provide your result within three. "
                         "\n\n```{SOURCE_CODE}```"
                     ),
                 ),

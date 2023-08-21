@@ -21,6 +21,7 @@ from .utils.enums import (
     VALID_TARGET_LANGUAGES,
 )
 from .utils.logger import create_logger
+from .language.examples import CODE_EXAMPLE_FILES
 
 log = create_logger(__name__)
 
@@ -307,6 +308,10 @@ class Translator:
 
     def _load_prompt_engine(self) -> None:
         """Load the prompt engine."""
+        with open(CODE_EXAMPLE_FILES[self.source_language], "r") as f:
+            source_example = f.read()
+        with open(CODE_EXAMPLE_FILES[self.target_language], "r") as f:
+            target_example = f.read()
         self._prompt_engine = PromptEngine(
             self._llm,
             self.model,
@@ -314,6 +319,8 @@ class Translator:
             self.target_language,
             self.target_version,
             self.prompt_template,
+            source_example,
+            target_example,
         )
 
     def _load_combiner(self) -> None:
