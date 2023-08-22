@@ -41,15 +41,20 @@ def main(directory_path, output_file):
                 file_path = os.path.join(root, file)
                 output = run_pyright_on_file(file_path)
                 errors, warnings = extract_errors_and_warnings(output)
+                with open(file_path,'r') as f:
+                    total_lines = len(f.readlines())
                 results.append(
                     {
                         "file": file_path,
                         "total_errors": len(errors),
                         "total_warnings": len(warnings),
+                        "total_lines": total_lines,
                         "errors": errors,
                         "warnings": warnings,
                     }
                 )
+    if not os.path.exists(os.path.dirname(output_file)):
+        os.makedirs(os.path.dirname(output_file))
 
     with open(output_file, "w") as f:
         json.dump(results, f, indent=4)
