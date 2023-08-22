@@ -322,9 +322,10 @@ class PromptEngine:
                 ChatMessagePromptTemplate(
                     role="system",
                     prompt=PromptTemplate.from_template(
-                        "You are an AI named Llama in a converstion with a human named user. "
-                        "Your purpose is to implement {SOURCE_LANGUAGE} {FILE_SUFFIX} code "
-                        "in {TARGET_LANGUAGE} ({TARGET_LANGUAGE} version "
+                        "You are an AI named Llama in a converstion with a human named "
+                        "user."
+                        "Your purpose is to implement {SOURCE_LANGUAGE} {FILE_SUFFIX} "
+                        "code in {TARGET_LANGUAGE} ({TARGET_LANGUAGE} version "
                         "{TARGET_LANGUAGE_VERSION})"
                     ),
                 ),
@@ -361,7 +362,8 @@ class PromptEngine:
                 ChatMessagePromptTemplate(
                     role="user",
                     prompt=PromptTemplate.from_template(
-                        "Good, now please implement the following {SOURCE_LANGUAGE} {FILE_SUFFIX} "
+                        "Good, now please implement the following {SOURCE_LANGUAGE} "
+                        "{FILE_SUFFIX} "
                         "code found in between triple backticks "
                         "in {TARGET_LANGUAGE} code. "
                         "If the given code is incomplete, assume it "
