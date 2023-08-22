@@ -28,7 +28,7 @@ MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
     "gpt-3.5-turbo-16k": dict(model_name="gpt-3.5-turbo-16k", **_open_ai_defaults),
     "llama": dict(
         inference_server_url="https://llama-aip.lt.mitre.org",
-        max_new_tokens=512,
+        max_new_tokens=4096,
         top_k=10,
         top_p=0.95,
         typical_p=0.95,
@@ -37,7 +37,7 @@ MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
     ),
     "falcon": dict(
         inference_server_url="https://falcon-aip.lt.mitre.org/",
-        max_new_tokens=512,
+        max_new_tokens=4096,
         top_k=10,
         top_p=0.95,
         typical_p=0.95,
