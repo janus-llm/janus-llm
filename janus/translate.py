@@ -99,12 +99,13 @@ class Translator:
             output_directory.mkdir(parents=True)
 
         # First, get the files in the input directory and split them into CodeBlocks
-        files = self._get_files(input_directory)
+        files,file_names = self._get_files(input_directory)
 
         translated_files: List[TranslatedCodeBlock] = []
 
         # Now, loop through every code block in every file and translate it with an LLM
-        for file in files:
+        for file,fname in zip(files,file_names):
+            log.info(f"File parsing = {fname}")
             # Create the output file
             out_filename = file.path.name.replace(
                 f".{source_suffix}", f".{target_suffix}"
@@ -211,11 +212,13 @@ class Translator:
             A list of code blocks.
         """
         files: List[CodeBlock] = []
+        file_names: List[str] = []
 
         for file in Path(directory).glob(self._glob):
+            file_names.append(file)
             files.append(self.splitter.split(file))
 
-        return files
+        return files, file_names
 
     def _unpack_code_blocks(self, block: CodeBlock) -> List[CodeBlock]:
         """Unpack a code block into a list of `CodeBlocks`.

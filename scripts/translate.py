@@ -68,15 +68,15 @@ parser.add_argument(
 )
 parser.add_argument(
     "--maximize-block-length",
-    action="store_true",
+    action='store_true',
     help="Whether to greedily combine code blocks after splitting to fit within"
-    "the context window. Incompatible with --force-split.",
+         "the context window. Incompatible with --force-split."
 )
 parser.add_argument(
     "--force-split",
-    action="store_true",
+    action='store_true',
     help="Whether to force the input file to be split into subroutines, even if "
-    "the full file would fit in the context window.",
+         "the full file would fit in the context window.",
 )
 parser.add_argument(
     "--temp",
@@ -106,7 +106,9 @@ if __name__ == "__main__":
         log.error("Output files would overwrite input! Aborting...")
         exit(-1)
 
-    model_arguments = dict(temperature=args.temp)
+    model_arguments = dict(
+        temperature=args.temp
+    )
     translator = Translator(
         model=args.llm_name,
         model_arguments=model_arguments,
