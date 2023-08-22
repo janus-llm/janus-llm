@@ -1,7 +1,7 @@
+import argparse
+import json
 import os
 import subprocess
-import json
-import argparse
 
 
 def run_pyright_on_file(file_path):
@@ -30,7 +30,8 @@ def extract_errors_and_warnings(output):
 
 def main(directory_path, output_file):
     """
-    Iterate through the directory, run pyright on each file, and save the results in a JSON file.
+    Iterate through the directory, run pyright on each file, and save the
+    results in a JSON file.
     """
     results = []
 
