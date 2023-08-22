@@ -322,27 +322,28 @@ class PromptEngine:
                 ChatMessagePromptTemplate(
                     role="system",
                     prompt=PromptTemplate.from_template(
-                        "Your purpose is to convert {SOURCE_LANGUAGE} {FILE_SUFFIX} code "
-                        "into runnable {TARGET_LANGUAGE} code ({TARGET_LANGUAGE} version "
+                        "You are an AI named Llama in a converstion with a human named user. "
+                        "Your purpose is to implement {SOURCE_LANGUAGE} {FILE_SUFFIX} code "
+                        "in {TARGET_LANGUAGE} ({TARGET_LANGUAGE} version "
                         "{TARGET_LANGUAGE_VERSION})"
                     ),
                 ),
                 ChatMessagePromptTemplate(
-                    role="human",
+                    role="user",
                     prompt=PromptTemplate.from_template(
-                        "Please convert the following {SOURCE_LANGUAGE} {FILE_SUFFIX} "
+                        "Implement the following {SOURCE_LANGUAGE} {FILE_SUFFIX} "
                         "code found in between triple backticks "
-                        "and is in string format into {TARGET_LANGUAGE} code. "
+                        "in {TARGET_LANGUAGE} code. "
                         "If the given code is incomplete, assume it "
                         "is implemented elsewhere. If the given code is missing variable "
                         "definitions, assume they are assigned elsewhere. If there are "
                         "incomplete statements that haven't been closed out, "
-                        "assume they are closed out in other conversions. "
+                        "assume they are closed out elsewhere. "
                         "If it only consists of "
-                        "comments, assume the code that is represented by that comment "
-                        "is implemented elsewhere. If the program contains "
+                        "comments, "
+                        "just implement the comments. If the program contains "
                         "comments, keep ALL of them. "
-                        "If there are any issues, convert the code anyway"
+                        "If there are any issues, implement the code anyway. "
                         "Some more things to remember: "
                         "(1) follow standard styling practice for "
                         "the target language, "
@@ -352,32 +353,32 @@ class PromptEngine:
                     ),
                 ),
                 ChatMessagePromptTemplate(
-                    role="ai",
+                    role="Llama",
                     prompt=PromptTemplate.from_template(
                         "```{TARGET_LANGUAGE} {EXAMPLE_TARGET_CODE}```"
                     ),
                 ),
                 ChatMessagePromptTemplate(
-                    role="human",
+                    role="user",
                     prompt=PromptTemplate.from_template(
-                        "Please convert the following {SOURCE_LANGUAGE} {FILE_SUFFIX} "
+                        "Good, now please implement the following {SOURCE_LANGUAGE} {FILE_SUFFIX} "
                         "code found in between triple backticks "
-                        "and is in string format into {TARGET_LANGUAGE} code. "
+                        "in {TARGET_LANGUAGE} code. "
                         "If the given code is incomplete, assume it "
                         "is implemented elsewhere. If the given code is missing variable "
                         "definitions, assume they are assigned elsewhere. If there are "
                         "incomplete statements that haven't been closed out, "
-                        "assume they are closed out in other conversions. "
+                        "assume they are closed out elsewhere. "
                         "If it only consists of "
-                        "comments, assume the code that is represented by that comment "
-                        "is implemented elsewhere. If the program contains "
+                        "comments, "
+                        "just implement the comments. If the program contains "
                         "comments, keep ALL of them. "
-                        "If there are any issues, convert the code anyway"
+                        "If there are any issues, implement the code anyway. "
                         "Some more things to remember: "
                         "(1) follow standard styling practice for "
                         "the target language, "
                         "(2) make sure the language is typed correctly. "
-                        "You must provide your result within three. "
+                        "You must provide your result within three backticks "
                         "\n\n```{SOURCE_CODE}```"
                     ),
                 ),
