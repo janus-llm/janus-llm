@@ -8,6 +8,7 @@ from langchain.schema.language_model import BaseLanguageModel
 from langchain.schema.messages import BaseMessage
 
 from ..language.block import CodeBlock
+from ..utils.enums import LANGUAGES
 from ..utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -47,8 +48,6 @@ class PromptEngine:
         target_language: str,
         target_version: str,
         prompt_template_name: str,
-        example_source_code: str,
-        example_target_code: str,
     ) -> None:
         """Initialize a PromptEngine instance.
 
@@ -57,6 +56,8 @@ class PromptEngine:
             source_language: The language to translate from
             target_language: The language to translate to
             target_version: The version of the target language
+            prompt_template_name: The name of the prompt template to use. Can be one of
+                "simple", "document", "document_inline", or "requirements".
         """
         self.model = model
         self.model_name = model_name
@@ -69,8 +70,9 @@ class PromptEngine:
         self.requirements_prompt_template: ChatPromptTemplate
         self._create_prompt_template()
         self.prompt_template_name = prompt_template_name
-        self.example_source_code = example_source_code
-        self.example_target_code = example_target_code
+        self.example_source_code = LANGUAGES[self.source_language]["example"]
+        self.example_target_code = LANGUAGES[self.target_language]["example"]
+        self.suffix = LANGUAGES[self.source_language]["suffix"]
 
     def create(self, code: CodeBlock) -> Prompt:
         """Create a prompt for the given code block.
@@ -99,7 +101,7 @@ class PromptEngine:
             TARGET_LANGUAGE=self.target_language,
             TARGET_LANGUAGE_VERSION=self.target_version,
             SOURCE_CODE=code.code,
-            FILE_SUFFIX=code.language,
+            FILE_SUFFIX=self.suffix,
             EXAMPLE_SOURCE_CODE=self.example_source_code,
             EXAMPLE_TARGET_CODE=self.example_target_code,
         )

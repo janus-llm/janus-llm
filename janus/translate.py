@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Tuple
 
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import Combiner
-from .language.examples import CODE_EXAMPLE_FILES
 from .language.mumps import MumpsSplitter
 from .language.treesitter import TreeSitterSplitter
 from .llm import (
@@ -303,10 +302,6 @@ class Translator:
 
     def _load_prompt_engine(self) -> None:
         """Load the prompt engine."""
-        with open(CODE_EXAMPLE_FILES[self.source_language], "r") as f:
-            source_example = f.read()
-        with open(CODE_EXAMPLE_FILES[self.target_language], "r") as f:
-            target_example = f.read()
         self._prompt_engine = PromptEngine(
             self._llm,
             self.model,
@@ -314,8 +309,6 @@ class Translator:
             self.target_language,
             self.target_version,
             self.prompt_template,
-            source_example,
-            target_example,
         )
 
     def _load_combiner(self) -> None:
