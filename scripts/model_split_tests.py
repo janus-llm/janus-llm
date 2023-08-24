@@ -59,7 +59,7 @@ for i in range(iterations):
             force_split=False,
             **kwargs
         )
-        outdir = output_dir / f"{model}_nosplit" / str(i)
+        outdir = output_dir / f"{model}_minimum" / str(i)
         outdir.mkdir(parents=True, exist_ok=True)
         translator.translate(input_dir, outdir, overwrite=False)
 
@@ -69,6 +69,6 @@ for i in range(iterations):
             force_split=True,
             **kwargs
         )
-        outdir : Path = output_dir / f"{model}_split" / str(i)
+        outdir : Path = output_dir / f"{model}_maximum" / str(i)
         outdir.mkdir(parents=True, exist_ok=True)
         translator.translate(input_dir, outdir, overwrite=False)
