@@ -50,11 +50,13 @@ kwargs = dict(
 )
 
 for i in range(iterations):
+    log.info(f"Iteration {i}")
     for temperature in temperatures:
+        log.info(f"Temperature {temperature}")
         translator = Translator(
             model_arguments=dict(temperature=temperature),
             **kwargs
         )
-        outdir = output_dir / f"temp_{temperature}" / f"run_{i}"
+        outdir = output_dir / f"temperature"/ f"{temperature}" / f"{i}"
         outdir.mkdir(parents=True, exist_ok=True)
         translator.translate(input_dir, outdir, overwrite=False)
