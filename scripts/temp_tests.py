@@ -57,6 +57,6 @@ for i in range(iterations):
             model_arguments=dict(temperature=temperature),
             **kwargs
         )
-        outdir = output_dir / f"temperature"/ f"{temperature}" / f"{i}"
+        outdir = output_dir / f"model_temperature"/ f"gpt-4_{temperature}" / f"{i}"
         outdir.mkdir(parents=True, exist_ok=True)
         translator.translate(input_dir, outdir, overwrite=False)
