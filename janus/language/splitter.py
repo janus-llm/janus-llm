@@ -26,16 +26,14 @@ class Splitter(FileManager):
     transcoding.
     """
 
-    def __init__(self, model: BaseLanguageModel, max_tokens: int = 4096):
+    def __init__(self, language: str, model: BaseLanguageModel, max_tokens: int = 4096):
         """
         Arguments:
             max_tokens: The maximum number of tokens to use for each functional block.
             model: The name of the model to use for translation.
         """
-        # Make sure `self.language` is set before calling `super().__init__` in
-        # subclasses of `Splitter`
-        super().__init__(language=self.language)
-        # Divide max_tokens by 2 because we want to leave just as much space for the
+        super().__init__(language=language)
+        # Divide max_tokens by 3 because we want to leave just as much space for the
         # prompt as for the translated code.
         self.max_tokens: int = max_tokens // 3
 
@@ -245,9 +243,12 @@ class Splitter(FileManager):
         Sets `self.parser`'s language to the one specified in `self.language`.
 
         Arguments:
-            so_file: The path to the so file for the language.
+            build_dir: The directory to store the so file in.
+            github_url: The url to the tree-sitter GitHub repository for the language.
         """
-        so_filename = f"parser_{platform.system()}_{platform.processor()}.so"
+        so_filename = (
+            f"{self.language}_parser_{platform.system()}_{platform.processor()}.so"
+        )
         so_file = (build_dir / so_filename).__str__()
         try:
             self.parser.set_language(tree_sitter.Language(so_file, self.language))

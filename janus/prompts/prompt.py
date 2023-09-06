@@ -8,9 +8,18 @@ from langchain.schema.language_model import BaseLanguageModel
 from langchain.schema.messages import BaseMessage
 
 from ..language.block import CodeBlock
+from ..utils.enums import LANGUAGES
 from ..utils.logger import create_logger
 
 log = create_logger(__name__)
+
+
+# Prompt names (self.template_map keys) that should output text,
+# regardless of the `output-lang` argument.
+TEXT_OUTPUT = ["document", "requirements"]
+# Prompt names (self.template_map keys) that should output the
+# same language as the input, regardless of the `output-lang` argument.
+SAME_OUTPUT = ["document_inline"]
 
 
 @dataclass
@@ -47,6 +56,8 @@ class PromptEngine:
             source_language: The language to translate from
             target_language: The language to translate to
             target_version: The version of the target language
+            prompt_template_name: The name of the prompt template to use. Can be one of
+                "simple", "document", "document_inline", or "requirements".
         """
         self.model = model
         self.model_name = model_name
@@ -56,8 +67,12 @@ class PromptEngine:
         self.prompt_template: ChatPromptTemplate
         self.document_inline_prompt_template: ChatPromptTemplate
         self.document_prompt_template: ChatPromptTemplate
+        self.requirements_prompt_template: ChatPromptTemplate
         self._create_prompt_template()
         self.prompt_template_name = prompt_template_name
+        self.example_source_code = LANGUAGES[self.source_language]["example"]
+        self.example_target_code = LANGUAGES[self.target_language]["example"]
+        self.suffix = LANGUAGES[self.source_language]["suffix"]
 
     def create(self, code: CodeBlock) -> Prompt:
         """Create a prompt for the given code block.
@@ -86,7 +101,9 @@ class PromptEngine:
             TARGET_LANGUAGE=self.target_language,
             TARGET_LANGUAGE_VERSION=self.target_version,
             SOURCE_CODE=code.code,
-            FILE_SUFFIX=code.language,
+            FILE_SUFFIX=self.suffix,
+            EXAMPLE_SOURCE_CODE=self.example_source_code,
+            EXAMPLE_TARGET_CODE=self.example_target_code,
         )
 
         return prompt
@@ -255,82 +272,115 @@ class PromptEngine:
                     ),
                 ),
             ]
+            messages_requirements = [
+                ChatMessagePromptTemplate(
+                    role="system",
+                    prompt=PromptTemplate.from_template(
+                        "Your purpose is to understand a source code file "
+                        "and generate a software requirements specification "
+                        "document for it."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Please convert the following code into software "
+                        "requirements that can replicate its functionality."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "In addition, describe the capabilities and "
+                        "limitations of the functionality, as well as how "
+                        "to test the functionality."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Please output English sentences in the style of an "
+                        "IEEE Software Requirements Specification document"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "If you think any section of the code is difficult to "
+                        "understand or has uncertain requirements, state what it is."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Here is the code\n\n{SOURCE_CODE}"
+                    ),
+                ),
+            ]
         else:
             messages = [
                 ChatMessagePromptTemplate(
                     role="system",
                     prompt=PromptTemplate.from_template(
-                        "Your purpose is to convert {SOURCE_LANGUAGE} {FILE_SUFFIX} code "
-                        "into runnable {TARGET_LANGUAGE} code ({TARGET_LANGUAGE} version "
+                        "You are an AI named Llama in a converstion with a human named "
+                        "user."
+                        "Your purpose is to implement {SOURCE_LANGUAGE} {FILE_SUFFIX} "
+                        "code in {TARGET_LANGUAGE} ({TARGET_LANGUAGE} version "
                         "{TARGET_LANGUAGE_VERSION})"
                     ),
                 ),
                 ChatMessagePromptTemplate(
-                    role="human",
+                    role="user",
                     prompt=PromptTemplate.from_template(
-                        "Do not include anything around the resultant code. "
-                        "Only report back the code itself in between triple backticks."
-                    ),
-                ),
-                ChatMessagePromptTemplate(
-                    role="human",
-                    prompt=PromptTemplate.from_template(
-                        "If the given code is incomplete, "
-                        "assume it is implemented elsewhere. "
-                        "Implement it anyway."
-                    ),
-                ),
-                ChatMessagePromptTemplate(
-                    role="human",
-                    prompt=PromptTemplate.from_template(
-                        "If the given code is missing variable definitions, "
-                        "assume they are assigned elsewhere. "
-                        "Implement it anyway."
-                    ),
-                ),
-                ChatMessagePromptTemplate(
-                    role="human",
-                    prompt=PromptTemplate.from_template(
-                        "Give an attempt even if it is incomplete."
-                        "If the code only consists of comments, assume the code that is "
-                        "represented by that comment is implemnted elsewhere. "
-                        "Implement it anyway."
-                    ),
-                ),
-                ChatMessagePromptTemplate(
-                    role="human",
-                    prompt=PromptTemplate.from_template(
-                        "If the code has comments, keep ALL of them"
-                    ),
-                ),
-                ChatMessagePromptTemplate(
-                    role="human",
-                    prompt=PromptTemplate.from_template(
-                        "If the code only consists of ONLY comments, "
-                        "assume the code that is "
-                        "represented by those comments is implemented elsewhere. "
-                        "Implement it anyway."
-                    ),
-                ),
-                ChatMessagePromptTemplate(
-                    role="human",
-                    prompt=PromptTemplate.from_template(
-                        "Please convert the following {SOURCE_LANGUAGE} {FILE_SUFFIX} "
+                        "Implement the following {SOURCE_LANGUAGE} {FILE_SUFFIX} "
                         "code found in between triple backticks "
-                        "and is in string format into {TARGET_LANGUAGE} code. "
+                        "in {TARGET_LANGUAGE} code. "
                         "If the given code is incomplete, assume it "
                         "is implemented elsewhere. If the given code is missing variable "
                         "definitions, assume they are assigned elsewhere. If there are "
                         "incomplete statements that haven't been closed out, "
-                        "assume they are closed out in other conversions. "
+                        "assume they are closed out elsewhere. "
                         "If it only consists of "
-                        "comments, assume the code that is represented by that comment "
-                        "is implemented elsewhere. If the program contains "
-                        "comments, keep ALL of them. Some more things to remember: "
+                        "comments, "
+                        "just implement the comments. If the program contains "
+                        "comments, keep ALL of them. "
+                        "If there are any issues, implement the code anyway. "
+                        "Some more things to remember: "
                         "(1) follow standard styling practice for "
                         "the target language, "
                         "(2) make sure the language is typed correctly. "
-                        "Make sure your result also fits within three backticks. "
+                        "You must provide your result within three backticks "
+                        "\n\n```{EXAMPLE_SOURCE_CODE}```"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="Llama",
+                    prompt=PromptTemplate.from_template(
+                        "```{TARGET_LANGUAGE} {EXAMPLE_TARGET_CODE}```"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Good, now please implement the following {SOURCE_LANGUAGE} "
+                        "{FILE_SUFFIX} "
+                        "code found in between triple backticks "
+                        "in {TARGET_LANGUAGE} code. "
+                        "If the given code is incomplete, assume it "
+                        "is implemented elsewhere. If the given code is missing variable "
+                        "definitions, assume they are assigned elsewhere. If there are "
+                        "incomplete statements that haven't been closed out, "
+                        "assume they are closed out elsewhere. "
+                        "If it only consists of "
+                        "comments, "
+                        "just implement the comments. If the program contains "
+                        "comments, keep ALL of them. "
+                        "If there are any issues, implement the code anyway. "
+                        "Some more things to remember: "
+                        "(1) follow standard styling practice for "
+                        "the target language, "
+                        "(2) make sure the language is typed correctly. "
+                        "You must provide your result within three backticks "
                         "\n\n```{SOURCE_CODE}```"
                     ),
                 ),
@@ -400,6 +450,51 @@ class PromptEngine:
                     ),
                 ),
             ]
+            messages_requirements = [
+                ChatMessagePromptTemplate(
+                    role="system",
+                    prompt=PromptTemplate.from_template(
+                        "Your purpose is to understand a source code file "
+                        "and generate a software requirements specification "
+                        "document for it."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Please convert the following code into software "
+                        "requirements that can replicate its functionality."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "In addition, describe the capabilities and "
+                        "limitations of the functionality, as well as how "
+                        "to test the functionality."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Please output English sentences in the style of an "
+                        "IEEE Software Requirements Specification document"
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "If you think any section of the code is difficult to "
+                        "understand or has uncertain requirements, state what it is."
+                    ),
+                ),
+                ChatMessagePromptTemplate(
+                    role="user",
+                    prompt=PromptTemplate.from_template(
+                        "Here is the code\n\n{SOURCE_CODE}"
+                    ),
+                ),
+            ]
         self.prompt_template = ChatPromptTemplate.from_messages(messages)
         self.document_inline_prompt_template = ChatPromptTemplate.from_messages(
             messages_document_inline
@@ -407,9 +502,13 @@ class PromptEngine:
         self.document_prompt_template = ChatPromptTemplate.from_messages(
             messages_document
         )
+        self.requirements_prompt_template = ChatPromptTemplate.from_messages(
+            messages_requirements
+        )
 
         self.template_map = {
             "simple": self.prompt_template,
             "document_inline": self.document_inline_prompt_template,
             "document": self.document_prompt_template,
+            "requirements": self.requirements_prompt_template,
         }
