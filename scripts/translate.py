@@ -68,7 +68,7 @@ parser.add_argument(
     help=(
         "Name of the Janus prompt template directory or "
         "path to a directory containing those template files.",
-    )
+    ),
 )
 
 if __name__ == "__main__":

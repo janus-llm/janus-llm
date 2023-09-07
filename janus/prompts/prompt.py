@@ -133,9 +133,9 @@ class PromptEngine:
             or not (dir_path / HUMAN_PROMPT_TEMPLATE_FILENAME).exists()
         ):
             raise Exception(
-                f"Specified prompt template directory {dir_path} should contain" +
-                f"{SYSTEM_PROMPT_TEMPLATE_FILENAME} and" +
-                f"{HUMAN_PROMPT_TEMPLATE_FILENAME} files."
+                f"Specified prompt template directory {dir_path} should contain"
+                + f"{SYSTEM_PROMPT_TEMPLATE_FILENAME} and"
+                + f"{HUMAN_PROMPT_TEMPLATE_FILENAME} files."
             )
 
     def _load_prompt_template(self, dir_name: str) -> (ChatPromptTemplate, dict):
