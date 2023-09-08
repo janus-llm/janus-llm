@@ -46,7 +46,8 @@ class Translator:
             target_version: The target version of the target programming language.
             max_prompts: The maximum number of times to prompt a model on one functional
                 block.
-            prompt_template: name of prompt template (see PromptTemplate)
+            prompt_template: name of prompt template directory
+                (see janus/prompts/templates) or path to a directory.
         """
         self.model = model.lower()
         self.model_arguments = model_arguments

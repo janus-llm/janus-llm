@@ -65,9 +65,13 @@ parser.add_argument(
     "--prompt-template",
     type=str,
     default="simple",
-    help="PromptTemplate used for prompt sent to llm",
+    help=(
+        (
+            "Name of the Janus prompt template directory or "
+            "path to a directory containing those template files."
+        ),
+    ),
 )
-
 
 if __name__ == "__main__":
     args = parser.parse_args()
