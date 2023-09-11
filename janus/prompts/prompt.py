@@ -27,6 +27,7 @@ SAME_OUTPUT = ["document_inline"]
 
 # Directory containing Janus prompt template directories and files
 JANUS_PROMPT_TEMPLATES_DIR = Path("janus/prompts/templates")
+# Filenames expected to be found within the above directory
 SYSTEM_PROMPT_TEMPLATE_FILENAME = "system.txt"
 HUMAN_PROMPT_TEMPLATE_FILENAME = "human.txt"
 PROMPT_VARIABLES_FILENAME = "variables.json"
@@ -154,10 +155,10 @@ class PromptEngine:
         human_template_filepath = template_dir / HUMAN_PROMPT_TEMPLATE_FILENAME
 
         system_prompt = SystemMessagePromptTemplate.from_template(
-            self._load_prompt_template_file(system_template_filepath)
+            system_template_filepath.read_text()
         )
         human_prompt = HumanMessagePromptTemplate.from_template(
-            self._load_prompt_template_file(human_template_filepath)
+            human_template_filepath.read_text()
         )
 
         # Initialize extra template variables to empty dictionary
@@ -172,13 +173,6 @@ class PromptEngine:
             ChatPromptTemplate.from_messages([system_prompt, human_prompt]),
             prompt_variables,
         )
-
-    def _load_prompt_template_file(self, filepath: Path) -> str:
-        """Read in the specified .txt file as a string.
-        File can contain multiple lines but they will be concatenated.
-
-        """
-        return filepath.read_text().replace("\n", " ")
 
     def _count_tokens(self, prompt: str | List[BaseMessage]) -> int:
         """Count the number of tokens in the given prompt.

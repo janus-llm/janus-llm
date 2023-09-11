@@ -15,9 +15,7 @@ directory_name/
 - `human.txt` contains text representing the human prompt template.
   + Ex. "Summarize the contents of the following {SOURCE_LANGUAGE} code in {written_language} sentences.
 
-Both prompt templates can make use of f-string-style arguments, i.e. `{VARIABLE}`.
-
-Multiple lines are supported, though note that files are read in as a single string with newlines replaced with spaces.
+Both prompt templates can make use of f-string-style arguments, i.e. `{VARIABLE}`. Multiple lines are supported.
 
 To reuse a prompt, say for the same system directive with differing output styles, create a symbolic link to the original file.  For example:
 `ln -s ../document/system.txt system.txt`
