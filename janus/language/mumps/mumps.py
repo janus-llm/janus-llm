@@ -3,10 +3,11 @@ from itertools import count, groupby
 from pathlib import Path
 from typing import List, Tuple
 
-import tiktoken
+from langchain.schema.language_model import BaseLanguageModel
 
 from ...utils.logger import create_logger
 from ..block import CodeBlock
+from ..combine import Combiner
 from ..splitter import Splitter
 from .patterns import MumpsLabeledBlockPattern
 
@@ -23,16 +24,16 @@ class CumulativeLengthGrouper:
 
     tokenizer = None
 
-    def __init__(self, max_tokens, tokenizer):
+    def __init__(self, max_tokens, model):
         self.max_tokens = max_tokens
-        self.tokenizer = tokenizer
+        self.model: BaseLanguageModel = model
 
         self.group_ctr = count()
         self.cur_grp = next(self.group_ctr)
         self.cum_len = 0
 
     def __call__(self, block):
-        block_length = len(self.tokenizer.encode(block))
+        block_length = self.model.get_num_tokens(block)
         self.cum_len += block_length
         # If accumulated length exceeds block limit...
         if self.cum_len > self.max_tokens:
@@ -40,6 +41,14 @@ class CumulativeLengthGrouper:
             self.cur_grp = next(self.group_ctr)
             self.cum_len = block_length
         return self.cur_grp
+
+
+class MumpsCombiner(Combiner):
+    """A class that combines code blocks into mumps files."""
+
+    def __init__(self) -> None:
+        """Initialize a MumpsCombiner instance."""
+        super().__init__("mumps")
 
 
 class MumpsSplitter(Splitter):
@@ -50,23 +59,35 @@ class MumpsSplitter(Splitter):
         patterns: A tuple of `Pattern`s to use for splitting Mumps code into
             functional blocks.
     """
+
     patterns: Tuple[MumpsLabeledBlockPattern, ...] = (MumpsLabeledBlockPattern(),)
 
-    def __init__(self, max_tokens: int = 4096, model: str = "gpt-3.5-turbo",
-                 maximize_block_length: bool = False) -> None:
+    def __init__(
+        self,
+        model: BaseLanguageModel,
+        max_tokens: int = 4096,
+        maximize_block_length: bool = False,
+        force_split: bool = False,
+    ) -> None:
         """Initialize a MumpsSplitter instance.
 
         Arguments:
-            patterns: A tuple of `Pattern`s to use for splitting MUMPS code into
-                functional blocks.
+            max_tokens: The maximum number of tokens supported by the model
+            maximize_block_length: Whether to greedily merge blocks back together
+                after splitting in order to maximize the context sent to the LLM
         """
+        # Divide max_tokens by 3 because we want to leave just as much space for the
+        # prompt as for the translated code.
+        self.max_tokens: int = max_tokens // 3
+        self.model = model
         self.language: str = "mumps"
         self.comment: str = ";"
         super().__init__(max_tokens=max_tokens, model=model)
 
         # MUMPS code tends to take about 2/3 the space of Python
-        self.max_tokens: int = int(max_tokens * 2/5)
+        self.max_tokens: int = int(max_tokens * 2 / 5)
         self.maximize_block_length = maximize_block_length
+        self.force_split = force_split
 
     @classmethod
     def _regex_split(cls, code: str):
@@ -84,7 +105,7 @@ class MumpsSplitter(Splitter):
         """
 
         # The whole file is one block
-        if self._count_tokens(code) < self.max_tokens:
+        if self._count_tokens(code) < self.max_tokens and not self.force_split:
             return CodeBlock(
                 code=code,
                 path=path,
@@ -100,9 +121,9 @@ class MumpsSplitter(Splitter):
             )
 
         blocks = self._regex_split(code)
-        if self.maximize_block_length:
+        if self.maximize_block_length and not self.force_split:
             # Merge adjacent blocks back together to meet self.max_tokens
-            grouper = CumulativeLengthGrouper(self.max_tokens, self._tokenizer)
+            grouper = CumulativeLengthGrouper(self.max_tokens, self.model)
             blocks = ["\n".join(grp) for _, grp in groupby(blocks, key=grouper)]
 
         components: List[CodeBlock] = []

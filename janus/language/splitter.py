@@ -2,9 +2,9 @@ import platform
 from pathlib import Path
 
 import numpy as np
-import tiktoken
 import tree_sitter
 from git import Repo
+from langchain.schema.language_model import BaseLanguageModel
 
 from ..utils.logger import create_logger
 from .block import CodeBlock
@@ -26,29 +26,19 @@ class Splitter(FileManager):
     transcoding.
     """
 
-    def __init__(
-        self,
-        max_tokens: int = 4096,
-        model: str = "gpt-3.5-turbo",
-    ) -> None:
-        """Initialize a Splitter instance.
-
+    def __init__(self, language: str, model: BaseLanguageModel, max_tokens: int = 4096):
+        """
         Arguments:
             max_tokens: The maximum number of tokens to use for each functional block.
             model: The name of the model to use for translation.
         """
-        # Make sure `self.language` is set before calling `super().__init__` in
-        # subclasses of `Splitter`
-        super().__init__(language=self.language)
-        # Divide max_tokens by 2 because we want to leave just as much space for the
+        super().__init__(language=language)
+        # Divide max_tokens by 3 because we want to leave just as much space for the
         # prompt as for the translated code.
         self.max_tokens: int = max_tokens // 3
 
         self.parser: tree_sitter.Parser = tree_sitter.Parser()
-
-        # Using tiktoken as the tokenizer because that's what's recommended for OpenAI
-        # models.
-        self._tokenizer = tiktoken.encoding_for_model(model)
+        self.model = model
 
     def split(self, file: Path | str) -> CodeBlock:
         """Split the given file into functional code blocks.
@@ -216,8 +206,7 @@ class Splitter(FileManager):
         Returns:
             The number of tokens in the given code.
         """
-        tokens = self._tokenizer.encode(code)
-        return len(tokens)
+        return self.model.get_num_tokens(code)
 
     def _git_clone(self, repository_url: str, destination_folder: Path | str) -> None:
         try:
@@ -254,9 +243,12 @@ class Splitter(FileManager):
         Sets `self.parser`'s language to the one specified in `self.language`.
 
         Arguments:
-            so_file: The path to the so file for the language.
+            build_dir: The directory to store the so file in.
+            github_url: The url to the tree-sitter GitHub repository for the language.
         """
-        so_filename = f"parser_{platform.system()}_{platform.processor()}.so"
+        so_filename = (
+            f"{self.language}_parser_{platform.system()}_{platform.processor()}.so"
+        )
         so_file = (build_dir / so_filename).__str__()
         try:
             self.parser.set_language(tree_sitter.Language(so_file, self.language))

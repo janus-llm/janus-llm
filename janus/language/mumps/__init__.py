@@ -1,1 +1,1 @@
-from .mumps import MumpsSplitter
+from .mumps import MumpsCombiner, MumpsSplitter
