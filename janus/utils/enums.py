@@ -612,6 +612,12 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "url": "https://github.com/tree-sitter/tree-sitter-embedded-template",
         "example": "<%# Hello, World! %>\nHello, World!\n",
     },
+    "text": {
+        "comment": "",
+        "suffix": "txt",
+        "url": None,
+        "example": "Hello, World!",
+    },
     "thrift": {
         "comment": "//",
         "suffix": "thrift",

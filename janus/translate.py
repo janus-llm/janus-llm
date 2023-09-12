@@ -50,7 +50,8 @@ class Translator:
                 block.
             force_split: Whether to force splitting even when a full file would
                 fit into the context window.
-            prompt_template: name of prompt template (see PromptTemplate)
+            prompt_template: name of prompt template directory
+                (see janus/prompts/templates) or path to a directory.
         """
         self.model = model.lower()
         self.model_arguments = model_arguments
