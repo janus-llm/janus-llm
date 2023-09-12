@@ -82,7 +82,7 @@ class MumpsSplitter(Splitter):
         self.model = model
         self.language: str = "mumps"
         self.comment: str = ";"
-        super().__init__(max_tokens=max_tokens, model=model)
+        super().__init__(max_tokens=max_tokens, model=model, language='mumps')
 
         # MUMPS code tends to take about 2/3 the space of Python
         self.max_tokens: int = int(max_tokens * 2 / 5)

@@ -80,8 +80,8 @@ class Translator:
             input_directory: The directory containing the code to translate.
             output_directory: The directory to write the translated code to.
         """
-        source_suffix = LANGUAGE_SUFFIXES[self.source_language]
-        target_suffix = LANGUAGE_SUFFIXES[self.target_language]
+        source_suffix = LANGUAGES[self.source_language]['suffix']
+        target_suffix = LANGUAGES[self.target_language]['suffix']
 
         # Convert paths to pathlib Paths if needed
         if isinstance(input_directory, str):
