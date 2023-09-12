@@ -89,10 +89,8 @@ parser.add_argument(
     type=str,
     default="simple",
     help=(
-        (
-            "Name of the Janus prompt template directory or "
-            "path to a directory containing those template files."
-        ),
+        "Name of the Janus prompt template directory or "
+        "path to a directory containing those template files."
     ),
 )
 
