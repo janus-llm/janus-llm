@@ -206,6 +206,8 @@ class Splitter(FileManager):
                     type=NodeType("subdivision"),
                     tokens=length,
                 )
+                child_blocks.append(child)
+
                 # Update grandchild depth and parent id accordingly
                 for grandchild in child.children:
                     grandchild.depth += 1
