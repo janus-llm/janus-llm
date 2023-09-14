@@ -1,7 +1,7 @@
 import platform
 from pathlib import Path
+from typing import Hashable, Optional, Callable
 
-import numpy as np
 import tree_sitter
 from git import Repo
 from langchain.schema.language_model import BaseLanguageModel
@@ -71,45 +71,48 @@ class Splitter(FileManager):
 
         tree = self.parser.parse(code)
         cursor = tree.walk()
-        if self._count_tokens(text := cursor.node.text.decode()) < self.max_tokens:
-            block = CodeBlock(
-                code=text,
-                path=path,
-                complete=True,
-                start_line=0,
-                end_line=len(text.splitlines()),
-                depth=0,
-                id=0,
-                children=[],
-                language=self.language,
-                type="file",
-                tokens=self._count_tokens(text),
-            )
-            out_block = block
-        else:
-            node = cursor.node
-            out_block = self._recurse_split(node, path, 0, 0)
-        return out_block
+
+        seen_ids = set()
+        def id_gen():
+            block_id = f"<<<child_{len(seen_ids)}>>>"
+            seen_ids.add(block_id)
+            return block_id
+
+        return self._recurse_split(
+            node=cursor.node,
+            path=path,
+            depth=0,
+            parent_id=None,
+            id_gen=id_gen
+        )
 
     def _recurse_split(
-        self, node: tree_sitter.Node, path: Path, depth: int, id: int
-    ) -> CodeBlock:
+            self,
+            node: tree_sitter.Node,
+            path: Path,
+            depth: int,
+            parent_id: Optional[Hashable],
+            id_gen: Callable[[], Hashable]
+        ) -> CodeBlock:
         """Recursively split the code into functional blocks.
 
         Arguments:
             node: The current node in the tree.
             path: The path to the file containing the code.
             depth: The current depth of the recursion.
-            id: The current id of the child block at depth `N`.
+            parent_id: The id of the calling parent
+            id_gen: A function with which to generate child ids
 
         Returns:
             A CodeBlock object.
         """
         # First get the text for all the siblings at this level
         text = node.text.decode()
+        block_length = self._count_tokens(text)
+        node_id = id_gen()
 
-        # If the text at the function input is less than the max tokens, then we can
-        # just return it as a CodeBlock with no children.
+        # If the text at the function input is less than the max tokens, then
+        #  we can just return it as a CodeBlock with no children.
         if self._count_tokens(text) < self.max_tokens:
             return CodeBlock(
                 code=text,
@@ -118,83 +121,47 @@ class Splitter(FileManager):
                 start_line=node.start_point[0],
                 end_line=node.end_point[0],
                 depth=depth,
-                id=id,
+                id=node_id,
+                parent_id=parent_id,
                 children=[],
                 language=self.language,
                 type=node.type,
-                tokens=self._count_tokens(text),
+                tokens=block_length,
             )
-        # Otherwise, we need to split the text into smaller blocks.
-        else:
-            # First, we need to find the child with the most tokens.
-            idxs = []
-            child_idx = 0
-            new_text = ""
-            max_idx = np.argmax(
-                [self._count_tokens(c.text.decode()) for c in node.children]
-            )
-            # Then, we need to find all of the child blocks that exceed the max tokens.
-            for i, child in enumerate(node.children):
-                child_text = child.text.decode()
-                # If the child is the one with the most tokens, then we need to split it
-                if i == max_idx:
-                    idxs.append(i)
-                    new_text += f"{self.comment} <<<child_{child_idx}>>>\n"
-                    child_idx += 1
-                # If the child is not the one with the most tokens, but it exceeds the
-                # max tokens, then we need to split it
-                elif self._count_tokens(child_text) > self.max_tokens:
-                    idxs.append(i)
-                    new_text += f"{self.comment} <<<child_{child_idx}>>>\n"
-                    child_idx += 1
-                # Otherwise, we can just add the child text to the new text
-                else:
-                    new_text += f"{child_text}\n"
 
-            if max_idx not in idxs:
-                idxs.append(max_idx)
+        text_chunks = [child.text.decode() for child in node.children]
+        lengths = list(map(self._count_tokens, text_chunks))
+        longest_indices = sorted(range(len(lengths)), key=lengths.__getitem__)
+        child_blocks = []
 
-            # If we get through all the children, but `new_text` still exceeds the token
-            # limit, then we need replace more children at this level.
-            while self._count_tokens(new_text) > self.max_tokens:
-                # Get the indices of the children that we haven't already added to the
-                # new text
-                temp_idxs = [i for i in range(len(node.children)) if i not in idxs]
-                # Get the child with the most tokens
-                max_child_idx = np.argmax(
-                    [
-                        self._count_tokens(node.children[i].text.decode())
-                        for i in temp_idxs
-                    ]
-                )
-                replaced_child_idx = temp_idxs[max_child_idx]
-                max_text = node.children[replaced_child_idx].text.decode()
-                # Replace the child with the most tokens with a placeholder
-                new_text = new_text.replace(
-                    max_text, f"{self.comment} <<<child_{child_idx}>>>\n"
-                )
-                idxs.append(replaced_child_idx)
-                child_idx += 1
-
-            children = []
-            for child_idx, i in enumerate(idxs):
-                children.append(
-                    self._recurse_split(node.children[i], path, depth + 1, child_idx)
-                )
-
-            return CodeBlock(
-                code=new_text,
+        # Replace child node code with placeholders until we can fit in context,
+        #  starting with the longest children
+        while self._count_tokens('\n'.join(text_chunks)) > self.max_tokens:
+            longest_index = longest_indices.pop()
+            child = self._recurse_split(
+                node=node.children[longest_index],
                 path=path,
-                complete=False,
-                start_line=node.start_point[0],
-                end_line=node.end_point[0],
-                depth=depth,
-                id=id,
-                children=children,
-                language=self.language,
-                type=node.type,
-                tokens=self._count_tokens(new_text),
+                depth=depth+1,
+                parent_id=node_id,
+                id_gen=id_gen
             )
+            text_chunks[longest_index] = f"{self.comment} {child.id}"
+            child_blocks.append(child)
+
+        return CodeBlock(
+            code='\n'.join(text_chunks),
+            path=path,
+            complete=False,
+            start_line=node.start_point[0],
+            end_line=node.end_point[0],
+            depth=depth,
+            id=node_id,
+            parent_id=parent_id,
+            children=child_blocks,
+            language=self.language,
+            type=node.type,
+            tokens=block_length,
+        )
 
     def _count_tokens(self, code: str) -> int:
         """Count the number of tokens in the given code.

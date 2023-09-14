@@ -1,5 +1,8 @@
 from ..utils.enums import LANGUAGES
+from ..utils.logger import create_logger
 from .block import CodeBlock
+
+log = create_logger(__name__)
 
 
 class FileManager:
@@ -38,16 +41,15 @@ class FileManager:
         """
         if len(block.children) == 0:
             return input
-        else:
-            output = input
-            for i, child in enumerate(block.children):
-                if f"{self.comment} <<<child_{i}>>>" in block.code:
-                    output = output.replace(f"{self.comment} <<<child_{i}>>>", child.code)
-                    if len(child.children) > 0:
-                        output = self._blocks_to_str(
-                            output,
-                            child,
-                        )
-                else:
-                    return input
-            return output
+
+        output = input
+        for i, child in enumerate(block.children):
+            placeholder = f"{self.comment} {child.id}"
+            if placeholder not in block.code:
+                log.warning("Not all children found in output!")
+                return input
+
+            output = output.replace(placeholder, child.code)
+            output = self._blocks_to_str(output, child)
+
+        return output

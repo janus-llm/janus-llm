@@ -147,6 +147,7 @@ class Translator:
                 )
                 out_blocks.append(out_block)
 
+            # The first block is the root
             out_file = self._nest_code_blocks(out_blocks)
 
             # Write the code blocks to the output file
@@ -189,6 +190,7 @@ class Translator:
             end_line=original_block.end_line,
             depth=original_block.depth,
             id=original_block.id,
+            parent_id=original_block.parent_id,
             language=self.target_language,
             type=original_block.type,
             tokens=tokens,
@@ -215,7 +217,8 @@ class Translator:
         return files
 
     def _unpack_code_blocks(self, block: CodeBlock) -> List[CodeBlock]:
-        """Unpack a code block into a list of `CodeBlocks`.
+        """Unpack a code block into a list of `CodeBlocks`. List order is
+            top-down, depth first.
 
         Arguments:
             block: The code block to unpack.
@@ -223,18 +226,11 @@ class Translator:
         Returns:
             A list of code blocks.
         """
-        blocks = [block]
-
-        if block not in blocks:
-            blocks.append(block)
-
-        for child in block.children:
-            blocks.extend(self._unpack_code_blocks(child))
-
-        return blocks
+        return sum(map(self._unpack_code_blocks, block.children), [block])
 
     def _nest_code_blocks(self, blocks: List[CodeBlock]) -> CodeBlock:
-        """Nest a list of code blocks.
+        """Nest a depth-first list of code blocks. The root should be the first
+            block in the list.
 
         Arguments:
             blocks: The code blocks to nest.
@@ -242,31 +238,11 @@ class Translator:
         Returns:
             The top level code block.
         """
-        return self._recurse_nest(blocks)[0]
-
-    def _recurse_nest(self, blocks: List[CodeBlock]) -> List[CodeBlock]:
-        """Recursively nest a list of code blocks.
-
-        Arguments:
-            blocks: The code blocks to nest.
-
-        Returns:
-            The nested code blocks.
-        """
-        result = []
-
-        for code_block in blocks:
-            depth = code_block.depth
-            id = code_block.id
-
-            children = [
-                block for block in blocks if block.depth == depth + 1 and block.id == id
+        for parent_block in blocks:
+            parent_block.children = [
+                block for block in blocks if block.parent_id == parent_block.id
             ]
-
-            code_block.children = self._recurse_nest(children)
-            result.append(code_block)
-
-        return result
+        return blocks[0]
 
     def _parse_llm_output(self, output: str) -> Tuple[str, bool]:
         """Parse the output of an LLM.

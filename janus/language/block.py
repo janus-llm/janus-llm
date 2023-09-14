@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ForwardRef, Tuple
+from typing import ForwardRef, List, Hashable, Optional
 
 from ..utils.logger import create_logger
 from .node import NodeType
@@ -38,8 +38,9 @@ class CodeBlock:
     type: NodeType
     tokens: int
     depth: int
-    id: int
-    children: Tuple[ForwardRef("CodeBlock")]
+    id: Hashable
+    parent_id: Optional[Hashable]
+    children: List[ForwardRef("CodeBlock")]
 
 
 @dataclass
