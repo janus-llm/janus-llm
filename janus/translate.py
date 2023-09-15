@@ -105,33 +105,38 @@ class Translator:
             # Loop through all code blocks in the file
             blocks = self._unpack_code_blocks(file)
             for block in blocks:
+                log.debug(f"Input code ({block.path.name}, {block.id}):\n{block.code}")
                 prompt = self._prompt_engine.create(block)
-                parsed = False
-                num_tries = 0
                 cost = COST_PER_MODEL[self.model]["input"] * prompt.tokens
-                while not parsed:
-                    # output, tokens, cost = self._llm.get_output(prompt.prompt)
+
+                # Retry the request up to max_prompts times before failing
+                for _ in range(self.max_prompts + 1):
                     output = self._llm.predict_messages(prompt.prompt)
                     if "text" == self.target_language:
                         # Pass through content if output is expected to be text
                         parsed_output = output.content
-                        parsed = True
-                    else:
-                        # Otherwise parse for code
-                        parsed_output, parsed = self._parse_llm_output(output.content)
-                    if not parsed:
-                        log.warning(
-                            f"Failed to parse output for block in file {block.path.name}"
-                        )
+                        break
 
-                    if num_tries > self.max_prompts:
-                        log.error(
-                            f"Failed to parse output after {num_tries} tries. Exiting."
-                        )
-                        raise RuntimeError(
-                            f"Failed to parse output after {num_tries} tries. Exiting."
-                        )
-                    num_tries += 1
+                    # Otherwise parse for code
+                    parsed_output, parsed = self._parse_llm_output(output.content)
+                    if not parsed:
+                        log.warning(f"Failed to parse output for block in file {block.path.name}")
+                        log.debug(f"Failed output:\n{parsed_output}")
+                        continue
+
+                    valid = self.combiner.validate(parsed_output, block)
+                    if not valid:
+                        continue
+
+                    break
+                else:
+                    error_msg = (
+                        f"Failed to parse output for block in file "
+                        f"{block.path.name} after {self.max_prompts} retries."
+                    )
+                    log.error(error_msg)
+                    raise RuntimeError(error_msg)
+
                 tokens = self._llm.get_num_tokens(output.content)
                 cost += COST_PER_MODEL[self.model]["output"] * tokens
 
@@ -145,6 +150,7 @@ class Translator:
                 out_block = self._output_to_block(
                     parsed_output, outpath, block, tokens, cost
                 )
+                log.debug(f"Output code ({out_block.path.name}, {out_block.id}):\n{out_block.code}")
                 out_blocks.append(out_block)
 
             # The first block is the root
