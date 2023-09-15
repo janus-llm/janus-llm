@@ -1,5 +1,6 @@
 from copy import deepcopy
 from pathlib import Path
+from collections import defaultdict
 from typing import Any, Dict, List, Tuple
 
 from .language.block import CodeBlock, TranslatedCodeBlock
@@ -244,10 +245,11 @@ class Translator:
         Returns:
             The top level code block.
         """
-        for parent_block in blocks:
-            parent_block.children = [
-                block for block in blocks if block.parent_id == parent_block.id
-            ]
+        id_to_children = defaultdict(list)
+        for block in blocks:
+            id_to_children[block.parent_id].append(block)
+        for block in blocks:
+            block.children = id_to_children[block.id]
         return blocks[0]
 
     def _parse_llm_output(self, output: str) -> Tuple[str, bool]:
