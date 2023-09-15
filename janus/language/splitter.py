@@ -139,11 +139,7 @@ class Splitter(FileManager):
         # Replace child node code with placeholders until we can fit in context,
         #  starting with the longest children
         child_blocks = []
-        while remaining_indices:
-            # If the code fits in the context window, stop breaking it up
-            if self._count_tokens('\n'.join(text_chunks)) <= self.max_tokens:
-                break
-
+        while remaining_indices and self._count_tokens('\n'.join(text_chunks)) > self.max_tokens:
             # Remaining indices is sorted by code length, ascending
             longest_index = remaining_indices.pop()
             group = node_groups[longest_index]
@@ -181,7 +177,7 @@ class Splitter(FileManager):
 
         # If we never brought code down to size, children need to be grouped
         #  The entire file currently consists of placeholders
-        else:
+        if self._count_tokens('\n'.join(text_chunks)) > self.max_tokens:
             # Make sure the blocks are sorted by position in the file
             grandchild_blocks = sorted(child_blocks, key=lambda b: b.start_line)
             child_blocks = []
@@ -208,10 +204,19 @@ class Splitter(FileManager):
                 )
                 child_blocks.append(child)
 
-                # Update grandchild depth and parent id accordingly
+                # Update grandchildren's parent ids to the child
                 for grandchild in child.children:
-                    grandchild.depth += 1
                     grandchild.parent_id = child.id
+
+                # Increase the depth of all ancestors
+                descendents = child.children
+                while descendents:
+                    b = descendents.pop()
+                    b.depth += 1
+                    descendents.extend(b.children)
+
+            # Replace the code with the newly-inserted layer's placeholders
+            text_chunks = [f"{self.comment} {child.id}" for child in child_blocks]
 
         return CodeBlock(
             code='\n'.join(text_chunks),
