@@ -29,7 +29,7 @@ class CodeBlock:
         children: A tuple of child code blocks.
     """
 
-    code: str
+    code: Optional[str]
     path: Path
     complete: bool
     start_line: int

@@ -1,7 +1,7 @@
 from copy import deepcopy
 from pathlib import Path
 from collections import defaultdict
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Optional
 
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import Combiner
@@ -97,15 +97,35 @@ class Translator:
         # First, get the files in the input directory and split them into CodeBlocks
         files = self._get_files(input_directory)
 
+        source_suffix = LANGUAGES[self.source_language]["suffix"]
+        target_suffix = LANGUAGES[self.target_language]["suffix"]
+
         translated_files: List[TranslatedCodeBlock] = []
 
         # Now, loop through every code block in every file and translate it with an LLM
         for file in files:
+            # Create the output file
+            outpath = output_directory / file.path.name.replace(
+                f".{source_suffix}",
+                f".{target_suffix}"
+            )
+
             # out_blocks is flat, whereas `translated_files` is nested
             out_blocks: List[TranslatedCodeBlock] = []
             # Loop through all code blocks in the file
             blocks = self._unpack_code_blocks(file)
             for block in blocks:
+                # If the block has no code, skip it
+                if block.code is None:
+                    out_blocks.append(self._output_to_block(
+                        output=None,
+                        outpath=outpath,
+                        original_block=block,
+                        tokens=0,
+                        cost=0
+                    ))
+                    continue
+
                 log.debug(f"Input code ({block.path.name}, {block.id}):\n{block.code}")
                 prompt = self._prompt_engine.create(block)
                 cost = COST_PER_MODEL[self.model]["input"] * prompt.tokens
@@ -141,21 +161,18 @@ class Translator:
                 tokens = self._llm.get_num_tokens(output.content)
                 cost += COST_PER_MODEL[self.model]["output"] * tokens
 
-                # Create the output file
-                source_suffix = LANGUAGES[self.source_language]["suffix"]
-                target_suffix = LANGUAGES[self.target_language]["suffix"]
-                out_filename = file.path.name.replace(
-                    f".{source_suffix}", f".{target_suffix}"
-                )
-                outpath = output_directory / out_filename
                 out_block = self._output_to_block(
-                    parsed_output, outpath, block, tokens, cost
+                    output=parsed_output,
+                    outpath=outpath,
+                    original_block=block,
+                    tokens=tokens,
+                    cost=cost
                 )
                 log.debug(f"Output code ({out_block.path.name}, {out_block.id}):\n{out_block.code}")
                 out_blocks.append(out_block)
 
             # The first block is the root
-            out_file = self._nest_code_blocks(out_blocks)
+            out_file: TranslatedCodeBlock = self._nest_code_blocks(out_blocks)
 
             # Write the code blocks to the output file
             self._save_to_file(out_file)
@@ -175,7 +192,7 @@ class Translator:
 
     def _output_to_block(
         self,
-        output: str,
+        output: Optional[str],
         outpath: Path,
         original_block: CodeBlock,
         tokens: int,

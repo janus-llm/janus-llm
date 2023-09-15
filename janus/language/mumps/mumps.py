@@ -133,7 +133,7 @@ class MumpsSplitter(Splitter):
                     seg_start_line = seg_end_line
                     subblocks.append(code_block)
                 code_block = CodeBlock(
-                    code='\n'.join(f"{self.comment} {child.id}" for child in subblocks),
+                    code=None,
                     path=path,
                     complete=False,
                     start_line=start_line,
@@ -150,7 +150,7 @@ class MumpsSplitter(Splitter):
             blocks.append(code_block)
 
         return CodeBlock(
-            code='\n'.join(f"{self.comment} {child.id}" for child in blocks),
+            code=None,
             path=path,
             complete=False,
             start_line=0,

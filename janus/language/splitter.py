@@ -175,51 +175,67 @@ class Splitter(FileManager):
             text_chunks[longest_index] = f"{self.comment} {child.id}"
             child_blocks.append(child)
 
-        # If we never brought code down to size, children need to be grouped
-        #  The entire file currently consists of placeholders
-        if self._count_tokens('\n'.join(text_chunks)) > self.max_tokens:
-            # Make sure the blocks are sorted by position in the file
-            grandchild_blocks = sorted(child_blocks, key=lambda b: b.start_line)
-            child_blocks = []
+        if self._count_tokens('\n'.join(text_chunks)) <= self.max_tokens:
+            return CodeBlock(
+                code='\n'.join(text_chunks),
+                path=path,
+                complete=False,
+                start_line=node.start_point[0],
+                end_line=node.end_point[0],
+                depth=depth,
+                id=node_id,
+                parent_id=parent_id,
+                children=child_blocks,
+                language=self.language,
+                type=node.type,
+                tokens=block_length,
+            )
 
-            # Split into sqrt(N) groups
-            group_size = int(sqrt(len(grandchild_blocks)))
-            for i in range(0, len(grandchild_blocks), group_size):
-                group = grandchild_blocks[i:i+group_size]
-                code = '\n'.join(text_chunks[i:i+group_size])
-                length = sum(c.tokens for c in group)
-                child = CodeBlock(
-                    code=code,
-                    path=path,
-                    complete=False,
-                    start_line=group[0].start_line,
-                    end_line=group[-1].end_line,
-                    depth=depth + 1,
-                    id=id_gen(),
-                    parent_id=node_id,
-                    children=group,
-                    language=self.language,
-                    type=NodeType("subdivision"),
-                    tokens=length,
-                )
-                child_blocks.append(child)
+        # If we never brought code down to size, the entire file currently
+        #  consists of placeholders, and children need to be grouped
+        # TODO: It is extremely likely, but possible, that the resulting code
+        #  may still be too long to fit in the context window. Technically this
+        #  should be moved to a recursive function to handle that.
+        # Make sure the blocks are sorted by position in the file
+        grandchild_blocks = sorted(child_blocks, key=lambda b: b.start_line)
+        child_blocks = []
 
-                # Update grandchildren's parent ids to the child
-                for grandchild in child.children:
-                    grandchild.parent_id = child.id
+        # Split into sqrt(N) groups
+        group_size = int(sqrt(len(grandchild_blocks)))
+        for i in range(0, len(grandchild_blocks), group_size):
+            group = grandchild_blocks[i:i+group_size]
+            code = '\n'.join(text_chunks[i:i+group_size])
+            length = sum(c.tokens for c in group)
+            child = CodeBlock(
+                code=code,
+                path=path,
+                complete=False,
+                start_line=group[0].start_line,
+                end_line=group[-1].end_line,
+                depth=depth,
+                id=id_gen(),
+                parent_id=node_id,
+                children=group,
+                language=self.language,
+                type=NodeType("subdivision"),
+                tokens=length,
+            )
 
-                # Increase the depth of all ancestors
-                descendents = child.children
-                while descendents:
-                    b = descendents.pop()
-                    b.depth += 1
-                    descendents.extend(b.children)
+            # Update grandchildren's parent ids to the inserted child's id
+            for grandchild in child.children:
+                grandchild.parent_id = child.id
 
-            # Replace the code with the newly-inserted layer's placeholders
-            text_chunks = [f"{self.comment} {child.id}" for child in child_blocks]
+            child_blocks.append(child)
+
+        # Increase the depth of all ancestors
+        descendents = child_blocks.copy()
+        while descendents:
+            b = descendents.pop()
+            b.depth += 1
+            descendents.extend(b.children)
 
         return CodeBlock(
-            code='\n'.join(text_chunks),
+            code=None,
             path=path,
             complete=False,
             start_line=node.start_point[0],

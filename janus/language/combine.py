@@ -1,3 +1,5 @@
+from typing import Optional
+
 from .file import FileManager
 from ..utils.logger import create_logger
 from .block import CodeBlock
@@ -25,7 +27,7 @@ class Combiner(FileManager):
         code_str = self._blocks_to_str(block.code, block)
         block.path.write_text(code_str, encoding="utf-8")
 
-    def _blocks_to_str(self, input: str, block: CodeBlock) -> str:
+    def _blocks_to_str(self, code: Optional[str], block: CodeBlock) -> str:
         """Recursively convert a functional code block to a string.
 
         # TODO: Fix the formatting issues with this method. It currently doesn't get
@@ -43,14 +45,21 @@ class Combiner(FileManager):
             issues)
         """
         if len(block.children) == 0:
-            return input
+            return str(code)
 
-        output = input
-        for i, child in enumerate(block.children):
+        # If input string is None, then this node consists exclusively of
+        #  children with no other formatting. Simply concatenate the children.
+        if code is None:
+            children = sorted(block.children, key=lambda b: b.start_line)
+            output = [self._blocks_to_str(child.code, child) for child in children]
+            return '\n'.join(output)
+
+        output = code
+        for child in block.children:
             placeholder = f"{self.comment} {child.id}"
             if placeholder not in block.code:
                 log.warning("Not all children found in output!")
-                return input
+                return code
 
             output = output.replace(placeholder, child.code)
             output = self._blocks_to_str(output, child)
