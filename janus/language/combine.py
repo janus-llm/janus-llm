@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List
 
 from .file import FileManager
 from ..utils.logger import create_logger
@@ -24,10 +24,10 @@ class Combiner(FileManager):
         Arguments:
             block: The functional code block to save.
         """
-        code_str = self._blocks_to_str(block.code, block)
+        code_str = self._blocks_to_str(block)
         block.path.write_text(code_str, encoding="utf-8")
 
-    def _blocks_to_str(self, code: Optional[str], block: CodeBlock) -> str:
+    def _blocks_to_str(self, block: CodeBlock) -> str:
         """Recursively convert a functional code block to a string.
 
         # TODO: Fix the formatting issues with this method. It currently doesn't get
@@ -45,32 +45,35 @@ class Combiner(FileManager):
             issues)
         """
         if len(block.children) == 0:
-            return str(code)
+            return str(block.code)
 
         # If input string is None, then this node consists exclusively of
         #  children with no other formatting. Simply concatenate the children.
-        if code is None:
+        if block.code is None:
             children = sorted(block.children, key=lambda b: b.start_line)
-            output = [self._blocks_to_str(child.code, child) for child in children]
+            output = [self._blocks_to_str(child) for child in children]
             return '\n'.join(output)
 
-        output = code
+        output = block.code
         for child in block.children:
             placeholder = f"{self.comment} {child.id}"
             if placeholder not in block.code:
                 log.warning("Not all children found in output!")
-                return code
-
-            output = output.replace(placeholder, child.code)
-            output = self._blocks_to_str(output, child)
+            output = output.replace(placeholder, self._blocks_to_str(child))
 
         return output
 
     def validate(self, code: str, input_block: CodeBlock) -> bool:
-        for child in input_block.children:
-            placeholder = f"{self.comment} {child.id}"
-            if placeholder not in code:
-                log.warning(f"Child placeholder ({child.id}) not present in code")
-                log.debug(f"Code:\n{code}")
-                return False
+        missing = self._find_missing_placeholders(code, input_block)
+        if missing:
+            log.warning(f"Child placeholders not present in code: {missing}")
+            log.debug(f"Code:\n{code}")
+            return False
         return True
+
+    def _find_missing_placeholders(self, code, input_block) -> List[str]:
+        missing_placeholders = []
+        for child in input_block.children:
+            if f"{self.comment} {child.id}" not in code:
+                missing_placeholders.append(child.id)
+        return missing_placeholders
