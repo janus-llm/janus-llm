@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+import dataclasses
 from pathlib import Path
 from typing import ForwardRef, List, Hashable, Optional
 
@@ -8,7 +8,7 @@ from .node import NodeType
 log = create_logger(__name__)
 
 
-@dataclass
+@dataclasses.dataclass
 class CodeBlock:
     """A class that represents a functional block of code.
 
@@ -30,7 +30,7 @@ class CodeBlock:
     """
 
     code: Optional[str]
-    path: Path
+    path: Optional[Path]
     complete: bool
     start_line: int
     end_line: int
@@ -43,7 +43,7 @@ class CodeBlock:
     children: List[ForwardRef("CodeBlock")]
 
 
-@dataclass
+@dataclasses.dataclass
 class TranslatedCodeBlock(CodeBlock):
     """A class that represents the translated functional block of code.
 
@@ -51,6 +51,21 @@ class TranslatedCodeBlock(CodeBlock):
         original: The original code block.
         cost: The total cost to translate the original code block.
     """
-
     original: CodeBlock
-    cost: float
+    cost: float = 0.0
+
+    @classmethod
+    def from_original(cls, original: CodeBlock, language: str) -> ForwardRef("TranslatedCodeBlock"):
+        block = cls(
+            **dataclasses.asdict(original),
+            original=original
+        )
+        return dataclasses.replace(
+            block,
+            code=None,
+            path=None,
+            complete=False,
+            language=language,
+            tokens=0,
+            children=[],
+        )

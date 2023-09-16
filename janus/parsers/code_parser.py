@@ -8,8 +8,7 @@ class CodeParser(BaseOutputParser):
 
     def parse(self, text: str) -> str:
         pattern = rf"```[^\S\r\n]*(?:{self.target_language}[^\S\r\n]*)?\n?(.*?)\n*```"
-        try:
-            response = re.search(pattern, text, re.DOTALL).group(1)
-        except Exception:
-            raise ValueError("Code is not between ```")
-        return response
+        code = re.search(pattern, text, re.DOTALL)
+        if code is None:
+            raise ValueError("Code not between ```")
+        return code.group(1)

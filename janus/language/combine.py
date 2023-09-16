@@ -2,7 +2,7 @@ from typing import List
 
 from .file import FileManager
 from ..utils.logger import create_logger
-from .block import CodeBlock
+from .block import CodeBlock, TranslatedCodeBlock
 
 log = create_logger(__name__)
 
@@ -18,62 +18,65 @@ class Combiner(FileManager):
         """
         super().__init__(language)
 
-    def blocks_to_file(self, block: CodeBlock) -> None:
-        """Save the CodeBlock to a path.
+    def combine_children(self, block: CodeBlock) -> None:
+        """Recursively combine block code with children code.
+
+        TODO: Fix the formatting issues with this method. It currently doesn't get
+         the indentation or number of newlines correct. But I feel that it would have
+         to be done differently to keep track of that sort of thing within the
+         `CodeBlock` when originally splitting.
 
         Arguments:
-            block: The functional code block to save.
-        """
-        code_str = self._blocks_to_str(block)
-        block.path.write_text(code_str, encoding="utf-8")
-
-    def _blocks_to_str(self, block: CodeBlock) -> str:
-        """Recursively convert a functional code block to a string.
-
-        # TODO: Fix the formatting issues with this method. It currently doesn't get
-        the indentation or number of newlines correct. But I feel that it would have
-        to be done differently to keep track of that sort of thing within the
-        `CodeBlock` when originally splitting.
-
-        Arguments:
-            input: The input string to replace with the children of `block`.
             block: The functional code block to recursively replace children.
-
-        Returns:
-            The string with the children of `block` inserted. It should replace the
-            whole tree of CodeBlocks to get the original code (with some formatting
-            issues)
         """
-        if len(block.children) == 0:
-            return str(block.code)
+        if block.complete:
+            return
+
+        children_complete = True
+        for child in block.children:
+            self.combine_children(child)
+            if not child.complete:
+                children_complete = False
 
         # If input string is None, then this node consists exclusively of
         #  children with no other formatting. Simply concatenate the children.
         if block.code is None:
             children = sorted(block.children, key=lambda b: b.start_line)
-            output = [self._blocks_to_str(child) for child in children]
-            return '\n'.join(output)
+            block.code = '\n'.join(child.code for child in children)
+            block.complete = children_complete
+            return
 
-        output = block.code
+        missing_children = set()
+        if isinstance(block, TranslatedCodeBlock):
+            original_children = {child.id for child in block.original.children}
+            translated_children = {child.id for child in block.children}
+            missing_children = original_children.difference(translated_children)
+
+        # Replace all placeholders
         for child in block.children:
-            placeholder = f"{self.comment} {child.id}"
-            if placeholder not in block.code:
-                log.warning("Not all children found in output!")
-            output = output.replace(placeholder, self._blocks_to_str(child))
+            if not self.contains_child(block.code, child):
+                missing_children.add(child.id)
+                continue
+            block.code = block.code.replace(self._placeholder(child), child.code)
 
-        return output
+        if missing_children:
+            log.warning(f"Some children not found in code: {missing_children}")
+
+        block.complete = children_complete and not missing_children
 
     def validate(self, code: str, input_block: CodeBlock) -> bool:
-        missing = self._find_missing_placeholders(code, input_block)
-        if missing:
-            log.warning(f"Child placeholders not present in code: {missing}")
+        missing_children = []
+        for child in input_block.children:
+            if not self.contains_child(code, child):
+                missing_children.append(child.id)
+        if missing_children:
+            log.warning(f"Child placeholders not present in code: {missing_children}")
             log.debug(f"Code:\n{code}")
             return False
         return True
 
-    def _find_missing_placeholders(self, code, input_block) -> List[str]:
-        missing_placeholders = []
-        for child in input_block.children:
-            if f"{self.comment} {child.id}" not in code:
-                missing_placeholders.append(child.id)
-        return missing_placeholders
+    def contains_child(self, code: str, child: CodeBlock) -> bool:
+        return code is None or self._placeholder(child) in code
+
+    def _placeholder(self, child) -> str:
+        return f"{self.comment} {child.id}"
