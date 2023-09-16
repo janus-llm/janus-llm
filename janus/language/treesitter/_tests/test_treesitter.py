@@ -1,3 +1,4 @@
+import re
 import unittest
 from pathlib import Path
 
@@ -17,11 +18,14 @@ class TestTreeSitterSplitter(unittest.TestCase):
     def _split(self):
         """Split the test file."""
         split_code = self.splitter.split(self.test_file)
-        flat_split_text = self.combiner._blocks_to_str(split_code)
+        self.assertFalse(split_code.complete)
+        self.combiner.combine_children(split_code)
+        self.assertTrue(split_code.complete)
+        flat_split_text = split_code.code
         # The newlines and spaces aren't the same but that doesn't matter for fortran
         # (to an extent)
-        flat_split_text = flat_split_text.replace("\n", "").replace(" ", "")
-        test_file_replaced = self.test_file.read_text().replace("\n", "").replace(" ", "")
+        flat_split_text = re.sub(r"\s+", "", flat_split_text)
+        test_file_replaced = re.sub(r"\s+", "", self.test_file.read_text())
         self.assertEqual(flat_split_text, test_file_replaced)
 
     def test_split_fortran(self):

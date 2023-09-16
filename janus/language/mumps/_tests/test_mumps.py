@@ -21,5 +21,8 @@ class TestMumpsSplitter(unittest.TestCase):
         """Test the split method."""
         split_code = self.splitter.split(self.test_file)
         self.assertEqual(len(split_code.children), 22)
-        flat_split_text = self.combiner._blocks_to_str(split_code)
+        self.assertFalse(split_code.complete)
+        self.combiner.combine_children(split_code)
+        self.assertTrue(split_code.complete)
+        flat_split_text = split_code.code
         self.assertEqual(flat_split_text, self.test_file.read_text())
