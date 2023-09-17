@@ -110,12 +110,12 @@ class Splitter(FileManager):
         """
         # First get the text for all the siblings at this level
         text = node.text.decode()
-        block_length = self._count_tokens(text)
+        length = self._count_tokens(text)
         node_id = id_gen()
 
         # If the text at the function input is less than the max tokens, then
         #  we can just return it as a CodeBlock with no children.
-        if self._count_tokens(text) < self.max_tokens:
+        if length < self.max_tokens:
             return CodeBlock(
                 code=text,
                 path=path,
@@ -128,7 +128,7 @@ class Splitter(FileManager):
                 children=[],
                 language=self.language,
                 type=node.type,
-                tokens=block_length,
+                tokens=length,
             )
 
         node_groups = self._consolidate_nodes(node.children, depth)
@@ -136,10 +136,13 @@ class Splitter(FileManager):
         lengths = list(map(self._count_tokens, text_chunks))
         remaining_indices = sorted(range(len(lengths)), key=lengths.__getitem__)
 
+        code = '\n'.join(text_chunks)
+        length = self._count_tokens(code)
+
         # Replace child node code with placeholders until we can fit in context,
         #  starting with the longest children
         child_blocks = []
-        while remaining_indices and self._count_tokens('\n'.join(text_chunks)) > self.max_tokens:
+        while remaining_indices and length > self.max_tokens:
             # Remaining indices is sorted by code length, ascending
             longest_index = remaining_indices.pop()
             group = node_groups[longest_index]
@@ -175,9 +178,12 @@ class Splitter(FileManager):
             text_chunks[longest_index] = f"{self.comment} {child.id}"
             child_blocks.append(child)
 
-        if self._count_tokens('\n'.join(text_chunks)) <= self.max_tokens:
+            code = '\n'.join(text_chunks)
+            length = self._count_tokens(code)
+
+        if length <= self.max_tokens:
             return CodeBlock(
-                code='\n'.join(text_chunks),
+                code=code,
                 path=path,
                 complete=False,
                 start_line=node.start_point[0],
@@ -188,7 +194,7 @@ class Splitter(FileManager):
                 children=child_blocks,
                 language=self.language,
                 type=node.type,
-                tokens=block_length,
+                tokens=length,
             )
 
         # If we never brought code down to size, the entire file currently
@@ -246,7 +252,7 @@ class Splitter(FileManager):
             children=child_blocks,
             language=self.language,
             type=node.type,
-            tokens=block_length,
+            tokens=0,
         )
 
     def _consolidate_nodes(self, nodes: List[tree_sitter.Node], depth) -> List[List[tree_sitter.Node]]:
