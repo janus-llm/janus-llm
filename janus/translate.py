@@ -97,12 +97,7 @@ class Translator:
         source_suffix = LANGUAGES[self.source_language]["suffix"]
         target_suffix = LANGUAGES[self.target_language]["suffix"]
 
-        # First, get the files in the input directory and split them into CodeBlocks
-        input_files = (
-            self.splitter.split(file)
-            for file in input_directory.glob(self._glob)
-        )
-        translated_files = map(self._recursive_translate, input_files)
+        translated_files = map(self.translate_file, input_directory.glob(self._glob))
 
         # Now, loop through every code block in every file and translate it with an LLM
         total_cost = 0.0
@@ -118,9 +113,56 @@ class Translator:
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
+    def translate_file(self, file: Path) -> TranslatedCodeBlock:
+        filename = file.name
+        log.info(f"[{filename}] Splitting file")
+        input_block = self.splitter.split(file)
+        log.info(
+            f"[{filename}] File split into {input_block.n_descendents:,} blocks, "
+            f"tree of height {input_block.height}")
+        output_block = self._iterative_translate(input_block)
+        completeness = output_block.total_input_tokens / input_block.total_tokens
+        log.info(
+            f"[{filename}] Translation complete\n"
+            f"  {completeness:.2%} of input successfully translated\n"
+            f"  Total cost: ${output_block.total_cost:,.2f}\n"
+            f"  Total retries: {output_block.total_retries:,d}\n"
+        )
+        self.combiner.combine_children(output_block)
+        return output_block
+
+    def _iterative_translate(self, root: CodeBlock) -> TranslatedCodeBlock:
+        translated_root = TranslatedCodeBlock.from_original(root, self.target_language)
+        last_prog = 0
+        stack = [translated_root]
+        while stack:
+            translated_block = stack.pop()
+            original_block = translated_block.original
+            if original_block.code is not None:
+                translated_code, cost, retries = self._translate_block(original_block)
+                translated_block.code = translated_code
+                translated_block.tokens = self._llm.get_num_tokens(translated_code)
+                translated_block.cost = cost
+                translated_block.retries = retries
+
+                progress = translated_root.total_input_tokens / root.total_tokens
+                if progress - last_prog > 0.1 or True:
+                    last_prog += round(progress, 1)
+                    log.info(f"{root.path.name} progress: {progress:.2%}")
+
+            for child in original_block.children:
+                # Don't bother translating children if they aren't used
+                if self.combiner.contains_child(translated_block.code, child):
+                    translated_child = TranslatedCodeBlock.from_original(child, self.target_language)
+                    translated_block.children.append(translated_child)
+                    stack.append(translated_child)
+                else:
+                    log.warning(f"Skipping {child.id} (not referenced in parent code)")
+
+        return translated_root
+
     def _recursive_translate(self, block: CodeBlock) -> TranslatedCodeBlock:
         translated_block = TranslatedCodeBlock.from_original(block, self.target_language)
-
         if block.code is not None:
             translated_code, cost, retries = self._translate_block(block)
             translated_block.code = translated_code
@@ -156,22 +198,30 @@ class Translator:
 
             # Pass through content if output is expected to be text
             if "text" == self.target_language:
-                parsed_output = output.content
+                best_seen = output.content
                 break
 
             # Otherwise parse for code
             try:
                 parsed_output = self.parser.parse(output.content)
             except ValueError:
-                log.warning(f"Failed to parse output for block in file {block.path.name}")
+                log.warning(f"Failed to parse output for {block.path.name}:{block.id}")
                 log.debug(f"Failed output:\n{output.content}")
                 continue
 
-            valid = self.combiner.validate(parsed_output, block)
-            if valid:
+            if best_seen is None:
+                best_seen = parsed_output
+
+            if self._validate(block, parsed_output):
+                best_seen = parsed_output
                 break
+
+            n_missing = self.combiner.count_missing(block, parsed_output)
+            if least_missing is None or n_missing < least_missing:
+                least_missing = n_missing
+                best_seen = parsed_output
         else:
-            if parsed_output is None:
+            if best_seen is None:
                 error_msg = (
                     f"Failed to parse output for block in file "
                     f"{block.path.name} after {self.max_prompts} retries."
@@ -184,8 +234,16 @@ class Translator:
         log.debug(f"Output code ({block.path.name}, {block.id}):\n{best_seen}")
         return best_seen, cost, retry_count
 
-        log.debug(f"Output code ({block.path.name}, {block.id}):\n{parsed_output}")
-        return parsed_output, cost
+    def _validate(self, input_block: CodeBlock, output_code: str) -> bool:
+        missing_children = []
+        for child in input_block.children:
+            if not self.combiner.contains_child(output_code, child):
+                missing_children.append(child.id)
+        if missing_children:
+            log.warning(f"Child placeholders not present in code: {missing_children}")
+            log.debug(f"Code:\n{output_code}")
+            return False
+        return True
 
     def _save_to_file(self, block: CodeBlock) -> None:
         """Save a file to disk.
@@ -195,51 +253,6 @@ class Translator:
         """
         block.path.parent.mkdir(parents=True, exist_ok=True)
         block.path.write_text(block.code, encoding="utf-8")
-
-    def _get_files(self, directory: Path) -> List[CodeBlock]:
-        """Get the files in the given directory and split them into functional blocks.
-
-        Arguments:
-            directory: The directory to get the files from.
-
-        Returns:
-            A list of code blocks.
-        """
-        files: List[CodeBlock] = []
-
-        for file in Path(directory).glob(self._glob):
-            files.append(self.splitter.split(file))
-
-        return files
-
-    def _unpack_code_blocks(self, block: CodeBlock) -> List[CodeBlock]:
-        """Unpack a code block into a list of `CodeBlocks`. List order is
-            top-down, depth first.
-
-        Arguments:
-            block: The code block to unpack.
-
-        Returns:
-            A list of code blocks.
-        """
-        return sum(map(self._unpack_code_blocks, block.children), [block])
-
-    def _nest_code_blocks(self, blocks: List[CodeBlock]) -> CodeBlock:
-        """Nest a depth-first list of code blocks. The root should be the first
-            block in the list.
-
-        Arguments:
-            blocks: The code blocks to nest.
-
-        Returns:
-            The top level code block.
-        """
-        id_to_children = defaultdict(list)
-        for block in blocks:
-            id_to_children[block.parent_id].append(block)
-        for block in blocks:
-            block.children = id_to_children[block.id]
-        return blocks[0]
 
     def _load_model(self) -> None:
         """Check that the model is valid."""
