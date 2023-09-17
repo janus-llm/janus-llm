@@ -78,5 +78,12 @@ class Combiner(FileManager):
     def contains_child(self, code: str, child: CodeBlock) -> bool:
         return code is None or self._placeholder(child) in code
 
+    def count_missing(self, input_block: CodeBlock, output_code: str) -> int:
+        missing_children = 0
+        for child in input_block.children:
+            if not self.contains_child(output_code, child):
+                missing_children += 1
+        return missing_children
+
     def _placeholder(self, child) -> str:
         return f"{self.comment} {child.id}"

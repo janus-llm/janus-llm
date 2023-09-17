@@ -107,23 +107,13 @@ class Translator:
         # Now, loop through every code block in every file and translate it with an LLM
         total_cost = 0.0
         for out_block in translated_files:
-            # Create the output file
+            total_cost += out_block.total_cost
+
+            # Write the code blocks to the output file
             out_block.path = output_directory / out_block.original.path.name.replace(
                 f".{source_suffix}",
                 f".{target_suffix}"
             )
-
-            self.combiner.combine_children(out_block)
-            file_cost = 0
-            stack = [out_block]
-            while stack:
-                node = stack.pop()
-                file_cost += node.cost
-                stack.extend(node.children)
-            log.info(f"Total cost for {out_block.original.path.name}: ${file_cost:,.2f}")
-            total_cost += file_cost
-
-            # Write the code blocks to the output file
             self._save_to_file(out_block)
 
         log.info(f"Total cost: ${total_cost:,.2f}")
@@ -132,9 +122,11 @@ class Translator:
         translated_block = TranslatedCodeBlock.from_original(block, self.target_language)
 
         if block.code is not None:
-            translated_code, cost = self._translate_block(block)
+            translated_code, cost, retries = self._translate_block(block)
             translated_block.code = translated_code
+            translated_block.tokens = self._llm.get_num_tokens(translated_code)
             translated_block.cost = cost
+            translated_block.retries = retries
 
         for child in block.children:
             # Don't bother translating children if they aren't used
@@ -145,17 +137,18 @@ class Translator:
 
         return translated_block
 
-    def _translate_block(self, block: CodeBlock) -> Tuple[str, float]:
-        log.debug(f"Input code ({block.path.name}, {block.id}):\n{block.code}")
+    def _translate_block(self, block: CodeBlock) -> Tuple[str, float, int]:
+        log.debug(f"Translating ({block.path.name}:{block.id})")
+        log.debug(f"Input code:\n{block.code}")
         prompt = self._prompt_engine.create(block)
         input_cost = COST_PER_MODEL[self.model]["input"] * prompt.tokens / 1000.
         cost = 0.0
-        parsed_output = None
+        retry_count = 0
+        best_seen = None
+        least_missing = None
 
         # Retry the request up to max_prompts times before failing
         for retry_count in range(self.max_prompts + 1):
-            if retry_count:
-                log.warning(f"Retry number {retry_count}")
             output = self._llm.predict_messages(prompt.prompt)
             tokens = self._llm.get_num_tokens(output.content)
             output_cost = COST_PER_MODEL[self.model]["output"] * tokens / 1000.
@@ -186,7 +179,10 @@ class Translator:
                 log.error(error_msg)
                 raise RuntimeError(error_msg)
 
-            log.warning(f"Output for block {block.id} not valid")
+            log.warning(f"Output for block {block.id} not complete")
+
+        log.debug(f"Output code ({block.path.name}, {block.id}):\n{best_seen}")
+        return best_seen, cost, retry_count
 
         log.debug(f"Output code ({block.path.name}, {block.id}):\n{parsed_output}")
         return parsed_output, cost

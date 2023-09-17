@@ -42,6 +42,24 @@ class CodeBlock:
     parent_id: Optional[Hashable]
     children: List[ForwardRef("CodeBlock")]
 
+    @property
+    def n_descendents(self):
+        return 1 + sum(c.n_descendents for c in self.children)
+
+    @property
+    def height(self):
+        return 1 + max(c.height for c in self.children) if self.children else 0
+
+    @property
+    def total_tokens(self):
+        return self.tokens + sum(c.total_tokens for c in self.children)
+
+    @property
+    def tree_str(self):
+        return '\n'.join([
+            f"{'| '*self.depth}{self.id}{'*' if self.code is None else ''}",
+            *[c.tree_str for c in self.children]
+        ])
 
 @dataclasses.dataclass
 class TranslatedCodeBlock(CodeBlock):
@@ -53,6 +71,7 @@ class TranslatedCodeBlock(CodeBlock):
     """
     original: CodeBlock
     cost: float = 0.0
+    retries: int = 0
 
     @classmethod
     def from_original(cls, original: CodeBlock, language: str) -> ForwardRef("TranslatedCodeBlock"):
@@ -69,3 +88,15 @@ class TranslatedCodeBlock(CodeBlock):
             tokens=0,
             children=[],
         )
+
+    @property
+    def total_cost(self):
+        return self.cost + sum(c.total_cost for c in self.children)
+
+    @property
+    def total_retries(self):
+        return self.retries + sum(c.total_retries for c in self.children)
+
+    @property
+    def total_input_tokens(self):
+        return self.original.tokens + sum(c.total_input_tokens for c in self.children)
