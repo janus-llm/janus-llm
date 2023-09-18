@@ -23,6 +23,8 @@ class Combiner(FileManager):
          the indentation or number of newlines correct. But I feel that it would have
          to be done differently to keep track of that sort of thing within the
          `CodeBlock` when originally splitting.
+         Update from Chris: The best way to go about this would be to track
+         bytes between nodes with tree_sitter's byte indexing.
 
         Arguments:
             block: The functional code block to recursively replace children.
@@ -69,21 +71,16 @@ class Combiner(FileManager):
 
         block.complete = children_complete and not missing_children
 
-    def validate(self, code: str, input_block: CodeBlock) -> bool:
-        missing_children = []
-        for child in input_block.children:
-            if not self.contains_child(code, child):
-                missing_children.append(child.id)
-        if missing_children:
-            log.warning(f"Child placeholders not present in code: {missing_children}")
-            log.debug(f"Code:\n{code}")
-            return False
-        return True
-
     def contains_child(self, code: str, child: CodeBlock) -> bool:
+        """ Determine whether the given code contains a placeholder for the given
+            child block.
+        """
         return code is None or self._placeholder(child) in code
 
     def count_missing(self, input_block: CodeBlock, output_code: str) -> int:
+        """ Return the number of children of input_block who are not represented
+            in output_code with a placeholder
+        """
         missing_children = 0
         for child in input_block.children:
             if not self.contains_child(output_code, child):
@@ -91,4 +88,5 @@ class Combiner(FileManager):
         return missing_children
 
     def _placeholder(self, child) -> str:
+        """ Get the placeholder to represent the code of the given block"""
         return f"{self.comment} {child.id}"

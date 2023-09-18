@@ -66,7 +66,9 @@ class Translator:
     def translate(
         self, input_directory: str | Path, output_directory: str | Path
     ) -> None:
-        """Translate code from the source language to the target language.
+        """ Translate code in the input directory from the source language to
+            the target language, and write the resulting files to the output
+            directory.
 
         Arguments:
             input_directory: The directory containing the code to translate.
@@ -102,6 +104,8 @@ class Translator:
         total_cost = 0.0
         for out_block in translated_files:
             total_cost += out_block.total_cost
+
+            # Don't attempt to write files for which translation failed
             if not out_block.translated:
                 continue
 
@@ -109,12 +113,23 @@ class Translator:
             out_block.path = output_directory / out_block.original.path.name.replace(
                 f".{source_suffix}", f".{target_suffix}"
             )
+            # Make sure the tree's code has been consolidated at the top level
             self.combiner.combine_children(out_block)
             self._save_to_file(out_block)
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
     def translate_file(self, file: Path) -> TranslatedCodeBlock:
+        """ Translate a single file.
+
+        Arguments:
+            file: Input path to file
+
+        Returns:
+            A TranslatedCodeBlock object. This block does not have a path set,
+                and its code is not guaranteed to be consolidated. To amend this,
+                run Combiner.combine_childen on the block.
+        """
         filename = file.name
         log.info(f"[{filename}] Splitting file")
         input_block = self.splitter.split(file)
@@ -124,7 +139,7 @@ class Translator:
         )
         output_block = self._iterative_translate(input_block)
         if output_block.translated:
-            completeness = output_block.total_input_tokens / input_block.total_tokens
+            completeness = output_block.translation_completeness
             log.info(
                 f"[{filename}] Translation complete\n"
                 f"  {completeness:.2%} of input successfully translated\n"
@@ -140,6 +155,14 @@ class Translator:
         return output_block
 
     def _iterative_translate(self, root: CodeBlock) -> TranslatedCodeBlock:
+        """ Translate the passed CodeBlock representing a full file.
+
+        Arguments:
+            A root block representing the top-level block of a file
+
+        Returns:
+            A TranslatedCodeBlock
+        """
         translated_root = TranslatedCodeBlock.from_original(root, self.target_language)
         last_prog, prog_delta = 0, 0.1
         stack = [translated_root]
@@ -160,7 +183,7 @@ class Translator:
                 else:
                     log.warning(f"Skipping {child.id} (not referenced in parent code)")
 
-            progress = translated_root.total_input_tokens / root.total_tokens
+            progress = translated_root.translation_completeness
             if progress - last_prog > prog_delta:
                 last_prog = int(progress / prog_delta) * prog_delta
                 log.info(f"{root.path.name} progress: {progress:.2%}")
@@ -168,6 +191,14 @@ class Translator:
         return translated_root
 
     def _recursive_translate(self, block: CodeBlock) -> TranslatedCodeBlock:
+        """ Recuresively translate the passed CodeBlock.
+
+        Arguments:
+            A CodeBlock to translate (may be a child in a larger tree)
+
+        Returns:
+            A TranslatedCodeBlock
+        """
         translated_block = TranslatedCodeBlock.from_original(block, self.target_language)
         self._add_translation(translated_block)
         if not translated_block.translated:
@@ -183,6 +214,15 @@ class Translator:
         return translated_block
 
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
+        """ Given an "empty" TranslatedCodeBlock, translate the code represented
+            in block.original, setting the relevant fields in the translated block.
+            The TranslatedCodeBlock is updated in-pace, nothing is returned.
+            Note that this translates *only* the code for this block, not its
+            children.
+
+        Arguments:
+            An empty TranslatedCodeBlock
+        """
         if block.translated:
             return
 
@@ -252,6 +292,17 @@ class Translator:
         block.translated = True
 
     def _validate(self, input_block: CodeBlock, output_code: str) -> bool:
+        """ Validate the given output code by ensuring it contains all necessary
+            placeholders corresponding to the children of the given input block
+
+        Arguments:
+            input_block: A CodeBlock representing the input to the LLM
+            output_code: The parsed code returned by the LLM
+
+        Returns:
+            Whether the given code is valid; True if all the child blocks are
+                referenced, False otherwise.
+        """
         missing_children = []
         for child in input_block.children:
             if not self.combiner.contains_child(output_code, child):

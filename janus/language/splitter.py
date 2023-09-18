@@ -128,7 +128,7 @@ class Splitter(FileManager):
                 tokens=length,
             )
 
-        node_groups = self._consolidate_nodes(node.children, depth)
+        node_groups = self._consolidate_nodes(node.children)
         text_chunks = ["\n".join(c.text.decode() for c in group) for group in node_groups]
         lengths = list(map(self._count_tokens, text_chunks))
         remaining_indices = sorted(range(len(lengths)), key=lengths.__getitem__)
@@ -253,8 +253,26 @@ class Splitter(FileManager):
         )
 
     def _consolidate_nodes(
-        self, nodes: List[tree_sitter.Node], depth
+        self, nodes: List[tree_sitter.Node]
     ) -> List[List[tree_sitter.Node]]:
+        """ Consolidate a list of tree_sitter nodes into groups. Each group
+            should fit into the context window, with the exception of single-node
+            groups which may be too long to fit on their own.
+            This ensures that nodes with many many short children are not
+            translated one child at a time, instead packing as many children
+            adjacent snippets as possible into context.
+
+            This function attempts to efficiently pack nodes, but is not optimal.
+
+        Arguments:
+            nodes: A list of tree_sitter nodes
+
+        Returns:
+            A list of lists. Each list consists of one or more nodes. This structure
+                is ordered such that, were it flattened, all nodes would be sorted
+                according to appearance in the original file.
+        """
+        nodes = sorted(nodes, key=lambda node: node.start_point)
         text_chunks = [child.text.decode() for child in nodes]
         lengths = list(map(self._count_tokens, text_chunks))
 
