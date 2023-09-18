@@ -75,7 +75,11 @@ class Combiner(FileManager):
             if not self.contains_child(code, child):
                 missing_children.append(child.id)
         if missing_children:
-            log.warning(f"Child placeholders not present in code: {missing_children}")
+            identifier = f"{input_block.original.path.name}:{input_block.id}"
+            log.warning(
+                f"[{identifier}] Child placeholders not present in code: "
+                f"{missing_children}"
+            )
             log.debug(f"Code:\n{code}")
             return False
         return True
