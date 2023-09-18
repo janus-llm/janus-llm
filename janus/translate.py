@@ -97,7 +97,11 @@ class Translator:
         target_suffix = LANGUAGES[self.target_language]["suffix"]
 
         files = list(input_directory.glob(self._glob))
-        files = [f for f in files if not (output_directory / f.with_suffix(f".{target_suffix}").name).exists()]
+        files = [
+            f
+            for f in files
+            if not (output_directory / f.with_suffix(f".{target_suffix}").name).exists()
+        ]
         translated_files = map(self.translate_file, files)
 
         # Now, loop through every code block in every file and translate it with an LLM
@@ -165,7 +169,7 @@ class Translator:
             progress = translated_root.total_input_tokens / root.total_tokens
             if progress - last_prog > prog_delta:
                 last_prog = int(progress / prog_delta) * prog_delta
-                log.info(f"{root.path.name} progress: {progress:.2%}")
+                log.info(f"[{root.path.name}] progress: {progress:.2%}")
 
         return translated_root
 
