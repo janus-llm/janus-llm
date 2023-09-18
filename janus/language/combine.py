@@ -32,6 +32,9 @@ class Combiner(FileManager):
         if block.complete:
             return
 
+        if isinstance(block, TranslatedCodeBlock) and not block.translated:
+            return
+
         children_complete = True
         for child in block.children:
             self.combine_children(child)
@@ -49,11 +52,13 @@ class Combiner(FileManager):
         missing_children = set()
         if isinstance(block, TranslatedCodeBlock):
             original_children = {child.id for child in block.original.children}
-            translated_children = {child.id for child in block.children}
+            translated_children = {child.id for child in block.children if child.translated}
             missing_children = original_children.difference(translated_children)
 
         # Replace all placeholders
         for child in block.children:
+            if isinstance(block, TranslatedCodeBlock) and not child.translated:
+                continue
             if not self.contains_child(block.code, child):
                 missing_children.add(child.id)
                 continue

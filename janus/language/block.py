@@ -72,6 +72,7 @@ class TranslatedCodeBlock(CodeBlock):
     original: CodeBlock
     cost: float = 0.0
     retries: int = 0
+    translated: bool = False
 
     @classmethod
     def from_original(cls, original: CodeBlock, language: str) -> ForwardRef("TranslatedCodeBlock"):
@@ -99,4 +100,5 @@ class TranslatedCodeBlock(CodeBlock):
 
     @property
     def total_input_tokens(self):
-        return self.original.tokens + sum(c.total_input_tokens for c in self.children)
+        children_sum = sum(c.total_input_tokens for c in self.children)
+        return children_sum + (self.original.tokens if self.translated else 0)

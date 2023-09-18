@@ -97,18 +97,23 @@ class Translator:
         source_suffix = LANGUAGES[self.source_language]["suffix"]
         target_suffix = LANGUAGES[self.target_language]["suffix"]
 
-        translated_files = map(self.translate_file, input_directory.glob(self._glob))
+        files = list(input_directory.glob(self._glob))
+        files = [f for f in files if not (output_directory / f.with_suffix(f".{target_suffix}").name).exists()]
+        translated_files = map(self.translate_file, files)
 
         # Now, loop through every code block in every file and translate it with an LLM
         total_cost = 0.0
         for out_block in translated_files:
             total_cost += out_block.total_cost
+            if not out_block.translated:
+                continue
 
             # Write the code blocks to the output file
             out_block.path = output_directory / out_block.original.path.name.replace(
                 f".{source_suffix}",
                 f".{target_suffix}"
             )
+            self.combiner.combine_children(out_block)
             self._save_to_file(out_block)
 
         log.info(f"Total cost: ${total_cost:,.2f}")
@@ -121,36 +126,33 @@ class Translator:
             f"[{filename}] File split into {input_block.n_descendents:,} blocks, "
             f"tree of height {input_block.height}")
         output_block = self._iterative_translate(input_block)
-        completeness = output_block.total_input_tokens / input_block.total_tokens
-        log.info(
-            f"[{filename}] Translation complete\n"
-            f"  {completeness:.2%} of input successfully translated\n"
-            f"  Total cost: ${output_block.total_cost:,.2f}\n"
-            f"  Total retries: {output_block.total_retries:,d}\n"
-        )
-        self.combiner.combine_children(output_block)
+        if output_block.translated:
+            completeness = output_block.total_input_tokens / input_block.total_tokens
+            log.info(
+                f"[{filename}] Translation complete\n"
+                f"  {completeness:.2%} of input successfully translated\n"
+                f"  Total cost: ${output_block.total_cost:,.2f}\n"
+                f"  Total retries: {output_block.total_retries:,d}\n"
+            )
+        else:
+            log.error(
+                f"[{filename}] Translation failed\n"
+                f"  Total cost: ${output_block.total_cost:,.2f}\n"
+                f"  Total retries: {output_block.total_retries:,d}\n"
+            )
         return output_block
 
     def _iterative_translate(self, root: CodeBlock) -> TranslatedCodeBlock:
         translated_root = TranslatedCodeBlock.from_original(root, self.target_language)
-        last_prog = 0
+        last_prog, prog_delta = 0, 0.1
         stack = [translated_root]
         while stack:
             translated_block = stack.pop()
-            original_block = translated_block.original
-            if original_block.code is not None:
-                translated_code, cost, retries = self._translate_block(original_block)
-                translated_block.code = translated_code
-                translated_block.tokens = self._llm.get_num_tokens(translated_code)
-                translated_block.cost = cost
-                translated_block.retries = retries
+            self._add_translation(translated_block)
+            if not translated_block.translated:
+                continue
 
-                progress = translated_root.total_input_tokens / root.total_tokens
-                if progress - last_prog > 0.1 or True:
-                    last_prog += round(progress, 1)
-                    log.info(f"{root.path.name} progress: {progress:.2%}")
-
-            for child in original_block.children:
+            for child in translated_block.original.children:
                 # Don't bother translating children if they aren't used
                 if self.combiner.contains_child(translated_block.code, child):
                     translated_child = TranslatedCodeBlock.from_original(child, self.target_language)
@@ -159,16 +161,18 @@ class Translator:
                 else:
                     log.warning(f"Skipping {child.id} (not referenced in parent code)")
 
+            progress = translated_root.total_input_tokens / root.total_tokens
+            if progress - last_prog > prog_delta:
+                last_prog = int(progress / prog_delta) * prog_delta
+                log.info(f"{root.path.name} progress: {progress:.2%}")
+
         return translated_root
 
     def _recursive_translate(self, block: CodeBlock) -> TranslatedCodeBlock:
         translated_block = TranslatedCodeBlock.from_original(block, self.target_language)
-        if block.code is not None:
-            translated_code, cost, retries = self._translate_block(block)
-            translated_block.code = translated_code
-            translated_block.tokens = self._llm.get_num_tokens(translated_code)
-            translated_block.cost = cost
-            translated_block.retries = retries
+        self._add_translation(translated_block)
+        if not translated_block.translated:
+            return translated_block
 
         for child in block.children:
             # Don't bother translating children if they aren't used
@@ -179,10 +183,19 @@ class Translator:
 
         return translated_block
 
-    def _translate_block(self, block: CodeBlock) -> Tuple[str, float, int]:
-        log.debug(f"Translating ({block.path.name}:{block.id})")
-        log.debug(f"Input code:\n{block.code}")
-        prompt = self._prompt_engine.create(block)
+    def _add_translation(self, block: TranslatedCodeBlock) -> None:
+        if block.translated:
+            return
+
+        if block.original.code is None:
+            block.translated = True
+            return
+
+        identifier = f"{block.original.path.name}:{block.id}"
+
+        log.debug(f"[{identifier}] Translating...")
+        log.debug(f"[{identifier}] Input code:\n{block.original.code}")
+        prompt = self._prompt_engine.create(block.original)
         input_cost = COST_PER_MODEL[self.model]["input"] * prompt.tokens / 1000.
         cost = 0.0
         retry_count = 0
@@ -205,34 +218,39 @@ class Translator:
             try:
                 parsed_output = self.parser.parse(output.content)
             except ValueError:
-                log.warning(f"Failed to parse output for {block.path.name}:{block.id}")
-                log.debug(f"Failed output:\n{output.content}")
+                log.warning(f"[{identifier}] Failed to parse output")
+                log.debug(f"[{identifier}] Failed output:\n{output.content}")
                 continue
 
             if best_seen is None:
                 best_seen = parsed_output
 
-            if self._validate(block, parsed_output):
+            if self._validate(block.original, parsed_output):
                 best_seen = parsed_output
                 break
 
-            n_missing = self.combiner.count_missing(block, parsed_output)
+            n_missing = self.combiner.count_missing(block.original, parsed_output)
             if least_missing is None or n_missing < least_missing:
                 least_missing = n_missing
                 best_seen = parsed_output
         else:
             if best_seen is None:
                 error_msg = (
-                    f"Failed to parse output for block in file "
-                    f"{block.path.name} after {self.max_prompts} retries."
+                    f"[{identifier}] Failed to parse output after "
+                    f"{self.max_prompts} retries. Marking as untranslated."
                 )
-                log.error(error_msg)
-                raise RuntimeError(error_msg)
+                log.warning(error_msg)
+                return
 
-            log.warning(f"Output for block {block.id} not complete")
+            log.warning(f"[{identifier}] Output not complete")
 
-        log.debug(f"Output code ({block.path.name}, {block.id}):\n{best_seen}")
-        return best_seen, cost, retry_count
+        log.debug(f"[[{identifier}] Output code:\n{best_seen}")
+
+        block.code = best_seen
+        block.tokens = self._llm.get_num_tokens(best_seen)
+        block.cost = cost
+        block.retries = retry_count
+        block.translated = True
 
     def _validate(self, input_block: CodeBlock, output_code: str) -> bool:
         missing_children = []
