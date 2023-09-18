@@ -66,9 +66,8 @@ class Translator:
     def translate(
         self, input_directory: str | Path, output_directory: str | Path
     ) -> None:
-        """Translate code in the input directory from the source language to
-            the target language, and write the resulting files to the output
-            directory.
+        """Translate code in the input directory from the source language to the target
+        language, and write the resulting files to the output directory.
 
         Arguments:
             input_directory: The directory containing the code to translate.
@@ -126,9 +125,9 @@ class Translator:
             file: Input path to file
 
         Returns:
-            A TranslatedCodeBlock object. This block does not have a path set,
-                and its code is not guaranteed to be consolidated. To amend this,
-                run Combiner.combine_childen on the block.
+            A `TranslatedCodeBlock` object. This block does not have a path set, and its
+            code is not guaranteed to be consolidated. To amend this, run
+            `Combiner.combine_childen` on the block.
         """
         filename = file.name
         log.info(f"[{filename}] Splitting file")
@@ -158,10 +157,10 @@ class Translator:
         """Translate the passed CodeBlock representing a full file.
 
         Arguments:
-            A root block representing the top-level block of a file
+            root: A root block representing the top-level block of a file
 
         Returns:
-            A TranslatedCodeBlock
+            A `TranslatedCodeBlock`
         """
         translated_root = TranslatedCodeBlock.from_original(root, self.target_language)
         last_prog, prog_delta = 0, 0.1
@@ -194,10 +193,10 @@ class Translator:
         """Recuresively translate the passed CodeBlock.
 
         Arguments:
-            A CodeBlock to translate (may be a child in a larger tree)
+            block: A `CodeBlock` to translate (may be a child in a larger tree)
 
         Returns:
-            A TranslatedCodeBlock
+            A `TranslatedCodeBlock`
         """
         translated_block = TranslatedCodeBlock.from_original(block, self.target_language)
         self._add_translation(translated_block)
@@ -214,14 +213,13 @@ class Translator:
         return translated_block
 
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
-        """Given an "empty" TranslatedCodeBlock, translate the code represented
-            in block.original, setting the relevant fields in the translated block.
-            The TranslatedCodeBlock is updated in-pace, nothing is returned.
-            Note that this translates *only* the code for this block, not its
-            children.
+        """Given an "empty" `TranslatedCodeBlock`, translate the code represented in
+        `block.original`, setting the relevant fields in the translated block. The
+        `TranslatedCodeBlock` is updated in-pace, nothing is returned. Note that this
+        translates *only* the code for this block, not its children.
 
         Arguments:
-            An empty TranslatedCodeBlock
+            block: An empty `TranslatedCodeBlock`
         """
         if block.translated:
             return
@@ -295,22 +293,22 @@ class Translator:
 
     def _validate(self, input_block: CodeBlock, output_code: str) -> bool:
         """Validate the given output code by ensuring it contains all necessary
-            placeholders corresponding to the children of the given input block
+        placeholders corresponding to the children of the given input block
 
         Arguments:
-            input_block: A CodeBlock representing the input to the LLM
+            input_block: A `CodeBlock` representing the input to the LLM
             output_code: The parsed code returned by the LLM
 
         Returns:
-            Whether the given code is valid; True if all the child blocks are
-                referenced, False otherwise.
+            Whether the given code is valid; `True` if all the child blocks are
+            referenced, `False` otherwise.
         """
         missing_children = []
         for child in input_block.children:
             if not self.combiner.contains_child(output_code, child):
                 missing_children.append(child.id)
         if missing_children:
-            identifier = f"{input_block.original.path.name}:{input_block.id}"
+            identifier = f"{input_block.path.name}:{input_block.id}"
             log.warning(
                 f"[{identifier}] Child placeholders not present in code: "
                 f"{missing_children}"
@@ -323,7 +321,7 @@ class Translator:
         """Save a file to disk.
 
         Arguments:
-            block: The file to save.
+            block: The `CodeBlock` to save to a file.
         """
         block.path.parent.mkdir(parents=True, exist_ok=True)
         block.path.write_text(block.code, encoding="utf-8")
@@ -354,7 +352,7 @@ class Translator:
         )
 
     def _load_combiner(self) -> None:
-        """Load the Combiner object."""
+        """Load the `Combiner` object."""
         # Ensure we can actually combine the output
         # With the current algorithm, combining requires the target language to be
         # included in LANGUAGES and have a "comment"
@@ -368,7 +366,7 @@ class Translator:
         self.combiner = Combiner(self.target_language)
 
     def _load_splitter(self) -> None:
-        """Load the Splitter object."""
+        """Load the `Splitter` object."""
         if self.source_language in CUSTOM_SPLITTERS:
             if self.source_language == "mumps":
                 self.splitter = MumpsSplitter(
@@ -387,7 +385,7 @@ class Translator:
         self._glob = f"**/*.{LANGUAGES[self.source_language]['suffix']}"
 
     def _load_parser(self) -> None:
-        """Load the CodeParser Object"""
+        """Load the `CodeParser` Object"""
         self.parser = CodeParser(target_language=self.target_language)
 
     def _check_languages(self) -> None:
