@@ -245,6 +245,8 @@ class Translator:
                     f"{self.max_prompts} retries. Marking as untranslated."
                 )
                 log.warning(error_msg)
+                block.retries = retry_count
+                block.cost = cost
                 return
 
             log.warning(f"[{identifier}] Output not complete")
