@@ -83,6 +83,7 @@ class MumpsSplitter(Splitter):
             )
 
         seen_ids = set()
+
         def id_gen():
             block_id = f"<<<child_{len(seen_ids)}>>>"
             seen_ids.add(block_id)
@@ -179,6 +180,6 @@ class MumpsSplitter(Splitter):
         else:
             lines = code.splitlines()
             split_idx = len(lines) // 2
-            left = '\n'.join(lines[:split_idx])
-            right = '\n'.join(lines[split_idx:])
+            left = "\n".join(lines[:split_idx])
+            right = "\n".join(lines[split_idx:])
             return self._recurse_divide(left) + self._recurse_divide(right)

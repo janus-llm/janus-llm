@@ -1,6 +1,6 @@
 import dataclasses
 from pathlib import Path
-from typing import ForwardRef, List, Hashable, Optional
+from typing import ForwardRef, Hashable, List, Optional
 
 from ..utils.logger import create_logger
 from .node import NodeType
@@ -56,10 +56,13 @@ class CodeBlock:
 
     @property
     def tree_str(self):
-        return '\n'.join([
-            f"{'| '*self.depth}{self.id}{'*' if self.code is None else ''}",
-            *[c.tree_str for c in self.children]
-        ])
+        return "\n".join(
+            [
+                f"{'| '*self.depth}{self.id}{'*' if self.code is None else ''}",
+                *[c.tree_str for c in self.children],
+            ]
+        )
+
 
 @dataclasses.dataclass
 class TranslatedCodeBlock(CodeBlock):
@@ -69,16 +72,16 @@ class TranslatedCodeBlock(CodeBlock):
         original: The original code block.
         cost: The total cost to translate the original code block.
     """
+
     original: CodeBlock
     cost: float = 0.0
     retries: int = 0
 
     @classmethod
-    def from_original(cls, original: CodeBlock, language: str) -> ForwardRef("TranslatedCodeBlock"):
-        block = cls(
-            **dataclasses.asdict(original),
-            original=original
-        )
+    def from_original(
+        cls, original: CodeBlock, language: str
+    ) -> ForwardRef("TranslatedCodeBlock"):
+        block = cls(**dataclasses.asdict(original), original=original)
         return dataclasses.replace(
             block,
             code=None,

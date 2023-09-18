@@ -1,16 +1,16 @@
 import platform
-from pathlib import Path
-from typing import Hashable, Optional, Callable, List
 from math import sqrt
+from pathlib import Path
+from typing import Callable, Hashable, List, Optional
 
 import tree_sitter
 from git import Repo
 from langchain.schema.language_model import BaseLanguageModel
 
 from ..utils.logger import create_logger
-from .node import NodeType
 from .block import CodeBlock
 from .file import FileManager
+from .node import NodeType
 
 log = create_logger(__name__)
 
@@ -75,27 +75,24 @@ class Splitter(FileManager):
         cursor = tree.walk()
 
         seen_ids = set()
+
         def id_gen():
             block_id = f"<<<child_{len(seen_ids)}>>>"
             seen_ids.add(block_id)
             return block_id
 
         return self._recurse_split(
-            node=cursor.node,
-            path=path,
-            depth=0,
-            parent_id=None,
-            id_gen=id_gen
+            node=cursor.node, path=path, depth=0, parent_id=None, id_gen=id_gen
         )
 
     def _recurse_split(
-            self,
-            node: tree_sitter.Node,
-            path: Path,
-            depth: int,
-            parent_id: Optional[Hashable],
-            id_gen: Callable[[], Hashable]
-        ) -> CodeBlock:
+        self,
+        node: tree_sitter.Node,
+        path: Path,
+        depth: int,
+        parent_id: Optional[Hashable],
+        id_gen: Callable[[], Hashable],
+    ) -> CodeBlock:
         """Recursively split the code into functional blocks.
 
         Arguments:
@@ -132,11 +129,11 @@ class Splitter(FileManager):
             )
 
         node_groups = self._consolidate_nodes(node.children, depth)
-        text_chunks = ['\n'.join(c.text.decode() for c in group) for group in node_groups]
+        text_chunks = ["\n".join(c.text.decode() for c in group) for group in node_groups]
         lengths = list(map(self._count_tokens, text_chunks))
         remaining_indices = sorted(range(len(lengths)), key=lengths.__getitem__)
 
-        code = '\n'.join(text_chunks)
+        code = "\n".join(text_chunks)
         length = self._count_tokens(code)
 
         # Replace child node code with placeholders until we can fit in context,
@@ -149,7 +146,7 @@ class Splitter(FileManager):
 
             # Multi-node groups are guaranteed to be within context length
             if len(group) > 1:
-                code = '\n'.join(c.text.decode() for c in group)
+                code = "\n".join(c.text.decode() for c in group)
                 length = self._count_tokens(code)
                 child = CodeBlock(
                     code=code,
@@ -171,14 +168,14 @@ class Splitter(FileManager):
                 child = self._recurse_split(
                     node=group[0],
                     path=path,
-                    depth=depth+1,
+                    depth=depth + 1,
                     parent_id=node_id,
-                    id_gen=id_gen
+                    id_gen=id_gen,
                 )
             text_chunks[longest_index] = f"{self.comment} {child.id}"
             child_blocks.append(child)
 
-            code = '\n'.join(text_chunks)
+            code = "\n".join(text_chunks)
             length = self._count_tokens(code)
 
         if length <= self.max_tokens:
@@ -209,8 +206,8 @@ class Splitter(FileManager):
         # Split into sqrt(N) groups
         group_size = int(sqrt(len(grandchild_blocks)))
         for i in range(0, len(grandchild_blocks), group_size):
-            group = grandchild_blocks[i:i+group_size]
-            code = '\n'.join(text_chunks[i:i+group_size])
+            group = grandchild_blocks[i : i + group_size]
+            code = "\n".join(text_chunks[i : i + group_size])
             length = sum(c.tokens for c in group)
             child = CodeBlock(
                 code=code,
@@ -255,12 +252,14 @@ class Splitter(FileManager):
             tokens=0,
         )
 
-    def _consolidate_nodes(self, nodes: List[tree_sitter.Node], depth) -> List[List[tree_sitter.Node]]:
+    def _consolidate_nodes(
+        self, nodes: List[tree_sitter.Node], depth
+    ) -> List[List[tree_sitter.Node]]:
         text_chunks = [child.text.decode() for child in nodes]
         lengths = list(map(self._count_tokens, text_chunks))
 
         # Estimate the length of each adjacent pair were they merged
-        adj_sums = [lengths[i] + lengths[i+1] for i in range(len(lengths)-1)]
+        adj_sums = [lengths[i] + lengths[i + 1] for i in range(len(lengths) - 1)]
 
         groups = [[n] for n in nodes]
         while len(groups) > 1 and min(adj_sums) <= self.max_tokens:
@@ -270,21 +269,21 @@ class Splitter(FileManager):
             i1 = i0 + 1
 
             # Merge the pair of node groups
-            groups[i0:i1+1] = [groups[i0] + groups[i1]]
+            groups[i0 : i1 + 1] = [groups[i0] + groups[i1]]
 
             # Recalculate the length. We can't simply use the adj_sum, because
             #  it is an underestimate due to the added newline.
             #  In testing, the length of a merged pair is between 2 and 3 tokens
             #  longer than the sum of the individual lengths, on average.
-            text_chunks[i0:i1+1] = [text_chunks[i0] + '\n' + text_chunks[i1]]
-            lengths[i0:i1+1] = [self._count_tokens(text_chunks[i0])]
+            text_chunks[i0 : i1 + 1] = [text_chunks[i0] + "\n" + text_chunks[i1]]
+            lengths[i0 : i1 + 1] = [self._count_tokens(text_chunks[i0])]
 
             # The potential merge length for this pair is removed
             adj_sums.pop(i0)
 
             # Update adjacent sum estimates
             if i0 > 0:
-                adj_sums[i0-1] = lengths[i0-1] + lengths[i0]
+                adj_sums[i0 - 1] = lengths[i0 - 1] + lengths[i0]
             if i0 < len(adj_sums):
                 adj_sums[i0] += lengths[i0] + lengths[i1]
 

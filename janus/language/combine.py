@@ -1,8 +1,6 @@
-from typing import List
-
-from .file import FileManager
 from ..utils.logger import create_logger
 from .block import CodeBlock, TranslatedCodeBlock
+from .file import FileManager
 
 log = create_logger(__name__)
 
@@ -42,7 +40,7 @@ class Combiner(FileManager):
         #  children with no other formatting. Simply concatenate the children.
         if block.code is None:
             children = sorted(block.children, key=lambda b: b.start_line)
-            block.code = '\n'.join(child.code for child in children)
+            block.code = "\n".join(child.code for child in children)
             block.complete = children_complete
             return
 

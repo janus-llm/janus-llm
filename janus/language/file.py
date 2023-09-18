@@ -1,6 +1,5 @@
 from ..utils.enums import LANGUAGES
 from ..utils.logger import create_logger
-from .block import CodeBlock
 
 log = create_logger(__name__)
 
