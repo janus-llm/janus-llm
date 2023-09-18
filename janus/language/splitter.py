@@ -28,7 +28,9 @@ class Splitter(FileManager):
     transcoding.
     """
 
-    def __init__(self, language: str, model: BaseLanguageModel, max_tokens: int = 4096):
+    def __init__(
+        self, language: str, model: BaseLanguageModel, max_tokens: int = 4096
+    ) -> None:
         """
         Arguments:
             max_tokens: The maximum number of tokens to use for each functional block.
@@ -76,7 +78,12 @@ class Splitter(FileManager):
 
         seen_ids = set()
 
-        def id_gen():
+        def id_gen() -> Hashable:
+            """Generate a unique id for each child block.
+
+            Returns:
+                A unique id for each child block.
+            """
             block_id = f"<<<child_{len(seen_ids)}>>>"
             seen_ids.add(block_id)
             return block_id
@@ -103,7 +110,7 @@ class Splitter(FileManager):
             id_gen: A function with which to generate child ids
 
         Returns:
-            A CodeBlock object.
+            A `CodeBlock` object.
         """
         # First get the text for all the siblings at this level
         text = node.text.decode()
@@ -255,22 +262,21 @@ class Splitter(FileManager):
     def _consolidate_nodes(
         self, nodes: List[tree_sitter.Node]
     ) -> List[List[tree_sitter.Node]]:
-        """ Consolidate a list of tree_sitter nodes into groups. Each group
-            should fit into the context window, with the exception of single-node
-            groups which may be too long to fit on their own.
-            This ensures that nodes with many many short children are not
-            translated one child at a time, instead packing as many children
-            adjacent snippets as possible into context.
+        """Consolidate a list of tree_sitter nodes into groups. Each group should fit
+        into the context window, with the exception of single-node groups which may be
+        too long to fit on their own. This ensures that nodes with many many short
+        children are not translated one child at a time, instead packing as many children
+        adjacent snippets as possible into context.
 
-            This function attempts to efficiently pack nodes, but is not optimal.
+        This function attempts to efficiently pack nodes, but is not optimal.
 
         Arguments:
             nodes: A list of tree_sitter nodes
 
         Returns:
-            A list of lists. Each list consists of one or more nodes. This structure
-                is ordered such that, were it flattened, all nodes would be sorted
-                according to appearance in the original file.
+            A list of lists. Each list consists of one or more nodes. This structure is
+            ordered such that, were it flattened, all nodes would be sorted according to
+            appearance in the original file.
         """
         nodes = sorted(nodes, key=lambda node: node.start_point)
         text_chunks = [child.text.decode() for child in nodes]

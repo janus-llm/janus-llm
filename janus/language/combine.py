@@ -6,7 +6,9 @@ log = create_logger(__name__)
 
 
 class Combiner(FileManager):
-    """No special functionality for the Combiner class yet."""
+    """Combine files that have been split into functional blocks back into a single
+    file.
+    """
 
     def __init__(self, language: str = "python") -> None:
         """Initialize a Combiner instance.
@@ -20,11 +22,12 @@ class Combiner(FileManager):
         """Recursively combine block code with children code.
 
         TODO: Fix the formatting issues with this method. It currently doesn't get
-         the indentation or number of newlines correct. But I feel that it would have
-         to be done differently to keep track of that sort of thing within the
-         `CodeBlock` when originally splitting.
-         Update from Chris: The best way to go about this would be to track
-         bytes between nodes with tree_sitter's byte indexing.
+        the indentation or number of newlines correct. But I feel that it would have
+        to be done differently to keep track of that sort of thing within the
+        `CodeBlock` when originally splitting.
+
+        Update from Chris: The best way to go about this would be to track
+        bytes between nodes with tree_sitter's byte indexing.
 
         Arguments:
             block: The functional code block to recursively replace children.
@@ -80,6 +83,14 @@ class Combiner(FileManager):
     def count_missing(self, input_block: CodeBlock, output_code: str) -> int:
         """Return the number of children of input_block who are not represented
         in output_code with a placeholder
+
+        Arguments:
+            input_block: The block to check for missing children
+            output_code: The code to check for placeholders
+
+        Returns:
+            The number of children of input_block who are not represented in
+            output_code with a placeholder
         """
         missing_children = 0
         for child in input_block.children:
@@ -87,6 +98,13 @@ class Combiner(FileManager):
                 missing_children += 1
         return missing_children
 
-    def _placeholder(self, child) -> str:
-        """Get the placeholder to represent the code of the given block"""
+    def _placeholder(self, child: CodeBlock) -> str:
+        """Get the placeholder to represent the code of the given block
+
+        Arguments:
+            child: The block to get the placeholder for
+
+        Returns:
+            The placeholder to represent the code of the given block
+        """
         return f"{self.comment} {child.id}"

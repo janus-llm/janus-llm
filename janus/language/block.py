@@ -43,23 +43,40 @@ class CodeBlock:
     children: List[ForwardRef("CodeBlock")]
 
     @property
-    def n_descendents(self):
-        """ The total number of ancestors of this block"""
+    def n_descendents(self) -> int:
+        """The total number of descendents of this block
+
+        Returns:
+            The total number of descendents of this block
+        """
         return 1 + sum(c.n_descendents for c in self.children)
 
     @property
-    def height(self):
-        """ The number of edges between this node and a leaf """
+    def height(self) -> int:
+        """The number of edges between this node and a leaf
+
+        Returns:
+            The number of edges between this node and a leaf
+        """
         return 1 + max(c.height for c in self.children) if self.children else 0
 
     @property
-    def total_tokens(self):
-        """ The total tokens represented by this block and all its descendents"""
+    def total_tokens(self) -> int:
+        """The total tokens represented by this block and all its descendents
+
+        Returns:
+            The total number of tokens represented by this block and all its
+            descendents
+        """
         return self.tokens + sum(c.total_tokens for c in self.children)
 
     @property
-    def tree_str(self):
-        """ A string representation of the tree with this block as the root"""
+    def tree_str(self) -> str:
+        """A string representation of the tree with this block as the root
+
+        Returns:
+            A string representation of the tree with this block as the root
+        """
         return "\n".join(
             [
                 f"{'| '*self.depth}{self.id}{'*' if self.code is None else ''}",
@@ -88,7 +105,16 @@ class TranslatedCodeBlock(CodeBlock):
     def from_original(
         cls, original: CodeBlock, language: str
     ) -> ForwardRef("TranslatedCodeBlock"):
-        """ Create an "empty" TranslatedCodeBlock from the given original"""
+        """Create an "empty" `TranslatedCodeBlock` from the given original
+
+        Arguments:
+            original: The original code block
+            language: The language to translate to
+
+        Returns:
+            A `TranslatedCodeBlock` with the same attributes as the original, except
+            for `code`, `path`, `complete`, `language`, `tokens`, and `children`
+        """
         block = cls(**dataclasses.asdict(original), original=original)
         return dataclasses.replace(
             block,
@@ -101,28 +127,40 @@ class TranslatedCodeBlock(CodeBlock):
         )
 
     @property
-    def total_cost(self):
-        """ The total cost spent translating this block and all its descendents"""
+    def total_cost(self) -> float:
+        """The total cost spent translating this block and all its descendents
+
+        Returns:
+            The total cost spent translating this block and all its descendents
+        """
         return self.cost + sum(c.total_cost for c in self.children)
 
     @property
-    def total_retries(self):
-        """ The total number of retries that were required to translate this
-            block and all its descendents
+    def total_retries(self) -> int:
+        """The total number of retries that were required to translate this block and
+        all its descendents
+
+        Returns:
+            The total number of retries that were required to translate this block and
         """
         return self.retries + sum(c.total_retries for c in self.children)
 
     @property
-    def total_input_tokens(self):
-        """ The total number of input tokens represented by this block and
-            all its successfully-translated descendents
+    def total_input_tokens(self) -> int:
+        """The total number of input tokens represented by this block and all its
+        successfully-translated descendents
+
+        Returns:
+            The total number of input tokens represented by this block and all its
         """
         children_sum = sum(c.total_input_tokens for c in self.children)
         return children_sum + (self.original.tokens if self.translated else 0)
 
     @property
-    def translation_completeness(self):
-        """ The share of the input that was successfully translated"""
+    def translation_completeness(self) -> float:
+        """The share of the input that was successfully translated
+
+        Returns:
+            The share of the input that was successfully translated
+        """
         return self.total_input_tokens / self.original.total_tokens
-
-
