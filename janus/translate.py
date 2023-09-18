@@ -96,9 +96,7 @@ class Translator:
         source_suffix = LANGUAGES[self.source_language]["suffix"]
         target_suffix = LANGUAGES[self.target_language]["suffix"]
 
-        files = list(input_directory.glob(self._glob))
-        files = [f for f in files if not (output_directory / f.with_suffix(f".{target_suffix}").name).exists()]
-        translated_files = map(self.translate_file, files)
+        translated_files = map(self.translate_file, input_directory.glob(self._glob))
 
         # Now, loop through every code block in every file and translate it with an LLM
         total_cost = 0.0

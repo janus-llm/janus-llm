@@ -50,7 +50,9 @@ class Combiner(FileManager):
         missing_children = set()
         if isinstance(block, TranslatedCodeBlock):
             original_children = {child.id for child in block.original.children}
-            translated_children = {child.id for child in block.children if child.translated}
+            translated_children = {
+                child.id for child in block.children if child.translated
+            }
             missing_children = original_children.difference(translated_children)
 
         # Replace all placeholders
