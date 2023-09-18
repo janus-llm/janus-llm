@@ -2,8 +2,8 @@ import unittest
 from pathlib import Path
 
 from ....llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS
-from ..mumps import MumpsSplitter
 from ...combine import Combiner
+from ..mumps import MumpsSplitter
 
 
 class TestMumpsSplitter(unittest.TestCase):

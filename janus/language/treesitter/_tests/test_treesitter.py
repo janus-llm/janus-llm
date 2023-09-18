@@ -3,8 +3,8 @@ import unittest
 from pathlib import Path
 
 from ....llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS
-from ..treesitter import TreeSitterSplitter
 from ...combine import Combiner
+from ..treesitter import TreeSitterSplitter
 
 
 class TestTreeSitterSplitter(unittest.TestCase):

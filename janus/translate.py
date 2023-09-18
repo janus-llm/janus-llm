@@ -1,7 +1,6 @@
 from copy import deepcopy
 from pathlib import Path
-from collections import defaultdict
-from typing import Any, Dict, List, Tuple, Optional
+from typing import Any, Dict, Tuple
 
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import Combiner
@@ -110,8 +109,7 @@ class Translator:
 
             # Write the code blocks to the output file
             out_block.path = output_directory / out_block.original.path.name.replace(
-                f".{source_suffix}",
-                f".{target_suffix}"
+                f".{source_suffix}", f".{target_suffix}"
             )
             self.combiner.combine_children(out_block)
             self._save_to_file(out_block)
@@ -124,7 +122,8 @@ class Translator:
         input_block = self.splitter.split(file)
         log.info(
             f"[{filename}] File split into {input_block.n_descendents:,} blocks, "
-            f"tree of height {input_block.height}")
+            f"tree of height {input_block.height}"
+        )
         output_block = self._iterative_translate(input_block)
         if output_block.translated:
             completeness = output_block.total_input_tokens / input_block.total_tokens
@@ -155,7 +154,9 @@ class Translator:
             for child in translated_block.original.children:
                 # Don't bother translating children if they aren't used
                 if self.combiner.contains_child(translated_block.code, child):
-                    translated_child = TranslatedCodeBlock.from_original(child, self.target_language)
+                    translated_child = TranslatedCodeBlock.from_original(
+                        child, self.target_language
+                    )
                     translated_block.children.append(translated_child)
                     stack.append(translated_child)
                 else:
@@ -196,7 +197,7 @@ class Translator:
         log.debug(f"[{identifier}] Translating...")
         log.debug(f"[{identifier}] Input code:\n{block.original.code}")
         prompt = self._prompt_engine.create(block.original)
-        input_cost = COST_PER_MODEL[self.model]["input"] * prompt.tokens / 1000.
+        input_cost = COST_PER_MODEL[self.model]["input"] * prompt.tokens / 1000.0
         cost = 0.0
         retry_count = 0
         best_seen = None
@@ -206,7 +207,7 @@ class Translator:
         for retry_count in range(self.max_prompts + 1):
             output = self._llm.predict_messages(prompt.prompt)
             tokens = self._llm.get_num_tokens(output.content)
-            output_cost = COST_PER_MODEL[self.model]["output"] * tokens / 1000.
+            output_cost = COST_PER_MODEL[self.model]["output"] * tokens / 1000.0
             cost += input_cost + output_cost
 
             # Pass through content if output is expected to be text
