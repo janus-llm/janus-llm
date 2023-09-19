@@ -76,16 +76,13 @@ class MumpsSplitter(Splitter):
             maximize_block_length: Whether to greedily merge blocks back together
                 after splitting in order to maximize the context sent to the LLM
         """
-        # Divide max_tokens by 3 because we want to leave just as much space for the
-        # prompt as for the translated code.
-        self.max_tokens: int = max_tokens // 3
+        # MUMPS code tends to take about 2/3 the space of Python
+        self.max_tokens: int = int(max_tokens * 2 / 5)
         self.model = model
         self.language: str = "mumps"
         self.comment: str = ";"
         super().__init__(max_tokens=max_tokens, model=model, language='mumps')
 
-        # MUMPS code tends to take about 2/3 the space of Python
-        self.max_tokens: int = int(max_tokens * 2 / 5)
         self.maximize_block_length = maximize_block_length
         self.force_split = force_split
 
@@ -103,9 +100,10 @@ class MumpsSplitter(Splitter):
         Returns:
             A File dataclass containing the path to the file and all of its code blocks
         """
+        block_length = self._count_tokens(code)
 
         # The whole file is one block
-        if self._count_tokens(code) < self.max_tokens and not self.force_split:
+        if block_length < self.max_tokens and not self.force_split:
             return CodeBlock(
                 code=code,
                 path=path,
@@ -114,24 +112,35 @@ class MumpsSplitter(Splitter):
                 end_line=len(code.splitlines()),
                 depth=0,
                 id=0,
+                parent_id=None,
                 children=[],
                 language=self.language,
                 type="file",
-                tokens=self._count_tokens(code),
+                tokens=block_length,
             )
 
-        blocks = self._regex_split(code)
+        split_code = self._regex_split(code)
+        split_code = [t for s in split_code if (t := s.strip())]
         if self.maximize_block_length and not self.force_split:
             # Merge adjacent blocks back together to meet self.max_tokens
             grouper = CumulativeLengthGrouper(self.max_tokens, self.model)
-            blocks = ["\n".join(grp) for _, grp in groupby(blocks, key=grouper)]
+            split_code = ["\n".join(grp) for _, grp in groupby(split_code, key=grouper)]
 
-        components: List[CodeBlock] = []
+        seen_ids = set()
+
+        def id_gen():
+            block_id = f"<<<child_{len(seen_ids)}>>>"
+            seen_ids.add(block_id)
+            return block_id
+
+        blocks: List[CodeBlock] = []
         start_line = 0
-        for block in blocks:
+        for i, block in enumerate(split_code):
+            block_id = id_gen()
+            end_line = start_line + len(block.splitlines())
+
             # The entire block is under the token length
             if self._count_tokens(block) <= self.max_tokens:
-                end_line = start_line + len(block.splitlines())
                 code_block = CodeBlock(
                     code=block,
                     path=path,
@@ -139,65 +148,83 @@ class MumpsSplitter(Splitter):
                     start_line=start_line,
                     end_line=end_line,
                     depth=1,
-                    id=0,
+                    id=block_id,
+                    parent_id="root",
                     children=[],
                     language=self.language,
                     type="file",
                     tokens=self._count_tokens(block),
                 )
-                start_line = end_line
-                components.append(code_block)
             # The whole block is too long, split into segments
             else:
-                segments = self._split_block_into_segs(block)
-                for segment_id, segment in enumerate(segments):
-                    end_line = start_line + len(segment.splitlines())
+                segments = self._recurse_divide(block)
+                subblocks = []
+                seg_start_line = start_line
+                for j, segment in enumerate(segments):
+                    seg_end_line = seg_start_line + len(segment.splitlines())
                     code_block = CodeBlock(
                         code=segment,
                         path=path,
                         complete=True,
-                        start_line=start_line,
-                        end_line=end_line,
-                        depth=1,
-                        id=segment_id,
+                        start_line=seg_start_line,
+                        end_line=seg_end_line,
+                        depth=2,
+                        id=id_gen(),
+                        parent_id=block_id,
                         children=[],
                         language=self.language,
                         type="",
                         tokens=self._count_tokens(segment),
                     )
-                    start_line = end_line
-                    components.append(code_block)
-        main_block = ""
-        for i in range(len(components)):
-            main_block += f"{self.comment} <<<child_{i}>>>\n"
+                    seg_start_line = seg_end_line
+                    subblocks.append(code_block)
+                code_block = CodeBlock(
+                    code=None,
+                    path=path,
+                    complete=False,
+                    start_line=start_line,
+                    end_line=end_line,
+                    depth=1,
+                    id=block_id,
+                    parent_id="root",
+                    children=subblocks,
+                    language=self.language,
+                    type="file",
+                    tokens=0,
+                )
+            start_line = end_line
+            blocks.append(code_block)
+
         return CodeBlock(
-            code=main_block,
+            code=None,
             path=path,
             complete=False,
             start_line=0,
             end_line=len(code.splitlines()),
             depth=0,
-            id=0,
-            children=components,
+            id="root",
+            parent_id=None,
+            children=blocks,
             language=self.language,
             type="file",
-            tokens=self._count_tokens(code),
+            tokens=0,
         )
 
-    def _split_block_into_segs(self, block: str) -> Tuple[str]:
-        """Recursively splt the block string in half until each segment is smaller than
-        the token limit.
+    def _recurse_divide(self, code: str) -> List[str]:
+        """Recursively splt the code in half (by line) until each segment is
+        smaller than the token limit.
 
         Arguments:
-            block: The block to split into segments.
+            code: The block to split into segments.
 
         Returns:
-            A tuple of segments.
+            A list of segments.
         """
-        if self._count_tokens(block) <= self.max_tokens:
-            return (block,)
+        if self._count_tokens(code) <= self.max_tokens:
+            return [code]
         else:
-            split_idx = len(block) // 2
-            return self._split_block_into_segs(
-                block[:split_idx]
-            ) + self._split_block_into_segs(block[split_idx:])
+            lines = code.splitlines()
+            split_idx = len(lines) // 2
+            left = "\n".join(lines[:split_idx])
+            right = "\n".join(lines[split_idx:])
+            return self._recurse_divide(left) + self._recurse_divide(right)

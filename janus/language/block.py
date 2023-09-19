@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+import dataclasses
 from pathlib import Path
-from typing import ForwardRef, Tuple
+from typing import ForwardRef, Hashable, List, Optional
 
 from ..utils.logger import create_logger
 from .node import NodeType
@@ -8,7 +8,7 @@ from .node import NodeType
 log = create_logger(__name__)
 
 
-@dataclass
+@dataclasses.dataclass
 class CodeBlock:
     """A class that represents a functional block of code.
 
@@ -25,12 +25,12 @@ class CodeBlock:
               language-specific modules.
         tokens: The number of tokens in the code block.
         depth: The depth of the code block in the AST.
-        id: The id of the code block in the AST at depth `N`.
+        id: The id of the code block in the AST
         children: A tuple of child code blocks.
     """
 
-    code: str
-    path: Path
+    code: Optional[str]
+    path: Optional[Path]
     complete: bool
     start_line: int
     end_line: int
@@ -38,18 +38,129 @@ class CodeBlock:
     type: NodeType
     tokens: int
     depth: int
-    id: int
-    children: Tuple[ForwardRef("CodeBlock")]
+    id: Hashable
+    parent_id: Optional[Hashable]
+    children: List[ForwardRef("CodeBlock")]
+
+    @property
+    def n_descendents(self) -> int:
+        """The total number of descendents of this block
+
+        Returns:
+            The total number of descendents of this block
+        """
+        return 1 + sum(c.n_descendents for c in self.children)
+
+    @property
+    def height(self) -> int:
+        """The number of edges between this node and a leaf
+
+        Returns:
+            The number of edges between this node and a leaf
+        """
+        return 1 + max(c.height for c in self.children) if self.children else 0
+
+    @property
+    def total_tokens(self) -> int:
+        """The total tokens represented by this block and all its descendents
+
+        Returns:
+            The total number of tokens represented by this block and all its
+            descendents
+        """
+        return self.tokens + sum(c.total_tokens for c in self.children)
+
+    @property
+    def tree_str(self) -> str:
+        """A string representation of the tree with this block as the root
+
+        Returns:
+            A string representation of the tree with this block as the root
+        """
+        return "\n".join(
+            [
+                f"{'| '*self.depth}{self.id}{'*' if self.code is None else ''}",
+                *[c.tree_str for c in self.children],
+            ]
+        )
 
 
-@dataclass
+@dataclasses.dataclass
 class TranslatedCodeBlock(CodeBlock):
     """A class that represents the translated functional block of code.
 
     Attributes:
         original: The original code block.
         cost: The total cost to translate the original code block.
+        retries: The number of times translation had to be retried for this code
+        translated: Whether this block has been successfully translated
     """
 
     original: CodeBlock
-    cost: float
+    cost: float = 0.0
+    retries: int = 0
+    translated: bool = False
+
+    @classmethod
+    def from_original(
+        cls, original: CodeBlock, language: str
+    ) -> ForwardRef("TranslatedCodeBlock"):
+        """Create an "empty" `TranslatedCodeBlock` from the given original
+
+        Arguments:
+            original: The original code block
+            language: The language to translate to
+
+        Returns:
+            A `TranslatedCodeBlock` with the same attributes as the original, except
+            for `code`, `path`, `complete`, `language`, `tokens`, and `children`
+        """
+        block = cls(**dataclasses.asdict(original), original=original)
+        return dataclasses.replace(
+            block,
+            code=None,
+            path=None,
+            complete=False,
+            language=language,
+            tokens=0,
+            children=[],
+        )
+
+    @property
+    def total_cost(self) -> float:
+        """The total cost spent translating this block and all its descendents
+
+        Returns:
+            The total cost spent translating this block and all its descendents
+        """
+        return self.cost + sum(c.total_cost for c in self.children)
+
+    @property
+    def total_retries(self) -> int:
+        """The total number of retries that were required to translate this block and
+        all its descendents
+
+        Returns:
+            The total number of retries that were required to translate this block and
+        """
+        return self.retries + sum(c.total_retries for c in self.children)
+
+    @property
+    def total_input_tokens(self) -> int:
+        """The total number of input tokens represented by this block and all its
+        successfully-translated descendents
+
+        Returns:
+            The total number of input tokens represented by this block and all its
+        """
+        children_sum = sum(c.total_input_tokens for c in self.children)
+        return children_sum + (self.original.tokens if self.translated else 0)
+
+    @property
+    def translation_completeness(self) -> float:
+        """The share of the input that was successfully translated
+
+        Returns:
+            The share of the input that was successfully translated
+        """
+        return self.total_input_tokens / self.original.total_tokens

@@ -1,7 +1,8 @@
 import platform
+from math import sqrt
 from pathlib import Path
+from typing import Callable, Hashable, List, Optional
 
-import numpy as np
 import tree_sitter
 from git import Repo
 from langchain.schema.language_model import BaseLanguageModel
@@ -9,6 +10,7 @@ from langchain.schema.language_model import BaseLanguageModel
 from ..utils.logger import create_logger
 from .block import CodeBlock
 from .file import FileManager
+from .node import NodeType
 
 log = create_logger(__name__)
 
@@ -26,7 +28,9 @@ class Splitter(FileManager):
     transcoding.
     """
 
-    def __init__(self, language: str, model: BaseLanguageModel, max_tokens: int = 4096):
+    def __init__(
+        self, language: str, model: BaseLanguageModel, max_tokens: int = 4096
+    ) -> None:
         """
         Arguments:
             max_tokens: The maximum number of tokens to use for each functional block.
@@ -52,6 +56,7 @@ class Splitter(FileManager):
         path = Path(file)
         code = path.read_text()
         block = self._split(code, path)
+        log.info(block.tree_str)
         return block
 
     def _split(self, code: str | bytes, path: Path) -> CodeBlock:
@@ -72,28 +77,30 @@ class Splitter(FileManager):
 
         tree = self.parser.parse(code)
         cursor = tree.walk()
-        if self._count_tokens(text := cursor.node.text.decode()) < self.max_tokens:
-            block = CodeBlock(
-                code=text,
-                path=path,
-                complete=True,
-                start_line=0,
-                end_line=len(text.splitlines()),
-                depth=0,
-                id=0,
-                children=[],
-                language=self.language,
-                type="file",
-                tokens=self._count_tokens(text),
-            )
-            out_block = block
-        else:
-            node = cursor.node
-            out_block = self._recurse_split(node, path, 0, 0)
-        return out_block
+
+        seen_ids = set()
+
+        def id_gen() -> Hashable:
+            """Generate a unique id for each child block.
+
+            Returns:
+                A unique id for each child block.
+            """
+            block_id = f"<<<child_{len(seen_ids)}>>>"
+            seen_ids.add(block_id)
+            return block_id
+
+        return self._recurse_split(
+            node=cursor.node, path=path, depth=0, parent_id=None, id_gen=id_gen
+        )
 
     def _recurse_split(
-        self, node: tree_sitter.Node, path: Path, depth: int, id: int
+        self,
+        node: tree_sitter.Node,
+        path: Path,
+        depth: int,
+        parent_id: Optional[Hashable],
+        id_gen: Callable[[], Hashable],
     ) -> CodeBlock:
         """Recursively split the code into functional blocks.
 
@@ -101,17 +108,20 @@ class Splitter(FileManager):
             node: The current node in the tree.
             path: The path to the file containing the code.
             depth: The current depth of the recursion.
-            id: The current id of the child block at depth `N`.
+            parent_id: The id of the calling parent
+            id_gen: A function with which to generate child ids
 
         Returns:
-            A CodeBlock object.
+            A `CodeBlock` object.
         """
         # First get the text for all the siblings at this level
         text = node.text.decode()
+        length = self._count_tokens(text)
+        node_id = id_gen()
 
-        # If the text at the function input is less than the max tokens, then we can
-        # just return it as a CodeBlock with no children.
-        if self._count_tokens(text) < self.max_tokens:
+        # If the text at the function input is less than the max tokens, then
+        #  we can just return it as a CodeBlock with no children.
+        if length < self.max_tokens:
             return CodeBlock(
                 code=text,
                 path=path,
@@ -119,83 +129,191 @@ class Splitter(FileManager):
                 start_line=node.start_point[0],
                 end_line=node.end_point[0],
                 depth=depth,
-                id=id,
+                id=node_id,
+                parent_id=parent_id,
                 children=[],
                 language=self.language,
                 type=node.type,
-                tokens=self._count_tokens(text),
+                tokens=length,
             )
-        # Otherwise, we need to split the text into smaller blocks.
-        else:
-            # First, we need to find the child with the most tokens.
-            idxs = []
-            child_idx = 0
-            new_text = ""
-            max_idx = np.argmax(
-                [self._count_tokens(c.text.decode()) for c in node.children]
-            )
-            # Then, we need to find all of the child blocks that exceed the max tokens.
-            for i, child in enumerate(node.children):
-                child_text = child.text.decode()
-                # If the child is the one with the most tokens, then we need to split it
-                if i == max_idx:
-                    idxs.append(i)
-                    new_text += f"{self.comment} <<<child_{child_idx}>>>\n"
-                    child_idx += 1
-                # If the child is not the one with the most tokens, but it exceeds the
-                # max tokens, then we need to split it
-                elif self._count_tokens(child_text) > self.max_tokens:
-                    idxs.append(i)
-                    new_text += f"{self.comment} <<<child_{child_idx}>>>\n"
-                    child_idx += 1
-                # Otherwise, we can just add the child text to the new text
-                else:
-                    new_text += f"{child_text}\n"
 
-            if max_idx not in idxs:
-                idxs.append(max_idx)
+        node_groups = self._consolidate_nodes(node.children)
+        text_chunks = ["\n".join(c.text.decode() for c in group) for group in node_groups]
+        lengths = list(map(self._count_tokens, text_chunks))
+        remaining_indices = sorted(range(len(lengths)), key=lengths.__getitem__)
 
-            # If we get through all the children, but `new_text` still exceeds the token
-            # limit, then we need replace more children at this level.
-            while self._count_tokens(new_text) > self.max_tokens:
-                # Get the indices of the children that we haven't already added to the
-                # new text
-                temp_idxs = [i for i in range(len(node.children)) if i not in idxs]
-                # Get the child with the most tokens
-                max_child_idx = np.argmax(
-                    [
-                        self._count_tokens(node.children[i].text.decode())
-                        for i in temp_idxs
-                    ]
-                )
-                replaced_child_idx = temp_idxs[max_child_idx]
-                max_text = node.children[replaced_child_idx].text.decode()
-                # Replace the child with the most tokens with a placeholder
-                new_text = new_text.replace(
-                    max_text, f"{self.comment} <<<child_{child_idx}>>>\n"
-                )
-                idxs.append(replaced_child_idx)
-                child_idx += 1
+        code = "\n".join(text_chunks)
+        length = self._count_tokens(code)
 
-            children = []
-            for child_idx, i in enumerate(idxs):
-                children.append(
-                    self._recurse_split(node.children[i], path, depth + 1, child_idx)
+        # Replace child node code with placeholders until we can fit in context,
+        #  starting with the longest children
+        child_blocks = []
+        while remaining_indices and length > self.max_tokens:
+            # Remaining indices is sorted by code length, ascending
+            longest_index = remaining_indices.pop()
+            group = node_groups[longest_index]
+
+            # Multi-node groups are guaranteed to be within context length
+            if len(group) > 1:
+                code = "\n".join(c.text.decode() for c in group)
+                length = self._count_tokens(code)
+                child = CodeBlock(
+                    code=code,
+                    path=path,
+                    complete=True,
+                    start_line=group[0].start_point[0],
+                    end_line=group[-1].end_point[0],
+                    depth=depth + 1,
+                    id=id_gen(),
+                    parent_id=node_id,
+                    children=[],
+                    language=self.language,
+                    type=node.type,
+                    tokens=length,
                 )
 
+            # Recursively split singleton nodes
+            else:
+                child = self._recurse_split(
+                    node=group[0],
+                    path=path,
+                    depth=depth + 1,
+                    parent_id=node_id,
+                    id_gen=id_gen,
+                )
+            text_chunks[longest_index] = f"{self.comment} {child.id}"
+            child_blocks.append(child)
+
+            code = "\n".join(text_chunks)
+            length = self._count_tokens(code)
+
+        if length <= self.max_tokens:
             return CodeBlock(
-                code=new_text,
+                code=code,
                 path=path,
                 complete=False,
                 start_line=node.start_point[0],
                 end_line=node.end_point[0],
                 depth=depth,
-                id=id,
-                children=children,
+                id=node_id,
+                parent_id=parent_id,
+                children=child_blocks,
                 language=self.language,
                 type=node.type,
-                tokens=self._count_tokens(new_text),
+                tokens=length,
             )
+
+        # If we never brought code down to size, the entire file currently
+        #  consists of placeholders, and children need to be grouped
+        # TODO: It is extremely likely, but possible, that the resulting code
+        #  may still be too long to fit in the context window. Technically this
+        #  should be moved to a recursive function to handle that.
+        # Make sure the blocks are sorted by position in the file
+        grandchild_blocks = sorted(child_blocks, key=lambda b: b.start_line)
+        child_blocks = []
+
+        # Split into sqrt(N) groups
+        group_size = int(sqrt(len(grandchild_blocks)))
+        for i in range(0, len(grandchild_blocks), group_size):
+            group = grandchild_blocks[i : i + group_size]
+            code = "\n".join(text_chunks[i : i + group_size])
+            length = sum(c.tokens for c in group)
+            child = CodeBlock(
+                code=code,
+                path=path,
+                complete=False,
+                start_line=group[0].start_line,
+                end_line=group[-1].end_line,
+                depth=depth,
+                id=id_gen(),
+                parent_id=node_id,
+                children=group,
+                language=self.language,
+                type=NodeType("subdivision"),
+                tokens=length,
+            )
+
+            # Update grandchildren's parent ids to the inserted child's id
+            for grandchild in child.children:
+                grandchild.parent_id = child.id
+
+            child_blocks.append(child)
+
+        # Increase the depth of all ancestors
+        descendents = child_blocks.copy()
+        while descendents:
+            b = descendents.pop()
+            b.depth += 1
+            descendents.extend(b.children)
+
+        return CodeBlock(
+            code=None,
+            path=path,
+            complete=False,
+            start_line=node.start_point[0],
+            end_line=node.end_point[0],
+            depth=depth,
+            id=node_id,
+            parent_id=parent_id,
+            children=child_blocks,
+            language=self.language,
+            type=node.type,
+            tokens=0,
+        )
+
+    def _consolidate_nodes(
+        self, nodes: List[tree_sitter.Node]
+    ) -> List[List[tree_sitter.Node]]:
+        """Consolidate a list of tree_sitter nodes into groups. Each group should fit
+        into the context window, with the exception of single-node groups which may be
+        too long to fit on their own. This ensures that nodes with many many short
+        children are not translated one child at a time, instead packing as many children
+        adjacent snippets as possible into context.
+
+        This function attempts to efficiently pack nodes, but is not optimal.
+
+        Arguments:
+            nodes: A list of tree_sitter nodes
+
+        Returns:
+            A list of lists. Each list consists of one or more nodes. This structure is
+            ordered such that, were it flattened, all nodes would be sorted according to
+            appearance in the original file.
+        """
+        nodes = sorted(nodes, key=lambda node: node.start_point)
+        text_chunks = [child.text.decode() for child in nodes]
+        lengths = list(map(self._count_tokens, text_chunks))
+
+        # Estimate the length of each adjacent pair were they merged
+        adj_sums = [lengths[i] + lengths[i + 1] for i in range(len(lengths) - 1)]
+
+        groups = [[n] for n in nodes]
+        while len(groups) > 1 and min(adj_sums) <= self.max_tokens:
+            # Get the indices of the adjacent nodes that would result in the
+            #  smallest possible merged snippet
+            i0 = int(min(range(len(adj_sums)), key=adj_sums.__getitem__))
+            i1 = i0 + 1
+
+            # Merge the pair of node groups
+            groups[i0 : i1 + 1] = [groups[i0] + groups[i1]]
+
+            # Recalculate the length. We can't simply use the adj_sum, because
+            #  it is an underestimate due to the added newline.
+            #  In testing, the length of a merged pair is between 2 and 3 tokens
+            #  longer than the sum of the individual lengths, on average.
+            text_chunks[i0 : i1 + 1] = [text_chunks[i0] + "\n" + text_chunks[i1]]
+            lengths[i0 : i1 + 1] = [self._count_tokens(text_chunks[i0])]
+
+            # The potential merge length for this pair is removed
+            adj_sums.pop(i0)
+
+            # Update adjacent sum estimates
+            if i0 > 0:
+                adj_sums[i0 - 1] = lengths[i0 - 1] + lengths[i0]
+            if i0 < len(adj_sums):
+                adj_sums[i0] += lengths[i0] + lengths[i1]
+
+        return groups
 
     def _count_tokens(self, code: str) -> int:
         """Count the number of tokens in the given code.
