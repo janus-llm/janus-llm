@@ -1,7 +1,7 @@
 import re
 from itertools import count, groupby
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Callable, Hashable
 
 from langchain.schema.language_model import BaseLanguageModel
 
@@ -10,37 +10,9 @@ from ..block import CodeBlock
 from ..combine import Combiner
 from ..splitter import Splitter
 from .patterns import MumpsLabeledBlockPattern
+from ..node import ASTNode, NodeType
 
 log = create_logger(__name__)
-
-
-class CumulativeLengthGrouper:
-    """A helper class for merging code up to a maximum token length.
-    Expected usage:
-        grouper = CumulativeLengthGrouper(2048, tiktoken.encoding_for_model(model))
-        groups = itertools.groupby(blocks, key=grouper)
-        blocks = ['\n'.join(g) for _, g in groups]
-    """
-
-    tokenizer = None
-
-    def __init__(self, max_tokens, model):
-        self.max_tokens = max_tokens
-        self.model: BaseLanguageModel = model
-
-        self.group_ctr = count()
-        self.cur_grp = next(self.group_ctr)
-        self.cum_len = 0
-
-    def __call__(self, block):
-        block_length = self.model.get_num_tokens(block)
-        self.cum_len += block_length
-        # If accumulated length exceeds block limit...
-        if self.cum_len > self.max_tokens:
-            # Move to new group
-            self.cur_grp = next(self.group_ctr)
-            self.cum_len = block_length
-        return self.cur_grp
 
 
 class MumpsCombiner(Combiner):
@@ -90,141 +62,69 @@ class MumpsSplitter(Splitter):
     def _regex_split(cls, code: str):
         return re.split(cls.patterns[0].start, code)
 
-    def _split(self, code: str, path: Path) -> CodeBlock:
-        """Split the given file into functional code blocks.
-
-        Arguments:
-            code: A string containing the code of the entire file to split
-            path: The path to the code
-
-        Returns:
-            A File dataclass containing the path to the file and all of its code blocks
-        """
-        block_length = self._count_tokens(code)
-
-        # The whole file is one block
-        if block_length < self.max_tokens and not self.force_split:
-            return CodeBlock(
-                code=code,
-                path=path,
-                complete=True,
-                start_line=0,
-                end_line=len(code.splitlines()),
-                depth=0,
-                id=0,
-                parent_id=None,
-                children=[],
-                language=self.language,
-                type="file",
-                tokens=block_length,
-            )
+    def _get_ast(self, code: str | bytes) -> ASTNode:
+        code = str(code)
 
         split_code = self._regex_split(code)
-        split_code = [t for s in split_code if (t := s.strip())]
-        if self.maximize_block_length and not self.force_split:
-            # Merge adjacent blocks back together to meet self.max_tokens
-            grouper = CumulativeLengthGrouper(self.max_tokens, self.model)
-            split_code = ["\n".join(grp) for _, grp in groupby(split_code, key=grouper)]
-
-        seen_ids = set()
-
-        def id_gen():
-            block_id = f"<<<child_{len(seen_ids)}>>>"
-            seen_ids.add(block_id)
-            return block_id
-
-        blocks: List[CodeBlock] = []
+        prefixes = ['']+split_code[1::2]
+        chunks = split_code[::2]
+        suffixes = split_code[1::2]
         start_line = 0
-        for i, block in enumerate(split_code):
-            block_id = id_gen()
-            end_line = start_line + len(block.splitlines())
+        start_byte = 0
+        nodes = []
+        for prefix, chunk, suffix in zip(prefixes, chunks, suffixes):
+            start_byte += len(bytes(prefix, "utf-8"))
+            start_line += prefix.count('\n')
+            end_byte = start_byte + len(bytes(chunk, "utf-8"))
+            end_line = start_line + chunk.count('\n')
+            end_char = len(chunk.rsplit('\n', 1)[-1])
 
-            # The entire block is under the token length
-            if self._count_tokens(block) <= self.max_tokens:
-                code_block = CodeBlock(
-                    code=block,
-                    path=path,
-                    complete=True,
-                    start_line=start_line,
-                    end_line=end_line,
-                    depth=1,
-                    id=block_id,
-                    parent_id="root",
-                    children=[],
-                    language=self.language,
-                    type="file",
-                    tokens=self._count_tokens(block),
-                )
-            # The whole block is too long, split into segments
-            else:
-                segments = self._recurse_divide(block)
-                subblocks = []
-                seg_start_line = start_line
-                for j, segment in enumerate(segments):
-                    seg_end_line = seg_start_line + len(segment.splitlines())
-                    code_block = CodeBlock(
-                        code=segment,
-                        path=path,
-                        complete=True,
-                        start_line=seg_start_line,
-                        end_line=seg_end_line,
-                        depth=2,
-                        id=id_gen(),
-                        parent_id=block_id,
-                        children=[],
-                        language=self.language,
-                        type="",
-                        tokens=self._count_tokens(segment),
-                    )
-                    seg_start_line = seg_end_line
-                    subblocks.append(code_block)
-                code_block = CodeBlock(
-                    code=None,
-                    path=path,
-                    complete=False,
-                    start_line=start_line,
-                    end_line=end_line,
-                    depth=1,
-                    id=block_id,
-                    parent_id="root",
-                    children=subblocks,
-                    language=self.language,
-                    type="file",
-                    tokens=0,
-                )
+            first_label = re.search(f"^(\w+)", chunk)
+            name = first_label.groups(1)[0] if first_label is not None else 'anon'
+
+            nodes.append(ASTNode(
+                text=chunk,
+                name=name,
+                start_point=(start_line, 0),
+                end_point=(end_line, end_char),
+                start_byte=start_byte,
+                end_byte=end_byte,
+                prefix=prefix,
+                suffix=suffix,
+                type=NodeType('subroutine'),
+                children=[]
+            ))
+            start_byte = end_byte
             start_line = end_line
-            blocks.append(code_block)
-
-        return CodeBlock(
-            code=None,
-            path=path,
-            complete=False,
-            start_line=0,
-            end_line=len(code.splitlines()),
-            depth=0,
-            id="root",
-            parent_id=None,
-            children=blocks,
-            language=self.language,
-            type="file",
-            tokens=0,
+        return ASTNode(
+                text=code,
+                name="root",
+                start_point=(0, 0),
+                end_point=(len(code.split('\n')), 0),
+                start_byte=0,
+                end_byte=len(bytes(code, "utf-8")),
+                prefix='',
+                suffix='',
+                type=NodeType('routine'),
+                children=nodes
         )
 
-    def _recurse_divide(self, code: str) -> List[str]:
-        """Recursively splt the code in half (by line) until each segment is
-        smaller than the token limit.
+    def _get_id_function(self) -> Callable[[ASTNode], Hashable]:
+        def id_gen(node: ASTNode) -> Hashable:
+            """Generate a unique id for each child block.
 
-        Arguments:
-            code: The block to split into segments.
+            Returns:
+                A unique id for each child block.
+            """
+            return f"<{node.name}>"
+        return id_gen
 
-        Returns:
-            A list of segments.
-        """
-        if self._count_tokens(code) <= self.max_tokens:
-            return [code]
-        else:
-            lines = code.splitlines()
-            split_idx = len(lines) // 2
-            left = "\n".join(lines[:split_idx])
-            right = "\n".join(lines[split_idx:])
-            return self._recurse_divide(left) + self._recurse_divide(right)
+    def _split(self, code: str | bytes, path: Path) -> CodeBlock:
+        root = self._get_ast(code)
+        return self._recurse_split(
+            node=root,
+            path=path,
+            depth=0,
+            parent_id=None,
+            use_placeholders=False
+        )

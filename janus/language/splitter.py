@@ -1,7 +1,7 @@
 import platform
 from math import sqrt
 from pathlib import Path
-from typing import Callable, Hashable, List, Optional
+from typing import Callable, Hashable, List, Optional, Tuple
 
 import tree_sitter
 from git import Repo
@@ -10,7 +10,7 @@ from langchain.schema.language_model import BaseLanguageModel
 from ..utils.logger import create_logger
 from .block import CodeBlock
 from .file import FileManager
-from .node import NodeType
+from .node import NodeType, ASTNode
 
 log = create_logger(__name__)
 
@@ -53,11 +53,35 @@ class Splitter(FileManager):
         Returns:
             A `CodeBlock` made up of nested `CodeBlock`s.
         """
+        self.id_gen = self._get_id_function()
         path = Path(file)
         code = path.read_text()
         block = self._split(code, path)
         log.info(block.tree_str)
         return block
+
+    def _get_ast(self, code: str | bytes) -> ASTNode:
+        if isinstance(code, str):
+            code = bytes(code, "utf-8")
+
+        tree = self.parser.parse(code)
+        cursor = tree.walk()
+        root = ASTNode.from_tree_sitter_node(cursor.node, code)
+        return root
+
+    def _get_id_function(self) -> Callable[[ASTNode], Hashable]:
+        seen_ids = set()
+        def id_gen(node: ASTNode) -> Hashable:
+            """Generate a unique id for each child block.
+
+            Returns:
+                A unique id for each child block.
+            """
+            return f"<{node.name}>"
+            block_id = f"<<<child_{len(seen_ids)}>>>"
+            seen_ids.add(block_id)
+            return block_id
+        return id_gen
 
     def _split(self, code: str | bytes, path: Path) -> CodeBlock:
         """Use tree-sitter to walk through the code and split into functional code blocks.
@@ -72,35 +96,19 @@ class Splitter(FileManager):
         Returns:
             A nested `CodeBlock`.
         """
-        if isinstance(code, str):
-            code = bytes(code, "utf-8")
-
-        tree = self.parser.parse(code)
-        cursor = tree.walk()
-
-        seen_ids = set()
-
-        def id_gen() -> Hashable:
-            """Generate a unique id for each child block.
-
-            Returns:
-                A unique id for each child block.
-            """
-            block_id = f"<<<child_{len(seen_ids)}>>>"
-            seen_ids.add(block_id)
-            return block_id
+        root = self._get_ast(code)
 
         return self._recurse_split(
-            node=cursor.node, path=path, depth=0, parent_id=None, id_gen=id_gen
+            node=root, path=path, depth=0, parent_id=None, use_placeholders=False
         )
 
     def _recurse_split(
         self,
-        node: tree_sitter.Node,
+        node: ASTNode,
         path: Path,
         depth: int,
         parent_id: Optional[Hashable],
-        id_gen: Callable[[], Hashable],
+        use_placeholders: bool = True,
     ) -> CodeBlock:
         """Recursively split the code into functional blocks.
 
@@ -109,15 +117,15 @@ class Splitter(FileManager):
             path: The path to the file containing the code.
             depth: The current depth of the recursion.
             parent_id: The id of the calling parent
-            id_gen: A function with which to generate child ids
+            use_placeholders: Whether to use placeholders
 
         Returns:
             A `CodeBlock` object.
         """
         # First get the text for all the siblings at this level
-        text = node.text.decode()
+        text = node.text
         length = self._count_tokens(text)
-        node_id = id_gen()
+        node_id = self.id_gen(node)
 
         # If the text at the function input is less than the max tokens, then
         #  we can just return it as a CodeBlock with no children.
@@ -138,7 +146,7 @@ class Splitter(FileManager):
             )
 
         node_groups = self._consolidate_nodes(node.children)
-        text_chunks = ["\n".join(c.text.decode() for c in group) for group in node_groups]
+        text_chunks = ["\n".join(c.text for c in group) for group in node_groups]
         lengths = list(map(self._count_tokens, text_chunks))
         remaining_indices = sorted(range(len(lengths)), key=lengths.__getitem__)
 
@@ -148,48 +156,29 @@ class Splitter(FileManager):
         # Replace child node code with placeholders until we can fit in context,
         #  starting with the longest children
         child_blocks = []
-        while remaining_indices and length > self.max_tokens:
+        while remaining_indices and (length > self.max_tokens or not use_placeholders):
             # Remaining indices is sorted by code length, ascending
             longest_index = remaining_indices.pop()
             group = node_groups[longest_index]
+            group_node = ASTNode.merge_nodes(group)
 
-            # Multi-node groups are guaranteed to be within context length
-            if len(group) > 1:
-                code = "\n".join(c.text.decode() for c in group)
-                length = self._count_tokens(code)
-                child = CodeBlock(
-                    code=code,
-                    path=path,
-                    complete=True,
-                    start_line=group[0].start_point[0],
-                    end_line=group[-1].end_point[0],
-                    depth=depth + 1,
-                    id=id_gen(),
-                    parent_id=node_id,
-                    children=[],
-                    language=self.language,
-                    type=node.type,
-                    tokens=length,
-                )
+            child = self._recurse_split(
+                node=group_node,
+                path=path,
+                depth=depth + 1,
+                parent_id=node_id,
+                use_placeholders=use_placeholders
+            )
 
-            # Recursively split singleton nodes
-            else:
-                child = self._recurse_split(
-                    node=group[0],
-                    path=path,
-                    depth=depth + 1,
-                    parent_id=node_id,
-                    id_gen=id_gen,
-                )
             text_chunks[longest_index] = f"{self.comment} {child.id}"
             child_blocks.append(child)
 
             code = "\n".join(text_chunks)
             length = self._count_tokens(code)
 
-        if length <= self.max_tokens:
+        if length <= self.max_tokens or not use_placeholders:
             return CodeBlock(
-                code=code,
+                code=code if use_placeholders else None,
                 path=path,
                 complete=False,
                 start_line=node.start_point[0],
@@ -200,7 +189,7 @@ class Splitter(FileManager):
                 children=child_blocks,
                 language=self.language,
                 type=node.type,
-                tokens=length,
+                tokens=length if use_placeholders else 0,
             )
 
         # If we never brought code down to size, the entire file currently
@@ -225,7 +214,7 @@ class Splitter(FileManager):
                 start_line=group[0].start_line,
                 end_line=group[-1].end_line,
                 depth=depth,
-                id=id_gen(),
+                id=self.id_gen(node),
                 parent_id=node_id,
                 children=group,
                 language=self.language,
@@ -262,8 +251,8 @@ class Splitter(FileManager):
         )
 
     def _consolidate_nodes(
-        self, nodes: List[tree_sitter.Node]
-    ) -> List[List[tree_sitter.Node]]:
+        self, nodes: List[ASTNode]
+    ) -> List[List[ASTNode]]:
         """Consolidate a list of tree_sitter nodes into groups. Each group should fit
         into the context window, with the exception of single-node groups which may be
         too long to fit on their own. This ensures that nodes with many many short
@@ -281,7 +270,7 @@ class Splitter(FileManager):
             appearance in the original file.
         """
         nodes = sorted(nodes, key=lambda node: node.start_point)
-        text_chunks = [child.text.decode() for child in nodes]
+        text_chunks = [child.text for child in nodes]
         lengths = list(map(self._count_tokens, text_chunks))
 
         # Estimate the length of each adjacent pair were they merged

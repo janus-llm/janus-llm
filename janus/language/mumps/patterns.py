@@ -72,7 +72,7 @@ optional_inline_comment = "[\t ]+(?:;.*)?\n|[\t ]*\n"
 
 # Labels start on column 1
 label_start = r"[^ \t;$]"
-routine_start = rf"(?<!\n)\n(?={label_start})"
+routine_start = rf"((?<!\n)\n(?={label_start}))"
 routine_end = rf"[ \t](?:Q(?:UIT)?|H(?:ALT)?){optional_inline_comment}"
 
 # This is meant to split routines such that comments preceding it are included
