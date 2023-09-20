@@ -1,12 +1,10 @@
 import re
-from itertools import count, groupby
-from pathlib import Path
-from typing import List, Tuple, Callable, Hashable
+from typing import Tuple, Callable, Hashable
+from collections import defaultdict
 
 from langchain.schema.language_model import BaseLanguageModel
 
 from ...utils.logger import create_logger
-from ..block import CodeBlock
 from ..combine import Combiner
 from ..splitter import Splitter
 from .patterns import MumpsLabeledBlockPattern
@@ -34,31 +32,44 @@ class MumpsSplitter(Splitter):
 
     patterns: Tuple[MumpsLabeledBlockPattern, ...] = (MumpsLabeledBlockPattern(),)
 
-    def __init__(
-        self,
-        model: BaseLanguageModel,
-        max_tokens: int = 4096,
-    ) -> None:
+    def __init__(self, model: BaseLanguageModel, max_tokens: int = 4096):
         """Initialize a MumpsSplitter instance.
 
         Arguments:
             max_tokens: The maximum number of tokens supported by the model
         """
+        super().__init__(
+            language='mumps',
+            model=model,
+            max_tokens=max_tokens,
+            use_placeholders=False,
+        )
+
         # MUMPS code tends to take about 2/3 the space of Python
         self.max_tokens: int = int(max_tokens * 2 / 5)
-        self.model = model
-        self.language: str = "mumps"
-        self.comment: str = ";"
-        super().__init__(max_tokens=max_tokens, model=model, language='mumps')
 
-    @classmethod
-    def _regex_split(cls, code: str):
-        return re.split(cls.patterns[0].start, code)
+    def _reset_id_function(self) -> None:
+        self.seen_ids = defaultdict(list)
+
+    def _get_id_function(self) -> Callable[[ASTNode], Hashable]:
+        def id_gen(node: ASTNode) -> Hashable:
+            """Generate a unique id for each child block.
+
+            Returns:
+                A unique id for each child block.
+            """
+            return f"<{node.name}>"
+        return id_gen
+
+    def _generate_id(self, node, *args, **kwargs) -> Hashable:
+        block_id = f"<{node.name}-{len(self.seen_ids[node.name])+1}>"
+        self.seen_ids[node.name].append(block_id)
+        return block_id
 
     def _get_ast(self, code: str | bytes) -> ASTNode:
         code = str(code)
 
-        split_code = self._regex_split(code)
+        split_code = re.split(self.patterns[0].start, code)
         prefixes = ['']+split_code[1::2]
         chunks = split_code[::2]
         suffixes = split_code[1::2]
@@ -100,24 +111,4 @@ class MumpsSplitter(Splitter):
                 suffix='',
                 type=NodeType('routine'),
                 children=nodes
-        )
-
-    def _get_id_function(self) -> Callable[[ASTNode], Hashable]:
-        def id_gen(node: ASTNode) -> Hashable:
-            """Generate a unique id for each child block.
-
-            Returns:
-                A unique id for each child block.
-            """
-            return f"<{node.name}>"
-        return id_gen
-
-    def _split(self, code: str | bytes, path: Path) -> CodeBlock:
-        root = self._get_ast(code)
-        return self._recurse_split(
-            node=root,
-            path=path,
-            depth=0,
-            parent_id=None,
-            use_placeholders=False
         )

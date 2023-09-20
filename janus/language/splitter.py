@@ -1,10 +1,7 @@
-import platform
 from math import sqrt
 from pathlib import Path
-from typing import Callable, Hashable, List, Optional, Tuple
+from typing import Hashable, List, Optional
 
-import tree_sitter
-from git import Repo
 from langchain.schema.language_model import BaseLanguageModel
 
 from ..utils.logger import create_logger
@@ -29,20 +26,24 @@ class Splitter(FileManager):
     """
 
     def __init__(
-        self, language: str, model: BaseLanguageModel, max_tokens: int = 4096
-    ) -> None:
+        self,
+        language: str,
+        model: BaseLanguageModel,
+        max_tokens: int = 4096,
+        use_placeholders: bool = True
+    ):
         """
         Arguments:
             max_tokens: The maximum number of tokens to use for each functional block.
             model: The name of the model to use for translation.
         """
         super().__init__(language=language)
+        self.model = model
+        self.use_placeholders = use_placeholders
+
         # Divide max_tokens by 3 because we want to leave just as much space for the
         # prompt as for the translated code.
         self.max_tokens: int = max_tokens // 3
-
-        self.parser: tree_sitter.Parser = tree_sitter.Parser()
-        self.model = model
 
     def split(self, file: Path | str) -> CodeBlock:
         """Split the given file into functional code blocks.
@@ -53,35 +54,23 @@ class Splitter(FileManager):
         Returns:
             A `CodeBlock` made up of nested `CodeBlock`s.
         """
-        self.id_gen = self._get_id_function()
+        self._reset_id_function()
         path = Path(file)
         code = path.read_text()
         block = self._split(code, path)
-        log.info(block.tree_str)
+        log.debug(f"Tree Structure:\n{block.tree_str}")
         return block
 
+    def _reset_id_function(self) -> None:
+        self.seen_ids = set()
+
+    def _generate_id(self, *args, **kwargs) -> Hashable:
+        block_id = f"<<<child_{len(self.seen_ids)}>>>"
+        self.seen_ids.add(block_id)
+        return block_id
+
     def _get_ast(self, code: str | bytes) -> ASTNode:
-        if isinstance(code, str):
-            code = bytes(code, "utf-8")
-
-        tree = self.parser.parse(code)
-        cursor = tree.walk()
-        root = ASTNode.from_tree_sitter_node(cursor.node, code)
-        return root
-
-    def _get_id_function(self) -> Callable[[ASTNode], Hashable]:
-        seen_ids = set()
-        def id_gen(node: ASTNode) -> Hashable:
-            """Generate a unique id for each child block.
-
-            Returns:
-                A unique id for each child block.
-            """
-            return f"<{node.name}>"
-            block_id = f"<<<child_{len(seen_ids)}>>>"
-            seen_ids.add(block_id)
-            return block_id
-        return id_gen
+        raise NotImplementedError()
 
     def _split(self, code: str | bytes, path: Path) -> CodeBlock:
         """Use tree-sitter to walk through the code and split into functional code blocks.
@@ -97,9 +86,12 @@ class Splitter(FileManager):
             A nested `CodeBlock`.
         """
         root = self._get_ast(code)
-
         return self._recurse_split(
-            node=root, path=path, depth=0, parent_id=None, use_placeholders=False
+            node=root,
+            path=path,
+            depth=0,
+            parent_id=None,
+            use_placeholders=self.use_placeholders
         )
 
     def _recurse_split(
@@ -125,7 +117,7 @@ class Splitter(FileManager):
         # First get the text for all the siblings at this level
         text = node.text
         length = self._count_tokens(text)
-        node_id = self.id_gen(node)
+        node_id = self._generate_id(node)
 
         # If the text at the function input is less than the max tokens, then
         #  we can just return it as a CodeBlock with no children.
@@ -214,7 +206,7 @@ class Splitter(FileManager):
                 start_line=group[0].start_line,
                 end_line=group[-1].end_line,
                 depth=depth,
-                id=self.id_gen(node),
+                id=self._generate_id(node),
                 parent_id=node_id,
                 children=group,
                 language=self.language,
@@ -315,54 +307,3 @@ class Splitter(FileManager):
         """
         return self.model.get_num_tokens(code)
 
-    def _git_clone(self, repository_url: str, destination_folder: Path | str) -> None:
-        try:
-            Repo.clone_from(repository_url, destination_folder)
-            log.debug(f"{repository_url} cloned to {destination_folder}")
-        except Exception as e:
-            log.error(f"Error: {e}")
-            raise e
-
-    def _create_parser(
-        self, so_file: Path | str, github_url: str, tree_sitter_lang_dir: str
-    ) -> None:
-        """Create the parser for the given language.
-
-        Arguments:
-            so_file: The path to the so file for the language.
-        """
-        tree_sitter_dir = Path.home() / ".tree-sitter"
-        tree_sitter_dir.mkdir(exist_ok=True)
-        lang_dir = tree_sitter_dir / tree_sitter_lang_dir
-
-        if not lang_dir.exists():
-            self._git_clone(github_url, lang_dir)
-
-        tree_sitter.Language.build_library(
-            # Store the library in the `build` directory
-            str(so_file),
-            [str(lang_dir)],
-        )
-
-    def _load_parser(self, build_dir: Path, github_url: str) -> None:
-        """Load the parser for the given language.
-
-        Sets `self.parser`'s language to the one specified in `self.language`.
-
-        Arguments:
-            build_dir: The directory to store the so file in.
-            github_url: The url to the tree-sitter GitHub repository for the language.
-        """
-        so_filename = (
-            f"{self.language}_parser_{platform.system()}_{platform.processor()}.so"
-        )
-        so_file = (build_dir / so_filename).__str__()
-        try:
-            self.parser.set_language(tree_sitter.Language(so_file, self.language))
-        except OSError:
-            log.warning(
-                f"Could not load {so_file}, building one for {platform.system()} "
-                f"system, with {platform.processor()} processor"
-            )
-            self._create_parser(so_file, github_url, f"tree-sitter-{self.language}")
-            self._load_parser(build_dir, github_url)

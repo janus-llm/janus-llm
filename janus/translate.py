@@ -286,7 +286,7 @@ class Translator:
 
             log.warning(f"[{identifier}] Output not complete")
 
-        log.debug(f"[[{identifier}] Output code:\n{best_seen}")
+        log.debug(f"[{identifier}] Output code:\n{best_seen}")
 
         block.code = best_seen
         block.tokens = self._llm.get_num_tokens(best_seen)
