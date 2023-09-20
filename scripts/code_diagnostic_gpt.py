@@ -59,32 +59,32 @@ messages.append(dict(role='system', content=system_prompt))
 if args.give_example:
     example_input = """
 def is_prime(num)
-    if num == 1:
-        print(num, "is not a prime number"))
-    elif num > 1:
-    # check for factors
-    for i in range(2, num):
-        if (num %% i) == 0:
-            Return False
-            break
-       else:
-           return true
-    
-    # if input number is less than
-    # or equal to 1, it is not prime
+  if num == 1:
+    print(num, "is not a prime number"))
+  elif num > 1:
+  # check for factors
+  for i in range(2, num):
+    if (num %% i) == 0:
+      Return False
+      break
     else:
-       return False
-       
-    elif num < 1:
-        return False
+      return true
+
+  # if input number is less than
+  # or equal to 1, it is not prime
+  else:
+    return False
+
+  elif num < 1:
+    return False
 """
     example_output = """
 1. line 1: `def is_prime(num)`: Missing expected character ':'
-2. line 3: `        print(num, "is not a prime number"))`: Unexpected character ')'
-3. line 6: `    for i in range(2, num):`: Expected an indented block after 'elif' statement
-4. line 7: `           if (num %% i) == 0:`: Invalid operator '%%'
-5. line 8: `               Return False`: Invalid keyword 'Return'
-6. line 18: `    elif num < 1:`: Unexpected 'elif' with no 'if'
+2. line 3: `    print(num, "is not a prime number"))`: Unexpected character ')'
+3. line 6: `  for i in range(2, num):`: Expected an indented block after 'elif' statement
+4. line 7: `       if (num %% i) == 0:`: Invalid operator '%%'
+5. line 8: `         Return False`: Invalid keyword 'Return'
+6. line 18: `  elif num < 1:`: Unexpected 'elif' with no 'if'
 """
     # Prepend each line with a line number if indicated
     if args.number_lines:
@@ -146,7 +146,7 @@ if __name__ == '__main__':
             tok = delta.get('content', None)
             if tok is not None:
                 print(tok, end="")
-    except:
+    except Exception:
         print()
         raise
 

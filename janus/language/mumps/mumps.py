@@ -83,7 +83,7 @@ class MumpsSplitter(Splitter):
             end_line = start_line + chunk.count('\n')
             end_char = len(chunk.rsplit('\n', 1)[-1])
 
-            first_label = re.search(f"^(\w+)", chunk)
+            first_label = re.search(r"^(\w+)", chunk)
             name = first_label.groups(1)[0] if first_label is not None else 'anon'
 
             nodes.append(ASTNode(

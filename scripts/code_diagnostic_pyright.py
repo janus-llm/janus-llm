@@ -5,6 +5,7 @@ import pandas as pd
 from pathlib import Path
 import re
 
+
 def get_line_analysis(output_dir: Path | str) -> pd.DataFrame:
     """
     Run pyright on a given directory and return the results.
@@ -55,12 +56,23 @@ def get_line_analysis(output_dir: Path | str) -> pd.DataFrame:
 
     # Format rules, convert messages to rules where necessary
     line_df['rule'] = line_df.rule.str.replace(r'^report', '', regex=True)
-    line_df.loc[line_df.message.str.contains('assigned before global declaration'), 'rule'] = "UndefinedGlobalDeclaration"
-    line_df.loc[line_df.message.str.contains('No binding for nonlocal'), 'rule'] = "UndefinedNonlocalDeclaration"
-    line_df.loc[line_df.message.str.contains('Duplicate parameter'), 'rule'] = "DuplicateParameterWarning"
-    line_df.loc[line_df.message.str.contains('f-string'), 'rule'] = "IllFormattedFStringError"
-    line_df.loc[line_df.message.str.contains('Too many type arguments'), 'rule'] = "TooManyTypeArgumentsWarning"
-    line_df.loc[line_df.rule.isna(), 'rule'] = (
+    line_df.loc[
+        line_df.message.str.contains('assigned before global declaration'),
+        'rule'] = "UndefinedGlobalDeclaration"
+    line_df.loc[
+        line_df.message.str.contains('No binding for nonlocal'),
+        'rule'] = "UndefinedNonlocalDeclaration"
+    line_df.loc[
+        line_df.message.str.contains('Duplicate parameter'),
+        'rule'] = "DuplicateParameterWarning"
+    line_df.loc[
+        line_df.message.str.contains('f-string'),
+        'rule'] = "IllFormattedFStringError"
+    line_df.loc[
+        line_df.message.str.contains('Too many type arguments'),
+        'rule'] = "TooManyTypeArgumentsWarning"
+    line_df.loc[
+        line_df.rule.isna(), 'rule'] = (
         line_df[line_df.rule.isna()].message
             .replace({
                 r'\.': 'period',
@@ -79,6 +91,7 @@ def get_line_analysis(output_dir: Path | str) -> pd.DataFrame:
     line_df['rule'] = line_df.rule + line_df.severity.str.title()
 
     return line_df
+
 
 def get_file_analysis(input_dir: str, output_dir: str) -> pd.DataFrame:
     """

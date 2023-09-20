@@ -306,4 +306,3 @@ class Splitter(FileManager):
             The number of tokens in the given code.
         """
         return self.model.get_num_tokens(code)
-

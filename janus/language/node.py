@@ -25,7 +25,11 @@ class ASTNode(object):
     name: Optional[str] = None
 
     @classmethod
-    def from_tree_sitter_node(cls, node: tree_sitter.Node, original: bytes) -> ForwardRef("ASTNode"):
+    def from_tree_sitter_node(
+        cls,
+        node: tree_sitter.Node,
+        original: bytes
+    ) -> ForwardRef("ASTNode"):
         prefix_start = 0
         if node.prev_sibling is not None:
             prefix_start = node.prev_sibling.end_byte

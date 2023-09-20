@@ -95,7 +95,6 @@ class Translator:
             # Document inline should output the same as the input
             self.target_language = self.source_language
 
-        source_suffix = LANGUAGES[self.source_language]["suffix"]
         target_suffix = LANGUAGES[self.target_language]["suffix"]
 
         input_paths = input_directory.glob(self._glob)

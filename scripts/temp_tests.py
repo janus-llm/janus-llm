@@ -36,17 +36,17 @@ input_dir = args.input_dir
 output_dir = Path(args.output_dir)
 
 iterations = 10
-temperatures = [i/10 for i in range(0,11)]  
+temperatures = [i/10 for i in range(0, 11)]
 
 kwargs = dict(
-    model = 'gpt-3.5-turbo-16k',
+    model='gpt-3.5-turbo-16k',
     source_language='mumps',
     target_language='python',
     target_version='3.10',
     max_prompts=10,
     prompt_template='simple',
     maximize_block_length=False,
-    force_split=False
+    force_split=False,
 )
 
 for i in range(iterations):
@@ -57,6 +57,6 @@ for i in range(iterations):
             model_arguments=dict(temperature=temperature),
             **kwargs
         )
-        outdir = output_dir / f"model_temperature"/ f"gpt-4_{temperature}" / f"{i}"
+        outdir = output_dir / "model_temperature" / f"gpt-4_{temperature}" / f"{i}"
         outdir.mkdir(parents=True, exist_ok=True)
         translator.translate(input_dir, outdir, overwrite=False)
