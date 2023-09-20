@@ -97,9 +97,7 @@ if __name__ == "__main__":
         log.error("Output files would overwrite input! Aborting...")
         exit(-1)
 
-    model_arguments = dict(
-        temperature=args.temp
-    )
+    model_arguments = dict(temperature=args.temp)
     translator = Translator(
         model=args.llm_name,
         model_arguments=model_arguments,

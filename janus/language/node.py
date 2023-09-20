@@ -26,9 +26,7 @@ class ASTNode(object):
 
     @classmethod
     def from_tree_sitter_node(
-        cls,
-        node: tree_sitter.Node,
-        original: bytes
+        cls, node: tree_sitter.Node, original: bytes
     ) -> ForwardRef("ASTNode"):
         prefix_start = 0
         if node.prev_sibling is not None:
@@ -51,10 +49,10 @@ class ASTNode(object):
             end_point=node.end_point,
             start_byte=node.start_byte,
             end_byte=node.end_byte,
-            prefix=str(original[prefix_start:node.start_byte]),
-            suffix=str(original[node.end_byte:suffix_end]),
+            prefix=str(original[prefix_start : node.start_byte]),
+            suffix=str(original[node.end_byte : suffix_end]),
             type=node.type,
-            children=children
+            children=children,
         )
 
     @classmethod
@@ -63,7 +61,7 @@ class ASTNode(object):
             return nodes[0]
 
         interleaved = [s for node in nodes for s in [node.text, node.suffix]]
-        text = ''.join(interleaved[:-1])
+        text = "".join(interleaved[:-1])
         return cls(
             text=text,
             name=f"{nodes[0].name}:{nodes[-1].name}",
@@ -74,5 +72,5 @@ class ASTNode(object):
             prefix=nodes[0].prefix,
             suffix=nodes[-1].suffix,
             type=NodeType("merge"),
-            children=sum([node.children for node in nodes], [])
+            children=sum([node.children for node in nodes], []),
         )

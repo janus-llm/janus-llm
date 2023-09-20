@@ -39,7 +39,7 @@ class MumpsSplitter(Splitter):
             max_tokens: The maximum number of tokens supported by the model
         """
         super().__init__(
-            language='mumps',
+            language="mumps",
             model=model,
             max_tokens=max_tokens,
             use_placeholders=False,
@@ -59,6 +59,7 @@ class MumpsSplitter(Splitter):
                 A unique id for each child block.
             """
             return f"<{node.name}>"
+
         return id_gen
 
     def _generate_id(self, node, *args, **kwargs) -> Hashable:
@@ -70,7 +71,7 @@ class MumpsSplitter(Splitter):
         code = str(code)
 
         split_code = re.split(self.patterns[0].start, code)
-        prefixes = ['']+split_code[1::2]
+        prefixes = [""] + split_code[1::2]
         chunks = split_code[::2]
         suffixes = split_code[1::2]
         start_line = 0
@@ -78,37 +79,39 @@ class MumpsSplitter(Splitter):
         nodes = []
         for prefix, chunk, suffix in zip(prefixes, chunks, suffixes):
             start_byte += len(bytes(prefix, "utf-8"))
-            start_line += prefix.count('\n')
+            start_line += prefix.count("\n")
             end_byte = start_byte + len(bytes(chunk, "utf-8"))
-            end_line = start_line + chunk.count('\n')
-            end_char = len(chunk.rsplit('\n', 1)[-1])
+            end_line = start_line + chunk.count("\n")
+            end_char = len(chunk.rsplit("\n", 1)[-1])
 
             first_label = re.search(r"^(\w+)", chunk)
-            name = first_label.groups(1)[0] if first_label is not None else 'anon'
+            name = first_label.groups(1)[0] if first_label is not None else "anon"
 
-            nodes.append(ASTNode(
-                text=chunk,
-                name=name,
-                start_point=(start_line, 0),
-                end_point=(end_line, end_char),
-                start_byte=start_byte,
-                end_byte=end_byte,
-                prefix=prefix,
-                suffix=suffix,
-                type=NodeType('subroutine'),
-                children=[]
-            ))
+            nodes.append(
+                ASTNode(
+                    text=chunk,
+                    name=name,
+                    start_point=(start_line, 0),
+                    end_point=(end_line, end_char),
+                    start_byte=start_byte,
+                    end_byte=end_byte,
+                    prefix=prefix,
+                    suffix=suffix,
+                    type=NodeType("subroutine"),
+                    children=[],
+                )
+            )
             start_byte = end_byte
             start_line = end_line
         return ASTNode(
-                text=code,
-                name="root",
-                start_point=(0, 0),
-                end_point=(len(code.split('\n')), 0),
-                start_byte=0,
-                end_byte=len(bytes(code, "utf-8")),
-                prefix='',
-                suffix='',
-                type=NodeType('routine'),
-                children=nodes
+            text=code,
+            name="root",
+            start_point=(0, 0),
+            end_point=(len(code.split("\n")), 0),
+            start_byte=0,
+            end_byte=len(bytes(code, "utf-8")),
+            prefix="",
+            suffix="",
+            type=NodeType("routine"),
+            children=nodes,
         )

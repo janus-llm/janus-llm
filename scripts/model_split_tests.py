@@ -36,39 +36,29 @@ input_dir = args.input_dir
 output_dir = Path(args.output_dir)
 
 iterations = 10
-models = [
-    'gpt-3.5-turbo',
-    'gpt-3.5-turbo-16k',
-    'gpt-4'
-]
+models = ["gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-4"]
 
 kwargs = dict(
     model_arguments=dict(temperature=0.7),
-    source_language='mumps',
-    target_language='python',
-    target_version='3.10',
+    source_language="mumps",
+    target_language="python",
+    target_version="3.10",
     max_prompts=10,
-    prompt_template='simple',
+    prompt_template="simple",
 )
 
 for i in range(iterations):
     for model in models:
         translator = Translator(
-            model=model,
-            maximize_block_length=True,
-            force_split=False,
-            **kwargs
+            model=model, maximize_block_length=True, force_split=False, **kwargs
         )
         outdir = output_dir / f"{model}_minimum" / str(i)
         outdir.mkdir(parents=True, exist_ok=True)
         translator.translate(input_dir, outdir, overwrite=False)
 
         translator = Translator(
-            model=model,
-            maximize_block_length=False,
-            force_split=True,
-            **kwargs
+            model=model, maximize_block_length=False, force_split=True, **kwargs
         )
-        outdir : Path = output_dir / f"{model}_maximum" / str(i)
+        outdir: Path = output_dir / f"{model}_maximum" / str(i)
         outdir.mkdir(parents=True, exist_ok=True)
         translator.translate(input_dir, outdir, overwrite=False)

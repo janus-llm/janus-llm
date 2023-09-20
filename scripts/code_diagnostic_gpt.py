@@ -10,30 +10,25 @@ parser = argparse.ArgumentParser(
         "Use ChatGPT to count the syntax error in Python code. "
         "This requires an OpenAI API key. set the OPENAI_API_KEY "
         "environment variable to your key."
-    )
+    ),
 )
 parser.add_argument("filename")
 parser.add_argument(
     "--give-example",
     action="store_true",
-    help="Whether to provide ChatGPT with example input and output"
+    help="Whether to provide ChatGPT with example input and output",
 )
 parser.add_argument(
-    "--number-lines",
-    action="store_true",
-    help="Whether to number the lines of code"
+    "--number-lines", action="store_true", help="Whether to number the lines of code"
 )
 parser.add_argument(
     "--temp",
     type=float,
     default=0.7,
-    help="Temperature. Set to 0 for deterministic output. Default 0.7"
+    help="Temperature. Set to 0 for deterministic output. Default 0.7",
 )
 parser.add_argument(
-    "--model",
-    type=str,
-    default="gpt-3.5-turbo-16k-0613",
-    help="The OpenAI model to use"
+    "--model", type=str, default="gpt-3.5-turbo-16k-0613", help="The OpenAI model to use"
 )
 
 args = parser.parse_args()
@@ -44,16 +39,16 @@ messages = list()
 
 # The system prompt defines the overall behavior of the agent
 system_prompt = (
-    'Act as a static analysis tool for Python code. Given a sample of Python '
-    '(wrapped in triple backticks), identify the syntax errors. Each line of '
-    'your response should be numbered, and include the original code wrapped in '
-    'backticks, followed by a short (1-2 sentence) description of the issue. '
-    'Skip lines that have no syntax errors. Do not include formatting issues or '
-    'logical errors, only report syntax errors that would prevent compilation '
-    'with a tool like py_compile.'
+    "Act as a static analysis tool for Python code. Given a sample of Python "
+    "(wrapped in triple backticks), identify the syntax errors. Each line of "
+    "your response should be numbered, and include the original code wrapped in "
+    "backticks, followed by a short (1-2 sentence) description of the issue. "
+    "Skip lines that have no syntax errors. Do not include formatting issues or "
+    "logical errors, only report syntax errors that would prevent compilation "
+    "with a tool like py_compile."
 )
 input_tokens = len(encoding.encode(system_prompt))
-messages.append(dict(role='system', content=system_prompt))
+messages.append(dict(role="system", content=system_prompt))
 
 # If indicated, provide example input and output for GPT to emulate
 if args.give_example:
@@ -88,9 +83,8 @@ def is_prime(num)
 """
     # Prepend each line with a line number if indicated
     if args.number_lines:
-        example_input = '\n'.join(
-            f"{i + 1}|{line}"
-            for i, line in enumerate(example_input.split('\n'))
+        example_input = "\n".join(
+            f"{i + 1}|{line}" for i, line in enumerate(example_input.split("\n"))
         )
     else:
         # Otherwise, remove line numbers in output
@@ -107,19 +101,18 @@ def is_prime(num)
     input_tokens += 10
 
     # Add to messages list
-    messages.extend([
-        dict(role='user', content=example_input),
-        dict(role='assistant', content=example_output)
-    ])
+    messages.extend(
+        [
+            dict(role="user", content=example_input),
+            dict(role="assistant", content=example_output),
+        ]
+    )
 
-code = open(args.filename, 'r').read()
+code = open(args.filename, "r").read()
 
 # Prepend each line with a line number if indicated
 if args.number_lines:
-    code = '\n'.join(
-        f"{i+1}|{line}"
-        for i, line in enumerate(code.split('\n'))
-    )
+    code = "\n".join(f"{i+1}|{line}" for i, line in enumerate(code.split("\n")))
 
 code = f"```\n{code}\n```"
 
@@ -129,21 +122,21 @@ input_tokens += len(encoding.encode(code))
 input_tokens += 10
 
 # Add to messages list
-messages.append(dict(role='user', content=code))
+messages.append(dict(role="user", content=code))
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     response = openai.ChatCompletion.create(
         model=args.model,
         messages=messages,
         stream=True,
         max_tokens=token_limit - input_tokens,
-        temperature=args.temp
+        temperature=args.temp,
     )
 
     try:
         for resp in response:
-            delta = resp.choices[0]['delta']
-            tok = delta.get('content', None)
+            delta = resp.choices[0]["delta"]
+            tok = delta.get("content", None)
             if tok is not None:
                 print(tok, end="")
     except Exception:

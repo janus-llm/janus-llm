@@ -30,7 +30,7 @@ class Splitter(FileManager):
         language: str,
         model: BaseLanguageModel,
         max_tokens: int = 4096,
-        use_placeholders: bool = True
+        use_placeholders: bool = True,
     ):
         """
         Arguments:
@@ -91,7 +91,7 @@ class Splitter(FileManager):
             path=path,
             depth=0,
             parent_id=None,
-            use_placeholders=self.use_placeholders
+            use_placeholders=self.use_placeholders,
         )
 
     def _recurse_split(
@@ -159,7 +159,7 @@ class Splitter(FileManager):
                 path=path,
                 depth=depth + 1,
                 parent_id=node_id,
-                use_placeholders=use_placeholders
+                use_placeholders=use_placeholders,
             )
 
             text_chunks[longest_index] = f"{self.comment} {child.id}"
@@ -242,9 +242,7 @@ class Splitter(FileManager):
             tokens=0,
         )
 
-    def _consolidate_nodes(
-        self, nodes: List[ASTNode]
-    ) -> List[List[ASTNode]]:
+    def _consolidate_nodes(self, nodes: List[ASTNode]) -> List[List[ASTNode]]:
         """Consolidate a list of tree_sitter nodes into groups. Each group should fit
         into the context window, with the exception of single-node groups which may be
         too long to fit on their own. This ensures that nodes with many many short
