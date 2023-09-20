@@ -38,15 +38,11 @@ class MumpsSplitter(Splitter):
         self,
         model: BaseLanguageModel,
         max_tokens: int = 4096,
-        maximize_block_length: bool = False,
-        force_split: bool = False,
     ) -> None:
         """Initialize a MumpsSplitter instance.
 
         Arguments:
             max_tokens: The maximum number of tokens supported by the model
-            maximize_block_length: Whether to greedily merge blocks back together
-                after splitting in order to maximize the context sent to the LLM
         """
         # MUMPS code tends to take about 2/3 the space of Python
         self.max_tokens: int = int(max_tokens * 2 / 5)
@@ -54,9 +50,6 @@ class MumpsSplitter(Splitter):
         self.language: str = "mumps"
         self.comment: str = ";"
         super().__init__(max_tokens=max_tokens, model=model, language='mumps')
-
-        self.maximize_block_length = maximize_block_length
-        self.force_split = force_split
 
     @classmethod
     def _regex_split(cls, code: str):

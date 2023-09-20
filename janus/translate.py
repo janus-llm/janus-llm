@@ -33,8 +33,6 @@ class Translator:
         target_language: str = "python",
         target_version: str = "3.10",
         max_prompts: int = 10,
-        maximize_block_length: bool = False,
-        force_split: bool = False,
         prompt_template: str = "simple",
     ) -> None:
         """Initialize a Translator instance.
@@ -46,10 +44,6 @@ class Translator:
             source_language: The source programming language.
             target_language: The target programming language.
             target_version: The target version of the target programming language.
-            max_prompts: The maximum number of times to prompt a model on one functional
-                block.
-            force_split: Whether to force splitting even when a full file would
-                fit into the context window.
             prompt_template: name of prompt template directory
                 (see janus/prompts/templates) or path to a directory.
         """
@@ -59,8 +53,6 @@ class Translator:
         self.target_language = target_language.lower()
         self.target_version = target_version
         self.max_prompts = max_prompts
-        self.maximize_block_length = maximize_block_length
-        self.force_split = force_split
         self.prompt_template = prompt_template
         self._check_languages()
         self._load_model()
@@ -383,8 +375,6 @@ class Translator:
                 self.splitter = MumpsSplitter(
                     max_tokens=self._max_tokens,
                     model=self._llm,
-                    maximize_block_length=self.maximize_block_length,
-                    force_split=self.force_split,
                 )
         elif self.source_language in list(LANGUAGES.keys()):
             self.splitter = TreeSitterSplitter(
