@@ -1,9 +1,10 @@
 import argparse
 import json
-import subprocess
-import pandas as pd
-from pathlib import Path
 import re
+import subprocess
+from pathlib import Path
+
+import pandas as pd
 
 
 def get_line_analysis(output_dir: Path | str) -> pd.DataFrame:

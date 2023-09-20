@@ -1,5 +1,6 @@
 import dataclasses
-from typing import NewType, Tuple, List, ForwardRef, Optional
+from typing import ForwardRef, List, NewType, Optional, Tuple
+
 import tree_sitter
 
 from ..utils.logger import create_logger

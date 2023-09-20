@@ -7,7 +7,7 @@ from langchain.schema.language_model import BaseLanguageModel
 from ..utils.logger import create_logger
 from .block import CodeBlock
 from .file import FileManager
-from .node import NodeType, ASTNode
+from .node import ASTNode, NodeType
 
 log = create_logger(__name__)
 

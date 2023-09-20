@@ -1,5 +1,6 @@
-from pathlib import Path
 import argparse
+from pathlib import Path
+
 from janus.translate import Translator
 from janus.utils.logger import create_logger
 

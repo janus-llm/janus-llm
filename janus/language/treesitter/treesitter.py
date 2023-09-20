@@ -1,5 +1,5 @@
-import platform
 import os
+import platform
 from pathlib import Path
 
 import tree_sitter
@@ -8,8 +8,8 @@ from langchain.schema.language_model import BaseLanguageModel
 
 from ...utils.enums import LANGUAGES
 from ...utils.logger import create_logger
-from ..splitter import Splitter
 from ..node import ASTNode
+from ..splitter import Splitter
 
 log = create_logger(__name__)
 

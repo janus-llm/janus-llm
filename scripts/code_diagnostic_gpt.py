@@ -1,7 +1,9 @@
-import re
-import tiktoken
-import openai
 import argparse
+import re
+
+import openai
+import tiktoken
+
 from janus.llm.openai import TOKEN_LIMITS
 
 parser = argparse.ArgumentParser(

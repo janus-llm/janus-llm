@@ -1,10 +1,10 @@
-import tiktoken
-from pathlib import Path
 import argparse
+from pathlib import Path
 from typing import Dict
+
 import numpy as np
 import scipy
-
+import tiktoken
 
 COST_PER_MODEL: Dict[str, Dict[str, float]] = {
     "gpt-4": {"input": 0.00003, "output": 0.00006},
