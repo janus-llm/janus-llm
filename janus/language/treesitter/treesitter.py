@@ -20,7 +20,11 @@ class TreeSitterSplitter(Splitter):
     """
 
     def __init__(
-        self, language: str, model: BaseLanguageModel, max_tokens: int = 4096
+            self,
+            language: str,
+            model: BaseLanguageModel,
+            max_tokens: int = 4096,
+            use_placeholders: bool = True
     ) -> None:
         """Initialize a TreeSitterSplitter instance.
 
@@ -29,7 +33,11 @@ class TreeSitterSplitter(Splitter):
             model: The name of the model to use for translation.
             max_tokens: The maximum number of tokens to use for each functional block.
         """
-        super().__init__(language, model, max_tokens)
+        super().__init__(
+            language=language,
+            model=model,
+            max_tokens=max_tokens,
+            use_placeholders=use_placeholders)
         self._load_parser()
 
     def _get_ast(self, code: str | bytes) -> ASTNode:
