@@ -1,14 +1,14 @@
 import re
-from typing import List
 from pathlib import Path
+from typing import List
 
 from langchain.schema.language_model import BaseLanguageModel
 
 from ...utils.logger import create_logger
+from ..block import CodeBlock
 from ..combine import Combiner
 from ..node import NodeType
 from ..splitter import Splitter
-from ..block import CodeBlock
 
 log = create_logger(__name__)
 
@@ -22,8 +22,8 @@ class MumpsCombiner(Combiner):
 
 
 class MumpsSplitter(Splitter):
-    """ A class for splitting MUMPS text into functional blocks to prompt
-        with for transcoding.
+    """A class for splitting MUMPS text into functional blocks to prompt
+    with for transcoding.
     """
 
     # Consider labels to delimit subroutines. Labels (and only labels) start on
@@ -36,15 +36,14 @@ class MumpsSplitter(Splitter):
         )\n*
         (.*?)           # Match the minimum amount of characters before...
         (?=           # ... a lookahead for:
-          \s*(?:      # Any amount of whitespace followed by either...  
-            \n[^\s;$] # ... a newline and the start of the next label...        
+          \s*(?:      # Any amount of whitespace followed by either...
+            \n[^\s;$] # ... a newline and the start of the next label...
             | $       # ... OR the end of the file
           )
         )
         """,
-        re.VERBOSE | re.DOTALL)
-
-    # subroutine_start_pattern: str = re.compile(rf"(\s*\n(?={label_pattern}|$)|^\s*(?= [^\s;$]))")
+        re.VERBOSE | re.DOTALL,
+    )
 
     def __init__(self, model: BaseLanguageModel, max_tokens: int = 4096):
         """Initialize a MumpsSplitter instance.
@@ -87,14 +86,6 @@ class MumpsSplitter(Splitter):
         prefixes = betweens[:-1]
         suffixes = betweens[1:]
 
-        # split_code = re.split(self.subroutine_start, code)
-        #
-        # # Subroutines will be captured in the even indices, while the newlines
-        # #  preceding each label will be captured in the odd indices.
-        # prefixes = split_code[1:-2:2]
-        # chunks = split_code[2::2]
-        # suffixes = split_code[3::2]
-
         start_line = 0
         start_byte = 0
         children: List[CodeBlock] = []
@@ -103,7 +94,7 @@ class MumpsSplitter(Splitter):
             start_line += prefix.count("\n")
             end_byte = start_byte + len(bytes(chunk, "utf-8"))
             end_line = start_line + chunk.count("\n")
-            end_char = len(chunk) - chunk.rfind('\n') - 1
+            end_char = len(chunk) - chunk.rfind("\n") - 1
 
             # Set the node name to its label; if there is no label (which will
             #  only occur for the first chunk in the file
@@ -125,7 +116,7 @@ class MumpsSplitter(Splitter):
                     children=[],
                     complete=True,
                     language=self.language,
-                    tokens=self._count_tokens(chunk)
+                    tokens=self._count_tokens(chunk),
                 )
             )
             start_byte = end_byte
@@ -144,5 +135,5 @@ class MumpsSplitter(Splitter):
             children=children,
             complete=True,
             language=self.language,
-            tokens=self._count_tokens(code)
+            tokens=self._count_tokens(code),
         )

@@ -77,10 +77,7 @@ class Splitter(FileManager):
             node.name = f"{path.name}:{node.id}"
             queue.extend(node.children)
 
-    def _recurse_split(
-        self,
-        node: CodeBlock
-    ):
+    def _recurse_split(self, node: CodeBlock):
         """Recursively split the code into functional blocks.
 
         Arguments:
@@ -155,10 +152,10 @@ class Splitter(FileManager):
             # Since this node's prefix is included in the text, remove the
             #  suffix from the previous node (if it hasn't already been visited)
             if idx > 0 and idx - 1 in remaining_indices:
-                remove_suffix_indices.add(idx-1)
+                remove_suffix_indices.add(idx - 1)
 
                 # Remove the suffix from the corresponding text chunk
-                prev = node.children[idx-1]
+                prev = node.children[idx - 1]
                 text_chunks[idx - 1] = prev.prefix if idx == 1 else ""
                 text_chunks[idx - 1] += prev.text
 
@@ -180,8 +177,8 @@ class Splitter(FileManager):
         # Only the first child's prefix is included in the text chunks, so
         #  preceding children's suffixes need not be removed.
         for i in remaining_indices:
-            if i < len(node.children)-1 and node.children[i].suffix:
-                remove_prefix_indices.add(i+1)
+            if i < len(node.children) - 1 and node.children[i].suffix:
+                remove_prefix_indices.add(i + 1)
 
         # Remove prefixes and suffixes from the appropriate nodes
         if node.tokens <= self.max_tokens:
@@ -277,7 +274,7 @@ class Splitter(FileManager):
             children=sum([node.children for node in nodes], []),
             language=language,
             tokens=self._count_tokens(text),
-            complete=all(node.complete for node in nodes)
+            complete=all(node.complete for node in nodes),
         )
 
     def _count_tokens(self, code: str) -> int:

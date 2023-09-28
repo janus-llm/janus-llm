@@ -52,10 +52,12 @@ class Combiner(FileManager):
         #  children with no other formatting. Simply concatenate the children.
         if block.text is None:
             children = sorted(block.children, key=lambda b: b.start_byte)
-            block.text = "".join([
-                children[0].prefix,
-                *[c.text + c.suffix for c in children],
-            ])
+            block.text = "".join(
+                [
+                    children[0].prefix,
+                    *[c.text + c.suffix for c in children],
+                ]
+            )
             block.children = []
             block.complete = children_complete
             return

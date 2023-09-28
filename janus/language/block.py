@@ -87,7 +87,7 @@ class CodeBlock:
         return "\n".join(
             [
                 f"{'| '*depth}{identifier} [{start}-{end}]",
-                *[c.tree_str(depth+1) for c in self.children],
+                *[c.tree_str(depth + 1) for c in self.children],
             ]
         )
 

@@ -9,8 +9,8 @@ from langchain.schema.language_model import BaseLanguageModel
 
 from ...utils.enums import LANGUAGES
 from ...utils.logger import create_logger
-from ..splitter import Splitter
 from ..block import CodeBlock
+from ..splitter import Splitter
 
 log = create_logger(__name__)
 
@@ -21,11 +21,11 @@ class TreeSitterSplitter(Splitter):
     """
 
     def __init__(
-            self,
-            language: str,
-            model: BaseLanguageModel,
-            max_tokens: int = 4096,
-            use_placeholders: bool = True
+        self,
+        language: str,
+        model: BaseLanguageModel,
+        max_tokens: int = 4096,
+        use_placeholders: bool = True,
     ) -> None:
         """Initialize a TreeSitterSplitter instance.
 
@@ -38,7 +38,8 @@ class TreeSitterSplitter(Splitter):
             language=language,
             model=model,
             max_tokens=max_tokens,
-            use_placeholders=use_placeholders)
+            use_placeholders=use_placeholders,
+        )
         self._load_parser()
 
     def _get_ast(self, code: str | bytes) -> CodeBlock:
@@ -60,29 +61,23 @@ class TreeSitterSplitter(Splitter):
             node.name = f"{path.name}:{node.id}"
             queue.extend(node.children)
 
-    def _node_to_block(
-            self,
-            node: tree_sitter.Node,
-            original_text: bytes) -> CodeBlock:
+    def _node_to_block(self, node: tree_sitter.Node, original_text: bytes) -> CodeBlock:
         prefix_start = 0
         if node.prev_sibling is not None:
             prefix_start = node.prev_sibling.end_byte
         elif node.parent is not None:
             prefix_start = node.parent.start_byte
-        prefix = original_text[prefix_start: node.start_byte].decode()
+        prefix = original_text[prefix_start : node.start_byte].decode()
 
         suffix_end = len(original_text)
         if node.next_sibling is not None:
             suffix_end = node.next_sibling.start_byte
         elif node.parent is not None:
             suffix_end = node.parent.end_byte
-        suffix = original_text[node.end_byte: suffix_end].decode()
+        suffix = original_text[node.end_byte : suffix_end].decode()
 
         text = node.text.decode()
-        children = [
-            self._node_to_block(child, original_text)
-            for child in node.children
-        ]
+        children = [self._node_to_block(child, original_text) for child in node.children]
         return CodeBlock(
             id=node.id,
             name=node.id,
