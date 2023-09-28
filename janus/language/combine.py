@@ -23,7 +23,7 @@ class Combiner(FileManager):
         block.text = block.prefix + block.text + block.suffix
 
     def combine_children(self, block: CodeBlock) -> None:
-        """Recursively combine block text with children text.
+        """Recursively combine block code with children code.
 
         TODO: Fix the formatting issues with this method. It currently doesn't get
         the indentation or number of newlines correct. But I feel that it would have
@@ -34,7 +34,7 @@ class Combiner(FileManager):
         bytes between nodes with tree_sitter's byte indexing.
 
         Arguments:
-            block: The functional text block to recursively replace children.
+            block: The functional code block to recursively replace children.
         """
         if block.complete:
             return
@@ -78,13 +78,13 @@ class Combiner(FileManager):
 
         if missing_children:
             missing_ids = [c.id for c in missing_children]
-            log.warning(f"Some children not found in text: {missing_ids}")
+            log.warning(f"Some children not found in code: {missing_ids}")
 
         block.children = missing_children
         block.complete = children_complete and not missing_children
 
     def contains_child(self, code: str, child: CodeBlock) -> bool:
-        """Determine whether the given text contains a placeholder for the given
+        """Determine whether the given code contains a placeholder for the given
         child block.
         """
         return code is None or self._placeholder(child) in code
@@ -95,7 +95,7 @@ class Combiner(FileManager):
 
         Arguments:
             input_block: The block to check for missing children
-            output_code: The text to check for placeholders
+            output_code: The code to check for placeholders
 
         Returns:
             The number of children of input_block who are not represented in
@@ -108,12 +108,12 @@ class Combiner(FileManager):
         return missing_children
 
     def _placeholder(self, child: CodeBlock) -> str:
-        """Get the placeholder to represent the text of the given block
+        """Get the placeholder to represent the code of the given block
 
         Arguments:
             child: The block to get the placeholder for
 
         Returns:
-            The placeholder to represent the text of the given block
+            The placeholder to represent the code of the given block
         """
         return f"<<<{child.id}>>>"

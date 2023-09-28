@@ -94,7 +94,7 @@ class MumpsLabeledBlockPattern:
         start: A regular expression pattern that matches the label at the
             beginning of a MUMPS block (typically a routine).
         end: A regular expression pattern that matches the end of a MUMPS block.
-        type: The type of the functional text block ('module', 'function', etc.).
+        type: The type of the functional code block ('module', 'function', etc.).
     """
 
     start: re.Pattern = re.compile(routine_start)

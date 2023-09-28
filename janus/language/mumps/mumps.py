@@ -14,7 +14,7 @@ log = create_logger(__name__)
 
 
 class MumpsCombiner(Combiner):
-    """A class that combines text blocks into mumps files."""
+    """A class that combines code blocks into mumps files."""
 
     def __init__(self) -> None:
         """Initialize a MumpsCombiner instance."""
@@ -22,7 +22,7 @@ class MumpsCombiner(Combiner):
 
 
 class MumpsSplitter(Splitter):
-    """A class for splitting MUMPS text into functional blocks to prompt
+    """A class for splitting MUMPS code into functional blocks to prompt
     with for transcoding.
     """
 
@@ -58,7 +58,7 @@ class MumpsSplitter(Splitter):
             use_placeholders=False,
         )
 
-        # MUMPS text tends to take about 2/3 the space of Python
+        # MUMPS code tends to take about 2/3 the space of Python
         self.max_tokens: int = int(max_tokens * 2 / 5)
 
     def _set_identifiers(self, root: CodeBlock, path: Path):
