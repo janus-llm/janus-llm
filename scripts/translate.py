@@ -67,6 +67,11 @@ parser.add_argument(
     help="Whether to overwrite existing files in the output directory",
 )
 parser.add_argument(
+    "--no-placeholders",
+    action="store_true",
+    help="Whether to forego the use of placeholders when splitting",
+)
+parser.add_argument(
     "--temp",
     type=float,
     default=0.7,
@@ -106,5 +111,6 @@ if __name__ == "__main__":
         target_version=output_lang_version,
         max_prompts=args.max_prompts,
         prompt_template=args.prompt_template,
+        use_placeholders=not args.no_placeholders,
     )
     translator.translate(args.input_dir, args.output_dir, args.overwrite)

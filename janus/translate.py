@@ -34,6 +34,7 @@ class Translator:
         target_version: str = "3.10",
         max_prompts: int = 10,
         prompt_template: str = "simple",
+        use_placeholders: bool = True,
     ) -> None:
         """Initialize a Translator instance.
 
@@ -56,7 +57,7 @@ class Translator:
         self.prompt_template = prompt_template
         self._check_languages()
         self._load_model()
-        self._load_splitter()
+        self._load_splitter(use_placeholders=use_placeholders)
         self._load_combiner()
         self._load_prompt_engine()
         self._load_parser()
@@ -366,7 +367,7 @@ class Translator:
             raise ValueError(message)
         self.combiner = Combiner(self.target_language)
 
-    def _load_splitter(self) -> None:
+    def _load_splitter(self, use_placeholders: bool = True) -> None:
         """Load the `Splitter` object."""
         if self.source_language in CUSTOM_SPLITTERS:
             if self.source_language == "mumps":
@@ -379,6 +380,7 @@ class Translator:
                 language=self.source_language,
                 max_tokens=self._max_tokens,
                 model=self._llm,
+                use_placeholders=use_placeholders,
             )
         else:
             raise NotImplementedError(
