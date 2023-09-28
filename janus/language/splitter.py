@@ -102,47 +102,99 @@ class Splitter(FileManager):
         node_groups = self._consolidate_nodes(node.children)
         node.children = list(map(self.merge_nodes, node_groups))
 
+        # If not using placeholders, simply recurse for every child and delete
+        #  this node's text and tokens
+        if not self.use_placeholders:
+            for child in node.children:
+                self._recurse_split(child)
+            node.text = None
+            node.tokens = 0
+            return
+
         # Create list of this node's component texts (excluding its own prefix/suffix)
         text_chunks = [c.text + c.suffix for c in node.children]
         text_chunks[0] = node.children[0].prefix + text_chunks[0]
 
-        lengths = list(map(self._count_tokens, text_chunks))
-        remaining_indices: List[int] = list(range(len(lengths)))
-        remaining_indices.sort(key=lengths.__getitem__)
+        # Create a list of child indices, ordered by length. This will be used
+        #  to select children, starting with the longest, and replace their
+        #  text with a placeholder.
+        remaining_indices: List[int] = sorted(
+            range(len(node.children)),
+            key=lambda idx: self._count_tokens(node.children[idx].text),
+        )
+
+        # Track which nodes' prefixes and suffixes need to be dropped. This
+        #  can't be done in-place because if the block is still too long after
+        #  pulling out every child, then we forego placeholders, requiring
+        #  all nodes to still have their prefixes and suffixes intact.
+        remove_prefix_indices = set()
+        remove_suffix_indices = set()
 
         # Replace child node text with placeholders until we can fit in context,
         #  starting with the longest children
-        while remaining_indices and (node.tokens > self.max_tokens or not self.use_placeholders):
-            # Remaining indices is sorted by text length, ascending
-            longest_index = remaining_indices.pop()
-            longest_child = node.children[longest_index]
+        while remaining_indices and node.tokens > self.max_tokens:
+            # Remaining indices are sorted by text length, ascending
+            idx = remaining_indices.pop()
+            longest_child = node.children[idx]
             self._recurse_split(longest_child)
 
-            text_chunks[longest_index] = f"<<<{longest_child.id}>>>"
+            # Replace the corresponding chunk with a placeholder, but include
+            #  the node's prefix and suffix in the text
+            chunk = f"<<<{longest_child.id}>>>"
+            if idx not in remove_prefix_indices:
+                chunk = longest_child.prefix + chunk
+            if idx not in remove_suffix_indices:
+                chunk += longest_child.suffix
+            text_chunks[idx] = chunk
+
+            # This node's prefix and suffix are included in the text now, so
+            #  mark them for removal from the node
+            remove_prefix_indices.add(idx)
+            remove_suffix_indices.add(idx)
+
+            # Since this node's prefix is included in the text, remove the
+            #  suffix from the previous node (if it hasn't already been visited)
+            if idx > 0 and idx - 1 in remaining_indices:
+                remove_suffix_indices.add(idx-1)
+
+                # Remove the suffix from the corresponding text chunk
+                prev = node.children[idx-1]
+                text_chunks[idx - 1] = prev.prefix if idx == 1 else ""
+                text_chunks[idx - 1] += prev.text
+
+            # Update the node's text and token count
             node.text = "".join(text_chunks)
             node.tokens = self._count_tokens(node.text)
 
-        # Any remaining children will be represented in this node's text, including
-        #  their prefixes and suffixes. Therefore, remove the prefixes of the
-        #  adjacent children (only the first child's prefix was included in
-        #  the text chunks, so suffixes need not be removed)
+        # If there are no remaining indices, then every child has been replaced
+        #  with a placeholder. Therefore, even if placeholders are enabled,
+        #  there is no benefit to using them for this node.
+        if not remaining_indices:
+            node.text = None
+            node.tokens = 0
+            return
+
+        # Any remaining children will be represented in this node's text,
+        #  including their prefixes and suffixes. Therefore, mark the
+        #  prefixes of the succeeding children for removal.
+        # Only the first child's prefix is included in the text chunks, so
+        #  preceding children's suffixes need not be removed.
         for i in remaining_indices:
-            if i < len(node.children)-1:
-                node.children[i+1].prefix = ""
+            if i < len(node.children)-1 and node.children[i].suffix:
+                remove_prefix_indices.add(i+1)
+
+        # Remove prefixes and suffixes from the appropriate nodes
+        if node.tokens <= self.max_tokens:
+            for i in remove_prefix_indices:
+                node.children[i].prefix = ""
+            for i in remove_suffix_indices:
+                node.children[i].suffix = ""
 
         # Any remaining children can be pruned, as their content is represented
         #  in this node's text. This must be done in reverse order to that the
         #  indices don't change due to the deletion
         for i in sorted(remaining_indices, reverse=True):
             del node.children[i]
-
-        # If the text is still too long, then every child has already been
-        #  replaced with a placeholder. Therefore, even if placeholders are
-        #  enabled, there is no benefit to using them for this node
-        if not self.use_placeholders or node.tokens > self.max_tokens:
-            node.text = None
-            node.tokens = 0
-            return
 
     def _consolidate_nodes(self, nodes: List[CodeBlock]) -> List[List[CodeBlock]]:
         """Consolidate a list of tree_sitter nodes into groups. Each group should fit
