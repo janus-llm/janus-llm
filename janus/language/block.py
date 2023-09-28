@@ -1,6 +1,5 @@
 import dataclasses
-from pathlib import Path
-from typing import ForwardRef, Hashable, List, Optional
+from typing import ForwardRef, Hashable, List, Optional, Tuple
 
 from ..utils.logger import create_logger
 from .node import NodeType
@@ -10,36 +9,38 @@ log = create_logger(__name__)
 
 @dataclasses.dataclass
 class CodeBlock:
-    """A class that represents a functional block of code.
+    """A class that represents a functional block of text.
 
     Attributes:
-        code: The code block.
-        path: The path to the file containing the code block.
-        complete: Whether or not the code block is complete. If it isn't complete, it
-                  should have children components. This means that this code block has
+        text: The text block.
+        path: The path to the file containing the text block.
+        complete: Whether or not the text block is complete. If it isn't complete, it
+                  should have children components. This means that this text block has
                   missing sections inside of it that are in its children.
-        start_line: The line number of the first line of the code block.
-        end_line: The line number of the last line of the code block.
-        language: The language of the code block.
-        type: The type of the code block ('function', 'module', etc.). Defined in the
+        start_line: The line number of the first line of the text block.
+        end_line: The line number of the last line of the text block.
+        language: The language of the text block.
+        type: The type of the text block ('function', 'module', etc.). Defined in the
               language-specific modules.
-        tokens: The number of tokens in the code block.
-        depth: The depth of the code block in the AST.
-        id: The id of the code block in the AST
-        children: A tuple of child code blocks.
+        tokens: The number of tokens in the text block.
+        depth: The depth of the text block in the AST.
+        id: The id of the text block in the AST
+        children: A tuple of child text blocks.
     """
 
-    code: Optional[str]
-    path: Optional[Path]
-    complete: bool
-    start_line: int
-    end_line: int
-    language: str
-    type: NodeType
-    tokens: int
-    depth: int
     id: Hashable
-    parent_id: Optional[Hashable]
+    name: Optional[str]
+    type: NodeType
+    complete: bool
+    language: str
+    text: Optional[str]
+    start_point: Tuple[int, int]
+    end_point: Tuple[int, int]
+    start_byte: int
+    end_byte: int
+    prefix: str
+    suffix: str
+    tokens: int
     children: List[ForwardRef("CodeBlock")]
 
     @property
@@ -70,29 +71,35 @@ class CodeBlock:
         """
         return self.tokens + sum(c.total_tokens for c in self.children)
 
-    @property
-    def tree_str(self) -> str:
+    def tree_str(self, depth: int = 0) -> str:
         """A string representation of the tree with this block as the root
 
         Returns:
             A string representation of the tree with this block as the root
         """
+        identifier = self.id
+        if self.text is None:
+            identifier = f"({identifier})"
+        elif not self.complete:
+            identifier += "*"
+        start = f"{self.start_point[0]}:{self.start_point[1]}"
+        end = f"{self.end_point[0]}:{self.end_point[1]}"
         return "\n".join(
             [
-                f"{'| '*self.depth}{self.id}{'*' if self.code is None else ''}",
-                *[c.tree_str for c in self.children],
+                f"{'| '*depth}{identifier} [{start}-{end}]",
+                *[c.tree_str(depth+1) for c in self.children],
             ]
         )
 
 
 @dataclasses.dataclass
 class TranslatedCodeBlock(CodeBlock):
-    """A class that represents the translated functional block of code.
+    """A class that represents the translated functional block of text.
 
     Attributes:
-        original: The original code block.
-        cost: The total cost to translate the original code block.
-        retries: The number of times translation had to be retried for this code
+        original: The original text block.
+        cost: The total cost to translate the original text block.
+        retries: The number of times translation had to be retried for this text
         translated: Whether this block has been successfully translated
     """
 
@@ -108,18 +115,17 @@ class TranslatedCodeBlock(CodeBlock):
         """Create an "empty" `TranslatedCodeBlock` from the given original
 
         Arguments:
-            original: The original code block
+            original: The original text block
             language: The language to translate to
 
         Returns:
             A `TranslatedCodeBlock` with the same attributes as the original, except
-            for `code`, `path`, `complete`, `language`, `tokens`, and `children`
+            for `text`, `path`, `complete`, `language`, `tokens`, and `children`
         """
         block = cls(**dataclasses.asdict(original), original=original)
         return dataclasses.replace(
             block,
-            code=None,
-            path=None,
+            text=None,
             complete=False,
             language=language,
             tokens=0,

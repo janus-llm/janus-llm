@@ -18,8 +18,12 @@ class Combiner(FileManager):
         """
         super().__init__(language)
 
+    def combine(self, block: CodeBlock) -> None:
+        self.combine_children(block)
+        block.text = block.prefix + block.text + block.suffix
+
     def combine_children(self, block: CodeBlock) -> None:
-        """Recursively combine block code with children code.
+        """Recursively combine block text with children text.
 
         TODO: Fix the formatting issues with this method. It currently doesn't get
         the indentation or number of newlines correct. But I feel that it would have
@@ -30,7 +34,7 @@ class Combiner(FileManager):
         bytes between nodes with tree_sitter's byte indexing.
 
         Arguments:
-            block: The functional code block to recursively replace children.
+            block: The functional text block to recursively replace children.
         """
         if block.complete:
             return
@@ -46,36 +50,39 @@ class Combiner(FileManager):
 
         # If input string is None, then this node consists exclusively of
         #  children with no other formatting. Simply concatenate the children.
-        if block.code is None:
-            children = sorted(block.children, key=lambda b: b.start_line)
-            block.code = "\n".join(child.code for child in children)
+        if block.text is None:
+            children = sorted(block.children, key=lambda b: b.start_byte)
+            block.text = "".join([
+                children[0].prefix,
+                *[c.text + c.suffix for c in children],
+            ])
+            block.children = []
             block.complete = children_complete
             return
 
-        missing_children = set()
-        if isinstance(block, TranslatedCodeBlock):
-            original_children = {child.id for child in block.original.children}
-            translated_children = {
-                child.id for child in block.children if child.translated
-            }
-            missing_children = original_children.difference(translated_children)
-
         # Replace all placeholders
+        missing_children = []
         for child in block.children:
             if isinstance(block, TranslatedCodeBlock) and not child.translated:
+                missing_children.append(child)
                 continue
-            if not self.contains_child(block.code, child):
-                missing_children.add(child.id)
+            if not self.contains_child(block.text, child):
+                missing_children.append(child)
                 continue
-            block.code = block.code.replace(self._placeholder(child), child.code)
+            block.text = block.text.replace(
+                self._placeholder(child),
+                child.prefix + child.text + child.suffix,
+            )
 
         if missing_children:
-            log.warning(f"Some children not found in code: {missing_children}")
+            missing_ids = [c.id for c in missing_children]
+            log.warning(f"Some children not found in text: {missing_ids}")
 
+        block.children = missing_children
         block.complete = children_complete and not missing_children
 
     def contains_child(self, code: str, child: CodeBlock) -> bool:
-        """Determine whether the given code contains a placeholder for the given
+        """Determine whether the given text contains a placeholder for the given
         child block.
         """
         return code is None or self._placeholder(child) in code
@@ -86,7 +93,7 @@ class Combiner(FileManager):
 
         Arguments:
             input_block: The block to check for missing children
-            output_code: The code to check for placeholders
+            output_code: The text to check for placeholders
 
         Returns:
             The number of children of input_block who are not represented in
@@ -99,12 +106,12 @@ class Combiner(FileManager):
         return missing_children
 
     def _placeholder(self, child: CodeBlock) -> str:
-        """Get the placeholder to represent the code of the given block
+        """Get the placeholder to represent the text of the given block
 
         Arguments:
             child: The block to get the placeholder for
 
         Returns:
-            The placeholder to represent the code of the given block
+            The placeholder to represent the text of the given block
         """
-        return f"{self.comment} {child.id}"
+        return f"<<<{child.id}>>>"

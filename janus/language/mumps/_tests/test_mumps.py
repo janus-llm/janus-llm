@@ -13,16 +13,16 @@ class TestMumpsSplitter(unittest.TestCase):
         """Set up the tests."""
         model_name = "gpt-3.5-turbo"
         llm = MODEL_CONSTRUCTORS[model_name](**MODEL_DEFAULT_ARGUMENTS[model_name])
-        self.splitter = MumpsSplitter(model=llm, max_tokens=4096, force_split=True)
+        self.splitter = MumpsSplitter(model=llm, max_tokens=4096)
         self.combiner = Combiner(language="mumps")
         self.test_file = Path("janus/language/mumps/_tests/mumps.m")
 
     def test_split(self):
         """Test the split method."""
         split_code = self.splitter.split(self.test_file)
-        self.assertEqual(len(split_code.children), 22)
+        self.assertEqual(len(split_code.children), 5)
         self.assertFalse(split_code.complete)
         self.combiner.combine_children(split_code)
         self.assertTrue(split_code.complete)
-        flat_split_text = split_code.code
+        flat_split_text = split_code.text
         self.assertEqual(flat_split_text, self.test_file.read_text())

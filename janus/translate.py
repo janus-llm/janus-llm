@@ -175,7 +175,7 @@ class Translator:
 
             for child in translated_block.original.children:
                 # Don't bother translating children if they aren't used
-                if self.combiner.contains_child(translated_block.code, child):
+                if self.combiner.contains_child(translated_block.text, child):
                     translated_child = TranslatedCodeBlock.from_original(
                         child, self.target_language
                     )
@@ -187,7 +187,7 @@ class Translator:
             progress = translated_root.translation_completeness
             if progress - last_prog > prog_delta:
                 last_prog = int(progress / prog_delta) * prog_delta
-                log.info(f"[{root.path.name}] progress: {progress:.2%}")
+                log.info(f"[{root.name}] progress: {progress:.2%}")
 
         return translated_root
 
@@ -207,7 +207,7 @@ class Translator:
 
         for child in block.children:
             # Don't bother translating children if they aren't used
-            if self.combiner.contains_child(translated_block.code, child):
+            if self.combiner.contains_child(translated_block.text, child):
                 translated_block.children.append(self._recursive_translate(child))
             else:
                 log.warning(f"Skipping {child.id} (not referenced in parent code)")
@@ -226,14 +226,14 @@ class Translator:
         if block.translated:
             return
 
-        if block.original.code is None:
+        if block.original.text is None:
             block.translated = True
             return
 
-        identifier = f"{block.original.path.name}:{block.id}"
+        identifier = block.name
 
         log.debug(f"[{identifier}] Translating...")
-        log.debug(f"[{identifier}] Input code:\n{block.original.code}")
+        log.debug(f"[{identifier}] Input text:\n{block.original.text}")
         prompt = self._prompt_engine.create(block.original)
         input_cost = COST_PER_MODEL[self.model]["input"] * prompt.tokens / 1000.0
         cost = 0.0
@@ -287,7 +287,7 @@ class Translator:
 
         log.debug(f"[{identifier}] Output code:\n{best_seen}")
 
-        block.code = best_seen
+        block.text = best_seen
         block.tokens = self._llm.get_num_tokens(best_seen)
         block.cost = cost
         block.retries = retry_count
@@ -310,9 +310,8 @@ class Translator:
             if not self.combiner.contains_child(output_code, child):
                 missing_children.append(child.id)
         if missing_children:
-            identifier = f"{input_block.path.name}:{input_block.id}"
             log.warning(
-                f"[{identifier}] Child placeholders not present in code: "
+                f"[{input_block.name}] Child placeholders not present in text: "
                 f"{missing_children}"
             )
             log.debug(f"Code:\n{output_code}")
@@ -326,7 +325,7 @@ class Translator:
             block: The `CodeBlock` to save to a file.
         """
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(block.code, encoding="utf-8")
+        out_path.write_text(block.text, encoding="utf-8")
 
     def _load_model(self) -> None:
         """Check that the model is valid."""

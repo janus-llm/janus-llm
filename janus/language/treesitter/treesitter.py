@@ -8,8 +8,8 @@ from langchain.schema.language_model import BaseLanguageModel
 
 from ...utils.enums import LANGUAGES
 from ...utils.logger import create_logger
-from ..node import ASTNode
 from ..splitter import Splitter
+from ..block import CodeBlock
 
 log = create_logger(__name__)
 
@@ -40,23 +40,60 @@ class TreeSitterSplitter(Splitter):
             use_placeholders=use_placeholders)
         self._load_parser()
 
-    def _get_ast(self, code: str | bytes) -> ASTNode:
+
+    def _get_ast(self, code: str | bytes) -> CodeBlock:
         if isinstance(code, str):
             code = bytes(code, "utf-8")
 
         tree = self.parser.parse(code)
-        cursor = tree.walk()
-        root = ASTNode.from_tree_sitter_node(cursor.node, code)
+        root = tree.walk().node
+        root = self._node_to_block(root, code)
         return root
+
+    def _node_to_block(
+            self,
+            node: tree_sitter.Node,
+            original_text: bytes) -> CodeBlock:
+        prefix_start = 0
+        if node.prev_sibling is not None:
+            prefix_start = node.prev_sibling.end_byte
+        elif node.parent is not None:
+            prefix_start = node.parent.start_byte
+        prefix = original_text[prefix_start: node.start_byte].decode()
+
+        suffix_end = len(original_text)
+        if node.next_sibling is not None:
+            suffix_end = node.next_sibling.start_byte
+        elif node.parent is not None:
+            suffix_end = node.parent.end_byte
+        suffix = original_text[node.end_byte: suffix_end].decode()
+
+        text = node.text.decode()
+        children = [
+            self._node_to_block(child, original_text)
+            for child in node.children
+        ]
+        return CodeBlock(
+            id=node.id,
+            name=node.id,
+            text=text,
+            prefix=prefix,
+            suffix=suffix,
+            start_point=node.start_point,
+            end_point=node.end_point,
+            start_byte=node.start_byte,
+            end_byte=node.end_byte,
+            type=node.type,
+            children=children,
+            language=self.language,
+            tokens=self._count_tokens(text),
+            complete=True,
+        )
 
     def _load_parser(self) -> None:
         """Load the parser for the given language.
 
         Sets `self.parser`'s language to the one specified in `self.language`.
-
-        Arguments:
-            build_dir: The directory to store the so file in.
-            github_url: The url to the tree-sitter GitHub repository for the language.
         """
         # Get the directory to store the file in from environment (or default)
         build_dir: Path = Path.home() / ".janus/tree-sitter/build-files"
