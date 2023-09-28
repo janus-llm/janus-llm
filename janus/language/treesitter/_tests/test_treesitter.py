@@ -12,6 +12,7 @@ class TestTreeSitterSplitter(unittest.TestCase):
     def setUp(self):
         """Set up the tests."""
         model_name = "gpt-3.5-turbo"
+        self.maxDiff = None
         self.llm = MODEL_CONSTRUCTORS[model_name](**MODEL_DEFAULT_ARGUMENTS[model_name])
 
     def _split(self):

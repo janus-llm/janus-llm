@@ -110,7 +110,7 @@ class PromptEngine:
             SOURCE_LANGUAGE=self.source_language,
             TARGET_LANGUAGE=self.target_language,
             TARGET_LANGUAGE_VERSION=self.target_version,
-            SOURCE_CODE=code.code,
+            SOURCE_CODE=code.text,
             FILE_SUFFIX=self.suffix,
             **extra_variables,
         ).to_messages()

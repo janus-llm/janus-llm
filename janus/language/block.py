@@ -9,23 +9,23 @@ log = create_logger(__name__)
 
 @dataclasses.dataclass
 class CodeBlock:
-    """A class that represents a functional block of text.
+    """A class that represents a functional block of code.
 
     Attributes:
-        text: The text block.
-        path: The path to the file containing the text block.
-        complete: Whether or not the text block is complete. If it isn't complete, it
-                  should have children components. This means that this text block has
+        text: The code block.
+        path: The path to the file containing the code block.
+        complete: Whether or not the code block is complete. If it isn't complete, it
+                  should have children components. This means that this code block has
                   missing sections inside of it that are in its children.
-        start_line: The line number of the first line of the text block.
-        end_line: The line number of the last line of the text block.
-        language: The language of the text block.
-        type: The type of the text block ('function', 'module', etc.). Defined in the
+        start_line: The line number of the first line of the code block.
+        end_line: The line number of the last line of the code block.
+        language: The language of the code block.
+        type: The type of the code block ('function', 'module', etc.). Defined in the
               language-specific modules.
-        tokens: The number of tokens in the text block.
-        depth: The depth of the text block in the AST.
-        id: The id of the text block in the AST
-        children: A tuple of child text blocks.
+        tokens: The number of tokens in the code block.
+        depth: The depth of the code block in the AST.
+        id: The id of the code block in the AST
+        children: A tuple of child code blocks.
     """
 
     id: Hashable
@@ -94,12 +94,12 @@ class CodeBlock:
 
 @dataclasses.dataclass
 class TranslatedCodeBlock(CodeBlock):
-    """A class that represents the translated functional block of text.
+    """A class that represents the translated functional block of code.
 
     Attributes:
-        original: The original text block.
-        cost: The total cost to translate the original text block.
-        retries: The number of times translation had to be retried for this text
+        original: The original code block.
+        cost: The total cost to translate the original code block.
+        retries: The number of times translation had to be retried for this code
         translated: Whether this block has been successfully translated
     """
 
@@ -115,7 +115,7 @@ class TranslatedCodeBlock(CodeBlock):
         """Create an "empty" `TranslatedCodeBlock` from the given original
 
         Arguments:
-            original: The original text block
+            original: The original code block
             language: The language to translate to
 
         Returns:

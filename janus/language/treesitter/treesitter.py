@@ -1,5 +1,6 @@
 import os
 import platform
+from collections import defaultdict
 from pathlib import Path
 
 import tree_sitter
@@ -40,7 +41,6 @@ class TreeSitterSplitter(Splitter):
             use_placeholders=use_placeholders)
         self._load_parser()
 
-
     def _get_ast(self, code: str | bytes) -> CodeBlock:
         if isinstance(code, str):
             code = bytes(code, "utf-8")
@@ -49,6 +49,16 @@ class TreeSitterSplitter(Splitter):
         root = tree.walk().node
         root = self._node_to_block(root, code)
         return root
+
+    def _set_identifiers(self, root: CodeBlock, path: Path):
+        seen_types = defaultdict(int)
+        queue = [root]
+        while queue:
+            node = queue.pop(0)  # BFS order to keep lower IDs toward the root
+            node.id = f"{node.type}-{seen_types[node.type]}"
+            seen_types[node.type] += 1
+            node.name = f"{path.name}:{node.id}"
+            queue.extend(node.children)
 
     def _node_to_block(
             self,
