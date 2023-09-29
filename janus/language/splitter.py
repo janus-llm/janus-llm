@@ -83,13 +83,9 @@ class Splitter(FileManager):
         Arguments:
             node: The current node in the tree.
         """
-        # First get the code for all the siblings at this level
-        text = node.text
-        length = self._count_tokens(text)
-
         # If the text at the function input is less than the max tokens, then
         #  we can just return it as a CodeBlock with no children.
-        if length < self.max_tokens:
+        if node.tokens < self.max_tokens:
             node.children = []
             return
 

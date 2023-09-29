@@ -116,7 +116,7 @@ class Translator:
 
             # Make sure the tree's code has been consolidated at the top level
             #  before writing to file
-            self.combiner.combine_children(out_block)
+            self.combiner.combine(out_block)
             self._save_to_file(out_block, out_path)
 
         log.info(f"Total cost: ${total_cost:,.2f}")

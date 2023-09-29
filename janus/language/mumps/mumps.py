@@ -1,4 +1,5 @@
 import re
+from math import ceil
 from pathlib import Path
 from typing import List
 
@@ -70,8 +71,24 @@ class MumpsSplitter(Splitter):
 
     def _get_ast(self, code: str | bytes) -> CodeBlock:
         code = str(code)
+        root = CodeBlock(
+            text=code,
+            name="root",
+            id="root",
+            start_point=(0, 0),
+            end_point=(code.count("\n"), 0),
+            start_byte=0,
+            end_byte=len(bytes(code, "utf-8")),
+            prefix="",
+            suffix="",
+            type=NodeType("routine"),
+            children=[],
+            complete=True,
+            language=self.language,
+            tokens=self._count_tokens(code),
+        )
 
-        subroutine_matches = self.subroutine_pattern.finditer(code)
+        subroutine_matches = self.subroutine_pattern.finditer(root.text)
         end_index = 0
         chunks = []
         betweens = []
@@ -79,17 +96,17 @@ class MumpsSplitter(Splitter):
             i0 = match.start(1)
             i1 = match.end(1)
             if i0 < i1:
-                betweens.append(code[end_index:i0])
-                chunks.append(code[i0:i1])
+                betweens.append(root.text[end_index:i0])
+                chunks.append(root.text[i0:i1])
                 end_index = i1
-        betweens.append(code[end_index:])
-        prefixes = betweens[:-1]
-        suffixes = betweens[1:]
+        betweens.append(root.text[end_index:])
+
+        if len(chunks) <= 1:
+            return root
 
         start_line = 0
         start_byte = 0
-        children: List[CodeBlock] = []
-        for prefix, chunk, suffix in zip(prefixes, chunks, suffixes):
+        for prefix, chunk, suffix in zip(betweens[:-1], chunks, betweens[1:]):
             start_byte += len(bytes(prefix, "utf-8"))
             start_line += prefix.count("\n")
             end_byte = start_byte + len(bytes(chunk, "utf-8"))
@@ -101,39 +118,67 @@ class MumpsSplitter(Splitter):
             label = re.search(r"^(\w+)", chunk)
             name = label.groups(1)[0] if label is not None else "anon"
 
-            children.append(
-                CodeBlock(
-                    text=chunk,
-                    name=name,
-                    id=name,
-                    start_point=(start_line, 0),
-                    end_point=(end_line, end_char),
-                    start_byte=start_byte,
-                    end_byte=end_byte,
-                    prefix=prefix,
-                    suffix=suffix,
-                    type=NodeType("subroutine"),
-                    children=[],
-                    complete=True,
-                    language=self.language,
-                    tokens=self._count_tokens(chunk),
-                )
+            node = CodeBlock(
+                text=chunk,
+                name=name,
+                id=name,
+                start_point=(start_line, 0),
+                end_point=(end_line, end_char),
+                start_byte=start_byte,
+                end_byte=end_byte,
+                prefix=prefix,
+                suffix=suffix,
+                type=NodeType("subroutine"),
+                children=[],
+                complete=True,
+                language=self.language,
+                tokens=self._count_tokens(chunk),
             )
+            self._segment_node(node)
+            root.children.append(node)
+
             start_byte = end_byte
             start_line = end_line
-        return CodeBlock(
-            text=code,
-            name="root",
-            id="root",
-            start_point=(0, 0),
-            end_point=(code.count("\n"), 0),
-            start_byte=0,
-            end_byte=len(bytes(code, "utf-8")),
-            prefix="",
-            suffix="",
-            type=NodeType("routine"),
-            children=children,
-            complete=True,
-            language=self.language,
-            tokens=self._count_tokens(code),
-        )
+
+        return root
+
+    def _segment_node(self, node: CodeBlock):
+        if node.tokens <= self.max_tokens:
+            return
+
+        n_children = ceil(node.tokens / self.max_tokens)
+        lines = node.text.split("\n")
+        n_lines = len(lines)
+        lines_per_child = n_lines // n_children
+        chunks = [
+            "\n".join(lines[i:i+lines_per_child])
+            for i in range(0, n_lines, lines_per_child)
+        ]
+
+        start_byte = node.start_byte
+        start_line = node.start_point[0]
+        for i, chunk in enumerate(chunks):
+            end_byte = start_byte + len(bytes(chunk, "utf-8"))
+            end_line = start_line + chunk.count("\n")
+            end_char = len(chunk) - chunk.rfind("\n") - 1
+
+            name = f"{node.name}_seg_{i}"
+
+            node.children.append(CodeBlock(
+                text=chunk,
+                name=name,
+                id=name,
+                start_point=(start_line, 0),
+                end_point=(end_line, end_char),
+                start_byte=start_byte,
+                end_byte=end_byte,
+                prefix="",
+                suffix="",
+                type=NodeType("segment"),
+                children=[],
+                complete=True,
+                language=self.language,
+                tokens=self._count_tokens(chunk),
+            ))
+            start_byte = end_byte
+            start_line = end_line
