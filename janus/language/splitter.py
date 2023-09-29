@@ -60,7 +60,7 @@ class Splitter(FileManager):
         self._set_identifiers(root, path)
 
         self._recurse_split(root)
-        log.debug(f"[{root.name}] CodeBlock Structure:\n{root.tree_str()}")
+        log.info(f"[{root.name}] CodeBlock Structure:\n{root.tree_str()}")
 
         return root
 

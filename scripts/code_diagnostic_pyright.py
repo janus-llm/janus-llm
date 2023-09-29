@@ -3,6 +3,7 @@ import json
 import re
 import subprocess
 from pathlib import Path
+from janus.utils.enums import LANGUAGES
 
 import pandas as pd
 
@@ -101,7 +102,7 @@ def get_line_analysis(output_dir: Path | str) -> pd.DataFrame:
     return line_df
 
 
-def get_file_analysis(input_dir: str, output_dir: str) -> pd.DataFrame:
+def get_file_analysis(input_dir: str, output_dir: str, language: str) -> pd.DataFrame:
     """
     Run pyright on a given directory and return the results.
     The directory structure must be as follows, with (1) being the top-level
@@ -123,25 +124,24 @@ def get_file_analysis(input_dir: str, output_dir: str) -> pd.DataFrame:
     # Get length of input and output files
     # Note that input files are indexed only on filename (e.g. PSSBPSUT) while
     #  output files are indexed on full absolute path
+    input_files = list(input_dir.rglob(f"*.{LANGUAGES[language]['suffix']}"))
+    output_files = list(output_dir.rglob("*.py"))
     input_file_lengths = pd.Series(
         {
             f.with_suffix("").name: len(f.read_text().split("\n"))
-            for f in input_dir.rglob("*.m")
-        }
-    )
-    input_file_routines = pd.Series(
-        {
-            f.with_suffix("").name: len(re.findall(r"(?:^|\n)\S", f.read_text()))
-            for f in input_dir.rglob("*.m")
+            for f in input_files
         }
     )
     output_file_lengths = pd.Series(
-        {f.resolve(): len(f.read_text().split("\n")) for f in output_dir.rglob("*.py")}
+        {
+            f.resolve(): len(f.read_text().split("\n"))
+            for f in output_files
+        }
     )
     output_file_ill_formatted = pd.Series(
         {
-            f.resolve(): re.search(r"(?:^|\n)[ \t]*#.*child_", f.read_text()) is not None
-            for f in output_dir.rglob("*.py")
+            f.resolve(): re.search(r"<<<\S+?>>>", f.read_text()) is not None
+            for f in output_files
         }
     )
 
@@ -199,9 +199,6 @@ def get_file_analysis(input_dir: str, output_dir: str) -> pd.DataFrame:
         input_file_lengths.rename("input_length"), left_on="filename", right_index=True
     )
     file_df = file_df.merge(
-        input_file_routines.rename("num_routines"), left_on="filename", right_index=True
-    )
-    file_df = file_df.merge(
         output_file_lengths.rename("output_length"), left_on="file", right_index=True
     )
     file_df = file_df.merge(
@@ -209,6 +206,18 @@ def get_file_analysis(input_dir: str, output_dir: str) -> pd.DataFrame:
         left_on="file",
         right_index=True,
     )
+    if language == "mumps":
+        input_file_routines = pd.Series(
+            {
+                f.with_suffix("").name: len(re.findall(r"(?:^|\n)\S", f.read_text()))
+                for f in input_files
+            }
+        )
+        file_df = file_df.merge(
+            input_file_routines.rename("num_routines"),
+            left_on="filename",
+            right_index=True
+        )
     file_df["normalized_error_lines"] = file_df.error_lines / file_df.input_length
     file_df["normalized_warning_lines"] = file_df.warning_lines / file_df.input_length
     return file_df
@@ -224,9 +233,16 @@ if __name__ == "__main__":
     parser.add_argument(
         "translated_dir", type=str, help="Directory containing translated python."
     )
+    parser.add_argument(
+        "--input-language",
+        type=str,
+        default="mumps",
+        choices=["mumps", "fortran"],
+        help="The input language (mumps or fortran)"
+    )
     args = parser.parse_args()
 
-    df = get_file_analysis(args.input_dir, args.translated_dir)
+    df = get_file_analysis(args.input_dir, args.translated_dir, args.input_language)
     df["input_ratio"] = df.output_length / df.input_length
     df.to_csv(Path(args.translated_dir) / "error_counts.tsv", sep="\t", index=False)
     g = df.groupby("experiment")
