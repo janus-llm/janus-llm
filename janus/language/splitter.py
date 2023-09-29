@@ -1,5 +1,5 @@
-from pathlib import Path
 from math import ceil
+from pathlib import Path
 from typing import List
 
 from langchain.schema.language_model import BaseLanguageModel
@@ -228,11 +228,7 @@ class Splitter(FileManager):
             #  In testing, the length of a merged pair is between 2 and 3 tokens
             #  longer than the sum of the individual lengths, on average.
             central_node = groups[i0][-1]
-            merged_text = "".join([
-                text_chunks[i0],
-                central_node.suffix,
-                text_chunks[i1]
-            ])
+            merged_text = "".join([text_chunks[i0], central_node.suffix, text_chunks[i1]])
             merged_text_length = self._count_tokens(merged_text)
             if merged_text_length > self.max_tokens:
                 break
