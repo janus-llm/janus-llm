@@ -1,4 +1,5 @@
 from pathlib import Path
+from math import ceil
 from typing import List
 
 from langchain.schema.language_model import BaseLanguageModel
@@ -85,7 +86,7 @@ class Splitter(FileManager):
         """
         # If the text at the function input is less than the max tokens, then
         #  we can just return it as a CodeBlock with no children.
-        if node.tokens < self.max_tokens:
+        if node.tokens <= self.max_tokens:
             node.children = []
             return
 
@@ -98,6 +99,8 @@ class Splitter(FileManager):
         # If not using placeholders, simply recurse for every child and delete
         #  this node's text and tokens
         if not self.use_placeholders:
+            if not node.children:
+                log.error(f"[{node.name}] Childless node too long for context!")
             for child in node.children:
                 self._recurse_split(child)
             node.text = None
@@ -208,7 +211,7 @@ class Splitter(FileManager):
         """
         nodes = sorted(nodes, key=lambda node: node.start_byte)
         text_chunks = [child.text for child in nodes]
-        lengths = list(map(self._count_tokens, text_chunks))
+        lengths = [node.tokens for node in nodes]
 
         # Estimate the length of each adjacent pair were they merged
         adj_sums = [lengths[i] + lengths[i + 1] for i in range(len(lengths) - 1)]
@@ -220,24 +223,33 @@ class Splitter(FileManager):
             i0 = int(min(range(len(adj_sums)), key=adj_sums.__getitem__))
             i1 = i0 + 1
 
-            # Merge the pair of node groups
-            groups[i0 : i1 + 1] = [groups[i0] + groups[i1]]
-
             # Recalculate the length. We can't simply use the adj_sum, because
-            #  it is an underestimate due to the added newline.
+            #  it is an underestimate due to the adjoining suffix/prefix.
             #  In testing, the length of a merged pair is between 2 and 3 tokens
             #  longer than the sum of the individual lengths, on average.
-            text_chunks[i0 : i1 + 1] = [text_chunks[i0] + "\n" + text_chunks[i1]]
-            lengths[i0 : i1 + 1] = [self._count_tokens(text_chunks[i0])]
+            central_node = groups[i0][-1]
+            merged_text = "".join([
+                text_chunks[i0],
+                central_node.suffix,
+                text_chunks[i1]
+            ])
+            merged_text_length = self._count_tokens(merged_text)
+            if merged_text_length > self.max_tokens:
+                break
+
+            # Update adjacent sum estimates
+            if i0 > 0:
+                adj_sums[i0 - 1] += merged_text_length
+            if i1 < len(adj_sums) - 1:
+                adj_sums[i1 + 1] += merged_text_length
 
             # The potential merge length for this pair is removed
             adj_sums.pop(i0)
 
-            # Update adjacent sum estimates
-            if i0 > 0:
-                adj_sums[i0 - 1] = lengths[i0 - 1] + lengths[i0]
-            if i0 < len(adj_sums):
-                adj_sums[i0] += lengths[i0] + lengths[i1]
+            # Merge the pair of node groups
+            groups[i0 : i1 + 1] = [groups[i0] + groups[i1]]
+            text_chunks[i0 : i1 + 1] = [merged_text]
+            lengths[i0 : i1 + 1] = [merged_text_length]
 
         return groups
 
@@ -283,3 +295,46 @@ class Splitter(FileManager):
             The number of tokens in the given text.
         """
         return self.model.get_num_tokens(code)
+
+    def _segment_node(self, node: CodeBlock):
+        if node.tokens <= self.max_tokens:
+            return
+
+        n_children = ceil(node.tokens / self.max_tokens)
+        lines = node.text.split("\n")
+        n_lines = len(lines)
+        lines_per_child = n_lines // n_children
+        chunks = [
+            "\n".join(lines[i : i + lines_per_child])
+            for i in range(0, n_lines, lines_per_child)
+        ]
+
+        start_byte = node.start_byte
+        start_line = node.start_point[0]
+        for i, chunk in enumerate(chunks):
+            end_byte = start_byte + len(bytes(chunk, "utf-8"))
+            end_line = start_line + chunk.count("\n")
+            end_char = len(chunk) - chunk.rfind("\n") - 1
+
+            name = f"{node.name}_seg_{i}"
+
+            node.children.append(
+                CodeBlock(
+                    text=chunk,
+                    name=name,
+                    id=name,
+                    start_point=(start_line, 0),
+                    end_point=(end_line, end_char),
+                    start_byte=start_byte,
+                    end_byte=end_byte,
+                    prefix="",
+                    suffix="",
+                    type=NodeType("segment"),
+                    children=[],
+                    complete=True,
+                    language=self.language,
+                    tokens=self._count_tokens(chunk),
+                )
+            )
+            start_byte = end_byte
+            start_line = end_line

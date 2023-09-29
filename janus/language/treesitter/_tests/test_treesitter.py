@@ -19,6 +19,7 @@ class TestTreeSitterSplitter(unittest.TestCase):
         """Split the test file."""
         tree_root = self.splitter.split(self.test_file)
         self.assertFalse(tree_root.complete)
+        self.assertLessEqual(tree_root.max_tokens, self.splitter.max_tokens)
         self.combiner.combine(tree_root)
         self.assertTrue(tree_root.complete)
         split_text = tree_root.text

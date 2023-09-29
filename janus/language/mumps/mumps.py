@@ -1,5 +1,4 @@
 import re
-from math import ceil
 from pathlib import Path
 
 from langchain.schema.language_model import BaseLanguageModel
@@ -140,46 +139,3 @@ class MumpsSplitter(Splitter):
             start_line = end_line
 
         return root
-
-    def _segment_node(self, node: CodeBlock):
-        if node.tokens <= self.max_tokens:
-            return
-
-        n_children = ceil(node.tokens / self.max_tokens)
-        lines = node.text.split("\n")
-        n_lines = len(lines)
-        lines_per_child = n_lines // n_children
-        chunks = [
-            "\n".join(lines[i : i + lines_per_child])
-            for i in range(0, n_lines, lines_per_child)
-        ]
-
-        start_byte = node.start_byte
-        start_line = node.start_point[0]
-        for i, chunk in enumerate(chunks):
-            end_byte = start_byte + len(bytes(chunk, "utf-8"))
-            end_line = start_line + chunk.count("\n")
-            end_char = len(chunk) - chunk.rfind("\n") - 1
-
-            name = f"{node.name}_seg_{i}"
-
-            node.children.append(
-                CodeBlock(
-                    text=chunk,
-                    name=name,
-                    id=name,
-                    start_point=(start_line, 0),
-                    end_point=(end_line, end_char),
-                    start_byte=start_byte,
-                    end_byte=end_byte,
-                    prefix="",
-                    suffix="",
-                    type=NodeType("segment"),
-                    children=[],
-                    complete=True,
-                    language=self.language,
-                    tokens=self._count_tokens(chunk),
-                )
-            )
-            start_byte = end_byte
-            start_line = end_line

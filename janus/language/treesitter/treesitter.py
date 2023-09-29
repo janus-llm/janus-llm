@@ -78,7 +78,7 @@ class TreeSitterSplitter(Splitter):
 
         text = node.text.decode()
         children = [self._node_to_block(child, original_text) for child in node.children]
-        return CodeBlock(
+        node = CodeBlock(
             id=node.id,
             name=node.id,
             text=text,
@@ -94,6 +94,9 @@ class TreeSitterSplitter(Splitter):
             tokens=self._count_tokens(text),
             complete=True,
         )
+        if not node.children:
+            self._segment_node(node)
+        return node
 
     def _load_parser(self) -> None:
         """Load the parser for the given language.

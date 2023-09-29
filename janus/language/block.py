@@ -62,6 +62,15 @@ class CodeBlock:
         return 1 + max(c.height for c in self.children) if self.children else 0
 
     @property
+    def max_tokens(self) -> int:
+        """The maximum number of tokens in this block or any of its descendents
+
+        Returns:
+            The maximum number of tokens in this block or any of  its descendents
+        """
+        return max([self.tokens, *[c.max_tokens for c in self.children]])
+
+    @property
     def total_tokens(self) -> int:
         """The total tokens represented by this block and all its descendents
 

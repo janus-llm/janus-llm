@@ -19,10 +19,10 @@ class TestMumpsSplitter(unittest.TestCase):
 
     def test_split(self):
         """Test the split method."""
-        split_code = self.splitter.split(self.test_file)
-        self.assertEqual(len(split_code.children), 5)
-        self.assertFalse(split_code.complete)
-        self.combiner.combine_children(split_code)
-        self.assertTrue(split_code.complete)
-        flat_split_text = split_code.text
-        self.assertEqual(flat_split_text, self.test_file.read_text())
+        tree_root = self.splitter.split(self.test_file)
+        self.assertEqual(len(tree_root.children), 6)
+        self.assertLessEqual(tree_root.max_tokens, self.splitter.max_tokens)
+        self.assertFalse(tree_root.complete)
+        self.combiner.combine_children(tree_root)
+        self.assertTrue(tree_root.complete)
+        self.assertEqual(tree_root.text, self.test_file.read_text())
