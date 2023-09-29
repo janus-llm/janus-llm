@@ -3,9 +3,10 @@ import json
 import re
 import subprocess
 from pathlib import Path
-from janus.utils.enums import LANGUAGES
 
 import pandas as pd
+
+from janus.utils.enums import LANGUAGES
 
 
 def get_line_analysis(output_dir: Path | str) -> pd.DataFrame:
@@ -127,16 +128,10 @@ def get_file_analysis(input_dir: str, output_dir: str, language: str) -> pd.Data
     input_files = list(input_dir.rglob(f"*.{LANGUAGES[language]['suffix']}"))
     output_files = list(output_dir.rglob("*.py"))
     input_file_lengths = pd.Series(
-        {
-            f.with_suffix("").name: len(f.read_text().split("\n"))
-            for f in input_files
-        }
+        {f.with_suffix("").name: len(f.read_text().split("\n")) for f in input_files}
     )
     output_file_lengths = pd.Series(
-        {
-            f.resolve(): len(f.read_text().split("\n"))
-            for f in output_files
-        }
+        {f.resolve(): len(f.read_text().split("\n")) for f in output_files}
     )
     output_file_ill_formatted = pd.Series(
         {
@@ -216,7 +211,7 @@ def get_file_analysis(input_dir: str, output_dir: str, language: str) -> pd.Data
         file_df = file_df.merge(
             input_file_routines.rename("num_routines"),
             left_on="filename",
-            right_index=True
+            right_index=True,
         )
     file_df["normalized_error_lines"] = file_df.error_lines / file_df.input_length
     file_df["normalized_warning_lines"] = file_df.warning_lines / file_df.input_length
@@ -238,7 +233,7 @@ if __name__ == "__main__":
         type=str,
         default="mumps",
         choices=["mumps", "fortran"],
-        help="The input language (mumps or fortran)"
+        help="The input language (mumps or fortran)",
     )
     args = parser.parse_args()
 
