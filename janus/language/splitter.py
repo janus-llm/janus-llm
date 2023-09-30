@@ -107,90 +107,43 @@ class Splitter(FileManager):
             node.tokens = 0
             return
 
-        # Create list of this node's component texts (excluding its own prefix/suffix)
-        text_chunks = [c.text + c.suffix for c in node.children]
-        text_chunks[0] = node.children[0].prefix + text_chunks[0]
+        text_chunks = [c.complete_placeholder for c in node.children]
+        node.text = "".join(text_chunks)
+        node.tokens = self._count_tokens(node.text)
 
-        # Create a list of child indices, ordered by length. This will be used
-        #  to select children, starting with the longest, and replace their
-        #  text with a placeholder.
-        remaining_indices: List[int] = sorted(
-            range(len(node.children)),
-            key=lambda idx: self._count_tokens(node.children[idx].text),
-        )
-
-        # Track which nodes' prefixes and suffixes need to be dropped. This
-        #  can't be done in-place because if the block is still too long after
-        #  pulling out every child, then we forego placeholders, requiring
-        #  all nodes to still have their prefixes and suffixes intact.
-        remove_prefix_indices = set()
-        remove_suffix_indices = set()
-
-        # Replace child node text with placeholders until we can fit in context,
-        #  starting with the longest children
-        while remaining_indices and node.tokens > self.max_tokens:
-            # Remaining indices are sorted by text length, ascending
-            idx = remaining_indices.pop()
-            longest_child = node.children[idx]
-            self._recurse_split(longest_child)
-
-            # Replace the corresponding chunk with a placeholder, but include
-            #  the node's prefix and suffix in the text
-            chunk = f"<<<{longest_child.id}>>>"
-            if idx not in remove_prefix_indices:
-                chunk = longest_child.prefix + chunk
-            if idx not in remove_suffix_indices:
-                chunk += longest_child.suffix
-            text_chunks[idx] = chunk
-
-            # This node's prefix and suffix are included in the text now, so
-            #  mark them for removal from the node
-            remove_prefix_indices.add(idx)
-            remove_suffix_indices.add(idx)
-
-            # Since this node's prefix is included in the text, remove the
-            #  suffix from the previous node (if it hasn't already been visited)
-            if idx > 0 and idx - 1 in remaining_indices:
-                remove_suffix_indices.add(idx - 1)
-
-                # Remove the suffix from the corresponding text chunk
-                prev = node.children[idx - 1]
-                text_chunks[idx - 1] = prev.prefix if idx == 1 else ""
-                text_chunks[idx - 1] += prev.text
-
-            # Update the node's text and token count
-            node.text = "".join(text_chunks)
-            node.tokens = self._count_tokens(node.text)
-
-        # If there are no remaining indices, then every child has been replaced
-        #  with a placeholder. Therefore, even if placeholders are enabled,
-        #  there is no benefit to using them for this node.
-        if not remaining_indices:
+        # If the text is still too long even with every child replaced with
+        #  placeholders, there's no reason to bother with placeholders at all
+        if node.tokens > self.max_tokens:
             node.text = None
             node.tokens = 0
             return
 
-        # Any remaining children will be represented in this node's text,
-        #  including their prefixes and suffixes. Therefore, mark the
-        #  prefixes of the succeeding children for removal.
-        # Only the first child's prefix is included in the text chunks, so
-        #  preceding children's suffixes need not be removed.
-        for i in remaining_indices:
-            if i < len(node.children) - 1 and node.children[i].suffix:
-                remove_prefix_indices.add(i + 1)
+        sorted_indices: List[int] = sorted(
+            range(len(node.children)),
+            key=lambda idx: node.children[idx].tokens,
+        )
 
-        # Remove prefixes and suffixes from the appropriate nodes
-        if node.tokens <= self.max_tokens:
-            for i in remove_prefix_indices:
-                node.children[i].prefix = ""
-            for i in remove_suffix_indices:
-                node.children[i].suffix = ""
+        merged_child_indices = set()
+        for idx in sorted_indices:
+            child = node.children[idx]
+            text_chunks[idx] = child.complete_text
+            text = "".join(text_chunks)
+            tokens = self._count_tokens(text)
+            if tokens > self.max_tokens:
+                break
 
-        # Any remaining children can be pruned, as their content is represented
-        #  in this node's text. This must be done in reverse order to that the
-        #  indices don't change due to the deletion
-        for i in sorted(remaining_indices, reverse=True):
-            del node.children[i]
+            node.text = text
+            node.tokens = tokens
+            merged_child_indices.add(idx)
+
+        # Remove all merged children from the child list
+        node.children = [
+            child for i, child in enumerate(node.children)
+            if i not in merged_child_indices
+        ]
+
+        for child in node.children:
+            self._recurse_split(child)
 
     def _consolidate_nodes(self, nodes: List[CodeBlock]) -> List[List[CodeBlock]]:
         """Consolidate a list of tree_sitter nodes into groups. Each group should fit
@@ -209,7 +162,7 @@ class Splitter(FileManager):
             ordered such that, were it flattened, all nodes would be sorted according to
             appearance in the original file.
         """
-        nodes = sorted(nodes, key=lambda node: node.start_byte)
+        nodes = sorted(nodes)
         text_chunks = [child.text for child in nodes]
         lengths = [node.tokens for node in nodes]
 
@@ -261,24 +214,25 @@ class Splitter(FileManager):
             raise ValueError("Nodes have conflicting language")
         (language,) = languages
 
-        interleaved = [s for node in nodes for s in [node.text, node.suffix]]
-        text = "".join(interleaved[:-1])
-        id = f"{nodes[0].id}:{nodes[-1].id}"
+        prefix = nodes[0].affixes[0]
+        suffix = nodes[-1].affixes[-1]
+        nodes[0].omit_prefix = True
+        nodes[-1].omit_suffix = True
+        text = "".join(node.complete_text for node in nodes)
+        name = f"{nodes[0].id}:{nodes[-1].id}"
         return CodeBlock(
             text=text,
-            name=id,
-            id=id,
+            name=name,
+            id=name,
             start_point=nodes[0].start_point,
             end_point=nodes[-1].end_point,
             start_byte=nodes[0].start_byte,
             end_byte=nodes[-1].end_byte,
-            prefix=nodes[0].prefix,
-            suffix=nodes[-1].suffix,
+            affixes=(prefix, suffix),
             type=NodeType("merge"),
-            children=sum([node.children for node in nodes], []),
+            children=sorted(sum([node.children for node in nodes], [])),
             language=language,
             tokens=self._count_tokens(text),
-            complete=all(node.complete for node in nodes),
         )
 
     def _count_tokens(self, code: str) -> int:
@@ -293,44 +247,35 @@ class Splitter(FileManager):
         return self.model.get_num_tokens(code)
 
     def _segment_node(self, node: CodeBlock):
-        if node.tokens <= self.max_tokens:
+        if node.tokens <= self.max_tokens or node.children:
             return
 
-        n_children = ceil(node.tokens / self.max_tokens)
         lines = node.text.split("\n")
-        n_lines = len(lines)
-        lines_per_child = n_lines // n_children
-        chunks = [
-            "\n".join(lines[i : i + lines_per_child])
-            for i in range(0, n_lines, lines_per_child)
-        ]
-
         start_byte = node.start_byte
-        start_line = node.start_point[0]
-        for i, chunk in enumerate(chunks):
-            end_byte = start_byte + len(bytes(chunk, "utf-8"))
-            end_line = start_line + chunk.count("\n")
-            end_char = len(chunk) - chunk.rfind("\n") - 1
+        for i, line in enumerate(lines):
+            end_byte = start_byte + len(bytes(line, "utf-8"))
 
-            name = f"{node.name}_seg_{i}"
+            name = f"{node.name}_line_{i}"
+            prefix = "\n" if i > 0 else ""
+            suffix = "\n" if i < len(lines) - 1 else ""
 
             node.children.append(
                 CodeBlock(
-                    text=chunk,
+                    text=line,
                     name=name,
                     id=name,
-                    start_point=(start_line, 0),
-                    end_point=(end_line, end_char),
+                    start_point=(node.start_point[0] + i, 0),
+                    end_point=(node.start_point[0] + i, len(line)),
                     start_byte=start_byte,
                     end_byte=end_byte,
-                    prefix="",
-                    suffix="",
+                    affixes=(prefix, suffix),
                     type=NodeType("segment"),
                     children=[],
-                    complete=True,
                     language=self.language,
-                    tokens=self._count_tokens(chunk),
+                    tokens=self._count_tokens(line),
                 )
             )
-            start_byte = end_byte
-            start_line = end_line
+            start_byte = end_byte + 1
+
+        # Don't forget the newline we split on
+        node.children[0].omit_prefix = False

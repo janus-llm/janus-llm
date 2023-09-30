@@ -82,8 +82,7 @@ class TreeSitterSplitter(Splitter):
             id=node.id,
             name=node.id,
             text=text,
-            prefix=prefix,
-            suffix=suffix,
+            affixes=(prefix, suffix),
             start_point=node.start_point,
             end_point=node.end_point,
             start_byte=node.start_byte,
@@ -92,10 +91,8 @@ class TreeSitterSplitter(Splitter):
             children=children,
             language=self.language,
             tokens=self._count_tokens(text),
-            complete=True,
         )
-        if not node.children:
-            self._segment_node(node)
+        self._segment_node(node)
         return node
 
     def _load_parser(self) -> None:

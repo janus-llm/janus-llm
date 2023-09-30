@@ -69,24 +69,8 @@ class MumpsSplitter(Splitter):
 
     def _get_ast(self, code: str | bytes) -> CodeBlock:
         code = str(code)
-        root = CodeBlock(
-            text=code,
-            name="root",
-            id="root",
-            start_point=(0, 0),
-            end_point=(code.count("\n"), 0),
-            start_byte=0,
-            end_byte=len(bytes(code, "utf-8")),
-            prefix="",
-            suffix="",
-            type=NodeType("routine"),
-            children=[],
-            complete=True,
-            language=self.language,
-            tokens=self._count_tokens(code),
-        )
 
-        subroutine_matches = self.subroutine_pattern.finditer(root.text)
+        subroutine_matches = self.subroutine_pattern.finditer(code)
         end_index = 0
         chunks = []
         betweens = []
@@ -94,16 +78,14 @@ class MumpsSplitter(Splitter):
             i0 = match.start(1)
             i1 = match.end(1)
             if i0 < i1:
-                betweens.append(root.text[end_index:i0])
-                chunks.append(root.text[i0:i1])
+                betweens.append(code[end_index:i0])
+                chunks.append(code[i0:i1])
                 end_index = i1
-        betweens.append(root.text[end_index:])
-
-        if len(chunks) <= 1:
-            return root
+        betweens.append(code[end_index:])
 
         start_line = 0
         start_byte = 0
+        children = []
         for prefix, chunk, suffix in zip(betweens[:-1], chunks, betweens[1:]):
             start_byte += len(bytes(prefix, "utf-8"))
             start_line += prefix.count("\n")
@@ -124,18 +106,28 @@ class MumpsSplitter(Splitter):
                 end_point=(end_line, end_char),
                 start_byte=start_byte,
                 end_byte=end_byte,
-                prefix=prefix,
-                suffix=suffix,
+                affixes=(prefix, suffix),
                 type=NodeType("subroutine"),
                 children=[],
-                complete=True,
                 language=self.language,
                 tokens=self._count_tokens(chunk),
             )
             self._segment_node(node)
-            root.children.append(node)
+            children.append(node)
 
             start_byte = end_byte
             start_line = end_line
 
-        return root
+        return CodeBlock(
+            text=code,
+            name="root",
+            id="root",
+            start_point=(0, 0),
+            end_point=(code.count("\n"), 0),
+            start_byte=0,
+            end_byte=len(bytes(code, "utf-8")),
+            type=NodeType("routine"),
+            children=children,
+            language=self.language,
+            tokens=self._count_tokens(code),
+        )

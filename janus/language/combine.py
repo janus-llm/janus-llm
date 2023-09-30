@@ -51,13 +51,8 @@ class Combiner(FileManager):
         # If input string is None, then this node consists exclusively of
         #  children with no other formatting. Simply concatenate the children.
         if block.text is None:
-            children = sorted(block.children, key=lambda b: b.start_byte)
-            block.text = "".join(
-                [
-                    children[0].prefix,
-                    *[c.text + c.suffix for c in children],
-                ]
-            )
+            children = sorted(block.children)
+            block.text = "".join([c.complete_text for c in children])
             block.children = []
             block.complete = children_complete
             return
@@ -71,10 +66,7 @@ class Combiner(FileManager):
             if not self.contains_child(block.text, child):
                 missing_children.append(child)
                 continue
-            block.text = block.text.replace(
-                self._placeholder(child),
-                child.prefix + child.text + child.suffix,
-            )
+            block.text = block.text.replace(self._placeholder(child), child.text)
 
         if missing_children:
             missing_ids = [c.id for c in missing_children]
