@@ -1,4 +1,3 @@
-import dataclasses
 from functools import total_ordering
 from typing import ForwardRef, Hashable, List, Optional, Tuple
 
@@ -30,19 +29,20 @@ class CodeBlock:
     """
 
     def __init__(
-            self,
-            id: Hashable,
-            name: Optional[str],
-            type: NodeType,
-            language: str,
-            text: Optional[str],
-            start_point: Optional[Tuple[int, int]],
-            end_point: Optional[Tuple[int, int]],
-            start_byte: Optional[int],
-            end_byte: Optional[int],
-            tokens: int,
-            children: List[ForwardRef("CodeBlock")],
-            affixes: Tuple[str, str] = ("", "")):
+        self,
+        id: Hashable,
+        name: Optional[str],
+        type: NodeType,
+        language: str,
+        text: Optional[str],
+        start_point: Optional[Tuple[int, int]],
+        end_point: Optional[Tuple[int, int]],
+        start_byte: Optional[int],
+        end_byte: Optional[int],
+        tokens: int,
+        children: List[ForwardRef("CodeBlock")],
+        affixes: Tuple[str, str] = ("", ""),
+    ):
         self.id = id
         self.name = name
         self.type = type
@@ -146,6 +146,7 @@ class CodeBlock:
             ]
         )
 
+
 class TranslatedCodeBlock(CodeBlock):
     """A class that represents the translated functional block of code.
 
@@ -155,6 +156,7 @@ class TranslatedCodeBlock(CodeBlock):
         retries: The number of times translation had to be retried for this code
         translated: Whether this block has been successfully translated
     """
+
     def __init__(self, original: CodeBlock, language: str):
         """Create an "empty" `TranslatedCodeBlock` from the given original
 
@@ -178,9 +180,9 @@ class TranslatedCodeBlock(CodeBlock):
             end_byte=None,
             tokens=0,
             children=[
-                TranslatedCodeBlock(child, language)
-                for child in original.children
-            ]
+                TranslatedCodeBlock(child, language) for child in original.children
+            ],
+            affixes=original.affixes,
         )
         self.original = original
 

@@ -1,4 +1,4 @@
-from math import ceil
+import re
 from pathlib import Path
 from typing import List
 
@@ -116,6 +116,8 @@ class Splitter(FileManager):
         if node.tokens > self.max_tokens:
             node.text = None
             node.tokens = 0
+            for child in node.children:
+                self._recurse_split(child)
             return
 
         sorted_indices: List[int] = sorted(
@@ -138,7 +140,8 @@ class Splitter(FileManager):
 
         # Remove all merged children from the child list
         node.children = [
-            child for i, child in enumerate(node.children)
+            child
+            for i, child in enumerate(node.children)
             if i not in merged_child_indices
         ]
 
@@ -178,13 +181,15 @@ class Splitter(FileManager):
 
             # Recalculate the length. We can't simply use the adj_sum, because
             #  it is an underestimate due to the adjoining suffix/prefix.
-            #  In testing, the length of a merged pair is between 2 and 3 tokens
-            #  longer than the sum of the individual lengths, on average.
             central_node = groups[i0][-1]
             merged_text = "".join([text_chunks[i0], central_node.suffix, text_chunks[i1]])
             merged_text_length = self._count_tokens(merged_text)
+
+            # If the true length of the merged pair is too long, don't merge them
+            #  Instead, correct the estimate, since shorter pairs may yet exist
             if merged_text_length > self.max_tokens:
-                break
+                adj_sums[i0] = merged_text_length
+                continue
 
             # Update adjacent sum estimates
             if i0 > 0:
@@ -220,6 +225,9 @@ class Splitter(FileManager):
         nodes[-1].omit_suffix = True
         text = "".join(node.complete_text for node in nodes)
         name = f"{nodes[0].id}:{nodes[-1].id}"
+        tokens = self._count_tokens(text)
+        if tokens > self.max_tokens:
+            log.error(f"Merged node ({name}) too long for context!")
         return CodeBlock(
             text=text,
             name=name,
@@ -232,7 +240,7 @@ class Splitter(FileManager):
             type=NodeType("merge"),
             children=sorted(sum([node.children for node in nodes], [])),
             language=language,
-            tokens=self._count_tokens(text),
+            tokens=tokens,
         )
 
     def _count_tokens(self, code: str) -> int:
@@ -250,32 +258,42 @@ class Splitter(FileManager):
         if node.tokens <= self.max_tokens or node.children:
             return
 
-        lines = node.text.split("\n")
-        start_byte = node.start_byte
-        for i, line in enumerate(lines):
-            end_byte = start_byte + len(bytes(line, "utf-8"))
+        split_text = re.split(r"(\n+)", node.text)
+        betweens = split_text[1::2]
+        lines = split_text[::2]
 
-            name = f"{node.name}_line_{i}"
-            prefix = "\n" if i > 0 else ""
-            suffix = "\n" if i < len(lines) - 1 else ""
+        start_byte = node.start_byte
+        start_line = node.start_point[0]
+        for prefix, line, suffix in zip(betweens[:-1], lines, betweens[1:]):
+            start_byte += len(bytes(prefix, "utf-8"))
+            start_line += len(prefix)
+            end_byte = start_byte + len(bytes(line, "utf-8"))
+            end_line = start_line
+            end_char = len(line)
+
+            name = f"{node.name}_line_{start_line}"
+            tokens = self._count_tokens(line)
+            if tokens > self.max_tokens:
+                raise Exception(r"Irreducible node too large for context!")
 
             node.children.append(
                 CodeBlock(
                     text=line,
                     name=name,
                     id=name,
-                    start_point=(node.start_point[0] + i, 0),
-                    end_point=(node.start_point[0] + i, len(line)),
+                    start_point=(start_line, 0),
+                    end_point=(end_line, end_char),
                     start_byte=start_byte,
                     end_byte=end_byte,
                     affixes=(prefix, suffix),
                     type=NodeType("segment"),
                     children=[],
                     language=self.language,
-                    tokens=self._count_tokens(line),
+                    tokens=tokens,
                 )
             )
-            start_byte = end_byte + 1
+            start_byte = end_byte + len(suffix)
+            start_line = end_line + len(suffix)
 
         # Don't forget the newline we split on
         node.children[0].omit_prefix = False

@@ -8,12 +8,7 @@ from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import Combiner
 from .language.mumps import MumpsSplitter
 from .language.treesitter import TreeSitterSplitter
-from .llm import (
-    COST_PER_MODEL,
-    MODEL_CONSTRUCTORS,
-    MODEL_DEFAULT_ARGUMENTS,
-    TOKEN_LIMITS,
-)
+from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
 from .parsers.code_parser import CodeParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
@@ -183,7 +178,7 @@ class Translator:
             with get_openai_callback() as cb:
                 self._add_translation(translated_block)
                 translated_block.cost = cb.total_cost
-                translated_block.retries = cb.successful_requests - 1
+                translated_block.retries = max(0, cb.successful_requests - 1)
 
             # If translating this block was unsuccessful, don't bother with its
             #  children (they wouldn't show up in the final text anyway)
@@ -300,7 +295,7 @@ class Translator:
             block: The `CodeBlock` to save to a file.
         """
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(block.text, encoding="utf-8")
+        out_path.write_text(block.complete_text, encoding="utf-8")
 
     def _load_model(self) -> None:
         """Check that the model is valid."""

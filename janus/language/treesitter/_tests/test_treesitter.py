@@ -22,20 +22,16 @@ class TestTreeSitterSplitter(unittest.TestCase):
         self.assertLessEqual(tree_root.max_tokens, self.splitter.max_tokens)
         self.combiner.combine(tree_root)
         self.assertTrue(tree_root.complete)
-        split_text = tree_root.text
-        # The newlines and spaces aren't the same but that doesn't matter for fortran
-        # (to an extent)
-        self.assertEqual(split_text, self.test_file.read_text())
+        self.assertEqual(tree_root.complete_text, self.test_file.read_text())
 
     def test_split_fortran(self):
         """Test the split method."""
         self.splitter = TreeSitterSplitter(language="fortran", model=self.llm)
         self.combiner = Combiner(language="fortran")
         self.test_file = Path("janus/language/treesitter/_tests/languages/fortran.f90")
-        self.splitter.use_placeholders = False
         self._split()
 
-        self.splitter.use_placeholders = True
+        self.splitter.use_placeholders = False
         self._split()
 
     def test_split_matlab(self):

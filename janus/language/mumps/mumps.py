@@ -115,8 +115,8 @@ class MumpsSplitter(Splitter):
             self._segment_node(node)
             children.append(node)
 
-            start_byte = end_byte
-            start_line = end_line
+            start_byte = end_byte + len(bytes(suffix, "utf-8"))
+            start_line = end_line + suffix.count("\n")
 
         return CodeBlock(
             text=code,

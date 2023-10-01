@@ -25,4 +25,4 @@ class TestMumpsSplitter(unittest.TestCase):
         self.assertFalse(tree_root.complete)
         self.combiner.combine_children(tree_root)
         self.assertTrue(tree_root.complete)
-        self.assertEqual(tree_root.text, self.test_file.read_text())
+        self.assertEqual(tree_root.complete_text, self.test_file.read_text())

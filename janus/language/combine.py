@@ -20,7 +20,7 @@ class Combiner(FileManager):
 
     def combine(self, block: CodeBlock) -> None:
         self.combine_children(block)
-        block.text = block.prefix + block.text + block.suffix
+        block.omit_prefix = False
 
     def combine_children(self, block: CodeBlock) -> None:
         """Recursively combine block code with children code.
@@ -66,7 +66,7 @@ class Combiner(FileManager):
             if not self.contains_child(block.text, child):
                 missing_children.append(child)
                 continue
-            block.text = block.text.replace(self._placeholder(child), child.text)
+            block.text = block.text.replace(child.placeholder, child.text)
 
         if missing_children:
             missing_ids = [c.id for c in missing_children]
@@ -79,7 +79,7 @@ class Combiner(FileManager):
         """Determine whether the given code contains a placeholder for the given
         child block.
         """
-        return code is None or self._placeholder(child) in code
+        return code is None or child.placeholder in code
 
     def count_missing(self, input_block: CodeBlock, output_code: str) -> int:
         """Return the number of children of input_block who are not represented
@@ -98,14 +98,3 @@ class Combiner(FileManager):
             if not self.contains_child(output_code, child):
                 missing_children += 1
         return missing_children
-
-    def _placeholder(self, child: CodeBlock) -> str:
-        """Get the placeholder to represent the code of the given block
-
-        Arguments:
-            child: The block to get the placeholder for
-
-        Returns:
-            The placeholder to represent the code of the given block
-        """
-        return f"<<<{child.id}>>>"
