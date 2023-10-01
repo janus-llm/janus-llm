@@ -27,7 +27,6 @@ class MumpsSplitter(Splitter):
 
     # Consider labels to delimit subroutines. Labels (and only labels) start on
     #  column 1
-    # subroutine_start_pattern: str = re.compile(rf"((?<!\n)\n(?=[^ \t;$]))")
     subroutine_pattern = re.compile(
         r"""
         (?:^          # Starting at either the beginning of the file...
@@ -67,9 +66,7 @@ class MumpsSplitter(Splitter):
             node.name = f"{path.name}:{node.id}"
             stack.extend(node.children)
 
-    def _get_ast(self, code: str | bytes) -> CodeBlock:
-        code = str(code)
-
+    def _get_ast(self, code: str) -> CodeBlock:
         subroutine_matches = self.subroutine_pattern.finditer(code)
         end_index = 0
         chunks = []
@@ -112,7 +109,6 @@ class MumpsSplitter(Splitter):
                 language=self.language,
                 tokens=self._count_tokens(chunk),
             )
-            self._segment_node(node)
             children.append(node)
 
             start_byte = end_byte + len(bytes(suffix, "utf-8"))

@@ -13,7 +13,7 @@ class TestMumpsSplitter(unittest.TestCase):
         """Set up the tests."""
         model_name = "gpt-3.5-turbo"
         llm = MODEL_CONSTRUCTORS[model_name](**MODEL_DEFAULT_ARGUMENTS[model_name])
-        self.splitter = MumpsSplitter(model=llm, max_tokens=4096)
+        self.splitter = MumpsSplitter(model=llm)
         self.combiner = Combiner(language="mumps")
         self.test_file = Path("janus/language/mumps/_tests/mumps.m")
 

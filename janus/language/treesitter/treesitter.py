@@ -42,9 +42,8 @@ class TreeSitterSplitter(Splitter):
         )
         self._load_parser()
 
-    def _get_ast(self, code: str | bytes) -> CodeBlock:
-        if isinstance(code, str):
-            code = bytes(code, "utf-8")
+    def _get_ast(self, code: str) -> CodeBlock:
+        code = bytes(code, "utf-8")
 
         tree = self.parser.parse(code)
         root = tree.walk().node
@@ -56,12 +55,17 @@ class TreeSitterSplitter(Splitter):
         queue = [root]
         while queue:
             node = queue.pop(0)  # BFS order to keep lower IDs toward the root
-            node.id = f"{node.type}-{seen_types[node.type]}"
+            node.id = f"{node.type}[{seen_types[node.type]}]"
             seen_types[node.type] += 1
             node.name = f"{path.name}:{node.id}"
             queue.extend(node.children)
 
     def _node_to_block(self, node: tree_sitter.Node, original_text: bytes) -> CodeBlock:
+        """Convert a tree_sitter Node into a CodeBlock. The original text is
+        used to populate the prefix and suffix of the node. This function is
+        recursively called for all children of the node.
+
+        """
         prefix_start = 0
         if node.prev_sibling is not None:
             prefix_start = node.prev_sibling.end_byte
@@ -92,7 +96,6 @@ class TreeSitterSplitter(Splitter):
             language=self.language,
             tokens=self._count_tokens(text),
         )
-        self._segment_node(node)
         return node
 
     def _load_parser(self) -> None:

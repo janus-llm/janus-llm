@@ -126,6 +126,22 @@ class CodeBlock:
         """
         return self.tokens + sum(c.total_tokens for c in self.children)
 
+    def pop_prefix(self):
+        """Get this block's prefix and remove it from the block. This may be used
+        to transfer the prefix from the first child of a node to its parent.
+        """
+        prefix = self.affixes[0]
+        self.affixes = ("", self.affixes[1])
+        return prefix
+
+    def pop_suffix(self):
+        """Get this block's suffix and remove it from the block. This may be used
+        to transfer the suffix from the first child of a node to its parent.
+        """
+        suffix = self.affixes[1]
+        self.affixes = (self.affixes[0], "")
+        return suffix
+
     def tree_str(self, depth: int = 0) -> str:
         """A string representation of the tree with this block as the root
 

@@ -59,16 +59,32 @@ class Splitter(FileManager):
 
         root = self._get_ast(code)
         self._set_identifiers(root, path)
+        self._segment_leaves(root)
 
-        self._recurse_split(root)
+        self._merge_tree(root)
         log.info(f"[{root.name}] CodeBlock Structure:\n{root.tree_str()}")
 
         return root
 
-    def _get_ast(self, code: str | bytes) -> CodeBlock:
+    def _get_ast(self, code: str) -> CodeBlock:
+        """Build an abstract syntax tree of the given code, represented by a tree
+        of CodeBlocks. Must be implemented in language-specific child classes.
+
+        Arguments:
+            code: The input file's code
+
+        Returns:
+            The root of a tree of CodeBlocks
+        """
         raise NotImplementedError()
 
     def _set_identifiers(self, root: CodeBlock, path: Path):
+        """Set the IDs and names of each node in the given tree. By default,
+        node IDs take the form `child_<i>`, where <i> is an integer counter which
+        increments in breadth-first order, and node names take the form
+        `<filename>:<ID>`. Child classes should override this function to use
+        more informative names based on the particular programming language.
+        """
         seen_ids = 0
         queue = [root]
         while queue:
@@ -78,11 +94,26 @@ class Splitter(FileManager):
             node.name = f"{path.name}:{node.id}"
             queue.extend(node.children)
 
-    def _recurse_split(self, node: CodeBlock):
-        """Recursively split the code into functional blocks.
+    def _merge_tree(self, root: CodeBlock):
+        """Given the root of an abstract syntax tree represented in CodeBlocks,
+        merge and prune nodes such that each constituent CodeBlock's text is
+        short enough to fit in context (but no shorter), and that each byte of
+        the represented code is present in the text of exactly one node in the
+        tree.
+        """
+        stack = [root]
+        while stack:
+            node = stack.pop()
+            self._merge_children(node)
+            stack.extend(node.children)
 
-        Arguments:
-            node: The current node in the tree.
+    def _merge_children(self, node: CodeBlock):
+        """Given a parent node in an abstract syntax tree, consolidate, merge,
+        and prune its children such that this node's text fits into context,
+        and does not overlap with the text represented by any of its children.
+        After processing, this node's children will have been merged such that
+        they maximally fit into LLM context. If the entire node text can fit
+        into context, all its children will be pruned.
         """
         # If the text at the function input is less than the max tokens, then
         #  we can just return it as a CodeBlock with no children.
@@ -93,7 +124,7 @@ class Splitter(FileManager):
         node.complete = False
 
         # Consolidate nodes into groups, and then merge each group into a new node
-        node_groups = self._consolidate_nodes(node.children)
+        node_groups = self._group_nodes(node.children)
         node.children = list(map(self.merge_nodes, node_groups))
 
         # If not using placeholders, simply recurse for every child and delete
@@ -101,8 +132,6 @@ class Splitter(FileManager):
         if not self.use_placeholders:
             if not node.children:
                 log.error(f"[{node.name}] Childless node too long for context!")
-            for child in node.children:
-                self._recurse_split(child)
             node.text = None
             node.tokens = 0
             return
@@ -116,8 +145,6 @@ class Splitter(FileManager):
         if node.tokens > self.max_tokens:
             node.text = None
             node.tokens = 0
-            for child in node.children:
-                self._recurse_split(child)
             return
 
         sorted_indices: List[int] = sorted(
@@ -145,10 +172,7 @@ class Splitter(FileManager):
             if i not in merged_child_indices
         ]
 
-        for child in node.children:
-            self._recurse_split(child)
-
-    def _consolidate_nodes(self, nodes: List[CodeBlock]) -> List[List[CodeBlock]]:
+    def _group_nodes(self, nodes: List[CodeBlock]) -> List[List[CodeBlock]]:
         """Consolidate a list of tree_sitter nodes into groups. Each group should fit
         into the context window, with the exception of single-node groups which may be
         too long to fit on their own. This ensures that nodes with many many short
@@ -208,6 +232,9 @@ class Splitter(FileManager):
         return groups
 
     def merge_nodes(self, nodes: List[CodeBlock]) -> CodeBlock:
+        """Merge a list of nodes into a single node. The first and last nodes'
+        respective prefix and suffix become this node's affixes.
+        """
         if len(nodes) == 0:
             raise ValueError("Cannot merge zero nodes")
 
@@ -219,15 +246,19 @@ class Splitter(FileManager):
             raise ValueError("Nodes have conflicting language")
         (language,) = languages
 
-        prefix = nodes[0].affixes[0]
-        suffix = nodes[-1].affixes[-1]
-        nodes[0].omit_prefix = True
-        nodes[-1].omit_suffix = True
+        # The prefix and suffix of the parent node are the prefix of the first
+        #  child and the suffix of the last. Remove them from these children.
+        prefix = nodes[0].pop_prefix()
+        suffix = nodes[-1].pop_suffix()
+
         text = "".join(node.complete_text for node in nodes)
         name = f"{nodes[0].id}:{nodes[-1].id}"
+
+        # Double check length (in theory this should never be an issue)
         tokens = self._count_tokens(text)
         if tokens > self.max_tokens:
             log.error(f"Merged node ({name}) too long for context!")
+
         return CodeBlock(
             text=text,
             name=name,
@@ -254,8 +285,19 @@ class Splitter(FileManager):
         """
         return self.model.get_num_tokens(code)
 
-    def _segment_node(self, node: CodeBlock):
-        if node.tokens <= self.max_tokens or node.children:
+    def _segment_leaves(self, node: CodeBlock):
+        """Given a root node, recurse to the leaf nodes of the tree and, if they
+        do not fit in context, segment them into their constituent lines.
+        The leaf nodes are updated in-place to hold a child for each
+        non-whitespace line. If a leaf node already fits into context, it is
+        left unchanged. Non-leaf nodes are not affected
+        """
+        if node.tokens <= self.max_tokens:
+            return
+
+        if node.children:
+            for child in node.children:
+                self._segment_leaves(child)
             return
 
         split_text = re.split(r"(\n+)", node.text)
@@ -263,18 +305,18 @@ class Splitter(FileManager):
         lines = split_text[::2]
 
         start_byte = node.start_byte
-        start_line = node.start_point[0]
+        node_line = 0
         for prefix, line, suffix in zip(betweens[:-1], lines, betweens[1:]):
             start_byte += len(bytes(prefix, "utf-8"))
-            start_line += len(prefix)
+            node_line += len(prefix)
+            start_line = node.start_point[0] + node_line
             end_byte = start_byte + len(bytes(line, "utf-8"))
-            end_line = start_line
             end_char = len(line)
 
-            name = f"{node.name}_line_{start_line}"
+            name = f"{node.name}L#{node_line}"
             tokens = self._count_tokens(line)
             if tokens > self.max_tokens:
-                raise Exception(r"Irreducible node too large for context!")
+                raise TokenLimitError(r"Irreducible node too large for context!")
 
             node.children.append(
                 CodeBlock(
@@ -282,7 +324,7 @@ class Splitter(FileManager):
                     name=name,
                     id=name,
                     start_point=(start_line, 0),
-                    end_point=(end_line, end_char),
+                    end_point=(start_line, end_char),
                     start_byte=start_byte,
                     end_byte=end_byte,
                     affixes=(prefix, suffix),
@@ -293,7 +335,7 @@ class Splitter(FileManager):
                 )
             )
             start_byte = end_byte + len(suffix)
-            start_line = end_line + len(suffix)
+            node_line += len(suffix)
 
-        # Don't forget the newline we split on
+        # Keep the first child's prefix
         node.children[0].omit_prefix = False
