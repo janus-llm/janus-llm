@@ -68,18 +68,18 @@ def get_line_analysis(output_dir: Path | str) -> pd.DataFrame:
     line_df.loc[
         line_df.message.str.contains("assigned before global declaration"), "rule"
     ] = "UndefinedGlobalDeclaration"
-    line_df.loc[line_df.message.str.contains("No binding for nonlocal"), "rule"] = (
-        "UndefinedNonlocalDeclaration"
-    )
-    line_df.loc[line_df.message.str.contains("Duplicate parameter"), "rule"] = (
-        "DuplicateParameterWarning"
-    )
-    line_df.loc[line_df.message.str.contains("f-string"), "rule"] = (
-        "IllFormattedFStringError"
-    )
-    line_df.loc[line_df.message.str.contains("Too many type arguments"), "rule"] = (
-        "TooManyTypeArgumentsWarning"
-    )
+    line_df.loc[
+        line_df.message.str.contains("No binding for nonlocal"), "rule"
+    ] = "UndefinedNonlocalDeclaration"
+    line_df.loc[
+        line_df.message.str.contains("Duplicate parameter"), "rule"
+    ] = "DuplicateParameterWarning"
+    line_df.loc[
+        line_df.message.str.contains("f-string"), "rule"
+    ] = "IllFormattedFStringError"
+    line_df.loc[
+        line_df.message.str.contains("Too many type arguments"), "rule"
+    ] = "TooManyTypeArgumentsWarning"
     line_df.loc[line_df.rule.isna(), "rule"] = (
         line_df[line_df.rule.isna()]
         .message.replace(

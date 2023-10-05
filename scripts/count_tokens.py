@@ -148,7 +148,8 @@ high_price = (
     + COST_PER_MODEL[args.model]["output"] * output_length_high
 )
 
-print(f"""
+print(
+    f"""
 System prompt tokens:    {system_length:,d}
 Mean user prompt tokens  {input_length_mean:,.2f}
 Mean output tokens       {output_length_mean:,.2f}
@@ -157,4 +158,5 @@ Mean price per request:  ${total_cost_mean:,.2f}
     95% confidence:      ${low_price:,.2f} - ${high_price:,.2f}
 Expected total cost:     ${total_cost_mean*n_outs:,.2f}
     95% confidence:      ${low_price*n_outs:,.2f} - ${high_price*n_outs:,.2f}
-""")
+"""
+)
