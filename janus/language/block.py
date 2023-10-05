@@ -43,18 +43,18 @@ class CodeBlock:
         children: List[ForwardRef("CodeBlock")],
         affixes: Tuple[str, str] = ("", ""),
     ):
-        self.id = id
-        self.name = name
-        self.type = type
-        self.language = language
-        self.text = text
-        self.start_point = start_point
-        self.end_point = end_point
-        self.start_byte = start_byte
-        self.end_byte = end_byte
-        self.tokens = tokens
-        self.children = sorted(children)
-        self.affixes = affixes
+        self.id: Hashable = id
+        self.name: Optional[str] = name
+        self.type: NodeType = type
+        self.language: str = language
+        self.text: Optional[str] = text
+        self.start_point: Optional[Tuple[int, int]] = start_point
+        self.end_point: Optional[Tuple[int, int]] = end_point
+        self.start_byte: Optional[int] = start_byte
+        self.end_byte: Optional[int] = end_byte
+        self.tokens: int = tokens
+        self.children: List[ForwardRef("CodeBlock")] = sorted(children)
+        self.affixes: Tuple[str, str] = affixes
 
         self.complete = True
         self.omit_prefix = True
@@ -153,11 +153,15 @@ class CodeBlock:
             identifier = f"({identifier})"
         elif not self.complete:
             identifier += "*"
-        start = f"{self.start_point[0]}:{self.start_point[1]}"
-        end = f"{self.end_point[0]}:{self.end_point[1]}"
+        if self.start_point is not None and self.end_point is not None:
+            start = f"{self.start_point[0]}:{self.start_point[1]}"
+            end = f"{self.end_point[0]}:{self.end_point[1]}"
+            seg = f" [{start}-{end}]"
+        else:
+            seg = ""
         return "\n".join(
             [
-                f"{'| '*depth}{identifier} [{start}-{end}]",
+                f"{'| '*depth}{identifier}{seg}",
                 *[c.tree_str(depth + 1) for c in self.children],
             ]
         )

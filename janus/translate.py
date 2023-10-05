@@ -140,6 +140,7 @@ class Translator:
             f"[{filename}] File split into {input_block.n_descendents:,} blocks, "
             f"tree of height {input_block.height}"
         )
+        log.info(f"[{filename}] CodeBlock Structure:\n{input_block.tree_str()}")
         output_block = self._iterative_translate(input_block)
         if output_block.translated:
             completeness = output_block.translation_completeness

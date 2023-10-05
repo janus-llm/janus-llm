@@ -60,9 +60,7 @@ class Splitter(FileManager):
         root = self._get_ast(code)
         self._set_identifiers(root, path)
         self._segment_leaves(root)
-
         self._merge_tree(root)
-        log.info(f"[{root.name}] CodeBlock Structure:\n{root.tree_str()}")
 
         return root
 

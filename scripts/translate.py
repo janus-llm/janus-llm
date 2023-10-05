@@ -80,7 +80,7 @@ parser.add_argument(
 parser.add_argument(
     "--prompt-template",
     type=str,
-    default="simple",
+    default="../janus/prompts/templates/simple",
     help=(
         "Name of the Janus prompt template directory or "
         "path to a directory containing those template files."
