@@ -37,15 +37,19 @@ group.add_argument(
     "--system-prompt",
     type=str,
     default=None,
-    help="The system prompt. If no system prompt is provided, will use OpenAI's "
-    "default prompt.",
+    help=(
+        "The system prompt. If no system prompt is provided, will use OpenAI's "
+        "default prompt."
+    ),
 )
 group.add_argument(
     "--system-prompt-file",
     type=str,
     default=None,
-    help="A text file containing the system prompt. Incompatible with "
-    "--system-prompt argument.",
+    help=(
+        "A text file containing the system prompt. Incompatible with "
+        "--system-prompt argument."
+    ),
 )
 
 group = parser.add_mutually_exclusive_group(required=True)
@@ -53,15 +57,19 @@ group.add_argument(
     "--example-input",
     type=str,
     default=None,
-    help="An example input. If the input changes with each request, use the "
-    "--example-input-dir argument.",
+    help=(
+        "An example input. If the input changes with each request, use the "
+        "--example-input-dir argument."
+    ),
 )
 group.add_argument(
     "--example-input-dir",
     type=str,
     default=None,
-    help="A path to a flat directory containing example input text files. "
-    "Incompatible with --example-input.",
+    help=(
+        "A path to a flat directory containing example input text files. "
+        "Incompatible with --example-input."
+    ),
 )
 
 parser.add_argument(
@@ -75,9 +83,11 @@ parser.add_argument(
     "-n",
     type=int,
     default=None,
-    help="The number of requests you expect to make. By default, this is the "
-    "number of output files in the directory provided in the "
-    "--example-output-dir argument",
+    help=(
+        "The number of requests you expect to make. By default, this is the "
+        "number of output files in the directory provided in the "
+        "--example-output-dir argument"
+    ),
 )
 
 args = parser.parse_args()
@@ -138,8 +148,7 @@ high_price = (
     + COST_PER_MODEL[args.model]["output"] * output_length_high
 )
 
-print(
-    f"""
+print(f"""
 System prompt tokens:    {system_length:,d}
 Mean user prompt tokens  {input_length_mean:,.2f}
 Mean output tokens       {output_length_mean:,.2f}
@@ -148,5 +157,4 @@ Mean price per request:  ${total_cost_mean:,.2f}
     95% confidence:      ${low_price:,.2f} - ${high_price:,.2f}
 Expected total cost:     ${total_cost_mean*n_outs:,.2f}
     95% confidence:      ${low_price*n_outs:,.2f} - ${high_price*n_outs:,.2f}
-"""
-)
+""")

@@ -1,6 +1,7 @@
 import argparse
 import json
 import re
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -67,18 +68,18 @@ def get_line_analysis(output_dir: Path | str) -> pd.DataFrame:
     line_df.loc[
         line_df.message.str.contains("assigned before global declaration"), "rule"
     ] = "UndefinedGlobalDeclaration"
-    line_df.loc[
-        line_df.message.str.contains("No binding for nonlocal"), "rule"
-    ] = "UndefinedNonlocalDeclaration"
-    line_df.loc[
-        line_df.message.str.contains("Duplicate parameter"), "rule"
-    ] = "DuplicateParameterWarning"
-    line_df.loc[
-        line_df.message.str.contains("f-string"), "rule"
-    ] = "IllFormattedFStringError"
-    line_df.loc[
-        line_df.message.str.contains("Too many type arguments"), "rule"
-    ] = "TooManyTypeArgumentsWarning"
+    line_df.loc[line_df.message.str.contains("No binding for nonlocal"), "rule"] = (
+        "UndefinedNonlocalDeclaration"
+    )
+    line_df.loc[line_df.message.str.contains("Duplicate parameter"), "rule"] = (
+        "DuplicateParameterWarning"
+    )
+    line_df.loc[line_df.message.str.contains("f-string"), "rule"] = (
+        "IllFormattedFStringError"
+    )
+    line_df.loc[line_df.message.str.contains("Too many type arguments"), "rule"] = (
+        "TooManyTypeArgumentsWarning"
+    )
     line_df.loc[line_df.rule.isna(), "rule"] = (
         line_df[line_df.rule.isna()]
         .message.replace(
@@ -213,8 +214,11 @@ def get_file_analysis(input_dir: str, output_dir: str, language: str) -> pd.Data
             left_on="filename",
             right_index=True,
         )
+    file_df["normalized_errors"] = file_df.errors / file_df.input_length
+    file_df["normalized_warnings"] = file_df.warnings / file_df.input_length
     file_df["normalized_error_lines"] = file_df.error_lines / file_df.input_length
     file_df["normalized_warning_lines"] = file_df.warning_lines / file_df.input_length
+    file_df["input_ratio"] = file_df.output_length / file_df.input_length
     return file_df
 
 
@@ -237,10 +241,33 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    df = get_file_analysis(args.input_dir, args.translated_dir, args.input_language)
-    df["input_ratio"] = df.output_length / df.input_length
-    df.to_csv(Path(args.translated_dir) / "error_counts.tsv", sep="\t", index=False)
+    outdir = Path(args.translated_dir)
+    count_file = outdir / "error_counts.tsv"
+    if count_file.exists() and False:
+        df = pd.read_csv(count_file, sep="\t")
+    else:
+        df = get_file_analysis(args.input_dir, args.translated_dir, args.input_language)
+        df.to_csv(outdir / "error_counts.tsv", sep="\t", index=False)
+
+    df["score"] = df.normalized_errors + df.normalized_warnings * 0.5
+    best_files = df.loc[df.groupby("filename").score.idxmin(), "file"]
+    worst_files = df.loc[df.groupby("filename").score.idxmax(), "file"]
+    best_dir = outdir / "best"
+    worst_dir = outdir / "worst"
+    best_dir.mkdir(exist_ok=True, parents=True)
+    worst_dir.mkdir(exist_ok=True, parents=True)
+    print(best_dir)
+    print(worst_dir)
+    for file in best_files:
+        file = Path(file)
+        out_file = best_dir / f"{file.parent.parent.name}_{file.name}"
+        shutil.copy(str(file), str(out_file))
+    for file in worst_files:
+        file = Path(file)
+        out_file = worst_dir / f"{file.parent.parent.name}_{file.name}"
+        shutil.copy(str(file), str(out_file))
+
     g = df.groupby("experiment")
-    print(g[["normalized_error_lines", "normalized_warning_lines"]].mean())
-    print(g[["normalized_error_lines", "normalized_warning_lines"]].median())
+    print(g[["normalized_errors", "normalized_warnings"]].mean())
+    print(g[["normalized_errors", "normalized_warnings"]].median())
     print(g.input_ratio.mean())
