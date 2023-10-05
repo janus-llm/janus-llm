@@ -185,12 +185,10 @@ class Translator:
             if not translated_block.translated:
                 continue
 
-            for child in translated_block.original.children:
+            for child in translated_block.children:
                 # Don't bother translating children if they aren't used
                 if self.combiner.contains_child(translated_block.text, child):
-                    translated_child = TranslatedCodeBlock(child, self.target_language)
-                    translated_block.children.append(translated_child)
-                    stack.append(translated_child)
+                    stack.append(child)
                 else:
                     log.warning(f"Skipping {child.id} (not referenced in parent code)")
 

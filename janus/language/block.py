@@ -202,6 +202,7 @@ class TranslatedCodeBlock(CodeBlock):
         )
         self.original = original
 
+        self.complete = original.complete
         self.translated = False
         self.cost = 0.0
         self.retries = 0
