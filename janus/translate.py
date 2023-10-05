@@ -31,7 +31,7 @@ class Translator:
         target_version: str = "3.10",
         max_prompts: int = 10,
         prompt_template: str = "simple",
-        use_placeholders: bool = True,
+        use_placeholders: bool = False,
     ) -> None:
         """Initialize a Translator instance.
 

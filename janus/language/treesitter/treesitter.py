@@ -25,7 +25,7 @@ class TreeSitterSplitter(Splitter):
         language: str,
         model: BaseLanguageModel,
         max_tokens: int = 4096,
-        use_placeholders: bool = True,
+        use_placeholders: bool = False,
     ) -> None:
         """Initialize a TreeSitterSplitter instance.
 
