@@ -62,9 +62,25 @@ parser.add_argument(
     ),
 )
 parser.add_argument(
+    "--overwrite",
+    action="store_true",
+    help="Whether to overwrite existing files in the output directory",
+)
+parser.add_argument(
+    "--no-placeholders",
+    action="store_true",
+    help="Whether to forego the use of placeholders when splitting",
+)
+parser.add_argument(
+    "--temp",
+    type=float,
+    default=0.7,
+    help="Sampling temperature.",
+)
+parser.add_argument(
     "--prompt-template",
     type=str,
-    default="simple",
+    default="../janus/prompts/templates/simple",
     help=(
         "Name of the Janus prompt template directory or "
         "path to a directory containing those template files."
@@ -85,12 +101,16 @@ if __name__ == "__main__":
     ):
         log.error("Output files would overwrite input! Aborting...")
         exit(-1)
+
+    model_arguments = dict(temperature=args.temp)
     translator = Translator(
         model=args.llm_name,
+        model_arguments=model_arguments,
         source_language=args.input_lang,
         target_language=output_lang_name,
         target_version=output_lang_version,
         max_prompts=args.max_prompts,
         prompt_template=args.prompt_template,
+        use_placeholders=not args.no_placeholders,
     )
-    translator.translate(args.input_dir, args.output_dir)
+    translator.translate(args.input_dir, args.output_dir, args.overwrite)

@@ -2,16 +2,13 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Tuple
 
+from langchain.callbacks import get_openai_callback
+
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import Combiner
 from .language.mumps import MumpsSplitter
 from .language.treesitter import TreeSitterSplitter
-from .llm import (
-    COST_PER_MODEL,
-    MODEL_CONSTRUCTORS,
-    MODEL_DEFAULT_ARGUMENTS,
-    TOKEN_LIMITS,
-)
+from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
 from .parsers.code_parser import CodeParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
@@ -34,6 +31,7 @@ class Translator:
         target_version: str = "3.10",
         max_prompts: int = 10,
         prompt_template: str = "simple",
+        use_placeholders: bool = False,
     ) -> None:
         """Initialize a Translator instance.
 
@@ -44,8 +42,6 @@ class Translator:
             source_language: The source programming language.
             target_language: The target programming language.
             target_version: The target version of the target programming language.
-            max_prompts: The maximum number of times to prompt a model on one functional
-                block.
             prompt_template: name of prompt template directory
                 (see janus/prompts/templates) or path to a directory.
         """
@@ -58,13 +54,16 @@ class Translator:
         self.prompt_template = prompt_template
         self._check_languages()
         self._load_model()
-        self._load_splitter()
+        self._load_splitter(use_placeholders=use_placeholders)
         self._load_combiner()
         self._load_prompt_engine()
         self._load_parser()
 
     def translate(
-        self, input_directory: str | Path, output_directory: str | Path
+        self,
+        input_directory: str | Path,
+        output_directory: str | Path,
+        overwrite: bool = False,
     ) -> None:
         """Translate code in the input directory from the source language to the target
         language, and write the resulting files to the output directory.
@@ -94,27 +93,32 @@ class Translator:
             # Document inline should output the same as the input
             self.target_language = self.source_language
 
-        source_suffix = LANGUAGES[self.source_language]["suffix"]
         target_suffix = LANGUAGES[self.target_language]["suffix"]
 
-        translated_files = map(self.translate_file, input_directory.glob(self._glob))
+        input_paths = input_directory.glob(self._glob)
 
         # Now, loop through every code block in every file and translate it with an LLM
         total_cost = 0.0
-        for out_block in translated_files:
-            total_cost += out_block.total_cost
+        for in_path in input_paths:
+            out_path = output_directory / in_path.with_suffix(f".{target_suffix}").name
+            if out_path.exists() and not overwrite:
+                continue
+
+            # Track the cost of translating the file
+            #  TODO: If non-OpenAI models with prices are added, this will need
+            #   to be updated.
+            with get_openai_callback() as cb:
+                out_block = self.translate_file(in_path)
+                total_cost += cb.total_cost
 
             # Don't attempt to write files for which translation failed
             if not out_block.translated:
                 continue
 
-            # Write the code blocks to the output file
-            out_block.path = output_directory / out_block.original.path.name.replace(
-                f".{source_suffix}", f".{target_suffix}"
-            )
             # Make sure the tree's code has been consolidated at the top level
-            self.combiner.combine_children(out_block)
-            self._save_to_file(out_block)
+            #  before writing to file
+            self.combiner.combine(out_block)
+            self._save_to_file(out_block, out_path)
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
@@ -136,6 +140,7 @@ class Translator:
             f"[{filename}] File split into {input_block.n_descendents:,} blocks, "
             f"tree of height {input_block.height}"
         )
+        log.info(f"[{filename}] CodeBlock Structure:\n{input_block.tree_str()}")
         output_block = self._iterative_translate(input_block)
         if output_block.translated:
             completeness = output_block.translation_completeness
@@ -162,55 +167,38 @@ class Translator:
         Returns:
             A `TranslatedCodeBlock`
         """
-        translated_root = TranslatedCodeBlock.from_original(root, self.target_language)
+        translated_root = TranslatedCodeBlock(root, self.target_language)
         last_prog, prog_delta = 0, 0.1
         stack = [translated_root]
         while stack:
             translated_block = stack.pop()
-            self._add_translation(translated_block)
+
+            # Track the cost of translating this block
+            #  TODO: If non-OpenAI models with prices are added, this will need
+            #   to be updated.
+            with get_openai_callback() as cb:
+                self._add_translation(translated_block)
+                translated_block.cost = cb.total_cost
+                translated_block.retries = max(0, cb.successful_requests - 1)
+
+            # If translating this block was unsuccessful, don't bother with its
+            #  children (they wouldn't show up in the final text anyway)
             if not translated_block.translated:
                 continue
 
-            for child in translated_block.original.children:
+            for child in translated_block.children:
                 # Don't bother translating children if they aren't used
-                if self.combiner.contains_child(translated_block.code, child):
-                    translated_child = TranslatedCodeBlock.from_original(
-                        child, self.target_language
-                    )
-                    translated_block.children.append(translated_child)
-                    stack.append(translated_child)
+                if self.combiner.contains_child(translated_block.text, child):
+                    stack.append(child)
                 else:
                     log.warning(f"Skipping {child.id} (not referenced in parent code)")
 
             progress = translated_root.translation_completeness
             if progress - last_prog > prog_delta:
                 last_prog = int(progress / prog_delta) * prog_delta
-                log.info(f"[{root.path.name}] progress: {progress:.2%}")
+                log.info(f"[{root.name}] progress: {progress:.2%}")
 
         return translated_root
-
-    def _recursive_translate(self, block: CodeBlock) -> TranslatedCodeBlock:
-        """Recuresively translate the passed CodeBlock.
-
-        Arguments:
-            block: A `CodeBlock` to translate (may be a child in a larger tree)
-
-        Returns:
-            A `TranslatedCodeBlock`
-        """
-        translated_block = TranslatedCodeBlock.from_original(block, self.target_language)
-        self._add_translation(translated_block)
-        if not translated_block.translated:
-            return translated_block
-
-        for child in block.children:
-            # Don't bother translating children if they aren't used
-            if self.combiner.contains_child(translated_block.code, child):
-                translated_block.children.append(self._recursive_translate(child))
-            else:
-                log.warning(f"Skipping {child.id} (not referenced in parent code)")
-
-        return translated_block
 
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
         """Given an "empty" `TranslatedCodeBlock`, translate the code represented in
@@ -224,72 +212,55 @@ class Translator:
         if block.translated:
             return
 
-        if block.original.code is None:
+        if block.original.text is None:
             block.translated = True
             return
 
-        identifier = f"{block.original.path.name}:{block.id}"
-
-        log.debug(f"[{identifier}] Translating...")
-        log.debug(f"[{identifier}] Input code:\n{block.original.code}")
+        log.debug(f"[{block.name}] Translating...")
+        log.debug(f"[{block.name}] Input text:\n{block.original.text}")
         prompt = self._prompt_engine.create(block.original)
-        input_cost = COST_PER_MODEL[self.model]["input"] * prompt.tokens / 1000.0
-        cost = 0.0
-        retry_count = 0
-        best_seen = None
         least_missing = None
 
         # Retry the request up to max_prompts times before failing
-        for retry_count in range(self.max_prompts + 1):
+        for _ in range(self.max_prompts + 1):
             output = self._llm.predict_messages(prompt.prompt)
-            tokens = self._llm.get_num_tokens(output.content)
-            output_cost = COST_PER_MODEL[self.model]["output"] * tokens / 1000.0
-            cost += input_cost + output_cost
 
             # Pass through content if output is expected to be text
             if "text" == self.target_language:
-                best_seen = output.content
+                block.text = output.content
                 break
 
             # Otherwise parse for code
             try:
                 parsed_output = self.parser.parse(output.content)
             except ValueError:
-                log.warning(f"[{identifier}] Failed to parse output")
-                log.debug(f"[{identifier}] Failed output:\n{output.content}")
+                log.warning(f"[{block.name}] Failed to parse output")
+                log.debug(f"[{block.name}] Failed output:\n{output.content}")
                 continue
 
-            if best_seen is None:
-                best_seen = parsed_output
-
             if self._validate(block.original, parsed_output):
-                best_seen = parsed_output
+                block.text = parsed_output
                 break
 
             n_missing = self.combiner.count_missing(block.original, parsed_output)
             if least_missing is None or n_missing < least_missing:
+                block.text = parsed_output
                 least_missing = n_missing
-                best_seen = parsed_output
         else:
-            if best_seen is None:
+            if block.text is None:
                 error_msg = (
-                    f"[{identifier}] Failed to parse output after "
+                    f"[{block.name}] Failed to parse output after "
                     f"{self.max_prompts} retries. Marking as untranslated."
                 )
                 log.warning(error_msg)
-                block.retries = retry_count
-                block.cost = cost
                 return
 
-            log.warning(f"[{identifier}] Output not complete")
+            log.warning(f"[{block.name}] Output not complete")
 
-        log.debug(f"[[{identifier}] Output code:\n{best_seen}")
-
-        block.code = best_seen
-        block.tokens = self._llm.get_num_tokens(best_seen)
-        block.cost = cost
-        block.retries = retry_count
+        block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
+
+        log.debug(f"[{block.name}] Output code:\n{block.text}")
 
     def _validate(self, input_block: CodeBlock, output_code: str) -> bool:
         """Validate the given output code by ensuring it contains all necessary
@@ -308,23 +279,22 @@ class Translator:
             if not self.combiner.contains_child(output_code, child):
                 missing_children.append(child.id)
         if missing_children:
-            identifier = f"{input_block.path.name}:{input_block.id}"
             log.warning(
-                f"[{identifier}] Child placeholders not present in code: "
+                f"[{input_block.name}] Child placeholders not present in text: "
                 f"{missing_children}"
             )
             log.debug(f"Code:\n{output_code}")
             return False
         return True
 
-    def _save_to_file(self, block: CodeBlock) -> None:
+    def _save_to_file(self, block: CodeBlock, out_path: Path) -> None:
         """Save a file to disk.
 
         Arguments:
             block: The `CodeBlock` to save to a file.
         """
-        block.path.parent.mkdir(parents=True, exist_ok=True)
-        block.path.write_text(block.code, encoding="utf-8")
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(block.complete_text, encoding="utf-8")
 
     def _load_model(self) -> None:
         """Check that the model is valid."""
@@ -365,18 +335,20 @@ class Translator:
             raise ValueError(message)
         self.combiner = Combiner(self.target_language)
 
-    def _load_splitter(self) -> None:
+    def _load_splitter(self, use_placeholders: bool = True) -> None:
         """Load the `Splitter` object."""
         if self.source_language in CUSTOM_SPLITTERS:
             if self.source_language == "mumps":
                 self.splitter = MumpsSplitter(
-                    max_tokens=self._max_tokens, model=self._llm
+                    max_tokens=self._max_tokens,
+                    model=self._llm,
                 )
         elif self.source_language in list(LANGUAGES.keys()):
             self.splitter = TreeSitterSplitter(
                 language=self.source_language,
                 max_tokens=self._max_tokens,
                 model=self._llm,
+                use_placeholders=use_placeholders,
             )
         else:
             raise NotImplementedError(

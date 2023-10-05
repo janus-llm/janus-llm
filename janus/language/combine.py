@@ -18,6 +18,10 @@ class Combiner(FileManager):
         """
         super().__init__(language)
 
+    def combine(self, block: CodeBlock) -> None:
+        self.combine_children(block)
+        block.omit_prefix = False
+
     def combine_children(self, block: CodeBlock) -> None:
         """Recursively combine block code with children code.
 
@@ -46,39 +50,36 @@ class Combiner(FileManager):
 
         # If input string is None, then this node consists exclusively of
         #  children with no other formatting. Simply concatenate the children.
-        if block.code is None:
-            children = sorted(block.children, key=lambda b: b.start_line)
-            block.code = "\n".join(child.code for child in children)
+        if block.text is None:
+            children = sorted(block.children)
+            block.text = "".join([c.complete_text for c in children])
+            block.children = []
             block.complete = children_complete
             return
 
-        missing_children = set()
-        if isinstance(block, TranslatedCodeBlock):
-            original_children = {child.id for child in block.original.children}
-            translated_children = {
-                child.id for child in block.children if child.translated
-            }
-            missing_children = original_children.difference(translated_children)
-
         # Replace all placeholders
+        missing_children = []
         for child in block.children:
             if isinstance(block, TranslatedCodeBlock) and not child.translated:
+                missing_children.append(child)
                 continue
-            if not self.contains_child(block.code, child):
-                missing_children.add(child.id)
+            if not self.contains_child(block.text, child):
+                missing_children.append(child)
                 continue
-            block.code = block.code.replace(self._placeholder(child), child.code)
+            block.text = block.text.replace(child.placeholder, child.text)
 
         if missing_children:
-            log.warning(f"Some children not found in code: {missing_children}")
+            missing_ids = [c.id for c in missing_children]
+            log.warning(f"Some children not found in code: {missing_ids}")
 
+        block.children = missing_children
         block.complete = children_complete and not missing_children
 
     def contains_child(self, code: str, child: CodeBlock) -> bool:
         """Determine whether the given code contains a placeholder for the given
         child block.
         """
-        return code is None or self._placeholder(child) in code
+        return code is None or child.placeholder in code
 
     def count_missing(self, input_block: CodeBlock, output_code: str) -> int:
         """Return the number of children of input_block who are not represented
@@ -97,14 +98,3 @@ class Combiner(FileManager):
             if not self.contains_child(output_code, child):
                 missing_children += 1
         return missing_children
-
-    def _placeholder(self, child: CodeBlock) -> str:
-        """Get the placeholder to represent the code of the given block
-
-        Arguments:
-            child: The block to get the placeholder for
-
-        Returns:
-            The placeholder to represent the code of the given block
-        """
-        return f"{self.comment} {child.id}"

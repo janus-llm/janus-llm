@@ -1,6 +1,5 @@
-import dataclasses
-from pathlib import Path
-from typing import ForwardRef, Hashable, List, Optional
+from functools import total_ordering
+from typing import ForwardRef, Hashable, List, Optional, Tuple
 
 from ..utils.logger import create_logger
 from .node import NodeType
@@ -8,12 +7,12 @@ from .node import NodeType
 log = create_logger(__name__)
 
 
-@dataclasses.dataclass
+@total_ordering
 class CodeBlock:
     """A class that represents a functional block of code.
 
     Attributes:
-        code: The code block.
+        text: The code block.
         path: The path to the file containing the code block.
         complete: Whether or not the code block is complete. If it isn't complete, it
                   should have children components. This means that this code block has
@@ -29,18 +28,66 @@ class CodeBlock:
         children: A tuple of child code blocks.
     """
 
-    code: Optional[str]
-    path: Optional[Path]
-    complete: bool
-    start_line: int
-    end_line: int
-    language: str
-    type: NodeType
-    tokens: int
-    depth: int
-    id: Hashable
-    parent_id: Optional[Hashable]
-    children: List[ForwardRef("CodeBlock")]
+    def __init__(
+        self,
+        id: Hashable,
+        name: Optional[str],
+        type: NodeType,
+        language: str,
+        text: Optional[str],
+        start_point: Optional[Tuple[int, int]],
+        end_point: Optional[Tuple[int, int]],
+        start_byte: Optional[int],
+        end_byte: Optional[int],
+        tokens: int,
+        children: List[ForwardRef("CodeBlock")],
+        affixes: Tuple[str, str] = ("", ""),
+    ):
+        self.id: Hashable = id
+        self.name: Optional[str] = name
+        self.type: NodeType = type
+        self.language: str = language
+        self.text: Optional[str] = text
+        self.start_point: Optional[Tuple[int, int]] = start_point
+        self.end_point: Optional[Tuple[int, int]] = end_point
+        self.start_byte: Optional[int] = start_byte
+        self.end_byte: Optional[int] = end_byte
+        self.tokens: int = tokens
+        self.children: List[ForwardRef("CodeBlock")] = sorted(children)
+        self.affixes: Tuple[str, str] = affixes
+
+        self.complete = True
+        self.omit_prefix = True
+        self.omit_suffix = False
+
+        if self.children:
+            self.children[0].omit_prefix = False
+
+    def __lt__(self, other):
+        return (self.start_byte, self.end_byte) < (other.start_byte, other.end_byte)
+
+    def __eq__(self, other):
+        return (self.start_byte, self.end_byte) == (other.start_byte, other.end_byte)
+
+    @property
+    def prefix(self):
+        return self.affixes[0] if not self.omit_prefix else ""
+
+    @property
+    def suffix(self):
+        return self.affixes[1] if not self.omit_suffix else ""
+
+    @property
+    def complete_text(self):
+        return f"{self.prefix}{self.text}{self.suffix}"
+
+    @property
+    def placeholder(self):
+        return f"<<<{self.id}>>>"
+
+    @property
+    def complete_placeholder(self):
+        return f"{self.prefix}<<<{self.id}>>>{self.suffix}"
 
     @property
     def n_descendents(self) -> int:
@@ -61,6 +108,15 @@ class CodeBlock:
         return 1 + max(c.height for c in self.children) if self.children else 0
 
     @property
+    def max_tokens(self) -> int:
+        """The maximum number of tokens in this block or any of its descendents
+
+        Returns:
+            The maximum number of tokens in this block or any of  its descendents
+        """
+        return max([self.tokens, *[c.max_tokens for c in self.children]])
+
+    @property
     def total_tokens(self) -> int:
         """The total tokens represented by this block and all its descendents
 
@@ -70,22 +126,47 @@ class CodeBlock:
         """
         return self.tokens + sum(c.total_tokens for c in self.children)
 
-    @property
-    def tree_str(self) -> str:
+    def pop_prefix(self):
+        """Get this block's prefix and remove it from the block. This may be used
+        to transfer the prefix from the first child of a node to its parent.
+        """
+        prefix = self.affixes[0]
+        self.affixes = ("", self.affixes[1])
+        return prefix
+
+    def pop_suffix(self):
+        """Get this block's suffix and remove it from the block. This may be used
+        to transfer the suffix from the first child of a node to its parent.
+        """
+        suffix = self.affixes[1]
+        self.affixes = (self.affixes[0], "")
+        return suffix
+
+    def tree_str(self, depth: int = 0) -> str:
         """A string representation of the tree with this block as the root
 
         Returns:
             A string representation of the tree with this block as the root
         """
+        identifier = self.id
+        if self.text is None:
+            identifier = f"({identifier})"
+        elif not self.complete:
+            identifier += "*"
+        if self.start_point is not None and self.end_point is not None:
+            start = f"{self.start_point[0]}:{self.start_point[1]}"
+            end = f"{self.end_point[0]}:{self.end_point[1]}"
+            seg = f" [{start}-{end}]"
+        else:
+            seg = ""
         return "\n".join(
             [
-                f"{'| '*self.depth}{self.id}{'*' if self.code is None else ''}",
-                *[c.tree_str for c in self.children],
+                f"{'| '*depth}{identifier}{seg}",
+                *[c.tree_str(depth + 1) for c in self.children],
             ]
         )
 
 
-@dataclasses.dataclass
 class TranslatedCodeBlock(CodeBlock):
     """A class that represents the translated functional block of code.
 
@@ -96,15 +177,7 @@ class TranslatedCodeBlock(CodeBlock):
         translated: Whether this block has been successfully translated
     """
 
-    original: CodeBlock
-    cost: float = 0.0
-    retries: int = 0
-    translated: bool = False
-
-    @classmethod
-    def from_original(
-        cls, original: CodeBlock, language: str
-    ) -> ForwardRef("TranslatedCodeBlock"):
+    def __init__(self, original: CodeBlock, language: str):
         """Create an "empty" `TranslatedCodeBlock` from the given original
 
         Arguments:
@@ -113,18 +186,30 @@ class TranslatedCodeBlock(CodeBlock):
 
         Returns:
             A `TranslatedCodeBlock` with the same attributes as the original, except
-            for `code`, `path`, `complete`, `language`, `tokens`, and `children`
+            for `text`, `path`, `complete`, `language`, `tokens`, and `children`
         """
-        block = cls(**dataclasses.asdict(original), original=original)
-        return dataclasses.replace(
-            block,
-            code=None,
-            path=None,
-            complete=False,
+        super().__init__(
+            id=original.id,
+            name=original.name,
+            type=original.type,
             language=language,
+            text=None,
+            start_point=None,
+            end_point=None,
+            start_byte=None,
+            end_byte=None,
             tokens=0,
-            children=[],
+            children=[
+                TranslatedCodeBlock(child, language) for child in original.children
+            ],
+            affixes=original.affixes,
         )
+        self.original = original
+
+        self.complete = original.complete
+        self.translated = False
+        self.cost = 0.0
+        self.retries = 0
 
     @property
     def total_cost(self) -> float:
