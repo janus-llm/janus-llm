@@ -82,17 +82,6 @@ class Translator:
         if not output_directory.exists():
             output_directory.mkdir(parents=True)
 
-        # Ensure that output languages are set to expected values for prompts
-        if self.prompt_template in TEXT_OUTPUT and "text" != self.target_language:
-            # Text outputs for documentation, requirements, etc.
-            self.target_language = "text"
-        if (
-            self.prompt_template in SAME_OUTPUT
-            and self.target_language != self.source_language
-        ):
-            # Document inline should output the same as the input
-            self.target_language = self.source_language
-
         target_suffix = LANGUAGES[self.target_language]["suffix"]
 
         input_paths = input_directory.glob(self._glob)
@@ -361,7 +350,9 @@ class Translator:
         self.parser = CodeParser(target_language=self.target_language)
 
     def _check_languages(self) -> None:
-        """Check that the source and target languages are valid."""
+        """Check that the source and target languages are valid and expected for the
+        selected prompt template.
+        """
         if self.source_language not in list(LANGUAGES.keys()):
             raise ValueError(
                 f"Invalid source language: {self.source_language}. "
@@ -372,3 +363,14 @@ class Translator:
                 f"Invalid target language: {self.target_language}. "
                 "Valid source languages are found in `janus.utils.enums.LANGUAGES`."
             )
+
+        # Ensure that output languages are set to expected values for prompts
+        if self.prompt_template in TEXT_OUTPUT and "text" != self.target_language:
+            # Text outputs for documentation, requirements, etc.
+            self.target_language = "text"
+        if (
+            self.prompt_template in SAME_OUTPUT
+            and self.target_language != self.source_language
+        ):
+            # Document inline should output the same as the input
+            self.target_language = self.source_language
