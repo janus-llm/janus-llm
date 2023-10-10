@@ -95,12 +95,13 @@ class Translator:
 
         target_suffix = LANGUAGES[self.target_language]["suffix"]
 
-        input_paths = input_directory.glob(self._glob)
+        input_paths = input_directory.rglob(self._glob)
 
         # Now, loop through every code block in every file and translate it with an LLM
         total_cost = 0.0
         for in_path in input_paths:
-            out_path = output_directory / in_path.with_suffix(f".{target_suffix}").name
+            relative = in_path.relative_to(input_directory)
+            out_path = output_directory / relative.with_suffix(f".{target_suffix}")
             if out_path.exists() and not overwrite:
                 continue
 
@@ -233,8 +234,8 @@ class Translator:
             # Otherwise parse for code
             try:
                 parsed_output = self.parser.parse(output.content)
-            except ValueError:
-                log.warning(f"[{block.name}] Failed to parse output")
+            except ValueError as e:
+                log.warning(f"[{block.name}] Failed to parse output: {e}")
                 log.debug(f"[{block.name}] Failed output:\n{output.content}")
                 continue
 

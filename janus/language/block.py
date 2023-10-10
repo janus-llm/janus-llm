@@ -248,4 +248,8 @@ class TranslatedCodeBlock(CodeBlock):
         Returns:
             The share of the input that was successfully translated
         """
-        return self.total_input_tokens / self.original.total_tokens
+        return (
+            (self.total_input_tokens / self.original.total_tokens)
+            if self.original.total_tokens
+            else 0
+        )
