@@ -183,6 +183,12 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
             "program HelloWorld\n  print *, 'Hello, World!'\nend program HelloWorld\n"
         ),
     },
+    "formatted_text": {
+        "comment": "",
+        "suffix": "txt",
+        "url": None,
+        "example": "Hello, World!\n```\nformatted-output\n```",
+    },
     "gitattributes": {
         "comment": "#",
         "suffix": "gitattributes",

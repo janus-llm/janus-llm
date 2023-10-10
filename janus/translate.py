@@ -9,7 +9,7 @@ from .language.combine import Combiner
 from .language.mumps import MumpsSplitter
 from .language.treesitter import TreeSitterSplitter
 from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
-from .parsers.code_parser import CodeParser
+from .parsers.code_parser import CodeParser, FormattedTextParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
@@ -239,6 +239,10 @@ class Translator:
                 log.debug(f"[{block.name}] Failed output:\n{output.content}")
                 continue
 
+            if "formatted_text" == self.target_language:
+                block.text = parsed_output
+                break
+
             if self._validate(block.original, parsed_output):
                 block.text = parsed_output
                 break
@@ -359,7 +363,10 @@ class Translator:
 
     def _load_parser(self) -> None:
         """Load the `CodeParser` Object"""
-        self.parser = CodeParser(target_language=self.target_language)
+        if "formatted_text" == self.target_language:
+            self.parser = FormattedTextParser()
+        else:
+            self.parser = CodeParser(target_language=self.target_language)
 
     def _check_languages(self) -> None:
         """Check that the source and target languages are valid."""
