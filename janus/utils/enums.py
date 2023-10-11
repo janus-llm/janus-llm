@@ -183,12 +183,6 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
             "program HelloWorld\n  print *, 'Hello, World!'\nend program HelloWorld\n"
         ),
     },
-    "formatted_text": {
-        "comment": "",
-        "suffix": "txt",
-        "url": None,
-        "example": "Hello, World!\n```\nformatted-output\n```",
-    },
     "gitattributes": {
         "comment": "#",
         "suffix": "gitattributes",
@@ -281,6 +275,21 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "suffix": "json",
         "url": "https://github.com/tree-sitter/tree-sitter-json",
         "example": '{\n  "message": "Hello, World!"\n}\n',
+    },
+    "json_eval": {
+        "comment": "//",
+        "suffix": "json",
+        "url": "https://github.com/tree-sitter/tree-sitter-json",
+        "example": (
+            '{\n  "syntax": 2,\n  "style": 1,\n  "completeness": 4,'
+            '\n  "correctness": 2\n}\n'
+        ),
+    },
+    "jsonl": {
+        "comment": "//",
+        "suffix": "jsonl",
+        "url": None,
+        "example": '{"message": "Hello, World!"}\n{"message": "Goodbye World!"}\n',
     },
     "json5": {
         "comment": "//",

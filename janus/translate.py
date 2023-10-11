@@ -9,7 +9,12 @@ from .language.combine import Combiner
 from .language.mumps import MumpsSplitter
 from .language.treesitter import TreeSitterSplitter
 from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
-from .parsers.code_parser import CodeParser, FormattedTextParser
+from .parsers.code_parser import (
+    CodeParser,
+    EvaluationParser,
+    JanusParser,
+    JsonLinesParser,
+)
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
@@ -52,6 +57,9 @@ class Translator:
         self.target_version = target_version
         self.max_prompts = max_prompts
         self.prompt_template = prompt_template
+
+        self.parser: JanusParser
+
         self._check_languages()
         self._load_model()
         self._load_splitter(use_placeholders=use_placeholders)
@@ -220,16 +228,11 @@ class Translator:
         log.debug(f"[{block.name}] Translating...")
         log.debug(f"[{block.name}] Input text:\n{block.original.text}")
         prompt = self._prompt_engine.create(block.original)
-        least_missing = None
+        top_score = -1.0
 
         # Retry the request up to max_prompts times before failing
         for _ in range(self.max_prompts + 1):
             output = self._llm.predict_messages(prompt.prompt)
-
-            # Pass through content if output is expected to be text
-            if "text" == self.target_language:
-                block.text = output.content
-                break
 
             # Otherwise parse for code
             try:
@@ -239,18 +242,14 @@ class Translator:
                 log.debug(f"[{block.name}] Failed output:\n{output.content}")
                 continue
 
-            if "formatted_text" == self.target_language:
+            score = self.parser.score(block.original, parsed_output)
+            if score > top_score:
                 block.text = parsed_output
+                top_score = score
+
+            if score >= 1.0:
                 break
 
-            if self._validate(block.original, parsed_output):
-                block.text = parsed_output
-                break
-
-            n_missing = self.combiner.count_missing(block.original, parsed_output)
-            if least_missing is None or n_missing < least_missing:
-                block.text = parsed_output
-                least_missing = n_missing
         else:
             if block.text is None:
                 error_msg = (
@@ -267,39 +266,15 @@ class Translator:
 
         log.debug(f"[{block.name}] Output code:\n{block.text}")
 
-    def _validate(self, input_block: CodeBlock, output_code: str) -> bool:
-        """Validate the given output code by ensuring it contains all necessary
-        placeholders corresponding to the children of the given input block
-
-        Arguments:
-            input_block: A `CodeBlock` representing the input to the LLM
-            output_code: The parsed code returned by the LLM
-
-        Returns:
-            Whether the given code is valid; `True` if all the child blocks are
-            referenced, `False` otherwise.
-        """
-        missing_children = []
-        for child in input_block.children:
-            if not self.combiner.contains_child(output_code, child):
-                missing_children.append(child.id)
-        if missing_children:
-            log.warning(
-                f"[{input_block.name}] Child placeholders not present in text: "
-                f"{missing_children}"
-            )
-            log.debug(f"Code:\n{output_code}")
-            return False
-        return True
-
     def _save_to_file(self, block: CodeBlock, out_path: Path) -> None:
         """Save a file to disk.
 
         Arguments:
             block: The `CodeBlock` to save to a file.
         """
+        out_text = self.parser.parse_combined_output(block.complete_text)
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(block.complete_text, encoding="utf-8")
+        out_path.write_text(out_text, encoding="utf-8")
 
     def _load_model(self) -> None:
         """Check that the model is valid."""
@@ -363,10 +338,16 @@ class Translator:
 
     def _load_parser(self) -> None:
         """Load the `CodeParser` Object"""
-        if "formatted_text" == self.target_language:
-            self.parser = FormattedTextParser()
+        if "json_eval" == self.target_language:
+            self.parser = EvaluationParser(
+                expected_keys={"syntax", "style", "completeness", "correctness"}
+            )
+        elif "jsonl" == self.target_language:
+            self.parser = JsonLinesParser()
+        elif "text" == self.target_language:
+            self.parser = JanusParser()
         else:
-            self.parser = CodeParser(target_language=self.target_language)
+            self.parser = CodeParser(combiner=self.combiner)
 
     def _check_languages(self) -> None:
         """Check that the source and target languages are valid."""

@@ -1,7 +1,5 @@
 import argparse
 import json
-import re
-import shutil
 import subprocess
 from pathlib import Path
 
@@ -10,7 +8,7 @@ import pandas as pd
 from janus.utils.enums import LANGUAGES
 
 
-def get_line_analysis(output_dir: Path | str) -> pd.DataFrame:
+def get_line_analysis(output_dir: Path) -> pd.DataFrame:
     """
     Run pyright on a given directory and return the results.
     The directory structure must be as follows, with (1) being the top-level
@@ -25,7 +23,7 @@ def get_line_analysis(output_dir: Path | str) -> pd.DataFrame:
         temp/0.7/2/PSSBPSUT.py
         prompt-id_model_temp/v1.2_gpt-3.5-turbo_0.7/4/PSSJXR5.py
     """
-    output_dir = Path(output_dir).expanduser().resolve()
+    output_dir = output_dir.expanduser().resolve()
 
     # Run pyright on the full output directory, returned in JSON format
     result = subprocess.run(
@@ -37,7 +35,7 @@ def get_line_analysis(output_dir: Path | str) -> pd.DataFrame:
     file, severity, message, start_line, end_line, rule = zip(
         *(
             (
-                Path(m["file"]),
+                str(Path(m["file"]).relative_to(output_dir)),
                 m["severity"],
                 m["message"],
                 m["range"]["start"]["line"],
@@ -104,46 +102,17 @@ def get_line_analysis(output_dir: Path | str) -> pd.DataFrame:
     return line_df
 
 
-def get_file_analysis(input_dir: str, output_dir: str, language: str) -> pd.DataFrame:
-    """
-    Run pyright on a given directory and return the results.
-    The directory structure must be as follows, with (1) being the top-level
-        directory (provided), (2) being its subdirectories, etc.:
-        1. Underscore-separated parameter names
-        2. Underscore-separated parameter values
-        3. Integer iteration number, zero-indexed
-        4. Filename matching input
-    Examples:
-        model_split/gpt-4_minimum/0/PSSBPSUT.py
-        model_split/gpt-3.5-turbo-16k_maximum/5/PSS32P5.py
-        temp/0.7/2/PSSBPSUT.py
-        prompt-id_model_temp/v1.2_gpt-3.5-turbo_0.7/4/PSSJXR5.py
-    """
-    input_dir = Path(input_dir).expanduser().resolve()
-    output_dir = Path(output_dir).expanduser().resolve()
-    parameter_names = output_dir.name.split("_")
-
-    # Get length of input and output files
-    # Note that input files are indexed only on filename (e.g. PSSBPSUT) while
-    #  output files are indexed on full absolute path
-    input_files = list(input_dir.rglob(f"*.{LANGUAGES[language]['suffix']}"))
+def get_file_analysis(line_df: pd.DataFrame, output_dir: Path) -> pd.DataFrame:
+    output_dir = output_dir.expanduser().resolve()
     output_files = list(output_dir.rglob("*.py"))
-    input_file_lengths = pd.Series(
-        {f.with_suffix("").name: len(f.read_text().split("\n")) for f in input_files}
-    )
     output_file_lengths = pd.Series(
-        {f.resolve(): len(f.read_text().split("\n")) for f in output_files}
-    )
-    output_file_ill_formatted = pd.Series(
         {
-            f.resolve(): re.search(r"<<<\S+?>>>", f.read_text()) is not None
+            str(f.resolve().relative_to(output_dir)): len(f.read_text().split("\n"))
             for f in output_files
         }
     )
 
-    line_df = get_line_analysis(output_dir)
-
-    file_df = output_file_lengths.to_frame("output_lines")
+    file_df = output_file_lengths.to_frame("output_length")
 
     # Get the total number of errors and warnings per file
     file_df = (
@@ -184,41 +153,57 @@ def get_file_analysis(input_dir: str, output_dir: str, language: str) -> pd.Data
 
     # Parse filenames to get experiment information
     file_df = file_df.reset_index()
-    file_df["file"] = file_df.file.apply(Path)
-    file_df["filename"] = file_df.file.apply(lambda p: p.with_suffix("").name)
-    file_df["experiment"] = file_df.file.apply(lambda p: p.parent.parent.name)
+    paths = file_df.file.apply(Path)
+    file_df["filename"] = paths.apply(lambda p: p.with_suffix("").name)
+    file_df["experiment"] = paths.apply(lambda p: p.parent.parent.name)
+    file_df["iter"] = paths.apply(lambda p: p.parent.name)
+
+    parameter_names = output_dir.name.split("_")
     file_df[parameter_names] = file_df.experiment.str.split("_", expand=True)
-    file_df["iter"] = file_df.file.apply(lambda p: p.parent.name)
+
+    return file_df
+
+
+def add_input_file_statistics(file_df: pd.DataFrame, input_dir: Path, language: str):
+    # Get lengths of input files
+    # Note that input files are indexed only on filename (e.g. PSSBPSUT) while
+    #  output files are indexed on full path relative to the output directory
+    input_dir = input_dir.expanduser().resolve()
+    input_files = list(input_dir.rglob(f"*.{LANGUAGES[language]['suffix']}"))
+    input_file_lengths = pd.Series(
+        {f.with_suffix("").name: len(f.read_text().split("\n")) for f in input_files}
+    )
 
     # Add the input and output file lengths for normalization
     file_df = file_df.merge(
         input_file_lengths.rename("input_length"), left_on="filename", right_index=True
     )
-    file_df = file_df.merge(
-        output_file_lengths.rename("output_length"), left_on="file", right_index=True
-    )
-    file_df = file_df.merge(
-        output_file_ill_formatted.rename("recombination_error"),
-        left_on="file",
-        right_index=True,
-    )
-    if language == "mumps":
-        input_file_routines = pd.Series(
-            {
-                f.with_suffix("").name: len(re.findall(r"(?:^|\n)\S", f.read_text()))
-                for f in input_files
-            }
-        )
-        file_df = file_df.merge(
-            input_file_routines.rename("num_routines"),
-            left_on="filename",
-            right_index=True,
-        )
     file_df["normalized_errors"] = file_df.errors / file_df.input_length
     file_df["normalized_warnings"] = file_df.warnings / file_df.input_length
     file_df["normalized_error_lines"] = file_df.error_lines / file_df.input_length
     file_df["normalized_warning_lines"] = file_df.warning_lines / file_df.input_length
     file_df["input_ratio"] = file_df.output_length / file_df.input_length
+    return file_df
+
+
+def add_evaluation_file_statistics(file_df: pd.DataFrame, eval_dir: Path) -> pd.DataFrame:
+    eval_dir = eval_dir.expanduser().resolve()
+    eval_files = list(eval_dir.rglob("*.json"))
+
+    objects = []
+    for f in eval_files:
+        try:
+            obj = json.loads(f.read_text())
+            obj = {k.lower(): float(v) for k, v in obj.items()}
+        except Exception:
+            continue
+        obj["file"] = str(f.resolve().relative_to(eval_dir).with_suffix(".py"))
+        objects.append(obj)
+
+    eval_df = pd.DataFrame(objects).set_index("file")
+    eval_df["annotated_score"] = eval_df.mean(axis=1) / 4
+
+    file_df = file_df.merge(eval_df, left_on="file", right_index=True)
     return file_df
 
 
@@ -233,6 +218,12 @@ if __name__ == "__main__":
         "translated_dir", type=str, help="Directory containing translated python."
     )
     parser.add_argument(
+        "--eval-dir",
+        type=str,
+        default=None,
+        help="Directory containing JSON evaluation files",
+    )
+    parser.add_argument(
         "--input-language",
         type=str,
         default="mumps",
@@ -241,33 +232,47 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    outdir = Path(args.translated_dir)
-    count_file = outdir / "error_counts.tsv"
+    input_dir = Path(args.input_dir).expanduser().resolve()
+    output_dir = Path(args.translated_dir).expanduser().resolve()
+    best_dir = output_dir / "best"
+    worst_dir = output_dir / "worst"
+    best_dir.unlink(missing_ok=True)
+    worst_dir.unlink(missing_ok=True)
+
+    count_file = output_dir / "error_counts.tsv"
     if count_file.exists() and False:
         df = pd.read_csv(count_file, sep="\t")
     else:
-        df = get_file_analysis(args.input_dir, args.translated_dir, args.input_language)
-        df.to_csv(outdir / "error_counts.tsv", sep="\t", index=False)
+        df = get_line_analysis(output_dir=output_dir)
+        df = get_file_analysis(line_df=df, output_dir=output_dir)
+        df = add_input_file_statistics(
+            file_df=df, input_dir=input_dir, language=args.input_language
+        )
+        if args.eval_dir is not None:
+            eval_dir = Path(args.eval_dir).expanduser().resolve()
+            df = add_evaluation_file_statistics(file_df=df, eval_dir=eval_dir)
+        df.to_csv(output_dir / "error_counts.tsv", sep="\t", index=False)
 
-    df["score"] = df.normalized_errors + df.normalized_warnings * 0.5
-    best_files = df.loc[df.groupby("filename").score.idxmin(), "file"]
-    worst_files = df.loc[df.groupby("filename").score.idxmax(), "file"]
-    best_dir = outdir / "best"
-    worst_dir = outdir / "worst"
-    best_dir.mkdir(exist_ok=True, parents=True)
-    worst_dir.mkdir(exist_ok=True, parents=True)
-    print(best_dir)
-    print(worst_dir)
-    for file in best_files:
-        file = Path(file)
-        out_file = best_dir / f"{file.parent.parent.name}_{file.name}"
-        shutil.copy(str(file), str(out_file))
-    for file in worst_files:
-        file = Path(file)
-        out_file = worst_dir / f"{file.parent.parent.name}_{file.name}"
-        shutil.copy(str(file), str(out_file))
+    # df["score"] = df.normalized_errors + df.normalized_warnings * 0.5
+    # best_files = df.loc[df.groupby("filename").score.idxmin(), "file"]
+    # worst_files = df.loc[df.groupby("filename").score.idxmax(), "file"]
+    # best_dir.mkdir(exist_ok=True, parents=True)
+    # worst_dir.mkdir(exist_ok=True, parents=True)
+    # print(best_dir)
+    # print(worst_dir)
+    # for file in best_files:
+    #     file = Path(file)
+    #     out_file = best_dir / f"{file.parent.parent.name}_{file.name}"
+    #     shutil.copy(str(file), str(out_file))
+    # for file in worst_files:
+    #     file = Path(file)
+    #     out_file = worst_dir / f"{file.parent.parent.name}_{file.name}"
+    #     shutil.copy(str(file), str(out_file))
 
     g = df.groupby("experiment")
-    print(g[["normalized_errors", "normalized_warnings"]].mean())
-    print(g[["normalized_errors", "normalized_warnings"]].median())
+    score_cols = ["normalized_errors", "normalized_warnings"]
+    if "annotated_score" in df:
+        score_cols.append("annotated_score")
+    print(g[score_cols].mean())
+    print(g[score_cols].median())
     print(g.input_ratio.mean())
