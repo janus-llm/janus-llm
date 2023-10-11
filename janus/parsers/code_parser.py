@@ -110,7 +110,7 @@ class JsonParser(JsonLinesParser):
         return jsonl_text
 
     def parse_combined_output(self, text: str) -> str:
-        jsonl_text = super().parse_combined_output(text)
+        jsonl_text = JsonLinesParser.parse(self, text)
         json_lines = jsonl_text.split("\n")
         output_obj = {i: json.loads(t) for i, t in enumerate(json_lines)}
         return json.dumps(output_obj)
