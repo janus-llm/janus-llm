@@ -1,0 +1,23 @@
+Adhere to the following rules for translating MUMPS to Python:
+
+1. Routines from other files
+When a function from another file is invoked, treat the file like a module. Keep all imports at the beginning of the returned code.
+
+2. Naming Conventions
+Adhere to PEP8 for variable and function names. Improve readability when possible, making use of context and documentation. For example, a MUMPS variable like `RXQTY` might be translated to `prescription_quantity`.
+
+3. Ignore K(ill) Commands
+Memory allocation and garbage collection is generally handled automatically in Python, so any MUMPS K(ill) commands should be ignored.
+
+4. Arrays
+MUMPS arrays should generally be treated as nested dictionaries.
+
+5. Global Variables
+When globals (prepended by a circumflex) are used in a routine, treat them as coming from a mysql database. Assume that database credentials are stored in environment variables ('SQL_HOST`, `SQL_USER`, `SQL_PWD`, `SQL_DB`).
+
+
+Please convert the following MUMPS .m code found in between triple backticks into {TARGET_LANGUAGE} code. The returned code should also be delimited with triple backticks.
+
+```
+{SOURCE_CODE}
+```
