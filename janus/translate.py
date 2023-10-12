@@ -27,11 +27,17 @@ VALID_MODELS: Set[str] = set(MODEL_CONSTRUCTORS).intersection(MODEL_DEFAULT_ARGU
 
 
 def run_if_changed(*tracked_vars):
+    """Wrapper to skip function calls if the given instance attributes haven't
+    been updated. Requires the _changed_attrs set to exist, and the __setattr__
+    method to be overridden to track parameter updates in _changed_attrs.
+    """
+
     def wrapper(func):
         @functools.wraps(func)
         def wrapped(self, *args, **kwargs):
-            changed = self._changed_attrs.intersection(tracked_vars)
-            if changed:
+            # If there is overlap between the tracked variables and the changed
+            #  ones, then call the function as normal
+            if self._changed_attrs.intersection(tracked_vars):
                 func(self, *args, **kwargs)
 
         return wrapped
@@ -67,19 +73,19 @@ class Translator:
         """
         self._changed_attrs = set()
 
-        self._parser_type: Optional[str] = None
-        self._model_name: Optional[str] = None
-        self._custom_model_arguments: Optional[Dict[str, Any]] = None
-        self._source_language: Optional[str] = None
-        self._source_glob: Optional[str] = None
-        self._target_language: Optional[str] = None
-        self._target_version: Optional[str] = None
-        self._target_glob: Optional[str] = None
-        self._prompt_template_name: Optional[str] = None
+        self._parser_type: Optional[str]
+        self._model_name: Optional[str]
+        self._custom_model_arguments: Optional[Dict[str, Any]]
+        self._source_language: Optional[str]
+        self._source_glob: Optional[str]
+        self._target_language: Optional[str]
+        self._target_version: Optional[str]
+        self._target_glob: Optional[str]
+        self._prompt_template_name: Optional[str]
+        self._parser: Optional[JanusParser]
+        self._splitter: Optional[Splitter]
 
         self._combiner: Combiner = Combiner()
-        self._parser: JanusParser
-        self._splitter: Splitter
 
         self.set_model(model_name=model, **model_arguments)
         self.set_prompt(prompt_template=prompt_template)
@@ -89,7 +95,7 @@ class Translator:
             target_language=target_language, target_version=target_version
         )
 
-        self.load_parameters()
+        self._load_parameters()
 
         self.max_prompts = max_prompts
 
@@ -97,9 +103,12 @@ class Translator:
         if hasattr(self, "_changed_attrs"):
             if not hasattr(self, key) or getattr(self, key) != value:
                 self._changed_attrs.add(key)
+        # Avoid infinite recursion
+        elif key != "_changed_attrs":
+            self._changed_attrs = set()
         super().__setattr__(key, value)
 
-    def load_parameters(self):
+    def _load_parameters(self):
         self._load_model()
         self._load_prompt_engine()
         self._load_splitter()
@@ -171,7 +180,7 @@ class Translator:
             code is not guaranteed to be consolidated. To amend this, run
             `Combiner.combine_childen` on the block.
         """
-        self.load_parameters()
+        self._load_parameters()
 
         filename = file.name
         log.info(f"[{filename}] Splitting file")
@@ -264,8 +273,6 @@ class Translator:
         # Retry the request up to max_prompts times before failing
         for _ in range(self.max_prompts + 1):
             output = self._llm.predict_messages(prompt)
-
-            # Otherwise parse for code
             try:
                 parsed_output = self.parser.parse(output.content)
             except ValueError as e:
