@@ -276,21 +276,6 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "url": "https://github.com/tree-sitter/tree-sitter-json",
         "example": '{\n  "message": "Hello, World!"\n}\n',
     },
-    "json_eval": {
-        "comment": "//",
-        "suffix": "json",
-        "url": "https://github.com/tree-sitter/tree-sitter-json",
-        "example": (
-            '{\n  "syntax": 2,\n  "style": 1,\n  "completeness": 4,'
-            '\n  "correctness": 2\n}\n'
-        ),
-    },
-    "jsonl": {
-        "comment": "//",
-        "suffix": "jsonl",
-        "url": None,
-        "example": '{"message": "Hello, World!"}\n{"message": "Goodbye World!"}\n',
-    },
     "json5": {
         "comment": "//",
         "suffix": "json5",
