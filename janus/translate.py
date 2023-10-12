@@ -1,19 +1,21 @@
+import functools
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Set
 
 from langchain.callbacks import get_openai_callback
 
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import Combiner
 from .language.mumps import MumpsSplitter
+from .language.splitter import Splitter
 from .language.treesitter import TreeSitterSplitter
 from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
 from .parsers.code_parser import (
+    PARSER_TYPES,
     CodeParser,
     EvaluationParser,
     JanusParser,
-    JsonLinesParser,
 )
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
@@ -21,7 +23,20 @@ from .utils.logger import create_logger
 
 log = create_logger(__name__)
 
-VALID_MODELS: Tuple[str, ...] = tuple(MODEL_CONSTRUCTORS.keys())
+VALID_MODELS: Set[str] = set(MODEL_CONSTRUCTORS).intersection(MODEL_DEFAULT_ARGUMENTS)
+
+
+def run_if_changed(*tracked_vars):
+    def wrapper(func):
+        @functools.wraps(func)
+        def wrapped(self, *args, **kwargs):
+            changed = self._changed_attrs.intersection(tracked_vars)
+            if changed:
+                func(self, *args, **kwargs)
+
+        return wrapped
+
+    return wrapper
 
 
 class Translator:
@@ -36,7 +51,7 @@ class Translator:
         target_version: str = "3.10",
         max_prompts: int = 10,
         prompt_template: str = "simple",
-        use_placeholders: bool = False,
+        parser_type: str = "code",
     ) -> None:
         """Initialize a Translator instance.
 
@@ -50,22 +65,46 @@ class Translator:
             prompt_template: name of prompt template directory
                 (see janus/prompts/templates) or path to a directory.
         """
-        self.model = model.lower()
-        self.model_arguments = model_arguments
-        self.source_language = source_language.lower()
-        self.target_language = target_language.lower()
-        self.target_version = target_version
+        self._changed_attrs = set()
+
+        self._parser_type: Optional[str] = None
+        self._model_name: Optional[str] = None
+        self._custom_model_arguments: Optional[Dict[str, Any]] = None
+        self._source_language: Optional[str] = None
+        self._source_glob: Optional[str] = None
+        self._target_language: Optional[str] = None
+        self._target_version: Optional[str] = None
+        self._target_glob: Optional[str] = None
+        self._prompt_template_name: Optional[str] = None
+
+        self._combiner: Combiner = Combiner()
+        self._parser: JanusParser
+        self._splitter: Splitter
+
+        self.set_model(model_name=model, **model_arguments)
+        self.set_prompt(prompt_template=prompt_template)
+        self.set_parser_type(parser_type=parser_type)
+        self.set_source_language(source_language=source_language)
+        self.set_target_language(
+            target_language=target_language, target_version=target_version
+        )
+
+        self.load_parameters()
+
         self.max_prompts = max_prompts
-        self.prompt_template = prompt_template
 
-        self.parser: JanusParser
+    def __setattr__(self, key, value):
+        if hasattr(self, "_changed_attrs"):
+            if not hasattr(self, key) or getattr(self, key) != value:
+                self._changed_attrs.add(key)
+        super().__setattr__(key, value)
 
-        self._check_languages()
+    def load_parameters(self):
         self._load_model()
-        self._load_splitter(use_placeholders=use_placeholders)
-        self._load_combiner()
         self._load_prompt_engine()
+        self._load_splitter()
         self._load_parser()
+        self._changed_attrs.clear()
 
     def translate(
         self,
@@ -79,6 +118,7 @@ class Translator:
         Arguments:
             input_directory: The directory containing the code to translate.
             output_directory: The directory to write the translated code to.
+            overwrite: Whether to overwrite existing files (vs skip them)
         """
         # Convert paths to pathlib Paths if needed
         if isinstance(input_directory, str):
@@ -90,20 +130,9 @@ class Translator:
         if not output_directory.exists():
             output_directory.mkdir(parents=True)
 
-        # Ensure that output languages are set to expected values for prompts
-        if self.prompt_template in TEXT_OUTPUT and "text" != self.target_language:
-            # Text outputs for documentation, requirements, etc.
-            self.target_language = "text"
-        if (
-            self.prompt_template in SAME_OUTPUT
-            and self.target_language != self.source_language
-        ):
-            # Document inline should output the same as the input
-            self.target_language = self.source_language
+        target_suffix = LANGUAGES[self._target_language]["suffix"]
 
-        target_suffix = LANGUAGES[self.target_language]["suffix"]
-
-        input_paths = input_directory.rglob(self._glob)
+        input_paths = input_directory.rglob(self._source_glob)
 
         # Now, loop through every code block in every file and translate it with an LLM
         total_cost = 0.0
@@ -126,7 +155,7 @@ class Translator:
 
             # Make sure the tree's code has been consolidated at the top level
             #  before writing to file
-            self.combiner.combine(out_block)
+            self._combiner.combine(out_block)
             self._save_to_file(out_block, out_path)
 
         log.info(f"Total cost: ${total_cost:,.2f}")
@@ -142,6 +171,8 @@ class Translator:
             code is not guaranteed to be consolidated. To amend this, run
             `Combiner.combine_childen` on the block.
         """
+        self.load_parameters()
+
         filename = file.name
         log.info(f"[{filename}] Splitting file")
         input_block = self.splitter.split(file)
@@ -176,7 +207,7 @@ class Translator:
         Returns:
             A `TranslatedCodeBlock`
         """
-        translated_root = TranslatedCodeBlock(root, self.target_language)
+        translated_root = TranslatedCodeBlock(root, self._target_language)
         last_prog, prog_delta = 0, 0.1
         stack = [translated_root]
         while stack:
@@ -197,7 +228,7 @@ class Translator:
 
             for child in translated_block.children:
                 # Don't bother translating children if they aren't used
-                if self.combiner.contains_child(translated_block.text, child):
+                if self._combiner.contains_child(translated_block.text, child):
                     stack.append(child)
                 else:
                     log.warning(f"Skipping {child.id} (not referenced in parent code)")
@@ -232,7 +263,7 @@ class Translator:
 
         # Retry the request up to max_prompts times before failing
         for _ in range(self.max_prompts + 1):
-            output = self._llm.predict_messages(prompt.prompt)
+            output = self._llm.predict_messages(prompt)
 
             # Otherwise parse for code
             try:
@@ -276,88 +307,136 @@ class Translator:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(out_text, encoding="utf-8")
 
-    def _load_model(self) -> None:
-        """Check that the model is valid."""
-        if self.model not in VALID_MODELS:
+    def set_model(self, model_name: str, **custom_arguments: Dict[str, Any]):
+        """Validate and set the model name.
+        The affected objects will not be updated until translate() is called.
+        """
+        if model_name not in VALID_MODELS:
             raise ValueError(
-                f"Invalid model: {self.model}. Valid models are: {VALID_MODELS}"
+                f"Invalid model: {model_name}. Valid models are: {VALID_MODELS}"
             )
-        if self.model in tuple(TOKEN_LIMITS.keys()):
-            self._max_tokens = TOKEN_LIMITS[self.model]
-        else:
-            self._max_tokens = 4096
-        arguments = deepcopy(MODEL_DEFAULT_ARGUMENTS[self.model])
-        arguments.update(self.model_arguments)
-        self._llm = MODEL_CONSTRUCTORS[self.model](**arguments)
 
-    def _load_prompt_engine(self) -> None:
-        """Load the prompt engine."""
+        self._model_name = model_name
+        self._custom_model_arguments = custom_arguments
+
+    def set_prompt(self, prompt_template: str):
+        """Validate and set the prompt template name.
+        The affected objects will not be updated until translate() is called.
+        """
+        self._prompt_template_name = prompt_template
+
+    def set_source_language(self, source_language: str):
+        """Validate and set the source language.
+        The affected objects will not be updated until translate() is called.
+        """
+        source_language = source_language.lower()
+        if source_language not in LANGUAGES:
+            raise ValueError(
+                f"Invalid source language: {source_language}. "
+                "Valid source languages are found in `janus.utils.enums.LANGUAGES`."
+            )
+
+        self._source_glob = f"**/*.{LANGUAGES[source_language]['suffix']}"
+        self._source_language = source_language
+
+    def set_target_language(self, target_language: str, target_version: str):
+        """Validate and set the target language.
+        The affected objects will not be updated until translate() is called.
+        """
+        target_language = target_language.lower()
+        if target_language not in LANGUAGES:
+            raise ValueError(
+                f"Invalid target language: {target_language}. "
+                "Valid source languages are found in `janus.utils.enums.LANGUAGES`."
+            )
+        self._target_glob = f"**/*.{LANGUAGES[target_language]['suffix']}"
+        self._target_language = target_language
+        self._target_version = target_version
+
+    def set_parser_type(self, parser_type: str):
+        """Validate and set the parser type.
+        The affected objects will not be updated until translate() is called.
+        """
+        if parser_type not in PARSER_TYPES:
+            raise ValueError(
+                f'Unsupported parser type "{parser_type}". Valid types: '
+                f"{PARSER_TYPES}"
+            )
+        self._parser_type = parser_type
+
+    @run_if_changed("_model_name", "_custom_model_arguments")
+    def _load_model(self):
+        """Load the model according to this instance's attributes.
+        If the relevant fields have not been changed since the last time
+        this method was called, nothing happens.
+        """
+
+        # Get default arguments, set custom ones
+        model_arguments = deepcopy(MODEL_DEFAULT_ARGUMENTS[self._model_name])
+        model_arguments.update(self._custom_model_arguments)
+
+        # Load the model
+        self._llm = MODEL_CONSTRUCTORS[self._model_name](**model_arguments)
+        self._max_tokens = TOKEN_LIMITS.get(self._model_name, 4096)
+
+    @run_if_changed(
+        "_prompt_template_name", "_source_language", "_target_language", "_target_version"
+    )
+    def _load_prompt_engine(self):
+        """Load the prompt engine according to this instance's attributes.
+        If the relevant fields have not been changed since the last time
+        this method was called, nothing happens.
+        """
+        if self._prompt_template_name in SAME_OUTPUT:
+            if self._target_language != self._source_language:
+                raise ValueError(
+                    f"Prompt template ({self._prompt_template_name}) suggests "
+                    f"source and target languages should match, but do not "
+                    f"({self._source_language} != {self._target_language})"
+                )
+        if self._prompt_template_name in TEXT_OUTPUT and self._target_language != "text":
+            raise ValueError(
+                f"Prompt template ({self._prompt_template_name}) suggests target "
+                f"language should be 'text', but is {self._target_language}"
+            )
+
         self._prompt_engine = PromptEngine(
-            self._llm,
-            self.model,
-            self.source_language,
-            self.target_language,
-            self.target_version,
-            self.prompt_template,
+            source_language=self._source_language,
+            target_language=self._target_language,
+            target_version=self._target_version,
+            prompt_template=self._prompt_template_name,
         )
 
-    def _load_combiner(self) -> None:
-        """Load the `Combiner` object."""
-        # Ensure we can actually combine the output
-        # With the current algorithm, combining requires the target language to be
-        # included in LANGUAGES and have a "comment"
-        if self.target_language not in list(LANGUAGES.keys()):
-            message = (
-                f"Target language '{self.target_language}' not implemented. "
-                "Output will not be combined."
-            )
-            log.error(message)
-            raise ValueError(message)
-        self.combiner = Combiner(self.target_language)
-
-    def _load_splitter(self, use_placeholders: bool = True) -> None:
-        """Load the `Splitter` object."""
-        if self.source_language in CUSTOM_SPLITTERS:
-            if self.source_language == "mumps":
+    @run_if_changed("_source_language", "_max_tokens", "_llm")
+    def _load_splitter(self):
+        """Load the splitter according to this instance's attributes.
+        If the relevant fields have not been changed since the last time
+        this method was called, nothing happens.
+        """
+        if self._source_language in CUSTOM_SPLITTERS:
+            if self._source_language == "mumps":
                 self.splitter = MumpsSplitter(
                     max_tokens=self._max_tokens,
                     model=self._llm,
                 )
-        elif self.source_language in list(LANGUAGES.keys()):
+        else:
             self.splitter = TreeSitterSplitter(
-                language=self.source_language,
+                language=self._source_language,
                 max_tokens=self._max_tokens,
                 model=self._llm,
-                use_placeholders=use_placeholders,
             )
-        else:
-            raise NotImplementedError(
-                f"Source language '{self.source_language}' not implemented."
-            )
-        self._glob = f"**/*.{LANGUAGES[self.source_language]['suffix']}"
 
-    def _load_parser(self) -> None:
-        """Load the `CodeParser` Object"""
-        if "json_eval" == self.target_language:
+    @run_if_changed("_parser_type", "_target_language")
+    def _load_parser(self):
+        """Load the parser according to this instance's attributes.
+        If the relevant fields have not been changed since the last time
+        this method was called, nothing happens.
+        """
+        if "code" == self._parser_type:
+            self.parser = CodeParser(language=self._target_language)
+        elif "eval" == self._parser_type:
             self.parser = EvaluationParser(
                 expected_keys={"syntax", "style", "completeness", "correctness"}
             )
-        elif "jsonl" == self.target_language:
-            self.parser = JsonLinesParser()
-        elif "text" == self.target_language:
-            self.parser = JanusParser()
         else:
-            self.parser = CodeParser(combiner=self.combiner)
-
-    def _check_languages(self) -> None:
-        """Check that the source and target languages are valid."""
-        if self.source_language not in list(LANGUAGES.keys()):
-            raise ValueError(
-                f"Invalid source language: {self.source_language}. "
-                "Valid source languages are found in `janus.utils.enums.LANGUAGES`."
-            )
-        if self.target_language not in list(LANGUAGES.keys()):
-            raise ValueError(
-                f"Invalid target language: {self.target_language}. "
-                "Valid source languages are found in `janus.utils.enums.LANGUAGES`."
-            )
+            self.parser = JanusParser()

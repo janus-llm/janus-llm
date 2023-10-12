@@ -12,6 +12,9 @@ from ..utils.logger import create_logger
 log = create_logger(__name__)
 
 
+PARSER_TYPES: Set[str] = {"code", "text", "eval"}
+
+
 class JanusParser(BaseOutputParser):
     def parse(self, text: str) -> str:
         return text
@@ -42,14 +45,11 @@ class JanusParser(BaseOutputParser):
         return type(self).__name__
 
 
-class CodeParser(JanusParser, arbitrary_types_allowed=True):
-    combiner: Combiner
-
-    def __init__(self, combiner: Combiner, **kwargs: Any):
-        super().__init__(combiner=combiner, **kwargs)
+class CodeParser(JanusParser):
+    language: str
 
     def parse(self, text: str) -> str:
-        pattern = rf"```[^\S\r\n]*(?:{self.combiner.language}[^\S\r\n]*)?\n?(.*?)\n*```"
+        pattern = rf"```[^\S\r\n]*(?:{self.language}[^\S\r\n]*)?\n?(.*?)\n*```"
         code = re.search(pattern, text, re.DOTALL)
         if code is None:
             raise ValueError("Code not find code between triple backticks")
@@ -64,7 +64,7 @@ class CodeParser(JanusParser, arbitrary_types_allowed=True):
 
         missing_children = []
         for child in input_block.children:
-            if not self.combiner.contains_child(output_text, child):
+            if not Combiner.contains_child(output_text, child):
                 missing_children.append(child.id)
 
         if missing_children:
