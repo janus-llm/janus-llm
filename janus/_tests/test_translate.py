@@ -1,11 +1,13 @@
 import unittest
 from pathlib import Path
 
+import pytest
+
 from ..translate import Translator
 
 
 class TestTranslator(unittest.TestCase):
-    """Tests for the Splitter class."""
+    """Tests for the Translator class."""
 
     def setUp(self):
         """Set up the tests."""
@@ -29,3 +31,26 @@ class TestTranslator(unittest.TestCase):
         # Only check the top-most level functionality, since it should be handled by other
         # unit tests anyway
         self.assertTrue(python_file.exists())
+
+
+@pytest.mark.parametrize(
+    "prompt_template,expected_target_language",
+    [
+        ("document_inline", "python"),
+        ("document", "text"),
+        ("requirements", "text"),
+        ("simple", "javascript"),
+    ],
+)
+def test_target_language(prompt_template, expected_target_language):
+    """Tests that translator target language settings are consistent
+    with prompt template expectations.
+    """
+    translator = Translator(
+        source_language="python",
+        target_language="javascript",
+        prompt_template=prompt_template,
+    )
+    assert translator.target_language == expected_target_language
+    assert translator.combiner.language == expected_target_language
+    assert translator.parser.target_language == expected_target_language
