@@ -88,7 +88,7 @@ class PromptEngine:
             code: The code block to convert.
 
         Returns:
-            The converted prompt.
+            The converted prompt as a list of messages.
         """
         return self.prompt.format_prompt(
             SOURCE_CODE=code.text,
@@ -99,6 +99,11 @@ class PromptEngine:
     def get_prompt_template_path(template_name: str) -> Path:
         """Raises an exception if the specified prompt template path
         is not a directory containing system.txt and human.txt files.
+
+        Arguments:
+            template_name: The name of the Janus prompt template directory to use.
+                Can be one of "simple", "document", "document_inline", or "requirements",
+                or a path to a custom directory containing system.txt and human.txt files.
         """
         template_path = JANUS_PROMPT_TEMPLATES_DIR / template_name
         try:
@@ -110,8 +115,16 @@ class PromptEngine:
         return template_path
 
     @staticmethod
-    def _verify_prompt_template_path(template_path: Path):
-        """Check for existence of Janus prompt template directory and necessary files"""
+    def _verify_prompt_template_path(template_path: Path) -> None:
+        """Check for existence of Janus prompt template directory and necessary files
+
+        Arguments:
+            template_path: The path to the Janus prompt template directory.
+
+        Raises:
+            ValueError: If the specified prompt template directory does not exist,
+                is not a directory, or is missing a system.txt or human.txt file.
+        """
         if not template_path.exists():
             raise ValueError(
                 f"Specified prompt template directory {template_path} does not exist"

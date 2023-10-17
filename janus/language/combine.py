@@ -12,6 +12,11 @@ class Combiner(FileManager):
 
     @staticmethod
     def combine(block: CodeBlock) -> None:
+        """Combine the given block with its children.
+
+        Arguments:
+            block: The functional code block to combine with its children.
+        """
         Combiner.combine_children(block)
         block.omit_prefix = False
 
@@ -65,6 +70,14 @@ class Combiner(FileManager):
     def contains_child(code: str, child: CodeBlock) -> bool:
         """Determine whether the given code contains a placeholder for the given
         child block.
+
+        Arguments:
+            code: The code to check for the placeholder
+            child: The child block to check for
+
+        Returns:
+            Whether the given code contains a placeholder for the given child
+            block.
         """
         return code is None or child.placeholder in code
 

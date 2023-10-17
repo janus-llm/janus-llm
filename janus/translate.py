@@ -56,7 +56,7 @@ class Translator:
         target_language: str = "python",
         target_version: str = "3.10",
         max_prompts: int = 10,
-        prompt_template: str = "simple",
+        prompt_template: str | Path = "simple",
         parser_type: str = "code",
     ) -> None:
         """Initialize a Translator instance.
@@ -65,11 +65,15 @@ class Translator:
             model: The LLM to use for translation. If an OpenAI model, the
                 `OPENAI_API_KEY` environment variable must be set and the
                 `OPENAI_ORG_ID` environment variable should be set if needed.
+            model_arguments: Additional arguments to pass to the LLM constructor.
             source_language: The source programming language.
             target_language: The target programming language.
             target_version: The target version of the target programming language.
+            max_prompts: The maximum number of prompts to try before giving up.
             prompt_template: name of prompt template directory
                 (see janus/prompts/templates) or path to a directory.
+            parser_type: The type of parser to use for parsing the LLM output. Valid
+                values are "code" (default), "text", and "eval".
         """
         self._changed_attrs = set()
 
@@ -99,7 +103,7 @@ class Translator:
 
         self.max_prompts = max_prompts
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: Any, value: Any) -> None:
         if hasattr(self, "_changed_attrs"):
             if not hasattr(self, key) or getattr(self, key) != value:
                 self._changed_attrs.add(key)
@@ -108,7 +112,7 @@ class Translator:
             self._changed_attrs = set()
         super().__setattr__(key, value)
 
-    def _load_parameters(self):
+    def _load_parameters(self) -> None:
         self._load_model()
         self._load_prompt_engine()
         self._load_splitter()
@@ -316,7 +320,13 @@ class Translator:
 
     def set_model(self, model_name: str, **custom_arguments: Dict[str, Any]):
         """Validate and set the model name.
+
         The affected objects will not be updated until translate() is called.
+
+        Arguments:
+            model_name: The name of the model to use. Valid models are found in
+                `janus.llm.models_info.MODEL_CONSTRUCTORS`.
+            custom_arguments: Additional arguments to pass to the model constructor.
         """
         if model_name not in VALID_MODELS:
             raise ValueError(
@@ -326,15 +336,24 @@ class Translator:
         self._model_name = model_name
         self._custom_model_arguments = custom_arguments
 
-    def set_prompt(self, prompt_template: str):
+    def set_prompt(self, prompt_template: str | Path) -> None:
         """Validate and set the prompt template name.
+
         The affected objects will not be updated until translate() is called.
+
+        Arguments:
+            prompt_template: name of prompt template directory
+                (see janus/prompts/templates) or path to a directory.
         """
         self._prompt_template_name = prompt_template
 
-    def set_source_language(self, source_language: str):
+    def set_source_language(self, source_language: str) -> None:
         """Validate and set the source language.
+
         The affected objects will not be updated until translate() is called.
+
+        Arguments:
+            source_language: The source programming language.
         """
         source_language = source_language.lower()
         if source_language not in LANGUAGES:
@@ -346,9 +365,14 @@ class Translator:
         self._source_glob = f"**/*.{LANGUAGES[source_language]['suffix']}"
         self._source_language = source_language
 
-    def set_target_language(self, target_language: str, target_version: str):
+    def set_target_language(self, target_language: str, target_version: str) -> None:
         """Validate and set the target language.
+
         The affected objects will not be updated until translate() is called.
+
+        Arguments:
+            target_language: The target programming language.
+            target_version: The target version of the target programming language.
         """
         target_language = target_language.lower()
         if target_language not in LANGUAGES:
@@ -360,9 +384,14 @@ class Translator:
         self._target_language = target_language
         self._target_version = target_version
 
-    def set_parser_type(self, parser_type: str):
+    def set_parser_type(self, parser_type: str) -> None:
         """Validate and set the parser type.
+
         The affected objects will not be updated until translate() is called.
+
+        Arguments:
+            parser_type: The type of parser to use for parsing the LLM output. Valid
+                values are "code" (default), "text", and "eval".
         """
         if parser_type not in PARSER_TYPES:
             raise ValueError(
@@ -374,8 +403,9 @@ class Translator:
     @run_if_changed("_model_name", "_custom_model_arguments")
     def _load_model(self):
         """Load the model according to this instance's attributes.
-        If the relevant fields have not been changed since the last time
-        this method was called, nothing happens.
+
+        If the relevant fields have not been changed since the last time this method was
+        called, nothing happens.
         """
 
         # Get default arguments, set custom ones
@@ -389,10 +419,11 @@ class Translator:
     @run_if_changed(
         "_prompt_template_name", "_source_language", "_target_language", "_target_version"
     )
-    def _load_prompt_engine(self):
+    def _load_prompt_engine(self) -> None:
         """Load the prompt engine according to this instance's attributes.
-        If the relevant fields have not been changed since the last time
-        this method was called, nothing happens.
+
+        If the relevant fields have not been changed since the last time this method was
+        called, nothing happens.
         """
         if self._prompt_template_name in SAME_OUTPUT:
             if self._target_language != self._source_language:
@@ -415,10 +446,11 @@ class Translator:
         )
 
     @run_if_changed("_source_language", "_max_tokens", "_llm")
-    def _load_splitter(self):
+    def _load_splitter(self) -> None:
         """Load the splitter according to this instance's attributes.
-        If the relevant fields have not been changed since the last time
-        this method was called, nothing happens.
+
+        If the relevant fields have not been changed since the last time this method was
+        called, nothing happens.
         """
         if self._source_language in CUSTOM_SPLITTERS:
             if self._source_language == "mumps":
@@ -434,10 +466,11 @@ class Translator:
             )
 
     @run_if_changed("_parser_type", "_target_language")
-    def _load_parser(self):
+    def _load_parser(self) -> None:
         """Load the parser according to this instance's attributes.
-        If the relevant fields have not been changed since the last time
-        this method was called, nothing happens.
+
+        If the relevant fields have not been changed since the last time this method was
+        called, nothing happens.
         """
         if "code" == self._parser_type:
             self.parser = CodeParser(language=self._target_language)
@@ -445,5 +478,10 @@ class Translator:
             self.parser = EvaluationParser(
                 expected_keys={"syntax", "style", "completeness", "correctness"}
             )
-        else:
+        elif "text" == self._parser_type:
             self.parser = JanusParser()
+        else:
+            raise ValueError(
+                f"Unsupported parser type: {self._parser_type}. Can be: "
+                f"{PARSER_TYPES}"
+            )

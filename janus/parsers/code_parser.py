@@ -17,9 +17,25 @@ PARSER_TYPES: Set[str] = {"code", "text", "eval"}
 
 class JanusParser(BaseOutputParser):
     def parse(self, text: str) -> str:
+        """Parse the output text from the LLM.
+
+        Arguments:
+            text: The output text from the LLM
+
+        Returns:
+            A parsed version of the text
+        """
         return text
 
     def parse_combined_output(self, text: str) -> str:
+        """Parse the output text from the LLM when multiple inputs are combined
+
+        Arguments:
+            text: The output text from the LLM
+
+        Returns:
+            A parsed version of the text
+        """
         return text
 
     def score(self, input_block: CodeBlock, output_text: str) -> float:
@@ -49,6 +65,14 @@ class CodeParser(JanusParser):
     language: str
 
     def parse(self, text: str) -> str:
+        """Parse the output text from the LLM.
+
+        Arguments:
+            text: The output text from the LLM
+
+        Returns:
+            A parsed version of the text
+        """
         pattern = rf"```[^\S\r\n]*(?:{self.language}[^\S\r\n]*)?\n?(.*?)\n*```"
         code = re.search(pattern, text, re.DOTALL)
         if code is None:
@@ -58,6 +82,15 @@ class CodeParser(JanusParser):
     def score(self, input_block: CodeBlock, output_text: str) -> float:
         """The score for translated code is the percentage of this block's
         children which are present in the output
+
+        Arguments:
+            input_block: A `CodeBlock` representing the input to the LLM
+            output_text: The parsed text returned by the LLM
+
+        Returns:
+            A score between 0 and 1 (inclusive). A score of 1.0 indicates that
+            the given text is fully acceptable, and no further attempts
+            should be made.
         """
         if not input_block.children:
             return 1.0
@@ -82,6 +115,14 @@ class CodeParser(JanusParser):
 
 class JsonLinesParser(JanusParser):
     def parse(self, text: str) -> str:
+        """Parse the output text from the LLM.
+
+        Arguments:
+            text: The output text from the LLM.
+
+        Returns:
+            A parsed version of the text.
+        """
         string = r"\"\w+\""
         number = r"-?\d+(?:\.\d*)?"
         json_value = rf"(?:{string}|{number})"
@@ -95,14 +136,35 @@ class JsonLinesParser(JanusParser):
         return "\n".join(output_strings)
 
     def parse_combined_output(self, text: str) -> str:
+        """Parse the output text from the LLM when multiple inputs are combined.
+
+        Arguments:
+            text: The output text from the LLM.
+
+        Returns:
+            A parsed version of the text.
+        """
         return self.parse(text)
 
     def get_format_instructions(self) -> str:
+        """Get the format instructions for the parser.
+
+        Returns:
+            The format instructions for the LLM.
+        """
         return "Output must contain one or more JSON-formatted blocks."
 
 
 class JsonParser(JsonLinesParser):
     def parse(self, text: str) -> str:
+        """Parse the output text from the LLM.
+
+        Arguments:
+            text: The output text from the LLM.
+
+        Returns:
+            A parsed version of the text.
+        """
         jsonl_text = super().parse(text)
         if len(jsonl_text.split("\n")) > 1:
             raise ValueError("Multiple JSON objects found")
@@ -110,12 +172,25 @@ class JsonParser(JsonLinesParser):
         return jsonl_text
 
     def parse_combined_output(self, text: str) -> str:
+        """Parse the output text from the LLM when multiple inputs are combined.
+
+        Arguments:
+            text: The output text from the LLM.
+
+        Returns:
+            A parsed version of the text.
+        """
         jsonl_text = JsonLinesParser.parse(self, text)
         json_lines = jsonl_text.split("\n")
         output_obj = {i: json.loads(t) for i, t in enumerate(json_lines)}
         return json.dumps(output_obj)
 
     def get_format_instructions(self) -> str:
+        """Get the format instructions for the parser.
+
+        Returns:
+            The format instructions for the LLM.
+        """
         return "Output must contain exactly one JSON-formatted block."
 
 
@@ -123,12 +198,25 @@ class EvaluationParser(JsonParser):
     expected_keys: Set[str]
 
     def __init__(self, expected_keys: Set[str], **kwargs: Any):
+        """Create a new EvaluationParser.
+
+        Arguments:
+            expected_keys: The set of keys that should be present in the JSON
+                object
+            kwargs: Additional arguments to pass to the parent class
+        """
         super().__init__(expected_keys=expected_keys, **kwargs)
         self.expected_keys = {k.lower() for k in expected_keys}
 
     def parse(self, text: str) -> str:
         """Parse the JSON object, convert keys to lowercase, filter out
         unexpected keys
+
+        Arguments:
+            text: The output text from the LLM.
+
+        Returns:
+            A parsed version of the text.
         """
         json_text = super().parse(text)
         obj = json.loads(json_text)
@@ -137,6 +225,15 @@ class EvaluationParser(JsonParser):
         return json.dumps(obj)
 
     def parse_combined_output(self, text: str) -> str:
+        """Parse the JSON object, convert keys to lowercase, filter out
+        unexpected keys, and average the values
+
+        Arguments:
+            text: The output text from the LLM.
+
+        Returns:
+            A parsed version of the text.
+        """
         json_text = super().parse_combined_output(text)
         multi_obj = json.loads(json_text)
         n_evals = len(multi_obj)
@@ -152,6 +249,15 @@ class EvaluationParser(JsonParser):
         """The score for the output text is the percentage of expected keys
         that are present in the json object. Non-numeric values count for
         half.
+
+        Arguments:
+            input_block: A `CodeBlock` representing the input to the LLM
+            output_text: The parsed text returned by the LLM
+
+        Returns:
+            A score between 0 and 1 (inclusive). A score of 1.0 indicates that
+            the given text is fully acceptable, and no further attempts
+            should be made.
         """
         obj = json.loads(output_text)
 
@@ -170,6 +276,11 @@ class EvaluationParser(JsonParser):
         return (len(expected_keys) - len(non_numerics) * 0.5) / len(self.expected_keys)
 
     def get_format_instructions(self) -> str:
+        """Get the format instructions for the parser.
+
+        Returns:
+            The format instructions for the LLM.
+        """
         return (
             "Output must contain exactly one JSON-formatted block. The JSON "
             "object should contain only the keys contained in the provided "

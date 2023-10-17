@@ -9,19 +9,26 @@ from janus.utils.enums import LANGUAGES
 
 
 def get_line_analysis(output_dir: Path) -> pd.DataFrame:
-    """
-    Run pyright on a given directory and return the results.
+    """Run pyright on a given directory and return the results.
+
     The directory structure must be as follows, with (1) being the top-level
         directory (provided), (2) being its subdirectories, etc.:
         1. Underscore-separated parameter names
         2. Underscore-separated parameter values
         3. Integer iteration number, zero-indexed
         4. Filename matching input
+
     Examples:
-        model_split/gpt-4_minimum/0/PSSBPSUT.py
-        model_split/gpt-3.5-turbo-16k_maximum/5/PSS32P5.py
-        temp/0.7/2/PSSBPSUT.py
-        prompt-id_model_temp/v1.2_gpt-3.5-turbo_0.7/4/PSSJXR5.py
+        `model_split/gpt-4_minimum/0/PSSBPSUT.py`
+        `model_split/gpt-3.5-turbo-16k_maximum/5/PSS32P5.py`
+        `temp/0.7/2/PSSBPSUT.py`
+        `prompt-id_model_temp/v1.2_gpt-3.5-turbo_0.7/4/PSSJXR5.py`
+
+    Arguments:
+        output_dir: The directory containing the output files
+
+    Returns:
+        A dataframe containing the line-by-line analysis of the output files
     """
     output_dir = output_dir.expanduser().resolve()
 
@@ -103,6 +110,15 @@ def get_line_analysis(output_dir: Path) -> pd.DataFrame:
 
 
 def get_file_analysis(line_df: pd.DataFrame, output_dir: Path) -> pd.DataFrame:
+    """Get the file-level analysis of the output files.
+
+    Arguments:
+        line_df: The line-by-line analysis of the output files
+        output_dir: The directory containing the output files
+
+    Returns:
+        A dataframe containing the file-level analysis of the output files
+    """
     output_dir = output_dir.expanduser().resolve()
     output_files = list(output_dir.rglob("*.py"))
     output_file_lengths = pd.Series(
@@ -164,7 +180,19 @@ def get_file_analysis(line_df: pd.DataFrame, output_dir: Path) -> pd.DataFrame:
     return file_df
 
 
-def add_input_file_statistics(file_df: pd.DataFrame, input_dir: Path, language: str):
+def add_input_file_statistics(
+    file_df: pd.DataFrame, input_dir: Path, language: str
+) -> pd.DataFrame:
+    """Add input file statistics to the file-level analysis dataframe.
+
+    Arguments:
+        file_df: The file-level analysis dataframe
+        input_dir: The directory containing the input files
+        language: The input language (mumps or fortran)
+
+    Returns:
+        The file-level analysis dataframe with input file statistics added
+    """
     # Get lengths of input files
     # Note that input files are indexed only on filename (e.g. PSSBPSUT) while
     #  output files are indexed on full path relative to the output directory
@@ -187,6 +215,15 @@ def add_input_file_statistics(file_df: pd.DataFrame, input_dir: Path, language: 
 
 
 def add_evaluation_file_statistics(file_df: pd.DataFrame, eval_dir: Path) -> pd.DataFrame:
+    """Add evaluation file statistics to the file-level analysis dataframe.
+
+    Arguments:
+        file_df: The file-level analysis dataframe
+        eval_dir: The directory containing the evaluation files
+
+    Returns:
+        The file-level analysis dataframe with evaluation file statistics added
+    """
     eval_dir = eval_dir.expanduser().resolve()
     eval_files = list(eval_dir.rglob("*.json"))
 
