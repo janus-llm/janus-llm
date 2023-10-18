@@ -1,6 +1,6 @@
-from typing import Dict, Tuple
+from typing import Dict, Set
 
-CUSTOM_SPLITTERS: Tuple[str, ...] = ("mumps",)
+CUSTOM_SPLITTERS: Set[str] = {"mumps"}
 
 LANGUAGES: Dict[str, Dict[str, str]] = {
     "ada": {

@@ -1,5 +1,4 @@
 import json
-from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
@@ -8,7 +7,6 @@ from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
     SystemMessagePromptTemplate,
 )
-from langchain.schema.language_model import BaseLanguageModel
 from langchain.schema.messages import BaseMessage
 
 from ..language.block import CodeBlock
@@ -25,27 +23,15 @@ TEXT_OUTPUT = ["document", "requirements"]
 # same language as the input, regardless of the `output-lang` argument.
 SAME_OUTPUT = ["document_inline"]
 
+JSON_OUTPUT = ["evaluate"]
+
 # Directory containing Janus prompt template directories and files
-JANUS_PROMPT_TEMPLATES_DIR = Path("janus/prompts/templates")
+JANUS_PROMPT_TEMPLATES_DIR = Path(__file__).parent / "templates"
+
 # Filenames expected to be found within the above directory
 SYSTEM_PROMPT_TEMPLATE_FILENAME = "system.txt"
 HUMAN_PROMPT_TEMPLATE_FILENAME = "human.txt"
 PROMPT_VARIABLES_FILENAME = "variables.json"
-
-
-@dataclass
-class Prompt:
-    """The prompt for a code block.
-
-    Attributes:
-        prompt: The prompt for the code block.
-        code: The `CodeBlock`.
-        tokens: The total tokens in the prompt.
-    """
-
-    prompt: List[BaseMessage]
-    code: CodeBlock
-    tokens: int
 
 
 class PromptEngine:
@@ -53,8 +39,6 @@ class PromptEngine:
 
     def __init__(
         self,
-        model: BaseLanguageModel,
-        model_name: str,
         source_language: str,
         target_language: str,
         target_version: str,
@@ -63,7 +47,6 @@ class PromptEngine:
         """Initialize a PromptEngine instance.
 
         Arguments:
-            model: The LLM to use for translation.
             source_language: The language to translate from
             target_language: The language to translate to
             target_version: The version of the target language
@@ -71,118 +54,94 @@ class PromptEngine:
                 Can be one of "simple", "document", "document_inline", or "requirements",
                 or a path to a custom directory containing system.txt and human.txt files.
         """
-        self.model = model
-        self.model_name = model_name
-        self.source_language = source_language.lower()
-        self.target_language = target_language.lower()
-        self.target_version = str(target_version)
+        # Build base prompt from provided template name
+        template_path = self.get_prompt_template_path(prompt_template)
+        self._template_path = template_path
+        self._template_name = prompt_template
+        system_prompt_path = SystemMessagePromptTemplate.from_template(
+            (template_path / SYSTEM_PROMPT_TEMPLATE_FILENAME).read_text()
+        )
+        human_prompt_path = HumanMessagePromptTemplate.from_template(
+            (template_path / HUMAN_PROMPT_TEMPLATE_FILENAME).read_text()
+        )
+        self.prompt = ChatPromptTemplate.from_messages(
+            [system_prompt_path, human_prompt_path]
+        )
 
-        self.prompt_template = prompt_template
-        self.example_source_code = LANGUAGES[self.source_language]["example"]
-        self.example_target_code = LANGUAGES[self.target_language]["example"]
-        self.suffix = LANGUAGES[self.source_language]["suffix"]
+        # Define variables to be passed in to the prompt formatter
+        source_language = source_language.lower()
+        target_language = target_language.lower()
+        self.variables = dict(
+            SOURCE_LANGUAGE=source_language.lower(),
+            TARGET_LANGUAGE=target_language.lower(),
+            TARGET_LANGUAGE_VERSION=str(target_version),
+            FILE_SUFFIX=LANGUAGES[source_language]["suffix"],
+            SOURCE_CODE_EXAMPLE=LANGUAGES[source_language]["example"],
+            TARGET_CODE_EXAMPLE=LANGUAGES[target_language]["example"],
+        )
+        variables_path = template_path / PROMPT_VARIABLES_FILENAME
+        if variables_path.exists():
+            self.variables.update(json.loads(variables_path.read_text()))
 
-    def create(self, code: CodeBlock) -> Prompt:
-        """Create a prompt for the given code block.
-
-        Arguments:
-            code: The `CodeBlock` to create a prompt for.
-
-        Returns:
-            A `Prompt` instance.
-        """
-        prompt = self._code_to_chat_prompt(code)
-
-        return Prompt(prompt, code, self._count_tokens(prompt))
-
-    def _code_to_chat_prompt(self, code: CodeBlock) -> List[BaseMessage]:
+    def create(self, code: CodeBlock) -> List[BaseMessage]:
         """Convert a code block to a Chat GPT prompt.
 
         Arguments:
             code: The code block to convert.
 
         Returns:
-            The converted prompt.
+            The converted prompt as a list of messages.
         """
-        prompt, extra_variables = self._load_prompt_template(self.prompt_template)
-
-        messages = prompt.format_prompt(
-            SOURCE_LANGUAGE=self.source_language,
-            TARGET_LANGUAGE=self.target_language,
-            TARGET_LANGUAGE_VERSION=self.target_version,
+        return self.prompt.format_prompt(
             SOURCE_CODE=code.text,
-            FILE_SUFFIX=self.suffix,
-            **extra_variables,
+            **self.variables,
         ).to_messages()
 
-        return messages
-
-    def _verify_prompt_template_dir(self, dir_path: Path) -> None:
+    @staticmethod
+    def get_prompt_template_path(template_name: str) -> Path:
         """Raises an exception if the specified prompt template path
         is not a directory containing system.txt and human.txt files.
-        """
-        if not dir_path.exists():
-            raise Exception(
-                f"Specified prompt template directory {dir_path} does not exist"
-            )
-        if not dir_path.is_dir():
-            raise Exception(
-                f"Specified prompt template directory {dir_path} is not a directory."
-            )
-        if (
-            not (dir_path / SYSTEM_PROMPT_TEMPLATE_FILENAME).exists()
-            or not (dir_path / HUMAN_PROMPT_TEMPLATE_FILENAME).exists()
-        ):
-            raise Exception(
-                f"Specified prompt template directory {dir_path} should contain"
-                + f"{SYSTEM_PROMPT_TEMPLATE_FILENAME} and"
-                + f"{HUMAN_PROMPT_TEMPLATE_FILENAME} files."
-            )
-
-    def _load_prompt_template(self, dir_name: str) -> (ChatPromptTemplate, dict):
-        """Loads chat prompt templates and variables from directory files."""
-
-        # Check for existence of Janus prompt template directory and necessary files
-        template_dir = JANUS_PROMPT_TEMPLATES_DIR / dir_name
-        try:
-            self._verify_prompt_template_dir(template_dir)
-        except Exception:
-            # Possible that the specified directory is a custom path
-            template_dir = Path(dir_name)
-            self._verify_prompt_template_dir(template_dir)
-
-        system_template_filepath = template_dir / SYSTEM_PROMPT_TEMPLATE_FILENAME
-        human_template_filepath = template_dir / HUMAN_PROMPT_TEMPLATE_FILENAME
-
-        system_prompt = SystemMessagePromptTemplate.from_template(
-            system_template_filepath.read_text()
-        )
-        human_prompt = HumanMessagePromptTemplate.from_template(
-            human_template_filepath.read_text()
-        )
-
-        # Initialize extra template variables to empty dictionary
-        prompt_variables = {}
-        # If a variables file exists, read into the dictionary
-        prompt_variables_filepath = template_dir / PROMPT_VARIABLES_FILENAME
-        if prompt_variables_filepath.exists():
-            with open(prompt_variables_filepath, "r") as f:
-                prompt_variables = json.load(f)
-
-        return (
-            ChatPromptTemplate.from_messages([system_prompt, human_prompt]),
-            prompt_variables,
-        )
-
-    def _count_tokens(self, prompt: str | List[BaseMessage]) -> int:
-        """Count the number of tokens in the given prompt.
 
         Arguments:
-            prompt: The prompt to count the tokens in.
-
-        Returns:
-            The number of tokens in the prompt.
+            template_name: The name of the Janus prompt template directory to use.
+                Can be one of "simple", "document", "document_inline", or "requirements",
+                or a path to a custom directory containing system.txt and human.txt files.
         """
-        if isinstance(prompt, list):
-            return self.model.get_num_tokens_from_messages(prompt)
-        return self.model.get_num_tokens(prompt)
+        template_path = JANUS_PROMPT_TEMPLATES_DIR / template_name
+        try:
+            PromptEngine._verify_prompt_template_path(template_path)
+        except ValueError:
+            # Possible that the specified directory is a custom path
+            template_path = Path(template_name).expanduser().resolve()
+            PromptEngine._verify_prompt_template_path(template_path)
+        return template_path
+
+    @staticmethod
+    def _verify_prompt_template_path(template_path: Path) -> None:
+        """Check for existence of Janus prompt template directory and necessary files
+
+        Arguments:
+            template_path: The path to the Janus prompt template directory.
+
+        Raises:
+            ValueError: If the specified prompt template directory does not exist,
+                is not a directory, or is missing a system.txt or human.txt file.
+        """
+        if not template_path.exists():
+            raise ValueError(
+                f"Specified prompt template directory {template_path} does not exist"
+            )
+        if not template_path.is_dir():
+            raise ValueError(
+                f"Specified prompt template directory {template_path} is not a directory."
+            )
+        if not (template_path / SYSTEM_PROMPT_TEMPLATE_FILENAME).exists():
+            raise ValueError(
+                f"Specified prompt template directory {template_path} is "
+                f"missing a {SYSTEM_PROMPT_TEMPLATE_FILENAME}"
+            )
+        if not (template_path / HUMAN_PROMPT_TEMPLATE_FILENAME).exists():
+            raise ValueError(
+                f"Specified prompt template directory {template_path} is "
+                f"missing a {HUMAN_PROMPT_TEMPLATE_FILENAME}"
+            )

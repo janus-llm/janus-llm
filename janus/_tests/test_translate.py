@@ -32,25 +32,49 @@ class TestTranslator(unittest.TestCase):
         # unit tests anyway
         self.assertTrue(python_file.exists())
 
+    def test_invalid_selections(self) -> None:
+        """Tests that settings values for the translator will raise exceptions"""
+        self.assertRaises(
+            ValueError, self.translator.set_target_language, "gobbledy", "goobledy"
+        )
+        self.assertRaises(ValueError, self.translator.set_parser_type, "blah")
+        self.assertRaises(
+            ValueError, self.translator.set_source_language, "scribbledy-doop"
+        )
+        self.translator.set_prompt("pish posh")
+        self.assertRaises(ValueError, self.translator._load_parameters)
+
 
 @pytest.mark.parametrize(
-    "prompt_template,expected_target_language",
+    "source_language,prompt_template,expected_target_language,expected_target_version,"
+    "parser_type",
     [
-        ("document_inline", "python"),
-        ("document", "text"),
-        ("requirements", "text"),
-        ("simple", "javascript"),
+        ("python", "document_inline", "python", "3.10", "code"),
+        ("fortran", "document", "text", None, "text"),
+        ("mumps", "requirements", "text", None, "text"),
+        ("python", "simple", "javascript", "es6", "code"),
     ],
 )
-def test_target_language(prompt_template, expected_target_language):
+def test_language_combinations(
+    source_language: str,
+    prompt_template: str,
+    expected_target_language: str,
+    expected_target_version: str,
+    parser_type: str,
+):
     """Tests that translator target language settings are consistent
     with prompt template expectations.
     """
-    translator = Translator(
-        source_language="python",
-        target_language="javascript",
-        prompt_template=prompt_template,
-    )
-    assert translator.target_language == expected_target_language
-    assert translator.combiner.language == expected_target_language
-    assert translator.parser.target_language == expected_target_language
+    translator = Translator(model="gpt-3.5-turbo")
+    translator.set_model("gpt-3.5-turbo-16k")
+    translator.set_source_language(source_language)
+    translator.set_target_language(expected_target_language, expected_target_version)
+    translator.set_parser_type(parser_type)
+    translator.set_prompt(prompt_template)
+    translator._load_parameters()
+    assert translator._target_language == expected_target_language
+    assert translator._target_version == expected_target_version
+    assert translator._parser_type == parser_type
+    assert translator.splitter.language == source_language
+    assert translator.splitter.model.model_name == "gpt-3.5-turbo-16k"
+    assert translator._prompt_engine._template_name == prompt_template
