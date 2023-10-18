@@ -56,6 +56,8 @@ class PromptEngine:
         """
         # Build base prompt from provided template name
         template_path = self.get_prompt_template_path(prompt_template)
+        self._template_path = template_path
+        self._template_name = prompt_template
         system_prompt_path = SystemMessagePromptTemplate.from_template(
             (template_path / SYSTEM_PROMPT_TEMPLATE_FILENAME).read_text()
         )
