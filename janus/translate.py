@@ -182,7 +182,7 @@ class Translator:
         Returns:
             A `TranslatedCodeBlock` object. This block does not have a path set, and its
             code is not guaranteed to be consolidated. To amend this, run
-            `Combiner.combine_childen` on the block.
+            `Combiner.combine_children` on the block.
         """
         self._load_parameters()
 
@@ -193,10 +193,13 @@ class Translator:
             f"[{filename}] File split into {input_block.n_descendents:,} blocks, "
             f"tree of height {input_block.height}"
         )
-        log.info(f"[{filename}] CodeBlock Structure:\n{input_block.tree_str()}")
+        log.info(f"[{filename}] Input CodeBlock Structure:\n{input_block.tree_str()}")
         output_block = self._iterative_translate(input_block)
         if output_block.translated:
             completeness = output_block.translation_completeness
+            log.info(
+                f"[{filename}] Output CodeBlock Structure:\n{output_block.tree_str()}"
+            )
             log.info(
                 f"[{filename}] Translation complete\n"
                 f"  {completeness:.2%} of input successfully translated\n"
@@ -435,7 +438,7 @@ class Translator:
         if self._prompt_template_name in TEXT_OUTPUT and self._target_language != "text":
             raise ValueError(
                 f"Prompt template ({self._prompt_template_name}) suggests target "
-                f"language should be 'text', but is {self._target_language}"
+                f"language should be 'text', but is '{self._target_language}'"
             )
 
         self._prompt_engine = PromptEngine(
@@ -472,6 +475,11 @@ class Translator:
         If the relevant fields have not been changed since the last time this method was
         called, nothing happens.
         """
+        if "text" == self._target_language and self._parser_type != "text":
+            raise ValueError(
+                f"Target language ({self._target_language}) suggests target "
+                f"parser should be 'text', but is '{self._parser_type}'"
+            )
         if "code" == self._parser_type:
             self.parser = CodeParser(language=self._target_language)
         elif "eval" == self._parser_type:
