@@ -52,7 +52,7 @@ class TestTranslator(unittest.TestCase):
         self.assertIsNone(input_block.embedding_id, "Precondition failed")
 
         result = self.translator._embed(
-            EmbeddingType.SOURCE, self.test_file.name, input_block
+            input_block, EmbeddingType.SOURCE, self.test_file.name
         )
 
         self.assertFalse(result, "Nothing to embed, so should have no result")
@@ -60,6 +60,9 @@ class TestTranslator(unittest.TestCase):
 
     def test_embed_has_values_for_each_non_empty_node(self):
         input_block = self.translator.splitter.split(self.test_file)
+        self.translator._embed_nodes_recursively(
+            input_block, EmbeddingType.SOURCE, self.test_file.name
+        )
         has_text_count = 0
         has_embeddings_count = 0
         nodes = [input_block]
@@ -67,13 +70,24 @@ class TestTranslator(unittest.TestCase):
             node = nodes.pop(0)
             if node.text:
                 has_text_count += 1
-            if self.translator._embed(EmbeddingType.SOURCE, self.test_file.name, node):
+            if node.embedding_id:
                 has_embeddings_count += 1
             nodes.extend(node.children)
         self.assertEqual(14, has_text_count, "Parsing of test_file has changed!")
         self.assertEqual(
             14, has_embeddings_count, "Not all non-empty nodes have embeddings!"
         )
+
+    def test_embed_nodes_recursively(self):
+        input_block = self.translator.splitter.split(self.test_file)
+        self.translator._embed_nodes_recursively(
+            input_block, EmbeddingType.SOURCE, self.test_file.name
+        )
+        nodes = [input_block]
+        while nodes:
+            node = nodes.pop(0)
+            self.assertEqual(node.text is not None, node.embedding_id is not None)
+            nodes.extend(node.children)
 
     def test_invalid_selections(self) -> None:
         """Tests that settings values for the translator will raise exceptions"""

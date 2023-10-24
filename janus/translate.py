@@ -228,12 +228,21 @@ class Translator:
     def embeddings(self, embedding_type: EmbeddingType):
         return self._collections[embedding_type]
 
+    def _embed_nodes_recursively(
+        self, code_block: CodeBlock, embedding_type: EmbeddingType, file_name: str
+    ):
+        nodes = [code_block]
+        while nodes:
+            node = nodes.pop(0)
+            self._embed(node, embedding_type, file_name)
+            nodes.extend(node.children)
+
     def _embed(
         self,
-        embedding_type: EmbeddingType,
-        file_name: str,  # perhaps this should be a relative path from the source, but for
-        # now we're all in 1 directory
         code_block: CodeBlock,
+        embedding_type: EmbeddingType,
+        file_name: str  # perhaps this should be a relative path from the source, but for
+        # now we're all in 1 directory
     ) -> bool:
         """Calculate code_block embedding, returning success & storing in embedding_id"""
         vector_store = self.embeddings(embedding_type)
