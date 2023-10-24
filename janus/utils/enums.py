@@ -1,4 +1,13 @@
+from enum import Enum
 from typing import Dict, Set
+
+
+class EmbeddingType(Enum):
+    SOURCE = 1
+    REQUIREMENT = 2
+    SUMMARY = 3
+    PSEUDO = 4
+
 
 CUSTOM_SPLITTERS: Set[str] = {"mumps"}
 

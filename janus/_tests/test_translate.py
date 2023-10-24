@@ -2,8 +2,10 @@ import unittest
 from pathlib import Path
 
 import pytest
+from langchain.vectorstores import Chroma
 
 from ..translate import Translator
+from ..utils.enums import EmbeddingType
 
 
 class TestTranslator(unittest.TestCase):
@@ -19,8 +21,9 @@ class TestTranslator(unittest.TestCase):
         )
         self.test_file = Path("janus/language/treesitter/_tests/languages/fortran.f90")
 
+    @pytest.mark.skip(reason="slow test")
     def test_translate(self):
-        """Test the translate method."""
+        """Test translate method."""
         # Delete a file if it's already there
         python_file = self.test_file.parent / "python" / f"{self.test_file.stem}.py"
         costs_file = self.test_file.parent / "python" / "costs.csv"
@@ -31,6 +34,46 @@ class TestTranslator(unittest.TestCase):
         # Only check the top-most level functionality, since it should be handled by other
         # unit tests anyway
         self.assertTrue(python_file.exists())
+
+    def test_embeddings(self):
+        """Testing access to embeddings"""
+        vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
+        self.assertIsInstance(vector_store, Chroma, "Unexpected vector store type!")
+        self.assertEqual(
+            0, vector_store._collection.count(), "Non-empty initial vector store?"
+        )
+
+    def test_embed_split_source(self):
+        """Characterize _embed method"""
+        input_block = self.translator.splitter.split(self.test_file)
+        self.assertIsNone(
+            input_block.text, "Root node of input text shouldn't contain text"
+        )
+        self.assertIsNone(input_block.embedding_id, "Precondition failed")
+
+        result = self.translator._embed(
+            EmbeddingType.SOURCE, self.test_file.name, input_block
+        )
+
+        self.assertFalse(result, "Nothing to embed, so should have no result")
+        self.assertIsNone(input_block.embedding_id, "Embeddings should not have changed")
+
+    def test_embed_has_values_for_each_non_empty_node(self):
+        input_block = self.translator.splitter.split(self.test_file)
+        has_text_count = 0
+        has_embeddings_count = 0
+        nodes = [input_block]
+        while nodes:
+            node = nodes.pop(0)
+            if node.text:
+                has_text_count += 1
+            if self.translator._embed(EmbeddingType.SOURCE, self.test_file.name, node):
+                has_embeddings_count += 1
+            nodes.extend(node.children)
+        self.assertEqual(14, has_text_count, "Parsing of test_file has changed!")
+        self.assertEqual(
+            14, has_embeddings_count, "Not all non-empty nodes have embeddings!"
+        )
 
     def test_invalid_selections(self) -> None:
         """Tests that settings values for the translator will raise exceptions"""

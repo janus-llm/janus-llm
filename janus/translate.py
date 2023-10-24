@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Set
 
 from langchain.callbacks import get_openai_callback
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
 
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import Combiner
@@ -18,7 +20,7 @@ from .parsers.code_parser import (
     JanusParser,
 )
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
-from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
+from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES, EmbeddingType
 from .utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -102,6 +104,15 @@ class Translator:
         self._load_parameters()
 
         self.max_prompts = max_prompts
+
+        self._embeddings = OpenAIEmbeddings(disallowed_special=())
+        self._collections = {}
+        for key in EmbeddingType:
+            self._collections[key] = Chroma(key.name, self._embeddings)
+
+    def __del__(self):
+        for key in self._collections:
+            self._collections[key].delete_collection()
 
     def __setattr__(self, key: Any, value: Any) -> None:
         if hasattr(self, "_changed_attrs"):
@@ -213,6 +224,37 @@ class Translator:
                 f"  Total retries: {output_block.total_retries:,d}\n"
             )
         return output_block
+
+    def embeddings(self, embedding_type: EmbeddingType):
+        return self._collections[embedding_type]
+
+    def _embed(
+        self,
+        embedding_type: EmbeddingType,
+        file_name: str,  # perhaps this should be a relative path from the source, but for
+        # now we're all in 1 directory
+        code_block: CodeBlock,
+    ) -> bool:
+        """Calculate code_block embedding, returning success & storing in embedding_id"""
+        vector_store = self.embeddings(embedding_type)
+        if code_block.text:
+            metadatas = [
+                {
+                    "type": code_block.type,
+                    "original_filename": file_name,
+                    "hash": hash(code_block.text)
+                    if code_block.text is not None
+                    else None,
+                    "start_line": code_block.start_point[0],
+                    "end_line": code_block.end_point[0],
+                    "tokens": code_block.tokens,
+                    "cost": 0,  # TranslatedCodeBlock has cost
+                },
+            ]
+            the_text = [code_block.text]
+            code_block.embedding_id = vector_store.add_texts(the_text, metadatas)[0]
+            return True
+        return False
 
     def _iterative_translate(self, root: CodeBlock) -> TranslatedCodeBlock:
         """Translate the passed CodeBlock representing a full file.

@@ -12,20 +12,22 @@ class CodeBlock:
     """A class that represents a functional block of code.
 
     Attributes:
-        text: The code block.
-        path: The path to the file containing the code block.
-        complete: Whether or not the code block is complete. If it isn't complete, it
-                  should have children components. This means that this code block has
-                  missing sections inside of it that are in its children.
-        start_line: The line number of the first line of the code block.
-        end_line: The line number of the last line of the code block.
-        language: The language of the code block.
+        id: The id of the code block in the AST
+        name: Descriptive name of node
         type: The type of the code block ('function', 'module', etc.). Defined in the
               language-specific modules.
+        language: The language of the code block.
+        text: The code block.
+        start_point: The line and column numbers of the first line of the code block.
+        end_point: The line and column numbers of the last line of the code block.
+        start_byte: starting byte offset into file
+        end_byte: ending byte offset into file
         tokens: The number of tokens in the code block.
-        depth: The depth of the code block in the AST.
-        id: The id of the code block in the AST
         children: A tuple of child code blocks.
+        embedding_id: id of embedding
+        affixes: prefix and suffix text for node
+        complete: Rolls up self and children's complete status, incomplete means a child
+                  is missing.
     """
 
     def __init__(
@@ -41,6 +43,7 @@ class CodeBlock:
         end_byte: Optional[int],
         tokens: int,
         children: List[ForwardRef("CodeBlock")],
+        embedding_id: Optional[str] = None,
         affixes: Tuple[str, str] = ("", ""),
     ):
         self.id: Hashable = id
@@ -54,6 +57,7 @@ class CodeBlock:
         self.end_byte: Optional[int] = end_byte
         self.tokens: int = tokens
         self.children: List[ForwardRef("CodeBlock")] = sorted(children)
+        self.embedding_id: Optional[str] = embedding_id
         self.affixes: Tuple[str, str] = affixes
 
         self.complete = True
