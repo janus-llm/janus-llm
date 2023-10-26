@@ -8,6 +8,26 @@ from ..translate import Translator
 from ..utils.enums import EmbeddingType
 
 
+def print_query_results(query, n_results):
+    # print(f"\n{query}")
+    # count = 1
+    # for t in n_results:
+    #     short_code = (
+    #         (t[0].page_content[0:50] + "..")
+    #         if (len(t[0].page_content) > 50)
+    #         else t[0].page_content
+    #     )
+    #     return_index = short_code.find("\n")
+    #     if -1 != return_index:
+    #         short_code = short_code[0:return_index] + ".."
+    #     print(
+    #         f"{count}. @ {t[0].metadata['start_line']}-{t[0].metadata['end_line']}"
+    #         f" -- {t[1]} -- {short_code}"
+    #     )
+    #     count += 1
+    pass
+
+
 class TestTranslator(unittest.TestCase):
     """Tests for the Translator class."""
 
@@ -59,6 +79,7 @@ class TestTranslator(unittest.TestCase):
         self.assertIsNone(input_block.embedding_id, "Embeddings should not have changed")
 
     def test_embed_has_values_for_each_non_empty_node(self):
+        """Characterize our sample fortran file"""
         input_block = self.translator.splitter.split(self.test_file)
         self.translator._embed_nodes_recursively(
             input_block, EmbeddingType.SOURCE, self.test_file.name
@@ -88,6 +109,74 @@ class TestTranslator(unittest.TestCase):
             node = nodes.pop(0)
             self.assertEqual(node.text is not None, node.embedding_id is not None)
             nodes.extend(node.children)
+
+    def test_embeddings_usage(self):
+        """Noodling on use of embeddings"""
+        input_block = self.translator.splitter.split(self.test_file)
+        self.translator._embed_nodes_recursively(
+            input_block, EmbeddingType.SOURCE, self.test_file.name
+        )
+        vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
+
+        # this symbol has the lowest relevance scores of any in this test, but
+        # still not very low; multiple embedded nodes contain it
+        QUERY_STRING = "IWX_BAND_START"
+        query = self.translator._embeddings.embed_query(QUERY_STRING)
+        n_results = vector_store.similarity_search_by_vector_with_relevance_scores(
+            embedding=query,
+            k=10,
+            where_document={"$contains": QUERY_STRING},
+        )
+        self.assertTrue(len(n_results) > 1, "Why was valid symbol not found?")
+        print_query_results(QUERY_STRING, n_results)
+
+        # in the XYZZY test, the least dissimilar results were the start and finish lines
+        # 0, and 415, which produced a similarity score of 0.47:
+
+        # QUERY_STRING = "XYZZY"
+        # query = self.translator._embeddings.embed_query(QUERY_STRING)
+        # n_results = vector_store.similarity_search_by_vector_with_relevance_scores(
+        #     embedding=query,
+        #     k=10,
+        #     # filter={"end_line": 15},
+        #     # filter={"$and": [{"end_line": 15}, {"tokens": {"$gte": 21}}]},
+        #     # where_document={"$contains": QUERY_STRING},
+        # )
+        # print_query_results(QUERY_STRING, n_results)
+        # # self.assertTrue(len(n_results) == 0, "Invalid symbol was found?")
+
+        # only returns a single result because only 1 embedded node contains CSV_ICASEARR:
+        QUERY_STRING = "What is the use of CSV_ICASEARR?"
+        query = self.translator._embeddings.embed_query(QUERY_STRING)
+        n_results = vector_store.similarity_search_by_vector_with_relevance_scores(
+            embedding=query,
+            k=10,
+            # where_document={"$contains": QUERY_STRING},
+            where_document={"$contains": "CSV_ICASEARR"},
+        )
+        print_query_results(QUERY_STRING, n_results)
+        self.assertTrue(len(n_results) == 1, "Was splitting changed?")
+
+        # trimmed out some characters from line 43, and still not very similar scoring
+        QUERY_STRING = "IYL_EDGEBUFFER EDGEBUFFER IGN_MASK CELLSIZE"
+        query = self.translator._embeddings.embed_query(QUERY_STRING)
+        n_results = vector_store.similarity_search_by_vector_with_relevance_scores(
+            embedding=query,
+            k=10,
+            # where_document={"$contains": QUERY_STRING},
+        )
+        print_query_results(QUERY_STRING, n_results)
+
+        # random string (as bad as XYZZY), but searching for a specific line
+        QUERY_STRING = "ghost in the invisible moon"
+        query = self.translator._embeddings.embed_query(QUERY_STRING)
+        n_results = vector_store.similarity_search_by_vector_with_relevance_scores(
+            embedding=query,
+            k=10,
+            filter={"$and": [{"end_line": 90}, {"tokens": {"$gte": 21}}]},
+        )
+        print_query_results(QUERY_STRING, n_results)
+        self.assertTrue(len(n_results) == 1, "Was splitting changed?")
 
     def test_invalid_selections(self) -> None:
         """Tests that settings values for the translator will raise exceptions"""
