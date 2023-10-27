@@ -20,8 +20,10 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker("always_run")
     if markexpr := config.getoption("markexpr", "False"):
         config.option.markexpr = f"always_run or ({markexpr})"
+        print("[Including tests marked as slow]")
     else:
         config.option.markexpr = "always_run"
+        print("[Use -m slow to include tests marked as slow]")
 
 
 def pytest_configure(config):
