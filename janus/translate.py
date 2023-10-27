@@ -205,6 +205,7 @@ class Translator:
             f"tree of height {input_block.height}"
         )
         log.info(f"[{filename}] Input CodeBlock Structure:\n{input_block.tree_str()}")
+        self._embed_nodes_recursively(input_block, EmbeddingType.SOURCE, filename)
         output_block = self._iterative_translate(input_block)
         if output_block.translated:
             completeness = output_block.translation_completeness

@@ -40,8 +40,15 @@ class TestTranslator(unittest.TestCase):
             target_version="3.10",
         )
         self.test_file = Path("janus/language/treesitter/_tests/languages/fortran.f90")
+        self.TEST_FILE_EMBEDDING_COUNT = 14
 
-    @pytest.mark.skip(reason="slow test")
+    def tearDown(self):
+        # explicitly delete the translator so Chroma collections are added/removed
+        # per test - otherwise sometimes lazy garbage collection will stagger the
+        # calls to destructor and try to delete multiple times
+        del self.translator
+
+    @pytest.mark.slow
     def test_translate(self):
         """Test translate method."""
         # Delete a file if it's already there
@@ -94,9 +101,15 @@ class TestTranslator(unittest.TestCase):
             if node.embedding_id:
                 has_embeddings_count += 1
             nodes.extend(node.children)
-        self.assertEqual(14, has_text_count, "Parsing of test_file has changed!")
         self.assertEqual(
-            14, has_embeddings_count, "Not all non-empty nodes have embeddings!"
+            self.TEST_FILE_EMBEDDING_COUNT,
+            has_text_count,
+            "Parsing of test_file has changed!",
+        )
+        self.assertEqual(
+            self.TEST_FILE_EMBEDDING_COUNT,
+            has_embeddings_count,
+            "Not all non-empty nodes have embeddings!",
         )
 
     def test_embed_nodes_recursively(self):
@@ -109,6 +122,17 @@ class TestTranslator(unittest.TestCase):
             node = nodes.pop(0)
             self.assertEqual(node.text is not None, node.embedding_id is not None)
             nodes.extend(node.children)
+
+    @pytest.mark.slow
+    def test_translate_file_adds_source_embeddings(self):
+        vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
+        self.assertEqual(0, vector_store._collection.count(), "Precondition failed")
+        self.translator.translate_file(self.test_file)
+        self.assertEqual(
+            self.TEST_FILE_EMBEDDING_COUNT,
+            vector_store._collection.count(),
+            "Precondition failed",
+        )
 
     def test_embeddings_usage(self):
         """Noodling on use of embeddings"""
