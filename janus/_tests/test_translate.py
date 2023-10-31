@@ -42,11 +42,21 @@ class TestTranslator(unittest.TestCase):
         self.test_file = Path("janus/language/treesitter/_tests/languages/fortran.f90")
         self.TEST_FILE_EMBEDDING_COUNT = 14
 
+        self.req_translator = Translator(
+            model="gpt-3.5-turbo",
+            source_language="fortran",
+            target_language="text",
+            target_version="3.10",
+            prompt_template="requirements",
+            parser_type="text",
+        )
+
     def tearDown(self):
         # explicitly delete the translator so Chroma collections are added/removed
         # per test - otherwise sometimes lazy garbage collection will stagger the
         # calls to destructor and try to delete multiple times
         del self.translator
+        del self.req_translator
 
     @pytest.mark.slow
     def test_translate(self):
@@ -70,6 +80,7 @@ class TestTranslator(unittest.TestCase):
             0, vector_store._collection.count(), "Non-empty initial vector store?"
         )
 
+    @pytest.mark.slow
     def test_embed_split_source(self):
         """Characterize _embed method"""
         input_block = self.translator.splitter.split(self.test_file)
@@ -85,6 +96,7 @@ class TestTranslator(unittest.TestCase):
         self.assertFalse(result, "Nothing to embed, so should have no result")
         self.assertIsNone(input_block.embedding_id, "Embeddings should not have changed")
 
+    @pytest.mark.slow
     def test_embed_has_values_for_each_non_empty_node(self):
         """Characterize our sample fortran file"""
         input_block = self.translator.splitter.split(self.test_file)
@@ -112,6 +124,7 @@ class TestTranslator(unittest.TestCase):
             "Not all non-empty nodes have embeddings!",
         )
 
+    @pytest.mark.slow
     def test_embed_nodes_recursively(self):
         input_block = self.translator.splitter.split(self.test_file)
         self.translator._embed_nodes_recursively(
@@ -131,9 +144,10 @@ class TestTranslator(unittest.TestCase):
         self.assertEqual(
             self.TEST_FILE_EMBEDDING_COUNT,
             vector_store._collection.count(),
-            "Precondition failed",
+            "Did not find expected source embeddings",
         )
 
+    @pytest.mark.slow
     def test_embeddings_usage(self):
         """Noodling on use of embeddings"""
         input_block = self.translator.splitter.split(self.test_file)
@@ -201,6 +215,37 @@ class TestTranslator(unittest.TestCase):
         )
         print_query_results(QUERY_STRING, n_results)
         self.assertTrue(len(n_results) == 1, "Was splitting changed?")
+
+    def test_output_as_requirements(self):
+        """Is output type requirements?"""
+        self.assertFalse(self.translator.outputting_requirements())
+        self.assertTrue(self.req_translator.outputting_requirements())
+
+    @pytest.mark.slow
+    def test_document_embeddings_added_by_translate(self):
+        vector_store = self.req_translator.embeddings(EmbeddingType.REQUIREMENT)
+        self.assertEqual(0, vector_store._collection.count(), "Precondition failed")
+        self.req_translator.translate(self.test_file.parent, self.test_file.parent, True)
+        self.assertTrue(vector_store._collection.count() > 0, "Why no documentation?")
+
+    @pytest.mark.slow
+    def test_embed_requirements(self):
+        vector_store = self.translator.embeddings(EmbeddingType.REQUIREMENT)
+        translated = self.req_translator.translate_file(self.test_file)
+        self.assertEqual(
+            0,
+            vector_store._collection.count(),
+            "Unexpected requirements added in translate_file",
+        )
+        result = self.req_translator._embed(
+            translated, EmbeddingType.REQUIREMENT, self.test_file.name
+        )
+        self.assertFalse(result, "No text in root node, so should generate no docs")
+        self.assertIsNotNone(translated.children[0].text, "Data changed?")
+        result = self.req_translator._embed(
+            translated.children[0], EmbeddingType.REQUIREMENT, self.test_file.name
+        )
+        self.assertTrue(result, "No docs generated for first child node?")
 
     def test_invalid_selections(self) -> None:
         """Tests that settings values for the translator will raise exceptions"""

@@ -7,6 +7,7 @@ class EmbeddingType(Enum):
     REQUIREMENT = 2
     SUMMARY = 3
     PSEUDO = 4
+    TARGET = 5  # placeholder embeddings, are these useful for analysis?
 
 
 CUSTOM_SPLITTERS: Set[str] = {"mumps"}

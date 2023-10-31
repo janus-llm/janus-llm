@@ -177,6 +177,15 @@ class Translator:
             if not out_block.translated:
                 continue
 
+            # maybe want target embeddings?
+            filename = out_path.name
+            if self.outputting_requirements():
+                embedding_type = EmbeddingType.REQUIREMENT
+            else:
+                embedding_type = EmbeddingType.TARGET
+
+            self._embed_nodes_recursively(out_block, embedding_type, filename)
+
             # Make sure the tree's code has been consolidated at the top level
             #  before writing to file
             self._combiner.combine(out_block)
@@ -209,9 +218,6 @@ class Translator:
         output_block = self._iterative_translate(input_block)
         if output_block.translated:
             completeness = output_block.translation_completeness
-            log.info(
-                f"[{filename}] Output CodeBlock Structure:\n{output_block.tree_str()}"
-            )
             log.info(
                 f"[{filename}] Translation complete\n"
                 f"  {completeness:.2%} of input successfully translated\n"
@@ -252,19 +258,27 @@ class Translator:
                 {
                     "type": code_block.type,
                     "original_filename": file_name,
-                    "hash": hash(code_block.text)
-                    if code_block.text is not None
-                    else None,
-                    "start_line": code_block.start_point[0],
-                    "end_line": code_block.end_point[0],
                     "tokens": code_block.tokens,
                     "cost": 0,  # TranslatedCodeBlock has cost
                 },
             ]
+            # for now, dealing with missing metadata by skipping it
+            if code_block.text is not None:
+                metadatas[0]["hash"] = hash(code_block.text)
+            if code_block.start_point is not None:
+                metadatas[0]["start_line"] = code_block.start_point[0]
+            if code_block.end_point is not None:
+                metadatas[0]["end_line"] = code_block.end_point[0]
             the_text = [code_block.text]
             code_block.embedding_id = vector_store.add_texts(the_text, metadatas)[0]
             return True
         return False
+
+    def outputting_requirements(self):
+        """Is the output of the translator a requirements file?"""
+        # expect we will revise system to output more than a single output
+        # so this is placeholder logic
+        return self._prompt_template_name == "requirements"
 
     def _iterative_translate(self, root: CodeBlock) -> TranslatedCodeBlock:
         """Translate the passed CodeBlock representing a full file.
