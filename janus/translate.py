@@ -108,7 +108,7 @@ class Translator:
         self._embeddings = OpenAIEmbeddings(disallowed_special=())
         self._collections = {}
         for key in EmbeddingType:
-            self._collections[key] = Chroma(key.name, self._embeddings)
+            self._collections[key] = Chroma(f"{key.name}-{id(self)}", self._embeddings)
 
     def __del__(self):
         for key in self._collections:
@@ -252,7 +252,6 @@ class Translator:
         # now we're all in 1 directory
     ) -> bool:
         """Calculate code_block embedding, returning success & storing in embedding_id"""
-        vector_store = self.embeddings(embedding_type)
         if code_block.text:
             metadatas = [
                 {
@@ -270,6 +269,7 @@ class Translator:
             if code_block.end_point is not None:
                 metadatas[0]["end_line"] = code_block.end_point[0]
             the_text = [code_block.text]
+            vector_store = self.embeddings(embedding_type)
             code_block.embedding_id = vector_store.add_texts(the_text, metadatas)[0]
             return True
         return False
