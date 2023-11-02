@@ -1,6 +1,6 @@
 # Contributing
 
-Right now, submission of [issues](https://github.com/mitrefireline/janus/issues) and [pull requests](https://github.com/mitrefireline/janus/pulls) through GitHub is the best way to suggest changes, and those will have to be applied and merged on the internal MITRE GitLab and mirrored to GitHub. This process may change in the future.
+Right now, submission of [issues](https://github.com/mitre-cem/janus/issues) and [pull requests](https://github.com/mitre-cem/janus/pulls) through GitHub is the best way to suggest changes, and those will have to be applied and merged on the internal MITRE GitLab and mirrored to GitHub. This process may change in the future.
 
 ## Contributing for MITRE Employees
 
@@ -29,7 +29,7 @@ Create a merge request based on that issue using the "Create Merge Request" butt
 First, clone the repository:
 
 ```shell
-git clone git@gitlab.mitre.org:fireline/janus.git
+git clone git@gitlab.mitre.org:cem-llm/janus.git
 ```
 
 Create a conda environment (preferred):
