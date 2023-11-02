@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Set
 
 from langchain.callbacks import get_openai_callback
+from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import GPT4AllEmbeddings, OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 
@@ -13,12 +14,7 @@ from .language.mumps import MumpsSplitter
 from .language.splitter import Splitter
 from .language.treesitter import TreeSitterSplitter
 from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
-from .parsers.code_parser import (
-    PARSER_TYPES,
-    CodeParser,
-    EvaluationParser,
-    JanusParser,
-)
+from .parsers.code_parser import PARSER_TYPES, CodeParser, EvaluationParser, JanusParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES, EmbeddingType
 from .utils.logger import create_logger
@@ -587,7 +583,7 @@ class Translator:
         If the relevant fields have not been changed since the last time this method was
         called, nothing happens.
         """
-        if self._llm.__name__ == "ChatOpenAI":
+        if isinstance(self._llm, ChatOpenAI):
             self._embeddings = OpenAIEmbeddings(disallowed_special=())
         else:
             self._embeddings = GPT4AllEmbeddings()

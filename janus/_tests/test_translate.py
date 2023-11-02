@@ -79,6 +79,13 @@ class TestTranslator(unittest.TestCase):
         self.assertEqual(
             0, vector_store._collection.count(), "Non-empty initial vector store?"
         )
+        self.translator.set_model("llama")
+        self.translator._load_parameters()
+        vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
+        self.assertIsInstance(vector_store, Chroma)
+        self.assertEqual(
+            0, vector_store._collection.count(), "Non-empty initial vector store?"
+        )
 
     @pytest.mark.slow
     def test_embed_split_source(self):
