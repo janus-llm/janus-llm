@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Set
 
 from langchain.callbacks import get_openai_callback
-from langchain.embeddings import OpenAIEmbeddings
+from langchain.embeddings import GPT4AllEmbeddings, OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 
 from .language.block import CodeBlock, TranslatedCodeBlock
@@ -77,7 +77,7 @@ class Translator:
             parser_type: The type of parser to use for parsing the LLM output. Valid
                 values are "code" (default), "text", and "eval".
         """
-        self._changed_attrs = set()
+        self._changed_attrs: set = set()
 
         self._parser_type: Optional[str]
         self._model_name: Optional[str]
@@ -105,11 +105,6 @@ class Translator:
 
         self.max_prompts = max_prompts
 
-        self._embeddings = OpenAIEmbeddings(disallowed_special=())
-        self._collections = {}
-        for key in EmbeddingType:
-            self._collections[key] = Chroma(f"{key.name}-{id(self)}", self._embeddings)
-
     def __del__(self):
         for key in self._collections:
             self._collections[key].delete_collection()
@@ -128,6 +123,7 @@ class Translator:
         self._load_prompt_engine()
         self._load_splitter()
         self._load_parser()
+        self._load_embeddings()
         self._changed_attrs.clear()
 
     def translate(
@@ -232,12 +228,27 @@ class Translator:
             )
         return output_block
 
-    def embeddings(self, embedding_type: EmbeddingType):
+    def embeddings(self, embedding_type: EmbeddingType) -> Chroma:
+        """Get the Chroma vector store for the given embedding type.
+
+        Arguments:
+            embedding_type: The type of embedding to get the vector store for
+
+        Returns:
+            The Chroma vector store for the given embedding type
+        """
         return self._collections[embedding_type]
 
     def _embed_nodes_recursively(
         self, code_block: CodeBlock, embedding_type: EmbeddingType, file_name: str
-    ):
+    ) -> None:
+        """Embed all nodes in the tree rooted at `code_block`
+
+        Arguments:
+            code_block: CodeBlock to embed
+            embedding_type: EmbeddingType to use
+            file_name: Name of file containing `code_block`
+        """
         nodes = [code_block]
         while nodes:
             node = nodes.pop(0)
@@ -251,7 +262,16 @@ class Translator:
         file_name: str  # perhaps this should be a relative path from the source, but for
         # now we're all in 1 directory
     ) -> bool:
-        """Calculate code_block embedding, returning success & storing in embedding_id"""
+        """Calculate code_block embedding, returning success & storing in embedding_id
+
+        Arguments:
+            code_block: CodeBlock to embed
+            embedding_type: EmbeddingType to use
+            file_name: Name of file containing `code_block`
+
+        Returns:
+            True if embedding was successful, False otherwise
+        """
         if code_block.text:
             metadatas = [
                 {
@@ -274,7 +294,7 @@ class Translator:
             return True
         return False
 
-    def outputting_requirements(self):
+    def outputting_requirements(self) -> bool:
         """Is the output of the translator a requirements file?"""
         # expect we will revise system to output more than a single output
         # so this is placeholder logic
@@ -559,3 +579,18 @@ class Translator:
                 f"Unsupported parser type: {self._parser_type}. Can be: "
                 f"{PARSER_TYPES}"
             )
+
+    @run_if_changed("_model_name")
+    def _load_embeddings(self) -> None:
+        """Load the embeddings according to this instance's attributes.
+
+        If the relevant fields have not been changed since the last time this method was
+        called, nothing happens.
+        """
+        if self._llm.__name__ == "ChatOpenAI":
+            self._embeddings = OpenAIEmbeddings(disallowed_special=())
+        else:
+            self._embeddings = GPT4AllEmbeddings()
+        self._collections = {}
+        for key in EmbeddingType:
+            self._collections[key] = Chroma(f"{key.name}-{id(self)}", self._embeddings)
