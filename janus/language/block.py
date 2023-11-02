@@ -15,7 +15,7 @@ class CodeBlock:
         id: The id of the code block in the AST
         name: Descriptive name of node
         type: The type of the code block ('function', 'module', etc.). Defined in the
-              language-specific modules.
+            language-specific modules.
         language: The language of the code block.
         text: The code block.
         start_point: The line and column numbers of the first line of the code block.
@@ -27,7 +27,7 @@ class CodeBlock:
         embedding_id: id of embedding
         affixes: prefix and suffix text for node
         complete: Rolls up self and children's complete status, incomplete means a child
-                  is missing.
+            is missing.
     """
 
     def __init__(
@@ -45,7 +45,7 @@ class CodeBlock:
         children: List[ForwardRef("CodeBlock")],
         embedding_id: Optional[str] = None,
         affixes: Tuple[str, str] = ("", ""),
-    ):
+    ) -> None:
         self.id: Hashable = id
         self.name: Optional[str] = name
         self.type: NodeType = type
@@ -67,30 +67,30 @@ class CodeBlock:
         if self.children:
             self.children[0].omit_prefix = False
 
-    def __lt__(self, other):
+    def __lt__(self, other: ForwardRef("CodeBlock")) -> bool:
         return (self.start_byte, self.end_byte) < (other.start_byte, other.end_byte)
 
-    def __eq__(self, other):
+    def __eq__(self, other: ForwardRef("CodeBlock")) -> bool:
         return (self.start_byte, self.end_byte) == (other.start_byte, other.end_byte)
 
     @property
-    def prefix(self):
+    def prefix(self) -> str:
         return self.affixes[0] if not self.omit_prefix else ""
 
     @property
-    def suffix(self):
+    def suffix(self) -> str:
         return self.affixes[1] if not self.omit_suffix else ""
 
     @property
-    def complete_text(self):
+    def complete_text(self) -> str:
         return f"{self.prefix}{self.text}{self.suffix}"
 
     @property
-    def placeholder(self):
+    def placeholder(self) -> str:
         return f"<<<{self.id}>>>"
 
     @property
-    def complete_placeholder(self):
+    def complete_placeholder(self) -> str:
         return f"{self.prefix}<<<{self.id}>>>{self.suffix}"
 
     @property
