@@ -51,13 +51,6 @@ class TestTranslator(unittest.TestCase):
             parser_type="text",
         )
 
-    def tearDown(self):
-        # explicitly delete the translator so Chroma collections are added/removed
-        # per test - otherwise sometimes lazy garbage collection will stagger the
-        # calls to destructor and try to delete multiple times
-        del self.translator
-        del self.req_translator
-
     @pytest.mark.slow
     def test_translate(self):
         """Test translate method."""

@@ -101,10 +101,6 @@ class Translator:
 
         self.max_prompts = max_prompts
 
-    def __del__(self):
-        for key in self._collections:
-            self._collections[key].delete_collection()
-
     def __setattr__(self, key: Any, value: Any) -> None:
         if hasattr(self, "_changed_attrs"):
             if not hasattr(self, key) or getattr(self, key) != value:
