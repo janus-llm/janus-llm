@@ -77,6 +77,9 @@ coverage:
     - lslab
   variables:
     GIT_SSL_NO_VERIFY: '1'
+    "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt"
+    "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
+    "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
   script:
     - poetry install --with coverage
     - poetry run python -m coverage run -m pytest janus
