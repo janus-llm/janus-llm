@@ -1,9 +1,13 @@
 import unittest
 from pathlib import Path
+from typing import Any, Iterable, List, Optional, Type
 
 import pytest
+from langchain.schema import Document
+from langchain.schema.vectorstore import VST, VectorStore
 from langchain.vectorstores import Chroma
 
+from ..llm.embeddings import Embeddings
 from ..translate import Translator
 from ..utils.enums import EmbeddingType
 
@@ -28,6 +32,45 @@ def print_query_results(query, n_results):
     pass
 
 
+class MockVectorStore(VectorStore):
+    """Vector store for testing"""
+
+    def __init__(self):
+        self._add_texts_calls = 0
+
+    def add_texts(
+        self, texts: Iterable[str], metadatas: Optional[List[dict]] = None, **kwargs: Any
+    ) -> List[str]:
+        self._add_texts_calls += 1
+        return ["id"]
+
+    def similarity_search(self, query: str, k: int = 4, **kwargs: Any) -> List[Document]:
+        raise NotImplementedError("similarity_search() not implemented!")
+
+    @classmethod
+    def from_texts(
+        cls: Type[VST],
+        texts: List[str],
+        embedding: Embeddings,
+        metadatas: Optional[List[dict]] = None,
+        **kwargs: Any,
+    ) -> VST:
+        raise NotImplementedError("from_texts() not implemented!")
+
+
+class MockEmbeddings(Embeddings):
+    """Embeddings for testing - uses MockVectorStore"""
+
+    def __init__(self):
+        self._delete_collection_calls = 0
+
+    def create_collection(self, name) -> VectorStore:
+        return MockVectorStore()
+
+    def delete_collection(self, vector_store):
+        self._delete_collection_calls += 1
+
+
 class TestTranslator(unittest.TestCase):
     """Tests for the Translator class."""
 
@@ -44,6 +87,7 @@ class TestTranslator(unittest.TestCase):
 
         self.req_translator = Translator(
             model="gpt-3.5-turbo",
+            embeddings_override=MockEmbeddings(),
             source_language="fortran",
             target_language="text",
             target_version="3.10",
@@ -72,6 +116,7 @@ class TestTranslator(unittest.TestCase):
         self.assertEqual(
             0, vector_store._collection.count(), "Non-empty initial vector store?"
         )
+
         self.translator.set_model("llama")
         self.translator._load_parameters()
         vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
@@ -80,9 +125,45 @@ class TestTranslator(unittest.TestCase):
             0, vector_store._collection.count(), "Non-empty initial vector store?"
         )
 
-    @pytest.mark.slow
+    def test_changing_embeddings_clears(self):
+        # test OpenAIEmbeddings -> GPT4AllEmbeddings
+        vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
+        self.translator._add_text_to_vector_store(
+            EmbeddingType.SOURCE, ["hi"], [{"a": 1}]
+        )
+        self.assertEqual(1, vector_store._collection.count(), "Missing data")
+
+        self.translator.set_model("llama")
+        self.translator._load_parameters()
+        vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
+        self.assertEqual(
+            0,
+            vector_store._collection.count(),
+            "Embeddings data was not cleared when embeddings changed!",
+        )
+
+        # test MockVectorStore -> MockVectorStore
+        mock_embeddings = MockEmbeddings()
+        self.translator.set_embeddings(mock_embeddings)
+        self.translator._load_parameters()
+        vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
+        self.assertEqual(0, vector_store._add_texts_calls)
+        self.translator._add_text_to_vector_store(
+            EmbeddingType.SOURCE, ["hi"], [{"a": 1}]
+        )
+        self.assertEqual(1, vector_store._add_texts_calls)
+
+        mock_embeddings = MockEmbeddings()
+        self.translator.set_embeddings(mock_embeddings)
+        self.translator._load_parameters()
+        vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
+        self.assertEqual(0, vector_store._add_texts_calls)
+
     def test_embed_split_source(self):
         """Characterize _embed method"""
+        mock_embeddings = MockEmbeddings()
+        self.translator.set_embeddings(mock_embeddings)
+        self.translator._load_parameters()
         input_block = self.translator.splitter.split(self.test_file)
         self.assertIsNone(
             input_block.text, "Root node of input text shouldn't contain text"
@@ -96,9 +177,11 @@ class TestTranslator(unittest.TestCase):
         self.assertFalse(result, "Nothing to embed, so should have no result")
         self.assertIsNone(input_block.embedding_id, "Embeddings should not have changed")
 
-    @pytest.mark.slow
     def test_embed_has_values_for_each_non_empty_node(self):
         """Characterize our sample fortran file"""
+        mock_embeddings = MockEmbeddings()
+        self.translator.set_embeddings(mock_embeddings)
+        self.translator._load_parameters()
         input_block = self.translator.splitter.split(self.test_file)
         self.translator._embed_nodes_recursively(
             input_block, EmbeddingType.SOURCE, self.test_file.name
@@ -124,8 +207,10 @@ class TestTranslator(unittest.TestCase):
             "Not all non-empty nodes have embeddings!",
         )
 
-    @pytest.mark.slow
     def test_embed_nodes_recursively(self):
+        mock_embeddings = MockEmbeddings()
+        self.translator.set_embeddings(mock_embeddings)
+        self.translator._load_parameters()
         input_block = self.translator.splitter.split(self.test_file)
         self.translator._embed_nodes_recursively(
             input_block, EmbeddingType.SOURCE, self.test_file.name
@@ -138,18 +223,23 @@ class TestTranslator(unittest.TestCase):
 
     @pytest.mark.slow
     def test_translate_file_adds_source_embeddings(self):
+        mock_embeddings = MockEmbeddings()
+        self.translator.set_embeddings(mock_embeddings)
+        self.translator._load_parameters()
         vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
-        self.assertEqual(0, vector_store._collection.count(), "Precondition failed")
+        self.assertEqual(0, vector_store._add_texts_calls)
         self.translator.translate_file(self.test_file)
         self.assertEqual(
             self.TEST_FILE_EMBEDDING_COUNT,
-            vector_store._collection.count(),
+            vector_store._add_texts_calls,
             "Did not find expected source embeddings",
         )
 
     @pytest.mark.slow
     def test_embeddings_usage(self):
-        """Noodling on use of embeddings"""
+        """Noodling on use of embeddings
+        To see results have to uncomment print_query_results() above
+        """
         input_block = self.translator.splitter.split(self.test_file)
         self.translator._embed_nodes_recursively(
             input_block, EmbeddingType.SOURCE, self.test_file.name
@@ -159,7 +249,7 @@ class TestTranslator(unittest.TestCase):
         # this symbol has the lowest relevance scores of any in this test, but
         # still not very low; multiple embedded nodes contain it
         QUERY_STRING = "IWX_BAND_START"
-        query = self.translator._embeddings.embed_query(QUERY_STRING)
+        query = self.translator._embeddings._embeddings.embed_query(QUERY_STRING)
         n_results = vector_store.similarity_search_by_vector_with_relevance_scores(
             embedding=query,
             k=10,
@@ -185,7 +275,7 @@ class TestTranslator(unittest.TestCase):
 
         # only returns a single result because only 1 embedded node contains CSV_ICASEARR:
         QUERY_STRING = "What is the use of CSV_ICASEARR?"
-        query = self.translator._embeddings.embed_query(QUERY_STRING)
+        query = self.translator._embeddings._embeddings.embed_query(QUERY_STRING)
         n_results = vector_store.similarity_search_by_vector_with_relevance_scores(
             embedding=query,
             k=10,
@@ -197,7 +287,7 @@ class TestTranslator(unittest.TestCase):
 
         # trimmed out some characters from line 43, and still not very similar scoring
         QUERY_STRING = "IYL_EDGEBUFFER EDGEBUFFER IGN_MASK CELLSIZE"
-        query = self.translator._embeddings.embed_query(QUERY_STRING)
+        query = self.translator._embeddings._embeddings.embed_query(QUERY_STRING)
         n_results = vector_store.similarity_search_by_vector_with_relevance_scores(
             embedding=query,
             k=10,
@@ -207,7 +297,7 @@ class TestTranslator(unittest.TestCase):
 
         # random string (as bad as XYZZY), but searching for a specific line
         QUERY_STRING = "ghost in the invisible moon"
-        query = self.translator._embeddings.embed_query(QUERY_STRING)
+        query = self.translator._embeddings._embeddings.embed_query(QUERY_STRING)
         n_results = vector_store.similarity_search_by_vector_with_relevance_scores(
             embedding=query,
             k=10,
@@ -224,17 +314,17 @@ class TestTranslator(unittest.TestCase):
     @pytest.mark.slow
     def test_document_embeddings_added_by_translate(self):
         vector_store = self.req_translator.embeddings(EmbeddingType.REQUIREMENT)
-        self.assertEqual(0, vector_store._collection.count(), "Precondition failed")
+        self.assertEqual(0, vector_store._add_texts_calls, "Precondition failed")
         self.req_translator.translate(self.test_file.parent, self.test_file.parent, True)
-        self.assertTrue(vector_store._collection.count() > 0, "Why no documentation?")
+        self.assertTrue(vector_store._add_texts_calls > 0, "Why no documentation?")
 
     @pytest.mark.slow
     def test_embed_requirements(self):
-        vector_store = self.translator.embeddings(EmbeddingType.REQUIREMENT)
+        vector_store = self.req_translator.embeddings(EmbeddingType.REQUIREMENT)
         translated = self.req_translator.translate_file(self.test_file)
         self.assertEqual(
             0,
-            vector_store._collection.count(),
+            vector_store._add_texts_calls,
             "Unexpected requirements added in translate_file",
         )
         result = self.req_translator._embed(

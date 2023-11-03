@@ -4,9 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Set
 
 from langchain.callbacks import get_openai_callback
-from langchain.chat_models import ChatOpenAI
-from langchain.embeddings import GPT4AllEmbeddings, OpenAIEmbeddings
-from langchain.vectorstores import Chroma
+from langchain.schema.vectorstore import VectorStore
 
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import Combiner
@@ -14,6 +12,7 @@ from .language.mumps import MumpsSplitter
 from .language.splitter import Splitter
 from .language.treesitter import TreeSitterSplitter
 from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
+from .llm.embeddings import Embeddings, get_embeddings_factory
 from .parsers.code_parser import PARSER_TYPES, CodeParser, EvaluationParser, JanusParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES, EmbeddingType
@@ -50,6 +49,7 @@ class Translator:
         self,
         model: str = "gpt-3.5-turbo",
         model_arguments: Dict[str, Any] = {},
+        embeddings_override: Embeddings = None,
         source_language: str = "fortran",
         target_language: str = "python",
         target_version: str = "3.10",
@@ -64,6 +64,8 @@ class Translator:
                 `OPENAI_API_KEY` environment variable must be set and the
                 `OPENAI_ORG_ID` environment variable should be set if needed.
             model_arguments: Additional arguments to pass to the LLM constructor.
+            embeddings_override: Hard-code the embeddings rather than picking one
+                based on the model. Leave as None to be based on model.
             source_language: The source programming language.
             target_language: The target programming language.
             target_version: The target version of the target programming language.
@@ -78,6 +80,7 @@ class Translator:
         self._parser_type: Optional[str]
         self._model_name: Optional[str]
         self._custom_model_arguments: Optional[Dict[str, Any]]
+        self._embeddings_override: Optional[Embeddings]
         self._source_language: Optional[str]
         self._source_glob: Optional[str]
         self._target_language: Optional[str]
@@ -90,6 +93,7 @@ class Translator:
         self._combiner: Combiner = Combiner()
 
         self.set_model(model_name=model, **model_arguments)
+        self.set_embeddings(embeddings_override=embeddings_override)
         self.set_prompt(prompt_template=prompt_template)
         self.set_parser_type(parser_type=parser_type)
         self.set_source_language(source_language=source_language)
@@ -220,7 +224,7 @@ class Translator:
             )
         return output_block
 
-    def embeddings(self, embedding_type: EmbeddingType) -> Chroma:
+    def embeddings(self, embedding_type: EmbeddingType) -> VectorStore:
         """Get the Chroma vector store for the given embedding type.
 
         Arguments:
@@ -281,10 +285,17 @@ class Translator:
             if code_block.end_point is not None:
                 metadatas[0]["end_line"] = code_block.end_point[0]
             the_text = [code_block.text]
-            vector_store = self.embeddings(embedding_type)
-            code_block.embedding_id = vector_store.add_texts(the_text, metadatas)[0]
+            code_block.embedding_id = self._add_text_to_vector_store(
+                embedding_type, the_text, metadatas
+            )
             return True
         return False
+
+    def _add_text_to_vector_store(self, embedding_type, texts, metadatas):
+        """Helper function that stores a single text (in an array) and associated
+        metadatas, returning the embedding id"""
+        vector_store = self.embeddings(embedding_type)
+        return vector_store.add_texts(texts, metadatas)[0]
 
     def outputting_requirements(self) -> bool:
         """Is the output of the translator a requirements file?"""
@@ -416,6 +427,21 @@ class Translator:
 
         self._model_name = model_name
         self._custom_model_arguments = custom_arguments
+
+    def set_embeddings(self, embeddings_override: Embeddings) -> None:
+        """Validate and set the Embeddings factory.
+
+        The affected objects will not be updated until translate() is called.
+
+        Arguments:
+            embeddings_override: Hard-code the embeddings rather than picking one
+                based on the model. Leave as None to be based on model."""
+        if not embeddings_override:
+            self._embeddings_override = None
+        elif not isinstance(embeddings_override, Embeddings):
+            raise ValueError(f"Can't set Embeddings as type {type(embeddings_override)}")
+        else:
+            self._embeddings_override = embeddings_override
 
     def set_prompt(self, prompt_template: str | Path) -> None:
         """Validate and set the prompt template name.
@@ -572,17 +598,25 @@ class Translator:
                 f"{PARSER_TYPES}"
             )
 
-    @run_if_changed("_model_name")
+    @run_if_changed("_model_name", "_embeddings_override")
     def _load_embeddings(self) -> None:
         """Load the embeddings according to this instance's attributes.
 
         If the relevant fields have not been changed since the last time this method was
         called, nothing happens.
         """
-        if isinstance(self._llm, ChatOpenAI):
-            self._embeddings = OpenAIEmbeddings(disallowed_special=())
+        # clean up
+        if hasattr(self, "_collections"):
+            for key in self._collections:
+                self._embeddings.delete_collection(self._collections[key])
+
+        if self._embeddings_override:
+            self._embeddings = self._embeddings_override
         else:
-            self._embeddings = GPT4AllEmbeddings()
+            self._embeddings = get_embeddings_factory(self._llm)
+
         self._collections = {}
         for key in EmbeddingType:
-            self._collections[key] = Chroma(f"{key.name}-{id(self)}", self._embeddings)
+            self._collections[key] = self._embeddings.create_collection(
+                f"{key.name}-{id(self)}"
+            )
