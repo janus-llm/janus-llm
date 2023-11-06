@@ -82,7 +82,7 @@ coverage:
     "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
   script:
     - poetry install --with coverage
-    - poetry run python -m coverage run -m pytest janus
+    - poetry run python -m coverage run -m pytest -v -m "not slow" -m translate janus
     - poetry run python -m coverage report -i
     - poetry run python -m coverage xml -i
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'

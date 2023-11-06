@@ -95,7 +95,7 @@ class TestTranslator(unittest.TestCase):
             parser_type="text",
         )
 
-    @pytest.mark.slow
+    @pytest.mark.translate
     def test_translate(self):
         """Test translate method."""
         # Delete a file if it's already there
