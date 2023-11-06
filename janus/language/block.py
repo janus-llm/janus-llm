@@ -12,20 +12,22 @@ class CodeBlock:
     """A class that represents a functional block of code.
 
     Attributes:
-        text: The code block.
-        path: The path to the file containing the code block.
-        complete: Whether or not the code block is complete. If it isn't complete, it
-                  should have children components. This means that this code block has
-                  missing sections inside of it that are in its children.
-        start_line: The line number of the first line of the code block.
-        end_line: The line number of the last line of the code block.
-        language: The language of the code block.
-        type: The type of the code block ('function', 'module', etc.). Defined in the
-              language-specific modules.
-        tokens: The number of tokens in the code block.
-        depth: The depth of the code block in the AST.
         id: The id of the code block in the AST
+        name: Descriptive name of node
+        type: The type of the code block ('function', 'module', etc.). Defined in the
+            language-specific modules.
+        language: The language of the code block.
+        text: The code block.
+        start_point: The line and column numbers of the first line of the code block.
+        end_point: The line and column numbers of the last line of the code block.
+        start_byte: starting byte offset into file
+        end_byte: ending byte offset into file
+        tokens: The number of tokens in the code block.
         children: A tuple of child code blocks.
+        embedding_id: id of embedding
+        affixes: prefix and suffix text for node
+        complete: Rolls up self and children's complete status, incomplete means a child
+            is missing.
     """
 
     def __init__(
@@ -41,8 +43,9 @@ class CodeBlock:
         end_byte: Optional[int],
         tokens: int,
         children: List[ForwardRef("CodeBlock")],
+        embedding_id: Optional[str] = None,
         affixes: Tuple[str, str] = ("", ""),
-    ):
+    ) -> None:
         self.id: Hashable = id
         self.name: Optional[str] = name
         self.type: NodeType = type
@@ -54,6 +57,7 @@ class CodeBlock:
         self.end_byte: Optional[int] = end_byte
         self.tokens: int = tokens
         self.children: List[ForwardRef("CodeBlock")] = sorted(children)
+        self.embedding_id: Optional[str] = embedding_id
         self.affixes: Tuple[str, str] = affixes
 
         self.complete = True
@@ -63,30 +67,30 @@ class CodeBlock:
         if self.children:
             self.children[0].omit_prefix = False
 
-    def __lt__(self, other):
+    def __lt__(self, other: ForwardRef("CodeBlock")) -> bool:
         return (self.start_byte, self.end_byte) < (other.start_byte, other.end_byte)
 
-    def __eq__(self, other):
+    def __eq__(self, other: ForwardRef("CodeBlock")) -> bool:
         return (self.start_byte, self.end_byte) == (other.start_byte, other.end_byte)
 
     @property
-    def prefix(self):
+    def prefix(self) -> str:
         return self.affixes[0] if not self.omit_prefix else ""
 
     @property
-    def suffix(self):
+    def suffix(self) -> str:
         return self.affixes[1] if not self.omit_suffix else ""
 
     @property
-    def complete_text(self):
+    def complete_text(self) -> str:
         return f"{self.prefix}{self.text}{self.suffix}"
 
     @property
-    def placeholder(self):
+    def placeholder(self) -> str:
         return f"<<<{self.id}>>>"
 
     @property
-    def complete_placeholder(self):
+    def complete_placeholder(self) -> str:
         return f"{self.prefix}<<<{self.id}>>>{self.suffix}"
 
     @property

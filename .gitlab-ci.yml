@@ -1,6 +1,7 @@
 image: "python:3.10"
 
 before_script:
+  - curl -ksSL https://gitlab.mitre.org/mitre-scripts/mitre-pki/raw/master/os_scripts/install_certs.sh | sh
   - python --version
   - curl -sSkL https://install.python-poetry.org | python -
   - export PATH=$PATH:$HOME/.local/bin
@@ -58,7 +59,7 @@ isort:
     - lslab
   script:
     - poetry install --only dev
-    - poetry run isort --check --trailing-comma -m=3 .
+    - poetry run isort --check --profile black --trailing-comma -m=3 .
   needs: []
   only:
     refs:
@@ -76,9 +77,12 @@ coverage:
     - lslab
   variables:
     GIT_SSL_NO_VERIFY: '1'
+    "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt"
+    "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
+    "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
   script:
     - poetry install --with coverage
-    - poetry run python -m coverage run -m pytest janus
+    - poetry run python -m coverage run -m pytest -v -m "not slow" -m translate janus
     - poetry run python -m coverage report -i
     - poetry run python -m coverage xml -i
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
