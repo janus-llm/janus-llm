@@ -10,6 +10,7 @@ load_dotenv()
 MODEL_CONSTRUCTORS: Dict[str, Any] = {
     "gpt-4": ChatOpenAI,
     "gpt-4-32k": ChatOpenAI,
+    "gpt-4-1106-preview": ChatOpenAI,
     "gpt-3.5-turbo": ChatOpenAI,
     "gpt-3.5-turbo-16k": ChatOpenAI,
     "llama": HuggingFaceTextGenInference,
@@ -19,12 +20,13 @@ MODEL_CONSTRUCTORS: Dict[str, Any] = {
 
 _open_ai_defaults: Dict[str, Any] = {
     "openai_api_key": os.getenv("OPENAI_API_KEY"),
-    # "openai_organization": os.getenv("OPENAI_ORG_ID")
+    "openai_organization": os.getenv("OPENAI_ORG_ID"),
 }
 
 MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
     "gpt-4": dict(model_name="gpt-4", **_open_ai_defaults),
     "gpt-4-32k": dict(model_name="gpt-4-32k", **_open_ai_defaults),
+    "gpt-4-1106-preview": dict(model_name="gpt-4-1106-preview", **_open_ai_defaults),
     "gpt-3.5-turbo": dict(model_name="gpt-3.5-turbo", **_open_ai_defaults),
     "gpt-3.5-turbo-16k": dict(model_name="gpt-3.5-turbo-16k", **_open_ai_defaults),
     "llama": dict(
@@ -61,15 +63,17 @@ MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
 
 TOKEN_LIMITS: Dict[str, int] = {
     "gpt-4": 8192,
-    "gpt-4-32k": 32768,
+    "gpt-4-32k": 32_768,
+    "gpt-4-1106-preview": 128_000,
     "gpt-3.5-turbo": 4096,
-    "gpt-3.5-turbo-16k": 16384,
-    "falcon": 32000,
+    "gpt-3.5-turbo-16k": 16_384,
+    "falcon": 32_000,
 }
 
 COST_PER_MODEL: Dict[str, Dict[str, float]] = {
     "gpt-4": {"input": 0.03, "output": 0.06},
     "gpt-4-32k": {"input": 0.6, "output": 0.12},
+    "gpt-4-1106-preview": {"input": 0.01, "output": 0.03},
     "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
     "gpt-3.5-turbo-16k": {"input": 0.003, "output": 0.004},
     "llama": {"input": 0.0, "output": 0.0},
