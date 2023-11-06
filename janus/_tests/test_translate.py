@@ -227,8 +227,10 @@ class TestTranslator(unittest.TestCase):
         self.translator.set_embeddings(mock_embeddings)
         self.translator._load_parameters()
         vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
-        self.assertEqual(0, vector_store._add_texts_calls)
+        self.assertEqual(0, vector_store._add_texts_calls, "precondition")
+
         self.translator.translate_file(self.test_file)
+
         self.assertEqual(
             self.TEST_FILE_EMBEDDING_COUNT,
             vector_store._add_texts_calls,
