@@ -170,10 +170,14 @@ class Translator:
                 continue
 
             # maybe want target embeddings?
-            filename = out_path.name
             if self.outputting_requirements():
+                filename = relative.__str__()
                 embedding_type = EmbeddingType.REQUIREMENT
+            elif self.outputting_summary():
+                filename = relative.__str__()
+                embedding_type = EmbeddingType.SUMMARY
             else:
+                filename = out_path.name
                 embedding_type = EmbeddingType.TARGET
 
             self._embed_nodes_recursively(out_block, embedding_type, filename)
@@ -184,6 +188,13 @@ class Translator:
             self._save_to_file(out_block, out_path)
 
         log.info(f"Total cost: ${total_cost:,.2f}")
+
+        # Sample embeddings access
+        if self.outputting_requirements():
+            docs = self.embeddings(EmbeddingType.REQUIREMENT).similarity_search(
+                "Which modules use fibonacci?"
+            )
+            print([d.metadata["original_filename"] for d in docs])
 
     def translate_file(self, file: Path) -> TranslatedCodeBlock:
         """Translate a single file.
@@ -302,6 +313,10 @@ class Translator:
         # expect we will revise system to output more than a single output
         # so this is placeholder logic
         return self._prompt_template_name == "requirements"
+
+    def outputting_summary(self) -> bool:
+        """Is the output of the translator a summary documentation?"""
+        return self._prompt_template_name == "document"
 
     def _iterative_translate(self, root: CodeBlock) -> TranslatedCodeBlock:
         """Translate the passed CodeBlock representing a full file.
