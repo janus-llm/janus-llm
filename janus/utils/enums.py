@@ -446,6 +446,12 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "url": "https://github.com/mitchellh/tree-sitter-proto",
         "example": "// Hello, World!\nmessage HelloWorld {\n  string message = 1;\n}\n",
     },
+    "pseudocode": {
+        "comment": "",
+        "suffix": "txt",
+        "url": "",
+        "example": "print Hello, World!",
+    },
     "python": {
         "comment": "#",
         "suffix": "py",

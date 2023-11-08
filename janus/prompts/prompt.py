@@ -51,8 +51,9 @@ class PromptEngine:
             target_language: The language to translate to
             target_version: The version of the target language
             prompt_template: The name of the Janus prompt template directory to use.
-                Can be one of "simple", "document", "document_inline", or "requirements",
-                or a path to a custom directory containing system.txt and human.txt files.
+                Can be one of "simple", "document", "document_inline", "pseudocode", or
+                "requirements", or a path to a custom directory containing system.txt and
+                human.txt files.
         """
         # Build base prompt from provided template name
         template_path = self.get_prompt_template_path(prompt_template)
