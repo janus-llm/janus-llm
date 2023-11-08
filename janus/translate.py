@@ -173,6 +173,8 @@ class Translator:
             filename = out_path.name
             if self.outputting_requirements():
                 embedding_type = EmbeddingType.REQUIREMENT
+            elif self.outputting_pseudocode():
+                embedding_type = EmbeddingType.PSEUDO
             else:
                 embedding_type = EmbeddingType.TARGET
 
@@ -291,9 +293,20 @@ class Translator:
             return True
         return False
 
-    def _add_text_to_vector_store(self, embedding_type, texts, metadatas):
+    def _add_text_to_vector_store(
+        self, embedding_type: EmbeddingType, texts: list[str], metadatas: list[dict]
+    ) -> list[str]:
         """Helper function that stores a single text (in an array) and associated
-        metadatas, returning the embedding id"""
+        metadatas, returning the embedding id
+
+        Arguments:
+            embedding_type: EmbeddingType to use
+            texts: list of texts to store
+            metadatas: list of metadatas to store
+
+        Returns:
+            list of embedding ids
+        """
         vector_store = self.embeddings(embedding_type)
         return vector_store.add_texts(texts, metadatas)[0]
 
@@ -302,6 +315,12 @@ class Translator:
         # expect we will revise system to output more than a single output
         # so this is placeholder logic
         return self._prompt_template_name == "requirements"
+
+    def outputting_pseudocode(self) -> bool:
+        """Is the output of the translator pseudocode?"""
+        # expect we will revise system to output more than a single output
+        # so this is placeholder logic
+        return self._prompt_template_name == "pseudocode"
 
     def _iterative_translate(self, root: CodeBlock) -> TranslatedCodeBlock:
         """Translate the passed CodeBlock representing a full file.
@@ -485,7 +504,7 @@ class Translator:
         if target_language not in LANGUAGES:
             raise ValueError(
                 f"Invalid target language: {target_language}. "
-                "Valid source languages are found in `janus.utils.enums.LANGUAGES`."
+                "Valid target languages are found in `janus.utils.enums.LANGUAGES`."
             )
         self._target_glob = f"**/*.{LANGUAGES[target_language]['suffix']}"
         self._target_language = target_language
