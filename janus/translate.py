@@ -171,10 +171,10 @@ class Translator:
 
             # maybe want target embeddings?
             if self.outputting_requirements():
-                filename = relative.__str__()
+                filename = str(relative)
                 embedding_type = EmbeddingType.REQUIREMENT
             elif self.outputting_summary():
-                filename = relative.__str__()
+                filename = str(relative)
                 embedding_type = EmbeddingType.SUMMARY
             else:
                 filename = out_path.name
@@ -188,13 +188,6 @@ class Translator:
             self._save_to_file(out_block, out_path)
 
         log.info(f"Total cost: ${total_cost:,.2f}")
-
-        # Sample embeddings access
-        if self.outputting_requirements():
-            docs = self.embeddings(EmbeddingType.REQUIREMENT).similarity_search(
-                "Which modules use fibonacci?"
-            )
-            print([d.metadata["original_filename"] for d in docs])
 
     def translate_file(self, file: Path) -> TranslatedCodeBlock:
         """Translate a single file.

@@ -181,7 +181,7 @@ class TranslatedCodeBlock(CodeBlock):
         translated: Whether this block has been successfully translated
     """
 
-    def __init__(self, original: CodeBlock, language: str):
+    def __init__(self, original: CodeBlock, language: str) -> None:
         """Create an "empty" `TranslatedCodeBlock` from the given original
 
         Arguments:
