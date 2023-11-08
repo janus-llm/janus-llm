@@ -170,12 +170,17 @@ class Translator:
                 continue
 
             # maybe want target embeddings?
-            filename = out_path.name
             if self.outputting_requirements():
+                filename = str(relative)
                 embedding_type = EmbeddingType.REQUIREMENT
+            elif self.outputting_summary():
+                filename = str(relative)
+                embedding_type = EmbeddingType.SUMMARY
             elif self.outputting_pseudocode():
+                filename = out_path.name
                 embedding_type = EmbeddingType.PSEUDO
             else:
+                filename = out_path.name
                 embedding_type = EmbeddingType.TARGET
 
             self._embed_nodes_recursively(out_block, embedding_type, filename)
@@ -315,6 +320,10 @@ class Translator:
         # expect we will revise system to output more than a single output
         # so this is placeholder logic
         return self._prompt_template_name == "requirements"
+
+    def outputting_summary(self) -> bool:
+        """Is the output of the translator a summary documentation?"""
+        return self._prompt_template_name == "document"
 
     def outputting_pseudocode(self) -> bool:
         """Is the output of the translator pseudocode?"""

@@ -119,7 +119,7 @@ class TreeSitterSplitter(Splitter):
             self._create_parser(so_file)
 
         # string required for Windows, as 'WindowsPath' is not iterable
-        so_file = so_file.__str__()
+        so_file = str(so_file)
 
         # Load the parser using the generated .so file
         self.parser: tree_sitter.Parser = tree_sitter.Parser()
