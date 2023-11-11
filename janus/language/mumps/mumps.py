@@ -43,7 +43,7 @@ class MumpsSplitter(Splitter):
         re.VERBOSE | re.DOTALL,
     )
 
-    def __init__(self, model: BaseLanguageModel, max_tokens: int = 4096):
+    def __init__(self, model: None | BaseLanguageModel = None, max_tokens: int = 4096):
         """Initialize a MumpsSplitter instance.
 
         Arguments:
