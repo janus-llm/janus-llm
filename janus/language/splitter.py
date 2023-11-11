@@ -309,6 +309,9 @@ class Splitter(FileManager):
                 self._segment_leaves(child)
             return
 
+        if node.start_point is None or node.end_point is None:
+            raise ValueError("Node has no start or end point")
+
         split_text = re.split(r"(\n+)", node.text)
         betweens = split_text[1::2]
         lines = split_text[::2]
