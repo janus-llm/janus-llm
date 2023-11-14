@@ -1,4 +1,14 @@
+from enum import Enum
 from typing import Dict, Set
+
+
+class EmbeddingType(Enum):
+    SOURCE = 1
+    REQUIREMENT = 2
+    SUMMARY = 3
+    PSEUDO = 4
+    TARGET = 5  # placeholder embeddings, are these useful for analysis?
+
 
 CUSTOM_SPLITTERS: Set[str] = {"mumps"}
 
@@ -447,6 +457,12 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "suffix": "proto",
         "url": "https://github.com/mitchellh/tree-sitter-proto",
         "example": "// Hello, World!\nmessage HelloWorld {\n  string message = 1;\n}\n",
+    },
+    "pseudocode": {
+        "comment": "",
+        "suffix": "txt",
+        "url": "",
+        "example": "print Hello, World!",
     },
     "python": {
         "comment": "#",
