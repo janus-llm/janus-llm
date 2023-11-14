@@ -15,6 +15,12 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "url": "https://github.com/tree-sitter/tree-sitter-agda",
         "example": 'postulate HelloWorld : String;\nHelloWorld = "Hello, World!";\n',
     },
+    "asm": {
+        "comment": "//",
+        "suffix": "s",
+        "url": "https://github.com/SethBarberee/tree-sitter-asm",
+        "example": '        add     x0, x24, #1\nmov     x1, x22\nmov     x2, x23\n',
+    },
     "bash": {
         "comment": "#",
         "suffix": "sh",
