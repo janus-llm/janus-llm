@@ -45,11 +45,8 @@ class Splitter(FileManager):
         self.model = model
         if self.model is None:
             self._encoding = tiktoken.get_encoding("cl100k_base")
-        self.use_placeholders = use_placeholders
-
-        # Divide max_tokens by 3 because we want to leave just as much space for the
-        # prompt as for the translated code.
-        self.max_tokens: int = max_tokens // 3
+        self.use_placeholders: bool = use_placeholders
+        self.max_tokens: int = max_tokens
 
     def split(self, file: Path | str) -> CodeBlock:
         """Split the given file into functional code blocks.
