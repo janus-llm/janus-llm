@@ -7,7 +7,7 @@ from langchain.schema import Document
 from langchain.schema.vectorstore import VST, VectorStore
 from langchain.vectorstores import Chroma
 
-from ..llm.embeddings import Embeddings
+from ..embedding.embeddings import Embeddings
 from ..translate import Translator
 from ..utils.enums import EmbeddingType
 

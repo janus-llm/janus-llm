@@ -1,10 +1,14 @@
 from pathlib import Path
 
-from langchain.schema.vectorstore import VectorStore
+from chromadb.api.models.Collection import Collection
+from langchain.vectorstores import Chroma
 
 from ..converter import Converter
 from ..language.block import CodeBlock
+from ..llm.models_info import TOKEN_LIMITS
 from ..utils.enums import EmbeddingType
+from .database import ChromaEmbeddingDatabase
+from .embeddings import get_embeddings
 
 
 class Vectorizer(Converter):
@@ -13,33 +17,75 @@ class Vectorizer(Converter):
     def __init__(
         self,
         source_language: str = "fortran",
-        parser_type: None | str = None,
+        max_tokens: None | int = None,
+        model: None | str = "gpt4all",
         path: str | Path = Path.home() / ".janus" / "chroma" / "chroma-data",
     ) -> None:
         """Initializes the Embedding class
 
         Arguments:
+            source_language: The source programming language.
+            max_tokens: The maximum number of tokens to send to the embedding model at
+                once. If `None`, the `Vectorizer` will use the default value for the
+                `model`.
+            model: The name of the model to use. This will also determine the `max_tokens`
+                if that variable is not set.
             path: The path to the ChromaDB. Can be either a string of a URL or path or a
                 Path object
         """
-        super().__init__(source_language=source_language, parser_type=parser_type)
-        # TODO: create a client for the DB based on the path
-        # Check whether or not it's a URL. If it is, parse it and configure the settings
-        # accordingly
-        # self._db = chromadb.ChromaDB(path)
+        if max_tokens is None:
+            max_tokens = TOKEN_LIMITS[model]
 
-    def embeddings(self, embedding_type: EmbeddingType) -> VectorStore:
-        """Get the Chroma vector store for the given embedding type.
+        super().__init__(
+            source_language=source_language,
+            max_tokens=max_tokens,
+        )
+        self._embeddings = get_embeddings(model)
+        self._db = ChromaEmbeddingDatabase(path)
+
+    def create_collection(self, embedding_type: EmbeddingType) -> None:
+        """Create a Chroma collection for the given embedding type.
 
         Arguments:
-            embedding_type: The type of embedding to get the vector store for
+            embedding_type: The type of embedding to create the vector store for
+        """
+        # First, check if the embedding type exists
+        if embedding_type not in EmbeddingType:
+            raise ValueError(f"Invalid embedding type: {embedding_type}")
+        # Now check if the collection exists
+        if embedding_type in self.collections():
+            # If it does, create a new collection with a similar but incremented name
+            # ex. "requirement" -> "requirement_1"
+            # Count the number of collections with the same embedding type
+            type_collections = [
+                collection
+                for collection in self.collections()
+                if collection.startswith(embedding_type.name.lower())
+            ]
+            collection_name = f"{embedding_type.name.lower()}_{len(type_collections) + 1}"
+        else:
+            collection_name = embedding_type.name.lower()
+        Chroma(collection_name=collection_name, client=self._db)
+
+    def collections(
+        self, name: None | EmbeddingType | str = None
+    ) -> list[Collection] | Collection:
+        """Get the Chroma collections for this vectorizer.
 
         Returns:
-            The Chroma vector store for the given embedding type
+            The Chroma collections for this vectorizer
         """
-        return self._collections[embedding_type]
+        if isinstance(name, str):
+            try:
+                return self._db.get_collection(name)
+            except ValueError:
+                return []
+        elif isinstance(name, EmbeddingType):
+            return self._db.get_collection(name.name.lower())
+        else:
+            return self._db.list_collections()
 
-    def _embed_nodes_recursively(
+    def _add_nodes_recursively(
         self, code_block: CodeBlock, embedding_type: EmbeddingType, file_name: str
     ) -> None:
         """Embed all nodes in the tree rooted at `code_block`
@@ -52,10 +98,10 @@ class Vectorizer(Converter):
         nodes = [code_block]
         while nodes:
             node = nodes.pop(0)
-            self._embed(node, embedding_type, file_name)
+            self._add(node, embedding_type, file_name)
             nodes.extend(node.children)
 
-    def _embed(
+    def _add(
         self,
         code_block: CodeBlock,
         embedding_type: EmbeddingType,
@@ -109,5 +155,5 @@ class Vectorizer(Converter):
         Returns:
             list of embedding ids
         """
-        vector_store = self.embeddings(embedding_type)
+        vector_store = self._embeddings(embedding_type)
         return vector_store.add_texts(texts, metadatas)[0]

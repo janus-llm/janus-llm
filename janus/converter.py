@@ -7,7 +7,6 @@ from .language.combine import Combiner
 from .language.mumps import MumpsSplitter
 from .language.splitter import Splitter
 from .language.treesitter import TreeSitterSplitter
-from .parsers.code_parser import PARSER_TYPES, CodeParser, EvaluationParser, JanusParser
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
 
@@ -44,7 +43,7 @@ class Converter:
     def __init__(
         self,
         source_language: str = "fortran",
-        parser_type: None | str = None,
+        max_tokens: None | int = None,
     ) -> None:
         """Initialize a Converter instance.
 
@@ -57,16 +56,14 @@ class Converter:
         """
         self._changed_attrs: set = set()
 
-        self._parser_type: None | str
         self._source_language: None | str
         self._source_glob: None | str
-        self._parser: None | JanusParser
         self._splitter: None | Splitter
-        self._llm: None | BaseLanguageModel
+        self._llm: None | BaseLanguageModel = None
+        self._max_tokens: None | int = max_tokens
 
         self._combiner: Combiner = Combiner()
 
-        self.set_parser_type(parser_type=parser_type)
         self.set_source_language(source_language=source_language)
 
         self._load_parameters()
@@ -82,7 +79,6 @@ class Converter:
 
     def _load_parameters(self) -> None:
         self._load_splitter()
-        self._load_parser()
         self._changed_attrs.clear()
 
     def set_source_language(self, source_language: str) -> None:
@@ -103,22 +99,6 @@ class Converter:
         self._source_glob = f"**/*.{LANGUAGES[source_language]['suffix']}"
         self._source_language = source_language
 
-    def set_parser_type(self, parser_type: str) -> None:
-        """Validate and set the parser type.
-
-        The affected objects will not be updated until translate() is called.
-
-        Arguments:
-            parser_type: The type of parser to use for parsing the LLM output. Valid
-                values are "code" (default), "text", and "eval".
-        """
-        if parser_type not in PARSER_TYPES:
-            raise ValueError(
-                f'Unsupported parser type "{parser_type}". Valid types: '
-                f"{PARSER_TYPES}"
-            )
-        self._parser_type = parser_type
-
     @run_if_changed("_source_language", "_max_tokens", "_llm")
     def _load_splitter(self) -> None:
         """Load the splitter according to this instance's attributes.
@@ -137,30 +117,4 @@ class Converter:
                 language=self._source_language,
                 max_tokens=self._max_tokens,
                 model=self._llm,
-            )
-
-    @run_if_changed("_parser_type", "_target_language")
-    def _load_parser(self) -> None:
-        """Load the parser according to this instance's attributes.
-
-        If the relevant fields have not been changed since the last time this method was
-        called, nothing happens.
-        """
-        if "text" == self._target_language and self._parser_type != "text":
-            raise ValueError(
-                f"Target language ({self._target_language}) suggests target "
-                f"parser should be 'text', but is '{self._parser_type}'"
-            )
-        if "code" == self._parser_type:
-            self.parser = CodeParser(language=self._target_language)
-        elif "eval" == self._parser_type:
-            self.parser = EvaluationParser(
-                expected_keys={"syntax", "style", "completeness", "correctness"}
-            )
-        elif "text" == self._parser_type:
-            self.parser = JanusParser()
-        else:
-            raise ValueError(
-                f"Unsupported parser type: {self._parser_type}. Can be: "
-                f"{PARSER_TYPES}"
             )

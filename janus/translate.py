@@ -7,7 +7,7 @@ from langchain.callbacks import get_openai_callback
 from .converter import Converter, run_if_changed
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
-from .llm.embeddings import Embeddings, get_embeddings_factory
+from .parsers.code_parser import PARSER_TYPES, CodeParser, EvaluationParser, JanusParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import LANGUAGES, EmbeddingType
 from .utils.logger import create_logger
@@ -24,7 +24,6 @@ class Translator(Converter):
         self,
         model: str = "gpt-3.5-turbo",
         model_arguments: Dict[str, Any] = {},
-        embeddings_override: Embeddings = None,
         source_language: str = "fortran",
         target_language: str = "python",
         target_version: str = "3.10",
@@ -52,16 +51,17 @@ class Translator(Converter):
         """
         super().__init__(source_language=source_language, parser_type=parser_type)
 
+        self._parser_type: None | str
+        self._parser: None | JanusParser
         self._model_name: None | str
         self._custom_model_arguments: None | Dict[str, Any]
-        self._embeddings_override: None | Embeddings
         self._target_language: None | str
         self._target_version: None | str
         self._target_glob: None | str
         self._prompt_template_name: None | str
 
         self.set_model(model_name=model, **model_arguments)
-        self.set_embeddings(embeddings_override=embeddings_override)
+        self.set_parser_type(parser_type=parser_type)
         self.set_prompt(prompt_template=prompt_template)
         self.set_target_language(
             target_language=target_language, target_version=target_version
@@ -76,7 +76,6 @@ class Translator(Converter):
         self._load_prompt_engine()
         self._load_splitter()
         self._load_parser()
-        self._load_embeddings()
         self._changed_attrs.clear()
 
     def translate(
@@ -337,20 +336,21 @@ class Translator(Converter):
         self._model_name = model_name
         self._custom_model_arguments = custom_arguments
 
-    def set_embeddings(self, embeddings_override: Embeddings) -> None:
-        """Validate and set the Embeddings factory.
+    def set_parser_type(self, parser_type: str) -> None:
+        """Validate and set the parser type.
 
         The affected objects will not be updated until translate() is called.
 
         Arguments:
-            embeddings_override: Hard-code the embeddings rather than picking one
-                based on the model. Leave as None to be based on model."""
-        if not embeddings_override:
-            self._embeddings_override = None
-        elif not isinstance(embeddings_override, Embeddings):
-            raise ValueError(f"Can't set Embeddings as type {type(embeddings_override)}")
-        else:
-            self._embeddings_override = embeddings_override
+            parser_type: The type of parser to use for parsing the LLM output. Valid
+                values are "code" (default), "text", and "eval".
+        """
+        if parser_type not in PARSER_TYPES:
+            raise ValueError(
+                f'Unsupported parser type "{parser_type}". Valid types: '
+                f"{PARSER_TYPES}"
+            )
+        self._parser_type = parser_type
 
     def set_prompt(self, prompt_template: str | Path) -> None:
         """Validate and set the prompt template name.
@@ -396,7 +396,35 @@ class Translator(Converter):
 
         # Load the model
         self._llm = MODEL_CONSTRUCTORS[self._model_name](**model_arguments)
-        self._max_tokens = TOKEN_LIMITS.get(self._model_name, 4096)
+        # Set the max_tokens to less than half the model's limit to allow for enough
+        # tokens at output
+        self._max_tokens = TOKEN_LIMITS.get(self._model_name, 4096) // 2.5
+
+    @run_if_changed("_parser_type", "_target_language")
+    def _load_parser(self) -> None:
+        """Load the parser according to this instance's attributes.
+
+        If the relevant fields have not been changed since the last time this method was
+        called, nothing happens.
+        """
+        if "text" == self._target_language and self._parser_type != "text":
+            raise ValueError(
+                f"Target language ({self._target_language}) suggests target "
+                f"parser should be 'text', but is '{self._parser_type}'"
+            )
+        if "code" == self._parser_type:
+            self.parser = CodeParser(language=self._target_language)
+        elif "eval" == self._parser_type:
+            self.parser = EvaluationParser(
+                expected_keys={"syntax", "style", "completeness", "correctness"}
+            )
+        elif "text" == self._parser_type:
+            self.parser = JanusParser()
+        else:
+            raise ValueError(
+                f"Unsupported parser type: {self._parser_type}. Can be: "
+                f"{PARSER_TYPES}"
+            )
 
     @run_if_changed(
         "_prompt_template_name", "_source_language", "_target_language", "_target_version"
@@ -426,26 +454,3 @@ class Translator(Converter):
             target_version=self._target_version,
             prompt_template=self._prompt_template_name,
         )
-
-    @run_if_changed("_model_name", "_embeddings_override")
-    def _load_embeddings(self) -> None:
-        """Load the embeddings according to this instance's attributes.
-
-        If the relevant fields have not been changed since the last time this method was
-        called, nothing happens.
-        """
-        # clean up
-        if hasattr(self, "_collections"):
-            for key in self._collections:
-                self._embeddings.delete_collection(self._collections[key])
-
-        if self._embeddings_override:
-            self._embeddings = self._embeddings_override
-        else:
-            self._embeddings = get_embeddings_factory(self._llm)
-
-        self._collections = {}
-        for key in EmbeddingType:
-            self._collections[key] = self._embeddings.create_collection(
-                f"{key.name}-{id(self)}"
-            )

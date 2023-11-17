@@ -71,7 +71,7 @@ class GPT4AllEmbeddingsFactory(Embeddings):
         vector_store.delete_collection()
 
 
-def get_embeddings_factory(llm: ChatOpenAI | HuggingFaceTextGenInference) -> Embeddings:
+def get_embeddings(llm: ChatOpenAI | HuggingFaceTextGenInference) -> Embeddings:
     """Return an instance of Embeddings based on the current `llm` type
 
     Arguments:
@@ -80,7 +80,7 @@ def get_embeddings_factory(llm: ChatOpenAI | HuggingFaceTextGenInference) -> Emb
     Returns:
         An Embeddings instance
     """
-    if isinstance(llm, ChatOpenAI):
-        return OpenAIEmbeddingsFactory()
+    if llm in ["text-embedding-ada-002", "openai"]:
+        return OpenAIEmbeddingsFactory()._embeddings
     else:
-        return GPT4AllEmbeddingsFactory()
+        return GPT4AllEmbeddingsFactory()._embeddings
