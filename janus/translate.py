@@ -9,6 +9,7 @@ from langchain.schema.vectorstore import VectorStore
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import Combiner
 from .language.mumps import MumpsSplitter
+from .language.binary import BinarySplitter
 from .language.splitter import Splitter
 from .language.treesitter import TreeSitterSplitter
 from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
@@ -590,6 +591,11 @@ class Translator:
         if self._source_language in CUSTOM_SPLITTERS:
             if self._source_language == "mumps":
                 self.splitter = MumpsSplitter(
+                    max_tokens=self._max_tokens,
+                    model=self._llm,
+                )
+            elif self._source_language == "binary":
+                self.splitter = BinarySplitter(
                     max_tokens=self._max_tokens,
                     model=self._llm,
                 )

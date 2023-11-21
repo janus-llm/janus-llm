@@ -10,7 +10,7 @@ class EmbeddingType(Enum):
     TARGET = 5  # placeholder embeddings, are these useful for analysis?
 
 
-CUSTOM_SPLITTERS: Set[str] = {"mumps"}
+CUSTOM_SPLITTERS: Set[str] = {"mumps", "binary"}
 
 LANGUAGES: Dict[str, Dict[str, str]] = {
     "ada": {
@@ -42,6 +42,12 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "suffix": "sh",
         "url": "https://github.com/tree-sitter/tree-sitter-bash",
         "example": 'echo "Hello world"\n',
+    },
+    "binary": {
+        "comment": None,
+        "suffix": "bin",
+        "url": "https://github.com/tree-sitter/tree-sitter-c",
+        "example": '04 00 00 00 cd 48 65 6c 6c 6f 2c 20 77 6f 72 6c 64',
     },
     "beancount": {
         "comment": ";",
