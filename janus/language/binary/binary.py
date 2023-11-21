@@ -4,6 +4,7 @@ import platform
 from pathlib import Path
 from typing import List
 from typing import Optional
+import tempfile
 
 import tree_sitter
 from langchain.schema.language_model import BaseLanguageModel
@@ -49,25 +50,19 @@ class BinarySplitter(TreeSitterSplitter):
         return ghidra_output
 
     def get_decompilation(self, file: str, output_path: str) -> str:
-        GHIDRA_PATH: str = "~/dev/ghidra_10.3.3_PUBLIC/"
+        GHIDRA_PATH: str = os.getenv("GHIDRA_INSTALL_PATH")
         script: str = GHIDRA_PATH + "support" + "/" + "analyzeHeadless"
 
-        # TODO!
-        os.system("rm -rf tmp*")
+        temp_decomp_file = tempfile.mktemp()
         command = (
             f"{script} . tmp -readOnly -import {file} -scriptPath . -postScript"
-            f" {Path(__file__).parent}/rev_eng/decompile_script.py {os.path.join(output_path, 'decompilation')}"
+            f" {Path(__file__).parent}/rev_eng/decompile_script.py {os.path.join(output_path, temp_decomp_file)}"
         )
-        print(output_path)
-        print(command)
 
         self.execute_ghidra_script(command)
         with open(os.path.join(output_path, 'decompilation'), "r") as f:
-        # with open(os.path.join(output_path, 'decompilation_fixup'), "r") as f:
-        # with open(os.path.join(output_path, 'smaz.c'), "r") as f:
             decompilation = f.read()
 
-        print(f"Decompilation: {decompilation}")
         return decompilation
 
     def get_disassembly(self, file: str, output_path: str) -> str:
@@ -79,7 +74,6 @@ class BinarySplitter(TreeSitterSplitter):
             f"{script} . tmp -readOnly -import {file} -scriptPath . -postScript"
             f" ~/dev/janus/rellm/rellm/rev_eng/ghidra_utils/disassemble_script.py {os.path.join(output_path, 'disassembly')}"
         )
-        print(command)
 
         self.execute_ghidra_script(command)
         disassembly = ""
