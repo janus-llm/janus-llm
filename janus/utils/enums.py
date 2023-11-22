@@ -29,13 +29,13 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "comment": "//",
         "suffix": "s",
         "url": "https://github.com/SethBarberee/tree-sitter-asm",
-        "example": 'add     x0, x24, #1\nmov     x1, x22\nmov     x2, x23\n',
+        "example": "add     x0, x24, #1\nmov     x1, x22\nmov     x2, x23\n",
     },
     "asm-x86": {
         "comment": "//",
         "suffix": "s",
         "url": "https://github.com/bearcove/tree-sitter-x86asm",
-        "example": 'mov     rax, 60\nxor       rdi, rdi\n',
+        "example": "mov     rax, 60\nxor       rdi, rdi\n",
     },
     "bash": {
         "comment": "#",
@@ -47,7 +47,7 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "comment": None,
         "suffix": "bin",
         "url": "https://github.com/tree-sitter/tree-sitter-c",
-        "example": '04 00 00 00 cd 48 65 6c 6c 6f 2c 20 77 6f 72 6c 64',
+        "example": "04 00 00 00 cd 48 65 6c 6c 6f 2c 20 77 6f 72 6c 64",
     },
     "beancount": {
         "comment": ";",

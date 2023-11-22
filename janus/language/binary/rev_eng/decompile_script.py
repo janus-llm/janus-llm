@@ -1,6 +1,5 @@
-from ghidra.app.decompiler import DecompInterface
-
 import __main__ as ghidra_app
+from ghidra.app.decompiler import DecompInterface
 
 
 def decompile_function(decompiler, function):
@@ -24,8 +23,11 @@ def decompile_program(decompiler):
     decompiled_buffer = ""
     all_functions = ghidra_app.currentProgram.getListing().getFunctions(True)
 
-    # Set up a filter for imported library functions etc., which we presumably are not interested in
-    external_functions = ghidra_app.currentProgram.getFunctionManager().getExternalFunctions()
+    # Set up a filter for imported library functions etc., which we presumably are not
+    # interested in
+    external_functions = (
+        ghidra_app.currentProgram.getFunctionManager().getExternalFunctions()
+    )
     external_function_names = []
     for function in external_functions:
         external_function_names.append(function.getName())
@@ -53,9 +55,9 @@ def run_decompilation():
     decompilation = decompile_program(decompiler)
 
     # Write the result to a file which binary.py will read
-    with open(output_path, 'w') as fw:
+    with open(output_path, "w") as fw:
         fw.write(decompilation)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_decompilation()
