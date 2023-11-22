@@ -49,7 +49,7 @@ class Translator(Converter):
             parser_type: The type of parser to use for parsing the LLM output. Valid
                 values are "code" (default), "text", and "eval".
         """
-        super().__init__(source_language=source_language, parser_type=parser_type)
+        super().__init__(source_language=source_language)
 
         self._parser_type: None | str
         self._parser: None | JanusParser
@@ -67,14 +67,13 @@ class Translator(Converter):
             target_language=target_language, target_version=target_version
         )
 
-        self._load_parameters()
+        self._load_parameters_translate()
 
         self.max_prompts = max_prompts
 
-    def _load_parameters(self) -> None:
+    def _load_parameters_translate(self) -> None:
         self._load_model()
         self._load_prompt_engine()
-        self._load_splitter()
         self._load_parser()
         self._changed_attrs.clear()
 
