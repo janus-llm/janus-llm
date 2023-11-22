@@ -51,6 +51,10 @@ class BinarySplitter(TreeSitterSplitter):
 
     def get_decompilation(self, file: str, output_path: str) -> str:
         GHIDRA_PATH: str = os.getenv("GHIDRA_INSTALL_PATH")
+        if not GHIDRA_PATH:
+            log.error(
+                f"Decompilation failed, the GHIDRA_INSTALL_PATH environment variable is not set. Follow the Ghidra installation instructions here: https://ghidra-sre.org/InstallationGuide.html, then run `export GHIDRA_INSTALL_PATH='<path_to_top_level_ghidra_folder>'`"
+            )
         script: str = GHIDRA_PATH + "support" + "/" + "analyzeHeadless"
 
         temp_decomp_file = tempfile.mktemp()
@@ -60,7 +64,7 @@ class BinarySplitter(TreeSitterSplitter):
         )
 
         self.execute_ghidra_script(command)
-        with open(os.path.join(output_path, 'decompilation'), "r") as f:
+        with open(os.path.join(output_path, "decompilation"), "r") as f:
             decompilation = f.read()
 
         return decompilation
@@ -131,4 +135,3 @@ class BinarySplitter(TreeSitterSplitter):
             self._git_clone(github_url, lang_dir)
 
         tree_sitter.Language.build_library(str(so_file), [str(lang_dir)])
-
