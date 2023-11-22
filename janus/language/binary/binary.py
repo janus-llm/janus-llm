@@ -65,25 +65,6 @@ class BinarySplitter(TreeSitterSplitter):
 
         return decompilation
 
-    def get_disassembly(self, file: str, output_path: str) -> str:
-        GHIDRA_PATH: str = "~/dev/ghidra_10.3.3_PUBLIC/"
-        script: str = GHIDRA_PATH + "support" + "/" + "analyzeHeadless"
-
-        os.system("rm -rf tmp*")
-        command = (
-            f"{script} . tmp -readOnly -import {file} -scriptPath . -postScript"
-            f" ~/dev/janus/rellm/rellm/rev_eng/ghidra_utils/disassemble_script.py {os.path.join(output_path, 'disassembly')}"
-        )
-
-        self.execute_ghidra_script(command)
-        disassembly = ""
-        with open(os.path.join(output_path, 'disassembly'), "r") as f:
-            lines = f.readlines()
-            for line in lines:
-                disassembly += line[56:]
-
-        return disassembly
-
     def split(self, file: Path | str) -> CodeBlock:
         """Split the given file into functional code blocks.
 
