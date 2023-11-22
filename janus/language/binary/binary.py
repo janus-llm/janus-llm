@@ -45,11 +45,20 @@ class BinarySplitter(TreeSitterSplitter):
         )
 
     def execute_ghidra_script(self, cmd: str) -> str:
+        """Start a subprocess for headless ghidra to do the actual decompilation"""
         output = subprocess.run(cmd, check=True, shell=True, capture_output=True).stdout
         ghidra_output = output.decode(errors="ignore")
         return ghidra_output
 
-    def get_decompilation(self, file: str, output_path: str) -> str:
+    def get_decompilation(self, file: str) -> str:
+        """Decompile a binary file.
+
+        Arguments:
+            file: The file to decompile.
+
+        Returns:
+            The decompilation as a str of C psuedocode.
+        """
         GHIDRA_PATH: str = os.getenv("GHIDRA_INSTALL_PATH")
         if not GHIDRA_PATH:
             log.error(
@@ -60,11 +69,11 @@ class BinarySplitter(TreeSitterSplitter):
         temp_decomp_file = tempfile.mktemp()
         command = (
             f"{script} . tmp -readOnly -import {file} -scriptPath . -postScript"
-            f" {Path(__file__).parent}/rev_eng/decompile_script.py {os.path.join(output_path, temp_decomp_file)}"
+            f" {Path(__file__).parent}/rev_eng/decompile_script.py {temp_decomp_file}"
         )
 
         self.execute_ghidra_script(command)
-        with open(os.path.join(output_path, "decompilation"), "r") as f:
+        with open(temp_decomp_file) as f:
             decompilation = f.read()
 
         return decompilation
@@ -79,7 +88,7 @@ class BinarySplitter(TreeSitterSplitter):
             A `CodeBlock` made up of nested `CodeBlock`s.
         """
         path = Path(file)
-        code = self.get_decompilation(file, ".")
+        code = self.get_decompilation(file)
 
         root = self._get_ast(code)
         self._set_identifiers(root, path)
