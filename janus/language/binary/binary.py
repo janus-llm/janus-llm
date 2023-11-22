@@ -1,18 +1,16 @@
 import os
-import subprocess
 import platform
-from pathlib import Path
-from typing import List
-from typing import Optional
+import subprocess
 import tempfile
+from pathlib import Path
 
 import tree_sitter
 from langchain.schema.language_model import BaseLanguageModel
 
+from ...utils.enums import LANGUAGES
 from ...utils.logger import create_logger
 from ..block import CodeBlock
 from ..combine import Combiner
-from ..node import NodeType
 from ..treesitter import TreeSitterSplitter
 
 log = create_logger(__name__)
@@ -35,6 +33,7 @@ class BinarySplitter(TreeSitterSplitter):
         """Initialize a BinarySplitter instance.
 
         Arguments:
+            model: The
             max_tokens: The maximum number of tokens supported by the model
         """
         super().__init__(
@@ -62,7 +61,10 @@ class BinarySplitter(TreeSitterSplitter):
         GHIDRA_PATH: str = os.getenv("GHIDRA_INSTALL_PATH")
         if not GHIDRA_PATH:
             log.error(
-                f"Decompilation failed, the GHIDRA_INSTALL_PATH environment variable is not set. Follow the Ghidra installation instructions here: https://ghidra-sre.org/InstallationGuide.html, then run `export GHIDRA_INSTALL_PATH='<path_to_top_level_ghidra_folder>'`"
+                "Decompilation failed, the GHIDRA_INSTALL_PATH environment variable is "
+                "not set. Follow the Ghidra installation instructions here: "
+                "https://ghidra-sre.org/InstallationGuide.html, then run `export "
+                "GHIDRA_INSTALL_PATH='<path_to_top_level_ghidra_folder>'`"
             )
         script: str = GHIDRA_PATH + "support" + "/" + "analyzeHeadless"
 
@@ -133,12 +135,12 @@ class BinarySplitter(TreeSitterSplitter):
         # Store the library in the `build` directory
         tree_sitter_dir = Path.home() / ".tree-sitter"
         tree_sitter_dir.mkdir(exist_ok=True)
-        lang_dir = tree_sitter_dir / f"tree-sitter-c"
+        lang_dir = tree_sitter_dir / "tree-sitter-c"
 
         if not lang_dir.exists():
             github_url = LANGUAGES["c"]["url"]
             if github_url is None:
-                message = f"Tree-sitter does not support c yet."
+                message = "Tree-sitter does not support c yet."
                 log.error(message)
                 raise ValueError(message)
             self._git_clone(github_url, lang_dir)
