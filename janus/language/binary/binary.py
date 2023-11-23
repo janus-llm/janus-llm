@@ -43,13 +43,20 @@ class BinarySplitter(TreeSitterSplitter):
             use_placeholders=False,
         )
 
-    def execute_ghidra_script(self, cmd: str) -> str:
-        """Start a subprocess for headless ghidra to do the actual decompilation"""
+    def _execute_ghidra_script(self, cmd: str) -> str:
+        """Start a subprocess for headless ghidra to do the actual decompilation
+
+        Arguments:
+            cmd: The command to run as a subprocess
+
+        Returns:
+            The Ghidra string output
+        """
         output = subprocess.run(cmd, check=True, shell=True, capture_output=True).stdout
         ghidra_output = output.decode(errors="ignore")
         return ghidra_output
 
-    def get_decompilation(self, file: str) -> str:
+    def _get_decompilation(self, file: str) -> str:
         """Decompile a binary file.
 
         Arguments:
@@ -68,15 +75,21 @@ class BinarySplitter(TreeSitterSplitter):
             )
         script: str = GHIDRA_PATH + "support" + "/" + "analyzeHeadless"
 
-        temp_decomp_file = tempfile.mktemp()
+        fd, temp_decomp_file = tempfile.mkstemp()
         command = (
             f"{script} . tmp -readOnly -import {file} -scriptPath . -postScript"
             f" {Path(__file__).parent}/reveng/decompile_script.py {temp_decomp_file}"
         )
 
-        self.execute_ghidra_script(command)
+        self._execute_ghidra_script(command)
         with open(temp_decomp_file) as f:
             decompilation = f.read()
+
+        fd.close()
+        # Delete the temporary file if it happens to exist
+        tmp_path = Path(temp_decomp_file)
+        if tmp_path.exists():
+            tmp_path.unlink()
 
         return decompilation
 
@@ -90,7 +103,7 @@ class BinarySplitter(TreeSitterSplitter):
             A `CodeBlock` made up of nested `CodeBlock`s.
         """
         path = Path(file)
-        code = self.get_decompilation(file)
+        code = self._get_decompilation(file)
 
         root = self._get_ast(code)
         self._set_identifiers(root, path)
