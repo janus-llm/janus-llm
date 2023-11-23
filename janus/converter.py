@@ -108,12 +108,12 @@ class Converter:
         """
         if self._source_language in CUSTOM_SPLITTERS:
             if self._source_language == "mumps":
-                self.splitter = MumpsSplitter(
+                self._splitter = MumpsSplitter(
                     max_tokens=self._max_tokens,
                     model=self._llm,
                 )
         else:
-            self.splitter = TreeSitterSplitter(
+            self._splitter = TreeSitterSplitter(
                 language=self._source_language,
                 max_tokens=self._max_tokens,
                 model=self._llm,

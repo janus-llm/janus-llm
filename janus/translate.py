@@ -162,7 +162,7 @@ class Translator(Converter):
 
         filename = file.name
         log.info(f"[{filename}] Splitting file")
-        input_block = self.splitter.split(file)
+        input_block = self._splitter.split(file)
         log.info(
             f"[{filename}] File split into {input_block.n_descendents:,} blocks, "
             f"tree of height {input_block.height}"
