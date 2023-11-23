@@ -6,10 +6,10 @@ from typing import Any, Dict, Optional, Set
 from langchain.callbacks import get_openai_callback
 from langchain.schema.vectorstore import VectorStore
 
+from .language.binary import BinarySplitter
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import Combiner
 from .language.mumps import MumpsSplitter
-from .language.binary import BinarySplitter
 from .language.splitter import Splitter
 from .language.treesitter import TreeSitterSplitter
 from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
