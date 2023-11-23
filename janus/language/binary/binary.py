@@ -71,7 +71,7 @@ class BinarySplitter(TreeSitterSplitter):
         temp_decomp_file = tempfile.mktemp()
         command = (
             f"{script} . tmp -readOnly -import {file} -scriptPath . -postScript"
-            f" {Path(__file__).parent}/rev_eng/decompile_script.py {temp_decomp_file}"
+            f" {Path(__file__).parent}/reveng/decompile_script.py {temp_decomp_file}"
         )
 
         self.execute_ghidra_script(command)
