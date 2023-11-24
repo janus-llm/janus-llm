@@ -85,7 +85,7 @@ class BinarySplitter(TreeSitterSplitter):
         with open(temp_decomp_file) as f:
             decompilation = f.read()
 
-        fd.close()
+        os.close(fd)
         # Delete the temporary file if it happens to exist
         tmp_path = Path(temp_decomp_file)
         if tmp_path.exists():
