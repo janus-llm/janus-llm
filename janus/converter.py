@@ -66,7 +66,8 @@ class Converter:
 
         self.set_source_language(source_language=source_language)
 
-        self._load_parameters()
+        # Child class must call this. Should we enforce somehow?
+        # self._load_parameters()
 
     def __setattr__(self, key: Any, value: Any) -> None:
         if hasattr(self, "_changed_attrs"):

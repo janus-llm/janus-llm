@@ -67,15 +67,15 @@ class Translator(Converter):
             target_language=target_language, target_version=target_version
         )
 
-        self._load_parameters_translate()
+        self._load_parameters()
 
         self.max_prompts = max_prompts
 
-    def _load_parameters_translate(self) -> None:
+    def _load_parameters(self) -> None:
         self._load_model()
         self._load_prompt_engine()
         self._load_parser()
-        self._changed_attrs.clear()
+        super()._load_parameters()  # will call self._changed_attrs.clear()
 
     def translate(
         self,

@@ -373,7 +373,7 @@ def test_language_combinations(
     translator.set_target_language(expected_target_language, expected_target_version)
     translator.set_parser_type(parser_type)
     translator.set_prompt(prompt_template)
-
+    translator._load_parameters()
     assert translator._target_language == expected_target_language
     assert translator._target_version == expected_target_version
     assert translator._parser_type == parser_type
