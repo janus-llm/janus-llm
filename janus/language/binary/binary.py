@@ -79,7 +79,9 @@ class BinarySplitter(TreeSitterSplitter):
                 "https://ghidra-sre.org/InstallationGuide.html, then run `export "
                 "GHIDRA_INSTALL_PATH='<path_to_top_level_ghidra_folder>'`"
             )
-        script: str = str(Path(GHIDRA_PATH) / "support" / "analyzeHeadless")
+        script: str = str(
+            Path(GHIDRA_PATH).expanduser().resolve() / "support" / "analyzeHeadless"
+        )
 
         if not Path(script).exists():
             log.error(
