@@ -1,6 +1,6 @@
 import os
 import platform
-import subprocess
+import subprocess  # nosec
 import tempfile
 from pathlib import Path
 
@@ -43,7 +43,7 @@ class BinarySplitter(TreeSitterSplitter):
             use_placeholders=False,
         )
 
-    def _execute_ghidra_script(self, cmd: str) -> str:
+    def _execute_ghidra_script(self, cmd: list[str]) -> str:
         """Start a subprocess for headless ghidra to do the actual decompilation
 
         Arguments:
@@ -52,7 +52,13 @@ class BinarySplitter(TreeSitterSplitter):
         Returns:
             The Ghidra string output
         """
-        output = subprocess.run(cmd, check=True, shell=True, capture_output=True).stdout
+        # We return Bandit B603 here because we are not using shell=True (the more
+        # dangerous option)
+        # But I added nosec to the end of the line to make it clear that we are aware of
+        # the risk
+        output = subprocess.run(
+            cmd, check=True, shell=False, capture_output=True
+        ).stdout  # nosec
         ghidra_output = output.decode(errors="ignore")
         return ghidra_output
 
@@ -73,12 +79,29 @@ class BinarySplitter(TreeSitterSplitter):
                 "https://ghidra-sre.org/InstallationGuide.html, then run `export "
                 "GHIDRA_INSTALL_PATH='<path_to_top_level_ghidra_folder>'`"
             )
-        script: str = GHIDRA_PATH + "support" + "/" + "analyzeHeadless"
+        script: str = str(Path(GHIDRA_PATH) / "support" / "analyzeHeadless")
+
+        if not Path(script).exists():
+            log.error(
+                f"Decompilation failed, the Ghidra script {script} does not exist. "
+                "Please check that the GHIDRA_INSTALL_PATH environment variable is "
+                "set correctly."
+            )
+            raise FileNotFoundError(f"Could not find Ghidra script {script}")
 
         fd, temp_decomp_file = tempfile.mkstemp()
         command = (
-            f"{script} . tmp -readOnly -import {file} -scriptPath . -postScript"
-            f" {Path(__file__).parent}/reveng/decompile_script.py {temp_decomp_file}"
+            script,
+            ".",
+            "tmp",
+            "-readOnly",
+            "-import",
+            file,
+            "-scriptPath",
+            ".",
+            "-postScript",
+            f"{Path(__file__).parent}/reveng/decompile_script.py",
+            temp_decomp_file,
         )
 
         self._execute_ghidra_script(command)

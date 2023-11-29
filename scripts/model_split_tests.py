@@ -28,7 +28,7 @@ parser.add_argument(
 parser.add_argument(
     "--output-dir",
     type=str,
-    default="/tmp/translated",
+    default="translated",
     help="The directory to store the translated code in",
 )
 
