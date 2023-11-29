@@ -1,7 +1,7 @@
+import uuid
 from pathlib import Path
 
 from chromadb.api.models.Collection import Collection
-from langchain.vectorstores import Chroma
 
 from ..converter import Converter
 from ..language.block import CodeBlock
@@ -62,14 +62,13 @@ class Vectorizer(Converter):
                 for collection in self.collections()
                 if collection.startswith(embedding_type.name.lower())
             ]
+            # TODO: do we want to iterate over similarly named collections?
             collection_name = f"{embedding_type.name.lower()}_{len(type_collections) + 1}"
         else:
             collection_name = embedding_type.name.lower()
-        Chroma(collection_name=collection_name, client=self._db)
+        self._db.create_collection(collection_name)
 
-    def collections(
-        self, name: None | EmbeddingType | str = None
-    ) -> list[Collection] | Collection:
+    def collections(self, name: None | EmbeddingType | str = None) -> list[Collection]:
         """Get the Chroma collections for this vectorizer.
 
         Returns:
@@ -81,7 +80,7 @@ class Vectorizer(Converter):
             except ValueError:
                 return []
         elif isinstance(name, EmbeddingType):
-            return self._db.get_collection(name.name.lower())
+            return [self._db.get_collection(name.name.lower())]
         else:
             return self._db.list_collections()
 
@@ -137,12 +136,16 @@ class Vectorizer(Converter):
             the_text = [code_block.text]
             code_block.embedding_id = self._add_text_to_vector_store(
                 embedding_type, the_text, metadatas
-            )
+            )[0]
             return True
         return False
 
     def _add_text_to_vector_store(
-        self, embedding_type: EmbeddingType, texts: list[str], metadatas: list[dict]
+        self,
+        embedding_type: EmbeddingType,
+        texts: list[str],
+        metadatas: list[dict],
+        ids: list[str] = None,
     ) -> list[str]:
         """Helper function that stores a single text (in an array) and associated
         metadatas, returning the embedding id
@@ -151,9 +154,15 @@ class Vectorizer(Converter):
             embedding_type: EmbeddingType to use
             texts: list of texts to store
             metadatas: list of metadatas to store
+            ids: list of embedding ids (must match lengh of texts),
+                 generated if not given by caller
 
         Returns:
             list of embedding ids
         """
-        vector_store = self._embeddings(embedding_type)
-        return vector_store.add_texts(texts, metadatas)[0]
+        if ids is None:
+            # logic from langchain add_texts
+            ids = [str(uuid.uuid1()) for _ in texts]
+        collections = self.collections(embedding_type)
+        collections[0].add(ids=ids, documents=texts, metadatas=metadatas)
+        return ids

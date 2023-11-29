@@ -4,10 +4,11 @@ from typing import Any, Iterable, List, Optional, Type
 
 import pytest
 from langchain.schema import Document
+from langchain.schema.embeddings import Embeddings
 from langchain.schema.vectorstore import VST, VectorStore
 from langchain.vectorstores import Chroma
 
-from ..embedding.embeddings import Embeddings
+from ..embedding.embeddings import EmbeddingsFactory
 from ..translate import Translator
 from ..utils.enums import EmbeddingType
 
@@ -32,7 +33,7 @@ def print_query_results(query, n_results):
     pass
 
 
-class MockVectorStore(VectorStore):
+class MockCollection(VectorStore):
     """Vector store for testing"""
 
     def __init__(self):
@@ -58,17 +59,11 @@ class MockVectorStore(VectorStore):
         raise NotImplementedError("from_texts() not implemented!")
 
 
-class MockEmbeddings(Embeddings):
-    """Embeddings for testing - uses MockVectorStore"""
+class MockEmbeddingsFactory(EmbeddingsFactory):
+    """Embeddings for testing - uses MockCollection"""
 
-    def __init__(self):
-        self._delete_collection_calls = 0
-
-    def create_collection(self, name) -> VectorStore:
-        return MockVectorStore()
-
-    def delete_collection(self, vector_store):
-        self._delete_collection_calls += 1
+    def get_embeddings(self) -> Embeddings:
+        return MockCollection()
 
 
 class TestTranslator(unittest.TestCase):
@@ -87,7 +82,7 @@ class TestTranslator(unittest.TestCase):
 
         self.req_translator = Translator(
             model="gpt-3.5-turbo",
-            embeddings_override=MockEmbeddings(),
+            embeddings_override=MockEmbeddingsFactory(),
             source_language="fortran",
             target_language="text",
             target_version="3.10",
@@ -142,8 +137,8 @@ class TestTranslator(unittest.TestCase):
             "Embeddings data was not cleared when embeddings changed!",
         )
 
-        # test MockVectorStore -> MockVectorStore
-        mock_embeddings = MockEmbeddings()
+        # test MockCollection -> MockCollection
+        mock_embeddings = MockEmbeddingsFactory()
         self.translator.set_embeddings(mock_embeddings)
         self.translator._load_parameters()
         vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
@@ -153,7 +148,7 @@ class TestTranslator(unittest.TestCase):
         )
         self.assertEqual(1, vector_store._add_texts_calls)
 
-        mock_embeddings = MockEmbeddings()
+        mock_embeddings = MockEmbeddingsFactory()
         self.translator.set_embeddings(mock_embeddings)
         self.translator._load_parameters()
         vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
@@ -161,7 +156,7 @@ class TestTranslator(unittest.TestCase):
 
     def test_embed_split_source(self):
         """Characterize _embed method"""
-        mock_embeddings = MockEmbeddings()
+        mock_embeddings = MockEmbeddingsFactory()
         self.translator.set_embeddings(mock_embeddings)
         self.translator._load_parameters()
         input_block = self.translator.splitter.split(self.test_file)
@@ -179,7 +174,7 @@ class TestTranslator(unittest.TestCase):
 
     def test_embed_has_values_for_each_non_empty_node(self):
         """Characterize our sample fortran file"""
-        mock_embeddings = MockEmbeddings()
+        mock_embeddings = MockEmbeddingsFactory()
         self.translator.set_embeddings(mock_embeddings)
         self.translator._load_parameters()
         input_block = self.translator.splitter.split(self.test_file)
@@ -208,7 +203,7 @@ class TestTranslator(unittest.TestCase):
         )
 
     def test_embed_nodes_recursively(self):
-        mock_embeddings = MockEmbeddings()
+        mock_embeddings = MockEmbeddingsFactory()
         self.translator.set_embeddings(mock_embeddings)
         self.translator._load_parameters()
         input_block = self.translator.splitter.split(self.test_file)
@@ -223,7 +218,7 @@ class TestTranslator(unittest.TestCase):
 
     @pytest.mark.slow
     def test_translate_file_adds_source_embeddings(self):
-        mock_embeddings = MockEmbeddings()
+        mock_embeddings = MockEmbeddingsFactory()
         self.translator.set_embeddings(mock_embeddings)
         self.translator._load_parameters()
         vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
