@@ -43,6 +43,8 @@ class Vectorizer(Converter):
         self._embeddings = get_embeddings(model)
         self._db = ChromaEmbeddingDatabase(path)
 
+        super()._load_parameters()
+
     def create_collection(self, embedding_type: EmbeddingType) -> None:
         """Create a Chroma collection for the given embedding type.
 
