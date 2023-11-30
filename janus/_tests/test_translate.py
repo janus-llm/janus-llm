@@ -123,9 +123,7 @@ class TestTranslator(unittest.TestCase):
     def test_changing_embeddings_clears(self):
         # test OpenAIEmbeddings -> GPT4AllEmbeddings
         vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
-        self.translator._add_text_to_vector_store(
-            EmbeddingType.SOURCE, ["hi"], [{"a": 1}]
-        )
+        self.translator.add_text(EmbeddingType.SOURCE, ["hi"], [{"a": 1}])
         self.assertEqual(1, vector_store._collection.count(), "Missing data")
 
         self.translator.set_model("llama")
@@ -143,9 +141,7 @@ class TestTranslator(unittest.TestCase):
         self.translator._load_parameters()
         vector_store = self.translator.embeddings(EmbeddingType.SOURCE)
         self.assertEqual(0, vector_store._add_texts_calls)
-        self.translator._add_text_to_vector_store(
-            EmbeddingType.SOURCE, ["hi"], [{"a": 1}]
-        )
+        self.translator.add_text(EmbeddingType.SOURCE, ["hi"], [{"a": 1}])
         self.assertEqual(1, vector_store._add_texts_calls)
 
         mock_embeddings = MockEmbeddingsFactory()

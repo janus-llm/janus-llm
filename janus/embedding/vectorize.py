@@ -45,7 +45,7 @@ class Vectorizer(Converter):
 
         super()._load_parameters()
 
-    def create_collection(self, embedding_type: EmbeddingType) -> None:
+    def create_collection(self, embedding_type: EmbeddingType) -> Collection:
         """Create a Chroma collection for the given embedding type.
 
         Arguments:
@@ -55,20 +55,21 @@ class Vectorizer(Converter):
         if embedding_type not in EmbeddingType:
             raise ValueError(f"Invalid embedding type: {embedding_type}")
         # Now check if the collection exists
-        if embedding_type in self.collections():
+        type_name = embedding_type.name.lower()
+        similar_collection_names = [
+            item.name for item in self.collections() if item.name.startswith(type_name)
+        ]
+        if type_name in similar_collection_names:
             # If it does, create a new collection with a similar but incremented name
             # ex. "requirement" -> "requirement_1"
             # Count the number of collections with the same embedding type
-            type_collections = [
-                collection
-                for collection in self.collections()
-                if collection.startswith(embedding_type.name.lower())
-            ]
             # TODO: do we want to iterate over similarly named collections?
-            collection_name = f"{embedding_type.name.lower()}_{len(type_collections) + 1}"
+            collection_name = (
+                f"{embedding_type.name.lower()}_{len(similar_collection_names) + 1}"
+            )
         else:
-            collection_name = embedding_type.name.lower()
-        self._db.create_collection(collection_name)
+            collection_name = type_name
+        return self._db.create_collection(collection_name)
 
     def collections(self, name: None | EmbeddingType | str = None) -> list[Collection]:
         """Get the Chroma collections for this vectorizer.
@@ -78,7 +79,7 @@ class Vectorizer(Converter):
         """
         if isinstance(name, str):
             try:
-                return self._db.get_collection(name)
+                return [self._db.get_collection(name)]
             except ValueError:
                 return []
         elif isinstance(name, EmbeddingType):
@@ -136,13 +137,13 @@ class Vectorizer(Converter):
             if code_block.end_point is not None:
                 metadatas[0]["end_line"] = code_block.end_point[0]
             the_text = [code_block.text]
-            code_block.embedding_id = self._add_text_to_vector_store(
-                embedding_type, the_text, metadatas
-            )[0]
+            code_block.embedding_id = self.add_text(embedding_type, the_text, metadatas)[
+                0
+            ]
             return True
         return False
 
-    def _add_text_to_vector_store(
+    def add_text(
         self,
         embedding_type: EmbeddingType,
         texts: list[str],
