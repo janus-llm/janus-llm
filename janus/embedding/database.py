@@ -77,7 +77,7 @@ class ChromaEmbeddingDatabase(object):
 
                         cls.client = chromadb.HttpClient(
                             host=parsed_url.hostname,
-                            port=parsed_url.port,
+                            port=str(parsed_url.port),
                             settings=cls.common_settings,
                         )
                     except ValueError:

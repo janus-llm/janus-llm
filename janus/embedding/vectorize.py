@@ -56,6 +56,8 @@ class Vectorizer(Converter):
             raise ValueError(f"Invalid embedding type: {embedding_type}")
         # Now check if the collection exists
         type_name = embedding_type.name.lower()
+        # TODO: do we want to iterate over similarly named collections in other
+        #  functions in this codebase?
         similar_collection_names = [
             item.name for item in self.collections() if item.name.startswith(type_name)
         ]
@@ -63,12 +65,10 @@ class Vectorizer(Converter):
             # If it does, create a new collection with a similar but incremented name
             # ex. "requirement" -> "requirement_1"
             # Count the number of collections with the same embedding type
-            # TODO: do we want to iterate over similarly named collections?
-            collection_name = (
-                f"{embedding_type.name.lower()}_{len(similar_collection_names) + 1}"
-            )
+            collection_name = f"{type_name}_{len(similar_collection_names) + 1}"
         else:
             collection_name = type_name
+        # TODO: set embedding_function argument to create_collection()
         return self._db.create_collection(collection_name)
 
     def collections(self, name: None | EmbeddingType | str = None) -> list[Collection]:
