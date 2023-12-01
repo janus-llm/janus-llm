@@ -75,13 +75,10 @@ class Vectorizer(Converter):
         """Get the Chroma collections for this vectorizer.
 
         Returns:
-            The Chroma collections for this vectorizer
+            The Chroma collections for this vectorizer. Raises ValueError if not found.
         """
         if isinstance(name, str):
-            try:
-                return [self._db.get_collection(name)]
-            except ValueError:
-                return []
+            return [self._db.get_collection(name)]
         elif isinstance(name, EmbeddingType):
             return [self._db.get_collection(name.name.lower())]
         else:

@@ -53,6 +53,9 @@ class TestVectorize(unittest.TestCase):
             "expected collection name to increment base type",
         )
 
+        self.assertRaises(ValueError, self.vectorizer.collections, "foo")
+        self.assertRaises(ValueError, self.vectorizer.collections, EmbeddingType.SUMMARY)
+
     def test_add_nodes_recursively(self):
         embedding_type = EmbeddingType.SOURCE
         self.vectorizer.create_collection(embedding_type)
