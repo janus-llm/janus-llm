@@ -1,7 +1,9 @@
 import uuid
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Sequence
 
+from chromadb import API
 from chromadb.api.models.Collection import Collection
 
 from ..converter import Converter
@@ -17,22 +19,21 @@ class Vectorizer(Converter):
 
     def __init__(
         self,
-        source_language: str = "fortran",
-        max_tokens: None | int = None,
-        model: None | str = "gpt4all",
-        path: str | Path = Path.home() / ".janus" / "chroma" / "chroma-data",
+        client: API,
+        source_language: str,
+        max_tokens: None | int,
+        model: None | str,
     ) -> None:
         """Initializes the Embedding class
 
         Arguments:
+            client: ChromaDB client instance
             source_language: The source programming language.
             max_tokens: The maximum number of tokens to send to the embedding model at
                 once. If `None`, the `Vectorizer` will use the default value for the
                 `model`.
             model: The name of the model to use. This will also determine the `max_tokens`
                 if that variable is not set.
-            path: The path to the ChromaDB. Can be either a string of a URL or path or a
-                Path object
         """
         if max_tokens is None:
             max_tokens = TOKEN_LIMITS[model]
@@ -41,7 +42,7 @@ class Vectorizer(Converter):
             source_language=source_language,
             max_tokens=max_tokens,
         )
-        self._db = ChromaEmbeddingDatabase(path)
+        self._db = client
         self._collections = Collections(self._db)
 
         super()._load_parameters()
@@ -136,3 +137,45 @@ class Vectorizer(Converter):
         collections = self._collections.get(embedding_type)
         collections[0].add(ids=ids, documents=texts, metadatas=metadatas)
         return ids
+
+
+class VectorizerFactory(ABC):
+    """Interface for creating a Vectorizer independent of type of ChromaDB client"""
+
+    @abstractmethod
+    def create_vectorizer(
+        self,
+        source_language: str,
+        max_tokens: None | int,
+        model: None | str,
+        path: str | Path,
+    ) -> Vectorizer:
+        """Factory method"""
+
+
+class ChromaDBVectorizer(VectorizerFactory):
+    """Factory for Vectorizer that uses ChromaEmbeddingDatabase"""
+
+    def create_vectorizer(
+        self,
+        source_language: str = "fortran",
+        max_tokens: None | int = None,
+        model: None | str = "gpt4all",
+        path: str | Path = Path.home() / ".janus" / "chroma" / "chroma-data",
+    ) -> Vectorizer:
+        """
+        Arguments:
+            source_language: The source programming language.
+            max_tokens: The maximum number of tokens to send to the embedding model at
+                once. If `None`, the `Vectorizer` will use the default value for the
+                `model`.
+            model: The name of the model to use. This will also determine the `max_tokens`
+                if that variable is not set.
+            path: The path to the ChromaDB. Can be either a string of a URL or path or a
+                Path object
+
+            Returns:
+                Vectorizer
+        """
+        database = ChromaEmbeddingDatabase(path)
+        return Vectorizer(database, source_language, max_tokens, model)
