@@ -1,5 +1,4 @@
 import os
-from abc import ABC
 from typing import Sequence
 
 from chromadb.api import API
@@ -11,7 +10,7 @@ from ..utils.enums import EmbeddingType
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
 
 
-class Collections(ABC):
+class Collections:
     """Manage embedding collections"""
 
     def __init__(self, client: API):

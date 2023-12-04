@@ -8,8 +8,8 @@ from ..converter import Converter
 from ..language.block import CodeBlock
 from ..llm.models_info import TOKEN_LIMITS
 from ..utils.enums import EmbeddingType
+from .collections import Collections
 from .database import ChromaEmbeddingDatabase
-from .embeddings import Collections
 
 
 class Vectorizer(Converter):
