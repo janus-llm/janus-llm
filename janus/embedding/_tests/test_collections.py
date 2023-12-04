@@ -1,60 +1,69 @@
-import tempfile
 import unittest
+from unittest.mock import MagicMock
+
+import pytest
 
 from janus.embedding.collections import Collections
-from janus.embedding.database import ChromaEmbeddingDatabase
 from janus.utils.enums import EmbeddingType
 
 
 class TestCollections(unittest.TestCase):
     def setUp(self):
-        # temporarily use file system
-        path = tempfile.gettempdir() + "/janus/test-vectorize"
-        self._db = ChromaEmbeddingDatabase(path)
+        self._db = MagicMock()
         self.collections = Collections(self._db)
 
-    def tearDown(self):
-        self._db.reset()
+    def test_creation(self):
+        self._db.create_collection.return_value = "foo"
 
-    def test_collections(self):
-        embedding_type = EmbeddingType.REQUIREMENT
-        collections = self.collections.get()
-        self.assertEqual(len(collections), 0, "precondition failed")
+        result = self.collections.create(EmbeddingType.PSEUDO)
 
-        orig_collection = self.collections.create(embedding_type)
-        collections = self.collections.get()
-        self.assertEqual(len(collections), 1, "failed to add collection")
-        self.assertEqual(orig_collection, collections[0], "didn't find added collection")
+        self._db.create_collection.assert_called_with("pseudo")
+        self.assertEqual(result, "foo")
 
-        retrieved_collections = self.collections.get(embedding_type)
-        self.assertEqual(len(retrieved_collections), 1, "couldn't find by type")
-        self.assertEqual(
-            orig_collection,
-            retrieved_collections[0],
-            "didn't find correct collection by type",
-        )
+    def test_creation_triangulation(self):
+        self._db.create_collection.return_value = []
 
-        retrieved_collections = self.collections.get(embedding_type.name.lower())
-        self.assertEqual(len(retrieved_collections), 1, "couldn't find by name")
-        self.assertEqual(
-            orig_collection,
-            retrieved_collections[0],
-            "didn't find correct collection by name",
-        )
+        result = self.collections.create(EmbeddingType.REQUIREMENT)
 
-        duplicate_type_collection = self.collections.create(embedding_type)
-        collections = self.collections.get()
-        self.assertEqual(len(collections), 2, "second collection not added")
-        self.assertNotEquals(
-            orig_collection,
-            duplicate_type_collection,
-            "second collection should be separate from original",
-        )
-        self.assertEqual(
-            "requirement_2",
-            duplicate_type_collection.name,
-            "expected collection name to increment base type",
-        )
+        self._db.create_collection.assert_called_with("requirement")
+        self.assertEqual(result, [])
 
-        self.assertRaises(ValueError, self.collections.get, "foo")
-        self.assertRaises(ValueError, self.collections.get, EmbeddingType.SUMMARY)
+    def test_creation_of_existing_type(self):
+        mock_collection = MagicMock()
+        mock_collection.name.__eq__._mock_return_value = True
+        self._db.list_collections.return_value = [mock_collection]
+
+        self.collections.create(EmbeddingType.REQUIREMENT)
+
+        self._db.create_collection.assert_called_with("requirement_2")
+
+    def test_missing_embedding_type(self):
+        with pytest.raises(ValueError):
+            self.collections.create(EmbeddingType(1337))
+
+    def test_get_with_None_name(self):
+        self._db.list_collections.return_value = 1337
+
+        result = self.collections.get()
+
+        self.assertTrue(self._db.list_collections.called)
+        self.assertEqual(result, 1337)
+        self.assertFalse(self._db.get_collection.called)
+
+    def test_get_with_embedding_type(self):
+        self._db.get_collection.return_value = "blah"
+
+        result = self.collections.get(EmbeddingType.SOURCE)
+
+        self._db.get_collection.assert_called_once_with("source")
+        self.assertEqual(result, ["blah"])
+        self.assertFalse(self._db.list_collections.called)
+
+    def test_get_with_string_name(self):
+        self._db.get_collection.return_value = "xxx"
+
+        result = self.collections.get("foo")
+
+        self._db.get_collection.assert_called_with("foo")
+        self.assertEqual(result, ["xxx"])
+        self.assertFalse(self._db.list_collections.called)
