@@ -1,5 +1,6 @@
 import uuid
 from pathlib import Path
+from typing import Sequence
 
 from chromadb.api.models.Collection import Collection
 
@@ -8,7 +9,7 @@ from ..language.block import CodeBlock
 from ..llm.models_info import TOKEN_LIMITS
 from ..utils.enums import EmbeddingType
 from .database import ChromaEmbeddingDatabase
-from .embeddings import get_embeddings
+from .embeddings import Collections
 
 
 class Vectorizer(Converter):
@@ -40,49 +41,18 @@ class Vectorizer(Converter):
             source_language=source_language,
             max_tokens=max_tokens,
         )
-        self._embeddings = get_embeddings(model)
         self._db = ChromaEmbeddingDatabase(path)
+        self._collections = Collections(self._db)
 
         super()._load_parameters()
 
     def create_collection(self, embedding_type: EmbeddingType) -> Collection:
-        """Create a Chroma collection for the given embedding type.
+        return self._collections.create(embedding_type)
 
-        Arguments:
-            embedding_type: The type of embedding to create the vector store for
-        """
-        # First, check if the embedding type exists
-        if embedding_type not in EmbeddingType:
-            raise ValueError(f"Invalid embedding type: {embedding_type}")
-        # Now check if the collection exists
-        type_name = embedding_type.name.lower()
-        # TODO: do we want to iterate over similarly named collections in other
-        #  functions in this codebase?
-        similar_collection_names = [
-            item.name for item in self.collections() if item.name.startswith(type_name)
-        ]
-        if type_name in similar_collection_names:
-            # If it does, create a new collection with a similar but incremented name
-            # ex. "requirement" -> "requirement_1"
-            # Count the number of collections with the same embedding type
-            collection_name = f"{type_name}_{len(similar_collection_names) + 1}"
-        else:
-            collection_name = type_name
-        # TODO: set embedding_function argument to create_collection()
-        return self._db.create_collection(collection_name)
-
-    def collections(self, name: None | EmbeddingType | str = None) -> list[Collection]:
-        """Get the Chroma collections for this vectorizer.
-
-        Returns:
-            The Chroma collections for this vectorizer. Raises ValueError if not found.
-        """
-        if isinstance(name, str):
-            return [self._db.get_collection(name)]
-        elif isinstance(name, EmbeddingType):
-            return [self._db.get_collection(name.name.lower())]
-        else:
-            return self._db.list_collections()
+    def collections(
+        self, name: None | EmbeddingType | str = None
+    ) -> Sequence[Collection]:
+        return self._collections.get(name)
 
     def _add_nodes_recursively(
         self, code_block: CodeBlock, embedding_type: EmbeddingType, file_name: str
@@ -158,11 +128,11 @@ class Vectorizer(Converter):
                  generated if not given by caller
 
         Returns:
-            list of embedding ids
+            list of embedding ids. Raises ValueError if collection not found.
         """
         if ids is None:
             # logic from langchain add_texts
             ids = [str(uuid.uuid1()) for _ in texts]
-        collections = self.collections(embedding_type)
+        collections = self._collections.get(embedding_type)
         collections[0].add(ids=ids, documents=texts, metadatas=metadatas)
         return ids
