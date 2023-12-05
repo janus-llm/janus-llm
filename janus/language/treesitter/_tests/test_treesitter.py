@@ -36,7 +36,13 @@ class TestTreeSitterSplitter(unittest.TestCase):
 
     def test_split_matlab(self):
         """Test the split method."""
-        self.splitter = TreeSitterSplitter(language="matlab", model=self.llm)
+        self.splitter = TreeSitterSplitter(
+            language="matlab",
+            model=self.llm,
+            max_tokens=(4096 // 3)
+            # max_tokens used to be / 3 always in TreeSitterSplitter to leave just as
+            # much space for the prompt as for the translated code.
+        )
         self.combiner = Combiner(language="matlab")
         self.test_file = Path("janus/language/treesitter/_tests/languages/matlab.m")
         self._split()

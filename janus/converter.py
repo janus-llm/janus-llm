@@ -66,7 +66,8 @@ class Converter:
 
         self.set_source_language(source_language=source_language)
 
-        self._load_parameters()
+        # Child class must call this. Should we enforce somehow?
+        # self._load_parameters()
 
     def __setattr__(self, key: Any, value: Any) -> None:
         if hasattr(self, "_changed_attrs"):
@@ -108,12 +109,12 @@ class Converter:
         """
         if self._source_language in CUSTOM_SPLITTERS:
             if self._source_language == "mumps":
-                self.splitter = MumpsSplitter(
+                self._splitter = MumpsSplitter(
                     max_tokens=self._max_tokens,
                     model=self._llm,
                 )
         else:
-            self.splitter = TreeSitterSplitter(
+            self._splitter = TreeSitterSplitter(
                 language=self._source_language,
                 max_tokens=self._max_tokens,
                 model=self._llm,

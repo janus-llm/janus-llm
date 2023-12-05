@@ -1,14 +1,17 @@
+import uuid
+from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Sequence
 
+from chromadb import API
 from chromadb.api.models.Collection import Collection
-from langchain.vectorstores import Chroma
 
 from ..converter import Converter
 from ..language.block import CodeBlock
 from ..llm.models_info import TOKEN_LIMITS
 from ..utils.enums import EmbeddingType
+from .collections import Collections
 from .database import ChromaEmbeddingDatabase
-from .embeddings import get_embeddings
 
 
 class Vectorizer(Converter):
@@ -16,22 +19,21 @@ class Vectorizer(Converter):
 
     def __init__(
         self,
-        source_language: str = "fortran",
-        max_tokens: None | int = None,
-        model: None | str = "gpt4all",
-        path: str | Path = Path.home() / ".janus" / "chroma" / "chroma-data",
+        client: API,
+        source_language: str,
+        max_tokens: None | int,
+        model: None | str,
     ) -> None:
         """Initializes the Embedding class
 
         Arguments:
+            client: ChromaDB client instance
             source_language: The source programming language.
             max_tokens: The maximum number of tokens to send to the embedding model at
                 once. If `None`, the `Vectorizer` will use the default value for the
                 `model`.
             model: The name of the model to use. This will also determine the `max_tokens`
                 if that variable is not set.
-            path: The path to the ChromaDB. Can be either a string of a URL or path or a
-                Path object
         """
         if max_tokens is None:
             max_tokens = TOKEN_LIMITS[model]
@@ -40,50 +42,18 @@ class Vectorizer(Converter):
             source_language=source_language,
             max_tokens=max_tokens,
         )
-        self._embeddings = get_embeddings(model)
-        self._db = ChromaEmbeddingDatabase(path)
+        self._db = client
+        self._collections = Collections(self._db)
 
-    def create_collection(self, embedding_type: EmbeddingType) -> None:
-        """Create a Chroma collection for the given embedding type.
+        super()._load_parameters()
 
-        Arguments:
-            embedding_type: The type of embedding to create the vector store for
-        """
-        # First, check if the embedding type exists
-        if embedding_type not in EmbeddingType:
-            raise ValueError(f"Invalid embedding type: {embedding_type}")
-        # Now check if the collection exists
-        if embedding_type in self.collections():
-            # If it does, create a new collection with a similar but incremented name
-            # ex. "requirement" -> "requirement_1"
-            # Count the number of collections with the same embedding type
-            type_collections = [
-                collection
-                for collection in self.collections()
-                if collection.startswith(embedding_type.name.lower())
-            ]
-            collection_name = f"{embedding_type.name.lower()}_{len(type_collections) + 1}"
-        else:
-            collection_name = embedding_type.name.lower()
-        Chroma(collection_name=collection_name, client=self._db)
+    def create_collection(self, embedding_type: EmbeddingType) -> Collection:
+        return self._collections.create(embedding_type)
 
     def collections(
         self, name: None | EmbeddingType | str = None
-    ) -> list[Collection] | Collection:
-        """Get the Chroma collections for this vectorizer.
-
-        Returns:
-            The Chroma collections for this vectorizer
-        """
-        if isinstance(name, str):
-            try:
-                return self._db.get_collection(name)
-            except ValueError:
-                return []
-        elif isinstance(name, EmbeddingType):
-            return self._db.get_collection(name.name.lower())
-        else:
-            return self._db.list_collections()
+    ) -> Sequence[Collection]:
+        return self._collections.get(name)
 
     def _add_nodes_recursively(
         self, code_block: CodeBlock, embedding_type: EmbeddingType, file_name: str
@@ -135,14 +105,18 @@ class Vectorizer(Converter):
             if code_block.end_point is not None:
                 metadatas[0]["end_line"] = code_block.end_point[0]
             the_text = [code_block.text]
-            code_block.embedding_id = self._add_text_to_vector_store(
-                embedding_type, the_text, metadatas
-            )
+            code_block.embedding_id = self.add_text(embedding_type, the_text, metadatas)[
+                0
+            ]
             return True
         return False
 
-    def _add_text_to_vector_store(
-        self, embedding_type: EmbeddingType, texts: list[str], metadatas: list[dict]
+    def add_text(
+        self,
+        embedding_type: EmbeddingType,
+        texts: list[str],
+        metadatas: list[dict],
+        ids: list[str] = None,
     ) -> list[str]:
         """Helper function that stores a single text (in an array) and associated
         metadatas, returning the embedding id
@@ -151,9 +125,57 @@ class Vectorizer(Converter):
             embedding_type: EmbeddingType to use
             texts: list of texts to store
             metadatas: list of metadatas to store
+            ids: list of embedding ids (must match lengh of texts),
+                 generated if not given by caller
 
         Returns:
-            list of embedding ids
+            list of embedding ids. Raises ValueError if collection not found.
         """
-        vector_store = self._embeddings(embedding_type)
-        return vector_store.add_texts(texts, metadatas)[0]
+        if ids is None:
+            # logic from langchain add_texts
+            ids = [str(uuid.uuid1()) for _ in texts]
+        collections = self._collections.get(embedding_type)
+        collections[0].add(ids=ids, documents=texts, metadatas=metadatas)
+        return ids
+
+
+class VectorizerFactory(ABC):
+    """Interface for creating a Vectorizer independent of type of ChromaDB client"""
+
+    @abstractmethod
+    def create_vectorizer(
+        self,
+        source_language: str,
+        max_tokens: None | int,
+        model: None | str,
+        path: str | Path,
+    ) -> Vectorizer:
+        """Factory method"""
+
+
+class ChromaDBVectorizer(VectorizerFactory):
+    """Factory for Vectorizer that uses ChromaEmbeddingDatabase"""
+
+    def create_vectorizer(
+        self,
+        source_language: str = "fortran",
+        max_tokens: None | int = None,
+        model: None | str = "gpt4all",
+        path: str | Path = Path.home() / ".janus" / "chroma" / "chroma-data",
+    ) -> Vectorizer:
+        """
+        Arguments:
+            source_language: The source programming language.
+            max_tokens: The maximum number of tokens to send to the embedding model at
+                once. If `None`, the `Vectorizer` will use the default value for the
+                `model`.
+            model: The name of the model to use. This will also determine the `max_tokens`
+                if that variable is not set.
+            path: The path to the ChromaDB. Can be either a string of a URL or path or a
+                Path object
+
+            Returns:
+                Vectorizer
+        """
+        database = ChromaEmbeddingDatabase(path)
+        return Vectorizer(database, source_language, max_tokens, model)

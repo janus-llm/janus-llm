@@ -1,30 +1,41 @@
 import unittest
 from pathlib import Path
+from unittest.mock import MagicMock
+
+from chromadb import API
 
 from ...utils.enums import EmbeddingType
-from ..vectorize import Vectorizer
+from ..vectorize import Vectorizer, VectorizerFactory
 
 
-class TestVectorizer(unittest.TestCase):
+class MockDBVectorizer(VectorizerFactory):
+    """Factory for Vectorizer that uses ChromaEmbeddingDatabase"""
+
+    def __init__(self, database: API):
+        self._db = database
+
+    def create_vectorizer(
+        self,
+        source_language: str = "fortran",
+        max_tokens: None | int = None,
+        model: None | str = "gpt4all",
+        path: str | Path = None,
+    ) -> Vectorizer:
+        return Vectorizer(self._db, source_language, max_tokens, model)
+
+
+class TestVectorize(unittest.TestCase):
     def setUp(self):
-        self.vectorizer = Vectorizer(path="/tmp/janus/chroma/chroma-data")
-        self.vectorizer._db.reset()
+        self.database = MagicMock(API)
+        self.vectorizer = MockDBVectorizer(self.database).create_vectorizer()
         self.test_file = Path("janus/language/treesitter/_tests/languages/fortran.f90")
-        self.test_block = self.vectorizer.splitter.split(self.test_file)
-
-    def test_collections(self):
-        embedding_type = EmbeddingType.REQUIREMENT
-        collections = self.vectorizer.collections()
-        self.assertEqual(len(collections), 0)
-        self.vectorizer.create_collection(embedding_type)
-        collections = self.vectorizer.collections()
-        self.assertEqual(len(collections), 1)
-        collection = self.vectorizer.collections(embedding_type.name.lower())
-        self.assertIsNotNone(collection)
+        self.test_block = self.vectorizer._splitter.split(self.test_file)
 
     def test_add_nodes_recursively(self):
         embedding_type = EmbeddingType.SOURCE
+        self.vectorizer.create_collection(embedding_type)
+        self.database.create_collection.assert_called_with("source")
         self.vectorizer._add_nodes_recursively(
             self.test_block, embedding_type, self.test_file.name
         )
-        # assert something here
+        self.database.get_collection.assert_called_with("source")
