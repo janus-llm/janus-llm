@@ -9,7 +9,7 @@ from .language.block import CodeBlock, TranslatedCodeBlock
 from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
 from .parsers.code_parser import PARSER_TYPES, CodeParser, EvaluationParser, JanusParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
-from .utils.enums import LANGUAGES, EmbeddingType
+from .utils.enums import LANGUAGES
 from .utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -38,8 +38,6 @@ class Translator(Converter):
                 `OPENAI_API_KEY` environment variable must be set and the
                 `OPENAI_ORG_ID` environment variable should be set if needed.
             model_arguments: Additional arguments to pass to the LLM constructor.
-            embeddings_override: Hard-code the embeddings rather than picking one
-                based on the model. Leave as None to be based on model.
             source_language: The source programming language.
             target_language: The target programming language.
             target_version: The target version of the target programming language.
@@ -124,21 +122,21 @@ class Translator(Converter):
             if not out_block.translated:
                 continue
 
-            # maybe want target embeddings?
-            if self.outputting_requirements():
-                filename = str(relative)
-                embedding_type = EmbeddingType.REQUIREMENT
-            elif self.outputting_summary():
-                filename = str(relative)
-                embedding_type = EmbeddingType.SUMMARY
-            elif self.outputting_pseudocode():
-                filename = out_path.name
-                embedding_type = EmbeddingType.PSEUDO
-            else:
-                filename = out_path.name
-                embedding_type = EmbeddingType.TARGET
-
-            self._embed_nodes_recursively(out_block, embedding_type, filename)
+            # # maybe want target embeddings?
+            # if self.outputting_requirements():
+            #     filename = str(relative)
+            #     embedding_type = EmbeddingType.REQUIREMENT
+            # elif self.outputting_summary():
+            #     filename = str(relative)
+            #     embedding_type = EmbeddingType.SUMMARY
+            # elif self.outputting_pseudocode():
+            #     filename = out_path.name
+            #     embedding_type = EmbeddingType.PSEUDO
+            # else:
+            #     filename = out_path.name
+            #     embedding_type = EmbeddingType.TARGET
+            #
+            # self._embed_nodes_recursively(out_block, embedding_type, filename)
 
             # Make sure the tree's code has been consolidated at the top level
             #  before writing to file
@@ -168,7 +166,8 @@ class Translator(Converter):
             f"tree of height {input_block.height}"
         )
         log.info(f"[{filename}] Input CodeBlock Structure:\n{input_block.tree_str()}")
-        self._embed_nodes_recursively(input_block, EmbeddingType.SOURCE, filename)
+        # (temporarily?) comment-out adding embeddings; will be moved
+        # self._embed_nodes_recursively(input_block, EmbeddingType.SOURCE, filename)
         output_block = self._iterative_translate(input_block)
         if output_block.translated:
             completeness = output_block.translation_completeness
