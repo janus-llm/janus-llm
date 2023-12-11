@@ -25,13 +25,7 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "url": "https://github.com/tree-sitter/tree-sitter-agda",
         "example": 'postulate HelloWorld : String;\nHelloWorld = "Hello, World!";\n',
     },
-    "asm-ARM": {
-        "comment": "//",
-        "suffix": "s",
-        "url": "https://github.com/SethBarberee/tree-sitter-asm",
-        "example": "add     x0, x24, #1\nmov     x1, x22\nmov     x2, x23\n",
-    },
-    "asm-x86": {
+    "x86asm": {
         "comment": "//",
         "suffix": "s",
         "url": "https://github.com/bearcove/tree-sitter-x86asm",
