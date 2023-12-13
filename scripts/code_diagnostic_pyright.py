@@ -1,6 +1,6 @@
 import argparse
 import json
-import subprocess
+import subprocess  # nosec
 from pathlib import Path
 
 import pandas as pd
@@ -34,7 +34,9 @@ def get_line_analysis(output_dir: Path) -> pd.DataFrame:
 
     # Run pyright on the full output directory, returned in JSON format
     result = subprocess.run(
-        ["pyright", "--outputjson", str(output_dir)], capture_output=True, text=True
+        ["pyright", "--outputjson", str(output_dir)],  # nosec
+        capture_output=True,
+        text=True,
     )
     result = json.loads(result.stdout)
 
@@ -232,7 +234,7 @@ def add_evaluation_file_statistics(file_df: pd.DataFrame, eval_dir: Path) -> pd.
         try:
             obj = json.loads(f.read_text())
             obj = {k.lower(): float(v) for k, v in obj.items()}
-        except Exception:
+        except json.decoder.JSONDecodeError:
             continue
         obj["file"] = str(f.resolve().relative_to(eval_dir).with_suffix(".py"))
         objects.append(obj)

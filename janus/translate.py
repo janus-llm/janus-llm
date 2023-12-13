@@ -6,6 +6,7 @@ from typing import Any, Dict, Optional, Set
 from langchain.callbacks import get_openai_callback
 from langchain.schema.vectorstore import VectorStore
 
+from .language.binary import BinarySplitter
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import Combiner
 from .language.mumps import MumpsSplitter
@@ -590,6 +591,11 @@ class Translator:
         if self._source_language in CUSTOM_SPLITTERS:
             if self._source_language == "mumps":
                 self.splitter = MumpsSplitter(
+                    max_tokens=self._max_tokens,
+                    model=self._llm,
+                )
+            elif self._source_language == "binary":
+                self.splitter = BinarySplitter(
                     max_tokens=self._max_tokens,
                     model=self._llm,
                 )
