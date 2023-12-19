@@ -20,6 +20,7 @@ transformers = "^4.31.0"
 python-dotenv = "^1.0.0"
 chromadb = "^0.4.14"
 gpt4all = "^2.0.2"
+typer = "^0.9.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -44,6 +45,7 @@ pytest-cov = "^4.1.0"
 [tool.black]
 line-length = 90
 target-version = ['py310']
+exclude = "decompile_script.py"
 
 [tool.pydocstyle]
 convention = "google"
@@ -52,8 +54,9 @@ match = '(?![test_|__init]).*\.py'
 
 [tool.pytest.ini_options]
 markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "translate: marks tests as translation tests (deselect with '-m \"not translate\"')",
+    "slow: marks tests as slow (select with '-m slow')",
+    "translate: marks tests as translation tests (select with '-m translate')",
+    "ghidra: marks tests as tests that use a Ghidra executable (select with '-m ghidra')",
 ]
 
 [build-system]

@@ -344,9 +344,9 @@ def test_language_combinations(
     translator.set_parser_type(parser_type)
     translator.set_prompt(prompt_template)
     translator._load_parameters()
-    assert translator._target_language == expected_target_language
-    assert translator._target_version == expected_target_version
-    assert translator._parser_type == parser_type
-    assert translator._splitter.language == source_language
-    assert translator._splitter.model.model_name == "gpt-3.5-turbo-16k"
-    assert translator._prompt_engine._template_name == prompt_template
+    assert translator._target_language == expected_target_language  # nosec
+    assert translator._target_version == expected_target_version  # nosec
+    assert translator._parser_type == parser_type  # nosec
+    assert translator._splitter.language == source_language  # nosec
+    assert translator._splitter.model.model_name == "gpt-3.5-turbo-16k"  # nosec
+    assert translator._prompt_engine._template_name == prompt_template  # nosec
