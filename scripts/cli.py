@@ -12,12 +12,18 @@ from janus.utils.logger import create_logger
 log = create_logger(__name__)
 
 app = typer.Typer(
-    help="Translate code from one language to another using LLMs! This will require an "
-    "OpenAI API key. Set the OPENAI_API_KEY environment variable to your key"
+    help="Choose a command",
+    add_completion=False,
+    no_args_is_help=True,
+    context_settings={"help_option_names": ["-h", "--help"]},
 )
 
 
-@app.command()
+@app.command(
+    help="Translate code from one language to another using LLMs! This will require an "
+    "OpenAI API key. Set the OPENAI_API_KEY environment variable to your key",
+    no_args_is_help=True,
+)
 def translate(
     input_dir: Annotated[
         Path,
@@ -109,6 +115,16 @@ def translate(
         parser_type=parser_type,
     )
     translator.translate(input_dir, output_dir, overwrite)
+
+
+@app.command(help="Add source modules to embeddings database")
+def add():
+    print("TODO")
+
+
+@app.command(help="Do something else")
+def something_else():
+    pass
 
 
 if __name__ == "__main__":
