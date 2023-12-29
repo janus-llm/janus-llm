@@ -23,7 +23,7 @@ class TreeSitterSplitter(Splitter):
     def __init__(
         self,
         language: str,
-        model: BaseLanguageModel,
+        model: None | BaseLanguageModel = None,
         max_tokens: int = 4096,
         use_placeholders: bool = False,
     ) -> None:

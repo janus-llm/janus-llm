@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 from typing import List
 
+import tiktoken
 from langchain.schema.language_model import BaseLanguageModel
 
 from ..utils.logger import create_logger
@@ -28,22 +29,24 @@ class Splitter(FileManager):
     def __init__(
         self,
         language: str,
-        model: BaseLanguageModel,
+        model: None | BaseLanguageModel = None,
         max_tokens: int = 4096,
         use_placeholders: bool = True,
     ):
         """
         Arguments:
+            language: The name of the language to split.
+            model: The name of the model to use for counting tokens. If the model is None,
+                will use tiktoken's default tokenizer to count tokens.
             max_tokens: The maximum number of tokens to use for each functional block.
-            model: The name of the model to use for translation.
+            use_placeholders: Whether to use placeholders when splitting the code.
         """
         super().__init__(language=language)
         self.model = model
-        self.use_placeholders = use_placeholders
-
-        # Divide max_tokens by 3 because we want to leave just as much space for the
-        # prompt as for the translated code.
-        self.max_tokens: int = max_tokens // 3
+        if self.model is None:
+            self._encoding = tiktoken.get_encoding("cl100k_base")
+        self.use_placeholders: bool = use_placeholders
+        self.max_tokens: int = max_tokens
 
     def split(self, file: Path | str) -> CodeBlock:
         """Split the given file into functional code blocks.
@@ -275,13 +278,18 @@ class Splitter(FileManager):
     def _count_tokens(self, code: str) -> int:
         """Count the number of tokens in the given text.
 
+        Will use tiktoken if a model is not specified.
+
         Arguments:
             code: The text to count the number of tokens in.
 
         Returns:
             The number of tokens in the given text.
         """
-        return self.model.get_num_tokens(code)
+        if self.model is not None:
+            return self.model.get_num_tokens(code)
+        else:
+            return len(self._encoding.encode(code))
 
     def _segment_leaves(self, node: CodeBlock):
         """Given a root node, recurse to the leaf nodes of the tree and, if they
@@ -297,6 +305,9 @@ class Splitter(FileManager):
             for child in node.children:
                 self._segment_leaves(child)
             return
+
+        if node.start_point is None or node.end_point is None:
+            raise ValueError("Node has no start or end point")
 
         split_text = re.split(r"(\n+)", node.text)
         betweens = split_text[1::2]

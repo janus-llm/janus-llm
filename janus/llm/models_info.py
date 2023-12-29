@@ -68,6 +68,8 @@ TOKEN_LIMITS: Dict[str, int] = {
     "gpt-3.5-turbo": 4096,
     "gpt-3.5-turbo-16k": 16_384,
     "falcon": 32_000,
+    "text-embedding-ada-002": 8191,
+    "gpt4all": 16_384,
 }
 
 COST_PER_MODEL: Dict[str, Dict[str, float]] = {

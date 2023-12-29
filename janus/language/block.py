@@ -1,5 +1,5 @@
 from functools import total_ordering
-from typing import ForwardRef, Hashable, List, Optional, Tuple
+from typing import ForwardRef, Hashable
 
 from ..utils.logger import create_logger
 from .node import NodeType
@@ -33,32 +33,32 @@ class CodeBlock:
     def __init__(
         self,
         id: Hashable,
-        name: Optional[str],
+        name: None | str,
         type: NodeType,
         language: str,
-        text: Optional[str],
-        start_point: Optional[Tuple[int, int]],
-        end_point: Optional[Tuple[int, int]],
-        start_byte: Optional[int],
-        end_byte: Optional[int],
+        text: None | str,
+        start_point: None | tuple[int, int],
+        end_point: None | tuple[int, int],
+        start_byte: None | int,
+        end_byte: None | int,
         tokens: int,
-        children: List[ForwardRef("CodeBlock")],
-        embedding_id: Optional[str] = None,
-        affixes: Tuple[str, str] = ("", ""),
+        children: list[ForwardRef("CodeBlock")],
+        embedding_id: None | str = None,
+        affixes: tuple[str, str] = ("", ""),
     ) -> None:
         self.id: Hashable = id
-        self.name: Optional[str] = name
+        self.name: None | str = name
         self.type: NodeType = type
         self.language: str = language
-        self.text: Optional[str] = text
-        self.start_point: Optional[Tuple[int, int]] = start_point
-        self.end_point: Optional[Tuple[int, int]] = end_point
-        self.start_byte: Optional[int] = start_byte
-        self.end_byte: Optional[int] = end_byte
+        self.text: None | str = text
+        self.start_point: None | tuple[int, int] = start_point
+        self.end_point: None | tuple[int, int] = end_point
+        self.start_byte: None | [int] = start_byte
+        self.end_byte: None | [int] = end_byte
         self.tokens: int = tokens
-        self.children: List[ForwardRef("CodeBlock")] = sorted(children)
-        self.embedding_id: Optional[str] = embedding_id
-        self.affixes: Tuple[str, str] = affixes
+        self.children: list[ForwardRef("CodeBlock")] = sorted(children)
+        self.embedding_id: None | [str] = embedding_id
+        self.affixes: tuple[str, str] = affixes
 
         self.complete = True
         self.omit_prefix = True
@@ -130,7 +130,7 @@ class CodeBlock:
         """
         return self.tokens + sum(c.total_tokens for c in self.children)
 
-    def pop_prefix(self):
+    def pop_prefix(self) -> str:
         """Get this block's prefix and remove it from the block. This may be used
         to transfer the prefix from the first child of a node to its parent.
         """
@@ -138,7 +138,7 @@ class CodeBlock:
         self.affixes = ("", self.affixes[1])
         return prefix
 
-    def pop_suffix(self):
+    def pop_suffix(self) -> str:
         """Get this block's suffix and remove it from the block. This may be used
         to transfer the suffix from the first child of a node to its parent.
         """

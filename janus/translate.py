@@ -1,22 +1,15 @@
-import functools
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Optional, Set
+from typing import Any, Dict, Set
 
 from langchain.callbacks import get_openai_callback
-from langchain.schema.vectorstore import VectorStore
 
-from .language.binary import BinarySplitter
+from .converter import Converter, run_if_changed
 from .language.block import CodeBlock, TranslatedCodeBlock
-from .language.combine import Combiner
-from .language.mumps import MumpsSplitter
-from .language.splitter import Splitter
-from .language.treesitter import TreeSitterSplitter
 from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
-from .llm.embeddings import Embeddings, get_embeddings_factory
 from .parsers.code_parser import PARSER_TYPES, CodeParser, EvaluationParser, JanusParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
-from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES, EmbeddingType
+from .utils.enums import LANGUAGES
 from .utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -24,33 +17,13 @@ log = create_logger(__name__)
 VALID_MODELS: Set[str] = set(MODEL_CONSTRUCTORS).intersection(MODEL_DEFAULT_ARGUMENTS)
 
 
-def run_if_changed(*tracked_vars):
-    """Wrapper to skip function calls if the given instance attributes haven't
-    been updated. Requires the _changed_attrs set to exist, and the __setattr__
-    method to be overridden to track parameter updates in _changed_attrs.
-    """
-
-    def wrapper(func):
-        @functools.wraps(func)
-        def wrapped(self, *args, **kwargs):
-            # If there is overlap between the tracked variables and the changed
-            #  ones, then call the function as normal
-            if self._changed_attrs.intersection(tracked_vars):
-                func(self, *args, **kwargs)
-
-        return wrapped
-
-    return wrapper
-
-
-class Translator:
+class Translator(Converter):
     """A class that translates code from one programming language to another."""
 
     def __init__(
         self,
         model: str = "gpt-3.5-turbo",
         model_arguments: Dict[str, Any] = {},
-        embeddings_override: Embeddings = None,
         source_language: str = "fortran",
         target_language: str = "python",
         target_version: str = "3.10",
@@ -65,8 +38,6 @@ class Translator:
                 `OPENAI_API_KEY` environment variable must be set and the
                 `OPENAI_ORG_ID` environment variable should be set if needed.
             model_arguments: Additional arguments to pass to the LLM constructor.
-            embeddings_override: Hard-code the embeddings rather than picking one
-                based on the model. Leave as None to be based on model.
             source_language: The source programming language.
             target_language: The target programming language.
             target_version: The target version of the target programming language.
@@ -76,28 +47,20 @@ class Translator:
             parser_type: The type of parser to use for parsing the LLM output. Valid
                 values are "code" (default), "text", and "eval".
         """
-        self._changed_attrs: set = set()
+        super().__init__(source_language=source_language)
 
-        self._parser_type: Optional[str]
-        self._model_name: Optional[str]
-        self._custom_model_arguments: Optional[Dict[str, Any]]
-        self._embeddings_override: Optional[Embeddings]
-        self._source_language: Optional[str]
-        self._source_glob: Optional[str]
-        self._target_language: Optional[str]
-        self._target_version: Optional[str]
-        self._target_glob: Optional[str]
-        self._prompt_template_name: Optional[str]
-        self._parser: Optional[JanusParser]
-        self._splitter: Optional[Splitter]
-
-        self._combiner: Combiner = Combiner()
+        self._parser_type: None | str
+        self._parser: None | JanusParser
+        self._model_name: None | str
+        self._custom_model_arguments: None | Dict[str, Any]
+        self._target_language: None | str
+        self._target_version: None | str
+        self._target_glob: None | str
+        self._prompt_template_name: None | str
 
         self.set_model(model_name=model, **model_arguments)
-        self.set_embeddings(embeddings_override=embeddings_override)
-        self.set_prompt(prompt_template=prompt_template)
         self.set_parser_type(parser_type=parser_type)
-        self.set_source_language(source_language=source_language)
+        self.set_prompt(prompt_template=prompt_template)
         self.set_target_language(
             target_language=target_language, target_version=target_version
         )
@@ -106,22 +69,11 @@ class Translator:
 
         self.max_prompts = max_prompts
 
-    def __setattr__(self, key: Any, value: Any) -> None:
-        if hasattr(self, "_changed_attrs"):
-            if not hasattr(self, key) or getattr(self, key) != value:
-                self._changed_attrs.add(key)
-        # Avoid infinite recursion
-        elif key != "_changed_attrs":
-            self._changed_attrs = set()
-        super().__setattr__(key, value)
-
     def _load_parameters(self) -> None:
         self._load_model()
         self._load_prompt_engine()
-        self._load_splitter()
         self._load_parser()
-        self._load_embeddings()
-        self._changed_attrs.clear()
+        super()._load_parameters()  # will call self._changed_attrs.clear()
 
     def translate(
         self,
@@ -170,21 +122,21 @@ class Translator:
             if not out_block.translated:
                 continue
 
-            # maybe want target embeddings?
-            if self.outputting_requirements():
-                filename = str(relative)
-                embedding_type = EmbeddingType.REQUIREMENT
-            elif self.outputting_summary():
-                filename = str(relative)
-                embedding_type = EmbeddingType.SUMMARY
-            elif self.outputting_pseudocode():
-                filename = out_path.name
-                embedding_type = EmbeddingType.PSEUDO
-            else:
-                filename = out_path.name
-                embedding_type = EmbeddingType.TARGET
-
-            self._embed_nodes_recursively(out_block, embedding_type, filename)
+            # # maybe want target embeddings?
+            # if self.outputting_requirements():
+            #     filename = str(relative)
+            #     embedding_type = EmbeddingType.REQUIREMENT
+            # elif self.outputting_summary():
+            #     filename = str(relative)
+            #     embedding_type = EmbeddingType.SUMMARY
+            # elif self.outputting_pseudocode():
+            #     filename = out_path.name
+            #     embedding_type = EmbeddingType.PSEUDO
+            # else:
+            #     filename = out_path.name
+            #     embedding_type = EmbeddingType.TARGET
+            #
+            # self._embed_nodes_recursively(out_block, embedding_type, filename)
 
             # Make sure the tree's code has been consolidated at the top level
             #  before writing to file
@@ -208,13 +160,14 @@ class Translator:
 
         filename = file.name
         log.info(f"[{filename}] Splitting file")
-        input_block = self.splitter.split(file)
+        input_block = self._splitter.split(file)
         log.info(
             f"[{filename}] File split into {input_block.n_descendents:,} blocks, "
             f"tree of height {input_block.height}"
         )
         log.info(f"[{filename}] Input CodeBlock Structure:\n{input_block.tree_str()}")
-        self._embed_nodes_recursively(input_block, EmbeddingType.SOURCE, filename)
+        # (temporarily?) comment-out adding embeddings; will be moved
+        # self._embed_nodes_recursively(input_block, EmbeddingType.SOURCE, filename)
         output_block = self._iterative_translate(input_block)
         if output_block.translated:
             completeness = output_block.translation_completeness
@@ -231,90 +184,6 @@ class Translator:
                 f"  Total retries: {output_block.total_retries:,d}\n"
             )
         return output_block
-
-    def embeddings(self, embedding_type: EmbeddingType) -> VectorStore:
-        """Get the Chroma vector store for the given embedding type.
-
-        Arguments:
-            embedding_type: The type of embedding to get the vector store for
-
-        Returns:
-            The Chroma vector store for the given embedding type
-        """
-        return self._collections[embedding_type]
-
-    def _embed_nodes_recursively(
-        self, code_block: CodeBlock, embedding_type: EmbeddingType, file_name: str
-    ) -> None:
-        """Embed all nodes in the tree rooted at `code_block`
-
-        Arguments:
-            code_block: CodeBlock to embed
-            embedding_type: EmbeddingType to use
-            file_name: Name of file containing `code_block`
-        """
-        nodes = [code_block]
-        while nodes:
-            node = nodes.pop(0)
-            self._embed(node, embedding_type, file_name)
-            nodes.extend(node.children)
-
-    def _embed(
-        self,
-        code_block: CodeBlock,
-        embedding_type: EmbeddingType,
-        file_name: str  # perhaps this should be a relative path from the source, but for
-        # now we're all in 1 directory
-    ) -> bool:
-        """Calculate code_block embedding, returning success & storing in embedding_id
-
-        Arguments:
-            code_block: CodeBlock to embed
-            embedding_type: EmbeddingType to use
-            file_name: Name of file containing `code_block`
-
-        Returns:
-            True if embedding was successful, False otherwise
-        """
-        if code_block.text:
-            metadatas = [
-                {
-                    "type": code_block.type,
-                    "original_filename": file_name,
-                    "tokens": code_block.tokens,
-                    "cost": 0,  # TranslatedCodeBlock has cost
-                },
-            ]
-            # for now, dealing with missing metadata by skipping it
-            if code_block.text is not None:
-                metadatas[0]["hash"] = hash(code_block.text)
-            if code_block.start_point is not None:
-                metadatas[0]["start_line"] = code_block.start_point[0]
-            if code_block.end_point is not None:
-                metadatas[0]["end_line"] = code_block.end_point[0]
-            the_text = [code_block.text]
-            code_block.embedding_id = self._add_text_to_vector_store(
-                embedding_type, the_text, metadatas
-            )
-            return True
-        return False
-
-    def _add_text_to_vector_store(
-        self, embedding_type: EmbeddingType, texts: list[str], metadatas: list[dict]
-    ) -> list[str]:
-        """Helper function that stores a single text (in an array) and associated
-        metadatas, returning the embedding id
-
-        Arguments:
-            embedding_type: EmbeddingType to use
-            texts: list of texts to store
-            metadatas: list of metadatas to store
-
-        Returns:
-            list of embedding ids
-        """
-        vector_store = self.embeddings(embedding_type)
-        return vector_store.add_texts(texts, metadatas)[0]
 
     def outputting_requirements(self) -> bool:
         """Is the output of the translator a requirements file?"""
@@ -395,6 +264,14 @@ class Translator:
         prompt = self._prompt_engine.create(block.original)
         top_score = -1.0
 
+        if self._llm is None:
+            message = (
+                "Model not configured correctly, cannot translate. Try setting "
+                "the model"
+            )
+            log.error(message)
+            raise ValueError(message)
+
         # Retry the request up to max_prompts times before failing
         for _ in range(self.max_prompts + 1):
             output = self._llm.predict_messages(prompt)
@@ -457,20 +334,21 @@ class Translator:
         self._model_name = model_name
         self._custom_model_arguments = custom_arguments
 
-    def set_embeddings(self, embeddings_override: Embeddings) -> None:
-        """Validate and set the Embeddings factory.
+    def set_parser_type(self, parser_type: str) -> None:
+        """Validate and set the parser type.
 
         The affected objects will not be updated until translate() is called.
 
         Arguments:
-            embeddings_override: Hard-code the embeddings rather than picking one
-                based on the model. Leave as None to be based on model."""
-        if not embeddings_override:
-            self._embeddings_override = None
-        elif not isinstance(embeddings_override, Embeddings):
-            raise ValueError(f"Can't set Embeddings as type {type(embeddings_override)}")
-        else:
-            self._embeddings_override = embeddings_override
+            parser_type: The type of parser to use for parsing the LLM output. Valid
+                values are "code" (default), "text", and "eval".
+        """
+        if parser_type not in PARSER_TYPES:
+            raise ValueError(
+                f'Unsupported parser type "{parser_type}". Valid types: '
+                f"{PARSER_TYPES}"
+            )
+        self._parser_type = parser_type
 
     def set_prompt(self, prompt_template: str | Path) -> None:
         """Validate and set the prompt template name.
@@ -482,24 +360,6 @@ class Translator:
                 (see janus/prompts/templates) or path to a directory.
         """
         self._prompt_template_name = prompt_template
-
-    def set_source_language(self, source_language: str) -> None:
-        """Validate and set the source language.
-
-        The affected objects will not be updated until translate() is called.
-
-        Arguments:
-            source_language: The source programming language.
-        """
-        source_language = source_language.lower()
-        if source_language not in LANGUAGES:
-            raise ValueError(
-                f"Invalid source language: {source_language}. "
-                "Valid source languages are found in `janus.utils.enums.LANGUAGES`."
-            )
-
-        self._source_glob = f"**/*.{LANGUAGES[source_language]['suffix']}"
-        self._source_language = source_language
 
     def set_target_language(self, target_language: str, target_version: str) -> None:
         """Validate and set the target language.
@@ -520,22 +380,6 @@ class Translator:
         self._target_language = target_language
         self._target_version = target_version
 
-    def set_parser_type(self, parser_type: str) -> None:
-        """Validate and set the parser type.
-
-        The affected objects will not be updated until translate() is called.
-
-        Arguments:
-            parser_type: The type of parser to use for parsing the LLM output. Valid
-                values are "code" (default), "text", and "eval".
-        """
-        if parser_type not in PARSER_TYPES:
-            raise ValueError(
-                f'Unsupported parser type "{parser_type}". Valid types: '
-                f"{PARSER_TYPES}"
-            )
-        self._parser_type = parser_type
-
     @run_if_changed("_model_name", "_custom_model_arguments")
     def _load_model(self):
         """Load the model according to this instance's attributes.
@@ -550,7 +394,35 @@ class Translator:
 
         # Load the model
         self._llm = MODEL_CONSTRUCTORS[self._model_name](**model_arguments)
-        self._max_tokens = TOKEN_LIMITS.get(self._model_name, 4096)
+        # Set the max_tokens to less than half the model's limit to allow for enough
+        # tokens at output
+        self._max_tokens = TOKEN_LIMITS.get(self._model_name, 4096) // 2.5
+
+    @run_if_changed("_parser_type", "_target_language")
+    def _load_parser(self) -> None:
+        """Load the parser according to this instance's attributes.
+
+        If the relevant fields have not been changed since the last time this method was
+        called, nothing happens.
+        """
+        if "text" == self._target_language and self._parser_type != "text":
+            raise ValueError(
+                f"Target language ({self._target_language}) suggests target "
+                f"parser should be 'text', but is '{self._parser_type}'"
+            )
+        if "code" == self._parser_type:
+            self.parser = CodeParser(language=self._target_language)
+        elif "eval" == self._parser_type:
+            self.parser = EvaluationParser(
+                expected_keys={"syntax", "style", "completeness", "correctness"}
+            )
+        elif "text" == self._parser_type:
+            self.parser = JanusParser()
+        else:
+            raise ValueError(
+                f"Unsupported parser type: {self._parser_type}. Can be: "
+                f"{PARSER_TYPES}"
+            )
 
     @run_if_changed(
         "_prompt_template_name", "_source_language", "_target_language", "_target_version"
@@ -580,77 +452,3 @@ class Translator:
             target_version=self._target_version,
             prompt_template=self._prompt_template_name,
         )
-
-    @run_if_changed("_source_language", "_max_tokens", "_llm")
-    def _load_splitter(self) -> None:
-        """Load the splitter according to this instance's attributes.
-
-        If the relevant fields have not been changed since the last time this method was
-        called, nothing happens.
-        """
-        if self._source_language in CUSTOM_SPLITTERS:
-            if self._source_language == "mumps":
-                self.splitter = MumpsSplitter(
-                    max_tokens=self._max_tokens,
-                    model=self._llm,
-                )
-            elif self._source_language == "binary":
-                self.splitter = BinarySplitter(
-                    max_tokens=self._max_tokens,
-                    model=self._llm,
-                )
-        else:
-            self.splitter = TreeSitterSplitter(
-                language=self._source_language,
-                max_tokens=self._max_tokens,
-                model=self._llm,
-            )
-
-    @run_if_changed("_parser_type", "_target_language")
-    def _load_parser(self) -> None:
-        """Load the parser according to this instance's attributes.
-
-        If the relevant fields have not been changed since the last time this method was
-        called, nothing happens.
-        """
-        if "text" == self._target_language and self._parser_type != "text":
-            raise ValueError(
-                f"Target language ({self._target_language}) suggests target "
-                f"parser should be 'text', but is '{self._parser_type}'"
-            )
-        if "code" == self._parser_type:
-            self.parser = CodeParser(language=self._target_language)
-        elif "eval" == self._parser_type:
-            self.parser = EvaluationParser(
-                expected_keys={"syntax", "style", "completeness", "correctness"}
-            )
-        elif "text" == self._parser_type:
-            self.parser = JanusParser()
-        else:
-            raise ValueError(
-                f"Unsupported parser type: {self._parser_type}. Can be: "
-                f"{PARSER_TYPES}"
-            )
-
-    @run_if_changed("_model_name", "_embeddings_override")
-    def _load_embeddings(self) -> None:
-        """Load the embeddings according to this instance's attributes.
-
-        If the relevant fields have not been changed since the last time this method was
-        called, nothing happens.
-        """
-        # clean up
-        if hasattr(self, "_collections"):
-            for key in self._collections:
-                self._embeddings.delete_collection(self._collections[key])
-
-        if self._embeddings_override:
-            self._embeddings = self._embeddings_override
-        else:
-            self._embeddings = get_embeddings_factory(self._llm)
-
-        self._collections = {}
-        for key in EmbeddingType:
-            self._collections[key] = self._embeddings.create_collection(
-                f"{key.name}-{id(self)}"
-            )
