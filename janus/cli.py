@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 import click
 import typer
@@ -10,6 +11,21 @@ from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
+
+homedir = Path.home()
+
+janus_dir = os.path.join(homedir, ".janus")
+if not os.path.exists(janus_dir):
+    os.mkdir(janus_dir)
+
+db_file = os.path.join(janus_dir, ".db")
+if not os.path.exists(db_file):
+    with open(db_file, 'w') as f:
+        f.write(str(os.path.join(janus_dir, "chroma.db")))
+
+with open(db_file, 'r') as f:
+    db_loc = f.read()
+
 
 app = typer.Typer(
     help="Choose a command",
@@ -125,6 +141,27 @@ def add():
 @app.command(help="Do something else")
 def something_else():
     pass
+
+@app.command()
+def db(cmd: str, path: str = str(os.path.join(janus_dir, "chroma.db")), url: str = ""):
+    global db_file
+    if cmd == "init":
+        if url != "":
+            print(f"Setting chroma db to use {url}")
+            with open(db_file, 'w') as f:
+                f.write(url)
+            db_file = url
+        else:
+            path = os.path.abspath(path)
+            print(f"Setting chroma db to use {path}")
+            with open(db_file, 'w') as f:
+                f.write(path)
+            db_file = path
+        #TODO: Create chroma database if it doesn't exist
+    elif cmd == "status":
+        print(f"Chroma DB currently pointing to {db_loc}")
+    else:
+        print("Please provide either init or status to db command")
 
 
 if __name__ == "__main__":
