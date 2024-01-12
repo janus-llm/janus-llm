@@ -7,8 +7,10 @@ from typing_extensions import Annotated
 
 from janus.parsers.code_parser import PARSER_TYPES
 from janus.translate import VALID_MODELS, Translator
-from janus.utils.enums import LANGUAGES
+from janus.utils.enums import LANGUAGES, EmbeddingType
 from janus.utils.logger import create_logger
+from janus.embedding.database import ChromaEmbeddingDatabase
+from janus.embedding.collections import Collections
 
 log = create_logger(__name__)
 
@@ -144,24 +146,39 @@ def something_else():
 
 @app.command()
 def db(cmd: str, path: str = str(os.path.join(janus_dir, "chroma.db")), url: str = ""):
-    global db_file
+    global db_loc
     if cmd == "init":
         if url != "":
             print(f"Setting chroma db to use {url}")
             with open(db_file, 'w') as f:
                 f.write(url)
-            db_file = url
+            db_loc = url
         else:
             path = os.path.abspath(path)
             print(f"Setting chroma db to use {path}")
             with open(db_file, 'w') as f:
                 f.write(path)
-            db_file = path
+            db_loc = path
+        global embedding_db
+        embedding_db = ChromaEmbeddingDatabase(db_loc)
         #TODO: Create chroma database if it doesn't exist
     elif cmd == "status":
         print(f"Chroma DB currently pointing to {db_loc}")
     else:
         print("Please provide either init or status to db command")
+
+@app.command()
+def ls():
+    db = ChromaEmbeddingDatabase(db_loc)
+    collections = Collections(db)
+    print(collections.get())
+
+@app.command()
+def add(collection_name: str, input_dir: str = "./", input_lang: str = "python"):
+    db = ChromaEmbeddingDatabase(db_loc)
+    collections = Collections(db)
+    collections.create(EmbeddingType.SOURCE)
+    print(collections.get(EmbeddingType.SOURCE).get())
 
 
 if __name__ == "__main__":
