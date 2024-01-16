@@ -177,8 +177,19 @@ def ls():
 def add(collection_name: str, input_dir: str = "./", input_lang: str = "python"):
     db = ChromaEmbeddingDatabase(db_loc)
     collections = Collections(db)
-    collections.create(EmbeddingType.SOURCE)
-    print(collections.get(EmbeddingType.SOURCE).get())
+    collection = collections.get(EmbeddingType.SOURCE)
+    if len(collection) == 0:
+        collections.create(EmbeddingType.SOURCE)
+        collection = collections.get(EmbeddingType.SOURCE)[0]
+    else:
+        collection = collection[0]
+    suffix = LANGUAGES[input_lang]["suffix"]
+    for fname in os.listdir(input_dir):
+        if fname.endswith(suffix):
+            absolute_path = os.path.abspath(os.path.join(input_dir, fname))
+            with open(os.path.join(input_dir, fname), 'r') as f:
+                file_contents = f.read()
+            collection.upsert(ids=[absolute_path], metadatas=[{"language": input_lang}], documents=[file_contents])
 
 
 if __name__ == "__main__":
