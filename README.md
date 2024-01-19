@@ -40,4 +40,3 @@ poetry install --no-dev
 
 See our contributing pages:
 * [For MITRE Employees](https://cem-llm.pages.mitre.org/janus/contributing.html#contributing-for-mitre-employees)
-* [Open Source](https://mitrefireline.github.io/janus/contributing.html)

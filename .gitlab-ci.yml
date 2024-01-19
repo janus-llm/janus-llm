@@ -6,8 +6,6 @@ before_script:
   - curl -sSkL https://install.python-poetry.org | python -
   - export PATH=$PATH:$HOME/.local/bin
   - poetry --version
-  - DEBIAN_FRONTEND=noninteractive apt update
-  - DEBIAN_FRONTEND=noninteractive apt -y install libgl1-mesa-dev
 
 .install_dev:
   script:
@@ -25,8 +23,6 @@ stages:
 ###################
 flake8:
   stage: Static Analysis
-  tags:
-    - lslab
   script:
     - poetry install --only dev
     - poetry run flake8 --config=.flake8 .
@@ -41,8 +37,6 @@ flake8:
 
 black:
   stage: Static Analysis
-  tags:
-    - lslab
   script:
     - poetry install --only dev
     - poetry run black --check --config pyproject.toml ./
@@ -56,8 +50,6 @@ black:
 
 isort:
   stage: Static Analysis
-  tags:
-    - lslab
   script:
     - poetry install --only dev
     - poetry run isort --check --profile black --trailing-comma -m=3 .
@@ -74,8 +66,6 @@ isort:
 ############
 bandit:
   stage: Security
-  tags:
-    - lslab
   script:
     - poetry install --only dev
     - poetry run bandit -r .
@@ -93,8 +83,6 @@ bandit:
 ##############
 coverage:
   stage: Tests
-  tags:
-    - lslab
   variables:
     GIT_SSL_NO_VERIFY: '1'
     "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt"
@@ -133,8 +121,6 @@ coverage:
 
 test-pages:
   stage: Documentation
-  tags:
-    - lslab
   extends: .pages
   needs: []
   artifacts:
@@ -152,8 +138,6 @@ test-pages:
 
 pages:
   stage: Documentation
-  tags:
-    - lslab
   extends: .pages
   artifacts:
     paths:
@@ -182,8 +166,6 @@ pages:
 
 test-release:
   stage: Release
-  tags:
-    - lslab
   script:
     - poetry build
     - poetry run pip install -U dist/*.whl
@@ -200,8 +182,6 @@ test-release:
 
 release-artifactory:
   stage: Release
-  tags:
-    - lslab
   script:
     - !reference [.check_version_and_commit, script]
     - poetry build
