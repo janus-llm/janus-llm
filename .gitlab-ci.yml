@@ -23,6 +23,8 @@ stages:
 ###################
 flake8:
   stage: Static Analysis
+  tags:
+    - docker
   script:
     - poetry install --only dev
     - poetry run flake8 --config=.flake8 .
@@ -37,6 +39,8 @@ flake8:
 
 black:
   stage: Static Analysis
+  tags:
+    - docker
   script:
     - poetry install --only dev
     - poetry run black --check --config pyproject.toml ./
@@ -50,6 +54,8 @@ black:
 
 isort:
   stage: Static Analysis
+  tags:
+    - docker
   script:
     - poetry install --only dev
     - poetry run isort --check --profile black --trailing-comma -m=3 .
@@ -66,6 +72,8 @@ isort:
 ############
 bandit:
   stage: Security
+  tags:
+    - docker
   script:
     - poetry install --only dev
     - poetry run bandit -r .
@@ -83,6 +91,8 @@ bandit:
 ##############
 coverage:
   stage: Tests
+  tags:
+    - docker
   variables:
     GIT_SSL_NO_VERIFY: '1'
     "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt"
@@ -121,6 +131,8 @@ coverage:
 
 test-pages:
   stage: Documentation
+  tags:
+    - docker
   extends: .pages
   needs: []
   artifacts:
@@ -138,6 +150,8 @@ test-pages:
 
 pages:
   stage: Documentation
+  tags:
+    - docker
   extends: .pages
   artifacts:
     paths:
@@ -166,6 +180,8 @@ pages:
 
 test-release:
   stage: Release
+  tags:
+    - docker
   script:
     - poetry build
     - poetry run pip install -U dist/*.whl
@@ -182,6 +198,8 @@ test-release:
 
 release-artifactory:
   stage: Release
+  tags:
+    - docker
   script:
     - !reference [.check_version_and_commit, script]
     - poetry build
