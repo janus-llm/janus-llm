@@ -155,7 +155,7 @@ def add():
 def something_else():
     pass
 
-@app.command()
+@app.command(help="Connect to/create a database or print the currently used database")
 def db(cmd: str, path: str = str(os.path.join(janus_dir, "chroma.db")), url: str = ""):
     global db_loc
     if cmd == "init":
@@ -178,13 +178,13 @@ def db(cmd: str, path: str = str(os.path.join(janus_dir, "chroma.db")), url: str
     else:
         print("Please provide either init or status to db command")
 
-@app.command()
+@app.command(help="List the current database's collections")
 def ls():
     db = ChromaEmbeddingDatabase(db_loc)
     collections = Collections(db)
     print(collections.get())
 
-@app.command()
+@app.command("Add a collection to the current database")
 def add(collection_name: str, input_dir: str = "./", input_lang: str = "python"):
     db = ChromaEmbeddingDatabase(db_loc)
     collections = Collections(db)
@@ -198,7 +198,7 @@ def add(collection_name: str, input_dir: str = "./", input_lang: str = "python")
                 file_contents = f.read()
             collection.upsert(ids=[absolute_path], metadatas=[{"language": input_lang}], documents=[file_contents])
 
-@app.command()
+@app.command("Remove a collection from the database")
 def remove(collection_name: str):
     db = ChromaEmbeddingDatabase(db_loc)
     collections = Collections(db)
