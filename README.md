@@ -26,7 +26,7 @@ Clone the repository:
 git clone git@gitlab.mitre.org:it-modernization/team-2/janus.git
 ```
 
-**NOTE**: Make sure you're using Python 3.10 or greater.
+**NOTE**: Make sure you're using Python 3.10 or 3.11.
 
 Then, install the requirements:
 
