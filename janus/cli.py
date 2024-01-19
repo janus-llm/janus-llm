@@ -110,6 +110,12 @@ def translate(
             help="The type of parser to use.",
         ),
     ] = "code",
+    collection: Annotated[
+        str,
+        typer.Option(
+            "--collection", "-c"
+        )
+    ],
 ):
     try:
         target_language, target_version = target_lang.split("-")
@@ -177,19 +183,22 @@ def ls():
 def add(collection_name: str, input_dir: str = "./", input_lang: str = "python"):
     db = ChromaEmbeddingDatabase(db_loc)
     collections = Collections(db)
-    collection = collections.get(EmbeddingType.SOURCE)
-    if len(collection) == 0:
-        collections.create(EmbeddingType.SOURCE)
-        collection = collections.get(EmbeddingType.SOURCE)[0]
-    else:
-        collection = collection[0]
+    collection = collections.get_or_create(collection_name)
     suffix = LANGUAGES[input_lang]["suffix"]
     for fname in os.listdir(input_dir):
+        print(f"Adding {fname} contents to the {collection_name}")
         if fname.endswith(suffix):
             absolute_path = os.path.abspath(os.path.join(input_dir, fname))
             with open(os.path.join(input_dir, fname), 'r') as f:
                 file_contents = f.read()
             collection.upsert(ids=[absolute_path], metadatas=[{"language": input_lang}], documents=[file_contents])
+
+@app.command()
+def remove(collection_name: str):
+    db = ChromaEmbeddingDatabase(db_loc)
+    collections = Collections(db)
+    print(f"Removing collection {collection_name}")
+    collections.delete(collection_name)
 
 
 if __name__ == "__main__":
