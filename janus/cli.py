@@ -145,12 +145,6 @@ def translate(
     )
     translator.translate(input_dir, output_dir, overwrite, output_collection)
 
-
-@app.command(help="Add source modules to embeddings database")
-def add():
-    print("TODO")
-
-
 @app.command(help="Do something else")
 def something_else():
     pass
