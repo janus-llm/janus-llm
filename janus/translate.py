@@ -82,7 +82,6 @@ class Translator(Converter):
         output_directory: str | Path | None = None,
         overwrite: bool = False,
         output_collection: Collection | None = None,
-        output_name: str | None = None,
     ) -> None:
         """Translate code in the input directory from the source language to the target
         language, and write the resulting files to the output directory.
@@ -110,6 +109,7 @@ class Translator(Converter):
         total_cost = 0.0
         for in_path in input_paths:
             relative = in_path.relative_to(input_directory)
+            output_name = relative.with_suffix(f".{target_suffix}").name
             if output_directory is not None:
                 out_path = output_directory / relative.with_suffix(f".{target_suffix}")
             else:
@@ -146,8 +146,8 @@ class Translator(Converter):
             self._combiner.combine(out_block)
             if out_path is not None and (overwrite or not out_path.exists()):
                 self._save_to_file(out_block, out_path)
-            if output_collection is not None and output_name is not None:
-                out_text = self.parser.parse_combined_output(block.complete_text)
+            if output_collection is not None:
+                out_text = self.parser.parse_combined_output(out_block.complete_text)
                 output_collection.upsert(ids=[output_name], documents=[out_text])
 
         log.info(f"Total cost: ${total_cost:,.2f}")

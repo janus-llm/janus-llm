@@ -50,10 +50,6 @@ def translate(
             "The files should all be in one flat directory"
         ),
     ],
-    output_dir: Annotated[
-        Path,
-        typer.Option(help="The directory to store the translated code in"),
-    ],
     source_lang: Annotated[
         str,
         typer.Option(
@@ -70,6 +66,10 @@ def translate(
             "text.  See source-lang for list of valid target languages."
         ),
     ] = "python-3.10",
+    output_dir: Annotated[
+        Path,
+        typer.Option(help="The directory to store the translated code in"),
+    ] = None,
     llm_name: Annotated[
         str,
         typer.Option(
@@ -115,7 +115,7 @@ def translate(
         typer.Option(
             "--collection", "-c"
         )
-    ],
+    ] = None,
 ):
     try:
         target_language, target_version = target_lang.split("-")
@@ -128,6 +128,11 @@ def translate(
         exit(-1)
 
     model_arguments = dict(temperature=temp)
+    output_collection = None
+    if collection is not None:
+        db = ChromaEmbeddingDatabase(db_loc)
+        collections = Collections(db)
+        output_collection = collections.get_or_create(collection)
     translator = Translator(
         model=llm_name,
         model_arguments=model_arguments,
@@ -138,7 +143,7 @@ def translate(
         prompt_template=prompt_template,
         parser_type=parser_type,
     )
-    translator.translate(input_dir, output_dir, overwrite)
+    translator.translate(input_dir, output_dir, overwrite, output_collection)
 
 
 @app.command(help="Add source modules to embeddings database")
