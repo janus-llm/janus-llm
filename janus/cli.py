@@ -1,16 +1,16 @@
-from pathlib import Path
 import os
+from pathlib import Path
 
 import click
 import typer
 from typing_extensions import Annotated
 
+from janus.embedding.collections import Collections
+from janus.embedding.database import ChromaEmbeddingDatabase
 from janus.parsers.code_parser import PARSER_TYPES
 from janus.translate import VALID_MODELS, Translator
-from janus.utils.enums import LANGUAGES, EmbeddingType
+from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
-from janus.embedding.database import ChromaEmbeddingDatabase
-from janus.embedding.collections import Collections
 
 log = create_logger(__name__)
 
@@ -22,10 +22,10 @@ if not os.path.exists(janus_dir):
 
 db_file = os.path.join(janus_dir, ".db")
 if not os.path.exists(db_file):
-    with open(db_file, 'w') as f:
+    with open(db_file, "w") as f:
         f.write(str(os.path.join(janus_dir, "chroma.db")))
 
-with open(db_file, 'r') as f:
+with open(db_file, "r") as f:
     db_loc = f.read()
 
 
@@ -110,12 +110,7 @@ def translate(
             help="The type of parser to use.",
         ),
     ] = "code",
-    collection: Annotated[
-        str,
-        typer.Option(
-            "--collection", "-c"
-        )
-    ] = None,
+    collection: Annotated[str, typer.Option("--collection", "-c")] = None,
 ):
     try:
         target_language, target_version = target_lang.split("-")
@@ -145,9 +140,11 @@ def translate(
     )
     translator.translate(input_dir, output_dir, overwrite, output_collection)
 
+
 @app.command(help="Do something else")
 def something_else():
     pass
+
 
 @app.command(help="Connect to/create a database or print the currently used database")
 def db(cmd: str, path: str = str(os.path.join(janus_dir, "chroma.db")), url: str = ""):
@@ -155,28 +152,30 @@ def db(cmd: str, path: str = str(os.path.join(janus_dir, "chroma.db")), url: str
     if cmd == "init":
         if url != "":
             print(f"Setting chroma db to use {url}")
-            with open(db_file, 'w') as f:
+            with open(db_file, "w") as f:
                 f.write(url)
             db_loc = url
         else:
             path = os.path.abspath(path)
             print(f"Setting chroma db to use {path}")
-            with open(db_file, 'w') as f:
+            with open(db_file, "w") as f:
                 f.write(path)
             db_loc = path
         global embedding_db
         embedding_db = ChromaEmbeddingDatabase(db_loc)
-        #TODO: Create chroma database if it doesn't exist
+        # TODO: Create chroma database if it doesn't exist
     elif cmd == "status":
         print(f"Chroma DB currently pointing to {db_loc}")
     else:
         print("Please provide either init or status to db command")
+
 
 @app.command(help="List the current database's collections")
 def ls():
     db = ChromaEmbeddingDatabase(db_loc)
     collections = Collections(db)
     print(collections.get())
+
 
 @app.command("Add a collection to the current database")
 def add(collection_name: str, input_dir: str = "./", input_lang: str = "python"):
@@ -188,9 +187,14 @@ def add(collection_name: str, input_dir: str = "./", input_lang: str = "python")
         print(f"Adding {fname} contents to the {collection_name}")
         if fname.endswith(suffix):
             absolute_path = os.path.abspath(os.path.join(input_dir, fname))
-            with open(os.path.join(input_dir, fname), 'r') as f:
+            with open(os.path.join(input_dir, fname), "r") as f:
                 file_contents = f.read()
-            collection.upsert(ids=[absolute_path], metadatas=[{"language": input_lang}], documents=[file_contents])
+            collection.upsert(
+                ids=[absolute_path],
+                metadatas=[{"language": input_lang}],
+                documents=[file_contents],
+            )
+
 
 @app.command("Remove a collection from the database")
 def remove(collection_name: str):

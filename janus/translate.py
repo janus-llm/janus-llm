@@ -2,6 +2,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Set
 
+from chromadb.api.models.Collection import Collection
 from langchain.callbacks import get_openai_callback
 
 from .converter import Converter, run_if_changed
@@ -11,7 +12,6 @@ from .parsers.code_parser import PARSER_TYPES, CodeParser, EvaluationParser, Jan
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import LANGUAGES
 from .utils.logger import create_logger
-from chromadb.api.models.Collection import Collection
 
 log = create_logger(__name__)
 

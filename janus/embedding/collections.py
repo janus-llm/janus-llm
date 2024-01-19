@@ -25,7 +25,7 @@ class Collections:
         if isinstance(name, EmbeddingType):
             # First, check if the embedding type exists
             if name not in EmbeddingType:
-                raise ValueError(f"Invalid embedding type: {embedding_type}")
+                raise ValueError(f"Invalid embedding type: {name}")
             # Now check if the collection exists
             type_name = name.name.lower()
             # TODO: do we want to iterate over similarly named collections in other
