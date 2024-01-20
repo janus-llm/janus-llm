@@ -173,7 +173,14 @@ def ls():
 
 
 @app.command(help="Add a collection to the current database")
-def add(collection_name: str, input_dir: str = "./", input_lang: str = "python"):
+def add(collection_name: str, input_dir: str = "./", input_lang: str = "python") -> None:
+    """Add a collection to the database
+
+    Arguments:
+        collection_name: The name of the collection to add
+        input_dir: The directory containing the source code to be added
+        input_lang: The language of the source code
+    """
     db = ChromaEmbeddingDatabase(db_loc)
     collections = Collections(db)
     collection = collections.get_or_create(collection_name)

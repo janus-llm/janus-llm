@@ -3,8 +3,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Sequence
 
-from chromadb import API
-from chromadb.api.models.Collection import Collection
+from chromadb import Client, Collection
 
 from ..converter import Converter
 from ..language.block import CodeBlock
@@ -19,7 +18,7 @@ class Vectorizer(Converter):
 
     def __init__(
         self,
-        client: API,
+        client: Client,
         source_language: str,
         max_tokens: None | int,
         model: None | str,

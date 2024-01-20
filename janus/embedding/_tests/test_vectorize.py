@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from chromadb import API
+from chromadb import Client
 
 from ...utils.enums import EmbeddingType
 from ..vectorize import Vectorizer, VectorizerFactory
@@ -11,7 +11,7 @@ from ..vectorize import Vectorizer, VectorizerFactory
 class MockDBVectorizer(VectorizerFactory):
     """Factory for Vectorizer that uses ChromaEmbeddingDatabase"""
 
-    def __init__(self, database: API):
+    def __init__(self, database: Client):
         self._db = database
 
     def create_vectorizer(
@@ -26,7 +26,7 @@ class MockDBVectorizer(VectorizerFactory):
 
 class TestVectorize(unittest.TestCase):
     def setUp(self):
-        self.database = MagicMock(API)
+        self.database = MagicMock(Client)
         self.vectorizer = MockDBVectorizer(self.database).create_vectorizer()
         self.test_file = Path("janus/language/treesitter/_tests/languages/fortran.f90")
         self.test_block = self.vectorizer._splitter.split(self.test_file)

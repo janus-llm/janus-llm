@@ -1,8 +1,7 @@
 import os
 from typing import Sequence
 
-from chromadb.api.client import Client
-from chromadb.api.models.Collection import Collection
+from chromadb import Client, Collection
 
 from ..utils.enums import EmbeddingType
 
