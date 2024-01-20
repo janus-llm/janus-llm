@@ -5,12 +5,12 @@ import click
 import typer
 from typing_extensions import Annotated
 
-from janus.embedding.collections import Collections
-from janus.embedding.database import ChromaEmbeddingDatabase
-from janus.parsers.code_parser import PARSER_TYPES
-from janus.translate import VALID_MODELS, Translator
-from janus.utils.enums import LANGUAGES
-from janus.utils.logger import create_logger
+from .embedding.collections import Collections
+from .embedding.database import ChromaEmbeddingDatabase
+from .parsers.code_parser import PARSER_TYPES
+from .translate import VALID_MODELS, Translator
+from .utils.enums import LANGUAGES
+from .utils.logger import create_logger
 
 log = create_logger(__name__)
 
@@ -38,8 +38,8 @@ app = typer.Typer(
 
 
 @app.command(
-    help="Translate code from one language to another using LLMs! This will require an "
-    "OpenAI API key. Set the OPENAI_API_KEY environment variable to your key",
+    help="Translate code from one language to another using an LLM. This will require an "
+    "OpenAI API key set to the OPENAI_API_KEY environment variable.",
     no_args_is_help=True,
 )
 def translate(
@@ -47,7 +47,7 @@ def translate(
         Path,
         typer.Option(
             help="The directory containing the source code to be translated. "
-            "The files should all be in one flat directory"
+            "The files should all be in one flat directory."
         ),
     ],
     source_lang: Annotated[
@@ -63,7 +63,7 @@ def translate(
             help="The desired output language to translate the source code to.  The "
             "format can follow a 'language-version' syntax.  Use 'text' to get plaintext"
             "results as returned by the LLM.  Examples: python-3.10, mumps, java-10,"
-            "text.  See source-lang for list of valid target languages."
+            "text. See source-lang for list of valid target languages."
         ),
     ] = "python-3.10",
     output_dir: Annotated[
@@ -141,11 +141,6 @@ def translate(
     translator.translate(input_dir, output_dir, overwrite, output_collection)
 
 
-@app.command(help="Do something else")
-def something_else():
-    pass
-
-
 @app.command(help="Connect to/create a database or print the currently used database")
 def db(cmd: str, path: str = str(os.path.join(janus_dir, "chroma.db")), url: str = ""):
     global db_loc
@@ -177,7 +172,7 @@ def ls():
     print(collections.get())
 
 
-@app.command("Add a collection to the current database")
+@app.command(help="Add a collection to the current database")
 def add(collection_name: str, input_dir: str = "./", input_lang: str = "python"):
     db = ChromaEmbeddingDatabase(db_loc)
     collections = Collections(db)
@@ -196,7 +191,7 @@ def add(collection_name: str, input_dir: str = "./", input_lang: str = "python")
             )
 
 
-@app.command("Remove a collection from the database")
+@app.command(help="Remove a collection from the database")
 def remove(collection_name: str):
     db = ChromaEmbeddingDatabase(db_loc)
     collections = Collections(db)
