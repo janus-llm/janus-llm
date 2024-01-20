@@ -14,16 +14,16 @@ from .utils.logger import create_logger
 
 log = create_logger(__name__)
 
-homedir = Path.home()
+homedir = Path.home().expanduser()
 
-janus_dir = os.path.join(homedir, ".janus")
-if not os.path.exists(janus_dir):
-    os.mkdir(janus_dir)
+janus_dir = homedir / ".janus"
+if not janus_dir.exists():
+    janus_dir.mkdir(parents=True)
 
-db_file = os.path.join(janus_dir, ".db")
-if not os.path.exists(db_file):
+db_file = janus_dir / ".db"
+if not db_file.exists():
     with open(db_file, "w") as f:
-        f.write(str(os.path.join(janus_dir, "chroma.db")))
+        f.write(str(janus_dir / "chroma.db"))
 
 with open(db_file, "r") as f:
     db_loc = f.read()
@@ -141,8 +141,35 @@ def translate(
     translator.translate(input_dir, output_dir, overwrite, output_collection)
 
 
-@app.command(help="Connect to/create a database or print the currently used database")
-def db(cmd: str, path: str = str(os.path.join(janus_dir, "chroma.db")), url: str = ""):
+@app.command(help="Connect to/create a database or print the currently used database.")
+def db(
+    cmd: Annotated[
+        str,
+        typer.Argument(
+            help=(
+                "The command to run. Either 'init' to set the database location or "
+                "'status' to print the current location."
+            )
+        ),
+    ],
+    path: Annotated[str, typer.Option(help="The path to the database file.")] = str(
+        janus_dir / "chroma.db"
+    ),
+    url: Annotated[
+        str,
+        typer.Option(
+            help="The URL of the database if the database is running externally."
+        ),
+    ] = "",
+) -> None:
+    """Connect to/create a database or print the currently used database
+
+    Arguments:
+        cmd: The command to run. Either "init" to set the database location or "status"
+            to print the current database location
+        path: The path to the database file
+        url: The URL of the database
+    """
     global db_loc
     if cmd == "init":
         if url != "":
@@ -165,15 +192,25 @@ def db(cmd: str, path: str = str(os.path.join(janus_dir, "chroma.db")), url: str
         print("Please provide either init or status to db command")
 
 
-@app.command(help="List the current database's collections")
-def ls():
+@app.command(help="List the current database's collections.")
+def ls() -> None:
+    """List the current database's collections"""
     db = ChromaEmbeddingDatabase(db_loc)
     collections = Collections(db)
     print(collections.get())
 
 
-@app.command(help="Add a collection to the current database")
-def add(collection_name: str, input_dir: str = "./", input_lang: str = "python") -> None:
+@app.command(help="Add a collection to the current database.")
+def add(
+    collection_name: Annotated[str, typer.Argument(help="The name of the collection.")],
+    input_dir: Annotated[
+        str,
+        typer.Option(help="The directory containing the source code to be added."),
+    ] = "./",
+    input_lang: Annotated[
+        str, typer.Option(help="The language of the source code.")
+    ] = "python",
+) -> None:
     """Add a collection to the database
 
     Arguments:
@@ -185,9 +222,9 @@ def add(collection_name: str, input_dir: str = "./", input_lang: str = "python")
     collections = Collections(db)
     collection = collections.get_or_create(collection_name)
     suffix = LANGUAGES[input_lang]["suffix"]
-    for fname in os.listdir(input_dir):
-        print(f"Adding {fname} contents to the {collection_name}")
-        if fname.endswith(suffix):
+    for fname in input_dir.iterdir():
+        print(f"Adding {fname} contents to the '{collection_name}' collection")
+        if str(fname).endswith(suffix):
             absolute_path = os.path.abspath(os.path.join(input_dir, fname))
             with open(os.path.join(input_dir, fname), "r") as f:
                 file_contents = f.read()
@@ -198,8 +235,15 @@ def add(collection_name: str, input_dir: str = "./", input_lang: str = "python")
             )
 
 
-@app.command(help="Remove a collection from the database")
-def remove(collection_name: str):
+@app.command(help="Remove a collection from the database.")
+def remove(
+    collection_name: Annotated[str, typer.Argument(help="The name of the collection.")]
+) -> None:
+    """Remove a collection from the database
+
+    Arguments:
+        collection_name: The name of the collection to remove
+    """
     db = ChromaEmbeddingDatabase(db_loc)
     collections = Collections(db)
     print(f"Removing collection {collection_name}")
