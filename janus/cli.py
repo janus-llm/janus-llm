@@ -1,6 +1,6 @@
 import os
-from pathlib import Path
 from copy import deepcopy
+from pathlib import Path
 
 import click
 import typer
@@ -9,14 +9,14 @@ from typing_extensions import Annotated
 from .embedding.collections import Collections
 from .embedding.database import ChromaEmbeddingDatabase
 from .embedding.vectorize import ChromaDBVectorizer
-from .parsers.code_parser import PARSER_TYPES
-from .translate import VALID_MODELS, Translator
-from .utils.enums import LANGUAGES, CUSTOM_SPLITTERS
-from .utils.logger import create_logger
-from .language.mumps import MumpsSplitter
 from .language.binary import BinarySplitter
+from .language.mumps import MumpsSplitter
 from .language.treesitter import TreeSitterSplitter
 from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
+from .parsers.code_parser import PARSER_TYPES
+from .translate import VALID_MODELS, Translator
+from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
+from .utils.logger import create_logger
 
 log = create_logger(__name__)
 
@@ -227,12 +227,12 @@ def add(
         input_dir: The directory containing the source code to be added
         input_lang: The language of the source code
     """
-    #TODO: import factory
+    # TODO: import factory
     vectorizer_factory = ChromaDBVectorizer()
     vectorizer = vectorizer_factory.create_vectorizer(
-            source_language=input_lang,
-            path=db_loc,
-            model=model_name,
+        source_language=input_lang,
+        path=db_loc,
+        model=model_name,
     )
     model_arguments = deepcopy(MODEL_DEFAULT_ARGUMENTS[model_name])
 
@@ -263,10 +263,11 @@ def add(
     for input_path in input_paths:
         input_block = splitter.split(input_path)
         vectorizer._add_nodes_recursively(
-                input_block,
-                collection_name,
-                input_path.name,
+            input_block,
+            collection_name,
+            input_path.name,
         )
+
 
 @app.command(help="Remove a collection from the database.")
 def remove(
