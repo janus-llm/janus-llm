@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from copy import deepcopy
 
 import click
 import typer
@@ -7,10 +8,15 @@ from typing_extensions import Annotated
 
 from .embedding.collections import Collections
 from .embedding.database import ChromaEmbeddingDatabase
+from .embedding.vectorize import ChromaDBVectorizer
 from .parsers.code_parser import PARSER_TYPES
 from .translate import VALID_MODELS, Translator
-from .utils.enums import LANGUAGES
+from .utils.enums import LANGUAGES, CUSTOM_SPLITTERS
 from .utils.logger import create_logger
+from .language.mumps import MumpsSplitter
+from .language.binary import BinarySplitter
+from .language.treesitter import TreeSitterSplitter
+from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
 
 log = create_logger(__name__)
 
@@ -210,6 +216,9 @@ def add(
     input_lang: Annotated[
         str, typer.Option(help="The language of the source code.")
     ] = "python",
+    model_name: Annotated[
+        str, typer.Option(help="The model name to use")
+    ] = "gpt-3.5-turbo",
 ) -> None:
     """Add a collection to the database
 
@@ -218,22 +227,45 @@ def add(
         input_dir: The directory containing the source code to be added
         input_lang: The language of the source code
     """
-    db = ChromaEmbeddingDatabase(db_loc)
-    collections = Collections(db)
-    collection = collections.get_or_create(collection_name)
-    suffix = LANGUAGES[input_lang]["suffix"]
-    for fname in input_dir.iterdir():
-        print(f"Adding {fname} contents to the '{collection_name}' collection")
-        if str(fname).endswith(suffix):
-            absolute_path = os.path.abspath(os.path.join(input_dir, fname))
-            with open(os.path.join(input_dir, fname), "r") as f:
-                file_contents = f.read()
-            collection.upsert(
-                ids=[absolute_path],
-                metadatas=[{"language": input_lang}],
-                documents=[file_contents],
-            )
+    #TODO: import factory
+    vectorizer_factory = ChromaDBVectorizer()
+    vectorizer = vectorizer_factory.create_vectorizer(
+            source_language=input_lang,
+            path=db_loc,
+    )
+    model_arguments = deepcopy(MODEL_DEFAULT_ARGUMENTS[model_name])
 
+    # Load the model
+    llm = MODEL_CONSTRUCTORS[model_name](**model_arguments)
+
+    max_tokens = TOKEN_LIMITS.get(model_name, 4096) // 2.5
+    input_dir = Path(input_dir)
+    source_glob = f"**/*.{LANGUAGES[input_lang]['suffix']}"
+    input_paths = input_dir.rglob(source_glob)
+    if input_lang in CUSTOM_SPLITTERS:
+        if input_lang == "mumps":
+            splitter = MumpsSplitter(
+                max_tokens=max_tokens,
+                model=llm,
+            )
+        elif input_lang == "binary":
+            splitter = BinarySplitter(
+                max_tokens=max_tokens,
+                model=llm,
+            )
+    else:
+        splitter = TreeSitterSplitter(
+            language=input_lang,
+            max_tokens=max_tokens,
+            model=llm,
+        )
+    for input_path in input_paths:
+        input_block = splitter.split(input_path)
+        vectorizer._add_nodes_recursively(
+                input_block,
+                collection_name,
+                input_path.name,
+        )
 
 @app.command(help="Remove a collection from the database.")
 def remove(
