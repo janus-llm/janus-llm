@@ -232,6 +232,7 @@ def add(
     vectorizer = vectorizer_factory.create_vectorizer(
             source_language=input_lang,
             path=db_loc,
+            model=model_name,
     )
     model_arguments = deepcopy(MODEL_DEFAULT_ARGUMENTS[model_name])
 
