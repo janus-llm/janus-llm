@@ -38,7 +38,7 @@ class Collections:
                 # Count the number of collections with the same embedding type
                 collection_name = f"{type_name}_{len(similar_collection_names) + 1}"
             else:
-                collection_name = type_name
+                collection_name = f"{type_name}_1"
             # TODO: set embedding_function argument to create_collection()
         else:
             collection_name = name
