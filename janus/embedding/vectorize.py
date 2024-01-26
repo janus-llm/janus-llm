@@ -133,8 +133,8 @@ class Vectorizer(Converter):
         if ids is None:
             # logic from langchain add_texts
             ids = [str(uuid.uuid1()) for _ in texts]
-        collections = self._collections.get(collection_name)
-        collections[0].add(ids=ids, documents=texts, metadatas=metadatas)
+        collection = self._collections.get_or_create(collection_name)
+        collection.upsert(ids=ids, documents=texts, metadatas=metadatas)
         return ids
 
 

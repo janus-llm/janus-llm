@@ -27,6 +27,9 @@ class MockDBVectorizer(VectorizerFactory):
 class TestVectorize(unittest.TestCase):
     def setUp(self):
         self.database = MagicMock(Client)
+        def list_collections():
+            return []
+        self.database.list_collections = list_collections
         self.vectorizer = MockDBVectorizer(self.database).create_vectorizer()
         self.test_file = Path("janus/language/treesitter/_tests/languages/fortran.f90")
         self.test_block = self.vectorizer._splitter.split(self.test_file)

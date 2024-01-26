@@ -42,6 +42,8 @@ app = typer.Typer(
     context_settings={"help_option_names": ["-h", "--help"]},
 )
 
+db = typer.Typer()
+
 
 @app.command(
     help="Translate code from one language to another using an LLM. This will require an "
@@ -147,17 +149,8 @@ def translate(
     translator.translate(input_dir, output_dir, overwrite, output_collection)
 
 
-@app.command(help="Connect to/create a database or print the currently used database.")
-def db(
-    cmd: Annotated[
-        str,
-        typer.Argument(
-            help=(
-                "The command to run. Either 'init' to set the database location or "
-                "'status' to print the current location."
-            )
-        ),
-    ],
+@db.command("init", help="Connect to/create a database")
+def db_init(
     path: Annotated[str, typer.Option(help="The path to the database file.")] = str(
         janus_dir / "chroma.db"
     ),
@@ -168,46 +161,36 @@ def db(
         ),
     ] = "",
 ) -> None:
-    """Connect to/create a database or print the currently used database
-
-    Arguments:
-        cmd: The command to run. Either "init" to set the database location or "status"
-            to print the current database location
-        path: The path to the database file
-        url: The URL of the database
-    """
     global db_loc
-    if cmd == "init":
-        if url != "":
-            print(f"Setting chroma db to use {url}")
-            with open(db_file, "w") as f:
-                f.write(url)
-            db_loc = url
-        else:
-            path = os.path.abspath(path)
-            print(f"Setting chroma db to use {path}")
-            with open(db_file, "w") as f:
-                f.write(path)
-            db_loc = path
-        global embedding_db
-        embedding_db = ChromaEmbeddingDatabase(db_loc)
-        # TODO: Create chroma database if it doesn't exist
-    elif cmd == "status":
-        print(f"Chroma DB currently pointing to {db_loc}")
+    if url != "":
+        print(f"Setting chroma db to use {url}")
+        with open(db_file, "w") as f:
+            f.write(url)
+        db_loc = url
     else:
-        print("Please provide either init or status to db command")
+        path = os.path.abspath(path)
+        print(f"Setting chroma db to use {path}")
+        with open(db_file, "w") as f:
+            f.write(path)
+        db_loc = path
+    global embedding_db
+    embedding_db = ChromaEmbeddingDatabase(db_loc)
+
+@db.command("status", help="Print current db location")
+def db_status():
+    print(f"Chroma DB currently pointing to {db_loc}")
 
 
-@app.command(help="List the current database's collections.")
-def ls() -> None:
+@db.command("ls", help="List the current database's collections.")
+def db_ls() -> None:
     """List the current database's collections"""
     db = ChromaEmbeddingDatabase(db_loc)
     collections = Collections(db)
     print(collections.get())
 
 
-@app.command(help="Add a collection to the current database.")
-def add(
+@db.command("add", help="Add a collection to the current database.")
+def db_add(
     collection_name: Annotated[str, typer.Argument(help="The name of the collection.")],
     input_dir: Annotated[
         str,
@@ -269,8 +252,8 @@ def add(
         )
 
 
-@app.command(help="Remove a collection from the database.")
-def remove(
+@db.command("remove", help="Remove a collection from the database.")
+def db_remove(
     collection_name: Annotated[str, typer.Argument(help="The name of the collection.")]
 ) -> None:
     """Remove a collection from the database
@@ -282,6 +265,8 @@ def remove(
     collections = Collections(db)
     print(f"Removing collection {collection_name}")
     collections.delete(collection_name)
+
+app.add_typer(db, name="db")
 
 
 if __name__ == "__main__":
