@@ -176,6 +176,7 @@ def db_init(
     global embedding_db
     embedding_db = ChromaEmbeddingDatabase(db_loc)
 
+
 @db.command("status", help="Print current db location")
 def db_status():
     print(f"Chroma DB currently pointing to {db_loc}")
@@ -265,6 +266,7 @@ def db_remove(
     collections = Collections(db)
     print(f"Removing collection {collection_name}")
     collections.delete(collection_name)
+
 
 app.add_typer(db, name="db")
 
