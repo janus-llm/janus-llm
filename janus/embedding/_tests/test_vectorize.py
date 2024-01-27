@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from chromadb import Client
+from chromadb.api.client import Client
 
 from ...utils.enums import EmbeddingType
 from ..vectorize import Vectorizer, VectorizerFactory
@@ -39,8 +39,8 @@ class TestVectorize(unittest.TestCase):
     def test_add_nodes_recursively(self):
         embedding_type = EmbeddingType.SOURCE
         self.vectorizer.create_collection(embedding_type)
-        self.database.create_collection.assert_called_with("source")
+        self.database.create_collection.assert_called_with("source_1")
         self.vectorizer._add_nodes_recursively(
             self.test_block, embedding_type, self.test_file.name
         )
-        self.database.get_collection.assert_called_with("source")
+        self.database.get_or_create_collection.assert_called_with("source")
