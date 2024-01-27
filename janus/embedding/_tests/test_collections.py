@@ -17,7 +17,7 @@ class TestCollections(unittest.TestCase):
 
         result = self.collections.create(EmbeddingType.PSEUDO)
 
-        self._db.create_collection.assert_called_with("pseudo")
+        self._db.create_collection.assert_called_with("pseudo_1")
         self.assertEqual(result, "foo")
 
     def test_creation_triangulation(self):
@@ -25,7 +25,7 @@ class TestCollections(unittest.TestCase):
 
         result = self.collections.create(EmbeddingType.REQUIREMENT)
 
-        self._db.create_collection.assert_called_with("requirement")
+        self._db.create_collection.assert_called_with("requirement_1")
         self.assertEqual(result, [])
 
     def test_creation_of_existing_type(self):

@@ -3,8 +3,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Sequence
 
-from chromadb import API
-from chromadb.api.models.Collection import Collection
+from chromadb import Client, Collection
 
 from ..converter import Converter
 from ..language.block import CodeBlock
@@ -19,7 +18,7 @@ class Vectorizer(Converter):
 
     def __init__(
         self,
-        client: API,
+        client: Client,
         source_language: str,
         max_tokens: None | int,
         model: None | str,
@@ -56,7 +55,7 @@ class Vectorizer(Converter):
         return self._collections.get(name)
 
     def _add_nodes_recursively(
-        self, code_block: CodeBlock, embedding_type: EmbeddingType, file_name: str
+        self, code_block: CodeBlock, collection_name: EmbeddingType | str, file_name: str
     ) -> None:
         """Embed all nodes in the tree rooted at `code_block`
 
@@ -68,13 +67,13 @@ class Vectorizer(Converter):
         nodes = [code_block]
         while nodes:
             node = nodes.pop(0)
-            self._add(node, embedding_type, file_name)
+            self._add(node, collection_name, file_name)
             nodes.extend(node.children)
 
     def _add(
         self,
         code_block: CodeBlock,
-        embedding_type: EmbeddingType,
+        collection_name: EmbeddingType | str,
         file_name: str  # perhaps this should be a relative path from the source, but for
         # now we're all in 1 directory
     ) -> bool:
@@ -105,7 +104,7 @@ class Vectorizer(Converter):
             if code_block.end_point is not None:
                 metadatas[0]["end_line"] = code_block.end_point[0]
             the_text = [code_block.text]
-            code_block.embedding_id = self.add_text(embedding_type, the_text, metadatas)[
+            code_block.embedding_id = self.add_text(collection_name, the_text, metadatas)[
                 0
             ]
             return True
@@ -113,7 +112,7 @@ class Vectorizer(Converter):
 
     def add_text(
         self,
-        embedding_type: EmbeddingType,
+        collection_name: EmbeddingType | str,
         texts: list[str],
         metadatas: list[dict],
         ids: list[str] = None,
@@ -134,8 +133,8 @@ class Vectorizer(Converter):
         if ids is None:
             # logic from langchain add_texts
             ids = [str(uuid.uuid1()) for _ in texts]
-        collections = self._collections.get(embedding_type)
-        collections[0].add(ids=ids, documents=texts, metadatas=metadatas)
+        collection = self._collections.get_or_create(collection_name)
+        collection.upsert(ids=ids, documents=texts, metadatas=metadatas)
         return ids
 
 

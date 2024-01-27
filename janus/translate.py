@@ -2,6 +2,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Set
 
+from chromadb.api.models.Collection import Collection
 from langchain.callbacks import get_openai_callback
 
 from .converter import Converter, run_if_changed
@@ -78,8 +79,9 @@ class Translator(Converter):
     def translate(
         self,
         input_directory: str | Path,
-        output_directory: str | Path,
+        output_directory: str | Path | None = None,
         overwrite: bool = False,
+        output_collection: Collection | None = None,
     ) -> None:
         """Translate code in the input directory from the source language to the target
         language, and write the resulting files to the output directory.
@@ -96,7 +98,7 @@ class Translator(Converter):
             output_directory = Path(output_directory)
 
         # Make sure the output directory exists
-        if not output_directory.exists():
+        if output_directory is not None and not output_directory.exists():
             output_directory.mkdir(parents=True)
 
         target_suffix = LANGUAGES[self._target_language]["suffix"]
@@ -107,10 +109,11 @@ class Translator(Converter):
         total_cost = 0.0
         for in_path in input_paths:
             relative = in_path.relative_to(input_directory)
-            out_path = output_directory / relative.with_suffix(f".{target_suffix}")
-            if out_path.exists() and not overwrite:
-                continue
-
+            output_name = relative.with_suffix(f".{target_suffix}").name
+            if output_directory is not None:
+                out_path = output_directory / relative.with_suffix(f".{target_suffix}")
+            else:
+                out_path = None
             # Track the cost of translating the file
             #  TODO: If non-OpenAI models with prices are added, this will need
             #   to be updated.
@@ -141,7 +144,11 @@ class Translator(Converter):
             # Make sure the tree's code has been consolidated at the top level
             #  before writing to file
             self._combiner.combine(out_block)
-            self._save_to_file(out_block, out_path)
+            if out_path is not None and (overwrite or not out_path.exists()):
+                self._save_to_file(out_block, out_path)
+            if output_collection is not None:
+                out_text = self.parser.parse_combined_output(out_block.complete_text)
+                output_collection.upsert(ids=[output_name], documents=[out_text])
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
