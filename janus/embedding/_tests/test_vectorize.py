@@ -43,4 +43,4 @@ class TestVectorize(unittest.TestCase):
         self.vectorizer._add_nodes_recursively(
             self.test_block, embedding_type, self.test_file.name
         )
-        self.database.get_or_create_collection.assert_called_with("source")
+        self.database.get_or_create_collection.assert_called_with("source_1")
