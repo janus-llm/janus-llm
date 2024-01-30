@@ -1,0 +1,91 @@
+:py:mod:`janus.embedding.vectorize`
+===================================
+
+.. py:module:: janus.embedding.vectorize
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   janus.embedding.vectorize.Vectorizer
+   janus.embedding.vectorize.VectorizerFactory
+   janus.embedding.vectorize.ChromaDBVectorizer
+
+
+
+
+.. py:class:: Vectorizer(client, source_language, max_tokens, model)
+
+   Bases: :py:obj:`janus.converter.Converter`
+
+   Class for creating embeddings/vectors in a specified ChromaDB
+
+   Initializes the Embedding class
+
+   :param client: ChromaDB client instance
+   :param source_language: The source programming language.
+   :param max_tokens: The maximum number of tokens to send to the embedding model at
+                      once. If `None`, the `Vectorizer` will use the default value for the
+                      `model`.
+   :param model: The name of the model to use. This will also determine the `max_tokens`
+                 if that variable is not set.
+
+   .. py:method:: create_collection(embedding_type)
+
+
+   .. py:method:: collections(name = None)
+
+
+   .. py:method:: add_text(collection_name, texts, metadatas, ids = None)
+
+      Helper function that stores a single text (in an array) and associated
+      metadatas, returning the embedding id
+
+      :param embedding_type: EmbeddingType to use
+      :param texts: list of texts to store
+      :param metadatas: list of metadatas to store
+      :param ids: list of embedding ids (must match lengh of texts),
+                  generated if not given by caller
+
+      :returns: list of embedding ids. Raises ValueError if collection not found.
+
+
+
+.. py:class:: VectorizerFactory
+
+   Bases: :py:obj:`abc.ABC`
+
+   Interface for creating a Vectorizer independent of type of ChromaDB client
+
+   .. py:method:: create_vectorizer(source_language, max_tokens, model, path)
+      :abstractmethod:
+
+      Factory method
+
+
+
+.. py:class:: ChromaDBVectorizer
+
+   Bases: :py:obj:`VectorizerFactory`
+
+   Factory for Vectorizer that uses ChromaEmbeddingDatabase
+
+   .. py:method:: create_vectorizer(source_language = 'fortran', max_tokens = None, model = 'gpt4all', path = Path.home() / '.janus' / 'chroma' / 'chroma-data')
+
+      :param source_language: The source programming language.
+      :param max_tokens: The maximum number of tokens to send to the embedding model at
+                         once. If `None`, the `Vectorizer` will use the default value for the
+                         `model`.
+      :param model: The name of the model to use. This will also determine the `max_tokens`
+                    if that variable is not set.
+      :param path: The path to the ChromaDB. Can be either a string of a URL or path or a
+                   Path object
+      :param Returns: Vectorizer
+
+
+

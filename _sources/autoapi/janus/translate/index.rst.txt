@@ -1,0 +1,137 @@
+:py:mod:`janus.translate`
+=========================
+
+.. py:module:: janus.translate
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   janus.translate.Translator
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   janus.translate.log
+   janus.translate.VALID_MODELS
+
+
+.. py:data:: log
+   
+
+   
+
+.. py:data:: VALID_MODELS
+   :annotation: :Set[str]
+
+   
+
+.. py:class:: Translator(model = 'gpt-3.5-turbo', model_arguments = {}, source_language = 'fortran', target_language = 'python', target_version = '3.10', max_prompts = 10, prompt_template = 'simple', parser_type = 'code')
+
+   Bases: :py:obj:`janus.converter.Converter`
+
+   A class that translates code from one programming language to another.
+
+   Initialize a Translator instance.
+
+   :param model: The LLM to use for translation. If an OpenAI model, the
+                 `OPENAI_API_KEY` environment variable must be set and the
+                 `OPENAI_ORG_ID` environment variable should be set if needed.
+   :param model_arguments: Additional arguments to pass to the LLM constructor.
+   :param source_language: The source programming language.
+   :param target_language: The target programming language.
+   :param target_version: The target version of the target programming language.
+   :param max_prompts: The maximum number of prompts to try before giving up.
+   :param prompt_template: name of prompt template directory
+                           (see janus/prompts/templates) or path to a directory.
+   :param parser_type: The type of parser to use for parsing the LLM output. Valid
+                       values are "code" (default), "text", and "eval".
+
+   .. py:method:: translate(input_directory, output_directory = None, overwrite = False, output_collection = None)
+
+      Translate code in the input directory from the source language to the target
+      language, and write the resulting files to the output directory.
+
+      :param input_directory: The directory containing the code to translate.
+      :param output_directory: The directory to write the translated code to.
+      :param overwrite: Whether to overwrite existing files (vs skip them)
+
+
+   .. py:method:: translate_file(file)
+
+      Translate a single file.
+
+      :param file: Input path to file
+
+      :returns: A `TranslatedCodeBlock` object. This block does not have a path set, and its
+                code is not guaranteed to be consolidated. To amend this, run
+                `Combiner.combine_children` on the block.
+
+
+   .. py:method:: outputting_requirements()
+
+      Is the output of the translator a requirements file?
+
+
+   .. py:method:: outputting_summary()
+
+      Is the output of the translator a summary documentation?
+
+
+   .. py:method:: outputting_pseudocode()
+
+      Is the output of the translator pseudocode?
+
+
+   .. py:method:: set_model(model_name, **custom_arguments)
+
+      Validate and set the model name.
+
+      The affected objects will not be updated until translate() is called.
+
+      :param model_name: The name of the model to use. Valid models are found in
+                         `janus.llm.models_info.MODEL_CONSTRUCTORS`.
+      :param custom_arguments: Additional arguments to pass to the model constructor.
+
+
+   .. py:method:: set_parser_type(parser_type)
+
+      Validate and set the parser type.
+
+      The affected objects will not be updated until translate() is called.
+
+      :param parser_type: The type of parser to use for parsing the LLM output. Valid
+                          values are "code" (default), "text", and "eval".
+
+
+   .. py:method:: set_prompt(prompt_template)
+
+      Validate and set the prompt template name.
+
+      The affected objects will not be updated until translate() is called.
+
+      :param prompt_template: name of prompt template directory
+                              (see janus/prompts/templates) or path to a directory.
+
+
+   .. py:method:: set_target_language(target_language, target_version)
+
+      Validate and set the target language.
+
+      The affected objects will not be updated until translate() is called.
+
+      :param target_language: The target programming language.
+      :param target_version: The target version of the target programming language.
+
+
+

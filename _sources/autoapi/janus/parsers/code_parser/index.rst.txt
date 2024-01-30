@@ -1,0 +1,234 @@
+:py:mod:`janus.parsers.code_parser`
+===================================
+
+.. py:module:: janus.parsers.code_parser
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   janus.parsers.code_parser.JanusParser
+   janus.parsers.code_parser.CodeParser
+   janus.parsers.code_parser.JsonLinesParser
+   janus.parsers.code_parser.JsonParser
+   janus.parsers.code_parser.EvaluationParser
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   janus.parsers.code_parser.log
+   janus.parsers.code_parser.PARSER_TYPES
+
+
+.. py:data:: log
+   
+
+   
+
+.. py:data:: PARSER_TYPES
+   :annotation: :Set[str]
+
+   
+
+.. py:class:: JanusParser
+
+   Bases: :py:obj:`langchain.schema.output_parser.BaseOutputParser`
+
+   .. py:method:: parse(text)
+
+      Parse the output text from the LLM.
+
+      :param text: The output text from the LLM
+
+      :returns: A parsed version of the text
+
+
+   .. py:method:: parse_combined_output(text)
+
+      Parse the output text from the LLM when multiple inputs are combined
+
+      :param text: The output text from the LLM
+
+      :returns: A parsed version of the text
+
+
+   .. py:method:: score(input_block, output_text)
+
+      Validate and score the output text based upon the input CodeBlock.
+      Output is a score between 0 and 1.
+
+      :param input_block: A `CodeBlock` representing the input to the LLM
+      :param output_text: The parsed text returned by the LLM
+
+      :returns: A score between 0 and 1 (inclusive). A score of 1.0 indicates that
+                the given text is fully acceptable, and no further attempts
+                should be made.
+
+
+   .. py:method:: get_format_instructions()
+
+
+
+.. py:class:: CodeParser
+
+   Bases: :py:obj:`JanusParser`
+
+   .. py:attribute:: language
+      :annotation: :str
+
+      
+
+   .. py:method:: parse(text)
+
+      Parse the output text from the LLM.
+
+      :param text: The output text from the LLM
+
+      :returns: A parsed version of the text
+
+
+   .. py:method:: score(input_block, output_text)
+
+      The score for translated code is the percentage of this block's
+      children which are present in the output
+
+      :param input_block: A `CodeBlock` representing the input to the LLM
+      :param output_text: The parsed text returned by the LLM
+
+      :returns: A score between 0 and 1 (inclusive). A score of 1.0 indicates that
+                the given text is fully acceptable, and no further attempts
+                should be made.
+
+
+   .. py:method:: get_format_instructions()
+
+
+
+.. py:class:: JsonLinesParser
+
+   Bases: :py:obj:`JanusParser`
+
+   .. py:method:: parse(text)
+
+      Parse the output text from the LLM.
+
+      :param text: The output text from the LLM.
+
+      :returns: A parsed version of the text.
+
+
+   .. py:method:: parse_combined_output(text)
+
+      Parse the output text from the LLM when multiple inputs are combined.
+
+      :param text: The output text from the LLM.
+
+      :returns: A parsed version of the text.
+
+
+   .. py:method:: get_format_instructions()
+
+      Get the format instructions for the parser.
+
+      :returns: The format instructions for the LLM.
+
+
+
+.. py:class:: JsonParser
+
+   Bases: :py:obj:`JsonLinesParser`
+
+   .. py:method:: parse(text)
+
+      Parse the output text from the LLM.
+
+      :param text: The output text from the LLM.
+
+      :returns: A parsed version of the text.
+
+
+   .. py:method:: parse_combined_output(text)
+
+      Parse the output text from the LLM when multiple inputs are combined.
+
+      :param text: The output text from the LLM.
+
+      :returns: A parsed version of the text.
+
+
+   .. py:method:: get_format_instructions()
+
+      Get the format instructions for the parser.
+
+      :returns: The format instructions for the LLM.
+
+
+
+.. py:class:: EvaluationParser(expected_keys, **kwargs)
+
+   Bases: :py:obj:`JsonParser`
+
+   
+   Create a new EvaluationParser.
+
+   :param expected_keys: The set of keys that should be present in the JSON
+                         object
+   :param kwargs: Additional arguments to pass to the parent class
+
+   .. py:attribute:: expected_keys
+      :annotation: :Set[str]
+
+      
+
+   .. py:method:: parse(text)
+
+      Parse the JSON object, convert keys to lowercase, filter out
+      unexpected keys
+
+      :param text: The output text from the LLM.
+
+      :returns: A parsed version of the text.
+
+
+   .. py:method:: parse_combined_output(text)
+
+      Parse the JSON object, convert keys to lowercase, filter out
+      unexpected keys, and average the values
+
+      :param text: The output text from the LLM.
+
+      :returns: A parsed version of the text.
+
+
+   .. py:method:: score(input_block, output_text)
+
+      The score for the output text is the percentage of expected keys
+      that are present in the json object. Non-numeric values count for
+      half.
+
+      :param input_block: A `CodeBlock` representing the input to the LLM
+      :param output_text: The parsed text returned by the LLM
+
+      :returns: A score between 0 and 1 (inclusive). A score of 1.0 indicates that
+                the given text is fully acceptable, and no further attempts
+                should be made.
+
+
+   .. py:method:: get_format_instructions()
+
+      Get the format instructions for the parser.
+
+      :returns: The format instructions for the LLM.
+
+
+

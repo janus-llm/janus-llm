@@ -1,0 +1,233 @@
+:py:mod:`janus.language.block`
+==============================
+
+.. py:module:: janus.language.block
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   janus.language.block.CodeBlock
+   janus.language.block.TranslatedCodeBlock
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   janus.language.block.log
+
+
+.. py:data:: log
+   
+
+   
+
+.. py:class:: CodeBlock(id, name, type, language, text, start_point, end_point, start_byte, end_byte, tokens, children, embedding_id = None, affixes = ('', ''))
+
+   A class that represents a functional block of code.
+
+   .. attribute:: id
+
+      The id of the code block in the AST
+
+   .. attribute:: name
+
+      Descriptive name of node
+
+   .. attribute:: type
+
+      The type of the code block ('function', 'module', etc.). Defined in the
+      language-specific modules.
+
+   .. attribute:: language
+
+      The language of the code block.
+
+   .. attribute:: text
+
+      The code block.
+
+   .. attribute:: start_point
+
+      The line and column numbers of the first line of the code block.
+
+   .. attribute:: end_point
+
+      The line and column numbers of the last line of the code block.
+
+   .. attribute:: start_byte
+
+      starting byte offset into file
+
+   .. attribute:: end_byte
+
+      ending byte offset into file
+
+   .. attribute:: tokens
+
+      The number of tokens in the code block.
+
+   .. attribute:: children
+
+      A tuple of child code blocks.
+
+   .. attribute:: embedding_id
+
+      id of embedding
+
+   .. attribute:: affixes
+
+      prefix and suffix text for node
+
+   .. attribute:: complete
+
+      Rolls up self and children's complete status, incomplete means a child
+      is missing.
+
+   .. py:method:: prefix()
+      :property:
+
+
+   .. py:method:: suffix()
+      :property:
+
+
+   .. py:method:: complete_text()
+      :property:
+
+
+   .. py:method:: placeholder()
+      :property:
+
+
+   .. py:method:: complete_placeholder()
+      :property:
+
+
+   .. py:method:: n_descendents()
+      :property:
+
+      The total number of descendents of this block
+
+      :returns: The total number of descendents of this block
+
+
+   .. py:method:: height()
+      :property:
+
+      The number of edges between this node and a leaf
+
+      :returns: The number of edges between this node and a leaf
+
+
+   .. py:method:: max_tokens()
+      :property:
+
+      The maximum number of tokens in this block or any of its descendents
+
+      :returns: The maximum number of tokens in this block or any of  its descendents
+
+
+   .. py:method:: total_tokens()
+      :property:
+
+      The total tokens represented by this block and all its descendents
+
+      :returns: The total number of tokens represented by this block and all its
+                descendents
+
+
+   .. py:method:: pop_prefix()
+
+      Get this block's prefix and remove it from the block. This may be used
+      to transfer the prefix from the first child of a node to its parent.
+
+
+   .. py:method:: pop_suffix()
+
+      Get this block's suffix and remove it from the block. This may be used
+      to transfer the suffix from the first child of a node to its parent.
+
+
+   .. py:method:: tree_str(depth = 0)
+
+      A string representation of the tree with this block as the root
+
+      :returns: A string representation of the tree with this block as the root
+
+
+
+.. py:class:: TranslatedCodeBlock(original, language)
+
+   Bases: :py:obj:`CodeBlock`
+
+   A class that represents the translated functional block of code.
+
+   .. attribute:: original
+
+      The original code block.
+
+   .. attribute:: cost
+
+      The total cost to translate the original code block.
+
+   .. attribute:: retries
+
+      The number of times translation had to be retried for this code
+
+   .. attribute:: translated
+
+      Whether this block has been successfully translated
+
+   Create an "empty" `TranslatedCodeBlock` from the given original
+
+   :param original: The original code block
+   :param language: The language to translate to
+
+   :returns: A `TranslatedCodeBlock` with the same attributes as the original, except
+             for `text`, `path`, `complete`, `language`, `tokens`, and `children`
+
+   .. py:method:: total_cost()
+      :property:
+
+      The total cost spent translating this block and all its descendents
+
+      :returns: The total cost spent translating this block and all its descendents
+
+
+   .. py:method:: total_retries()
+      :property:
+
+      The total number of retries that were required to translate this block and
+      all its descendents
+
+      :returns: The total number of retries that were required to translate this block and
+
+
+   .. py:method:: total_input_tokens()
+      :property:
+
+      The total number of input tokens represented by this block and all its
+      successfully-translated descendents
+
+      :returns: The total number of input tokens represented by this block and all its
+
+
+   .. py:method:: translation_completeness()
+      :property:
+
+      The share of the input that was successfully translated
+
+      :returns: The share of the input that was successfully translated
+
+
+

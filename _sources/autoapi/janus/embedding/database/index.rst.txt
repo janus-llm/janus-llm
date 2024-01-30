@@ -1,0 +1,81 @@
+:py:mod:`janus.embedding.database`
+==================================
+
+.. py:module:: janus.embedding.database
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   janus.embedding.database.ChromaEmbeddingDatabase
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   janus.embedding.database.uri_to_path
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   janus.embedding.database.log
+
+
+.. py:data:: log
+   
+
+   
+
+.. py:function:: uri_to_path(uri)
+
+
+.. py:class:: ChromaEmbeddingDatabase
+
+   Bases: :py:obj:`object`
+
+   Singleton holding a Chroma ClientAPI object.
+
+   Example usage:
+   ```
+   # Connects to default persistent db directory
+   chroma_client = ChromaEmbeddingDatabase()
+   chroma_client.list_collections()
+
+   langchain_collection = langchain.vectorstores.Chroma(
+       collection_name="janus",
+       client=chroma_client,
+       embedding_function=...
+   )
+   ```
+
+   Instantiates or returns a Chroma ClientAPI object as configured by the
+   provided path.
+
+   :param path: The path to the ChromaDB. Can be either a string of a URL or path or a
+                Path object.
+
+   :returns: A Chroma ClientAPI object.
+
+   .. py:attribute:: client
+      
+
+      
+
+   .. py:attribute:: common_settings
+      
+
+      
+
+

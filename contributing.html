@@ -1,0 +1,516 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="API Reference" href="autoapi/index.html" /><link rel="prev" title="Introduction" href="intro.html" />
+
+    <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 6.2.1 and Furo 2023.03.27 -->
+        <title>Contributing - Janus latest documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">Janus latest documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/janus_logo.png" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">Janus latest documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Contributing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="autoapi/index.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/janus/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/janus/embedding/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.embedding</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/embedding/collections/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.embedding.collections</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/embedding/database/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.embedding.database</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/embedding/vectorize/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.embedding.vectorize</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/janus/language/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.language</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/janus/language/binary/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.language.binary</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/janus/language/binary/binary/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.language.binary.binary</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/janus/language/mumps/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.language.mumps</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/janus/language/mumps/mumps/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.language.mumps.mumps</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/janus/language/mumps/patterns/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.language.mumps.patterns</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/janus/language/treesitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.language.treesitter</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/janus/language/treesitter/treesitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.language.treesitter.treesitter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/language/block/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.language.block</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/language/combine/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.language.combine</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/language/file/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.language.file</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/language/node/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.language.node</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/language/splitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.language.splitter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/janus/llm/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.llm</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/llm/models_info/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.llm.models_info</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/janus/parsers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.parsers</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/parsers/code_parser/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.parsers.code_parser</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/janus/prompts/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.prompts</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/prompts/prompt/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.prompts.prompt</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/janus/utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.utils</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/utils/enums/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.utils.enums</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/utils/logger/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.utils.logger</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/janus/cli/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.cli</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/janus/converter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.converter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/janus/translate/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">janus.translate</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/decompile_script/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">decompile_script</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="contributing">
+<h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this heading">#</a></h1>
+<p>Right now, submission of <a class="reference external" href="https://github.com/janus-llm/janus-llm/issues">issues</a> and <a class="reference external" href="https://github.com/janus-llm/janus-llm/pulls">pull requests</a> through GitHub is the best way to suggest changes, and those will have to be applied and merged on the internal MITRE GitLab and mirrored to GitHub. This process may change in the future.</p>
+<section id="contributing-for-mitre-employees">
+<h2>Contributing for MITRE Employees<a class="headerlink" href="#contributing-for-mitre-employees" title="Permalink to this heading">#</a></h2>
+<p>Contributing to the Janus codebase (<a class="reference external" href="https://gitlab.mitre.org/it-modernization/team-2/janus">GitLab</a>) requires a process to be followed. This page will explain how to follow that process and will provide some tools to make local development easier.</p>
+<p><strong>Some guidlines</strong>:</p>
+<ol class="arabic simple">
+<li><p>Nobody can commit directly to <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p></li>
+<li><p>You must create a merge request in order to publish changes to <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p></li>
+<li><p>Before merging, all stages of the GitLab CI pipeline must pass. This includes linting with <a class="reference external" href="https://flake8.pycqa.org/en/latest/"><code class="docutils literal notranslate"><span class="pre">flake8</span></code></a> (<a class="reference external" href="https://gitlab.mitre.org/it-modernization/team-2/janus/-/blob/main/.flake8">config</a>), code-formatting with <a class="reference external" href="https://github.com/psf/black"><code class="docutils literal notranslate"><span class="pre">black</span></code></a> (<a class="reference external" href="https://gitlab.mitre.org/it-modernization/team-2/janus/-/blob/main/pyproject.toml">config</a>), passing the Python unit tests, and creating the documentation.</p></li>
+<li><p>Once all pipeline stages have passed, then the branch can be merged into main.</p></li>
+<li><p>These pipeline stages can be tested locally to ensure that they are passed on the remote side (explained in <a class="reference internal" href="#using-pre-commit"><span class="xref myst">Using Pre-commit</span></a>)</p></li>
+</ol>
+<section id="important-docstring-information">
+<h3>Important Docstring Information<a class="headerlink" href="#important-docstring-information" title="Permalink to this heading">#</a></h3>
+<p>Do your best to make sure that all docstrings adhere to the Google docstring format. The reasoning can be found <a class="reference external" href="https://www.sphinx-doc.org/en/main/usage/extensions/napoleon.html">here</a>. We’re using double quotes for docstrings and strings per the formatting requirements of <a class="reference external" href="https://github.com/psf/black"><code class="docutils literal notranslate"><span class="pre">black</span></code></a>.</p>
+<p>If you are editing a file and see that a docstring doesn’t adhere to the Python3 Google Style Guide, please be a good steward and fix it so that it does.</p>
+</section>
+</section>
+<section id="issue-merge-request-creation">
+<h2>Issue &amp; Merge Request Creation<a class="headerlink" href="#issue-merge-request-creation" title="Permalink to this heading">#</a></h2>
+<p>Create or assign an issue to yourself at the <a class="reference external" href="https://gitlab.mitre.org/groups/it-modernization/team-2/-/boards">Group Issue Board Page</a>, add the label <code class="docutils literal notranslate"><span class="pre">janus</span></code>, and move it to “Doing”.</p>
+<p>Create a merge request based on that issue using the “Create Merge Request” button on the issue page.</p>
+</section>
+<section id="environment-setup">
+<h2>Environment Setup<a class="headerlink" href="#environment-setup" title="Permalink to this heading">#</a></h2>
+<p>First, clone the repository:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>git@gitlab.mitre.org:it-modernization/team-2/janus.git
+</pre></div>
+</div>
+<p>Create a conda environment (preferred):</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>janus<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10<span class="w">  </span><span class="c1"># or 3.11</span>
+</pre></div>
+</div>
+<p>Install <a class="reference external" href="https://python-poetry.org/">poetry</a> and activate the conda environment:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-sSL<span class="w"> </span>https://install.python-poetry.org<span class="w"> </span><span class="p">|</span><span class="w"> </span>python<span class="w"> </span>-
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;export PATH=</span><span class="nv">$PATH</span><span class="s2">:</span><span class="nv">$HOME</span><span class="s2">/.local/bin&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span><span class="nv">$HOME</span>/.bashrc
+<span class="nb">source</span><span class="w"> </span><span class="nv">$HOME</span>/.bashrc
+conda<span class="w"> </span>activate<span class="w"> </span>janus
+</pre></div>
+</div>
+<p>Then, install the <strong>developer</strong> requirements:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>install
+</pre></div>
+</div>
+</section>
+<section id="using-pre-commit">
+<h2>Using Pre-commit<a class="headerlink" href="#using-pre-commit" title="Permalink to this heading">#</a></h2>
+<p>If you’d like, you can install <a class="reference external" href="https://pre-commit.com/">pre-commit</a> to run linting and code-formatting before you are able to commit. This will ensure that you pass this portion of the remote pipelines when you push to your merge request.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>install
+</pre></div>
+</div>
+<p>Now, every time you try to commit, your code that you have staged will be linted by <code class="docutils literal notranslate"><span class="pre">flake8</span></code> and auto-formatted by <code class="docutils literal notranslate"><span class="pre">black</span></code>. If the linting doesn’t pass pre-commit, it will tell you, and you’ll have to make those changes before committing those files. If <code class="docutils literal notranslate"><span class="pre">black</span></code> autoformats your code during pre-commit, you can view those changes and then you’ll have to stage them. Then you can commit and push.</p>
+<p>Pre-commit can also be run manually on all files without having to commit.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files
+</pre></div>
+</div>
+</section>
+<section id="running-unit-tests">
+<h2>Running Unit Tests<a class="headerlink" href="#running-unit-tests" title="Permalink to this heading">#</a></h2>
+<p>There are also unit tests that need to be passed, and to make sure you are passing those locally (before pushing to your remote branch and running the pipeline) you can run the following command in the root directory:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>run<span class="w"> </span>pytest
+</pre></div>
+</div>
+<p>This will search for all <code class="docutils literal notranslate"><span class="pre">test_*.py</span></code> files and run the tests held in those files.</p>
+</section>
+<section id="adding-packages-modules">
+<h2>Adding Packages &amp; Modules<a class="headerlink" href="#adding-packages-modules" title="Permalink to this heading">#</a></h2>
+<p>If you add a package or module, make sure to create a unit test for it and preferably all classes and functions within it. When creating a package (directory with Python modules), add a <code class="docutils literal notranslate"><span class="pre">_tests</span></code> directory that mirrors the package directory. See the example below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>janus
+├── utils
+│   ├── _tests
+│   │   ├── __init__.py
+│   │   └── test_logger.py
+│   ├── __init__.py
+│   └── logger.py
+</pre></div>
+</div>
+<p>In the <code class="docutils literal notranslate"><span class="pre">utils</span></code> package, there is one module, <code class="docutils literal notranslate"><span class="pre">logger</span></code>. This is mirrored in the <code class="docutils literal notranslate"><span class="pre">_tests</span></code> directory as <code class="docutils literal notranslate"><span class="pre">test_logger.py</span></code>. And inside each of those, there is a mirrored <code class="docutils literal notranslate"><span class="pre">Test</span></code> class for every class in each module.</p>
+</section>
+<section id="adding-documentation">
+<h2>Adding Documentation<a class="headerlink" href="#adding-documentation" title="Permalink to this heading">#</a></h2>
+<p>API documentation is autogenerated by <a class="reference external" href="https://sphinx-autoapi.readthedocs.io/en/latest/">Sphinx AutoAPI</a>.</p>
+<p>If you’d like to add to this documentation, you can create markdown or <code class="docutils literal notranslate"><span class="pre">.rst</span></code> files in the <code class="docutils literal notranslate"><span class="pre">docs/source</span></code> directory, and <strong>add them to the <code class="docutils literal notranslate"><span class="pre">index.rst</span></code></strong> under the <code class="docutils literal notranslate"><span class="pre">toctree</span></code>:</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="gh">Janus LLM Transcoder</span>
+<span class="gh">====================</span>
+
+<span class="gh">Usage</span>
+<span class="gh">----------------------</span>
+<span class="na">:doc:</span><span class="nv">`intro`</span>
+   Introduction to installing and using the package.
+
+<span class="gh">Development</span>
+<span class="gh">-----------</span>
+
+<span class="na">:doc:</span><span class="nv">`contributing`</span>
+   How to contribute changes to the codebase or to documentation.
+
+<span class="gh">API</span>
+<span class="gh">---</span>
+
+<span class="na">:doc:</span><span class="nv">`autoapi/index`</span>
+
+<span class="cp">.. Hidden TOCs</span>
+
+<span class="p">..</span> <span class="ow">toctree</span><span class="p">::</span>
+   <span class="nc">:maxdepth:</span> 2
+   <span class="nc">:caption:</span> Usage
+   <span class="nc">:hidden:</span>
+
+   intro
+
+<span class="p">..</span> <span class="ow">toctree</span><span class="p">::</span>
+   <span class="nc">:maxdepth:</span> 2
+   <span class="nc">:caption:</span> Development
+   <span class="nc">:hidden:</span>
+
+   contributing
+
+<span class="p">..</span> <span class="ow">toctree</span><span class="p">::</span>
+   <span class="nc">:maxdepth:</span> 1
+   <span class="nc">:caption:</span> API Reference
+   <span class="nc">:hidden:</span>
+
+   autoapi/index
+
+<span class="gh">Indices and tables</span>
+<span class="gh">------------------</span>
+
+<span class="m">*</span> <span class="na">:ref:</span><span class="nv">`genindex`</span>
+<span class="m">*</span> <span class="na">:ref:</span><span class="nv">`modindex`</span>
+<span class="m">*</span> <span class="na">:ref:</span><span class="nv">`search`</span>
+</pre></div>
+</div>
+<p>Where your file is located in that <code class="docutils literal notranslate"><span class="pre">toctree</span></code> (Table of Contents Tree) is where the page will exist in the sidebar and on the homepage.</p>
+<section id="pushing-doc-changes-to-mrs">
+<h3>Pushing Doc Changes to MRs<a class="headerlink" href="#pushing-doc-changes-to-mrs" title="Permalink to this heading">#</a></h3>
+<p>Every time changes are pushed to a merge request, artifacts will be created that will allow you to view the hosted version of the GitLab Pages documentation, seen if you click on <em>HTML Documentation</em> (see below) and navigate to <code class="docutils literal notranslate"><span class="pre">public/index.html</span></code>.</p>
+<p><img alt="view_artifacts" src="_images/html_documentation.png" /></p>
+</section>
+<section id="testing-documentation-locally">
+<h3>Testing Documentation Locally<a class="headerlink" href="#testing-documentation-locally" title="Permalink to this heading">#</a></h3>
+<p>In order test documentation locally, you’ll first have to install all the necessary packages that are left out of the <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">install</span></code> command (this is installed automatically during CI):</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>install<span class="w"> </span>--with<span class="w"> </span>docs
+</pre></div>
+</div>
+<p>Then, you can build the documentation:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>run<span class="w"> </span>sphinx-build<span class="w"> </span>-d<span class="w"> </span>docs/build/doctrees<span class="w"> </span>docs/source<span class="w"> </span>docs/build/html
+</pre></div>
+</div>
+<p>And view it by opening the <code class="docutils literal notranslate"><span class="pre">index.html</span></code> file located at:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docs</span><span class="o">/</span><span class="n">build</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
+</pre></div>
+</div>
+<p>If you’re working locally, just find the file location, and open the file in a browser by copying the path.</p>
+</section>
+</section>
+<section id="publishing-the-package">
+<h2>Publishing the Package<a class="headerlink" href="#publishing-the-package" title="Permalink to this heading">#</a></h2>
+<p>In order to publish the package, there will be three steps to follow:</p>
+<ol class="arabic simple">
+<li><p>Open an issue with the <code class="docutils literal notranslate"><span class="pre">version</span></code> tag labeled “Change Janus Version to <Version Number>”</p></li>
+<li><p>Open a Merge Request off of that issue.</p></li>
+<li><p>Bump the version in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> with <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">version</span> <span class="pre">&lt;patch|minor|major&gt;</span></code>, use that same version in <code class="docutils literal notranslate"><span class="pre">janus/__init__.py</span></code> and <code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code>, and commit those changes to the MR.</p></li>
+<li><p>Once the MR is merged, create a tag and release on GitLab. This should kick off the <code class="docutils literal notranslate"><span class="pre">publish.yml</span></code> workflow on GitHub and publish the package to PyPI.</p></li>
+</ol>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="autoapi/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">API Reference</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="intro.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Introduction</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, MITRE
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Contributing</a><ul>
+<li><a class="reference internal" href="#contributing-for-mitre-employees">Contributing for MITRE Employees</a><ul>
+<li><a class="reference internal" href="#important-docstring-information">Important Docstring Information</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#issue-merge-request-creation">Issue &amp; Merge Request Creation</a></li>
+<li><a class="reference internal" href="#environment-setup">Environment Setup</a></li>
+<li><a class="reference internal" href="#using-pre-commit">Using Pre-commit</a></li>
+<li><a class="reference internal" href="#running-unit-tests">Running Unit Tests</a></li>
+<li><a class="reference internal" href="#adding-packages-modules">Adding Packages &amp; Modules</a></li>
+<li><a class="reference internal" href="#adding-documentation">Adding Documentation</a><ul>
+<li><a class="reference internal" href="#pushing-doc-changes-to-mrs">Pushing Doc Changes to MRs</a></li>
+<li><a class="reference internal" href="#testing-documentation-locally">Testing Documentation Locally</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#publishing-the-package">Publishing the Package</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    </body>
+</html>

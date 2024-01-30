@@ -1,0 +1,71 @@
+:py:mod:`janus.language.splitter`
+=================================
+
+.. py:module:: janus.language.splitter
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   janus.language.splitter.Splitter
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   janus.language.splitter.log
+
+
+.. py:data:: log
+   
+
+   
+
+.. py:exception:: TokenLimitError
+
+   Bases: :py:obj:`Exception`
+
+   An exception raised when the token limit is exceeded and the code cannot be
+   split into smaller blocks.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+
+.. py:class:: Splitter(language, model = None, max_tokens = 4096, use_placeholders = True)
+
+   Bases: :py:obj:`janus.language.file.FileManager`
+
+   A class for splitting code into functional blocks to prompt with for
+   transcoding.
+
+   :param language: The name of the language to split.
+   :param model: The name of the model to use for counting tokens. If the model is None,
+                 will use tiktoken's default tokenizer to count tokens.
+   :param max_tokens: The maximum number of tokens to use for each functional block.
+   :param use_placeholders: Whether to use placeholders when splitting the code.
+
+   .. py:method:: split(file)
+
+      Split the given file into functional code blocks.
+
+      :param file: The file to split into functional blocks.
+
+      :returns: A `CodeBlock` made up of nested `CodeBlock`s.
+
+
+   .. py:method:: merge_nodes(nodes)
+
+      Merge a list of nodes into a single node. The first and last nodes'
+      respective prefix and suffix become this node's affixes.
+
+
+

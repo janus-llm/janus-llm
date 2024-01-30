@@ -1,0 +1,109 @@
+:py:mod:`janus.prompts.prompt`
+==============================
+
+.. py:module:: janus.prompts.prompt
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   janus.prompts.prompt.PromptEngine
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   janus.prompts.prompt.log
+   janus.prompts.prompt.TEXT_OUTPUT
+   janus.prompts.prompt.SAME_OUTPUT
+   janus.prompts.prompt.JSON_OUTPUT
+   janus.prompts.prompt.JANUS_PROMPT_TEMPLATES_DIR
+   janus.prompts.prompt.SYSTEM_PROMPT_TEMPLATE_FILENAME
+   janus.prompts.prompt.HUMAN_PROMPT_TEMPLATE_FILENAME
+   janus.prompts.prompt.PROMPT_VARIABLES_FILENAME
+
+
+.. py:data:: log
+   
+
+   
+
+.. py:data:: TEXT_OUTPUT
+   :annotation: = ['document', 'requirements']
+
+   
+
+.. py:data:: SAME_OUTPUT
+   :annotation: = ['document_inline']
+
+   
+
+.. py:data:: JSON_OUTPUT
+   :annotation: = ['evaluate']
+
+   
+
+.. py:data:: JANUS_PROMPT_TEMPLATES_DIR
+   
+
+   
+
+.. py:data:: SYSTEM_PROMPT_TEMPLATE_FILENAME
+   :annotation: = system.txt
+
+   
+
+.. py:data:: HUMAN_PROMPT_TEMPLATE_FILENAME
+   :annotation: = human.txt
+
+   
+
+.. py:data:: PROMPT_VARIABLES_FILENAME
+   :annotation: = variables.json
+
+   
+
+.. py:class:: PromptEngine(source_language, target_language, target_version, prompt_template)
+
+   A class defining prompting schemes for the LLM.
+
+   Initialize a PromptEngine instance.
+
+   :param source_language: The language to translate from
+   :param target_language: The language to translate to
+   :param target_version: The version of the target language
+   :param prompt_template: The name of the Janus prompt template directory to use.
+                           Can be one of "simple", "document", "document_inline", "pseudocode", or
+                           "requirements", or a path to a custom directory containing system.txt and
+                           human.txt files.
+
+   .. py:method:: create(code)
+
+      Convert a code block to a Chat GPT prompt.
+
+      :param code: The code block to convert.
+
+      :returns: The converted prompt as a list of messages.
+
+
+   .. py:method:: get_prompt_template_path(template_name)
+      :staticmethod:
+
+      Raises an exception if the specified prompt template path
+      is not a directory containing system.txt and human.txt files.
+
+      :param template_name: The name of the Janus prompt template directory to use.
+                            Can be one of "simple", "document", "document_inline", or "requirements",
+                            or a path to a custom directory containing system.txt and human.txt files.
+
+
+

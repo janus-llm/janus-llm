@@ -1,0 +1,116 @@
+:py:mod:`janus.language.mumps.patterns`
+=======================================
+
+.. py:module:: janus.language.mumps.patterns
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   janus.language.mumps.patterns.MumpsLabeledBlockPattern
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   janus.language.mumps.patterns.log
+   janus.language.mumps.patterns.MUMPS_COMMANDS
+   janus.language.mumps.patterns.comment
+   janus.language.mumps.patterns.optional_inline_comment
+   janus.language.mumps.patterns.label_start
+   janus.language.mumps.patterns.routine_start
+   janus.language.mumps.patterns.routine_end
+
+
+.. py:data:: log
+   
+
+   
+
+.. py:data:: MUMPS_COMMANDS
+   :annotation: = ['break', 'b', 'close', 'c', 'database', 'do', 'd', 'else', 'e', 'for', 'f', 'goto', 'g',...
+
+   
+
+.. py:data:: comment
+   :annotation: = [\t ]*;.*\n
+
+   
+
+.. py:data:: optional_inline_comment
+   :annotation: = Multiline-String
+
+    .. raw:: html
+
+        <details><summary>Show Value</summary>
+
+    .. code-block:: text
+        :linenos:
+
+        [	 ]+(?:;.*)?
+        |[	 ]*
+
+
+    .. raw:: html
+
+        </details>
+
+   
+
+.. py:data:: label_start
+   :annotation: = [^ \t;$]
+
+   
+
+.. py:data:: routine_start
+   
+
+   
+
+.. py:data:: routine_end
+   
+
+   
+
+.. py:class:: MumpsLabeledBlockPattern
+
+   A pattern for matching MUMPS labeled blocks.
+
+   .. attribute:: start
+
+      A regular expression pattern that matches the label at the
+      beginning of a MUMPS block (typically a routine).
+
+   .. attribute:: end
+
+      A regular expression pattern that matches the end of a MUMPS block.
+
+   .. attribute:: type
+
+      The type of the functional code block ('module', 'function', etc.).
+
+   .. py:attribute:: start
+      :annotation: :re.Pattern
+
+      
+
+   .. py:attribute:: end
+      :annotation: :re.Pattern
+
+      
+
+   .. py:attribute:: type
+      :annotation: :str = labeled_block
+
+      
+
+
