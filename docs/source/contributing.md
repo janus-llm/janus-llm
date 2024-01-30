@@ -1,15 +1,15 @@
 # Contributing
 
-Right now, submission of [issues](https://github.com/mitre-cem/janus/issues) and [pull requests](https://github.com/mitre-cem/janus/pulls) through GitHub is the best way to suggest changes, and those will have to be applied and merged on the internal MITRE GitLab and mirrored to GitHub. This process may change in the future.
+Right now, submission of [issues](https://github.com/janus-llm/janus-llm/issues) and [pull requests](https://github.com/janus-llm/janus-llm/pulls) through GitHub is the best way to suggest changes, and those will have to be applied and merged on the internal MITRE GitLab and mirrored to GitHub. This process may change in the future.
 
 ## Contributing for MITRE Employees
 
-Contributing to the Janus codebase ([GitLab](https://gitlab.mitre.org/cem-llm/janus)) requires a process to be followed. This page will explain how to follow that process and will provide some tools to make local development easier.
+Contributing to the Janus codebase ([GitLab](https://gitlab.mitre.org/it-modernization/team-2/janus)) requires a process to be followed. This page will explain how to follow that process and will provide some tools to make local development easier.
 
 **Some guidlines**:
   1. Nobody can commit directly to `main`.
   2. You must create a merge request in order to publish changes to `main`.
-  3. Before merging, all stages of the GitLab CI pipeline must pass. This includes linting with [`flake8`](https://flake8.pycqa.org/en/latest/) ([config](https://gitlab.mitre.org/cem-llm/janus/-/blob/main/.flake8)), code-formatting with [`black`](https://github.com/psf/black) ([config](https://gitlab.mitre.org/cem-llm/janus/-/blob/main/pyproject.toml)), passing the Python unit tests, and creating the documentation.
+  3. Before merging, all stages of the GitLab CI pipeline must pass. This includes linting with [`flake8`](https://flake8.pycqa.org/en/latest/) ([config](https://gitlab.mitre.org/it-modernization/team-2/janus/-/blob/main/.flake8)), code-formatting with [`black`](https://github.com/psf/black) ([config](https://gitlab.mitre.org/it-modernization/team-2/janus/-/blob/main/pyproject.toml)), passing the Python unit tests, and creating the documentation.
   4. Once all pipeline stages have passed, then the branch can be merged into main.
   5. These pipeline stages can be tested locally to ensure that they are passed on the remote side (explained in [Using Pre-commit](#using-pre-commit))
 
@@ -20,7 +20,7 @@ Do your best to make sure that all docstrings adhere to the Google docstring for
 If you are editing a file and see that a docstring doesn't adhere to the Python3 Google Style Guide, please be a good steward and fix it so that it does.
 
 ## Issue & Merge Request Creation
-Create or assign an issue to yourself at the [Group Issue Board Page](https://gitlab.mitre.org/groups/cem-llm/-/boards), add the label `janus`, and move it to “Doing”.
+Create or assign an issue to yourself at the [Group Issue Board Page](https://gitlab.mitre.org/groups/it-modernization/team-2/-/boards), add the label `janus`, and move it to “Doing”.
 
 Create a merge request based on that issue using the "Create Merge Request" button on the issue page.
 
@@ -29,13 +29,13 @@ Create a merge request based on that issue using the "Create Merge Request" butt
 First, clone the repository:
 
 ```shell
-git clone git@gitlab.mitre.org:cem-llm/janus.git
+git clone git@gitlab.mitre.org:it-modernization/team-2/janus.git
 ```
 
 Create a conda environment (preferred):
 
 ```shell
-conda create -n janus python=3.10
+conda create -n janus python=3.10  # or 3.11
 ```
 
 Install [poetry](https://python-poetry.org/) and activate the conda environment:
@@ -182,3 +182,12 @@ docs/build/html/index.html
 ```
 
 If you're working locally, just find the file location, and open the file in a browser by copying the path.
+
+## Publishing the Package
+
+In order to publish the package, there will be three steps to follow:
+
+1. Open an issue with the `version` tag labeled "Change Janus Version to <Version Number>"
+2. Open a Merge Request off of that issue.
+3. Bump the version in `pyproject.toml` with `poetry version <patch|minor|major>`, use that same version in `janus/__init__.py` and `CITATION.cff`, and commit those changes to the MR.
+4. Once the MR is merged, create a tag and release on GitLab. This should kick off the `publish.yml` workflow on GitHub and publish the package to PyPI.
