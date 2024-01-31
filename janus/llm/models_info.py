@@ -1,5 +1,7 @@
+import json
 import os
-from typing import Any, Dict
+from pathlib import Path
+from typing import Any, Dict, Tuple
 
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
@@ -7,15 +9,21 @@ from langchain.llms import HuggingFaceTextGenInference
 
 load_dotenv()
 
-MODEL_CONSTRUCTORS: Dict[str, Any] = {
-    "gpt-4": ChatOpenAI,
-    "gpt-4-32k": ChatOpenAI,
-    "gpt-4-1106-preview": ChatOpenAI,
-    "gpt-3.5-turbo": ChatOpenAI,
-    "gpt-3.5-turbo-16k": ChatOpenAI,
-    "llama": HuggingFaceTextGenInference,
-    "falcon": HuggingFaceTextGenInference,
-    "wizard-coder": HuggingFaceTextGenInference,
+MODEL_TYPE_CONSTRUCTORS = {
+    "OpenAI": ChatOpenAI,
+    "HuggingFace": HuggingFaceTextGenInference,
+}
+
+
+MODEL_TYPES: Dict[str, Any] = {
+    "gpt-4": "OpenAI",
+    "gpt-4-32k": "OpenAI",
+    "gpt-4-1106-preview": "OpenAI",
+    "gpt-3.5-turbo": "OpenAI",
+    "gpt-3.5-turbo-16k": "OpenAI",
+    "mitre-llama": "HuggingFace",
+    "mitre-falcon": "HuggingFace",
+    "mitre-wizard-coder": "HuggingFace",
 }
 
 _open_ai_defaults: Dict[str, Any] = {
@@ -29,7 +37,7 @@ MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
     "gpt-4-1106-preview": dict(model_name="gpt-4-1106-preview", **_open_ai_defaults),
     "gpt-3.5-turbo": dict(model_name="gpt-3.5-turbo", **_open_ai_defaults),
     "gpt-3.5-turbo-16k": dict(model_name="gpt-3.5-turbo-16k", **_open_ai_defaults),
-    "llama": dict(
+    "mitre-llama": dict(
         inference_server_url="https://llama2-70b.aip.mitre.org",
         max_new_tokens=4096,
         top_k=10,
@@ -39,7 +47,7 @@ MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
         repetition_penalty=1.03,
         timeout=240,
     ),
-    "falcon": dict(
+    "mitre-falcon": dict(
         inference_server_url="https://falcon-40b.aip.mitre.org",
         max_new_tokens=4096,
         top_k=10,
@@ -49,7 +57,7 @@ MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
         repetition_penalty=1.03,
         timeout=240,
     ),
-    "wizard-coder": dict(
+    "mitre-wizard-coder": dict(
         inference_server_url="https://wizard-coder-34b.aip.mitre.org",
         max_new_tokens=1024,
         top_k=10,
@@ -61,13 +69,17 @@ MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
     ),
 }
 
+DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
+
+MODEL_CONFIG_DIR = Path.home().expanduser() / ".janus" / "llm"
+
 TOKEN_LIMITS: Dict[str, int] = {
     "gpt-4": 8192,
     "gpt-4-32k": 32_768,
     "gpt-4-1106-preview": 128_000,
     "gpt-3.5-turbo": 4096,
     "gpt-3.5-turbo-16k": 16_384,
-    "falcon": 32_000,
+    "mitre-falcon": 32_000,
     "text-embedding-ada-002": 8191,
     "gpt4all": 16_384,
 }
@@ -78,7 +90,31 @@ COST_PER_MODEL: Dict[str, Dict[str, float]] = {
     "gpt-4-1106-preview": {"input": 0.01, "output": 0.03},
     "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
     "gpt-3.5-turbo-16k": {"input": 0.003, "output": 0.004},
-    "llama": {"input": 0.0, "output": 0.0},
-    "falcon": {"input": 0.0, "output": 0.0},
-    "wizard-coder": {"input": 0.0, "output": 0.0},
+    "mitre-llama": {"input": 0.0, "output": 0.0},
+    "mitre-falcon": {"input": 0.0, "output": 0.0},
+    "mitre-wizard-coder": {"input": 0.0, "output": 0.0},
 }
+
+
+def load_model(model_name: str) -> Tuple[Any, int, Dict[str, float]]:
+    if not MODEL_CONFIG_DIR.exists():
+        MODEL_CONFIG_DIR.mkdir(parents=True)
+    model_config_file = MODEL_CONFIG_DIR / f"{model_name}.json"
+    if not model_config_file.exists():
+        if model_name not in DEFAULT_MODELS:
+            raise ValueError(f"Error: could not find model {model_name}")
+        model_config = {
+            "model_type": MODEL_TYPES[model_name],
+            "model_args": MODEL_DEFAULT_ARGUMENTS[model_name],
+            "token_limit": TOKEN_LIMITS.get(model_name, 4096),
+            "model_cost": COST_PER_MODEL.get(model_name, {"input": 0, "output": 0}),
+        }
+        with open(model_config_file, "w") as f:
+            json.dump(model_config, f)
+    else:
+        with open(model_config_file, "r") as f:
+            model_config = json.read(f)
+    model_constructor = MODEL_TYPE_CONSTRUCTORS[model_config["model_type"]]
+    model_args = model_config["model_args"]
+    model = model_constructor(**model_args)
+    model, model_config["token_limit"], model_config["model_cost"]

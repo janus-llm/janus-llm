@@ -1,5 +1,4 @@
 import os
-from copy import deepcopy
 from pathlib import Path
 
 import click
@@ -12,9 +11,9 @@ from .embedding.vectorize import ChromaDBVectorizer
 from .language.binary import BinarySplitter
 from .language.mumps import MumpsSplitter
 from .language.treesitter import TreeSitterSplitter
-from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
+from .llm import load_model
 from .parsers.code_parser import PARSER_TYPES
-from .translate import VALID_MODELS, Translator
+from .translate import Translator
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
 
@@ -81,7 +80,6 @@ def translate(
     llm_name: Annotated[
         str,
         typer.Option(
-            click_type=click.Choice(sorted(VALID_MODELS)),
             help="The OpenAI model name to use. See this link for more details:\n"
             "https://platform.openai.com/docs/models/overview",
         ),
@@ -218,12 +216,11 @@ def db_add(
         path=db_loc,
         model=model_name,
     )
-    model_arguments = deepcopy(MODEL_DEFAULT_ARGUMENTS[model_name])
 
     # Load the model
-    llm = MODEL_CONSTRUCTORS[model_name](**model_arguments)
+    llm, token_limit, _ = load_model(model_name)
 
-    max_tokens = TOKEN_LIMITS.get(model_name, 4096) // 2.5
+    max_tokens = token_limit // 2.5
     input_dir = Path(input_dir)
     source_glob = f"**/*.{LANGUAGES[input_lang]['suffix']}"
     input_paths = input_dir.rglob(source_glob)
