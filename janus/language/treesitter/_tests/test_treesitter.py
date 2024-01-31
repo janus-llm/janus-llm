@@ -13,7 +13,7 @@ class TestTreeSitterSplitter(unittest.TestCase):
         """Set up the tests."""
         model_name = "gpt-3.5-turbo"
         self.maxDiff = None
-        self.llm = load_model(model_name)
+        self.llm, _, _ = load_model(model_name)
 
     def _split(self):
         """Split the test file."""

@@ -115,10 +115,10 @@ def load_model(model_name: str) -> Tuple[Any, int, Dict[str, float]]:
             json.dump(model_config, f)
     else:
         with open(model_config_file, "r") as f:
-            model_config = json.read(f)
+            model_config = json.load(f)
     model_constructor = MODEL_TYPE_CONSTRUCTORS[model_config["model_type"]]
     model_args = model_config["model_args"]
     if model_config["model_type"] == "OpenAI":
         model_args.update(_open_ai_defaults)
     model = model_constructor(**model_args)
-    model, model_config["token_limit"], model_config["model_cost"]
+    return model, model_config["token_limit"], model_config["model_cost"]

@@ -12,7 +12,7 @@ class TestMumpsSplitter(unittest.TestCase):
     def setUp(self):
         """Set up the tests."""
         model_name = "gpt-3.5-turbo"
-        llm = load_model(model_name)
+        llm, _, _ = load_model(model_name)
         self.splitter = MumpsSplitter(model=llm)
         self.combiner = Combiner(language="mumps")
         self.test_file = Path("janus/language/mumps/_tests/mumps.m")
