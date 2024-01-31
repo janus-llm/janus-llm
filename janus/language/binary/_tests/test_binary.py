@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from ....llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS
+from ....llm import load_model
 from ..binary import BinarySplitter
 
 
@@ -14,7 +14,7 @@ class TestBinarySplitter(unittest.TestCase):
     def setUp(self):
         model_name = "gpt-3.5-turbo"
         self.binary_file = Path("janus/language/binary/_tests/hello")
-        self.llm = MODEL_CONSTRUCTORS[model_name](**MODEL_DEFAULT_ARGUMENTS[model_name])
+        self.llm = load_model(model_name)
         self.splitter = BinarySplitter(model=self.llm)
         os.environ["GHIDRA_INSTALL_PATH"] = "~/programs/ghidra_10.4_PUBLIC"
 
