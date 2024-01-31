@@ -320,7 +320,29 @@ def llm_add(
         with open(model_cfg, "w") as f:
             json.dump(cfg, f)
     elif type == "HuggingFaceLocal":
-        pass
+        model_id = typer.prompt("Enter the model id")
+        task = typer.prompt("Enter the task")
+        max_token_str = typer.prompt("Enter the model's maximum tokens", default=4096)
+        if max_token_str != "":
+            max_tokens = int(max_token_str)
+        in_cost = 0
+        in_cost_str = typer.prompt("Enter the cost per input token", default=0)
+        if in_cost_str != "":
+            in_cost = float(in_cost_str)
+        out_cost = 0
+        out_cost_str = typer.prompt("Enter the cost per output token", default=0)
+        if out_cost_str != "":
+            out_cost = float(out_cost_str)
+        params = {"model_id": model_id, "task": task}
+        cfg = {
+            "model_type": type,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": {"input": in_cost, "output": out_cost},
+        }
+        with open(model_cfg, "w") as f:
+            json.dump(cfg, f)
+
     elif type == "OpenAI":
         model_name = typer.prompt("Enter the model name", default="gpt-3.5-turbo")
         params = dict(
