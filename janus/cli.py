@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 
@@ -12,6 +13,12 @@ from .language.binary import BinarySplitter
 from .language.mumps import MumpsSplitter
 from .language.treesitter import TreeSitterSplitter
 from .llm import load_model
+from .llm.models_info import (
+    COST_PER_MODEL,
+    MODEL_CONFIG_DIR,
+    MODEL_TYPE_CONSTRUCTORS,
+    TOKEN_LIMITS,
+)
 from .parsers.code_parser import PARSER_TYPES
 from .translate import Translator
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
@@ -42,6 +49,7 @@ app = typer.Typer(
 )
 
 db = typer.Typer()
+llm = typer.Typer()
 
 
 @app.command(
@@ -265,7 +273,74 @@ def db_remove(
     collections.delete(collection_name)
 
 
+@llm.command("add", help="Add a model config to janus")
+def llm_add(
+    model_name: Annotated[str, typer.Argument(help="The name of the model")],
+    type: Annotated[
+        str,
+        typer.Option(
+            help="The type of the model",
+            click_type=click.Choice(sorted(list(MODEL_TYPE_CONSTRUCTORS.keys()))),
+        ),
+    ] = "HuggingFace",
+):
+    if not MODEL_CONFIG_DIR.exists():
+        MODEL_CONFIG_DIR.mkdir(parents=True)
+    model_cfg = MODEL_CONFIG_DIR / f"{model_name}.json"
+    if type == "HuggingFace":
+        url = typer.prompt("Enter the model's url")
+        max_tokens = 4096
+        max_token_str = typer.prompt("Enter the model's maximum tokens", default=4096)
+        if max_token_str != "":
+            max_tokens = int(max_token_str)
+        in_cost = 0
+        in_cost_str = typer.prompt("Enter the cost per input token", default=0)
+        if in_cost_str != "":
+            in_cost = float(in_cost_str)
+        out_cost = 0
+        out_cost_str = typer.prompt("Enter the cost per output token", default=0)
+        if out_cost_str != "":
+            out_cost = float(out_cost_str)
+        params = dict(
+            inference_server_url=url,
+            max_new_tokens=max_tokens,
+            top_k=10,
+            top_p=0.95,
+            typical_p=0.95,
+            temperature=0.01,
+            repetition_penalty=1.03,
+            timeout=240,
+        )
+        cfg = {
+            "model_type": type,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": {"input": in_cost, "output": out_cost},
+        }
+        with open(model_cfg, "w") as f:
+            json.dump(cfg, f)
+    elif type == "HuggingFaceLocal":
+        pass
+    elif type == "OpenAI":
+        model_name = typer.prompt("Enter the model name", default="gpt-3.5-turbo")
+        params = dict(
+            model_name=model_name,
+        )
+        max_tokens = TOKEN_LIMITS[model_name]
+        model_cost = COST_PER_MODEL[model_name]
+        cfg = {
+            "model_type": type,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": model_cost,
+        }
+        with open(model_cfg, "w") as f:
+            json.dump(cfg, f)
+    print(f"Model config written to {model_cfg}")
+
+
 app.add_typer(db, name="db")
+app.add_typer(llm, name="llm")
 
 
 if __name__ == "__main__":

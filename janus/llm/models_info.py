@@ -6,12 +6,14 @@ from typing import Any, Dict, Tuple
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import HuggingFaceTextGenInference
+from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 
 load_dotenv()
 
 MODEL_TYPE_CONSTRUCTORS = {
     "OpenAI": ChatOpenAI,
     "HuggingFace": HuggingFaceTextGenInference,
+    "HuggingFaceLocal": HuggingFacePipeline.from_model_id,
 }
 
 
@@ -32,11 +34,11 @@ _open_ai_defaults: Dict[str, Any] = {
 }
 
 MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
-    "gpt-4": dict(model_name="gpt-4", **_open_ai_defaults),
-    "gpt-4-32k": dict(model_name="gpt-4-32k", **_open_ai_defaults),
-    "gpt-4-1106-preview": dict(model_name="gpt-4-1106-preview", **_open_ai_defaults),
-    "gpt-3.5-turbo": dict(model_name="gpt-3.5-turbo", **_open_ai_defaults),
-    "gpt-3.5-turbo-16k": dict(model_name="gpt-3.5-turbo-16k", **_open_ai_defaults),
+    "gpt-4": dict(model_name="gpt-4"),
+    "gpt-4-32k": dict(model_name="gpt-4-32k"),
+    "gpt-4-1106-preview": dict(model_name="gpt-4-1106-preview"),
+    "gpt-3.5-turbo": dict(model_name="gpt-3.5-turbo"),
+    "gpt-3.5-turbo-16k": dict(model_name="gpt-3.5-turbo-16k"),
     "mitre-llama": dict(
         inference_server_url="https://llama2-70b.aip.mitre.org",
         max_new_tokens=4096,
@@ -116,5 +118,7 @@ def load_model(model_name: str) -> Tuple[Any, int, Dict[str, float]]:
             model_config = json.read(f)
     model_constructor = MODEL_TYPE_CONSTRUCTORS[model_config["model_type"]]
     model_args = model_config["model_args"]
+    if model_config["model_type"] == "OpenAI":
+        model_args.update(_open_ai_defaults)
     model = model_constructor(**model_args)
     model, model_config["token_limit"], model_config["model_cost"]
