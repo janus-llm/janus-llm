@@ -289,18 +289,11 @@ def llm_add(
     model_cfg = MODEL_CONFIG_DIR / f"{model_name}.json"
     if type == "HuggingFace":
         url = typer.prompt("Enter the model's url")
-        max_tokens = 4096
-        max_token_str = typer.prompt("Enter the model's maximum tokens", default=4096)
-        if max_token_str != "":
-            max_tokens = int(max_token_str)
-        in_cost = 0
-        in_cost_str = typer.prompt("Enter the cost per input token", default=0)
-        if in_cost_str != "":
-            in_cost = float(in_cost_str)
-        out_cost = 0
-        out_cost_str = typer.prompt("Enter the cost per output token", default=0)
-        if out_cost_str != "":
-            out_cost = float(out_cost_str)
+        max_tokens = typer.prompt(
+            "Enter the model's maximum tokens", default=4096, type=int
+        )
+        in_cost = typer.prompt("Enter the cost per input token", default=0, type=float)
+        out_cost = typer.prompt("Enter the cost per output token", default=0, type=float)
         params = dict(
             inference_server_url=url,
             max_new_tokens=max_tokens,
@@ -322,17 +315,11 @@ def llm_add(
     elif type == "HuggingFaceLocal":
         model_id = typer.prompt("Enter the model id")
         task = typer.prompt("Enter the task")
-        max_token_str = typer.prompt("Enter the model's maximum tokens", default=4096)
-        if max_token_str != "":
-            max_tokens = int(max_token_str)
-        in_cost = 0
-        in_cost_str = typer.prompt("Enter the cost per input token", default=0)
-        if in_cost_str != "":
-            in_cost = float(in_cost_str)
-        out_cost = 0
-        out_cost_str = typer.prompt("Enter the cost per output token", default=0)
-        if out_cost_str != "":
-            out_cost = float(out_cost_str)
+        max_tokens = typer.prompt(
+            "Enter the model's maximum tokens", default=4096, type=int
+        )
+        in_cost = typer.prompt("Enter the cost per input token", default=0, type=float)
+        out_cost = typer.prompt("Enter the cost per output token", default=0, type=float)
         params = {"model_id": model_id, "task": task}
         cfg = {
             "model_type": type,
