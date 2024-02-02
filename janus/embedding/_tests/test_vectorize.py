@@ -1,3 +1,4 @@
+import datetime
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -39,8 +40,14 @@ class TestVectorize(unittest.TestCase):
     def test_add_nodes_recursively(self):
         embedding_type = EmbeddingType.SOURCE
         self.vectorizer.create_collection(embedding_type)
-        self.database.create_collection.assert_called_with("source_1")
+        metadata = {
+            "date_updated": datetime.datetime.now().date().isoformat(),
+            "time_updated": datetime.datetime.now().time().isoformat("minutes"),
+        }
+        self.database.create_collection.assert_called_with("source_1", metadata=metadata)
         self.vectorizer._add_nodes_recursively(
             self.test_block, embedding_type, self.test_file.name
         )
-        self.database.get_or_create_collection.assert_called_with("source_1")
+        self.database.get_or_create_collection.assert_called_with(
+            "source_1", metadata=metadata
+        )
