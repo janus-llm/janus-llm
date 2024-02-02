@@ -11,8 +11,10 @@
 </a>
 <a href="https://github.com/psf/black" target="_blank">
     <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code Style: black">
+</a>
 <a href="https://pypi.org/project/janus-llm" target="_blank">
     <img src="https://img.shields.io/pypi/pyversions/janus-llm" alt="Python versions">
+</a>
 <a href="https://pypi.org/project/janus-llm" target="_blank">
     <img src="https://img.shields.io/pypi/v/janus-llm?color=%2334D058&label=pypi%20package" alt="Package version">
 </a>
@@ -61,3 +63,6 @@ poetry install
 ### Contributing
 
 See our [contributing pages](https://janus-llm.github.io/janus-llm/contributing.html)
+
+### Copyright
+Copyright ©2024 The MITRE Corporation. ALL RIGHTS RESERVED. Approved for Public Release; Distribution Unlimited. Public Release Case Number 23-4084.
