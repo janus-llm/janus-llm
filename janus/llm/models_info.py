@@ -23,9 +23,6 @@ MODEL_TYPES: Dict[str, Any] = {
     "gpt-4-1106-preview": "OpenAI",
     "gpt-3.5-turbo": "OpenAI",
     "gpt-3.5-turbo-16k": "OpenAI",
-    "mitre-llama": "HuggingFace",
-    "mitre-falcon": "HuggingFace",
-    "mitre-wizard-coder": "HuggingFace",
 }
 
 _open_ai_defaults: Dict[str, Any] = {
@@ -39,36 +36,6 @@ MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
     "gpt-4-1106-preview": dict(model_name="gpt-4-1106-preview"),
     "gpt-3.5-turbo": dict(model_name="gpt-3.5-turbo"),
     "gpt-3.5-turbo-16k": dict(model_name="gpt-3.5-turbo-16k"),
-    "mitre-llama": dict(
-        inference_server_url="https://llama2-70b.aip.mitre.org",
-        max_new_tokens=4096,
-        top_k=10,
-        top_p=0.95,
-        typical_p=0.95,
-        temperature=0.01,
-        repetition_penalty=1.03,
-        timeout=240,
-    ),
-    "mitre-falcon": dict(
-        inference_server_url="https://falcon-40b.aip.mitre.org",
-        max_new_tokens=4096,
-        top_k=10,
-        top_p=0.95,
-        typical_p=0.95,
-        temperature=0.01,
-        repetition_penalty=1.03,
-        timeout=240,
-    ),
-    "mitre-wizard-coder": dict(
-        inference_server_url="https://wizard-coder-34b.aip.mitre.org",
-        max_new_tokens=1024,
-        top_k=10,
-        top_p=0.95,
-        typical_p=0.95,
-        temperature=0.01,
-        repetition_penalty=1.03,
-        timeout=240,
-    ),
 }
 
 DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
@@ -81,7 +48,6 @@ TOKEN_LIMITS: Dict[str, int] = {
     "gpt-4-1106-preview": 128_000,
     "gpt-3.5-turbo": 4096,
     "gpt-3.5-turbo-16k": 16_384,
-    "mitre-falcon": 32_000,
     "text-embedding-ada-002": 8191,
     "gpt4all": 16_384,
 }
@@ -92,9 +58,6 @@ COST_PER_MODEL: Dict[str, Dict[str, float]] = {
     "gpt-4-1106-preview": {"input": 0.01, "output": 0.03},
     "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
     "gpt-3.5-turbo-16k": {"input": 0.003, "output": 0.004},
-    "mitre-llama": {"input": 0.0, "output": 0.0},
-    "mitre-falcon": {"input": 0.0, "output": 0.0},
-    "mitre-wizard-coder": {"input": 0.0, "output": 0.0},
 }
 
 
