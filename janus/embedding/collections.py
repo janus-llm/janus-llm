@@ -1,3 +1,4 @@
+import datetime
 import os
 from typing import Sequence
 
@@ -22,7 +23,11 @@ class Collections:
             embedding_type: The type of embedding to create the vector store for
         """
         collection_name = self._set_collection_name(name)
-        return self._client.create_collection(collection_name)
+        metadata = {
+            "date_created": datetime.datetime.now().date().isoformat(),
+            "time_created": datetime.datetime.now().time().isoformat(),
+        }
+        return self._client.create_collection(collection_name, metadata=metadata)
 
     def get_or_create(self, name: EmbeddingType | str) -> Collection:
         """Create a Chroma collection for the given embedding type.
@@ -31,7 +36,11 @@ class Collections:
             embedding_type: The type of embedding to create the vector store for
         """
         collection_name = self._set_collection_name(name)
-        return self._client.get_or_create_collection(collection_name)
+        metadata = {
+            "date_created": datetime.datetime.now().date().isoformat(),
+            "time_created": datetime.datetime.now().time().isoformat(),
+        }
+        return self._client.get_or_create_collection(collection_name, metadata=metadata)
 
     def get(self, name: None | EmbeddingType | str = None) -> Sequence[Collection]:
         """Get the Chroma collections.

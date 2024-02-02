@@ -23,7 +23,7 @@ class Vectorizer(Converter):
         max_tokens: None | int,
         model: None | str,
     ) -> None:
-        """Initializes the Embedding class
+        """Initializes the Vectorizer class
 
         Arguments:
             client: ChromaDB client instance
