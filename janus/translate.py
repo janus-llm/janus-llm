@@ -1,3 +1,4 @@
+import uuid
 from pathlib import Path
 from typing import Any, Dict
 
@@ -106,7 +107,7 @@ class Translator(Converter):
         total_cost = 0.0
         for in_path in input_paths:
             relative = in_path.relative_to(input_directory)
-            output_name = relative.with_suffix(f".{target_suffix}").name
+            # output_name = relative.with_suffix(f".{target_suffix}").name
             if output_directory is not None:
                 out_path = output_directory / relative.with_suffix(f".{target_suffix}")
             else:
@@ -145,7 +146,9 @@ class Translator(Converter):
                 self._save_to_file(out_block, out_path)
             if output_collection is not None:
                 out_text = self.parser.parse_combined_output(out_block.complete_text)
-                output_collection.upsert(ids=[output_name], documents=[out_text])
+                # Using same id naming convention from vectorize.py
+                ids = [str(uuid.uuid3(uuid.NAMESPACE_DNS, out_text))]
+                output_collection.upsert(ids=ids, documents=[out_text])
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 

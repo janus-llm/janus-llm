@@ -1,3 +1,4 @@
+import datetime
 import unittest
 from unittest.mock import MagicMock
 
@@ -17,7 +18,12 @@ class TestCollections(unittest.TestCase):
 
         result = self.collections.create(EmbeddingType.PSEUDO)
 
-        self._db.create_collection.assert_called_with("pseudo_1")
+        metadata = {
+            "date_updated": datetime.datetime.now().date().isoformat(),
+            "time_updated": datetime.datetime.now().time().isoformat("minutes"),
+        }
+
+        self._db.create_collection.assert_called_with("pseudo_1", metadata=metadata)
         self.assertEqual(result, "foo")
 
     def test_creation_triangulation(self):
@@ -25,7 +31,12 @@ class TestCollections(unittest.TestCase):
 
         result = self.collections.create(EmbeddingType.REQUIREMENT)
 
-        self._db.create_collection.assert_called_with("requirement_1")
+        metadata = {
+            "date_updated": datetime.datetime.now().date().isoformat(),
+            "time_updated": datetime.datetime.now().time().isoformat("minutes"),
+        }
+
+        self._db.create_collection.assert_called_with("requirement_1", metadata=metadata)
         self.assertEqual(result, [])
 
     def test_creation_of_existing_type(self):
@@ -34,8 +45,11 @@ class TestCollections(unittest.TestCase):
         self._db.list_collections.return_value = [mock_collection]
 
         self.collections.create(EmbeddingType.REQUIREMENT)
-
-        self._db.create_collection.assert_called_with("requirement_2")
+        metadata = {
+            "date_updated": datetime.datetime.now().date().isoformat(),
+            "time_updated": datetime.datetime.now().time().isoformat("minutes"),
+        }
+        self._db.create_collection.assert_called_with("requirement_2", metadata=metadata)
 
     def test_missing_embedding_type(self):
         with pytest.raises(ValueError):

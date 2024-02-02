@@ -115,7 +115,7 @@ class Converter:
                     model=self._llm,
                 )
             elif self._source_language == "binary":
-                self.splitter = BinarySplitter(
+                self._splitter = BinarySplitter(
                     max_tokens=self._max_tokens,
                     model=self._llm,
                 )

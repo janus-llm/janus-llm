@@ -1,9 +1,13 @@
 import json
 import os
 from pathlib import Path
+from typing import Optional
 
 import click
 import typer
+from rich import print
+from rich.console import Console
+from rich.prompt import Confirm
 from typing_extensions import Annotated
 
 from .embedding.collections import Collections
@@ -12,7 +16,6 @@ from .embedding.vectorize import ChromaDBVectorizer
 from .language.binary import BinarySplitter
 from .language.mumps import MumpsSplitter
 from .language.treesitter import TreeSitterSplitter
-from .llm import load_model
 from .llm.models_info import (
     COST_PER_MODEL,
     MODEL_CONFIG_DIR,
@@ -48,13 +51,22 @@ app = typer.Typer(
     context_settings={"help_option_names": ["-h", "--help"]},
 )
 
-db = typer.Typer()
-llm = typer.Typer()
+db = typer.Typer(
+    help="Database commands",
+    add_completion=False,
+    no_args_is_help=True,
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
+llm = typer.Typer(
+    help="LLM commands",
+    add_completion=False,
+    no_args_is_help=True,
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
 
 
 @app.command(
-    help="Translate code from one language to another using an LLM. This will require an "
-    "OpenAI API key set to the OPENAI_API_KEY environment variable.",
+    help="Translate code from one language to another using an LLM.",
     no_args_is_help=True,
 )
 def translate(
@@ -72,24 +84,23 @@ def translate(
             click_type=click.Choice(sorted(LANGUAGES)),
         ),
     ],
+    output_dir: Annotated[
+        Path,
+        typer.Option(help="The directory to store the translated code in."),
+    ],
     target_lang: Annotated[
         str,
         typer.Option(
-            help="The desired output language to translate the source code to.  The "
+            help="The desired output language to translate the source code to. The "
             "format can follow a 'language-version' syntax.  Use 'text' to get plaintext"
-            "results as returned by the LLM.  Examples: python-3.10, mumps, java-10,"
-            "text. See source-lang for list of valid target languages."
+            "results as returned by the LLM. Examples: `python-3.10`, `mumps`, `java-10`,"
+            "text."
         ),
-    ] = "python-3.10",
-    output_dir: Annotated[
-        Path,
-        typer.Option(help="The directory to store the translated code in"),
-    ] = None,
+    ],
     llm_name: Annotated[
         str,
         typer.Option(
-            help="The OpenAI model name to use. See this link for more details:\n"
-            "https://platform.openai.com/docs/models/overview",
+            help="The custom name of the model set with 'janus llm add'.",
         ),
     ] = "gpt-3.5-turbo",
     max_prompts: Annotated[
@@ -124,7 +135,15 @@ def translate(
             help="The type of parser to use.",
         ),
     ] = "code",
-    collection: Annotated[str, typer.Option("--collection", "-c")] = None,
+    collection: Annotated[
+        str,
+        typer.Option(
+            "--collection",
+            "-c",
+            help="If set, will put the translated result into a Chroma DB "
+            "collection with the name provided.",
+        ),
+    ] = None,
 ):
     try:
         target_language, target_version = target_lang.split("-")
@@ -134,11 +153,12 @@ def translate(
     # make sure not overwriting input
     if source_lang.lower() == target_language.lower() and input_dir == output_dir:
         log.error("Output files would overwrite input! Aborting...")
-        exit(-1)
+        raise ValueError
 
     model_arguments = dict(temperature=temp)
     output_collection = None
     if collection is not None:
+        _check_collection(collection, input_dir)
         db = ChromaEmbeddingDatabase(db_loc)
         collections = Collections(db)
         output_collection = collections.get_or_create(collection)
@@ -155,7 +175,7 @@ def translate(
     translator.translate(input_dir, output_dir, overwrite, output_collection)
 
 
-@db.command("init", help="Connect to/create a database")
+@db.command("init", help="Connect to or create a database.")
 def db_init(
     path: Annotated[str, typer.Option(help="The path to the database file.")] = str(
         janus_dir / "chroma.db"
@@ -169,13 +189,13 @@ def db_init(
 ) -> None:
     global db_loc
     if url != "":
-        print(f"Setting chroma db to use {url}")
+        print(f"Pointing to Chroma DB at {url}")
         with open(db_file, "w") as f:
             f.write(url)
         db_loc = url
     else:
         path = os.path.abspath(path)
-        print(f"Setting chroma db to use {path}")
+        print(f"Setting up Chroma DB at {path}")
         with open(db_file, "w") as f:
             f.write(path)
         db_loc = path
@@ -183,17 +203,54 @@ def db_init(
     embedding_db = ChromaEmbeddingDatabase(db_loc)
 
 
-@db.command("status", help="Print current db location")
+@db.command("status", help="Print current database location.")
 def db_status():
     print(f"Chroma DB currently pointing to {db_loc}")
 
 
-@db.command("ls", help="List the current database's collections.")
-def db_ls() -> None:
+@db.command(
+    "ls",
+    help="List the current database's collections. Or supply a collection name to list "
+    "information about its contents.",
+)
+def db_ls(
+    collection_name: Annotated[
+        Optional[str], typer.Argument(help="The name of the collection.")
+    ] = None,
+    peek: Annotated[
+        Optional[int],
+        typer.Option(help="Peek at N entries for a specific collection."),
+    ] = None,
+) -> None:
     """List the current database's collections"""
+    if peek is not None and collection_name is None:
+        print(
+            "\n[bold red]Cannot peek at all collections. Please specify a "
+            "collection by name.[/bold red]"
+        )
+        return
     db = ChromaEmbeddingDatabase(db_loc)
     collections = Collections(db)
-    print(collections.get())
+    collection_list = collections.get(collection_name)
+    for collection in collection_list:
+        print(
+            f"\n[bold underline]Collection[/bold underline]: "
+            f"[bold salmon1]{collection.name}[/bold salmon1]"
+        )
+        print(f"  ID: {collection.id}")
+        print(f"  Metadata: {collection.metadata}")
+        print(f"  Tenant: [green]{collection.tenant}[/green]")
+        print(f"  Database: [green]{collection.database}[/green]")
+        print(f"  Length: {collection.count()}")
+        if peek:
+            entry = collection.peek(peek)
+            entry["embeddings"] = entry["embeddings"][0][:2] + ["..."]
+            if peek == 1:
+                print("  [bold]Peeking at first entry[/bold]:")
+            else:
+                print(f"  [bold]Peeking at first {peek} entries[/bold]:")
+            print(entry)
+        print()
 
 
 @db.command("add", help="Add a collection to the current database.")
@@ -206,9 +263,12 @@ def db_add(
     input_lang: Annotated[
         str, typer.Option(help="The language of the source code.")
     ] = "python",
-    model_name: Annotated[
-        str, typer.Option(help="The model name to use")
-    ] = "gpt-3.5-turbo",
+    max_tokens: Annotated[
+        int,
+        typer.Option(
+            help="The maximum number of tokens for each chunk of input source code."
+        ),
+    ] = 4096,
 ) -> None:
     """Add a collection to the database
 
@@ -218,48 +278,55 @@ def db_add(
         input_lang: The language of the source code
     """
     # TODO: import factory
-    vectorizer_factory = ChromaDBVectorizer()
-    vectorizer = vectorizer_factory.create_vectorizer(
-        source_language=input_lang,
-        path=db_loc,
-        model=model_name,
-    )
+    console = Console()
 
-    # Load the model
-    llm, token_limit, _ = load_model(model_name)
+    added_to = _check_collection(collection_name, input_dir)
 
-    max_tokens = token_limit // 2.5
-    input_dir = Path(input_dir)
-    source_glob = f"**/*.{LANGUAGES[input_lang]['suffix']}"
-    input_paths = input_dir.rglob(source_glob)
-    if input_lang in CUSTOM_SPLITTERS:
-        if input_lang == "mumps":
-            splitter = MumpsSplitter(
-                max_tokens=max_tokens,
-                model=llm,
-            )
-        elif input_lang == "binary":
-            splitter = BinarySplitter(
-                max_tokens=max_tokens,
-                model=llm,
-            )
-    else:
-        splitter = TreeSitterSplitter(
-            language=input_lang,
+    with console.status(
+        f"Adding collection: [bold salmon]{collection_name}[/bold salmon]",
+        spinner="arrow3",
+    ):
+        vectorizer_factory = ChromaDBVectorizer()
+        vectorizer = vectorizer_factory.create_vectorizer(
+            source_language=input_lang,
+            path=db_loc,
             max_tokens=max_tokens,
-            model=llm,
         )
-    for input_path in input_paths:
-        input_block = splitter.split(input_path)
-        vectorizer._add_nodes_recursively(
-            input_block,
-            collection_name,
-            input_path.name,
-        )
+        input_dir = Path(input_dir)
+        source_glob = f"**/*.{LANGUAGES[input_lang]['suffix']}"
+        input_paths = input_dir.rglob(source_glob)
+        if input_lang in CUSTOM_SPLITTERS:
+            if input_lang == "mumps":
+                splitter = MumpsSplitter(
+                    max_tokens=max_tokens,
+                )
+            elif input_lang == "binary":
+                splitter = BinarySplitter(
+                    max_tokens=max_tokens,
+                )
+        else:
+            splitter = TreeSitterSplitter(
+                language=input_lang,
+                max_tokens=max_tokens,
+            )
+        for input_path in input_paths:
+            input_block = splitter.split(input_path)
+            vectorizer._add_nodes_recursively(
+                input_block,
+                collection_name,
+                input_path.name,
+            )
+    if added_to:
+        print(f"Added to collection [bold salmon1]{collection_name}[/bold salmon1]")
+    else:
+        print(f"Created collection [bold salmon1]{collection_name}[/bold salmon1]")
 
 
-@db.command("remove", help="Remove a collection from the database.")
-def db_remove(
+@db.command(
+    "rm",
+    help="Remove a collection from the database.",
+)
+def db_rm(
     collection_name: Annotated[str, typer.Argument(help="The name of the collection.")]
 ) -> None:
     """Remove a collection from the database
@@ -267,10 +334,38 @@ def db_remove(
     Arguments:
         collection_name: The name of the collection to remove
     """
+    delete = Confirm.ask(
+        f"\nAre you sure you want to [bold red]remove[/bold red] "
+        f"[bold salmon1]{collection_name}[/bold salmon1]?",
+    )
+    if not delete:
+        raise typer.Abort()
     db = ChromaEmbeddingDatabase(db_loc)
     collections = Collections(db)
-    print(f"Removing collection {collection_name}")
     collections.delete(collection_name)
+    print(
+        f"[bold red]Removed[/bold red] collection "
+        f"[bold salmon1]{collection_name}[/bold salmon1]"
+    )
+
+
+def _check_collection(collection_name: str, input_dir: str | Path) -> bool:
+    db = ChromaEmbeddingDatabase(db_loc)
+    collections = Collections(db)
+    added_to = False
+    try:
+        collections.get(collection_name)
+        # confirm_add = Confirm.ask(
+        #     f"\nCollection [bold salmon1]{collection_name}[/bold salmon1] exists. Are "
+        #     "you sure you want to update it with the contents of"
+        #     f"[bold green]{input_dir}[/bold green]?"
+        # )
+        added_to = True
+        # if not confirm_add:
+        #     raise typer.Abort()
+    except ValueError:
+        pass
+    return added_to
 
 
 @llm.command("add", help="Add a model config to janus")
@@ -333,6 +428,8 @@ def llm_add(
         model_name = typer.prompt("Enter the model name", default="gpt-3.5-turbo")
         params = dict(
             model_name=model_name,
+            temperature=0.7,
+            n=1,
         )
         max_tokens = TOKEN_LIMITS[model_name]
         model_cost = COST_PER_MODEL[model_name]

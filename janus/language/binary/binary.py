@@ -29,11 +29,11 @@ class BinarySplitter(TreeSitterSplitter):
     with for transcoding.
     """
 
-    def __init__(self, model: BaseLanguageModel, max_tokens: int = 4096):
+    def __init__(self, model: None | BaseLanguageModel = None, max_tokens: int = 4096):
         """Initialize a BinarySplitter instance.
 
         Arguments:
-            model: The
+            model: The language model to use for the binary code
             max_tokens: The maximum number of tokens supported by the model
         """
         super().__init__(
