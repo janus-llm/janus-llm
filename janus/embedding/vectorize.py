@@ -131,8 +131,11 @@ class Vectorizer(Converter):
             list of embedding ids. Raises ValueError if collection not found.
         """
         if ids is None:
-            # logic from langchain add_texts
-            ids = [str(uuid.uuid1()) for _ in texts]
+            # Logic originally from langchain's vectorstores.chroma.Chroma.add_texts
+            # Modified to use uuid3 instead of uuid1. We don't need to update
+            # an entry in the database if the text is the same. So we generate the UUID
+            # based on the text.
+            ids = [str(uuid.uuid3(uuid.NAMESPACE_DNS, text)) for text in texts]
         collection = self._collections.get_or_create(collection_name)
         collection.upsert(ids=ids, documents=texts, metadatas=metadatas)
         return ids
