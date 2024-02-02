@@ -32,33 +32,31 @@ Attributes
 
 
 .. py:data:: log
-   
 
    
 
 .. py:data:: MUMPS_COMMANDS
-   :annotation: = ['break', 'b', 'close', 'c', 'database', 'do', 'd', 'else', 'e', 'for', 'f', 'goto', 'g',...
+   :value: ['break', 'b', 'close', 'c', 'database', 'do', 'd', 'else', 'e', 'for', 'f', 'goto', 'g',...
 
    
 
 .. py:data:: comment
-   :annotation: = [\t ]*;.*\n
+   :value: '[\\t ]*;.*\\n'
 
    
 
 .. py:data:: optional_inline_comment
-   :annotation: = Multiline-String
+   :value: Multiline-String
 
     .. raw:: html
 
         <details><summary>Show Value</summary>
 
-    .. code-block:: text
-        :linenos:
+    .. code-block:: python
 
-        [	 ]+(?:;.*)?
+        """[	 ]+(?:;.*)?
         |[	 ]*
-
+        """
 
     .. raw:: html
 
@@ -67,21 +65,20 @@ Attributes
    
 
 .. py:data:: label_start
-   :annotation: = [^ \t;$]
+   :value: '[^ \\t;$]'
 
    
 
 .. py:data:: routine_start
-   
 
    
 
 .. py:data:: routine_end
-   
 
    
 
 .. py:class:: MumpsLabeledBlockPattern
+
 
    A pattern for matching MUMPS labeled blocks.
 
@@ -99,17 +96,18 @@ Attributes
       The type of the functional code block ('module', 'function', etc.).
 
    .. py:attribute:: start
-      :annotation: :re.Pattern
+      :type: re.Pattern
 
       
 
    .. py:attribute:: end
-      :annotation: :re.Pattern
+      :type: re.Pattern
 
       
 
    .. py:attribute:: type
-      :annotation: :str = labeled_block
+      :type: str
+      :value: 'labeled_block'
 
       
 

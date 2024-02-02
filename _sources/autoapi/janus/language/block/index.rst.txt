@@ -27,11 +27,11 @@ Attributes
 
 
 .. py:data:: log
-   
 
    
 
 .. py:class:: CodeBlock(id, name, type, language, text, start_point, end_point, start_byte, end_byte, tokens, children, embedding_id = None, affixes = ('', ''))
+
 
    A class that represents a functional block of code.
 
@@ -93,58 +93,54 @@ Attributes
       Rolls up self and children's complete status, incomplete means a child
       is missing.
 
-   .. py:method:: prefix()
-      :property:
+   .. py:property:: prefix
+      :type: str
 
 
-   .. py:method:: suffix()
-      :property:
+   .. py:property:: suffix
+      :type: str
 
 
-   .. py:method:: complete_text()
-      :property:
+   .. py:property:: complete_text
+      :type: str
 
 
-   .. py:method:: placeholder()
-      :property:
+   .. py:property:: placeholder
+      :type: str
 
 
-   .. py:method:: complete_placeholder()
-      :property:
+   .. py:property:: complete_placeholder
+      :type: str
 
 
-   .. py:method:: n_descendents()
-      :property:
+   .. py:property:: n_descendents
+      :type: int
 
       The total number of descendents of this block
 
       :returns: The total number of descendents of this block
 
-
-   .. py:method:: height()
-      :property:
+   .. py:property:: height
+      :type: int
 
       The number of edges between this node and a leaf
 
       :returns: The number of edges between this node and a leaf
 
-
-   .. py:method:: max_tokens()
-      :property:
+   .. py:property:: max_tokens
+      :type: int
 
       The maximum number of tokens in this block or any of its descendents
 
       :returns: The maximum number of tokens in this block or any of  its descendents
 
-
-   .. py:method:: total_tokens()
-      :property:
+   .. py:property:: total_tokens
+      :type: int
 
       The total tokens represented by this block and all its descendents
 
       :returns: The total number of tokens represented by this block and all its
                 descendents
-
 
    .. py:method:: pop_prefix()
 
@@ -167,6 +163,7 @@ Attributes
 
 
 .. py:class:: TranslatedCodeBlock(original, language)
+
 
    Bases: :py:obj:`CodeBlock`
 
@@ -196,38 +193,34 @@ Attributes
    :returns: A `TranslatedCodeBlock` with the same attributes as the original, except
              for `text`, `path`, `complete`, `language`, `tokens`, and `children`
 
-   .. py:method:: total_cost()
-      :property:
+   .. py:property:: total_cost
+      :type: float
 
       The total cost spent translating this block and all its descendents
 
       :returns: The total cost spent translating this block and all its descendents
 
-
-   .. py:method:: total_retries()
-      :property:
+   .. py:property:: total_retries
+      :type: int
 
       The total number of retries that were required to translate this block and
       all its descendents
 
       :returns: The total number of retries that were required to translate this block and
 
-
-   .. py:method:: total_input_tokens()
-      :property:
+   .. py:property:: total_input_tokens
+      :type: int
 
       The total number of input tokens represented by this block and all its
       successfully-translated descendents
 
       :returns: The total number of input tokens represented by this block and all its
 
-
-   .. py:method:: translation_completeness()
-      :property:
+   .. py:property:: translation_completeness
+      :type: float
 
       The share of the input that was successfully translated
 
       :returns: The share of the input that was successfully translated
-
 
 

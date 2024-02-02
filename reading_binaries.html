@@ -2,9 +2,18 @@
 <html class="no-js" lang="en" data-content_root="">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="#" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<meta property="og:title" content="Reading Binaries" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="reading_binaries.html" />
+<meta property="og:site_name" content="Janus" />
+<meta property="og:description" content="janus-llm uses Ghidra to decompile and parse binary files. This allows the user to translate binaries to another programming language or to perform retrieval augmented generation (RAG) on their dec..." />
+<meta name="description" content="janus-llm uses Ghidra to decompile and parse binary files. This allows the user to translate binaries to another programming language or to perform retrieval augmented generation (RAG) on their dec..." />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Supported Languages" href="supported_languages.html" /><link rel="prev" title="Quick Start" href="quickstart.html" />
 
-    <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 6.2.1 and Furo 2023.09.10 --><title>Search - Janus latest documentation</title><link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 6.2.1 and Furo 2023.09.10 -->
+        <title>Reading Binaries - Janus latest documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -133,7 +142,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -150,16 +159,16 @@
   
   <span class="sidebar-brand-text">Janus latest documentation</span>
   
-</a><form class="sidebar-search-container" method="get" action="#" role="search">
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Usage</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reading_binaries.html">Reading Binaries</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Reading Binaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported_languages.html">Supported Languages</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -241,7 +250,8 @@
           <span>Back to top</span>
         </a>
         <div class="content-icon-container">
-          <div class="theme-toggle-container theme-toggle-content">
+          
+<div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
@@ -249,31 +259,102 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
-          
-<noscript>
-<div class="admonition error">
-  <p class="admonition-title">Error</p>
-  <p>
-    Please activate JavaScript to enable the search functionality.
-  </p>
+          <section id="reading-binaries">
+<h1>Reading Binaries<a class="headerlink" href="#reading-binaries" title="Permalink to this heading">#</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">janus-llm</span></code> uses Ghidra to decompile and parse binary files. This allows the user to translate binaries to another programming language or to perform retrieval augmented generation (RAG) on their decompiled contents.</p>
+<p>To read a binary as input, you’ll follow the same instructions as in the <a class="reference internal" href="quickstart.html"><span class="std std-doc">Quick Start</span></a> documentation. However, you’ll first need to <a class="reference external" href="https://ghidra-sre.org/InstallationGuide.html">install Ghidra</a>.</p>
+<p>Then you’ll set the <code class="docutils literal notranslate"><span class="pre">GHIDRA_INSTALL_PATH</span></code> environment variable to the location of the Ghidra installation.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">GHIDRA_INSTALL_PATH</span><span class="o">=</span>/Users/mdoyle/programs/ghidra_10.4_PUBLIC
+</pre></div>
 </div>
-</noscript>
-
-<div id="search-results"></div>
+<p>After setting the environment variable, you can use the <code class="docutils literal notranslate"><span class="pre">janus</span></code> CLI to read binaries.</p>
+<section id="adding-to-chroma">
+<h2>Adding to Chroma<a class="headerlink" href="#adding-to-chroma" title="Permalink to this heading">#</a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>janus<span class="w"> </span>db<span class="w"> </span>add<span class="w"> </span>--input-dir<span class="w"> </span>janus/language/binary/_tests<span class="w"> </span>--input-lang<span class="w"> </span>binary<span class="w"> </span>binary-collection
+</pre></div>
+</div>
+<p>Then we can peek at the collection we just created. You can see in the output that it decompiled the <em>Hello World</em> binary to C-like pseudocode and embedded that document in the embedding database:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>janus<span class="w"> </span>db<span class="w"> </span>ls<span class="w"> </span>--peek<span class="w"> </span>binary-collection
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-output notranslate"><div class="highlight"><pre><span></span><span class="go">Collection: binary-collection</span>
+<span class="go">  ID: 04b71a0f-50d8-4061-8775-0b48b575601f</span>
+<span class="go">  Metadata: {&#39;date_created&#39;: &#39;2024-02-01&#39;, &#39;time_created&#39;: &#39;22:50:22.857642&#39;}</span>
+<span class="go">  Tenant: default_tenant</span>
+<span class="go">  Database: default_database</span>
+<span class="go">  Length: 1</span>
+<span class="go">  Peeking at first entry:</span>
+<span class="go">{</span>
+<span class="go">    &#39;ids&#39;: [&#39;566265ca-c197-11ee-ab3f-5accbc90a9b9&#39;],</span>
+<span class="go">    &#39;embeddings&#39;: [0.07846622169017792, 0.06490962952375412, &#39;...&#39;],</span>
+<span class="go">    &#39;metadatas&#39;: [</span>
+<span class="go">        {</span>
+<span class="go">            &#39;cost&#39;: 0,</span>
+<span class="go">            &#39;end_line&#39;: 8,</span>
+<span class="go">            &#39;hash&#39;: -7749008126979110064,</span>
+<span class="go">            &#39;original_filename&#39;: &#39;hello.bin&#39;,</span>
+<span class="go">            &#39;start_line&#39;: 1,</span>
+<span class="go">            &#39;tokens&#39;: 20,</span>
+<span class="go">            &#39;type&#39;: &#39;translation_unit&#39;</span>
+<span class="go">        }</span>
+<span class="go">    ],</span>
+<span class="go">    &#39;documents&#39;: [&#39;undefined4 entry(void)\n\n{\n  _printf(&quot;Hello, World!&quot;);\n  return 0;\n}\n\n&#39;],</span>
+<span class="go">    &#39;uris&#39;: None,</span>
+<span class="go">    &#39;data&#39;: None</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+</section>
+<section id="translating">
+<h2>Translating<a class="headerlink" href="#translating" title="Permalink to this heading">#</a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>janus<span class="w"> </span>translate<span class="w"> </span>--input-lang<span class="w"> </span>binary<span class="w"> </span>--output-lang<span class="w"> </span>python<span class="w"> </span>--input-dir<span class="w"> </span>janus/language/binary/_tests<span class="w"> </span>--output-dir<span class="w"> </span>python-tests
+</pre></div>
+</div>
+<p>Then we can <code class="docutils literal notranslate"><span class="pre">cat</span></code> the translated code we just created with ChatGPT:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>cat<span class="w"> </span>python-tests/hello.py
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">python-tests/hello.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">entry</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello, World!&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+</section>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          
-          
+          <a class="next-page" href="supported_languages.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Supported Languages</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="quickstart.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Quick Start</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -292,8 +373,28 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Reading Binaries</a><ul>
+<li><a class="reference internal" href="#adding-to-chroma">Adding to Chroma</a></li>
+<li><a class="reference internal" href="#translating">Translating</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -304,8 +405,5 @@
     <script src="_static/scripts/furo.js"></script>
     <script src="_static/clipboard.min.js"></script>
     <script src="_static/copybutton.js"></script>
-    
-<script src="_static/searchtools.js"></script>
-<script src="_static/language_data.js"></script>
-<script src="searchindex.js"></script></body>
+    </body>
 </html>

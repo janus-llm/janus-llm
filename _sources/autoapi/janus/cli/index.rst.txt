@@ -18,7 +18,7 @@ Functions
    janus.cli.db_status
    janus.cli.db_ls
    janus.cli.db_add
-   janus.cli.db_remove
+   janus.cli.db_rm
    janus.cli.llm_add
 
 
@@ -39,46 +39,38 @@ Attributes
 
 
 .. py:data:: log
-   
 
    
 
 .. py:data:: homedir
-   
 
    
 
 .. py:data:: janus_dir
-   
 
    
 
 .. py:data:: db_file
-   
 
    
 
 .. py:data:: db_loc
-   
 
    
 
 .. py:data:: app
-   
 
    
 
 .. py:data:: db
-   
 
    
 
 .. py:data:: llm
-   
 
    
 
-.. py:function:: translate(input_dir, source_lang, target_lang = 'python-3.10', output_dir = None, llm_name = 'gpt-3.5-turbo', max_prompts = 10, overwrite = False, temp = 0.7, prompt_template = 'simple', parser_type = 'code', collection = None)
+.. py:function:: translate(input_dir, source_lang, output_dir, target_lang, llm_name = 'gpt-3.5-turbo', max_prompts = 10, overwrite = False, temp = 0.7, prompt_template = 'simple', parser_type = 'code', collection = None)
 
 
 .. py:function:: db_init(path = str(janus_dir / 'chroma.db'), url = '')
@@ -87,12 +79,12 @@ Attributes
 .. py:function:: db_status()
 
 
-.. py:function:: db_ls()
+.. py:function:: db_ls(collection_name = None, peek = None)
 
    List the current database's collections
 
 
-.. py:function:: db_add(collection_name, input_dir = './', input_lang = 'python', model_name = 'gpt-3.5-turbo')
+.. py:function:: db_add(collection_name, input_dir = './', input_lang = 'python', max_tokens = 4096)
 
    Add a collection to the database
 
@@ -101,7 +93,7 @@ Attributes
    :param input_lang: The language of the source code
 
 
-.. py:function:: db_remove(collection_name)
+.. py:function:: db_rm(collection_name)
 
    Remove a collection from the database
 

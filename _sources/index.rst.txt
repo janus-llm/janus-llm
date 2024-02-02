@@ -1,10 +1,19 @@
-Janus LLM Transcoder
-====================
+Janus LLM
+=========
 
 Usage
 ----------------------
-:doc:`intro`
-   Introduction to installing and using the package.
+:doc:`quickstart`
+   How to use `janus-llm` to load source code files into a Chroma vector database.
+
+:doc:`reading_binaries`
+   How to read binaries and load the C-like pseudocode into a Chroma vector database.
+
+:doc:`translating`
+   How to use LLMs to translate from one programming language to another.
+
+:doc:`supported_languages`
+   The supported input languages. This depends on `tree-sitter` parsers that have been included or is based on custom parsers created for this project.
 
 Development
 -----------
@@ -24,7 +33,9 @@ API
    :caption: Usage
    :hidden:
 
-   intro
+   quickstart
+   reading_binaries
+   supported_languages
 
 .. toctree::
    :maxdepth: 2
