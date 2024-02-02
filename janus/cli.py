@@ -275,20 +275,24 @@ def db_remove(
 
 @llm.command("add", help="Add a model config to janus")
 def llm_add(
-    model_name: Annotated[str, typer.Argument(help="The name of the model")],
-    type: Annotated[
+    model_name: Annotated[
+        str, typer.Argument(help="The user's custom name of the model")
+    ],
+    model_type: Annotated[
         str,
         typer.Option(
+            "--type",
+            "-t",
             help="The type of the model",
             click_type=click.Choice(sorted(list(MODEL_TYPE_CONSTRUCTORS.keys()))),
         ),
-    ] = "HuggingFace",
+    ] = "OpenAI",
 ):
     if not MODEL_CONFIG_DIR.exists():
         MODEL_CONFIG_DIR.mkdir(parents=True)
     model_cfg = MODEL_CONFIG_DIR / f"{model_name}.json"
-    if type == "HuggingFace":
-        url = typer.prompt("Enter the model's url")
+    if model_type == "HuggingFace":
+        url = typer.prompt("Enter the model's URL")
         max_tokens = typer.prompt(
             "Enter the model's maximum tokens", default=4096, type=int
         )
@@ -305,32 +309,27 @@ def llm_add(
             timeout=240,
         )
         cfg = {
-            "model_type": type,
+            "model_type": model_type,
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": {"input": in_cost, "output": out_cost},
         }
-        with open(model_cfg, "w") as f:
-            json.dump(cfg, f)
-    elif type == "HuggingFaceLocal":
-        model_id = typer.prompt("Enter the model id")
+    elif model_type == "HuggingFaceLocal":
+        model_id = typer.prompt("Enter the model ID")
         task = typer.prompt("Enter the task")
         max_tokens = typer.prompt(
             "Enter the model's maximum tokens", default=4096, type=int
         )
-        in_cost = typer.prompt("Enter the cost per input token", default=0, type=float)
-        out_cost = typer.prompt("Enter the cost per output token", default=0, type=float)
+        in_cost = 0
+        out_cost = 0
         params = {"model_id": model_id, "task": task}
         cfg = {
-            "model_type": type,
+            "model_type": model_type,
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": {"input": in_cost, "output": out_cost},
         }
-        with open(model_cfg, "w") as f:
-            json.dump(cfg, f)
-
-    elif type == "OpenAI":
+    elif model_type == "OpenAI":
         model_name = typer.prompt("Enter the model name", default="gpt-3.5-turbo")
         params = dict(
             model_name=model_name,
@@ -338,13 +337,15 @@ def llm_add(
         max_tokens = TOKEN_LIMITS[model_name]
         model_cost = COST_PER_MODEL[model_name]
         cfg = {
-            "model_type": type,
+            "model_type": model_type,
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": model_cost,
         }
-        with open(model_cfg, "w") as f:
-            json.dump(cfg, f)
+    else:
+        raise ValueError(f"Unknown model type {model_type}")
+    with open(model_cfg, "w") as f:
+        json.dump(cfg, f, indent=2)
     print(f"Model config written to {model_cfg}")
 
 
