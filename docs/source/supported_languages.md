@@ -1,12 +1,12 @@
 # Supported Languages
 
-Below is a list of supported languages, linked to their corresponding tree-sitter grammar repository (if it exists):
+Below is a list of supported input/source languages, linked to their corresponding [tree-sitter](https://tree-sitter.github.io/tree-sitter/) grammar repository (if it exists):
 
 - [Ada](https://github.com/briot/tree-sitter-ada)
 - [Agda](https://github.com/tree-sitter/tree-sitter-agda)
 - [Apex](https://github.com/aheber/tree-sitter-sfapex)
 - [Bash](https://github.com/tree-sitter/tree-sitter-bash)
-- Binary (must have [Ghidra](https://github.com/NationalSecurityAgency/ghidra) installed)
+- Binary (must have [Ghidra](https://github.com/NationalSecurityAgency/ghidra) installed) - [Docs Page](reading_binaries.md)
 - [Beancount](https://github.com/zwpaper/tree-sitter-beancount)
 - [C](https://github.com/tree-sitter/tree-sitter-c)
 - [Cap'n Proto](https://github.com/amaanq/tree-sitter-capnp)

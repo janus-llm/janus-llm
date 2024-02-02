@@ -1,7 +1,7 @@
 # Reading Binaries
-`janus-llm` uses Ghidra to decompile and parse binary files. This allows the user to translate binary files to another programming language or to perform retrieval augmented generation (RAG) using their decompiled contents.
+`janus-llm` uses Ghidra to decompile and parse binary files. This allows the user to translate binaries to another programming language or to perform retrieval augmented generation (RAG) on their decompiled contents.
 
-To read a binary file as input, you'll follow the same instructions as in the [Quick Start](quickstart.md) documentation. However, you'll first need to [install Ghidra](https://ghidra-sre.org/InstallationGuide.html).
+To read a binary as input, you'll follow the same instructions as in the [Quick Start](quickstart.md) documentation. However, you'll first need to [install Ghidra](https://ghidra-sre.org/InstallationGuide.html).
 
 Then you'll set the `GHIDRA_INSTALL_PATH` environment variable to the location of the Ghidra installation. 
 
@@ -9,7 +9,9 @@ Then you'll set the `GHIDRA_INSTALL_PATH` environment variable to the location o
 export GHIDRA_INSTALL_PATH=/Users/mdoyle/programs/ghidra_10.4_PUBLIC
 ```
 
-After that, you can use the `janus` CLI to read binary files:
+After setting the environment variable, you can use the `janus` CLI to read binaries.
+
+## Adding to Chroma
 
 ```shell
 janus db add --input-dir janus/language/binary/_tests --input-lang binary binary-collection
@@ -49,4 +51,24 @@ Collection: binary-collection
     'uris': None,
     'data': None
 }
+```
+
+## Translating
+
+```shell
+janus translate --input-lang binary --output-lang python --input-dir janus/language/binary/_tests --output-dir python-tests
+```
+
+Then we can `cat` the translated code we just created with ChatGPT:
+
+```shell
+cat python-tests/hello.py
+```
+
+`python-tests/hello.py`:
+
+```python
+def entry():
+    print("Hello, World!")
+    return 0
 ```
