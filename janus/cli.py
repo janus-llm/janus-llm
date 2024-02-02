@@ -73,24 +73,24 @@ def translate(
             click_type=click.Choice(sorted(LANGUAGES)),
         ),
     ],
+    output_dir: Annotated[
+        Path,
+        typer.Option(help="The directory to store the translated code in."),
+    ],
     target_lang: Annotated[
         str,
         typer.Option(
-            help="The desired output language to translate the source code to.  The "
+            help="The desired output language to translate the source code to. The "
             "format can follow a 'language-version' syntax.  Use 'text' to get plaintext"
-            "results as returned by the LLM.  Examples: python-3.10, mumps, java-10,"
-            "text. See source-lang for list of valid target languages."
+            "results as returned by the LLM. Examples: `python-3.10`, `mumps`, `java-10`,"
+            "text."
         ),
-    ] = "python-3.10",
-    output_dir: Annotated[
-        Path,
-        typer.Option(help="The directory to store the translated code in"),
-    ] = None,
+    ],
     llm_name: Annotated[
         str,
         typer.Option(
             click_type=click.Choice(sorted(VALID_MODELS)),
-            help="The OpenAI model name to use. See this link for more details:\n"
+            help="The model name to use. See this link for more details:\n"
             "https://platform.openai.com/docs/models/overview",
         ),
     ] = "gpt-3.5-turbo",
@@ -126,7 +126,15 @@ def translate(
             help="The type of parser to use.",
         ),
     ] = "code",
-    collection: Annotated[str, typer.Option("--collection", "-c")] = None,
+    collection: Annotated[
+        str,
+        typer.Option(
+            "--collection",
+            "-c",
+            help="If set, will put the translated result into a Chroma DB "
+            "collection with the name provided.",
+        ),
+    ] = None,
 ):
     try:
         target_language, target_version = target_lang.split("-")
@@ -136,11 +144,12 @@ def translate(
     # make sure not overwriting input
     if source_lang.lower() == target_language.lower() and input_dir == output_dir:
         log.error("Output files would overwrite input! Aborting...")
-        exit(-1)
+        raise ValueError
 
     model_arguments = dict(temperature=temp)
     output_collection = None
     if collection is not None:
+        _check_collection(collection, input_dir)
         db = ChromaEmbeddingDatabase(db_loc)
         collections = Collections(db)
         output_collection = collections.get_or_create(collection)
@@ -157,7 +166,7 @@ def translate(
     translator.translate(input_dir, output_dir, overwrite, output_collection)
 
 
-@db.command("init", help="Connect to/create a database.")
+@db.command("init", help="Connect to or create a database.")
 def db_init(
     path: Annotated[str, typer.Option(help="The path to the database file.")] = str(
         janus_dir / "chroma.db"
@@ -200,14 +209,15 @@ def db_ls(
         Optional[str], typer.Argument(help="The name of the collection.")
     ] = None,
     peek: Annotated[
-        Optional[bool], typer.Option(help="Peek at the first entry.", is_flag=True)
-    ] = False,
+        Optional[int],
+        typer.Option(help="Peek at N entries for a specific collection."),
+    ] = None,
 ) -> None:
     """List the current database's collections"""
-    if peek and collection_name is None:
+    if peek is not None and collection_name is None:
         print(
             "\n[bold red]Cannot peek at all collections. Please specify a "
-            "collection.[/bold red]"
+            "collection by name.[/bold red]"
         )
         return
     db = ChromaEmbeddingDatabase(db_loc)
@@ -224,9 +234,12 @@ def db_ls(
         print(f"  Database: [green]{collection.database}[/green]")
         print(f"  Length: {collection.count()}")
         if peek:
-            entry = collection.peek(1)
+            entry = collection.peek(peek)
             entry["embeddings"] = entry["embeddings"][0][:2] + ["..."]
-            print("  [bold]Peeking at first entry[/bold]:")
+            if peek == 1:
+                print("  [bold]Peeking at first entry[/bold]:")
+            else:
+                print(f"  [bold]Peeking at first {peek} entries[/bold]:")
             print(entry)
         print()
 
@@ -254,24 +267,11 @@ def db_add(
     """
     # TODO: import factory
     console = Console()
-    db = ChromaEmbeddingDatabase(db_loc)
-    collections = Collections(db)
-    added_to = False
-    try:
-        collections.get(collection_name)
-        confirm_add = Confirm.ask(
-            f"\nCollection [bold salmon1]{collection_name}[/bold salmon1] exists. Add "
-            f"[bold green]{input_dir}[/bold green] to "
-            f"[bold salmon1]{collection_name}[/bold salmon1]?"
-        )
-        added_to = True
-        if not confirm_add:
-            raise typer.Abort()
-    except ValueError:
-        pass
+
+    added_to = _check_collection(collection_name, input_dir)
 
     with console.status(
-        f"Adding collection [bold salmon]{collection_name}[/bold salmon]",
+        f"Adding collection: [bold salmon]{collection_name}[/bold salmon]",
         spinner="arrow3",
     ):
         vectorizer_factory = ChromaDBVectorizer()
@@ -344,6 +344,25 @@ def db_rm(
         f"[bold red]Removed[/bold red] collection "
         f"[bold salmon1]{collection_name}[/bold salmon1]"
     )
+
+
+def _check_collection(collection_name: str, input_dir: str | Path) -> bool:
+    db = ChromaEmbeddingDatabase(db_loc)
+    collections = Collections(db)
+    added_to = False
+    try:
+        collections.get(collection_name)
+        # confirm_add = Confirm.ask(
+        #     f"\nCollection [bold salmon1]{collection_name}[/bold salmon1] exists. Are "
+        #     "you sure you want to update it with the contents of"
+        #     f"[bold green]{input_dir}[/bold green]?"
+        # )
+        added_to = True
+        # if not confirm_add:
+        #     raise typer.Abort()
+    except ValueError:
+        pass
+    return added_to
 
 
 app.add_typer(db, name="db")
