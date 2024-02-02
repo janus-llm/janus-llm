@@ -283,6 +283,9 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#janus.cli.db_remove" title="janus.cli.db_remove"><code class="xref py py-obj docutils literal notranslate"><span class="pre">db_remove</span></code></a>(collection_name)</p></td>
 <td><p>Remove a collection from the database</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#janus.cli.llm_add" title="janus.cli.llm_add"><code class="xref py py-obj docutils literal notranslate"><span class="pre">llm_add</span></code></a>(model_name[, model_type])</p></td>
+<td><p></p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -311,6 +314,9 @@
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#janus.cli.db" title="janus.cli.db"><code class="xref py py-obj docutils literal notranslate"><span class="pre">db</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#janus.cli.llm" title="janus.cli.llm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">llm</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -351,6 +357,11 @@
 <span class="sig-prename descclassname"><span class="pre">janus.cli.</span></span><span class="sig-name descname"><span class="pre">db</span></span><a class="headerlink" href="#janus.cli.db" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="janus.cli.llm">
+<span class="sig-prename descclassname"><span class="pre">janus.cli.</span></span><span class="sig-name descname"><span class="pre">llm</span></span><a class="headerlink" href="#janus.cli.llm" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="janus.cli.translate">
 <span class="sig-prename descclassname"><span class="pre">janus.cli.</span></span><span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_lang</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_lang</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'python-3.10'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">llm_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gpt-3.5-turbo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_prompts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'simple'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'code'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.cli.translate" title="Permalink to this definition">#</a></dt>
@@ -361,7 +372,7 @@
 <li><p><strong>source_lang</strong> (<em>typing_extensions.Annotated</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>typer.Option</em><em>(</em><em>help='The language</em><em> of </em><em>the source code.'</em><em>, </em><em>click_type=click.Choice</em><em>(</em><em>sorted</em><em>(</em><em>LANGUAGES</em><em>)</em><em>)</em><em>)</em><em>]</em>) – </p></li>
 <li><p><strong>target_lang</strong> (<em>typing_extensions.Annotated</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>typer.Option</em><em>(</em><em>help=&quot;The desired output language to translate the source code to.  The format can follow a 'language-version' syntax.  Use 'text' to get plaintextresults as returned by the LLM.  Examples: python-3.10</em><em>, </em><em>mumps</em><em>, </em><em>java-10</em><em>,</em><em>text. See source-lang for list</em><em> of </em><em>valid target languages.&quot;</em><em>)</em><em>]</em>) – </p></li>
 <li><p><strong>output_dir</strong> (<em>typing_extensions.Annotated</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>pathlib.Path</em></a><em>, </em><em>typer.Option</em><em>(</em><em>help='The directory to store the translated code in'</em><em>)</em><em>]</em>) – </p></li>
-<li><p><strong>llm_name</strong> (<em>typing_extensions.Annotated</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>typer.Option</em><em>(</em><em>click_type=click.Choice</em><em>(</em><em>sorted</em><em>(</em><em>VALID_MODELS</em><em>)</em><em>)</em><em>, </em><em>help='The OpenAI model name to use. See this link for more details:\nhttps://platform.openai.com/docs/models/overview'</em><em>)</em><em>]</em>) – </p></li>
+<li><p><strong>llm_name</strong> (<em>typing_extensions.Annotated</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>typer.Option</em><em>(</em><em>help='The OpenAI model name to use. See this link for more details:\nhttps://platform.openai.com/docs/models/overview'</em><em>)</em><em>]</em>) – </p></li>
 <li><p><strong>max_prompts</strong> (<em>typing_extensions.Annotated</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><em>typer.Option</em><em>(</em><em>help='The maximum number</em><em> of </em><em>times to prompt a model on one functional block before exiting the application. This is to prevent wasting too much money.'</em><em>)</em><em>]</em>) – </p></li>
 <li><p><strong>overwrite</strong> (<em>typing_extensions.Annotated</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>typer.Option</em><em>(</em><em>'--overwrite/--preserve'</em><em>, </em><em>help='Whether to overwrite existing files in the output directory'</em><em>)</em><em>]</em>) – </p></li>
 <li><p><strong>temp</strong> (<em>typing_extensions.Annotated</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>typer.Option</em><em>(</em><em>help='Sampling temperature.'</em><em>, </em><em>min=0</em><em>, </em><em>max=2</em><em>)</em><em>]</em>) – </p></li>
@@ -438,6 +449,19 @@
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="janus.cli.llm_add">
+<span class="sig-prename descclassname"><span class="pre">janus.cli.</span></span><span class="sig-name descname"><span class="pre">llm_add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'OpenAI'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.cli.llm_add" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<em>typing_extensions.Annotated</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>typer.Argument</em><em>(</em><em>help=&quot;The user's custom name</em><em> of </em><em>the model&quot;</em><em>)</em><em>]</em>) – </p></li>
+<li><p><strong>model_type</strong> (<em>typing_extensions.Annotated</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>typer.Option</em><em>(</em><em>'--type'</em><em>, </em><em>'-t'</em><em>, </em><em>help='The type</em><em> of </em><em>the model'</em><em>, </em><em>click_type=click.Choice</em><em>(</em><em>sorted</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>(</em><em>MODEL_TYPE_CONSTRUCTORS.keys</em><em>(</em><em>)</em><em>)</em><em>)</em><em>)</em><em>)</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 </section>
@@ -508,12 +532,14 @@
 <li><a class="reference internal" href="#janus.cli.db_loc"><code class="docutils literal notranslate"><span class="pre">db_loc</span></code></a></li>
 <li><a class="reference internal" href="#janus.cli.app"><code class="docutils literal notranslate"><span class="pre">app</span></code></a></li>
 <li><a class="reference internal" href="#janus.cli.db"><code class="docutils literal notranslate"><span class="pre">db</span></code></a></li>
+<li><a class="reference internal" href="#janus.cli.llm"><code class="docutils literal notranslate"><span class="pre">llm</span></code></a></li>
 <li><a class="reference internal" href="#janus.cli.translate"><code class="docutils literal notranslate"><span class="pre">translate()</span></code></a></li>
 <li><a class="reference internal" href="#janus.cli.db_init"><code class="docutils literal notranslate"><span class="pre">db_init()</span></code></a></li>
 <li><a class="reference internal" href="#janus.cli.db_status"><code class="docutils literal notranslate"><span class="pre">db_status()</span></code></a></li>
 <li><a class="reference internal" href="#janus.cli.db_ls"><code class="docutils literal notranslate"><span class="pre">db_ls()</span></code></a></li>
 <li><a class="reference internal" href="#janus.cli.db_add"><code class="docutils literal notranslate"><span class="pre">db_add()</span></code></a></li>
 <li><a class="reference internal" href="#janus.cli.db_remove"><code class="docutils literal notranslate"><span class="pre">db_remove()</span></code></a></li>
+<li><a class="reference internal" href="#janus.cli.llm_add"><code class="docutils literal notranslate"><span class="pre">llm_add()</span></code></a></li>
 <li><a class="reference internal" href="#janus.cli.log">log</a></li>
 <li><a class="reference internal" href="#janus.cli.homedir">homedir</a></li>
 <li><a class="reference internal" href="#janus.cli.janus_dir">janus_dir</a></li>
@@ -521,12 +547,14 @@
 <li><a class="reference internal" href="#janus.cli.db_loc">db_loc</a></li>
 <li><a class="reference internal" href="#janus.cli.app">app</a></li>
 <li><a class="reference internal" href="#janus.cli.db">db</a></li>
+<li><a class="reference internal" href="#janus.cli.llm">llm</a></li>
 <li><a class="reference internal" href="#janus.cli.translate">translate</a></li>
 <li><a class="reference internal" href="#janus.cli.db_init">db_init</a></li>
 <li><a class="reference internal" href="#janus.cli.db_status">db_status</a></li>
 <li><a class="reference internal" href="#janus.cli.db_ls">db_ls</a></li>
 <li><a class="reference internal" href="#janus.cli.db_add">db_add</a></li>
 <li><a class="reference internal" href="#janus.cli.db_remove">db_remove</a></li>
+<li><a class="reference internal" href="#janus.cli.llm_add">llm_add</a></li>
 </ul>
 </li>
 </ul>
