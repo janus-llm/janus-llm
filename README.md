@@ -32,7 +32,7 @@ Janus (`janus-llm`) uses LLMs to aid in the modernization of legacy IT systems. 
 ### Priorities
 
 1. Scripts interacting with Chroma Vector DB for RAG translation and understanding.
-2. Evaluation of outputs in CLI using LLM self-evaluation or static analysis. 
+2. Evaluation of outputs in CLI using LLM self-evaluation or static analysis.
 
 ## Installation
 

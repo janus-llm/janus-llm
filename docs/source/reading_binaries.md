@@ -3,7 +3,7 @@
 
 To read a binary as input, you'll follow the same instructions as in the [Quick Start](quickstart.md) documentation. However, you'll first need to [install Ghidra](https://ghidra-sre.org/InstallationGuide.html).
 
-Then you'll set the `GHIDRA_INSTALL_PATH` environment variable to the location of the Ghidra installation. 
+Then you'll set the `GHIDRA_INSTALL_PATH` environment variable to the location of the Ghidra installation.
 
 ```shell
 export GHIDRA_INSTALL_PATH=/Users/mdoyle/programs/ghidra_10.4_PUBLIC

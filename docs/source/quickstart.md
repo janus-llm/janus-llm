@@ -1,6 +1,6 @@
 # Quick Start
 
-Janus LLM (`janus-llm`) allows users to parse and chunk over 100 programming languages and embed that information into a [Chroma](trychroma.com) vector database for retrieval augmented generation (RAG). It also allows the user to directly translate source code from one language into another using an LLM (results may vary). 
+Janus LLM (`janus-llm`) allows users to parse and chunk over 100 programming languages and embed that information into a [Chroma](trychroma.com) vector database for retrieval augmented generation (RAG). It also allows the user to directly translate source code from one language into another using an LLM (results may vary).
 
 [GitHub Page](https://github.com/janus-llm/janus-llm)
 
@@ -84,12 +84,12 @@ Collection: janus-collection
         }
     ],
     'documents': [
-        'from copy import deepcopy\nfrom pathlib import Path\nfrom typing import Any, Dict, Set\n\nfrom 
-chromadb.api.models.Collection import Collection\nfrom langchain.callbacks import get_openai_callback\n\nfrom 
-.converter import Converter, run_if_changed\nfrom .language.block import CodeBlock, TranslatedCodeBlock\nfrom .llm 
-import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS\nfrom .parsers.code_parser import PARSER_TYPES, 
-CodeParser, EvaluationParser, JanusParser\nfrom .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine\nfrom 
-.utils.enums import LANGUAGES\nfrom .utils.logger import create_logger\n\nlog = 
+        'from copy import deepcopy\nfrom pathlib import Path\nfrom typing import Any, Dict, Set\n\nfrom
+chromadb.api.models.Collection import Collection\nfrom langchain.callbacks import get_openai_callback\n\nfrom
+.converter import Converter, run_if_changed\nfrom .language.block import CodeBlock, TranslatedCodeBlock\nfrom .llm
+import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS\nfrom .parsers.code_parser import PARSER_TYPES,
+CodeParser, EvaluationParser, JanusParser\nfrom .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine\nfrom
+.utils.enums import LANGUAGES\nfrom .utils.logger import create_logger\n\nlog =
 create_logger(__name__)\n\nVALID_MODELS: Set[str] = set(MODEL_CONSTRUCTORS).intersection(MODEL_DEFAULT_ARGUMENTS)'
     ],
     'uris': None,
