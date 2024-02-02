@@ -1,5 +1,5 @@
+import json
 import os
-from copy import deepcopy
 from pathlib import Path
 from typing import Optional
 
@@ -16,9 +16,14 @@ from .embedding.vectorize import ChromaDBVectorizer
 from .language.binary import BinarySplitter
 from .language.mumps import MumpsSplitter
 from .language.treesitter import TreeSitterSplitter
-from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
+from .llm.models_info import (
+    COST_PER_MODEL,
+    MODEL_CONFIG_DIR,
+    MODEL_TYPE_CONSTRUCTORS,
+    TOKEN_LIMITS,
+)
 from .parsers.code_parser import PARSER_TYPES
-from .translate import VALID_MODELS, Translator
+from .translate import Translator
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
 
@@ -48,6 +53,12 @@ app = typer.Typer(
 
 db = typer.Typer(
     help="Database commands",
+    add_completion=False,
+    no_args_is_help=True,
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
+llm = typer.Typer(
+    help="LLM commands",
     add_completion=False,
     no_args_is_help=True,
     context_settings={"help_option_names": ["-h", "--help"]},
@@ -89,8 +100,7 @@ def translate(
     llm_name: Annotated[
         str,
         typer.Option(
-            click_type=click.Choice(sorted(VALID_MODELS)),
-            help="The model name to use. See this link for more details:\n"
+            help="The OpenAI model name to use. See this link for more details:\n"
             "https://platform.openai.com/docs/models/overview",
         ),
     ] = "gpt-3.5-turbo",
@@ -254,9 +264,12 @@ def db_add(
     input_lang: Annotated[
         str, typer.Option(help="The language of the source code.")
     ] = "python",
-    model_name: Annotated[
-        str, typer.Option(help="The model name to use")
-    ] = "gpt-3.5-turbo",
+    max_tokens: Annotated[
+        int,
+        typer.Option(
+            help="The maximum number of tokens for each chunk of input source code."
+        ),
+    ] = 4096,
 ) -> None:
     """Add a collection to the database
 
@@ -278,14 +291,8 @@ def db_add(
         vectorizer = vectorizer_factory.create_vectorizer(
             source_language=input_lang,
             path=db_loc,
-            model=model_name,
+            max_tokens=max_tokens,
         )
-        model_arguments = deepcopy(MODEL_DEFAULT_ARGUMENTS[model_name])
-
-        # Load the model
-        llm = MODEL_CONSTRUCTORS[model_name](**model_arguments)
-
-        max_tokens = TOKEN_LIMITS.get(model_name, 4096) // 2.5
         input_dir = Path(input_dir)
         source_glob = f"**/*.{LANGUAGES[input_lang]['suffix']}"
         input_paths = input_dir.rglob(source_glob)
@@ -293,18 +300,15 @@ def db_add(
             if input_lang == "mumps":
                 splitter = MumpsSplitter(
                     max_tokens=max_tokens,
-                    model=llm,
                 )
             elif input_lang == "binary":
                 splitter = BinarySplitter(
                     max_tokens=max_tokens,
-                    model=llm,
                 )
         else:
             splitter = TreeSitterSplitter(
                 language=input_lang,
                 max_tokens=max_tokens,
-                model=llm,
             )
         for input_path in input_paths:
             input_block = splitter.split(input_path)
@@ -365,7 +369,84 @@ def _check_collection(collection_name: str, input_dir: str | Path) -> bool:
     return added_to
 
 
+@llm.command("add", help="Add a model config to janus")
+def llm_add(
+    model_name: Annotated[
+        str, typer.Argument(help="The user's custom name of the model")
+    ],
+    model_type: Annotated[
+        str,
+        typer.Option(
+            "--type",
+            "-t",
+            help="The type of the model",
+            click_type=click.Choice(sorted(list(MODEL_TYPE_CONSTRUCTORS.keys()))),
+        ),
+    ] = "OpenAI",
+):
+    if not MODEL_CONFIG_DIR.exists():
+        MODEL_CONFIG_DIR.mkdir(parents=True)
+    model_cfg = MODEL_CONFIG_DIR / f"{model_name}.json"
+    if model_type == "HuggingFace":
+        url = typer.prompt("Enter the model's URL")
+        max_tokens = typer.prompt(
+            "Enter the model's maximum tokens", default=4096, type=int
+        )
+        in_cost = typer.prompt("Enter the cost per input token", default=0, type=float)
+        out_cost = typer.prompt("Enter the cost per output token", default=0, type=float)
+        params = dict(
+            inference_server_url=url,
+            max_new_tokens=max_tokens,
+            top_k=10,
+            top_p=0.95,
+            typical_p=0.95,
+            temperature=0.01,
+            repetition_penalty=1.03,
+            timeout=240,
+        )
+        cfg = {
+            "model_type": model_type,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": {"input": in_cost, "output": out_cost},
+        }
+    elif model_type == "HuggingFaceLocal":
+        model_id = typer.prompt("Enter the model ID")
+        task = typer.prompt("Enter the task")
+        max_tokens = typer.prompt(
+            "Enter the model's maximum tokens", default=4096, type=int
+        )
+        in_cost = 0
+        out_cost = 0
+        params = {"model_id": model_id, "task": task}
+        cfg = {
+            "model_type": model_type,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": {"input": in_cost, "output": out_cost},
+        }
+    elif model_type == "OpenAI":
+        model_name = typer.prompt("Enter the model name", default="gpt-3.5-turbo")
+        params = dict(
+            model_name=model_name,
+        )
+        max_tokens = TOKEN_LIMITS[model_name]
+        model_cost = COST_PER_MODEL[model_name]
+        cfg = {
+            "model_type": model_type,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": model_cost,
+        }
+    else:
+        raise ValueError(f"Unknown model type {model_type}")
+    with open(model_cfg, "w") as f:
+        json.dump(cfg, f, indent=2)
+    print(f"Model config written to {model_cfg}")
+
+
 app.add_typer(db, name="db")
+app.add_typer(llm, name="llm")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from ....llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS
+from ....llm import load_model
 from ...combine import Combiner
 from ..treesitter import TreeSitterSplitter
 
@@ -13,7 +13,7 @@ class TestTreeSitterSplitter(unittest.TestCase):
         """Set up the tests."""
         model_name = "gpt-3.5-turbo"
         self.maxDiff = None
-        self.llm = MODEL_CONSTRUCTORS[model_name](**MODEL_DEFAULT_ARGUMENTS[model_name])
+        self.llm, _, _ = load_model(model_name)
 
     def _split(self):
         """Split the test file."""

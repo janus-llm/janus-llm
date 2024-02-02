@@ -1,22 +1,20 @@
 import uuid
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Set
+from typing import Any, Dict
 
 from chromadb.api.models.Collection import Collection
 from langchain.callbacks import get_openai_callback
 
 from .converter import Converter, run_if_changed
 from .language.block import CodeBlock, TranslatedCodeBlock
-from .llm import MODEL_CONSTRUCTORS, MODEL_DEFAULT_ARGUMENTS, TOKEN_LIMITS
+from .llm import load_model
 from .parsers.code_parser import PARSER_TYPES, CodeParser, EvaluationParser, JanusParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import LANGUAGES
 from .utils.logger import create_logger
 
 log = create_logger(__name__)
-
-VALID_MODELS: Set[str] = set(MODEL_CONSTRUCTORS).intersection(MODEL_DEFAULT_ARGUMENTS)
 
 
 class Translator(Converter):
@@ -336,11 +334,6 @@ class Translator(Converter):
                 `janus.llm.models_info.MODEL_CONSTRUCTORS`.
             custom_arguments: Additional arguments to pass to the model constructor.
         """
-        if model_name not in VALID_MODELS:
-            raise ValueError(
-                f"Invalid model: {model_name}. Valid models are: {VALID_MODELS}"
-            )
-
         self._model_name = model_name
         self._custom_model_arguments = custom_arguments
 
@@ -399,14 +392,14 @@ class Translator(Converter):
         """
 
         # Get default arguments, set custom ones
-        model_arguments = deepcopy(MODEL_DEFAULT_ARGUMENTS[self._model_name])
-        model_arguments.update(self._custom_model_arguments)
+        # model_arguments = deepcopy(MODEL_DEFAULT_ARGUMENTS[self._model_name])
+        # model_arguments.update(self._custom_model_arguments)
 
         # Load the model
-        self._llm = MODEL_CONSTRUCTORS[self._model_name](**model_arguments)
+        self._llm, token_limit, self.model_cost = load_model(self._model_name)
         # Set the max_tokens to less than half the model's limit to allow for enough
         # tokens at output
-        self._max_tokens = TOKEN_LIMITS.get(self._model_name, 4096) // 2.5
+        self._max_tokens = token_limit // 2.5
 
     @run_if_changed("_parser_type", "_target_language")
     def _load_parser(self) -> None:
