@@ -57,7 +57,7 @@ janus db ls
 And to peek at the first entry:
 
 ```shell
-janus db ls janus-collection --peek
+janus db ls janus-collection --peek 1
 ```
 
 Output:
