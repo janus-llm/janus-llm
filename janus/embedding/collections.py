@@ -37,8 +37,8 @@ class Collections:
         """
         collection_name = self._set_collection_name(name)
         metadata = {
-            "date_created": datetime.datetime.now().date().isoformat(),
-            "time_created": datetime.datetime.now().time().isoformat(),
+            "date_updated": datetime.datetime.now().date().isoformat(),
+            "time_updated": datetime.datetime.now().time().isoformat(),
         }
         return self._client.get_or_create_collection(collection_name, metadata=metadata)
 
