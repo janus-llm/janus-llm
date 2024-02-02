@@ -100,8 +100,7 @@ def translate(
     llm_name: Annotated[
         str,
         typer.Option(
-            help="The OpenAI model name to use. See this link for more details:\n"
-            "https://platform.openai.com/docs/models/overview",
+            help="The custom name of the model set with 'janus llm add'.",
         ),
     ] = "gpt-3.5-turbo",
     max_prompts: Annotated[
@@ -429,6 +428,8 @@ def llm_add(
         model_name = typer.prompt("Enter the model name", default="gpt-3.5-turbo")
         params = dict(
             model_name=model_name,
+            temperature=0.7,
+            n=1,
         )
         max_tokens = TOKEN_LIMITS[model_name]
         model_cost = COST_PER_MODEL[model_name]
