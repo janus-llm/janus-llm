@@ -288,21 +288,13 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="janus.embedding.vectorize.Vectorizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.embedding.vectorize.</span></span><span class="sig-name descname"><span class="pre">Vectorizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_language</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tokens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.embedding.vectorize.Vectorizer" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../../converter/index.html#janus.converter.Converter" title="janus.converter.Converter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">janus.converter.Converter</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.embedding.vectorize.</span></span><span class="sig-name descname"><span class="pre">Vectorizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.embedding.vectorize.Vectorizer" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class for creating embeddings/vectors in a specified ChromaDB</p>
 <p>Initializes the Vectorizer class</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>client</strong> (<em>chromadb.Client</em>) – ChromaDB client instance</p></li>
-<li><p><strong>source_language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The source programming language.</p></li>
-<li><p><strong>max_tokens</strong> (<em>None</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – The maximum number of tokens to send to the embedding model at
-once. If <cite>None</cite>, the <cite>Vectorizer</cite> will use the default value for the
-<cite>model</cite>.</p></li>
-<li><p><strong>model</strong> (<em>None</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The name of the model to use. This will also determine the <cite>max_tokens</cite>
-if that variable is not set.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>client</strong> (<em>chromadb.Client</em>) – ChromaDB client instance</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -332,6 +324,24 @@ if that variable is not set.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="janus.embedding.vectorize.Vectorizer.add_nodes_recursively">
+<span class="sig-name descname"><span class="pre">add_nodes_recursively</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.embedding.vectorize.Vectorizer.add_nodes_recursively" title="Permalink to this definition">#</a></dt>
+<dd><p>Embed all nodes in the tree rooted at <cite>code_block</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code_block</strong> (<a class="reference internal" href="../../language/block/index.html#janus.language.block.CodeBlock" title="janus.language.block.CodeBlock"><em>janus.language.block.CodeBlock</em></a>) – CodeBlock to embed</p></li>
+<li><p><strong>collection_name</strong> (<a class="reference internal" href="../../utils/enums/index.html#janus.utils.enums.EmbeddingType" title="janus.utils.enums.EmbeddingType"><em>janus.utils.enums.EmbeddingType</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Collection to add to</p></li>
+<li><p><strong>file_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Name of file containing <cite>code_block</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="janus.embedding.vectorize.Vectorizer.add_text">
 <span class="sig-name descname"><span class="pre">add_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadatas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.embedding.vectorize.Vectorizer.add_text" title="Permalink to this definition">#</a></dt>
 <dd><p>Helper function that stores a single text (in an array) and associated
@@ -339,12 +349,11 @@ metadatas, returning the embedding id</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>embedding_type</strong> – EmbeddingType to use</p></li>
+<li><p><strong>collection_name</strong> (<a class="reference internal" href="../../utils/enums/index.html#janus.utils.enums.EmbeddingType" title="janus.utils.enums.EmbeddingType"><em>janus.utils.enums.EmbeddingType</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Collection to add to</p></li>
 <li><p><strong>texts</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>]</em>) – list of texts to store</p></li>
 <li><p><strong>metadatas</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>]</em>) – list of metadatas to store</p></li>
 <li><p><strong>ids</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>]</em>) – list of embedding ids (must match lengh of texts),
 generated if not given by caller</p></li>
-<li><p><strong>collection_name</strong> (<a class="reference internal" href="../../utils/enums/index.html#janus.utils.enums.EmbeddingType" title="janus.utils.enums.EmbeddingType"><em>janus.utils.enums.EmbeddingType</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -365,16 +374,11 @@ generated if not given by caller</p></li>
 <p>Interface for creating a Vectorizer independent of type of ChromaDB client</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="janus.embedding.vectorize.VectorizerFactory.create_vectorizer">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_vectorizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_language</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tokens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.embedding.vectorize.VectorizerFactory.create_vectorizer" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_vectorizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.embedding.vectorize.VectorizerFactory.create_vectorizer" title="Permalink to this definition">#</a></dt>
 <dd><p>Factory method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>source_language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
-<li><p><strong>max_tokens</strong> (<em>None</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
-<li><p><strong>model</strong> (<em>None</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>pathlib.Path</em></a>) – </p></li>
-</ul>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>pathlib.Path</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#janus.embedding.vectorize.Vectorizer" title="janus.embedding.vectorize.Vectorizer">Vectorizer</a></p>
@@ -391,16 +395,10 @@ generated if not given by caller</p></li>
 <p>Factory for Vectorizer that uses ChromaEmbeddingDatabase</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="janus.embedding.vectorize.ChromaDBVectorizer.create_vectorizer">
-<span class="sig-name descname"><span class="pre">create_vectorizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fortran'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gpt4all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Path.home()</span> <span class="pre">/</span> <span class="pre">'.janus'</span> <span class="pre">/</span> <span class="pre">'chroma'</span> <span class="pre">/</span> <span class="pre">'chroma-data'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.embedding.vectorize.ChromaDBVectorizer.create_vectorizer" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">create_vectorizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Path.home()</span> <span class="pre">/</span> <span class="pre">'.janus'</span> <span class="pre">/</span> <span class="pre">'chroma'</span> <span class="pre">/</span> <span class="pre">'chroma-data'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.embedding.vectorize.ChromaDBVectorizer.create_vectorizer" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>source_language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The source programming language.</p></li>
-<li><p><strong>max_tokens</strong> (<em>None</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – The maximum number of tokens to send to the embedding model at
-once. If <cite>None</cite>, the <cite>Vectorizer</cite> will use the default value for the
-<cite>model</cite>.</p></li>
-<li><p><strong>model</strong> (<em>None</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The name of the model to use. This will also determine the <cite>max_tokens</cite>
-if that variable is not set.</p></li>
 <li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>pathlib.Path</em></a>) – The path to the ChromaDB. Can be either a string of a URL or path or a
 Path object</p></li>
 <li><p><strong>Returns</strong> – Vectorizer</p></li>
@@ -479,6 +477,7 @@ Path object</p></li>
 <li><a class="reference internal" href="#janus.embedding.vectorize.Vectorizer"><code class="docutils literal notranslate"><span class="pre">Vectorizer</span></code></a><ul>
 <li><a class="reference internal" href="#janus.embedding.vectorize.Vectorizer.create_collection"><code class="docutils literal notranslate"><span class="pre">Vectorizer.create_collection()</span></code></a></li>
 <li><a class="reference internal" href="#janus.embedding.vectorize.Vectorizer.collections"><code class="docutils literal notranslate"><span class="pre">Vectorizer.collections()</span></code></a></li>
+<li><a class="reference internal" href="#janus.embedding.vectorize.Vectorizer.add_nodes_recursively"><code class="docutils literal notranslate"><span class="pre">Vectorizer.add_nodes_recursively()</span></code></a></li>
 <li><a class="reference internal" href="#janus.embedding.vectorize.Vectorizer.add_text"><code class="docutils literal notranslate"><span class="pre">Vectorizer.add_text()</span></code></a></li>
 </ul>
 </li>

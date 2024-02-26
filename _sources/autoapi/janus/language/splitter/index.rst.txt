@@ -40,7 +40,7 @@ Attributes
    Initialize self.  See help(type(self)) for accurate signature.
 
 
-.. py:class:: Splitter(language, model = None, max_tokens = 4096, use_placeholders = True)
+.. py:class:: Splitter(language, model = None, max_tokens = 4096, use_placeholders = True, skip_merge = False)
 
 
    Bases: :py:obj:`janus.language.file.FileManager`
@@ -53,6 +53,11 @@ Attributes
                  will use tiktoken's default tokenizer to count tokens.
    :param max_tokens: The maximum number of tokens to use for each functional block.
    :param use_placeholders: Whether to use placeholders when splitting the code.
+   :param skip_merge: Whether to merge child nodes up to the max_token length.
+                      May be used for situations like documentation where function-level
+                      documentation is preferred.
+                      TODO: Maybe instead support something like a list of node types that
+                            shouldnt be merged (e.g. functions, classes)?
 
    .. py:method:: split(file)
 

@@ -29,7 +29,7 @@ Attributes
 
    
 
-.. py:class:: Translator(model = 'gpt-3.5-turbo', model_arguments = {}, source_language = 'fortran', target_language = 'python', target_version = '3.10', max_prompts = 10, prompt_template = 'simple', parser_type = 'code')
+.. py:class:: Translator(model = 'gpt-3.5-turbo', model_arguments = {}, source_language = 'fortran', target_language = 'python', target_version = '3.10', max_prompts = 10, prompt_template = 'simple', parser_type = 'code', db_path = None)
 
 
    Bases: :py:obj:`janus.converter.Converter`
@@ -51,7 +51,7 @@ Attributes
    :param parser_type: The type of parser to use for parsing the LLM output. Valid
                        values are "code" (default), "text", and "eval".
 
-   .. py:method:: translate(input_directory, output_directory = None, overwrite = False, output_collection = None)
+   .. py:method:: translate(input_directory, output_directory = None, overwrite = False, collection_name = None)
 
       Translate code in the input directory from the source language to the target
       language, and write the resulting files to the output directory.
@@ -59,6 +59,7 @@ Attributes
       :param input_directory: The directory containing the code to translate.
       :param output_directory: The directory to write the translated code to.
       :param overwrite: Whether to overwrite existing files (vs skip them)
+      :param collection_name: Collection to add to
 
 
    .. py:method:: translate_file(file)
@@ -126,6 +127,9 @@ Attributes
 
       :param target_language: The target programming language.
       :param target_version: The target version of the target programming language.
+
+
+   .. py:method:: set_db_path(db_path)
 
 
 

@@ -299,7 +299,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="janus.translate.Translator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.translate.</span></span><span class="sig-name descname"><span class="pre">Translator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gpt-3.5-turbo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_arguments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fortran'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'python'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'3.10'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_prompts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'simple'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'code'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.translate.Translator" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.translate.</span></span><span class="sig-name descname"><span class="pre">Translator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gpt-3.5-turbo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_arguments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fortran'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'python'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'3.10'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_prompts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'simple'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'code'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.translate.Translator" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../converter/index.html#janus.converter.Converter" title="janus.converter.Converter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">janus.converter.Converter</span></code></a></p>
 <p>A class that translates code from one programming language to another.</p>
 <p>Initialize a Translator instance.</p>
@@ -318,12 +318,13 @@
 (see janus/prompts/templates) or path to a directory.</p></li>
 <li><p><strong>parser_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The type of parser to use for parsing the LLM output. Valid
 values are “code” (default), “text”, and “eval”.</p></li>
+<li><p><strong>db_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> | </em><em>None</em>) – </p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="janus.translate.Translator.translate">
-<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_collection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.translate.Translator.translate" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.translate.Translator.translate" title="Permalink to this definition">#</a></dt>
 <dd><p>Translate code in the input directory from the source language to the target
 language, and write the resulting files to the output directory.</p>
 <dl class="field-list simple">
@@ -332,7 +333,7 @@ language, and write the resulting files to the output directory.</p>
 <li><p><strong>input_directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>pathlib.Path</em></a>) – The directory containing the code to translate.</p></li>
 <li><p><strong>output_directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>pathlib.Path</em></a><em> | </em><em>None</em>) – The directory to write the translated code to.</p></li>
 <li><p><strong>overwrite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Whether to overwrite existing files (vs skip them)</p></li>
-<li><p><strong>output_collection</strong> (<em>chromadb.api.models.Collection.Collection</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>collection_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> | </em><em>None</em>) – Collection to add to</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -459,6 +460,19 @@ values are “code” (default), “text”, and “eval”.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="janus.translate.Translator.set_db_path">
+<span class="sig-name descname"><span class="pre">set_db_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.translate.Translator.set_db_path" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>db_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -535,6 +549,7 @@ values are “code” (default), “text”, and “eval”.</p>
 <li><a class="reference internal" href="#janus.translate.Translator.set_parser_type"><code class="docutils literal notranslate"><span class="pre">Translator.set_parser_type()</span></code></a></li>
 <li><a class="reference internal" href="#janus.translate.Translator.set_prompt"><code class="docutils literal notranslate"><span class="pre">Translator.set_prompt()</span></code></a></li>
 <li><a class="reference internal" href="#janus.translate.Translator.set_target_language"><code class="docutils literal notranslate"><span class="pre">Translator.set_target_language()</span></code></a></li>
+<li><a class="reference internal" href="#janus.translate.Translator.set_db_path"><code class="docutils literal notranslate"><span class="pre">Translator.set_db_path()</span></code></a></li>
 </ul>
 </li>
 </ul>

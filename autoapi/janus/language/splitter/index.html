@@ -308,7 +308,7 @@ split into smaller blocks.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="janus.language.splitter.Splitter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.language.splitter.</span></span><span class="sig-name descname"><span class="pre">Splitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">language</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4096</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_placeholders</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.language.splitter.Splitter" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.language.splitter.</span></span><span class="sig-name descname"><span class="pre">Splitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">language</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4096</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_placeholders</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_merge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.language.splitter.Splitter" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../file/index.html#janus.language.file.FileManager" title="janus.language.file.FileManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">janus.language.file.FileManager</span></code></a></p>
 <p>A class for splitting code into functional blocks to prompt with for
 transcoding.</p>
@@ -320,6 +320,14 @@ transcoding.</p>
 will use tiktoken’s default tokenizer to count tokens.</p></li>
 <li><p><strong>max_tokens</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – The maximum number of tokens to use for each functional block.</p></li>
 <li><p><strong>use_placeholders</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Whether to use placeholders when splitting the code.</p></li>
+<li><p><strong>skip_merge</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – <p>Whether to merge child nodes up to the max_token length.
+May be used for situations like documentation where function-level
+documentation is preferred.
+TODO: Maybe instead support something like a list of node types that</p>
+<blockquote>
+<div><p>shouldnt be merged (e.g. functions, classes)?</p>
+</div></blockquote>
+</p></li>
 </ul>
 </dd>
 </dl>

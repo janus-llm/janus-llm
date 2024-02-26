@@ -19,22 +19,16 @@ Classes
 
 
 
-.. py:class:: Vectorizer(client, source_language, max_tokens, model)
+.. py:class:: Vectorizer(client)
 
 
-   Bases: :py:obj:`janus.converter.Converter`
+   Bases: :py:obj:`object`
 
    Class for creating embeddings/vectors in a specified ChromaDB
 
    Initializes the Vectorizer class
 
    :param client: ChromaDB client instance
-   :param source_language: The source programming language.
-   :param max_tokens: The maximum number of tokens to send to the embedding model at
-                      once. If `None`, the `Vectorizer` will use the default value for the
-                      `model`.
-   :param model: The name of the model to use. This will also determine the `max_tokens`
-                 if that variable is not set.
 
    .. py:method:: create_collection(embedding_type)
 
@@ -42,12 +36,21 @@ Classes
    .. py:method:: collections(name = None)
 
 
+   .. py:method:: add_nodes_recursively(code_block, collection_name, file_name)
+
+      Embed all nodes in the tree rooted at `code_block`
+
+      :param code_block: CodeBlock to embed
+      :param collection_name: Collection to add to
+      :param file_name: Name of file containing `code_block`
+
+
    .. py:method:: add_text(collection_name, texts, metadatas, ids = None)
 
       Helper function that stores a single text (in an array) and associated
       metadatas, returning the embedding id
 
-      :param embedding_type: EmbeddingType to use
+      :param collection_name: Collection to add to
       :param texts: list of texts to store
       :param metadatas: list of metadatas to store
       :param ids: list of embedding ids (must match lengh of texts),
@@ -64,7 +67,7 @@ Classes
 
    Interface for creating a Vectorizer independent of type of ChromaDB client
 
-   .. py:method:: create_vectorizer(source_language, max_tokens, model, path)
+   .. py:method:: create_vectorizer(path)
       :abstractmethod:
 
       Factory method
@@ -78,14 +81,8 @@ Classes
 
    Factory for Vectorizer that uses ChromaEmbeddingDatabase
 
-   .. py:method:: create_vectorizer(source_language = 'fortran', max_tokens = None, model = 'gpt4all', path = Path.home() / '.janus' / 'chroma' / 'chroma-data')
+   .. py:method:: create_vectorizer(path = Path.home() / '.janus' / 'chroma' / 'chroma-data')
 
-      :param source_language: The source programming language.
-      :param max_tokens: The maximum number of tokens to send to the embedding model at
-                         once. If `None`, the `Vectorizer` will use the default value for the
-                         `model`.
-      :param model: The name of the model to use. This will also determine the `max_tokens`
-                    if that variable is not set.
       :param path: The path to the ChromaDB. Can be either a string of a URL or path or a
                    Path object
       :param Returns: Vectorizer
