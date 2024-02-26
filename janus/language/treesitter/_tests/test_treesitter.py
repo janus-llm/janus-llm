@@ -34,12 +34,24 @@ class TestTreeSitterSplitter(unittest.TestCase):
         self.splitter.use_placeholders = False
         self._split()
 
+    def test_split_ibmhlasm(self):
+        """Test the split method."""
+        self.splitter = TreeSitterSplitter(
+            language="ibmhlasm", model=self.llm, max_tokens=100
+        )
+        self.combiner = Combiner(language="ibmhlasm")
+        self.test_file = Path("janus/language/treesitter/_tests/languages/ibmhlasm.asm")
+        self._split()
+
+        self.splitter.use_placeholders = False
+        self._split()
+
     def test_split_matlab(self):
         """Test the split method."""
         self.splitter = TreeSitterSplitter(
             language="matlab",
             model=self.llm,
-            max_tokens=(4096 // 3)
+            max_tokens=(4096 // 3),
             # max_tokens used to be / 3 always in TreeSitterSplitter to leave just as
             # much space for the prompt as for the translated code.
         )
