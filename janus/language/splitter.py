@@ -32,6 +32,7 @@ class Splitter(FileManager):
         model: None | BaseLanguageModel = None,
         max_tokens: int = 4096,
         use_placeholders: bool = True,
+        skip_merge: bool = False,
     ):
         """
         Arguments:
@@ -40,12 +41,18 @@ class Splitter(FileManager):
                 will use tiktoken's default tokenizer to count tokens.
             max_tokens: The maximum number of tokens to use for each functional block.
             use_placeholders: Whether to use placeholders when splitting the code.
+            skip_merge: Whether to merge child nodes up to the max_token length.
+                May be used for situations like documentation where function-level
+                documentation is preferred.
+                TODO: Maybe instead support something like a list of node types that
+                      shouldnt be merged (e.g. functions, classes)?
         """
         super().__init__(language=language)
         self.model = model
         if self.model is None:
             self._encoding = tiktoken.get_encoding("cl100k_base")
         self.use_placeholders: bool = use_placeholders
+        self.skip_merge = skip_merge
         self.max_tokens: int = max_tokens
 
     def split(self, file: Path | str) -> CodeBlock:
@@ -102,6 +109,9 @@ class Splitter(FileManager):
         the represented code is present in the text of exactly one node in the
         tree.
         """
+        if self.skip_merge:
+            return
+
         stack = [root]
         while stack:
             node = stack.pop()

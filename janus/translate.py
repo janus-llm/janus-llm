@@ -1,11 +1,11 @@
-import uuid
 from pathlib import Path
 from typing import Any, Dict
 
-from chromadb.api.models.Collection import Collection
+import openai.error
 from langchain.callbacks import get_openai_callback
 
 from .converter import Converter, run_if_changed
+from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .llm import load_model
 from .parsers.code_parser import PARSER_TYPES, CodeParser, EvaluationParser, JanusParser
@@ -29,6 +29,7 @@ class Translator(Converter):
         max_prompts: int = 10,
         prompt_template: str | Path = "simple",
         parser_type: str = "code",
+        db_path: str | None = None,
     ) -> None:
         """Initialize a Translator instance.
 
@@ -56,13 +57,16 @@ class Translator(Converter):
         self._target_version: None | str
         self._target_glob: None | str
         self._prompt_template_name: None | str
+        self._db_path: None | str
 
         self.set_model(model_name=model, **model_arguments)
         self.set_parser_type(parser_type=parser_type)
         self.set_prompt(prompt_template=prompt_template)
         self.set_target_language(
-            target_language=target_language, target_version=target_version
+            target_language=target_language,
+            target_version=target_version,
         )
+        self.set_db_path(db_path=db_path)
 
         self._load_parameters()
 
@@ -72,6 +76,7 @@ class Translator(Converter):
         self._load_model()
         self._load_prompt_engine()
         self._load_parser()
+        self._load_vectorizer()
         super()._load_parameters()  # will call self._changed_attrs.clear()
 
     def translate(
@@ -79,7 +84,7 @@ class Translator(Converter):
         input_directory: str | Path,
         output_directory: str | Path | None = None,
         overwrite: bool = False,
-        output_collection: Collection | None = None,
+        collection_name: str | None = None,
     ) -> None:
         """Translate code in the input directory from the source language to the target
         language, and write the resulting files to the output directory.
@@ -88,6 +93,7 @@ class Translator(Converter):
             input_directory: The directory containing the code to translate.
             output_directory: The directory to write the translated code to.
             overwrite: Whether to overwrite existing files (vs skip them)
+            collection_name: Collection to add to
         """
         # Convert paths to pathlib Paths if needed
         if isinstance(input_directory, str):
@@ -101,23 +107,38 @@ class Translator(Converter):
 
         target_suffix = LANGUAGES[self._target_language]["suffix"]
 
-        input_paths = input_directory.rglob(self._source_glob)
+        input_paths = list(input_directory.rglob(self._source_glob))
+        if output_directory is not None:
+            output_paths = [
+                output_directory
+                / p.relative_to(input_directory).with_suffix(f".{target_suffix}")
+                for p in input_paths
+            ]
+            in_out_pairs = list(zip(input_paths, output_paths))
+            if not overwrite:
+                n_files = len(in_out_pairs)
+                in_out_pairs = [
+                    (inp, outp) for inp, outp in in_out_pairs if not outp.exists()
+                ]
+                log.info(f"Skipping {n_files - len(in_out_pairs)} existing files")
+        else:
+            in_out_pairs = [(f, None) for f in input_paths]
+        log.info(f"Translating {len(in_out_pairs)} files")
 
         # Now, loop through every code block in every file and translate it with an LLM
         total_cost = 0.0
-        for in_path in input_paths:
-            relative = in_path.relative_to(input_directory)
-            # output_name = relative.with_suffix(f".{target_suffix}").name
-            if output_directory is not None:
-                out_path = output_directory / relative.with_suffix(f".{target_suffix}")
-            else:
-                out_path = None
-            # Track the cost of translating the file
-            #  TODO: If non-OpenAI models with prices are added, this will need
-            #   to be updated.
-            with get_openai_callback() as cb:
+        for in_path, out_path in in_out_pairs:
+            # Translate the file, skip it if there's a rate limit error
+            try:
                 out_block = self.translate_file(in_path)
-                total_cost += cb.total_cost
+                total_cost += out_block.total_cost
+            except openai.error.RateLimitError:
+                continue
+            except openai.error.InvalidRequestError as e:
+                if str(e).startswith("Detected an error in the prompt"):
+                    log.warning("Malformed input, skipping")
+                    continue
+                raise e
 
             # Don't attempt to write files for which translation failed
             if not out_block.translated:
@@ -139,16 +160,22 @@ class Translator(Converter):
             #
             # self._embed_nodes_recursively(out_block, embedding_type, filename)
 
+            if collection_name is not None:
+                self._vectorizer.add_nodes_recursively(
+                    out_block,
+                    collection_name,
+                    in_path.name,
+                )
+                # out_text = self.parser.parse_combined_output(out_block.complete_text)
+                # # Using same id naming convention from vectorize.py
+                # ids = [str(uuid.uuid3(uuid.NAMESPACE_DNS, out_text))]
+                # output_collection.upsert(ids=ids, documents=[out_text])
+
             # Make sure the tree's code has been consolidated at the top level
             #  before writing to file
             self._combiner.combine(out_block)
             if out_path is not None and (overwrite or not out_path.exists()):
                 self._save_to_file(out_block, out_path)
-            if output_collection is not None:
-                out_text = self.parser.parse_combined_output(out_block.complete_text)
-                # Using same id naming convention from vectorize.py
-                ids = [str(uuid.uuid3(uuid.NAMESPACE_DNS, out_text))]
-                output_collection.upsert(ids=ids, documents=[out_text])
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
@@ -173,8 +200,7 @@ class Translator(Converter):
             f"tree of height {input_block.height}"
         )
         log.info(f"[{filename}] Input CodeBlock Structure:\n{input_block.tree_str()}")
-        # (temporarily?) comment-out adding embeddings; will be moved
-        # self._embed_nodes_recursively(input_block, EmbeddingType.SOURCE, filename)
+
         output_block = self._iterative_translate(input_block)
         if output_block.translated:
             completeness = output_block.translation_completeness
@@ -183,7 +209,9 @@ class Translator(Converter):
                 f"  {completeness:.2%} of input successfully translated\n"
                 f"  Total cost: ${output_block.total_cost:,.2f}\n"
                 f"  Total retries: {output_block.total_retries:,d}\n"
+                f"  Output CodeBlock Structure:\n{input_block.tree_str()}\n"
             )
+
         else:
             log.error(
                 f"[{filename}] Translation failed\n"
@@ -382,6 +410,9 @@ class Translator(Converter):
         self._target_language = target_language
         self._target_version = target_version
 
+    def set_db_path(self, db_path: str) -> None:
+        self._db_path = db_path
+
     @run_if_changed("_model_name", "_custom_model_arguments")
     def _load_model(self):
         """Load the model according to this instance's attributes.
@@ -454,3 +485,11 @@ class Translator(Converter):
             target_version=self._target_version,
             prompt_template=self._prompt_template_name,
         )
+
+    @run_if_changed("_db_path")
+    def _load_vectorizer(self) -> None:
+        if self._db_path is None:
+            self._vectorizer = None
+            return
+        vectorizer_factory = ChromaDBVectorizer()
+        self._vectorizer = vectorizer_factory.create_vectorizer(self._db_path)

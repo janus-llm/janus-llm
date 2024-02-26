@@ -156,12 +156,6 @@ def translate(
         raise ValueError
 
     model_arguments = dict(temperature=temp)
-    output_collection = None
-    if collection is not None:
-        _check_collection(collection, input_dir)
-        db = ChromaEmbeddingDatabase(db_loc)
-        collections = Collections(db)
-        output_collection = collections.get_or_create(collection)
     translator = Translator(
         model=llm_name,
         model_arguments=model_arguments,
@@ -171,8 +165,9 @@ def translate(
         max_prompts=max_prompts,
         prompt_template=prompt_template,
         parser_type=parser_type,
+        db_path=db_loc,
     )
-    translator.translate(input_dir, output_dir, overwrite, output_collection)
+    translator.translate(input_dir, output_dir, overwrite, collection)
 
 
 @db.command("init", help="Connect to or create a database.")
@@ -288,9 +283,7 @@ def db_add(
     ):
         vectorizer_factory = ChromaDBVectorizer()
         vectorizer = vectorizer_factory.create_vectorizer(
-            source_language=input_lang,
             path=db_loc,
-            max_tokens=max_tokens,
         )
         input_dir = Path(input_dir)
         source_glob = f"**/*.{LANGUAGES[input_lang]['suffix']}"
@@ -311,7 +304,7 @@ def db_add(
             )
         for input_path in input_paths:
             input_block = splitter.split(input_path)
-            vectorizer._add_nodes_recursively(
+            vectorizer.add_nodes_recursively(
                 input_block,
                 collection_name,
                 input_path.name,

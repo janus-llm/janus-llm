@@ -1,5 +1,5 @@
 from functools import total_ordering
-from typing import ForwardRef, Hashable
+from typing import ForwardRef, Hashable, Optional, Tuple
 
 from ..utils.logger import create_logger
 from .node import NodeType
@@ -33,32 +33,32 @@ class CodeBlock:
     def __init__(
         self,
         id: Hashable,
-        name: None | str,
+        name: Optional[str],
         type: NodeType,
         language: str,
-        text: None | str,
-        start_point: None | tuple[int, int],
-        end_point: None | tuple[int, int],
-        start_byte: None | int,
-        end_byte: None | int,
+        text: Optional[str],
+        start_point: Optional[Tuple[int, int]],
+        end_point: Optional[Tuple[int, int]],
+        start_byte: Optional[int],
+        end_byte: Optional[int],
         tokens: int,
         children: list[ForwardRef("CodeBlock")],
-        embedding_id: None | str = None,
-        affixes: tuple[str, str] = ("", ""),
+        embedding_id: Optional[str] = None,
+        affixes: Tuple[str, str] = ("", ""),
     ) -> None:
         self.id: Hashable = id
-        self.name: None | str = name
+        self.name: Optional[str] = name
         self.type: NodeType = type
         self.language: str = language
-        self.text: None | str = text
-        self.start_point: None | tuple[int, int] = start_point
-        self.end_point: None | tuple[int, int] = end_point
-        self.start_byte: None | [int] = start_byte
-        self.end_byte: None | [int] = end_byte
+        self.text: Optional[str] = text
+        self.start_point: Optional[Tuple[int, int]] = start_point
+        self.end_point: Optional[Tuple[int, int]] = end_point
+        self.start_byte: Optional[int] = start_byte
+        self.end_byte: Optional[int] = end_byte
         self.tokens: int = tokens
         self.children: list[ForwardRef("CodeBlock")] = sorted(children)
-        self.embedding_id: None | [str] = embedding_id
-        self.affixes: tuple[str, str] = affixes
+        self.embedding_id: Optional[str] = embedding_id
+        self.affixes: Tuple[str, str] = affixes
 
         self.complete = True
         self.omit_prefix = True
