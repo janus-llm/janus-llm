@@ -25,7 +25,7 @@ class Translator(Converter):
         model_arguments: Dict[str, Any] = {},
         source_language: str = "fortran",
         target_language: str = "python",
-        target_version: str = "3.10",
+        target_version: str | None = "3.10",
         max_prompts: int = 10,
         prompt_template: str | Path = "simple",
         parser_type: str = "code",

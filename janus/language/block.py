@@ -14,7 +14,7 @@ class CodeBlock:
     Attributes:
         id: The id of the code block in the AST
         name: Descriptive name of node
-        type: The type of the code block ('function', 'module', etc.). Defined in the
+        node_type: The type of the code block ('function', 'module', etc.). Defined in the
             language-specific modules.
         language: The language of the code block.
         text: The code block.
@@ -34,7 +34,7 @@ class CodeBlock:
         self,
         id: Hashable,
         name: Optional[str],
-        type: NodeType,
+        node_type: NodeType,
         language: str,
         text: Optional[str],
         start_point: Optional[Tuple[int, int]],
@@ -48,7 +48,7 @@ class CodeBlock:
     ) -> None:
         self.id: Hashable = id
         self.name: Optional[str] = name
-        self.type: NodeType = type
+        self.node_type: NodeType = node_type
         self.language: str = language
         self.text: Optional[str] = text
         self.start_point: Optional[Tuple[int, int]] = start_point
@@ -195,7 +195,7 @@ class TranslatedCodeBlock(CodeBlock):
         super().__init__(
             id=original.id,
             name=original.name,
-            type=original.type,
+            type=original.node_type,
             language=language,
             text=None,
             start_point=original.start_point,

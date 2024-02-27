@@ -55,8 +55,8 @@ class TreeSitterSplitter(Splitter):
         queue = [root]
         while queue:
             node = queue.pop(0)  # BFS order to keep lower IDs toward the root
-            node.id = f"{node.type}[{seen_types[node.type]}]"
-            seen_types[node.type] += 1
+            node.id = f"{node.node_type}[{seen_types[node.node_type]}]"
+            seen_types[node.node_type] += 1
             node.name = f"{path.name}:{node.id}"
             queue.extend(node.children)
 

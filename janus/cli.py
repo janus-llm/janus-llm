@@ -170,6 +170,90 @@ def translate(
     translator.translate(input_dir, output_dir, overwrite, collection)
 
 
+@app.command(
+    help="Document input code using an LLM.",
+    no_args_is_help=True,
+)
+def document(
+    input_dir: Annotated[
+        Path,
+        typer.Option(
+            help="The directory containing the source code to be translated. "
+            "The files should all be in one flat directory."
+        ),
+    ],
+    lang: Annotated[
+        str,
+        typer.Option(
+            help="The language of the source code.",
+            click_type=click.Choice(sorted(LANGUAGES)),
+        ),
+    ],
+    output_dir: Annotated[
+        Path,
+        typer.Option(help="The directory to store the translated code in."),
+    ],
+    llm_name: Annotated[
+        str,
+        typer.Option(
+            help="The custom name of the model set with 'janus llm add'.",
+        ),
+    ] = "gpt-3.5-turbo",
+    max_prompts: Annotated[
+        int,
+        typer.Option(
+            help="The maximum number of times to prompt a model on one functional block "
+            "before exiting the application. This is to prevent wasting too much money."
+        ),
+    ] = 10,
+    overwrite: Annotated[
+        bool,
+        typer.Option(
+            "--overwrite/--preserve",
+            help="Whether to overwrite existing files in the output directory",
+        ),
+    ] = False,
+    temp: Annotated[
+        float,
+        typer.Option(help="Sampling temperature.", min=0, max=2),
+    ] = 0.7,
+    doc_type: Annotated[
+        str,
+        typer.Option(
+            click_type=click.Choice(["module", "inline"]),
+            help="The type of parser to use.",
+        ),
+    ] = "module",
+    collection: Annotated[
+        str,
+        typer.Option(
+            "--collection",
+            "-c",
+            help="If set, will put the translated result into a Chroma DB "
+            "collection with the name provided.",
+        ),
+    ] = None,
+):
+    prompt_template = "document"
+    if "inline" == doc_type:
+        prompt_template = "document_inline"
+
+    model_arguments = dict(temperature=temp)
+    translator = Translator(
+        model=llm_name,
+        model_arguments=model_arguments,
+        source_language=lang,
+        target_language="text",
+        target_version=None,
+        max_prompts=max_prompts,
+        prompt_template=prompt_template,
+        parser_type="text",
+        db_path=db_loc,
+    )
+    translator.set_
+    translator.translate(input_dir, output_dir, overwrite, collection)
+
+
 @db.command("init", help="Connect to or create a database.")
 def db_init(
     path: Annotated[str, typer.Option(help="The path to the database file.")] = str(
