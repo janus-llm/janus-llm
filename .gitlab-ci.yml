@@ -1,4 +1,4 @@
-image: "python:3.10"
+image: "python:3.11"
 
 before_script:
   - curl -ksSL https://gitlab.mitre.org/mitre-scripts/mitre-pki/raw/master/os_scripts/install_certs.sh | sh
@@ -17,6 +17,7 @@ stages:
   - Documentation
   - Release
   - Tests
+  - Dummy
 
 ###################
 # Static Analysis #
@@ -182,3 +183,19 @@ test-release:
       - "**/*.py"
       - poetry.lock
       - pyproject.toml
+
+#########
+# Dummy #
+#########
+dummy-workflow:
+  stage: Dummy
+  tags:
+    - docker
+  script:
+    - echo "Dummy CI Job"
+  needs: []
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - .github/workflows/**/*
