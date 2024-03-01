@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 
 from chromadb.api.client import Client
 
+from ...language.treesitter import TreeSitterSplitter
 from ...utils.enums import EmbeddingType
 from ..vectorize import Vectorizer, VectorizerFactory
 
@@ -22,7 +23,7 @@ class MockDBVectorizer(VectorizerFactory):
         model: None | str = "gpt4all",
         path: str | Path = None,
     ) -> Vectorizer:
-        return Vectorizer(self._db, source_language, max_tokens, model)
+        return Vectorizer(self._db)
 
 
 class TestVectorize(unittest.TestCase):
@@ -35,7 +36,11 @@ class TestVectorize(unittest.TestCase):
         self.database.list_collections = list_collections
         self.vectorizer = MockDBVectorizer(self.database).create_vectorizer()
         self.test_file = Path("janus/language/treesitter/_tests/languages/fortran.f90")
-        self.test_block = self.vectorizer._splitter.split(self.test_file)
+        splitter = TreeSitterSplitter(
+            language="fortran",
+            max_tokens=16_384,
+        )
+        self.test_block = splitter.split(self.test_file)
 
     def test_add_nodes_recursively(self):
         embedding_type = EmbeddingType.SOURCE
@@ -45,7 +50,7 @@ class TestVectorize(unittest.TestCase):
             "time_updated": datetime.datetime.now().time().isoformat("minutes"),
         }
         self.database.create_collection.assert_called_with("source_1", metadata=metadata)
-        self.vectorizer._add_nodes_recursively(
+        self.vectorizer.add_nodes_recursively(
             self.test_block, embedding_type, self.test_file.name
         )
         self.database.get_or_create_collection.assert_called_with(
