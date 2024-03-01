@@ -293,8 +293,9 @@ def db_add(
             max_tokens=max_tokens,
         )
         input_dir = Path(input_dir)
-        source_glob = f"**/*.{LANGUAGES[input_lang]['suffix']}"
-        input_paths = input_dir.rglob(source_glob)
+        suffix = LANGUAGES[input_lang]["suffix"]
+        source_glob = f"**/*.{suffix}"
+        input_paths = [p for p in input_dir.rglob(source_glob)]
         if input_lang in CUSTOM_SPLITTERS:
             if input_lang == "mumps":
                 splitter = MumpsSplitter(
@@ -317,9 +318,23 @@ def db_add(
                 input_path.name,
             )
     if added_to:
-        print(f"Added to collection [bold salmon1]{collection_name}[/bold salmon1]")
+        print(
+            f"\nAdded to [bold salmon1]{collection_name}[/bold salmon1]:\n"
+            f"  Input Directory: {input_dir.absolute()}\n"
+            f"  {input_lang.capitalize()} [green]*.{suffix}[/green] Files: "
+            f"{len(input_paths)}\n"
+            "  Other Files (skipped): "
+            f"{len(list(input_dir.iterdir())) - len(input_paths)}\n"
+        )
     else:
-        print(f"Created collection [bold salmon1]{collection_name}[/bold salmon1]")
+        print(
+            f"\nCreated [bold salmon1]{collection_name}[/bold salmon1]:\n"
+            f"  Input Directory: {input_dir.absolute()}\n"
+            f"  {input_lang.capitalize()} [green]*.{suffix}[/green] Files: "
+            f"{len(input_paths)}\n"
+            "  Other Files (skipped): "
+            f"{len(list(input_dir.iterdir())) - len(input_paths)}\n"
+        )
 
 
 @db.command(

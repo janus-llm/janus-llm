@@ -99,9 +99,20 @@ class Translator(Converter):
         if output_directory is not None and not output_directory.exists():
             output_directory.mkdir(parents=True)
 
+        source_suffix = LANGUAGES[self._source_language]["suffix"]
         target_suffix = LANGUAGES[self._target_language]["suffix"]
 
-        input_paths = input_directory.rglob(self._source_glob)
+        input_paths = [p for p in input_directory.rglob(self._source_glob)]
+
+        log.info(f"Input Directory: {input_directory.absolute()}")
+        log.info(
+            f"{self._source_language.capitalize()} '*.{source_suffix}' Files: "
+            f"{len(input_paths)}"
+        )
+        log.info(
+            "Other Files (skipped): "
+            f"{len(list(input_directory.iterdir())) - len(input_paths)}\n"
+        )
 
         # Now, loop through every code block in every file and translate it with an LLM
         total_cost = 0.0
