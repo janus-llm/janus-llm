@@ -277,12 +277,7 @@ class Translator(Converter):
             if not translated_block.translated:
                 continue
 
-            for child in translated_block.children:
-                # Don't bother translating children if they aren't used
-                if self._combiner.contains_child(translated_block.text, child):
-                    stack.append(child)
-                else:
-                    log.warning(f"Skipping {child.id} (not referenced in parent code)")
+            stack.extend(translated_block.children)
 
             progress = translated_root.translation_completeness
             if progress - last_prog > prog_delta:
