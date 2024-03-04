@@ -147,7 +147,7 @@ class MumpsSplitter(Splitter):
 
         # In mumps, quotes are escaped by doubling them (""). Single quote
         #  characters are logical not operators, not quotes
-        n_quotes = len(re.findall(r"(?<!\")\"(?!\")", line[:first_semicolon]))
+        n_quotes = line[:first_semicolon].replace('""', "").count('"')
 
         # If the number of quotes prior to the first semicolon is even, then
         #  that semicolon is not part of a quote (and therefore starts a comment)
@@ -156,8 +156,7 @@ class MumpsSplitter(Splitter):
 
         last_semicolon = first_semicolon
         while (next_semicolon := line.find(";", last_semicolon + 1)) > 0:
-            chunk = line[last_semicolon:next_semicolon]
-            n_quotes = len(re.findall(r"(?<!\")\"(?!\")", chunk))
+            n_quotes = line[last_semicolon:next_semicolon].replace('""', "").count('"')
 
             # If the number of quotes in this chunk is odd, the total number
             #  of them up to this point is even, and the next semicolon begins
