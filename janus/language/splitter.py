@@ -243,7 +243,7 @@ class Splitter(FileManager):
         ]
 
         groups = [[n] for n in nodes]
-        while len(groups) > 1 and min(adj_sums) <= self.max_tokens:
+        while len(groups) > 1 and min(adj_sums) <= self.max_tokens and any(merge_allowed):
             # Get the indices of the adjacent nodes that would result in the
             #  smallest possible merged snippet. Ignore protected nodes.
             mergeable_indices = compress(range(len(adj_sums)), merge_allowed)
@@ -267,6 +267,10 @@ class Splitter(FileManager):
                 adj_sums[i0 - 1] += merged_text_length
             if i1 < len(adj_sums) - 1:
                 adj_sums[i1 + 1] += merged_text_length
+
+            if i0 > 0 and i1 < len(merge_allowed) - 1:
+                if not (merge_allowed[i0 - 1] and merge_allowed[i1 + 1]):
+                    merge_allowed[i0 - 1] = merge_allowed[i1 + 1] = False
 
             # The potential merge length for this pair is removed
             adj_sums.pop(i0)
