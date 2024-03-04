@@ -141,34 +141,32 @@ class MumpsSplitter(Splitter):
 
     @staticmethod
     def comment_start(line: str) -> int:
-        first = line.find(";")
-        head = line[:first]
+        first_semicolon = line.find(";")
+        if first_semicolon < 0:
+            return first_semicolon
 
-        # If there is no comment character, return -1
-        if first < 0:
-            return first
+        # In mumps, quotes are escaped by doubling them (""). Single quote
+        #  characters are logical not operators, not quotes
+        n_quotes = len(re.findall(r"(?<!\")\"(?!\")", line[:first_semicolon]))
 
-        # If the part of the line before the first comment character either
-        #  (1) has no quote characters, or (2) has only one kind of quote
-        #  character and there's an even number of them, then the first comment
-        #  character is the start of the comment
-        if '"' not in head and "'" not in head:
-            return first
-        if "'" not in head and head.count('"') % 2 == 0:
-            return first
-        if '"' not in head and head.count("'") % 2 == 0:
-            return first
+        # If the number of quotes prior to the first semicolon is even, then
+        #  that semicolon is not part of a quote (and therefore starts a comment)
+        if n_quotes % 2 == 0:
+            return first_semicolon
 
-        # Keep track of the type of quote we are in. If not in a quotation, None
-        quote_char = None
-        for i, char in enumerate(line):
-            if char == "'" or char == '"':
-                if quote_char is None:
-                    quote_char = char
-                elif char == quote_char:
-                    quote_char = None
-            elif char == ";" and quote_char is None:
-                return i
+        last_semicolon = first_semicolon
+        while (next_semicolon := line.find(";", last_semicolon + 1)) > 0:
+            chunk = line[last_semicolon:next_semicolon]
+            n_quotes = len(re.findall(r"(?<!\")\"(?!\")", chunk))
+
+            # If the number of quotes in this chunk is odd, the total number
+            #  of them up to this point is even, and the next semicolon begins
+            #  the comment
+            if n_quotes % 2:
+                return next_semicolon
+
+            last_semicolon = next_semicolon
+
         return -1
 
     def _split_comment(self, line_node: CodeBlock):
