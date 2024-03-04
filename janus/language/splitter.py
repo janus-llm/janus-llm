@@ -78,12 +78,7 @@ class Splitter(FileManager):
         code = path.read_text()
 
         root = self._get_ast(code)
-        size = root.total_tokens
-        log.debug(self._all_node_types(root))
-        log.debug(root.tree_str())
         self._prune(root)
-        pruned_size = root.total_tokens
-        log.debug(f"Pruned down to {pruned_size / size:.2%}")
         if prune_unprotected:
             self._prune_unprotected(root)
         self._set_identifiers(root, path)
