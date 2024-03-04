@@ -63,6 +63,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
             '#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n'
             "    return 0;\n}\n"
         ),
+        "functional_node_type": "function_definition",
+        "comment_node_type": "comment",
     },
     "capnp": {
         "comment": "#",
@@ -204,6 +206,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "example": (
             "program HelloWorld\n  print *, 'Hello, World!'\nend program HelloWorld\n"
         ),
+        "functional_node_type": "function",
+        "comment_node_type": "comment",
     },
     "gitattributes": {
         "comment": "#",
@@ -387,6 +391,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "suffix": "m",
         "url": None,
         "example": 'WRITE "Hello, World!"',
+        "functional_node_type": "subroutine",
+        "comment_node_type": "comment",
     },
     "nix": {
         "comment": "#",

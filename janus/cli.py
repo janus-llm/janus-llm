@@ -23,7 +23,7 @@ from .llm.models_info import (
     TOKEN_LIMITS,
 )
 from .parsers.code_parser import PARSER_TYPES
-from .translate import Translator
+from .translate import Documenter, Translator
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
 
@@ -213,17 +213,17 @@ def document(
             help="Whether to overwrite existing files in the output directory",
         ),
     ] = False,
+    drop_comments: Annotated[
+        bool,
+        typer.Option(
+            "--drop-comments/--keep-comments",
+            help="Whether to drop or keep comments in the code sent to the LLM",
+        ),
+    ] = False,
     temp: Annotated[
         float,
         typer.Option(help="Sampling temperature.", min=0, max=2),
     ] = 0.7,
-    doc_type: Annotated[
-        str,
-        typer.Option(
-            click_type=click.Choice(["module", "inline"]),
-            help="The type of parser to use.",
-        ),
-    ] = "module",
     collection: Annotated[
         str,
         typer.Option(
@@ -234,24 +234,16 @@ def document(
         ),
     ] = None,
 ):
-    prompt_template = "document"
-    if "inline" == doc_type:
-        prompt_template = "document_inline"
-
     model_arguments = dict(temperature=temp)
-    translator = Translator(
+    documenter = Documenter(
         model=llm_name,
         model_arguments=model_arguments,
         source_language=lang,
-        target_language="text",
-        target_version=None,
         max_prompts=max_prompts,
-        prompt_template=prompt_template,
-        parser_type="text",
         db_path=db_loc,
+        drop_comments=drop_comments,
     )
-    translator.set_
-    translator.translate(input_dir, output_dir, overwrite, collection)
+    documenter.translate(input_dir, output_dir, overwrite, collection)
 
 
 @db.command("init", help="Connect to or create a database.")

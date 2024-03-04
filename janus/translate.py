@@ -7,6 +7,7 @@ from langchain.callbacks import get_openai_callback
 from .converter import Converter, run_if_changed
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
+from .language.splitter import EmptyTreeError, TokenLimitError
 from .llm import load_model
 from .parsers.code_parser import PARSER_TYPES, CodeParser, EvaluationParser, JanusParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
@@ -139,6 +140,14 @@ class Translator(Converter):
                     log.warning("Malformed input, skipping")
                     continue
                 raise e
+            except TokenLimitError:
+                log.warning("Ran into irreducible node too large for context, skipping")
+                continue
+            except EmptyTreeError:
+                log.warning(
+                    f'Input file "{in_path.name}" has no nodes of interest, skipping'
+                )
+                continue
 
             # Don't attempt to write files for which translation failed
             if not out_block.translated:
@@ -179,6 +188,17 @@ class Translator(Converter):
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
+    def _split_file(self, file: Path) -> CodeBlock:
+        filename = file.name
+        log.info(f"[{filename}] Splitting file")
+        root = self._splitter.split(file)
+        log.info(
+            f"[{filename}] File split into {root.n_descendents:,} blocks, "
+            f"tree of height {root.height}"
+        )
+        log.info(f"[{filename}] Input CodeBlock Structure:\n{root.tree_str()}")
+        return root
+
     def translate_file(self, file: Path) -> TranslatedCodeBlock:
         """Translate a single file.
 
@@ -191,16 +211,9 @@ class Translator(Converter):
             `Combiner.combine_children` on the block.
         """
         self._load_parameters()
-
         filename = file.name
-        log.info(f"[{filename}] Splitting file")
-        input_block = self._splitter.split(file)
-        log.info(
-            f"[{filename}] File split into {input_block.n_descendents:,} blocks, "
-            f"tree of height {input_block.height}"
-        )
-        log.info(f"[{filename}] Input CodeBlock Structure:\n{input_block.tree_str()}")
 
+        input_block = self._split_file(file)
         output_block = self._iterative_translate(input_block)
         if output_block.translated:
             completeness = output_block.translation_completeness
@@ -493,3 +506,54 @@ class Translator(Converter):
             return
         vectorizer_factory = ChromaDBVectorizer()
         self._vectorizer = vectorizer_factory.create_vectorizer(self._db_path)
+
+
+class Documenter(Translator):
+    def __init__(
+        self,
+        model: str = "gpt-3.5-turbo",
+        model_arguments: Dict[str, Any] = {},
+        source_language: str = "fortran",
+        max_prompts: int = 10,
+        db_path: str | None = None,
+        drop_comments: bool = False,
+    ) -> None:
+        """Initialize a Translator instance.
+
+        Arguments:
+            model: The LLM to use for translation. If an OpenAI model, the
+                `OPENAI_API_KEY` environment variable must be set and the
+                `OPENAI_ORG_ID` environment variable should be set if needed.
+            model_arguments: Additional arguments to pass to the LLM constructor.
+            source_language: The source programming language.
+            max_prompts: The maximum number of prompts to try before giving up.
+        """
+        super().__init__(
+            model=model,
+            model_arguments=model_arguments,
+            source_language=source_language,
+            target_language="text",
+            target_version=None,
+            max_prompts=max_prompts,
+            prompt_template="document",
+            parser_type="text",
+            db_path=db_path,
+        )
+
+        module_node_type = LANGUAGES[source_language]["functional_node_type"]
+        self.set_protected_node_types([module_node_type])
+
+        if drop_comments:
+            comment_node_type = LANGUAGES[source_language]["comment_node_type"]
+            self.set_prune_node_types([comment_node_type])
+
+    def _split_file(self, file: Path) -> CodeBlock:
+        filename = file.name
+        log.info(f"[{filename}] Splitting file")
+        root = self._splitter.split(file, prune_unprotected=True)
+        log.info(
+            f"[{filename}] File split into {root.n_descendents:,} blocks, "
+            f"tree of height {root.height}"
+        )
+        log.info(f"[{filename}] Input CodeBlock Structure:\n{root.tree_str()}")
+        return root

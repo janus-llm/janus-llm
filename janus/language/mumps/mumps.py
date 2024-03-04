@@ -43,7 +43,13 @@ class MumpsSplitter(Splitter):
         re.VERBOSE | re.DOTALL,
     )
 
-    def __init__(self, model: None | BaseLanguageModel = None, max_tokens: int = 4096):
+    def __init__(
+        self,
+        model: None | BaseLanguageModel = None,
+        max_tokens: int = 4096,
+        protected_node_types: tuple[str] = ("subroutine",),
+        prune_node_types: tuple[str] = (),
+    ):
         """Initialize a MumpsSplitter instance.
 
         Arguments:
@@ -53,7 +59,8 @@ class MumpsSplitter(Splitter):
             language="mumps",
             model=model,
             max_tokens=max_tokens,
-            use_placeholders=False,
+            protected_node_types=protected_node_types,
+            prune_node_types=prune_node_types,
         )
 
         # MUMPS code tends to take about 2/3 the space of Python

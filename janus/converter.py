@@ -45,6 +45,8 @@ class Converter:
         self,
         source_language: str = "fortran",
         max_tokens: None | int = None,
+        protected_node_types: set[str] | list[str] | tuple[str] = (),
+        prune_node_types: set[str] | list[str] | tuple[str] = (),
     ) -> None:
         """Initialize a Converter instance.
 
@@ -59,13 +61,17 @@ class Converter:
 
         self._source_language: None | str
         self._source_glob: None | str
+        self._protected_node_types: tuple[str] = ()
+        self._prune_node_types: tuple[str] = ()
         self._splitter: None | Splitter
         self._llm: None | BaseLanguageModel = None
         self._max_tokens: None | int = max_tokens
 
         self._combiner: Combiner = Combiner()
 
-        self.set_source_language(source_language=source_language)
+        self.set_source_language(source_language)
+        self.set_protected_node_types(protected_node_types)
+        self.set_prune_node_types(prune_node_types)
 
         # Child class must call this. Should we enforce somehow?
         # self._load_parameters()
@@ -86,7 +92,7 @@ class Converter:
     def set_source_language(self, source_language: str) -> None:
         """Validate and set the source language.
 
-        The affected objects will not be updated until translate() is called.
+        The affected objects will not be updated until _load_parameters() is called.
 
         Arguments:
             source_language: The source programming language.
@@ -101,27 +107,55 @@ class Converter:
         self._source_glob = f"**/*.{LANGUAGES[source_language]['suffix']}"
         self._source_language = source_language
 
-    @run_if_changed("_source_language", "_max_tokens", "_llm")
+    def set_protected_node_types(
+        self, protected_node_types: set[str] | list[str] | tuple[str]
+    ) -> None:
+        """Set the protected (non-mergeable) node types. This will often be structures
+        like functions, classes, or modules which you might want to keep separate
+
+        The affected objects will not be updated until _load_parameters() is called.
+
+        Arguments:
+            protected_node_types: A set of node types that aren't to be merged
+        """
+        self._protected_node_types = tuple(set(protected_node_types or []))
+
+    def set_prune_node_types(
+        self, prune_node_types: set[str] | list[str] | tuple[str]
+    ) -> None:
+        """Set the node types to prune. This will often be structures
+        like comments or whitespace which you might want to keep out of the LLM
+
+        The affected objects will not be updated until _load_parameters() is called.
+
+        Arguments:
+            prune_node_types: A set of node types which should be pruned
+        """
+        self._prune_node_types = tuple(set(prune_node_types or []))
+
+    @run_if_changed(
+        "_source_language",
+        "_max_tokens",
+        "_llm",
+        "_protected_node_types",
+        "_prune_node_types",
+    )
     def _load_splitter(self) -> None:
         """Load the splitter according to this instance's attributes.
 
         If the relevant fields have not been changed since the last time this method was
         called, nothing happens.
         """
+        kwargs = dict(
+            max_tokens=self._max_tokens,
+            model=self._llm,
+            protected_node_types=self._protected_node_types,
+            prune_node_types=self._prune_node_types,
+        )
         if self._source_language in CUSTOM_SPLITTERS:
             if self._source_language == "mumps":
-                self._splitter = MumpsSplitter(
-                    max_tokens=self._max_tokens,
-                    model=self._llm,
-                )
+                self._splitter = MumpsSplitter(**kwargs)
             elif self._source_language == "binary":
-                self._splitter = BinarySplitter(
-                    max_tokens=self._max_tokens,
-                    model=self._llm,
-                )
+                self._splitter = BinarySplitter(**kwargs)
         else:
-            self._splitter = TreeSitterSplitter(
-                language=self._source_language,
-                max_tokens=self._max_tokens,
-                model=self._llm,
-            )
+            self._splitter = TreeSitterSplitter(language=self._source_language, **kwargs)

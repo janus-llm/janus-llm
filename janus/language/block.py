@@ -86,14 +86,6 @@ class CodeBlock:
         return f"{self.prefix}{self.text}{self.suffix}"
 
     @property
-    def placeholder(self) -> str:
-        return f"<<<{self.id}>>>"
-
-    @property
-    def complete_placeholder(self) -> str:
-        return f"{self.prefix}<<<{self.id}>>>{self.suffix}"
-
-    @property
     def n_descendents(self) -> int:
         """The total number of descendents of this block
 
@@ -146,6 +138,14 @@ class CodeBlock:
         self.affixes = (self.affixes[0], "")
         return suffix
 
+    def rebuild_text_from_children(self):
+        if self.children:
+            prefix = self.affixes[0] + self.children[0].pop_prefix()
+            suffix = self.children[-1].pop_suffix() + self.affixes[1]
+            self.text = "".join(c.complete_text for c in self.children)
+            self.affixes = (prefix, suffix)
+            self.tokens = sum(c.tokens for c in self.children)
+
     def tree_str(self, depth: int = 0) -> str:
         """A string representation of the tree with this block as the root
 
@@ -195,7 +195,7 @@ class TranslatedCodeBlock(CodeBlock):
         super().__init__(
             id=original.id,
             name=original.name,
-            type=original.node_type,
+            node_type=original.node_type,
             language=language,
             text=None,
             start_point=original.start_point,
