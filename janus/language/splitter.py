@@ -356,6 +356,9 @@ class Splitter(FileManager):
         if node.start_point is None or node.end_point is None:
             raise ValueError("Node has no start or end point")
 
+        self._split_into_lines(node)
+
+    def _split_into_lines(self, node: CodeBlock):
         split_text = re.split(r"(\n+)", node.text)
         betweens = split_text[1::2]
         lines = split_text[::2]
@@ -364,12 +367,12 @@ class Splitter(FileManager):
         node_line = 0
         for prefix, line, suffix in zip(betweens[:-1], lines, betweens[1:]):
             start_byte += len(bytes(prefix, "utf-8"))
-            node_line += len(prefix)
+            # node_line += len(prefix)
             start_line = node.start_point[0] + node_line
             end_byte = start_byte + len(bytes(line, "utf-8"))
             end_char = len(line)
 
-            name = f"{node.name}L#{node_line}"
+            name = f"{node.name}-L#{node_line}"
             tokens = self._count_tokens(line)
             if tokens > self.max_tokens:
                 raise TokenLimitError(r"Irreducible node too large for context!")
@@ -384,7 +387,7 @@ class Splitter(FileManager):
                     start_byte=start_byte,
                     end_byte=end_byte,
                     affixes=(prefix, suffix),
-                    node_type=NodeType("segment"),
+                    node_type=NodeType(f"{node.node_type}__segment"),
                     children=[],
                     language=self.language,
                     tokens=tokens,

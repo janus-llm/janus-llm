@@ -109,6 +109,10 @@ class MumpsSplitter(Splitter):
                 language=self.language,
                 tokens=self._count_tokens(chunk),
             )
+            self._split_into_lines(node)
+            for line_node in node.children:
+                self._split_comment(line_node)
+
             children.append(node)
 
             start_byte = end_byte + len(bytes(suffix, "utf-8"))
@@ -127,3 +131,82 @@ class MumpsSplitter(Splitter):
             language=self.language,
             tokens=self._count_tokens(code),
         )
+
+    @staticmethod
+    def comment_start(line: str) -> int:
+        first = line.find(";")
+        head = line[:first]
+
+        # If there is no comment character, return -1
+        if first < 0:
+            return first
+
+        # If the part of the line before the first comment character either
+        #  (1) has no quote characters, or (2) has only one kind of quote
+        #  character and there's an even number of them, then the first comment
+        #  character is the start of the comment
+        if '"' not in head and "'" not in head:
+            return first
+        if "'" not in head and head.count('"') % 2 == 0:
+            return first
+        if '"' not in head and head.count("'") % 2 == 0:
+            return first
+
+        # Keep track of the type of quote we are in. If not in a quotation, None
+        quote_char = None
+        for i, char in enumerate(line):
+            if char == "'" or char == '"':
+                if quote_char is None:
+                    quote_char = char
+                elif char == quote_char:
+                    quote_char = None
+            elif char == ";" and quote_char is None:
+                return i
+        return -1
+
+    def _split_comment(self, line_node: CodeBlock):
+        comment_start = self.comment_start(line_node.text)
+        if comment_start < 0:
+            line_node.node_type = NodeType("code_line")
+            return
+
+        code = line_node.text[:comment_start]
+        if not code.strip():
+            line_node.node_type = NodeType("comment")
+            return
+
+        comment = line_node.text[comment_start:]
+        (l0, c0), (l1, c1) = line_node.start_point, line_node.end_point
+        prefix, suffix = line_node.affixes
+        code_bytes = len(bytes(code, "utf-8"))
+
+        line_node.children = [
+            CodeBlock(
+                text=code,
+                name=f"{line_node.name}-code",
+                id=f"{line_node.name}-code",
+                start_point=(l0, c0),
+                end_point=(l1, comment_start),
+                start_byte=line_node.start_byte,
+                end_byte=line_node.start_byte + code_bytes,
+                affixes=(prefix, ""),
+                node_type=NodeType("code_line"),
+                children=[],
+                language=line_node.language,
+                tokens=self._count_tokens(code),
+            ),
+            CodeBlock(
+                text=comment,
+                name=f"{line_node.name}-comment",
+                id=f"{line_node.name}-comment",
+                start_point=(l0, c0 + comment_start),
+                end_point=(l1, c1),
+                start_byte=line_node.start_byte + code_bytes,
+                end_byte=line_node.end_byte,
+                affixes=("", suffix),
+                node_type=NodeType("comment"),
+                children=[],
+                language=self.language,
+                tokens=self._count_tokens(comment),
+            ),
+        ]
