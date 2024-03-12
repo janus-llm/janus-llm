@@ -1,4 +1,5 @@
 import inspect
+import json
 
 from .cli import evaluate, state
 
@@ -12,7 +13,11 @@ def metric():
                 src = f.read()
             with open(cmp_file, "r") as f:
                 cmp = f.read()
-            return function(src, cmp, *args, **kwargs)
+            out = function(src, cmp, *args, **kwargs)
+            res = {f"{src_file}_{cmp_file}_{function.__name__}": float(out)}
+            out_file = state["out_file"]
+            with open(out_file, "w") as f:
+                json.dump(res, f)
 
         sig1 = inspect.signature(function)
         sig2 = inspect.signature(func)
