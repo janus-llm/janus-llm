@@ -6,7 +6,6 @@ from typing import Any, Set
 from langchain.schema.output_parser import BaseOutputParser
 
 from ..language.block import CodeBlock
-from ..language.combine import Combiner
 from ..utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -81,7 +80,8 @@ class CodeParser(JanusParser):
 
     def score(self, input_block: CodeBlock, output_text: str) -> float:
         """The score for translated code is the percentage of this block's
-        children which are present in the output
+        children which are present in the output. NOTE: Since placeholders
+        are no longer used, this score can only ever be 1.
 
         Arguments:
             input_block: A `CodeBlock` representing the input to the LLM
@@ -92,22 +92,7 @@ class CodeParser(JanusParser):
             the given text is fully acceptable, and no further attempts
             should be made.
         """
-        if not input_block.children:
-            return 1.0
-
-        missing_children = []
-        for child in input_block.children:
-            if not Combiner.contains_child(output_text, child):
-                missing_children.append(child.id)
-
-        if missing_children:
-            log.warning(
-                f"[{input_block.name}] Child placeholders not present in text: "
-                f"{missing_children}"
-            )
-            log.debug(f"Code:\n{output_text}")
-
-        return 1.0 - len(missing_children) / len(input_block.children)
+        return 1.0
 
     def get_format_instructions(self) -> str:
         return "Output must contain text contained within triple backticks."

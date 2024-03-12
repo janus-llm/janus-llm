@@ -64,7 +64,7 @@ class Vectorizer(object):
         if code_block.text:
             metadatas = [
                 {
-                    "type": code_block.type,
+                    "type": code_block.node_type,
                     "id": code_block.id,
                     "name": code_block.name,
                     "language": code_block.language,

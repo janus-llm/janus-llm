@@ -1,4 +1,5 @@
 import re
+from itertools import compress
 from pathlib import Path
 from typing import List
 
@@ -21,6 +22,14 @@ class TokenLimitError(Exception):
     pass
 
 
+class EmptyTreeError(Exception):
+    """An exception raised when the tree is empty or does not exist (can happen
+    when there are no nodes of interest in the tree)
+    """
+
+    pass
+
+
 class Splitter(FileManager):
     """A class for splitting code into functional blocks to prompt with for
     transcoding.
@@ -31,8 +40,9 @@ class Splitter(FileManager):
         language: str,
         model: None | BaseLanguageModel = None,
         max_tokens: int = 4096,
-        use_placeholders: bool = True,
         skip_merge: bool = False,
+        protected_node_types: tuple[str] = (),
+        prune_node_types: tuple[str] = (),
     ):
         """
         Arguments:
@@ -40,7 +50,6 @@ class Splitter(FileManager):
             model: The name of the model to use for counting tokens. If the model is None,
                 will use tiktoken's default tokenizer to count tokens.
             max_tokens: The maximum number of tokens to use for each functional block.
-            use_placeholders: Whether to use placeholders when splitting the code.
             skip_merge: Whether to merge child nodes up to the max_token length.
                 May be used for situations like documentation where function-level
                 documentation is preferred.
@@ -51,11 +60,12 @@ class Splitter(FileManager):
         self.model = model
         if self.model is None:
             self._encoding = tiktoken.get_encoding("cl100k_base")
-        self.use_placeholders: bool = use_placeholders
         self.skip_merge = skip_merge
         self.max_tokens: int = max_tokens
+        self._protected_node_types = set(protected_node_types)
+        self._prune_node_types = set(prune_node_types)
 
-    def split(self, file: Path | str) -> CodeBlock:
+    def split(self, file: Path | str, prune_unprotected: bool = False) -> CodeBlock:
         """Split the given file into functional code blocks.
 
         Arguments:
@@ -68,6 +78,9 @@ class Splitter(FileManager):
         code = path.read_text()
 
         root = self._get_ast(code)
+        self._prune(root)
+        if prune_unprotected:
+            self._prune_unprotected(root)
         self._set_identifiers(root, path)
         self._segment_leaves(root)
         self._merge_tree(root)
@@ -85,6 +98,15 @@ class Splitter(FileManager):
             The root of a tree of CodeBlocks
         """
         raise NotImplementedError()
+
+    def _all_node_types(self, root: CodeBlock) -> set[NodeType]:
+        types = set()
+        stack = [root]
+        while stack:
+            node = stack.pop()
+            types.add(node.node_type)
+            stack.extend(node.children)
+        return types
 
     def _set_identifiers(self, root: CodeBlock, path: Path):
         """Set the IDs and names of each node in the given tree. By default,
@@ -109,79 +131,90 @@ class Splitter(FileManager):
         the represented code is present in the text of exactly one node in the
         tree.
         """
-        if self.skip_merge:
+        # Simulate recursion with a stack
+        stack = [root]
+        while stack:
+            node = stack.pop()
+
+            # If the text of this node can fit in context, then we can just
+            #  prune its children, making it a leaf node.
+            if node.tokens <= self.max_tokens and not self._has_protected_descendents(
+                node
+            ):
+                node.children = []
+                continue
+
+            # Otherwise, this is an internal node. Mark it as incomplete, and
+            #  drop its text (which will be represented in its children)
+            node.complete = False
+            node.text = None
+            node.tokens = 0
+
+            # If this node has no children but cannot fit into context, then we
+            #  have a problem. Oversized nodes have already been segmented into
+            #  lines, so this node contains a single line too long to send to
+            #  the LLM. If this happens, the source code is probably malformed.
+            # We have no choice but to log an error and simply ignore the node.
+            if not node.children:
+                log.error(f"[{node.name}] Childless node too long for context!")
+                continue
+
+            # Consolidate nodes into groups, and then merge each group into a new node
+            node_groups = self._group_nodes(node.children)
+            node.children = list(map(self.merge_nodes, node_groups))
+
+            # "Recurse" by pushing the children onto the stack
+            stack.extend(node.children)
+
+    def _should_prune(self, node: CodeBlock) -> bool:
+        return node.node_type in self._prune_node_types
+
+    def _prune(self, root: CodeBlock) -> None:
+        stack = [root]
+        traversal = []
+        while stack:
+            node = stack.pop()
+            traversal.append(node)
+            node.children = [c for c in node.children if not self._should_prune(c)]
+            stack.extend(node.children)
+
+        for node in traversal[::-1]:
+            node.rebuild_text_from_children()
+            node.tokens = self._count_tokens(node.text)
+
+    def _is_protected(self, node: CodeBlock) -> bool:
+        return node.node_type in self._protected_node_types
+
+    def _has_protected_descendents(self, node: CodeBlock) -> bool:
+        if not self._protected_node_types:
+            return False
+
+        queue = [*node.children]
+        while queue:
+            node = queue.pop(0)
+            if self._is_protected(node):
+                return True
+            queue.extend(node.children)
+        return False
+
+    def _prune_unprotected(self, root: CodeBlock) -> None:
+        if not self._has_protected_descendents(root):
+            if not self._is_protected(root):
+                raise EmptyTreeError("No protected nodes in tree!")
+            root.children = []
             return
 
         stack = [root]
         while stack:
             node = stack.pop()
-            self._merge_children(node)
+            if self._is_protected(node):
+                node.children = []
+            node.children = [
+                c
+                for c in node.children
+                if self._is_protected(c) or self._has_protected_descendents(c)
+            ]
             stack.extend(node.children)
-
-    def _merge_children(self, node: CodeBlock):
-        """Given a parent node in an abstract syntax tree, consolidate, merge,
-        and prune its children such that this node's text fits into context,
-        and does not overlap with the text represented by any of its children.
-        After processing, this node's children will have been merged such that
-        they maximally fit into LLM context. If the entire node text can fit
-        into context, all its children will be pruned.
-        """
-        # If the text at the function input is less than the max tokens, then
-        #  we can just return it as a CodeBlock with no children.
-        if node.tokens <= self.max_tokens:
-            node.children = []
-            return
-
-        node.complete = False
-
-        # Consolidate nodes into groups, and then merge each group into a new node
-        node_groups = self._group_nodes(node.children)
-        node.children = list(map(self.merge_nodes, node_groups))
-
-        # If not using placeholders, simply recurse for every child and delete
-        #  this node's text and tokens
-        if not self.use_placeholders:
-            if not node.children:
-                log.error(f"[{node.name}] Childless node too long for context!")
-            node.text = None
-            node.tokens = 0
-            return
-
-        text_chunks = [c.complete_placeholder for c in node.children]
-        node.text = "".join(text_chunks)
-        node.tokens = self._count_tokens(node.text)
-
-        # If the text is still too long even with every child replaced with
-        #  placeholders, there's no reason to bother with placeholders at all
-        if node.tokens > self.max_tokens:
-            node.text = None
-            node.tokens = 0
-            return
-
-        sorted_indices: List[int] = sorted(
-            range(len(node.children)),
-            key=lambda idx: node.children[idx].tokens,
-        )
-
-        merged_child_indices = set()
-        for idx in sorted_indices:
-            child = node.children[idx]
-            text_chunks[idx] = child.complete_text
-            text = "".join(text_chunks)
-            tokens = self._count_tokens(text)
-            if tokens > self.max_tokens:
-                break
-
-            node.text = text
-            node.tokens = tokens
-            merged_child_indices.add(idx)
-
-        # Remove all merged children from the child list
-        node.children = [
-            child
-            for i, child in enumerate(node.children)
-            if i not in merged_child_indices
-        ]
 
     def _group_nodes(self, nodes: List[CodeBlock]) -> List[List[CodeBlock]]:
         """Consolidate a list of tree_sitter nodes into groups. Each group should fit
@@ -207,11 +240,19 @@ class Splitter(FileManager):
         # Estimate the length of each adjacent pair were they merged
         adj_sums = [lengths[i] + lengths[i + 1] for i in range(len(lengths) - 1)]
 
+        # Create list of booleans parallel with adj_sums indicating whether that
+        #  merge is allowed (according to the protected node types list)
+        protected = list(map(self._is_protected, nodes))
+        merge_allowed = [
+            not (protected[i] or protected[i + 1]) for i in range(len(protected) - 1)
+        ]
+
         groups = [[n] for n in nodes]
-        while len(groups) > 1 and min(adj_sums) <= self.max_tokens:
+        while len(groups) > 1 and min(adj_sums) <= self.max_tokens and any(merge_allowed):
             # Get the indices of the adjacent nodes that would result in the
-            #  smallest possible merged snippet
-            i0 = int(min(range(len(adj_sums)), key=adj_sums.__getitem__))
+            #  smallest possible merged snippet. Ignore protected nodes.
+            mergeable_indices = compress(range(len(adj_sums)), merge_allowed)
+            i0 = int(min(mergeable_indices, key=adj_sums.__getitem__))
             i1 = i0 + 1
 
             # Recalculate the length. We can't simply use the adj_sum, because
@@ -232,8 +273,13 @@ class Splitter(FileManager):
             if i1 < len(adj_sums) - 1:
                 adj_sums[i1 + 1] += merged_text_length
 
+            if i0 > 0 and i1 < len(merge_allowed) - 1:
+                if not (merge_allowed[i0 - 1] and merge_allowed[i1 + 1]):
+                    merge_allowed[i0 - 1] = merge_allowed[i1 + 1] = False
+
             # The potential merge length for this pair is removed
             adj_sums.pop(i0)
+            merge_allowed.pop(i0)
 
             # Merge the pair of node groups
             groups[i0 : i1 + 1] = [groups[i0] + groups[i1]]
@@ -279,7 +325,7 @@ class Splitter(FileManager):
             start_byte=nodes[0].start_byte,
             end_byte=nodes[-1].end_byte,
             affixes=(prefix, suffix),
-            type=NodeType("merge"),
+            node_type=NodeType("merge"),
             children=sorted(sum([node.children for node in nodes], [])),
             language=language,
             tokens=tokens,
@@ -311,6 +357,9 @@ class Splitter(FileManager):
         if node.tokens <= self.max_tokens:
             return
 
+        if self._is_protected(node):
+            raise TokenLimitError(r"Irreducible node too large for context!")
+
         if node.children:
             for child in node.children:
                 self._segment_leaves(child)
@@ -319,6 +368,9 @@ class Splitter(FileManager):
         if node.start_point is None or node.end_point is None:
             raise ValueError("Node has no start or end point")
 
+        self._split_into_lines(node)
+
+    def _split_into_lines(self, node: CodeBlock):
         split_text = re.split(r"(\n+)", node.text)
         betweens = split_text[1::2]
         lines = split_text[::2]
@@ -327,12 +379,12 @@ class Splitter(FileManager):
         node_line = 0
         for prefix, line, suffix in zip(betweens[:-1], lines, betweens[1:]):
             start_byte += len(bytes(prefix, "utf-8"))
-            node_line += len(prefix)
+            # node_line += len(prefix)
             start_line = node.start_point[0] + node_line
             end_byte = start_byte + len(bytes(line, "utf-8"))
             end_char = len(line)
 
-            name = f"{node.name}L#{node_line}"
+            name = f"{node.name}-L#{node_line}"
             tokens = self._count_tokens(line)
             if tokens > self.max_tokens:
                 raise TokenLimitError(r"Irreducible node too large for context!")
@@ -347,7 +399,7 @@ class Splitter(FileManager):
                     start_byte=start_byte,
                     end_byte=end_byte,
                     affixes=(prefix, suffix),
-                    type=NodeType("segment"),
+                    node_type=NodeType(f"{node.node_type}__segment"),
                     children=[],
                     language=self.language,
                     tokens=tokens,

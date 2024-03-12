@@ -9,7 +9,7 @@ from langchain.schema.language_model import BaseLanguageModel
 
 from ...utils.enums import LANGUAGES
 from ...utils.logger import create_logger
-from ..block import CodeBlock
+from ..block import CodeBlock, NodeType
 from ..splitter import Splitter
 
 log = create_logger(__name__)
@@ -25,7 +25,8 @@ class TreeSitterSplitter(Splitter):
         language: str,
         model: None | BaseLanguageModel = None,
         max_tokens: int = 4096,
-        use_placeholders: bool = False,
+        protected_node_types: tuple[str] = (),
+        prune_node_types: tuple[str] = (),
     ) -> None:
         """Initialize a TreeSitterSplitter instance.
 
@@ -38,7 +39,8 @@ class TreeSitterSplitter(Splitter):
             language=language,
             model=model,
             max_tokens=max_tokens,
-            use_placeholders=use_placeholders,
+            protected_node_types=protected_node_types,
+            prune_node_types=prune_node_types,
         )
         self._load_parser()
 
@@ -55,8 +57,8 @@ class TreeSitterSplitter(Splitter):
         queue = [root]
         while queue:
             node = queue.pop(0)  # BFS order to keep lower IDs toward the root
-            node.id = f"{node.type}[{seen_types[node.type]}]"
-            seen_types[node.type] += 1
+            node.id = f"{node.node_type}[{seen_types[node.node_type]}]"
+            seen_types[node.node_type] += 1
             node.name = f"{path.name}:{node.id}"
             queue.extend(node.children)
 
@@ -84,14 +86,14 @@ class TreeSitterSplitter(Splitter):
         children = [self._node_to_block(child, original_text) for child in node.children]
         node = CodeBlock(
             id=node.id,
-            name=node.id,
+            name=str(node.id),
             text=text,
             affixes=(prefix, suffix),
             start_point=node.start_point,
             end_point=node.end_point,
             start_byte=node.start_byte,
             end_byte=node.end_byte,
-            type=node.type,
+            node_type=NodeType(node.type),
             children=children,
             language=self.language,
             tokens=self._count_tokens(text),

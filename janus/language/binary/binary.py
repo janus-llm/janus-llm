@@ -29,7 +29,13 @@ class BinarySplitter(TreeSitterSplitter):
     with for transcoding.
     """
 
-    def __init__(self, model: None | BaseLanguageModel = None, max_tokens: int = 4096):
+    def __init__(
+        self,
+        model: None | BaseLanguageModel = None,
+        max_tokens: int = 4096,
+        protected_node_types: tuple[str] = (),
+        prune_node_types: tuple[str] = (),
+    ):
         """Initialize a BinarySplitter instance.
 
         Arguments:
@@ -40,7 +46,8 @@ class BinarySplitter(TreeSitterSplitter):
             language="binary",
             model=model,
             max_tokens=max_tokens,
-            use_placeholders=False,
+            protected_node_types=protected_node_types,
+            prune_node_types=prune_node_types,
         )
 
     def _execute_ghidra_script(self, cmd: list[str]) -> str:
