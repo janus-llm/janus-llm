@@ -7,17 +7,12 @@ from .cli import evaluate, state
 def metric():
     def decorator(function):
         def func(*args, **kwargs):
-            src_file = state["src_file"]
-            cmp_file = state["cmp_file"]
-            with open(src_file, "r") as f:
-                src = f.read()
-            with open(cmp_file, "r") as f:
-                cmp = f.read()
-            out = function(src, cmp, *args, **kwargs)
-            res = {f"{src_file}_{cmp_file}_{function.__name__}": float(out)}
+            out = []
+            for src, cmp in state["pairs"]:
+                out.append(function(src, cmp, *args, **kwargs))
             out_file = state["out_file"]
             with open(out_file, "w") as f:
-                json.dump(res, f)
+                json.dump(out, f)
 
         sig1 = inspect.signature(function)
         sig2 = inspect.signature(func)
