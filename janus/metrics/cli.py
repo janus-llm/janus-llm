@@ -17,7 +17,7 @@ state = {}
 
 @evaluate.callback()
 def evaluate_main(
-    src_file: Annotated[str, typer.Option()],
+    src_file: Annotated[str, typer.Option(help)],
     cmp_file: Annotated[str, typer.Option()],
     out_file: Annotated[str, typer.Option()],
     lang: Annotated[
