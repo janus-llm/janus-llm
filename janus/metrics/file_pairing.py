@@ -10,6 +10,10 @@ FILE_PAIRING_METHODS: Dict[str, Callable[[str, str], List[Tuple[str, str]]]] = {
 
 
 def register_pairing_method(name: Optional[str] = None):
+    """
+    Registers a pairing method for pairing strings between files
+    """
+
     def decorator(f: Callable[[str, str], List[Tuple[str, str]]]):
         if name is None:
             pairing_name = f.__name__
@@ -23,11 +27,23 @@ def register_pairing_method(name: Optional[str] = None):
 
 @register_pairing_method()
 def PAIR_BY_FILE(src: str, cmp: str, state: Dict[str, Any]) -> List[Tuple[str, str]]:
+    """
+    Pairs the entire contents of a file together
+    :param src src file text
+    :param cmp cmp file text
+    :param state current evaluation state
+    """
     return [(src, cmp)]
 
 
 @register_pairing_method()
 def PAIR_BY_LINE(src: str, cmp: str, state: Dict[str, Any]) -> List[Tuple[str, str]]:
+    """
+    Pairs the contents of a file together by line
+    :param src src file text
+    :param cmp cmp file text
+    :param state current evaluation state
+    """
     return list(zip(src.split("\n"), cmp.split("\n")))
 
 
@@ -35,6 +51,12 @@ def PAIR_BY_LINE(src: str, cmp: str, state: Dict[str, Any]) -> List[Tuple[str, s
 def PAIR_BY_LINE_COMMENT(
     src: str, cmp: str, state: Dict[str, Any]
 ) -> List[Tuple[str, str]]:
+    """
+    Pairs the comments of a file together by line
+    :param src src file text
+    :param cmp cmp file text
+    :param state current evaluation state
+    """
     kwargs = dict(
         max_tokens=state["token_limit"] // 2.5,
         model=state["llm"],
