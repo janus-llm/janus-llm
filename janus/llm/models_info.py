@@ -1,16 +1,17 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Callable, Dict, Tuple
 
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import HuggingFaceTextGenInference
+from langchain.schema.language_model import BaseLanguageModel
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 
 load_dotenv()
 
-MODEL_TYPE_CONSTRUCTORS = {
+MODEL_TYPE_CONSTRUCTORS: dict[str, Callable[[Any], BaseLanguageModel]] = {
     "OpenAI": ChatOpenAI,
     "HuggingFace": HuggingFaceTextGenInference,
     "HuggingFaceLocal": HuggingFacePipeline.from_model_id,
@@ -21,6 +22,7 @@ MODEL_TYPES: Dict[str, Any] = {
     "gpt-4": "OpenAI",
     "gpt-4-32k": "OpenAI",
     "gpt-4-1106-preview": "OpenAI",
+    "gpt-4-0125-preview": "OpenAI",
     "gpt-3.5-turbo": "OpenAI",
     "gpt-3.5-turbo-16k": "OpenAI",
 }
@@ -34,6 +36,7 @@ MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
     "gpt-4": dict(model_name="gpt-4"),
     "gpt-4-32k": dict(model_name="gpt-4-32k"),
     "gpt-4-1106-preview": dict(model_name="gpt-4-1106-preview"),
+    "gpt-4-0125-preview": dict(model_name="gpt-4-0125-preview"),
     "gpt-3.5-turbo": dict(model_name="gpt-3.5-turbo"),
     "gpt-3.5-turbo-16k": dict(model_name="gpt-3.5-turbo-16k"),
 }
@@ -46,6 +49,7 @@ TOKEN_LIMITS: Dict[str, int] = {
     "gpt-4": 8192,
     "gpt-4-32k": 32_768,
     "gpt-4-1106-preview": 128_000,
+    "gpt-4-0125-preview": 128_000,
     "gpt-3.5-turbo": 4096,
     "gpt-3.5-turbo-16k": 16_384,
     "text-embedding-ada-002": 8191,
@@ -56,12 +60,13 @@ COST_PER_MODEL: Dict[str, Dict[str, float]] = {
     "gpt-4": {"input": 0.03, "output": 0.06},
     "gpt-4-32k": {"input": 0.6, "output": 0.12},
     "gpt-4-1106-preview": {"input": 0.01, "output": 0.03},
+    "gpt-4-0125-preview": {"input": 0.01, "output": 0.03},
     "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
     "gpt-3.5-turbo-16k": {"input": 0.003, "output": 0.004},
 }
 
 
-def load_model(model_name: str) -> Tuple[Any, int, Dict[str, float]]:
+def load_model(model_name: str) -> Tuple[BaseLanguageModel, int, Dict[str, float]]:
     if not MODEL_CONFIG_DIR.exists():
         MODEL_CONFIG_DIR.mkdir(parents=True)
     model_config_file = MODEL_CONFIG_DIR / f"{model_name}.json"
