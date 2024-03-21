@@ -122,8 +122,8 @@ class MumpsSplitter(Splitter):
 
             children.append(node)
 
-            start_byte = end_byte + len(bytes(suffix, "utf-8"))
-            start_line = end_line + suffix.count("\n")
+            start_byte = end_byte
+            start_line = end_line
 
         return CodeBlock(
             text=code,
@@ -193,7 +193,6 @@ class MumpsSplitter(Splitter):
                 end_point=(l1, comment_start),
                 start_byte=line_node.start_byte,
                 end_byte=line_node.start_byte + code_bytes,
-                affixes=(prefix, ""),
                 node_type=NodeType("code_line"),
                 children=[],
                 language=line_node.language,
@@ -207,7 +206,6 @@ class MumpsSplitter(Splitter):
                 end_point=(l1, c1),
                 start_byte=line_node.start_byte + code_bytes,
                 end_byte=line_node.end_byte,
-                affixes=("", suffix),
                 node_type=NodeType("comment"),
                 children=[],
                 language=self.language,

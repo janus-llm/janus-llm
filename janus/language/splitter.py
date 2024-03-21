@@ -372,14 +372,21 @@ class Splitter(FileManager):
 
     def _split_into_lines(self, node: CodeBlock):
         split_text = re.split(r"(\n+)", node.text)
-        betweens = split_text[1::2]
-        lines = split_text[::2]
+
+        # If the string didn't start/end with newlines, make sure to include
+        #  empty strings for the prefix/suffixes
+        if split_text[0].strip("\n"):
+            split_text = [""] + split_text
+        if split_text[-1].strip("\n"):
+            split_text.append("")
+        betweens = split_text[::2]
+        lines = split_text[1::2]
 
         start_byte = node.start_byte
         node_line = 0
         for prefix, line, suffix in zip(betweens[:-1], lines, betweens[1:]):
             start_byte += len(bytes(prefix, "utf-8"))
-            # node_line += len(prefix)
+            node_line += len(prefix)
             start_line = node.start_point[0] + node_line
             end_byte = start_byte + len(bytes(line, "utf-8"))
             end_char = len(line)
@@ -405,8 +412,7 @@ class Splitter(FileManager):
                     tokens=tokens,
                 )
             )
-            start_byte = end_byte + len(suffix)
-            node_line += len(suffix)
+            start_byte = end_byte
 
         # Keep the first child's prefix
         node.children[0].omit_prefix = False

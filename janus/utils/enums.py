@@ -500,6 +500,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "suffix": "py",
         "url": "https://github.com/tree-sitter/tree-sitter-python",
         "example": "# Hello, World!\nprint('Hello, World!')\n",
+        "functional_node_type": "function_definition",
+        "comment_node_type": "comment",
     },
     "qmljs": {
         "comment": "//",
