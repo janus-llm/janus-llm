@@ -106,9 +106,20 @@ class Translator(Converter):
         if output_directory is not None and not output_directory.exists():
             output_directory.mkdir(parents=True)
 
+        source_suffix = LANGUAGES[self._source_language]["suffix"]
         target_suffix = LANGUAGES[self._target_language]["suffix"]
 
-        input_paths = list(input_directory.rglob(self._source_glob))
+        input_paths = [p for p in input_directory.rglob(self._source_glob)]
+
+        log.info(f"Input directory: {input_directory.absolute()}")
+        log.info(
+            f"{self._source_language.capitalize()} '*.{source_suffix}' files: "
+            f"{len(input_paths)}"
+        )
+        log.info(
+            "Other files (skipped): "
+            f"{len(list(input_directory.iterdir())) - len(input_paths)}\n"
+        )
         if output_directory is not None:
             output_paths = [
                 output_directory
@@ -121,10 +132,13 @@ class Translator(Converter):
                 in_out_pairs = [
                     (inp, outp) for inp, outp in in_out_pairs if not outp.exists()
                 ]
-                log.info(f"Skipping {n_files - len(in_out_pairs)} existing files")
+                log.info(
+                    f"Skipping {n_files - len(in_out_pairs)} existing "
+                    f"'*.{source_suffix}' files"
+                )
         else:
             in_out_pairs = [(f, None) for f in input_paths]
-        log.info(f"Translating {len(in_out_pairs)} files")
+        log.info(f"Translating {len(in_out_pairs)} '*.{source_suffix}' files")
 
         # Now, loop through every code block in every file and translate it with an LLM
         total_cost = 0.0
