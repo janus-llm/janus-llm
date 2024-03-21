@@ -23,7 +23,7 @@ from .llm.models_info import (
     TOKEN_LIMITS,
 )
 from .parsers.code_parser import PARSER_TYPES
-from .translate import Translator
+from .translate import Documenter, Translator
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
 
@@ -168,6 +168,82 @@ def translate(
         db_path=db_loc,
     )
     translator.translate(input_dir, output_dir, overwrite, collection)
+
+
+@app.command(
+    help="Document input code using an LLM.",
+    no_args_is_help=True,
+)
+def document(
+    input_dir: Annotated[
+        Path,
+        typer.Option(
+            help="The directory containing the source code to be translated. "
+            "The files should all be in one flat directory."
+        ),
+    ],
+    lang: Annotated[
+        str,
+        typer.Option(
+            help="The language of the source code.",
+            click_type=click.Choice(sorted(LANGUAGES)),
+        ),
+    ],
+    output_dir: Annotated[
+        Path,
+        typer.Option(help="The directory to store the translated code in."),
+    ],
+    llm_name: Annotated[
+        str,
+        typer.Option(
+            help="The custom name of the model set with 'janus llm add'.",
+        ),
+    ] = "gpt-3.5-turbo",
+    max_prompts: Annotated[
+        int,
+        typer.Option(
+            help="The maximum number of times to prompt a model on one functional block "
+            "before exiting the application. This is to prevent wasting too much money."
+        ),
+    ] = 10,
+    overwrite: Annotated[
+        bool,
+        typer.Option(
+            "--overwrite/--preserve",
+            help="Whether to overwrite existing files in the output directory",
+        ),
+    ] = False,
+    drop_comments: Annotated[
+        bool,
+        typer.Option(
+            "--drop-comments/--keep-comments",
+            help="Whether to drop or keep comments in the code sent to the LLM",
+        ),
+    ] = False,
+    temp: Annotated[
+        float,
+        typer.Option(help="Sampling temperature.", min=0, max=2),
+    ] = 0.7,
+    collection: Annotated[
+        str,
+        typer.Option(
+            "--collection",
+            "-c",
+            help="If set, will put the translated result into a Chroma DB "
+            "collection with the name provided.",
+        ),
+    ] = None,
+):
+    model_arguments = dict(temperature=temp)
+    documenter = Documenter(
+        model=llm_name,
+        model_arguments=model_arguments,
+        source_language=lang,
+        max_prompts=max_prompts,
+        db_path=db_loc,
+        drop_comments=drop_comments,
+    )
+    documenter.translate(input_dir, output_dir, overwrite, collection)
 
 
 @db.command("init", help="Connect to or create a database.")

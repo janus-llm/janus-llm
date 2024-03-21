@@ -31,9 +31,6 @@ class TestTreeSitterSplitter(unittest.TestCase):
         self.test_file = Path("janus/language/treesitter/_tests/languages/fortran.f90")
         self._split()
 
-        self.splitter.use_placeholders = False
-        self._split()
-
     def test_split_ibmhlasm(self):
         """Test the split method."""
         self.splitter = TreeSitterSplitter(
@@ -41,9 +38,6 @@ class TestTreeSitterSplitter(unittest.TestCase):
         )
         self.combiner = Combiner(language="ibmhlasm")
         self.test_file = Path("janus/language/treesitter/_tests/languages/ibmhlasm.asm")
-        self._split()
-
-        self.splitter.use_placeholders = False
         self._split()
 
     def test_split_matlab(self):
@@ -57,7 +51,4 @@ class TestTreeSitterSplitter(unittest.TestCase):
         )
         self.combiner = Combiner(language="matlab")
         self.test_file = Path("janus/language/treesitter/_tests/languages/matlab.m")
-        self._split()
-
-        self.splitter.use_placeholders = False
         self._split()

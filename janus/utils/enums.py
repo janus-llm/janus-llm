@@ -63,6 +63,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
             '#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n'
             "    return 0;\n}\n"
         ),
+        "functional_node_type": "function_definition",
+        "comment_node_type": "comment",
     },
     "capnp": {
         "comment": "#",
@@ -204,6 +206,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "example": (
             "program HelloWorld\n  print *, 'Hello, World!'\nend program HelloWorld\n"
         ),
+        "functional_node_type": "function",
+        "comment_node_type": "comment",
     },
     "gitattributes": {
         "comment": "#",
@@ -412,6 +416,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "suffix": "m",
         "url": None,
         "example": 'WRITE "Hello, World!"',
+        "functional_node_type": "subroutine",
+        "comment_node_type": "comment",
     },
     "nix": {
         "comment": "#",
@@ -494,6 +500,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "suffix": "py",
         "url": "https://github.com/tree-sitter/tree-sitter-python",
         "example": "# Hello, World!\nprint('Hello, World!')\n",
+        "functional_node_type": "function_definition",
+        "comment_node_type": "comment",
     },
     "qmljs": {
         "comment": "//",

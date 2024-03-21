@@ -48,16 +48,11 @@ class Combiner(FileManager):
             block.complete = children_complete
             return
 
-        # Replace all placeholders
         missing_children = []
         for child in block.children:
             if isinstance(block, TranslatedCodeBlock) and not child.translated:
                 missing_children.append(child)
                 continue
-            if not Combiner.contains_child(block.text, child):
-                missing_children.append(child)
-                continue
-            block.text = block.text.replace(child.placeholder, child.text)
 
         if missing_children:
             missing_ids = [c.id for c in missing_children]
@@ -65,37 +60,3 @@ class Combiner(FileManager):
 
         block.children = missing_children
         block.complete = children_complete and not missing_children
-
-    @staticmethod
-    def contains_child(code: str, child: CodeBlock) -> bool:
-        """Determine whether the given code contains a placeholder for the given
-        child block.
-
-        Arguments:
-            code: The code to check for the placeholder
-            child: The child block to check for
-
-        Returns:
-            Whether the given code contains a placeholder for the given child
-            block.
-        """
-        return code is None or child.placeholder in code
-
-    @staticmethod
-    def count_missing(input_block: CodeBlock, output_code: str) -> int:
-        """Return the number of children of input_block who are not represented
-        in output_code with a placeholder
-
-        Arguments:
-            input_block: The block to check for missing children
-            output_code: The code to check for placeholders
-
-        Returns:
-            The number of children of input_block who are not represented in
-            output_code with a placeholder
-        """
-        missing_children = 0
-        for child in input_block.children:
-            if not Combiner.contains_child(output_code, child):
-                missing_children += 1
-        return missing_children
