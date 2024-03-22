@@ -14,6 +14,7 @@ def register_pairing_method(name: None | str = None) -> Callable[[Callable], Cal
 
     Arguments:
         name: The name of the pairing method. If None, the function name is used.
+        help: The help text for the pairing method.
 
     Returns:
         The decorator function.
@@ -30,7 +31,7 @@ def register_pairing_method(name: None | str = None) -> Callable[[Callable], Cal
     return decorator
 
 
-@register_pairing_method(name="file", help="Pair the entire file together")
+@register_pairing_method(name="file")
 def pair_by_file(
     target: str, reference: str, state: dict[str, Any]
 ) -> list[tuple[str, str]]:
@@ -47,7 +48,7 @@ def pair_by_file(
     return [(target, reference)]
 
 
-@register_pairing_method(name="line", help="Pair the file contents by line")
+@register_pairing_method(name="line")
 def pair_by_line(
     target: str, reference: str, state: dict[str, Any]
 ) -> list[tuple[str, str]]:
@@ -64,7 +65,7 @@ def pair_by_line(
     return list(zip(target.split("\n"), reference.split("\n")))
 
 
-@register_pairing_method(name="line-comment", help="Pair the file comments by line")
+@register_pairing_method(name="line-comment")
 def pair_by_line_comment(
     target: str, reference: str, state: dict[str, Any]
 ) -> list[tuple[str, str]]:

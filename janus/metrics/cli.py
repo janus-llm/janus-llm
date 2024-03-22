@@ -44,7 +44,7 @@ def evaluate_main(
             "--method",
             "-m",
             click_type=click.Choice(FILE_PAIRING_METHODS.keys()),
-            help="Method to use for pairing segemnts of source and comparison files.",
+            help="Method to use for pairing segments of target and reference files.",
         ),
     ] = "file",
     llm_name: Annotated[
@@ -55,14 +55,14 @@ def evaluate_main(
         ),
     ] = "gpt-3.5-turbo",
 ) -> None:
-    """Evaluate the source file against the comparison file.
+    """Evaluate the target file against the reference file.
 
     Arguments:
-        target: The source file to evaluate.
-        reference: The comparison file to use as reference/baseline.
+        target: The target file to evaluate.
+        reference: The reference file to use as reference/baseline.
         out_file: The out file to write.
         lang: The language of the source code.
-        file_pairing_method: Method to use for pairing segemnts of source and comparison
+        file_pairing_method: Method to use for pairing segments of target and reference
             files.
         llm_name: The custom name of the model set with 'janus llm add'.
     """
