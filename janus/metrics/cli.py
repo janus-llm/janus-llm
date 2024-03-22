@@ -40,7 +40,18 @@ def evaluate_main(
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ] = "gpt-3.5-turbo",
-):
+) -> None:
+    """Evaluate the source file against the comparison file.
+
+    Arguments:
+        src_file: The source file to evaluate.
+        cmp_file: The comparison file to use as reference/baseline.
+        out_file: The out file to write.
+        lang: The language of the source code.
+        file_pairing_method: Method to use for pairing segemnts of source and comparison
+            files.
+        llm_name: The custom name of the model set with 'janus llm add'.
+    """
     global state
     with open(src_file, "r") as f:
         src = f.read()

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable
 
 from janus.language.binary import BinarySplitter
 from janus.language.mumps import MumpsSplitter
@@ -6,15 +6,20 @@ from janus.language.node import NodeType
 from janus.language.treesitter import TreeSitterSplitter
 from janus.utils.enums import CUSTOM_SPLITTERS
 
-FILE_PAIRING_METHODS: Dict[str, Callable[[str, str], List[Tuple[str, str]]]] = {}
+FILE_PAIRING_METHODS: dict[str, Callable[[str, str], list[tuple[str, str]]]] = {}
 
 
-def register_pairing_method(name: Optional[str] = None):
+def register_pairing_method(name: None | str = None) -> Callable[[Callable], Callable]:
+    """Registers a pairing method for pairing strings between files
+
+    Arguments:
+        name: The name of the pairing method. If None, the function name is used.
+
+    Returns:
+        The decorator function.
     """
-    Registers a pairing method for pairing strings between files
-    """
 
-    def decorator(f: Callable[[str, str], List[Tuple[str, str]]]):
+    def decorator(f: Callable[[str, str], list[tuple[str, str]]]):
         if name is None:
             pairing_name = f.__name__
         else:
@@ -26,36 +31,48 @@ def register_pairing_method(name: Optional[str] = None):
 
 
 @register_pairing_method(name="file")
-def PAIR_BY_FILE(src: str, cmp: str, state: Dict[str, Any]) -> List[Tuple[str, str]]:
-    """
-    Pairs the entire contents of a file together
-    :param src src file text
-    :param cmp cmp file text
-    :param state current evaluation state
+def pair_by_file(src: str, cmp: str, state: dict[str, Any]) -> list[tuple[str, str]]:
+    """Pairs the entire contents of a file together
+
+    Arguments:
+        src: The source file text.
+        cmp: The comparison file text.
+        state: The current evaluation state.
+
+    Returns:
+        A list of tuples of the source and comparison file text.
     """
     return [(src, cmp)]
 
 
 @register_pairing_method(name="line")
-def PAIR_BY_LINE(src: str, cmp: str, state: Dict[str, Any]) -> List[Tuple[str, str]]:
-    """
-    Pairs the contents of a file together by line
-    :param src src file text
-    :param cmp cmp file text
-    :param state current evaluation state
+def pair_by_line(src: str, cmp: str, state: dict[str, Any]) -> list[tuple[str, str]]:
+    """Pairs the contents of a file together by line
+
+    Arguments:
+        src: The source file text.
+        cmp: The comparison file text.
+        state: The current evaluation state.
+
+    Returns:
+        A list of tuples of the source and comparison file text.
     """
     return list(zip(src.split("\n"), cmp.split("\n")))
 
 
 @register_pairing_method(name="line-comment")
-def PAIR_BY_LINE_COMMENT(
-    src: str, cmp: str, state: Dict[str, Any]
-) -> List[Tuple[str, str]]:
-    """
-    Pairs the comments of a file together by line
-    :param src src file text
-    :param cmp cmp file text
-    :param state current evaluation state
+def pair_by_line_comment(
+    src: str, cmp: str, state: dict[str, Any]
+) -> list[tuple[str, str]]:
+    """Pairs the comments of a file together by line
+
+    Arguments:
+        src: The source file text.
+        cmp: The comparison file text.
+        state: The current evaluation state.
+
+    Returns:
+        A list of tuples of the source and comparison file text.
     """
     kwargs = dict(
         max_tokens=state["token_limit"] // 2.5,

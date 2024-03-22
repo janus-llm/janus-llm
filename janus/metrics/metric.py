@@ -1,14 +1,21 @@
 import inspect
 import json
-from typing import Optional
+from typing import Callable
 
 from .cli import evaluate, state
 
 
-def metric(name: Optional[str] = None, help: Optional[str] = None):
-    """
-    Returns a decorator to add a given metric to the cli
-    metrics must follow the format (src_str, cmp_str, **other_params)
+def metric(name: None | str = None, help: None | str = None) -> Callable:
+    """Returns a decorator to add a given metric to the cli
+
+    Metrics must follow the format (src_str, cmp_str, **other_params)
+
+    Arguments:
+        name: The name of the metric. If None, the function name is used.
+        help: The help text for the metric.
+
+    Returns:
+        The decorator function.
     """
 
     def decorator(function):
