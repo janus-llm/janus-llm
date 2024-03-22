@@ -22,6 +22,7 @@ from .llm.models_info import (
     MODEL_TYPE_CONSTRUCTORS,
     TOKEN_LIMITS,
 )
+from .metrics.cli import evaluate
 from .parsers.code_parser import PARSER_TYPES
 from .translate import Documenter, Translator
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
@@ -50,6 +51,7 @@ app = typer.Typer(
     no_args_is_help=True,
     context_settings={"help_option_names": ["-h", "--help"]},
 )
+
 
 db = typer.Typer(
     help="Database commands",
@@ -532,6 +534,7 @@ def llm_add(
 
 app.add_typer(db, name="db")
 app.add_typer(llm, name="llm")
+app.add_typer(evaluate, name="evaluate")
 
 
 if __name__ == "__main__":
