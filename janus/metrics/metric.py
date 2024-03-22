@@ -1,5 +1,6 @@
 import inspect
 import json
+from functools import wraps
 from typing import Callable
 
 from .cli import evaluate, state
@@ -19,6 +20,7 @@ def metric(name: None | str = None, help: None | str = None) -> Callable:
     """
 
     def decorator(function):
+        @wraps(function)
         def func(*args, **kwargs):
             out = []
             for src, cmp in state["pairs"]:

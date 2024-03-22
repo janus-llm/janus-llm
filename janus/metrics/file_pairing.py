@@ -30,49 +30,55 @@ def register_pairing_method(name: None | str = None) -> Callable[[Callable], Cal
     return decorator
 
 
-@register_pairing_method(name="file")
-def pair_by_file(src: str, cmp: str, state: dict[str, Any]) -> list[tuple[str, str]]:
+@register_pairing_method(name="file", help="Pair the entire file together")
+def pair_by_file(
+    target: str, reference: str, state: dict[str, Any]
+) -> list[tuple[str, str]]:
     """Pairs the entire contents of a file together
 
     Arguments:
-        src: The source file text.
-        cmp: The comparison file text.
+        target: The target file text.
+        reference: The reference file text.
         state: The current evaluation state.
 
     Returns:
-        A list of tuples of the source and comparison file text.
+        A list of tuples of the target and reference file text.
     """
-    return [(src, cmp)]
+    return [(target, reference)]
 
 
-@register_pairing_method(name="line")
-def pair_by_line(src: str, cmp: str, state: dict[str, Any]) -> list[tuple[str, str]]:
+@register_pairing_method(name="line", help="Pair the file contents by line")
+def pair_by_line(
+    target: str, reference: str, state: dict[str, Any]
+) -> list[tuple[str, str]]:
     """Pairs the contents of a file together by line
 
     Arguments:
-        src: The source file text.
-        cmp: The comparison file text.
+        target: The target file text.
+        reference: The reference file text.
         state: The current evaluation state.
 
     Returns:
-        A list of tuples of the source and comparison file text.
+        A list of tuples of the target and reference file text.
     """
-    return list(zip(src.split("\n"), cmp.split("\n")))
+    return list(zip(target.split("\n"), reference.split("\n")))
 
 
-@register_pairing_method(name="line-comment")
+@register_pairing_method(name="line-comment", help="Pair the file comments by line")
 def pair_by_line_comment(
-    src: str, cmp: str, state: dict[str, Any]
+    target: str, reference: str, state: dict[str, Any]
 ) -> list[tuple[str, str]]:
     """Pairs the comments of a file together by line
 
+    **WARNING**: Do not use, as this method is extremely brittle.
+
     Arguments:
-        src: The source file text.
-        cmp: The comparison file text.
+        target: The target file text.
+        reference: The reference/reference file text.
         state: The current evaluation state.
 
     Returns:
-        A list of tuples of the source and comparison file text.
+        A list of tuples of the target and reference file text.
     """
     kwargs = dict(
         max_tokens=state["token_limit"] // 2.5,
@@ -87,8 +93,8 @@ def pair_by_line_comment(
             splitter = BinarySplitter(**kwargs)
     else:
         splitter = TreeSitterSplitter(language=state["lang"], **kwargs)
-    src_tree = splitter.split(state["src_file"], prune_unprotected=False)
-    cmp_tree = splitter.split(state["cmp_file"])
+    target_tree = splitter.split(state["target_file"], prune_unprotected=False)
+    reference_tree = splitter.split(state["reference_file"])
     pairs = []
 
     def _parse_pairs(node1, node2, pairs):
@@ -98,5 +104,5 @@ def pair_by_line_comment(
             else:
                 _parse_pairs(c1, c2, pairs)
 
-    _parse_pairs(src_tree, cmp_tree, pairs)
+    _parse_pairs(target_tree, reference_tree, pairs)
     return pairs
