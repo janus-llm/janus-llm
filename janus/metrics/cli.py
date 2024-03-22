@@ -17,9 +17,11 @@ state = {}
 
 @evaluate.callback()
 def evaluate_main(
-    src_file: Annotated[str, typer.Option()],
-    cmp_file: Annotated[str, typer.Option()],
-    out_file: Annotated[str, typer.Option()],
+    src_file: Annotated[str, typer.Option(help="Source file to evaluate")],
+    cmp_file: Annotated[
+        str, typer.Option(help="Comparison file to use as reference/baseline")
+    ],
+    out_file: Annotated[str, typer.Option(help="out file to write")],
     lang: Annotated[
         str,
         typer.Option(
@@ -28,7 +30,9 @@ def evaluate_main(
         ),
     ],
     file_pairing_method: str = typer.Option(
-        default="PAIR_BY_FILE", click_type=click.Choice(FILE_PAIRING_METHODS.keys())
+        default="PAIR_BY_FILE",
+        click_type=click.Choice(FILE_PAIRING_METHODS.keys()),
+        help="Method to use for pairing segemnts of source and comparison files",
     ),
     llm_name: Annotated[
         str,

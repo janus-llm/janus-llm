@@ -4,7 +4,7 @@ from torchmetrics.text import CHRFScore
 from .metric import metric
 
 
-@metric()
+@metric(help="Chrf Score using Torchmetrics")
 def chrf(
     src: str,
     dst: str,

@@ -25,7 +25,7 @@ def register_pairing_method(name: Optional[str] = None):
     return decorator
 
 
-@register_pairing_method()
+@register_pairing_method(name="file")
 def PAIR_BY_FILE(src: str, cmp: str, state: Dict[str, Any]) -> List[Tuple[str, str]]:
     """
     Pairs the entire contents of a file together
@@ -36,7 +36,7 @@ def PAIR_BY_FILE(src: str, cmp: str, state: Dict[str, Any]) -> List[Tuple[str, s
     return [(src, cmp)]
 
 
-@register_pairing_method()
+@register_pairing_method(name="line")
 def PAIR_BY_LINE(src: str, cmp: str, state: Dict[str, Any]) -> List[Tuple[str, str]]:
     """
     Pairs the contents of a file together by line
@@ -47,7 +47,7 @@ def PAIR_BY_LINE(src: str, cmp: str, state: Dict[str, Any]) -> List[Tuple[str, s
     return list(zip(src.split("\n"), cmp.split("\n")))
 
 
-@register_pairing_method()
+@register_pairing_method(name="line-comment")
 def PAIR_BY_LINE_COMMENT(
     src: str, cmp: str, state: Dict[str, Any]
 ) -> List[Tuple[str, str]]:
