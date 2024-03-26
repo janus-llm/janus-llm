@@ -33,7 +33,7 @@ def register_pairing_method(name: None | str = None) -> Callable[[Callable], Cal
 
 @register_pairing_method(name="file")
 def pair_by_file(
-    target: str, reference: str, state: dict[str, Any]
+    target: str, reference: str, **kwargs: dict[str, Any]
 ) -> list[tuple[str, str]]:
     """Pairs the entire contents of a file together
 
@@ -50,7 +50,7 @@ def pair_by_file(
 
 @register_pairing_method(name="line")
 def pair_by_line(
-    target: str, reference: str, state: dict[str, Any]
+    target: str, reference: str, **kwargs: dict[str, Any]
 ) -> list[tuple[str, str]]:
     """Pairs the contents of a file together by line
 
@@ -67,7 +67,7 @@ def pair_by_line(
 
 @register_pairing_method(name="line-comment")
 def pair_by_line_comment(
-    target: str, reference: str, state: dict[str, Any]
+    target: str, reference: str, **kwargs: dict[str, Any]
 ) -> list[tuple[str, str]]:
     """Pairs the comments of a file together by line
 
@@ -82,20 +82,20 @@ def pair_by_line_comment(
         A list of tuples of the target and reference file text.
     """
     kwargs = dict(
-        max_tokens=state["token_limit"] // 2.5,
-        model=state["llm"],
+        max_tokens=kwargs["token_limit"] // 2.5,
+        model=kwargs["llm"],
         protected_node_types=(NodeType("comment"),),
         prune_node_types=tuple(),
     )
-    if state["lang"] in CUSTOM_SPLITTERS:
-        if state["lang"] == "mumps":
+    if kwargs["lang"] in CUSTOM_SPLITTERS:
+        if kwargs["lang"] == "mumps":
             splitter = MumpsSplitter(**kwargs)
-        elif state["lang"] == "binary":
+        elif kwargs["lang"] == "binary":
             splitter = BinarySplitter(**kwargs)
     else:
-        splitter = TreeSitterSplitter(language=state["lang"], **kwargs)
-    target_tree = splitter.split(state["target_file"], prune_unprotected=False)
-    reference_tree = splitter.split(state["reference_file"])
+        splitter = TreeSitterSplitter(language=kwargs["lang"], **kwargs)
+    target_tree = splitter.split(kwargs["target_file"], prune_unprotected=False)
+    reference_tree = splitter.split(kwargs["reference_file"])
     pairs = []
 
     def _parse_pairs(node1, node2, pairs):
