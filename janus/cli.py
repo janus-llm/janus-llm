@@ -22,8 +22,7 @@ from .llm.models_info import (
     MODEL_TYPE_CONSTRUCTORS,
     TOKEN_LIMITS,
 )
-from .parsers.code_parser import PARSER_TYPES
-from .translate import Documenter, Translator
+from .translate import PARSER_TYPES, Documenter, Translator
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
 

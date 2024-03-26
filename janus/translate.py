@@ -1,20 +1,27 @@
 from pathlib import Path
 from typing import Any, Dict
 
-import openai.error
 from langchain.callbacks import get_openai_callback
+from langchain.output_parsers.fix import OutputFixingParser
+from langchain_core.output_parsers import BaseOutputParser
+from openai import BadRequestError, RateLimitError
 
 from .converter import Converter, run_if_changed
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.splitter import EmptyTreeError, TokenLimitError
 from .llm import load_model
-from .parsers.code_parser import PARSER_TYPES, CodeParser, EvaluationParser, JanusParser
+from .parsers.code_parser import CodeParser, JanusParser
+from .parsers.doc_parser import DocumentationParser
+from .parsers.eval_parser import EvaluationParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import LANGUAGES
 from .utils.logger import create_logger
 
 log = create_logger(__name__)
+
+
+PARSER_TYPES: set[str] = {"code", "text", "eval", "doc"}
 
 
 class Translator(Converter):
@@ -60,6 +67,8 @@ class Translator(Converter):
         self._prompt_template_name: None | str
         self._db_path: None | str
 
+        self.max_prompts = max_prompts
+
         self.set_model(model_name=model, **model_arguments)
         self.set_parser_type(parser_type=parser_type)
         self.set_prompt(prompt_template=prompt_template)
@@ -70,8 +79,6 @@ class Translator(Converter):
         self.set_db_path(db_path=db_path)
 
         self._load_parameters()
-
-        self.max_prompts = max_prompts
 
     def _load_parameters(self) -> None:
         self._load_model()
@@ -147,9 +154,9 @@ class Translator(Converter):
             try:
                 out_block = self.translate_file(in_path)
                 total_cost += out_block.total_cost
-            except openai.error.RateLimitError:
+            except RateLimitError:
                 continue
-            except openai.error.InvalidRequestError as e:
+            except BadRequestError as e:
                 if str(e).startswith("Detected an error in the prompt"):
                     log.warning("Malformed input, skipping")
                     continue
@@ -316,11 +323,6 @@ class Translator(Converter):
             block.translated = True
             return
 
-        log.debug(f"[{block.name}] Translating...")
-        log.debug(f"[{block.name}] Input text:\n{block.original.text}")
-        prompt = self._prompt_engine.create(block.original)
-        top_score = -1.0
-
         if self._llm is None:
             message = (
                 "Model not configured correctly, cannot translate. Try setting "
@@ -329,34 +331,12 @@ class Translator(Converter):
             log.error(message)
             raise ValueError(message)
 
-        # Retry the request up to max_prompts times before failing
-        for _ in range(self.max_prompts + 1):
-            output = self._llm.predict_messages(prompt)
-            try:
-                parsed_output = self.parser.parse(output.content)
-            except ValueError as e:
-                log.warning(f"[{block.name}] Failed to parse output: {e}")
-                log.debug(f"[{block.name}] Failed output:\n{output.content}")
-                continue
+        log.debug(f"[{block.name}] Translating...")
+        log.debug(f"[{block.name}] Input text:\n{block.original.text}")
 
-            score = self.parser.score(block.original, parsed_output)
-            if score > top_score:
-                block.text = parsed_output
-                top_score = score
+        query_and_parse = self.prompt | self._llm | self.parser
 
-            if score >= 1.0:
-                break
-
-        else:
-            if block.text is None:
-                error_msg = (
-                    f"[{block.name}] Failed to parse output after "
-                    f"{self.max_prompts} retries. Marking as untranslated."
-                )
-                log.warning(error_msg)
-                return
-
-            log.warning(f"[{block.name}] Output not complete")
+        block.text = query_and_parse.invoke({"SOURCE_CODE": block.original.text})
 
         block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
@@ -369,6 +349,7 @@ class Translator(Converter):
         Arguments:
             block: The `CodeBlock` to save to a file.
         """
+        # TODO: can't use output fixer and this system for combining output
         out_text = self.parser.parse_combined_output(block.complete_text)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(out_text, encoding="utf-8")
@@ -460,19 +441,27 @@ class Translator(Converter):
         If the relevant fields have not been changed since the last time this method was
         called, nothing happens.
         """
-        if "text" == self._target_language and self._parser_type != "text":
+        if "text" == self._target_language and self._parser_type not in {"text", "eval"}:
             raise ValueError(
                 f"Target language ({self._target_language}) suggests target "
                 f"parser should be 'text', but is '{self._parser_type}'"
             )
         if "code" == self._parser_type:
-            self.parser = CodeParser(language=self._target_language)
-        elif "eval" == self._parser_type:
-            self.parser = EvaluationParser(
-                expected_keys={"syntax", "style", "completeness", "correctness"}
+            self.parser = OutputFixingParser.from_llm(
+                llm=self._llm,
+                parser=CodeParser(language=self._target_language),
+                max_retries=self.max_prompts,
             )
+        elif "eval" == self._parser_type:
+            self.parser = OutputFixingParser.from_llm(
+                llm=self._llm,
+                parser=EvaluationParser(),
+                max_retries=self.max_prompts,
+            )
+        elif "doc" == self._parser_type:
+            self.parser = DocumentationParser()
         elif "text" == self._parser_type:
-            self.parser = JanusParser()
+            self.parser = BaseOutputParser()
         else:
             raise ValueError(
                 f"Unsupported parser type: {self._parser_type}. Can be: "
@@ -507,6 +496,7 @@ class Translator(Converter):
             target_version=self._target_version,
             prompt_template=self._prompt_template_name,
         )
+        self.prompt = self._prompt_engine.prompt
 
     @run_if_changed("_db_path")
     def _load_vectorizer(self) -> None:
@@ -545,7 +535,7 @@ class Documenter(Translator):
             target_version=None,
             max_prompts=max_prompts,
             prompt_template="document",
-            parser_type="text",
+            parser_type="doc",
             db_path=db_path,
         )
 
