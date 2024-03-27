@@ -1,6 +1,5 @@
 import inspect
 import json
-from functools import wraps
 from typing import Callable
 
 import click
@@ -33,7 +32,6 @@ def metric(
     def decorator(function):
         if use_reference:
 
-            @wraps(function)
             def func(
                 target: Annotated[
                     str, typer.Option("--target", "-t", help="Target file to evaluate.")
@@ -103,7 +101,7 @@ def metric(
                     json.dump(out, f)
 
             sig1 = inspect.signature(function)
-            sig2 = inspect.signature(func, follow_wrapped=False)
+            sig2 = inspect.signature(func)
             func.__signature__ = sig2.replace(
                 parameters=tuple(
                     list(sig2.parameters.values())[:6]
@@ -112,7 +110,6 @@ def metric(
             )
         else:
 
-            @wraps(function)
             def func(
                 target: Annotated[
                     str, typer.Option("--target", "-t", help="Target file to evaluate.")
@@ -169,14 +166,14 @@ def metric(
                 with open(out_file, "w") as f:
                     json.dump(out, f)
 
-            sig1 = inspect.signature(function)
-            sig2 = inspect.signature(func)
-            func.__signature__ = sig2.replace(
-                parameters=tuple(
-                    list(sig2.parameters.values())[:5]
-                    + list(sig1.parameters.values())[1:]
-                )
-            )
+            # sig1 = inspect.signature(function)
+            # sig2 = inspect.signature(func)
+            # func.__signature__ = sig2.replace(
+            #     parameters=tuple(
+            #         list(sig2.parameters.values())[:5]
+            #         + list(sig1.parameters.values())[1:]
+            #     )
+            # )
         if name is None:
             func.__name__ = function.__name__
         else:

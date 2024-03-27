@@ -9,7 +9,7 @@ from .metric import metric
 # from sacrebleu import sentence_chrf
 
 
-@metric(help="Compute the BLEU score using sacrebleu")
+@metric(help="BLEU score using sacrebleu")
 def bleu(
     target: str,
     reference: str,
