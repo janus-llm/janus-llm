@@ -1,10 +1,10 @@
 from typing import Any, Callable
 
-from janus.language.binary import BinarySplitter
-from janus.language.mumps import MumpsSplitter
-from janus.language.node import NodeType
-from janus.language.treesitter import TreeSitterSplitter
-from janus.utils.enums import CUSTOM_SPLITTERS
+from ..language.binary import BinarySplitter
+from ..language.mumps import MumpsSplitter
+from ..language.node import NodeType
+from ..language.treesitter import TreeSitterSplitter
+from ..utils.enums import CUSTOM_SPLITTERS
 
 FILE_PAIRING_METHODS: dict[str, Callable[[str, str], list[tuple[str, str]]]] = {}
 

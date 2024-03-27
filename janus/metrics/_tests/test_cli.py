@@ -3,7 +3,7 @@
 import unittest
 from unittest.mock import mock_open, patch
 
-from janus.metrics.cli import evaluate_main, state
+from ..cli import evaluate_main, state
 
 
 class TestEvaluateMain(unittest.TestCase):
