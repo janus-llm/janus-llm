@@ -81,7 +81,7 @@ def pair_by_line_comment(
     Returns:
         A list of tuples of the target and reference file text.
     """
-    kwargs = dict(
+    splitter_kwargs = dict(
         max_tokens=kwargs["token_limit"] // 2.5,
         model=kwargs["llm"],
         protected_node_types=(NodeType("comment"),),
@@ -89,11 +89,11 @@ def pair_by_line_comment(
     )
     if kwargs["lang"] in CUSTOM_SPLITTERS:
         if kwargs["lang"] == "mumps":
-            splitter = MumpsSplitter(**kwargs)
+            splitter = MumpsSplitter(**splitter_kwargs)
         elif kwargs["lang"] == "binary":
-            splitter = BinarySplitter(**kwargs)
+            splitter = BinarySplitter(**splitter_kwargs)
     else:
-        splitter = TreeSitterSplitter(language=kwargs["lang"], **kwargs)
+        splitter = TreeSitterSplitter(language=kwargs["lang"], **splitter_kwargs)
     target_tree = splitter.split(kwargs["target_file"], prune_unprotected=False)
     reference_tree = splitter.split(kwargs["reference_file"])
     pairs = []

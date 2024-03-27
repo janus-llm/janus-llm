@@ -1,5 +1,6 @@
 import inspect
 import json
+from functools import wraps
 from typing import Callable
 
 import click
@@ -9,7 +10,7 @@ from typing_extensions import Annotated
 from janus.llm import load_model
 from janus.utils.enums import LANGUAGES
 
-from .cli import evaluate  # , state
+from .cli import evaluate
 from .file_pairing import FILE_PAIRING_METHODS
 from .splitting import SPLITTING_METHODS
 
@@ -32,6 +33,7 @@ def metric(
     def decorator(function):
         if use_reference:
 
+            @wraps(function)
             def func(
                 target: Annotated[
                     str, typer.Option("--target", "-t", help="Target file to evaluate.")
@@ -101,7 +103,7 @@ def metric(
                     json.dump(out, f)
 
             sig1 = inspect.signature(function)
-            sig2 = inspect.signature(func)
+            sig2 = inspect.signature(func, follow_wrapped=False)
             func.__signature__ = sig2.replace(
                 parameters=tuple(
                     list(sig2.parameters.values())[:6]
@@ -110,6 +112,7 @@ def metric(
             )
         else:
 
+            @wraps(function)
             def func(
                 target: Annotated[
                     str, typer.Option("--target", "-t", help="Target file to evaluate.")
