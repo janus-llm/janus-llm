@@ -32,7 +32,7 @@ def bleu(
     ),
 ):
     """Computes BLEU score using sacrebleu
-    
+
     Arguments:
         target: The target text.
         reference: The reference text.
