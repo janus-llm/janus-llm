@@ -26,5 +26,13 @@ def register_splitting_method(name: None | str = None) -> Callable[[Callable], C
 
 
 @register_splitting_method(name="file")
-def split_by_file(src: str, **kwargs):
+def split_by_file(src: str, **kwargs) -> list[str]:
+    """Split the source text by file
+
+    Arguments:
+        src: The source text.
+
+    Returns:
+        A list of strings.
+    """
     return [src]
