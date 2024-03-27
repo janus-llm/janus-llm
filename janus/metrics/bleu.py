@@ -9,30 +9,30 @@ from .metric import metric
 # from sacrebleu import sentence_chrf
 
 
-@metric(help="Compute the bleu score using sacrebleu")
+@metric(help="Compute the BLEU score using sacrebleu")
 def bleu(
     target: str,
     reference: str,
     smooth_method: str = typer.Option(
         default="exp",
         click_type=click.Choice(["exp", "floor", "add-k", "none"]),
-        help="smoothing method to use.",
+        help="Smoothing method to use.",
     ),
     smooth_value: Optional[float] = typer.Option(
         default=None,
-        help="smoothing value (only for floor and add-k).",
+        help="Smoothing value (only for 'floor' and 'add-k').",
     ),
     lowercase: bool = typer.Option(
         default=False,
-        help="whether to lowercase the data.",
+        help="Whether to lowercase the data.",
     ),
     use_effective_order: bool = typer.Option(
         default=True,
-        help="Don't use n-gram orders without matches.",
+        help="Whether to use n-gram orders without matches.",
     ),
 ):
-    """
-    Computes bleu score using sacrebleu
+    """Computes BLEU score using sacrebleu
+    
     Arguments:
         target: The target text.
         reference: The reference text.
@@ -40,6 +40,9 @@ def bleu(
         smooth_value: smoothing value (only for floor and add-k).
         lowercase: whether to lowercase the data.
         use_effective_order: Don't use n-gram orders without matches.
+
+    Returns:
+        The BLEU score float.
     """
     score = sentence_bleu(
         target,
