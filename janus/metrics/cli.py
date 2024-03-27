@@ -2,9 +2,9 @@ import click
 import typer
 from typing_extensions import Annotated
 
-from janus.llm import load_model
-from janus.metrics.file_pairing import FILE_PAIRING_METHODS
-from janus.utils.enums import LANGUAGES
+from ..llm import load_model
+from ..utils.enums import LANGUAGES
+from .file_pairing import FILE_PAIRING_METHODS
 
 evaluate = typer.Typer(
     help="Evaluation of generated source code or documentation against a reference file.",
