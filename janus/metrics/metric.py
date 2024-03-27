@@ -132,7 +132,7 @@ def metric(
                     typer.Option(
                         "--method",
                         "-m",
-                        click_type=click.Choice(FILE_PAIRING_METHODS.keys()),
+                        click_type=click.Choice(SPLITTING_METHODS.keys()),
                         help="Method to use for pairing\
                               segments of target and reference files.",
                     ),
