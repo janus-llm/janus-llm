@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import Any, Dict
 
@@ -606,3 +607,16 @@ class MadLibsDocumenter(Translator):
             parser_type="doc",
             db_path=db_path,
         )
+
+    def _add_translation(self, block: TranslatedCodeBlock):
+        if block.original.text:
+            first_comment = re.search(
+                r"<(?:INLINE|BLOCK)_COMMENT \w{8}>",
+                block.original.text,
+            )
+            if first_comment is None:
+                log.info(f"[{block.name}] Skipping commentless block")
+                block.translated = True
+                return
+
+        super()._add_translation(block)
