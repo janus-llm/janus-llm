@@ -299,6 +299,7 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
                      END   HELLO
         """
         ),
+        "branch_node_types": ["branch_statement"],
     },
     "java": {
         "comment": "//",
@@ -418,6 +419,7 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "example": 'WRITE "Hello, World!"',
         "functional_node_type": "subroutine",
         "comment_node_type": "comment",
+        "branch_node_types": ["if_statement"],
     },
     "nix": {
         "comment": "#",
