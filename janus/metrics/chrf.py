@@ -29,6 +29,7 @@ def chrf(
             "importance is equal."
         ),
     ),
+    **kwargs,
 ) -> float:
     """Calculate the chrF Score using Torchmetrics.
 
