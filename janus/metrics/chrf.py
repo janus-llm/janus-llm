@@ -4,7 +4,7 @@ from sacrebleu import sentence_chrf
 from .metric import metric
 
 
-@metric(help="chrF score using Torchmetrics")
+@metric(help="chrF score using sacrebleu")
 def chrf(
     target: str,
     reference: str,
