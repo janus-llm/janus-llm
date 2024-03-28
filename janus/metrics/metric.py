@@ -96,7 +96,18 @@ def metric(
                     model_cost=model_cost,
                 )
                 for src, cmp in pairs:
-                    out.append(function(src, cmp, *args, **kwargs))
+                    out.append(
+                        function(
+                            src,
+                            cmp,
+                            *args,
+                            **kwargs,
+                            language=language,
+                            llm=llm,
+                            token_limit=token_limit,
+                            model_cost=model_cost,
+                        )
+                    )
                 with open(out_file, "w") as f:
                     json.dump(out, f)
 
@@ -105,7 +116,7 @@ def metric(
             func.__signature__ = sig2.replace(
                 parameters=tuple(
                     list(sig2.parameters.values())[:6]
-                    + list(sig1.parameters.values())[2:]
+                    + list(sig1.parameters.values())[2:-1]
                 )
             )
         else:
@@ -162,18 +173,28 @@ def metric(
                     model_cost=model_cost,
                 )
                 for string in strings:
-                    out.append(function(string, *args, **kwargs))
+                    out.append(
+                        function(
+                            string,
+                            *args,
+                            **kwargs,
+                            language=language,
+                            llm=llm,
+                            token_limit=token_limit,
+                            model_cost=model_cost,
+                        )
+                    )
                 with open(out_file, "w") as f:
                     json.dump(out, f)
 
-            # sig1 = inspect.signature(function)
-            # sig2 = inspect.signature(func)
-            # func.__signature__ = sig2.replace(
-            #     parameters=tuple(
-            #         list(sig2.parameters.values())[:5]
-            #         + list(sig1.parameters.values())[1:]
-            #     )
-            # )
+            sig1 = inspect.signature(function)
+            sig2 = inspect.signature(func)
+            func.__signature__ = sig2.replace(
+                parameters=tuple(
+                    list(sig2.parameters.values())[:5]
+                    + list(sig1.parameters.values())[1:-1]
+                )
+            )
         if name is None:
             func.__name__ = function.__name__
         else:
@@ -182,6 +203,6 @@ def metric(
             func = evaluate.command()(func)
         else:
             func = evaluate.command(help=help)(func)
-        return func
+        return function
 
     return decorator

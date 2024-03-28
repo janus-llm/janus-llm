@@ -30,6 +30,7 @@ def bleu(
         default=True,
         help="Whether to use n-gram orders without matches.",
     ),
+    **kwargs,
 ) -> float:
     """Computes BLEU score using sacrebleu
 
