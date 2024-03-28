@@ -1,5 +1,5 @@
 import re
-from itertools import compress, product
+from itertools import compress
 from pathlib import Path
 from typing import List
 

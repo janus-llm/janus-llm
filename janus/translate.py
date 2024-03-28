@@ -9,7 +9,8 @@ from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.splitter import EmptyTreeError, TokenLimitError
 from .llm import load_model
-from .parsers.code_parser import PARSER_TYPES, CodeParser, EvaluationParser, JanusParser
+from .parsers.code_parser import (PARSER_TYPES, CodeParser, EvaluationParser,
+                                  JanusParser)
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import LANGUAGES
 from .utils.logger import create_logger

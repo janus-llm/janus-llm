@@ -1,13 +1,10 @@
-from janus.language.block import CodeBlock
-from .metric import metric
+from typing import List
 
-import multiprocessing
-import os
+from janus.language.block import CodeBlock
 from janus.language.treesitter.treesitter import TreeSitterSplitter
 from janus.utils.enums import LANGUAGES
-from typing import List, Optional, Tuple
 
-from tree_sitter import Node, Parser, Tree
+from .metric import metric
 
 
 class CyclomaticComplexity:
@@ -36,7 +33,7 @@ class CyclomaticComplexity:
         self.splitter = TreeSitterSplitter(
             language=language, protected_node_types=tuple(self.branch_nodes)
         )
-        # TODO: Protecting node types will ensure that the splitter doesn't merge node types
+        # TODO: Protecting node types will ensure that the splitter doesn't merge nodes
         # self.ast = self.splitter.parser.parse(bytes(file, "utf-8"))
         self.ast = self.splitter.split_string(
             file, name="metrics", prune_unprotected=False

@@ -3,10 +3,8 @@ from pathlib import Path
 from typing import List
 
 from langchain.prompts import ChatPromptTemplate
-from langchain.prompts.chat import (
-    HumanMessagePromptTemplate,
-    SystemMessagePromptTemplate,
-)
+from langchain.prompts.chat import (HumanMessagePromptTemplate,
+                                    SystemMessagePromptTemplate)
 from langchain.schema.messages import BaseMessage
 
 from ..language.block import CodeBlock
