@@ -28,7 +28,7 @@ class CyclomaticComplexity:
             )
         self.file = file
         self.splitter = TreeSitterSplitter(
-            language=language, protected_node_types=('branch_instruction',))
+            language=language, protected_node_types=('branch_instruction', 'instruction'))
         # TODO: Protecting node types will ensure that the splitter doesn't merge nodes
         # self.ast = self.splitter.parser.parse(bytes(file, "utf-8"))
         self.ast = self.splitter.split_string(
