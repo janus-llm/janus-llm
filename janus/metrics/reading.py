@@ -18,7 +18,7 @@ def get_readability(target: str) -> readability.Readability:
 
 
 @metric(use_reference=False, help="The Flesch Readability score of text")
-def flesch(target: str) -> float:
+def flesch(target: str, **kwargs) -> float:
     """Calculate the Flesch Score using py-readability-metrics.
 
     Arguments:
@@ -32,7 +32,7 @@ def flesch(target: str) -> float:
 
 
 @metric(use_reference=False, help="The Gunning-Fog Readability score of text")
-def gunning_fog(target: str) -> float:
+def gunning_fog(target: str, **kwargs) -> float:
     """Calculate the Gunning-Fog Score using py-readability-metrics.
 
     Arguments:
