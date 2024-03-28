@@ -1,3 +1,4 @@
+from janus.language.block import CodeBlock
 from .metric import metric
 
 import multiprocessing
@@ -21,27 +22,29 @@ class CyclomaticComplexity:
         :param file: The source code file
         """
         if LANGUAGES[language]["branch_node_types"]:
-            self.branch_nodes = LANGUAGES[language]["branch_node_types"]
+            self.branch_nodes: List[str] = LANGUAGES[language]["branch_node_types"]
+            print(self.branch_nodes)
         else:
             print(f"No branch_node_types defined for language: {language}. \
                 Cyclomatic complexity cannot be calculated.")
-        if not os.path.isfile(file):
-            raise FileNotFoundError
+        print(file)
+        # if not os.path.isfile(file):
+        #     raise FileNotFoundError
         self.file = file
         self.splitter = TreeSitterSplitter(language=language, protected_node_types=tuple(self.branch_nodes))
         # TODO: Protecting node types will ensure that the splitter doesn't merge node types
-        self.ast = self.splitter.parser.parse(bytes(file, "utf-8"))
-        # self.ast = self.splitter.split(file).
+        # self.ast = self.splitter.parser.parse(bytes(file, "utf-8"))
+        self.ast = self.splitter.split_string(file, name="metrics", prune_unprotected=False)
 
     def get_complexity(self) -> int:
-        return self._traverse_tree(self.ast.root_node)
+        return self._traverse_tree(self.ast)
 
-    def _traverse_tree(self, node: Node):
+    def _traverse_tree(self, code_block: CodeBlock):
         # TODO: traverse CodeBlock instead of TS Tree
         count = 0
-        if node.type in self.branch_nodes:
+        if code_block.name in self.branch_nodes:
             count += 1
-        for item in node.children:
+        for item in code_block.children:
             count += self._traverse_tree(item)
         return count
 
@@ -54,7 +57,7 @@ class CyclomaticComplexity:
 @metric(use_reference=False, help="Cyclomatic complexity score")
 def cyclomatic_complexity(
     target: str,
-    # language: str,
+    **kwargs
 ) -> float:
     """Calculate the cyclomatic complexity score.
 
@@ -64,6 +67,6 @@ def cyclomatic_complexity(
     Returns:
         The chrF score.
     """
-    language = "ibmhlasm"
+    language = kwargs["language"]
     score = CyclomaticComplexity(target, language).get_complexity()
     return score 

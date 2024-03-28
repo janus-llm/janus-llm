@@ -52,14 +52,14 @@ class TreeSitterSplitter(Splitter):
         root = self._node_to_block(root, code)
         return root
 
-    def _set_identifiers(self, root: CodeBlock, path: Path):
+    def _set_identifiers(self, root: CodeBlock, name: str):
         seen_types = defaultdict(int)
         queue = [root]
         while queue:
             node = queue.pop(0)  # BFS order to keep lower IDs toward the root
             node.id = f"{node.node_type}[{seen_types[node.node_type]}]"
             seen_types[node.node_type] += 1
-            node.name = f"{path.name}:{node.id}"
+            node.name = f"{name}:{node.id}"
             queue.extend(node.children)
 
     def _node_to_block(self, node: tree_sitter.Node, original_text: bytes) -> CodeBlock:

@@ -138,7 +138,7 @@ class BinarySplitter(TreeSitterSplitter):
         code = self._get_decompilation(file)
 
         root = self._get_ast(code)
-        self._set_identifiers(root, path)
+        self._set_identifiers(root, path.name)
         self._segment_leaves(root)
         self._merge_tree(root)
 
