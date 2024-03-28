@@ -24,7 +24,7 @@ from .llm.models_info import (
 )
 from .metrics.cli import evaluate
 from .parsers.code_parser import PARSER_TYPES
-from .translate import Documenter, Translator
+from .translate import Documenter, MadLibsDocumenter, Translator
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
 
@@ -215,6 +215,13 @@ def document(
             help="Whether to overwrite existing files in the output directory",
         ),
     ] = False,
+    doc_mode: Annotated[
+        str,
+        typer.Option(
+            help="The documentation mode.",
+            click_type=click.Choice(["module", "madlibs"]),
+        ),
+    ] = "madlibs",
     drop_comments: Annotated[
         bool,
         typer.Option(
@@ -237,14 +244,24 @@ def document(
     ] = None,
 ):
     model_arguments = dict(temperature=temp)
-    documenter = Documenter(
-        model=llm_name,
-        model_arguments=model_arguments,
-        source_language=lang,
-        max_prompts=max_prompts,
-        db_path=db_loc,
-        drop_comments=drop_comments,
-    )
+    if doc_mode == "module":
+        documenter = Documenter(
+            model=llm_name,
+            model_arguments=model_arguments,
+            source_language=lang,
+            max_prompts=max_prompts,
+            db_path=db_loc,
+            drop_comments=drop_comments,
+        )
+    elif doc_mode == "madlibs":
+        documenter = MadLibsDocumenter(
+            model=llm_name,
+            model_arguments=model_arguments,
+            source_language=lang,
+            max_prompts=max_prompts,
+            db_path=db_loc,
+        )
+
     documenter.translate(input_dir, output_dir, overwrite, collection)
 
 

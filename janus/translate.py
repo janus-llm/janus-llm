@@ -9,7 +9,13 @@ from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.splitter import EmptyTreeError, TokenLimitError
 from .llm import load_model
-from .parsers.code_parser import PARSER_TYPES, CodeParser, EvaluationParser, JanusParser
+from .parsers.code_parser import (
+    PARSER_TYPES,
+    CodeParser,
+    EvaluationParser,
+    JanusParser,
+    MadlibsDocumentationParser,
+)
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import LANGUAGES
 from .utils.logger import create_logger
@@ -460,7 +466,7 @@ class Translator(Converter):
         If the relevant fields have not been changed since the last time this method was
         called, nothing happens.
         """
-        if "text" == self._target_language and self._parser_type != "text":
+        if "text" == self._target_language and self._parser_type not in {"text", "doc"}:
             raise ValueError(
                 f"Target language ({self._target_language}) suggests target "
                 f"parser should be 'text', but is '{self._parser_type}'"
@@ -471,6 +477,8 @@ class Translator(Converter):
             self.parser = EvaluationParser(
                 expected_keys={"syntax", "style", "completeness", "correctness"}
             )
+        elif "doc" == self._parser_type:
+            self.parser = MadlibsDocumentationParser()
         elif "text" == self._parser_type:
             self.parser = JanusParser()
         else:
@@ -566,3 +574,35 @@ class Documenter(Translator):
         )
         log.info(f"[{filename}] Input CodeBlock Structure:\n{root.tree_str()}")
         return root
+
+
+class MadLibsDocumenter(Translator):
+    def __init__(
+        self,
+        model: str = "gpt-3.5-turbo",
+        model_arguments: Dict[str, Any] = {},
+        source_language: str = "fortran",
+        max_prompts: int = 10,
+        db_path: str | None = None,
+    ) -> None:
+        """Initialize a Translator instance.
+
+        Arguments:
+            model: The LLM to use for translation. If an OpenAI model, the
+                `OPENAI_API_KEY` environment variable must be set and the
+                `OPENAI_ORG_ID` environment variable should be set if needed.
+            model_arguments: Additional arguments to pass to the LLM constructor.
+            source_language: The source programming language.
+            max_prompts: The maximum number of prompts to try before giving up.
+        """
+        super().__init__(
+            model=model,
+            model_arguments=model_arguments,
+            source_language=source_language,
+            target_language="json",
+            target_version=None,
+            max_prompts=max_prompts,
+            prompt_template="document_madlibs",
+            parser_type="doc",
+            db_path=db_path,
+        )

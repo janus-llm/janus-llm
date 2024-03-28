@@ -11,7 +11,7 @@ from ..utils.logger import create_logger
 log = create_logger(__name__)
 
 
-PARSER_TYPES: Set[str] = {"code", "text", "eval"}
+PARSER_TYPES: Set[str] = {"code", "text", "eval", "doc"}
 
 
 class JanusParser(BaseOutputParser):
@@ -108,7 +108,7 @@ class JsonLinesParser(JanusParser):
         Returns:
             A parsed version of the text.
         """
-        string = r"\"\w+\""
+        string = r"\".+\""
         number = r"-?\d+(?:\.\d*)?"
         json_value = rf"(?:{string}|{number})"
         json_line = rf"\s*{string} *: *{json_value},?\s*"
@@ -270,4 +270,60 @@ class EvaluationParser(JsonParser):
             "Output must contain exactly one JSON-formatted block. The JSON "
             "object should contain only the keys contained in the provided "
             "expected_keys set (if any), and values should be numeric."
+        )
+
+
+class MadlibsDocumentationParser(JsonParser):
+    def score(self, input_block: CodeBlock, output_text: str) -> float:
+        """The score for the output text is the percentage of expected keys
+        that are present in the json object. Non-numeric values count for
+        half.
+
+        Arguments:
+            input_block: A `CodeBlock` representing the input to the LLM
+            output_text: The parsed text returned by the LLM
+
+        Returns:
+            A score between 0 and 1 (inclusive). A score of 1.0 indicates that
+            the given text is fully acceptable, and no further attempts
+            should be made.
+        """
+        obj = json.loads(output_text)
+        comment_ids = re.findall(r"<(?:BLOCK|INLINE)_COMMENT (\w{8})>", input_block.text)
+
+        seen_keys = set(obj.keys())
+        expected_keys = set(comment_ids)
+        valid_keys = seen_keys.intersection(expected_keys)
+        missing_keys = expected_keys.difference(obj.keys())
+        if missing_keys:
+            log.warning(f"[{input_block.name}] Expected keys missing: {missing_keys}")
+
+        return len(valid_keys) / len(expected_keys)
+
+    def parse_combined_output(self, text: str) -> str:
+        """Parse the output text from the LLM when multiple inputs are combined.
+
+        Arguments:
+            text: The output text from the LLM.
+
+        Returns:
+            A parsed version of the text.
+        """
+        jsonl_text = JsonLinesParser.parse(self, text)
+        objs = [json.loads(line) for line in jsonl_text.split("\n")]
+        output_obj = {}
+        for obj in objs:
+            output_obj.update(obj)
+        return json.dumps(output_obj)
+
+    def get_format_instructions(self) -> str:
+        """Get the format instructions for the parser.
+
+        Returns:
+            The format instructions for the LLM.
+        """
+        return (
+            "Output must contain exactly one JSON-formatted block. The JSON "
+            "object should contain only (and all of) the comment IDs present "
+            "in the input code."
         )
