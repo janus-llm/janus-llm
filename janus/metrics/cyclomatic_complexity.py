@@ -28,14 +28,16 @@ class CyclomaticComplexity:
         if not os.path.isfile(file):
             raise FileNotFoundError
         self.file = file
-        self.splitter = TreeSitterSplitter(language=language)
+        self.splitter = TreeSitterSplitter(language=language, protected_node_types=tuple(self.branch_nodes))
+        # TODO: Protecting node types will ensure that the splitter doesn't merge node types
         self.ast = self.splitter.parser.parse(bytes(file, "utf-8"))
-        # self.ast = self.splitter.split(file)
+        # self.ast = self.splitter.split(file).
 
     def get_complexity(self) -> int:
         return self._traverse_tree(self.ast.root_node)
 
     def _traverse_tree(self, node: Node):
+        # TODO: traverse CodeBlock instead of TS Tree
         count = 0
         if node.type in self.branch_nodes:
             count += 1
@@ -48,9 +50,11 @@ class CyclomaticComplexity:
     #     with multiprocessing.Pool() as pool:
     #         return pool.map(self._complexity_item, params)
 
-@metric(use_reference=False, help="Cyclonamatic complexity score")
+
+@metric(use_reference=False, help="Cyclomatic complexity score")
 def cyclomatic_complexity(
     target: str,
+    # language: str,
 ) -> float:
     """Calculate the cyclomatic complexity score.
 
