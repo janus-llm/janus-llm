@@ -299,7 +299,7 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
                      END   HELLO
         """
         ),
-        "branch_node_type": "branch_statement",
+        "branch_node_type": "branch_instruction",
     },
     "java": {
         "comment": "//",

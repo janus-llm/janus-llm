@@ -42,10 +42,9 @@ class CyclomaticComplexity:
     def _traverse_tree(self, code_block: CodeBlock):
         count = 0
         print("Traversing tree...")
-        print(code_block.name)
-        print(code_block.children)
+        print([node.node_type for node in code_block.children])
+        print(code_block.node_type, self.branch_node)
         if code_block.node_type == self.branch_node:
-            print(code_block.name)
             count += 1
         for item in code_block.children:
             count += self._traverse_tree(item)
