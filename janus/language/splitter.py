@@ -1,5 +1,5 @@
 import re
-from itertools import compress
+from itertools import compress, product
 from pathlib import Path
 from typing import List
 
@@ -76,12 +76,23 @@ class Splitter(FileManager):
         """
         path = Path(file)
         code = path.read_text()
+        return self.split_string(code, path.name, prune_unprotected)
+
+    def split_string(self, code: str, name: str, prune_unprotected: bool = False) -> CodeBlock:
+        """Split the given code into functional code blocks.
+
+        Arguments:
+            code: The code as a string to split into functional blocks.
+
+        Returns:
+            A `CodeBlock` made up of nested `CodeBlock`s.
+        """
 
         root = self._get_ast(code)
         self._prune(root)
         if prune_unprotected:
             self._prune_unprotected(root)
-        self._set_identifiers(root, path)
+        self._set_identifiers(root, name)
         self._segment_leaves(root)
         self._merge_tree(root)
 
@@ -108,11 +119,11 @@ class Splitter(FileManager):
             stack.extend(node.children)
         return types
 
-    def _set_identifiers(self, root: CodeBlock, path: Path):
+    def _set_identifiers(self, root: CodeBlock, name: str):
         """Set the IDs and names of each node in the given tree. By default,
         node IDs take the form `child_<i>`, where <i> is an integer counter which
         increments in breadth-first order, and node names take the form
-        `<filename>:<ID>`. Child classes should override this function to use
+        `<name>:<ID>`. Child classes should override this function to use
         more informative names based on the particular programming language.
         """
         seen_ids = 0
@@ -121,7 +132,7 @@ class Splitter(FileManager):
             node = queue.pop(0)  # BFS order to keep lower IDs toward the root
             node.id = f"child_{seen_ids}"
             seen_ids += 1
-            node.name = f"{path.name}:{node.id}"
+            node.name = f"{name}:{node.id}"
             queue.extend(node.children)
 
     def _merge_tree(self, root: CodeBlock):
