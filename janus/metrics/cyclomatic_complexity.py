@@ -18,21 +18,17 @@ class CyclomaticComplexity:
         :param directory: The source language
         :param file: The source code file
         """
-        if LANGUAGES[language]["branch_node_types"]:
-            self.branch_nodes: List[str] = LANGUAGES[language]["branch_node_types"]
-            print(self.branch_nodes)
+        if LANGUAGES[language]["branch_node_type"]:
+            self.branch_node = LANGUAGES[language]["branch_node_type"]
+            print(self.branch_node)
         else:
             print(
                 f"No branch_node_types defined for language: {language}. \
                 Cyclomatic complexity cannot be calculated."
             )
-        print(file)
-        # if not os.path.isfile(file):
-        #     raise FileNotFoundError
         self.file = file
         self.splitter = TreeSitterSplitter(
-            language=language, protected_node_types=tuple(self.branch_nodes)
-        )
+            language=language, protected_node_types=('branch_instruction',))
         # TODO: Protecting node types will ensure that the splitter doesn't merge nodes
         # self.ast = self.splitter.parser.parse(bytes(file, "utf-8"))
         self.ast = self.splitter.split_string(
@@ -40,12 +36,16 @@ class CyclomaticComplexity:
         )
 
     def get_complexity(self) -> int:
+        print("Getting complexity...")
         return self._traverse_tree(self.ast)
 
     def _traverse_tree(self, code_block: CodeBlock):
-        # TODO: traverse CodeBlock instead of TS Tree
         count = 0
-        if code_block.name in self.branch_nodes:
+        print("Traversing tree...")
+        print(code_block.name)
+        print(code_block.children)
+        if code_block.node_type == self.branch_node:
+            print(code_block.name)
             count += 1
         for item in code_block.children:
             count += self._traverse_tree(item)
