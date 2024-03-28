@@ -25,16 +25,22 @@ class CyclomaticComplexity:
             self.branch_nodes: List[str] = LANGUAGES[language]["branch_node_types"]
             print(self.branch_nodes)
         else:
-            print(f"No branch_node_types defined for language: {language}. \
-                Cyclomatic complexity cannot be calculated.")
+            print(
+                f"No branch_node_types defined for language: {language}. \
+                Cyclomatic complexity cannot be calculated."
+            )
         print(file)
         # if not os.path.isfile(file):
         #     raise FileNotFoundError
         self.file = file
-        self.splitter = TreeSitterSplitter(language=language, protected_node_types=tuple(self.branch_nodes))
+        self.splitter = TreeSitterSplitter(
+            language=language, protected_node_types=tuple(self.branch_nodes)
+        )
         # TODO: Protecting node types will ensure that the splitter doesn't merge node types
         # self.ast = self.splitter.parser.parse(bytes(file, "utf-8"))
-        self.ast = self.splitter.split_string(file, name="metrics", prune_unprotected=False)
+        self.ast = self.splitter.split_string(
+            file, name="metrics", prune_unprotected=False
+        )
 
     def get_complexity(self) -> int:
         return self._traverse_tree(self.ast)
@@ -55,10 +61,7 @@ class CyclomaticComplexity:
 
 
 @metric(use_reference=False, help="Cyclomatic complexity score")
-def cyclomatic_complexity(
-    target: str,
-    **kwargs
-) -> float:
+def cyclomatic_complexity(target: str, **kwargs) -> float:
     """Calculate the cyclomatic complexity score.
 
     Arguments:
@@ -69,4 +72,4 @@ def cyclomatic_complexity(
     """
     language = kwargs["language"]
     score = CyclomaticComplexity(target, language).get_complexity()
-    return score 
+    return score

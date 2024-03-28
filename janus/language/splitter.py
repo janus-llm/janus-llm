@@ -78,7 +78,9 @@ class Splitter(FileManager):
         code = path.read_text()
         return self.split_string(code, path.name, prune_unprotected)
 
-    def split_string(self, code: str, name: str, prune_unprotected: bool = False) -> CodeBlock:
+    def split_string(
+        self, code: str, name: str, prune_unprotected: bool = False
+    ) -> CodeBlock:
         """Split the given code into functional code blocks.
 
         Arguments:
