@@ -31,8 +31,17 @@ for comment_file in output_dir.rglob("*.json"):
     key = comment_file.with_suffix(".m").name
     if key not in master_obj:
         print(f"Skipping file: {comment_file.name}")
+        continue
     obj = json.loads(comment_file.read_text())
+    valid_keys = set(master_obj[key]["comments"].keys())
+    missing_keys = valid_keys.difference(obj.keys())
+    invalid_keys = set(obj.keys()).difference(valid_keys)
+    if missing_keys:
+        print(f"{comment_file.name} missing keys: {missing_keys}")
+    if invalid_keys:
+        print(f"{comment_file.name} has invalid keys (skipping): {invalid_keys}")
+    obj = {k: obj[k] for k in obj if k in valid_keys}
     master_obj[key]["generated_comments"] = obj
 
 
-(output_dir / "processed.json").write_text(json.dumps(master_obj))
+(output_dir / "processed.json").write_text(json.dumps(master_obj, indent=2))

@@ -109,11 +109,13 @@ for input_file in input_dir.rglob("*.m"):
     code = input_file.read_text()
     processed_code, comments = process(code)
 
-    obj[input_file.name] = dict(original=code, processed=code, comments=comments)
+    obj[input_file.name] = dict(
+        original=code, processed=processed_code, comments=comments
+    )
 
     # reference_file.write_text(code)
     output_file.write_text(processed_code)
     # comment_file.write_text("\n\n".join(comments))
     # exit()
 
-(output_dir / "processed.json").write_text(json.dumps(obj))
+(output_dir / "processed.json").write_text(json.dumps(obj, indent=2))

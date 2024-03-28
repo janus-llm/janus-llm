@@ -108,7 +108,7 @@ class JsonLinesParser(JanusParser):
         Returns:
             A parsed version of the text.
         """
-        string = r"\".+\""
+        string = r"\".+?\""
         number = r"-?\d+(?:\.\d*)?"
         json_value = rf"(?:{string}|{number})"
         json_line = rf"\s*{string} *: *{json_value},?\s*"
@@ -117,7 +117,10 @@ class JsonLinesParser(JanusParser):
         if not matches:
             raise ValueError("Could not find JSON output")
 
-        output_strings = [json.dumps(json.loads(match.group(1))) for match in matches]
+        try:
+            output_strings = [json.dumps(json.loads(match.group(1))) for match in matches]
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Failed to parse JSON text: {e}")
         return "\n".join(output_strings)
 
     def parse_combined_output(self, text: str) -> str:
@@ -295,10 +298,12 @@ class MadlibsDocumentationParser(JsonParser):
         expected_keys = set(comment_ids)
         valid_keys = seen_keys.intersection(expected_keys)
         missing_keys = expected_keys.difference(obj.keys())
+        invalid_keys = seen_keys.difference(expected_keys)
         if missing_keys:
             log.warning(f"[{input_block.name}] Expected keys missing: {missing_keys}")
-
-        return len(valid_keys) / len(expected_keys)
+        if invalid_keys:
+            log.warning(f"[{input_block.name}] Invalid keys present: {invalid_keys}")
+        return (len(valid_keys) / len(expected_keys)) if expected_keys else 1.0
 
     def parse_combined_output(self, text: str) -> str:
         """Parse the output text from the LLM when multiple inputs are combined.
