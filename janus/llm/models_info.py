@@ -8,6 +8,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.llms import HuggingFaceTextGenInference
 from langchain.schema.language_model import BaseLanguageModel
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
+from langchain_community.llms.bedrock import Bedrock
 
 load_dotenv()
 
@@ -15,6 +16,7 @@ MODEL_TYPE_CONSTRUCTORS: dict[str, Callable[[Any], BaseLanguageModel]] = {
     "OpenAI": ChatOpenAI,
     "HuggingFace": HuggingFaceTextGenInference,
     "HuggingFaceLocal": HuggingFacePipeline.from_model_id,
+    "Bedrock": Bedrock,
 }
 
 
@@ -25,6 +27,8 @@ MODEL_TYPES: Dict[str, Any] = {
     "gpt-4-0125-preview": "OpenAI",
     "gpt-3.5-turbo": "OpenAI",
     "gpt-3.5-turbo-16k": "OpenAI",
+    "anthropic.claude-3-haiku-20240307-v1:0": "Bedrock",
+    "meta.llama2-70b-v1": "Bedrock",
 }
 
 _open_ai_defaults: Dict[str, Any] = {
@@ -39,6 +43,8 @@ MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
     "gpt-4-0125-preview": dict(model_name="gpt-4-0125-preview"),
     "gpt-3.5-turbo": dict(model_name="gpt-3.5-turbo"),
     "gpt-3.5-turbo-16k": dict(model_name="gpt-3.5-turbo-16k"),
+    "anthropic.claude-3-haiku-20240307-v1:0": dict(model_name="anthropic.claude-3-haiku-20240307-v1:0"),
+    "meta.llama2-70b-v1": dict(model_name="meta.llama2-70b-v1"),
 }
 
 DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
@@ -54,6 +60,8 @@ TOKEN_LIMITS: Dict[str, int] = {
     "gpt-3.5-turbo-16k": 16_384,
     "text-embedding-ada-002": 8191,
     "gpt4all": 16_384,
+    "anthropic.claude-3-haiku-20240307-v1:0": 248_000,
+    "meta.llama2-70b-v1": 4096,
 }
 
 COST_PER_MODEL: Dict[str, Dict[str, float]] = {
@@ -63,6 +71,8 @@ COST_PER_MODEL: Dict[str, Dict[str, float]] = {
     "gpt-4-0125-preview": {"input": 0.01, "output": 0.03},
     "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
     "gpt-3.5-turbo-16k": {"input": 0.003, "output": 0.004},
+    "anthropic.claude-3-haiku-20240307-v1:0": {"input": 0.0, "output": 0.0},
+    "meta.llama2-70b-v1": {"input": 0.0, "output": 0.0},
 }
 
 
