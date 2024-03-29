@@ -35,7 +35,7 @@ class CyclomaticComplexity:
 
     def get_complexity(self) -> int:
         print("Getting complexity...")
-        return self._traverse_tree(self.ast)
+        return self._traverse_tree(self.ast) + 1
 
     def _traverse_tree(self, code_block: CodeBlock) -> int:
         count = 0
