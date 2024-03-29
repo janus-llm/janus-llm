@@ -1,5 +1,4 @@
 import re
-from pathlib import Path
 
 from langchain.schema.language_model import BaseLanguageModel
 
@@ -66,11 +65,11 @@ class MumpsSplitter(Splitter):
         # MUMPS code tends to take about 2/3 the space of Python
         self.max_tokens: int = int(max_tokens * 2 / 5)
 
-    def _set_identifiers(self, root: CodeBlock, path: Path):
+    def _set_identifiers(self, root: CodeBlock, name: str):
         stack = [root]
         while stack:
             node = stack.pop()
-            node.name = f"{path.name}:{node.id}"
+            node.name = f"{name}:{node.id}"
             stack.extend(node.children)
 
     def _get_ast(self, code: str) -> CodeBlock:
