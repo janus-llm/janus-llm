@@ -113,7 +113,14 @@ def metric(
                 if json_file_name is not None:
                     with open(json_file_name, "r") as f:
                         json_obj = json.load(f)
-                    pairs = list(zip(json_obj[target_key], json_obj[reference_key]))
+                    pairs = []
+                    for key in json_obj:
+                        pairs += list(
+                            zip(
+                                json_obj[key][target_key].values(),
+                                json_obj[key][reference_key].values(),
+                            )
+                        )
                 elif target is not None and reference is not None:
                     with open(target, "r") as f:
                         target_contents = f.read()
@@ -155,7 +162,7 @@ def metric(
             sig2 = inspect.signature(func)
             func.__signature__ = sig2.replace(
                 parameters=tuple(
-                    list(sig2.parameters.values())[:6]
+                    list(sig2.parameters.values())[:9]
                     + list(sig1.parameters.values())[2:-1]
                 )
             )
@@ -221,7 +228,9 @@ def metric(
                 if json_file_name is not None:
                     with open(json_file_name, "r") as f:
                         json_obj = json.load(f)
-                    strings = json_obj[target_key]
+                    strings = []
+                    for key in json_obj:
+                        strings += list(json_obj[key][target_key].values())
                 elif target is not None:
                     with open(target, "r") as f:
                         target_contents = f.read()
@@ -258,7 +267,7 @@ def metric(
             sig2 = inspect.signature(func)
             func.__signature__ = sig2.replace(
                 parameters=tuple(
-                    list(sig2.parameters.values())[:5]
+                    list(sig2.parameters.values())[:7]
                     + list(sig1.parameters.values())[1:-1]
                 )
             )
