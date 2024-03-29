@@ -1,5 +1,6 @@
 import argparse
 import json
+import re
 import uuid
 from pathlib import Path
 
@@ -8,6 +9,10 @@ from janus.language.combine import Combiner
 from janus.language.treesitter import TreeSitterSplitter
 
 splitter = TreeSitterSplitter(language="ibmhlasm", max_tokens=float("inf"))
+
+
+def is_separator(comment: str) -> bool:
+    return not re.sub(r"\W+", "", comment)
 
 
 def merge_adjacent_comments(children: list[CodeBlock]) -> list[CodeBlock]:
@@ -39,12 +44,16 @@ def process(code: str) -> tuple[str, list[dict[str, str | int]]]:
         node = stack.pop()
 
         if node.node_type in {"comment", "remark"}:
+            if is_separator(node.text):
+                node.text = ""
+                continue
+
             comment_id = next(
                 t for _ in range(1000) if (t := str(uuid.uuid4())[:8]) not in comments
             )
             comments[comment_id] = node.text
             if node.node_type == "comment":
-                node.text = f"<BLOCK_COMMENT {comment_id}>"
+                node.text = f"* <BLOCK_COMMENT {comment_id}>"
             else:
                 node.text = f"<INLINE_COMMENT {comment_id}>"
 
