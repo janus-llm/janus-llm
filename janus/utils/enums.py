@@ -278,8 +278,9 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
     "ibmhlasm": {
         "comment": "*",
         "suffix": "asm",
-        "url": "https://gitlab.mitre.org/it-modernization/team-2/tree-sitter-ibmhlasm/-/ \
-        tree/branch_instructions?ref_type=heads",
+        "url": "https://gitlab.mitre.org/it-modernization/team-2/"
+        "tree-sitter-ibmhlasm.git",
+        "branch": "branch_instructions",
         "example": (
             """
                      TITLE 'Hello, World! Program'

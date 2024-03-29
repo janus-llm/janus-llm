@@ -2,6 +2,7 @@ import os
 import platform
 from collections import defaultdict
 from pathlib import Path
+from typing import Optional
 
 import tree_sitter
 from git import Repo
@@ -144,14 +145,22 @@ class TreeSitterSplitter(Splitter):
                 message = f"Tree-sitter does not support {self.language} yet."
                 log.error(message)
                 raise ValueError(message)
-            self._git_clone(github_url, lang_dir)
+            if LANGUAGES[self.language].get("branch"):
+                self._git_clone(github_url, lang_dir, LANGUAGES[self.language]["branch"])
+            else:
+                self._git_clone(github_url, lang_dir)
 
         tree_sitter.Language.build_library(str(so_file), [str(lang_dir)])
 
     @staticmethod
-    def _git_clone(repository_url: str, destination_folder: Path | str) -> None:
+    def _git_clone(
+        repository_url: str, destination_folder: Path | str, branch: Optional[str] = None
+    ) -> None:
         try:
-            Repo.clone_from(repository_url, destination_folder)
+            if branch:
+                Repo.clone_from(repository_url, destination_folder, branch=branch)
+            else:
+                Repo.clone_from(repository_url, destination_folder)
             log.debug(f"{repository_url} cloned to {destination_folder}")
         except Exception as e:
             log.error(f"Error: {e}")
