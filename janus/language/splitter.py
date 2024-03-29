@@ -130,6 +130,10 @@ class Splitter(FileManager):
         increments in breadth-first order, and node names take the form
         `<name>:<ID>`. Child classes should override this function to use
         more informative names based on the particular programming language.
+
+        Arguments:
+            root: The root of the tree to set identifiers for.
+            name: The name of the file being split.
         """
         seen_ids = 0
         queue = [root]
