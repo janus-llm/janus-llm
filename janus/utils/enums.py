@@ -278,8 +278,7 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
     "ibmhlasm": {
         "comment": "*",
         "suffix": "asm",
-        "url": "https://gitlab.mitre.org/it-modernization/team-2/"
-        "tree-sitter-ibmhlasm.git",
+        "url": "https://github.com/janus-llm/tree-sitter-ibmhlasm.git",
         "branch": "branch_instructions",
         "example": (
             """
