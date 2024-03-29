@@ -70,6 +70,7 @@ class Splitter(FileManager):
 
         Arguments:
             file: The file to split into functional blocks.
+            prune_unprotected: Whether to prune unprotected nodes from the tree.
 
         Returns:
             A `CodeBlock` made up of nested `CodeBlock`s.
@@ -85,6 +86,8 @@ class Splitter(FileManager):
 
         Arguments:
             code: The code as a string to split into functional blocks.
+            name: The filename of the code block.
+            prune_unprotected: Whether to prune unprotected nodes from the tree.
 
         Returns:
             A `CodeBlock` made up of nested `CodeBlock`s.
