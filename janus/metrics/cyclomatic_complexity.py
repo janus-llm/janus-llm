@@ -5,39 +5,44 @@ from janus.utils.enums import LANGUAGES
 from .metric import metric
 
 
+class BranchNodeException(Exception):
+    pass
+
+
 class CyclomaticComplexity:
+    """A class for calculating cyclomatic complexity of code."""
+
     def __init__(
         self,
-        file: str,
+        code: str,
         language: str,
     ):
         """
-        The order of param is source > file > directory
-        :param directory: The source language
-        :param file: The source code file
+        Arguments:
+            code: The code to get metrics on
+            language: The language the code is written in
         """
         if LANGUAGES[language]["branch_node_type"]:
             self.branch_node = LANGUAGES[language]["branch_node_type"]
             print(self.branch_node)
         else:
-            print(
-                f"No branch_node_types defined for language: {language}. \
-                Cyclomatic complexity cannot be calculated."
+            raise BranchNodeException(
+                f"No branch nodes defined in utils/enums.py for {language}."
             )
-            exit(1)
-        self.file = file
+        self.code = code
         self.splitter = TreeSitterSplitter(
             language=language, protected_node_types=("branch_instruction", "instruction")
         )
         self.ast = self.splitter.split_string(
-            file, name="metrics", prune_unprotected=False
+            code, name="metrics", prune_unprotected=False
         )
 
     def get_complexity(self) -> int:
-        print("Getting complexity...")
         return self._traverse_tree(self.ast) + 1
 
     def _traverse_tree(self, code_block: CodeBlock) -> int:
+        """Recurse through all nodes of a CodeBlock, take count of the number of branch
+        nodes"""
         count = 0
         if code_block.node_type == self.branch_node:
             count += 1
