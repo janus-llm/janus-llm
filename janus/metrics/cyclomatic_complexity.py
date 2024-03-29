@@ -1,5 +1,3 @@
-from typing import List
-
 from janus.language.block import CodeBlock
 from janus.language.treesitter.treesitter import TreeSitterSplitter
 from janus.utils.enums import LANGUAGES
@@ -26,11 +24,11 @@ class CyclomaticComplexity:
                 f"No branch_node_types defined for language: {language}. \
                 Cyclomatic complexity cannot be calculated."
             )
+            exit(1)
         self.file = file
         self.splitter = TreeSitterSplitter(
-            language=language, protected_node_types=('branch_instruction', 'instruction'))
-        # TODO: Protecting node types will ensure that the splitter doesn't merge nodes
-        # self.ast = self.splitter.parser.parse(bytes(file, "utf-8"))
+            language=language, protected_node_types=("branch_instruction", "instruction")
+        )
         self.ast = self.splitter.split_string(
             file, name="metrics", prune_unprotected=False
         )
@@ -39,21 +37,13 @@ class CyclomaticComplexity:
         print("Getting complexity...")
         return self._traverse_tree(self.ast)
 
-    def _traverse_tree(self, code_block: CodeBlock):
+    def _traverse_tree(self, code_block: CodeBlock) -> int:
         count = 0
-        print("Traversing tree...")
-        print([node.node_type for node in code_block.children])
-        print(code_block.node_type, self.branch_node)
         if code_block.node_type == self.branch_node:
             count += 1
         for item in code_block.children:
             count += self._traverse_tree(item)
         return count
-
-    # def complexity(self):
-    #     params = [(file, code) for file, code in self._source_codes()]
-    #     with multiprocessing.Pool() as pool:
-    #         return pool.map(self._complexity_item, params)
 
 
 @metric(use_reference=False, help="Cyclomatic complexity score")
@@ -64,7 +54,7 @@ def cyclomatic_complexity(target: str, **kwargs) -> float:
         target: The target text.
 
     Returns:
-        The chrF score.
+        The cyclomatic complexity.
     """
     language = kwargs["language"]
     score = CyclomaticComplexity(target, language).get_complexity()

@@ -3,8 +3,13 @@
 import unittest
 from pathlib import Path
 
-from ..file_pairing import (FILE_PAIRING_METHODS, pair_by_file, pair_by_line,
-                            pair_by_line_comment, register_pairing_method)
+from ..file_pairing import (
+    FILE_PAIRING_METHODS,
+    pair_by_file,
+    pair_by_line,
+    pair_by_line_comment,
+    register_pairing_method,
+)
 
 
 class TestFilePairing(unittest.TestCase):
