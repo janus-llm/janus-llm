@@ -180,32 +180,42 @@ def document(
     input_dir: Annotated[
         Path,
         typer.Option(
+            "--input-dir",
+            "-i",
             help="The directory containing the source code to be translated. "
-            "The files should all be in one flat directory."
+            "The files should all be in one flat directory.",
         ),
     ],
-    lang: Annotated[
+    language: Annotated[
         str,
         typer.Option(
+            "--language",
+            "-l",
             help="The language of the source code.",
             click_type=click.Choice(sorted(LANGUAGES)),
         ),
     ],
     output_dir: Annotated[
         Path,
-        typer.Option(help="The directory to store the translated code in."),
+        typer.Option(
+            "--output-dir", "-o", help="The directory to store the translated code in."
+        ),
     ],
     llm_name: Annotated[
         str,
         typer.Option(
+            "--llm",
+            "-n",
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ] = "gpt-3.5-turbo",
     max_prompts: Annotated[
         int,
         typer.Option(
+            "--max-prompts",
+            "-m",
             help="The maximum number of times to prompt a model on one functional block "
-            "before exiting the application. This is to prevent wasting too much money."
+            "before exiting the application. This is to prevent wasting too much money.",
         ),
     ] = 10,
     overwrite: Annotated[
@@ -218,6 +228,8 @@ def document(
     doc_mode: Annotated[
         str,
         typer.Option(
+            "--doc-mode",
+            "-d",
             help="The documentation mode.",
             click_type=click.Choice(["module", "madlibs"]),
         ),
@@ -229,9 +241,9 @@ def document(
             help="Whether to drop or keep comments in the code sent to the LLM",
         ),
     ] = False,
-    temp: Annotated[
+    temperature: Annotated[
         float,
-        typer.Option(help="Sampling temperature.", min=0, max=2),
+        typer.Option("--temperature", "-t", help="Sampling temperature.", min=0, max=2),
     ] = 0.7,
     collection: Annotated[
         str,
@@ -243,12 +255,12 @@ def document(
         ),
     ] = None,
 ):
-    model_arguments = dict(temperature=temp)
+    model_arguments = dict(temperature=temperature)
     if doc_mode == "module":
         documenter = Documenter(
             model=llm_name,
             model_arguments=model_arguments,
-            source_language=lang,
+            source_language=language,
             max_prompts=max_prompts,
             db_path=db_loc,
             drop_comments=drop_comments,
@@ -257,7 +269,7 @@ def document(
         documenter = MadLibsDocumenter(
             model=llm_name,
             model_arguments=model_arguments,
-            source_language=lang,
+            source_language=language,
             max_prompts=max_prompts,
             db_path=db_loc,
         )
