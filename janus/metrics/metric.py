@@ -1,6 +1,6 @@
 import inspect
 import json
-from typing import Callable
+from typing import Callable, Optional
 
 import click
 import typer
@@ -33,17 +33,6 @@ def metric(
         if use_reference:
 
             def func(
-                target: Annotated[
-                    str, typer.Option("--target", "-t", help="Target file to evaluate.")
-                ],
-                reference: Annotated[
-                    str,
-                    typer.Option(
-                        "--reference",
-                        "-r",
-                        help="Reference file to use as reference/baseline.",
-                    ),
-                ],
                 out_file: Annotated[
                     str,
                     typer.Option("--out-file", "-o", help="Output JSON file to write."),
@@ -57,6 +46,47 @@ def metric(
                         click_type=click.Choice(sorted(LANGUAGES)),
                     ),
                 ],
+                target: Annotated[
+                    Optional[str],
+                    typer.Option(
+                        "--target",
+                        "-t",
+                        help="Target file to evaluate.",
+                    ),
+                ] = None,
+                reference: Annotated[
+                    Optional[str],
+                    typer.Option(
+                        "--reference",
+                        "-r",
+                        help="Reference file to use as reference/baseline.",
+                    ),
+                ] = None,
+                json_file_name: Annotated[
+                    Optional[str],
+                    typer.Option(
+                        "--json",
+                        "-j",
+                        help="Json file to extract pairs from \
+                            (if set ignores --target and --reference)",
+                    ),
+                ] = None,
+                target_key: Annotated[
+                    str,
+                    typer.Option(
+                        "--target-key",
+                        "-tk",
+                        help="json key to extract list of target strings",
+                    ),
+                ] = "target",
+                reference_key: Annotated[
+                    str,
+                    typer.Option(
+                        "--reference-key",
+                        "-rk",
+                        help="json key to extract list of reference strings",
+                    ),
+                ] = "reference",
                 file_pairing_method: Annotated[
                     str,
                     typer.Option(
@@ -64,7 +94,8 @@ def metric(
                         "-m",
                         click_type=click.Choice(FILE_PAIRING_METHODS.keys()),
                         help="Method to use for pairing\
-                              segments of target and reference files.",
+                              segments of target and reference files \
+                                (ignored for json).",
                     ),
                 ] = "file",
                 llm_name: Annotated[
@@ -78,23 +109,32 @@ def metric(
                 **kwargs,
             ):
                 out = []
-                with open(target, "r") as f:
-                    target_contents = f.read()
-
-                with open(reference, "r") as f:
-                    reference_contents = f.read()
                 llm, token_limit, model_cost = load_model(llm_name)
-                pairs = FILE_PAIRING_METHODS[file_pairing_method](
-                    target_contents,
-                    reference_contents,
-                    target_file=target,
-                    reference_file=reference,
-                    out_file=out_file,
-                    lang=language,
-                    llm=llm,
-                    token_limit=token_limit,
-                    model_cost=model_cost,
-                )
+                if json_file_name is not None:
+                    with open(json_file_name, "r") as f:
+                        json_obj = json.load(f)
+                    pairs = list(zip(json_obj[target_key], json_obj[reference_key]))
+                elif target is not None and reference is not None:
+                    with open(target, "r") as f:
+                        target_contents = f.read()
+
+                    with open(reference, "r") as f:
+                        reference_contents = f.read()
+                    pairs = FILE_PAIRING_METHODS[file_pairing_method](
+                        target_contents,
+                        reference_contents,
+                        target_file=target,
+                        reference_file=reference,
+                        out_file=out_file,
+                        lang=language,
+                        llm=llm,
+                        token_limit=token_limit,
+                        model_cost=model_cost,
+                    )
+                else:
+                    raise ValueError(
+                        "Error, must specify either json or target and reference files"
+                    )
                 for src, cmp in pairs:
                     out.append(
                         function(
@@ -122,9 +162,6 @@ def metric(
         else:
 
             def func(
-                target: Annotated[
-                    str, typer.Option("--target", "-t", help="Target file to evaluate.")
-                ],
                 out_file: Annotated[
                     str,
                     typer.Option("--out-file", "-o", help="Output JSON file to write."),
@@ -138,6 +175,27 @@ def metric(
                         click_type=click.Choice(sorted(LANGUAGES)),
                     ),
                 ],
+                target: Annotated[
+                    Optional[str],
+                    typer.Option("--target", "-t", help="Target file to evaluate."),
+                ] = None,
+                json_file_name: Annotated[
+                    Optional[str],
+                    typer.Option(
+                        "--json",
+                        "-j",
+                        help="Json file to extract pairs from \
+                            (if set ignores --target)",
+                    ),
+                ] = None,
+                target_key: Annotated[
+                    str,
+                    typer.Option(
+                        "--target-key",
+                        "-tk",
+                        help="json key to extract list of target strings",
+                    ),
+                ] = "target",
                 splitting_method: Annotated[
                     str,
                     typer.Option(
@@ -159,19 +217,28 @@ def metric(
                 **kwargs,
             ):
                 out = []
-                with open(target, "r") as f:
-                    target_contents = f.read()
-
                 llm, token_limit, model_cost = load_model(llm_name)
-                strings = SPLITTING_METHODS[splitting_method](
-                    target_contents,
-                    target_file=target,
-                    out_file=out_file,
-                    lang=language,
-                    llm=llm,
-                    token_limit=token_limit,
-                    model_cost=model_cost,
-                )
+                if json_file_name is not None:
+                    with open(json_file_name, "r") as f:
+                        json_obj = json.load(f)
+                    strings = json_obj[target_key]
+                elif target is not None:
+                    with open(target, "r") as f:
+                        target_contents = f.read()
+
+                    strings = SPLITTING_METHODS[splitting_method](
+                        target_contents,
+                        target_file=target,
+                        out_file=out_file,
+                        lang=language,
+                        llm=llm,
+                        token_limit=token_limit,
+                        model_cost=model_cost,
+                    )
+                else:
+                    raise ValueError(
+                        "Error: must specify either json file or target file"
+                    )
                 for string in strings:
                     out.append(
                         function(
