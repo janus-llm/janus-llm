@@ -33,10 +33,8 @@ class TestCyclomaticComplexity(unittest.TestCase):
 
     def test_cyclomatic_complexity(self):
         """Test the cyclomayfunction with custom parameters."""
-        function_score = cyclomatic_complexity(
-            self.target_text,
-        )
-        expected_score = 3
+        function_score = cyclomatic_complexity(self.target_text, language="ibmhlasm")
+        expected_score = 2
         self.assertEqual(function_score, expected_score)
 
 
