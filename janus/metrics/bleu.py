@@ -29,14 +29,12 @@ def bleu(
     lowercase: Annotated[
         bool,
         typer.Option(
-            default=False,
             help="Whether to lowercase the data.",
         ),
     ] = False,
     use_effective_order: Annotated[
         bool,
         typer.Option(
-            default=True,
             help="Whether to use n-gram orders without matches.",
         ),
     ] = True,
