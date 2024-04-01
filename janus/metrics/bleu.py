@@ -53,4 +53,6 @@ def bleu(
         lowercase=lowercase,
         use_effective_order=use_effective_order,
     )
-    return float(score.score)
+    # Dividing by 100 to get the score in the range [0, 1]
+    # sacrebleu gives the score in percentage
+    return float(score.score) / 100.0

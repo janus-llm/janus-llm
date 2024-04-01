@@ -50,4 +50,6 @@ def chrf(
         word_order=n_word_order,
         beta=beta,
     )
-    return float(score.score)
+    # Dividing by 100 to get the score in the range [0, 1]
+    # sacrebleu gives the score in percentage
+    return float(score.score) / 100.0
