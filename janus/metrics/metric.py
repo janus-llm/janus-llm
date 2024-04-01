@@ -102,6 +102,7 @@ def metric(
                     str,
                     typer.Option(
                         "--llm",
+                        "-L",
                         help="The custom name of the model set with 'janus llm add'.",
                     ),
                 ] = "gpt-3.5-turbo",
@@ -217,6 +218,7 @@ def metric(
                     str,
                     typer.Option(
                         "--llm",
+                        "-L",
                         help="The custom name of the model set with 'janus llm add'.",
                     ),
                 ] = "gpt-3.5-turbo",
