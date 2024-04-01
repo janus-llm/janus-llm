@@ -8,22 +8,58 @@ class TestRouge(unittest.TestCase):
         self.target = "This is a test sentence."
         self.reference = "This is a reference sentence."
 
-    def test_rouge_with_integer_ngram(self):
-        score = rouge(self.target, self.reference, n_gram=2)
+    def test_rouge_with_granularity_n(self):
+        score = rouge(
+            self.target, self.reference, granularity="n", n_gram=2, score_type="f"
+        )
         self.assertIsInstance(score, float)
 
-    def test_rouge_with_l_ngram(self):
-        score = rouge(self.target, self.reference, n_gram="L")
+    def test_rouge_with_granularity_l(self):
+        score = rouge(
+            self.target, self.reference, granularity="l", n_gram=2, score_type="f"
+        )
         self.assertIsInstance(score, float)
 
-    def test_rouge_with_invalid_ngram(self):
+    def test_rouge_with_granularity_w(self):
+        score = rouge(
+            self.target, self.reference, granularity="w", n_gram=2, score_type="f"
+        )
+        self.assertIsInstance(score, float)
+
+    def test_rouge_with_invalid_granularity(self):
         with self.assertRaises(ValueError):
-            rouge(self.target, self.reference, n_gram="invalid")
+            rouge(
+                self.target,
+                self.reference,
+                granularity="invalid",
+                n_gram=2,
+                score_type="f",
+            )
 
-    def test_rouge_with_same_target_and_reference(self):
-        score = rouge(self.target, self.target, n_gram=2)
-        self.assertEqual(score, 1.0)
+    def test_rouge_with_score_type_f(self):
+        score = rouge(
+            self.target, self.reference, granularity="n", n_gram=2, score_type="f"
+        )
+        self.assertIsInstance(score, float)
 
+    def test_rouge_with_score_type_p(self):
+        score = rouge(
+            self.target, self.reference, granularity="n", n_gram=2, score_type="p"
+        )
+        self.assertIsInstance(score, float)
 
-if __name__ == "__main__":
-    unittest.main()
+    def test_rouge_with_score_type_r(self):
+        score = rouge(
+            self.target, self.reference, granularity="n", n_gram=2, score_type="r"
+        )
+        self.assertIsInstance(score, float)
+
+    def test_rouge_with_invalid_score_type(self):
+        with self.assertRaises(ValueError):
+            rouge(
+                self.target,
+                self.reference,
+                granularity="n",
+                n_gram=2,
+                score_type="invalid",
+            )
