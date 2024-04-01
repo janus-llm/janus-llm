@@ -1,4 +1,5 @@
 import click
+import nltk
 import typer
 from rouge import Rouge
 from typing_extensions import Annotated
@@ -48,8 +49,6 @@ def rouge(
     Returns:
         The ROUGE score.
     """
-    import nltk
-
     nltk.download("punkt", quiet=True)
     if isinstance(n_gram, int):
         metric_name = "rouge-n"
