@@ -607,6 +607,7 @@ class MadLibsDocumenter(Translator):
             parser_type="doc",
             db_path=db_path,
         )
+        self._splitter.max_tokens = 8192
 
     def _add_translation(self, block: TranslatedCodeBlock):
         if block.original.text:

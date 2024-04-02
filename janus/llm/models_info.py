@@ -21,10 +21,12 @@ MODEL_TYPE_CONSTRUCTORS: dict[str, Callable[[Any], BaseLanguageModel]] = {
 MODEL_TYPES: Dict[str, Any] = {
     "gpt-4": "OpenAI",
     "gpt-4-32k": "OpenAI",
+    "gpt-4-0613": "OpenAI",
     "gpt-4-1106-preview": "OpenAI",
     "gpt-4-0125-preview": "OpenAI",
     "gpt-3.5-turbo": "OpenAI",
     "gpt-3.5-turbo-16k": "OpenAI",
+    "gpt-3.5-turbo-0125": "OpenAI",
 }
 
 _open_ai_defaults: Dict[str, Any] = {
@@ -35,10 +37,12 @@ _open_ai_defaults: Dict[str, Any] = {
 MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
     "gpt-4": dict(model_name="gpt-4"),
     "gpt-4-32k": dict(model_name="gpt-4-32k"),
+    "gpt-4-0613": dict(model_name="gpt-4-0613"),
     "gpt-4-1106-preview": dict(model_name="gpt-4-1106-preview"),
     "gpt-4-0125-preview": dict(model_name="gpt-4-0125-preview"),
     "gpt-3.5-turbo": dict(model_name="gpt-3.5-turbo"),
     "gpt-3.5-turbo-16k": dict(model_name="gpt-3.5-turbo-16k"),
+    "gpt-3.5-turbo-0125": dict(model_name="gpt-3.5-turbo-0125"),
 }
 
 DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
@@ -48,21 +52,25 @@ MODEL_CONFIG_DIR = Path.home().expanduser() / ".janus" / "llm"
 TOKEN_LIMITS: Dict[str, int] = {
     "gpt-4": 8192,
     "gpt-4-32k": 32_768,
+    "gpt-4-0613": 8192,
     "gpt-4-1106-preview": 128_000,
     "gpt-4-0125-preview": 128_000,
     "gpt-3.5-turbo": 4096,
     "gpt-3.5-turbo-16k": 16_384,
+    "gpt-3.5-turbo-0125": 16_384,
     "text-embedding-ada-002": 8191,
     "gpt4all": 16_384,
 }
 
 COST_PER_MODEL: Dict[str, Dict[str, float]] = {
     "gpt-4": {"input": 0.03, "output": 0.06},
-    "gpt-4-32k": {"input": 0.6, "output": 0.12},
+    "gpt-4-0613": {"input": 0.6, "output": 0.12},
+    "gpt-4-32k": {"input": 0.03, "output": 0.06},
     "gpt-4-1106-preview": {"input": 0.01, "output": 0.03},
     "gpt-4-0125-preview": {"input": 0.01, "output": 0.03},
     "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
     "gpt-3.5-turbo-16k": {"input": 0.003, "output": 0.004},
+    "gpt-3.5-turbo-0125": {"input": 0.0005, "output": 0.0015},
 }
 
 

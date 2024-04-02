@@ -28,7 +28,7 @@ output_dir = Path(args.output_dir).expanduser()
 
 master_obj = json.loads(input_file.read_text())
 for comment_file in output_dir.rglob("*.json"):
-    key = comment_file.with_suffix(".m").name
+    key = comment_file.with_suffix(".asm").name
     if key not in master_obj:
         print(f"Skipping file: {comment_file.name}")
         continue
@@ -43,5 +43,6 @@ for comment_file in output_dir.rglob("*.json"):
     obj = {k: obj[k] for k in obj if k in valid_keys}
     master_obj[key]["generated_comments"] = obj
 
-
-(output_dir / "processed.json").write_text(json.dumps(master_obj, indent=2))
+output_file = output_dir / "processed.json"
+output_file.write_text(json.dumps(master_obj, indent=2))
+print(f"Wrote output to {output_file}")
