@@ -12,6 +12,7 @@ from typing_extensions import Annotated
 
 from .embedding.collections import Collections
 from .embedding.database import ChromaEmbeddingDatabase
+from .embedding.embedding_models_info import EMBEDDING_MODEL_CONFIG_DIR
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.binary import BinarySplitter
 from .language.mumps import MumpsSplitter
@@ -61,6 +62,13 @@ db = typer.Typer(
 )
 llm = typer.Typer(
     help="LLM commands",
+    add_completion=False,
+    no_args_is_help=True,
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
+
+embedding = typer.Typer(
+    help="Embedding Model Commands",
     add_completion=False,
     no_args_is_help=True,
     context_settings={"help_option_names": ["-h", "--help"]},
@@ -561,9 +569,73 @@ def llm_add(
     print(f"Model config written to {model_cfg}")
 
 
+@embedding.command("add", help="Add an embedding model config to janus")
+def embedding_add(
+    model_name: Annotated[
+        str, typer.Argument(help="The user's custom name of the model")
+    ],
+    model_type: Annotated[
+        str,
+        typer.Option(
+            "--type",
+            "-t",
+            help="The type of the model",
+            click_type=click.Choice(sorted(list(MODEL_TYPE_CONSTRUCTORS.keys()))),
+        ),
+    ] = "OpenAI",
+):
+    if not EMBEDDING_MODEL_CONFIG_DIR.exists():
+        EMBEDDING_MODEL_CONFIG_DIR.mkdir(parents=True)
+    model_cfg = EMBEDDING_MODEL_CONFIG_DIR / f"{model_name}.json"
+    if model_type == "HuggingFace":
+        url = typer.prompt("Enter the model's URL")
+        max_tokens = typer.prompt(
+            "Enter the model's maximum tokens", default=4096, type=int
+        )
+        in_cost = typer.prompt("Enter the cost per input token", default=0, type=float)
+        out_cost = typer.prompt("Enter the cost per output token", default=0, type=float)
+        params = dict(
+            inference_server_url=url,
+            max_new_tokens=max_tokens,
+            top_k=10,
+            top_p=0.95,
+            typical_p=0.95,
+            temperature=0.01,
+            repetition_penalty=1.03,
+            timeout=240,
+        )
+        cfg = {
+            "model_type": model_type,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": {"input": in_cost, "output": out_cost},
+        }
+    elif model_type == "OpenAI":
+        model_name = typer.prompt("Enter the model name", default="gpt-3.5-turbo")
+        params = dict(
+            model_name=model_name,
+            temperature=0.7,
+            n=1,
+        )
+        max_tokens = TOKEN_LIMITS[model_name]
+        model_cost = COST_PER_MODEL[model_name]
+        cfg = {
+            "model_type": model_type,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": model_cost,
+        }
+    else:
+        raise ValueError(f"Unknown model type {model_type}")
+    with open(model_cfg, "w") as f:
+        json.dump(cfg, f, indent=2)
+    print(f"Model config written to {model_cfg}")
+
+
 app.add_typer(db, name="db")
 app.add_typer(llm, name="llm")
 app.add_typer(evaluate, name="evaluate")
+app.add_typer(embedding, name="embedding")
 
 
 if __name__ == "__main__":
