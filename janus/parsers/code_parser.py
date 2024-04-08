@@ -24,6 +24,9 @@ class JanusParser:
     def parse_into_block(self, text: str, block: CodeBlock):
         block.text = text
 
+    def set_reference(self, block: CodeBlock):
+        pass
+
 
 class CodeParser(BaseOutputParser[str], JanusParser):
     language: str
@@ -39,7 +42,3 @@ class CodeParser(BaseOutputParser[str], JanusParser):
 
     def get_format_instructions(self) -> str:
         return "Output must contain text contained within triple square brackets (```)"
-
-    @property
-    def _type(self) -> str:
-        return "code_parser"
