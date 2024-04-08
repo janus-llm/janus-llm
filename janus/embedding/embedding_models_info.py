@@ -29,12 +29,12 @@ _open_ai_defaults: Dict[str, Any] = {
 }
 
 EMBEDDING_MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
-    "gpt-4": dict(model_name="gpt-4"),
-    "gpt-4-32k": dict(model_name="gpt-4-32k"),
-    "gpt-4-1106-preview": dict(model_name="gpt-4-1106-preview"),
-    "gpt-4-0125-preview": dict(model_name="gpt-4-0125-preview"),
-    "gpt-3.5-turbo": dict(model_name="gpt-3.5-turbo"),
-    "gpt-3.5-turbo-16k": dict(model_name="gpt-3.5-turbo-16k"),
+    "gpt-4": dict(model="gpt-4"),
+    "gpt-4-32k": dict(model="gpt-4-32k"),
+    "gpt-4-1106-preview": dict(model="gpt-4-1106-preview"),
+    "gpt-4-0125-preview": dict(model="gpt-4-0125-preview"),
+    "gpt-3.5-turbo": dict(model="gpt-3.5-turbo"),
+    "gpt-3.5-turbo-16k": dict(model="gpt-3.5-turbo-16k"),
 }
 
 DEFAULT_EMBEDDING_MODELS = list(EMBEDDING_MODEL_DEFAULT_ARGUMENTS.keys())
