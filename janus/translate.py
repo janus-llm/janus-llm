@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import openai.error
-from langchain.callbacks import get_openai_callback
+from langchain_community.callbacks import get_openai_callback
 
 from .converter import Converter, run_if_changed
 from .embedding.vectorize import ChromaDBVectorizer
