@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import openai.error
 from langchain.callbacks import get_openai_callback
@@ -38,6 +38,7 @@ class Translator(Converter):
         prompt_template: str | Path = "simple",
         parser_type: str = "code",
         db_path: str | None = None,
+        db_config: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Initialize a Translator instance.
 
@@ -66,6 +67,7 @@ class Translator(Converter):
         self._target_glob: None | str
         self._prompt_template_name: None | str
         self._db_path: None | str
+        self._db_config: None | Dict[str, Any]
 
         self.set_model(model_name=model, **model_arguments)
         self.set_parser_type(parser_type=parser_type)
@@ -75,6 +77,7 @@ class Translator(Converter):
             target_version=target_version,
         )
         self.set_db_path(db_path=db_path)
+        self.set_db_config(db_config=db_config)
 
         self._load_parameters()
 
@@ -442,6 +445,9 @@ class Translator(Converter):
     def set_db_path(self, db_path: str) -> None:
         self._db_path = db_path
 
+    def set_db_config(self, db_config: Optional[Dict[str, Any]]):
+        self._db_config = db_config
+
     @run_if_changed("_model_name", "_custom_model_arguments")
     def _load_model(self):
         """Load the model according to this instance's attributes.
@@ -523,7 +529,9 @@ class Translator(Converter):
             self._vectorizer = None
             return
         vectorizer_factory = ChromaDBVectorizer()
-        self._vectorizer = vectorizer_factory.create_vectorizer(self._db_path)
+        self._vectorizer = vectorizer_factory.create_vectorizer(
+            self._db_path, self._db_config
+        )
 
 
 class Documenter(Translator):
@@ -534,6 +542,7 @@ class Documenter(Translator):
         source_language: str = "fortran",
         max_prompts: int = 10,
         db_path: str | None = None,
+        db_config: Optional[Dict[str, Any]] = None,
         drop_comments: bool = False,
     ) -> None:
         """Initialize a Translator instance.
@@ -556,6 +565,7 @@ class Documenter(Translator):
             prompt_template="document",
             parser_type="text",
             db_path=db_path,
+            db_config=db_config,
         )
 
         module_node_type = LANGUAGES[source_language]["functional_node_type"]
@@ -585,6 +595,7 @@ class MadLibsDocumenter(Translator):
         source_language: str = "fortran",
         max_prompts: int = 10,
         db_path: str | None = None,
+        db_config: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Initialize a Translator instance.
 
@@ -606,6 +617,7 @@ class MadLibsDocumenter(Translator):
             prompt_template="document_madlibs",
             parser_type="doc",
             db_path=db_path,
+            db_config=db_config,
         )
 
     def _add_translation(self, block: TranslatedCodeBlock):

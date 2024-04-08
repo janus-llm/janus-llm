@@ -1,10 +1,11 @@
 import datetime
 import os
-from typing import Sequence
+from typing import Dict, Optional, Sequence
 
 from chromadb import Client, Collection
 
 from ..utils.enums import EmbeddingType
+from .embedding_models_info import load_embedding_model
 
 # See https://docs.trychroma.com/telemetry#in-chromas-backend-using-environment-variables
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
@@ -13,10 +14,16 @@ os.environ["ANONYMIZED_TELEMETRY"] = "False"
 class Collections:
     """Manage embedding collections"""
 
-    def __init__(self, client: Client):
+    def __init__(self, client: Client, config: Optional[Dict[str, str]] = None):
         self._client = client
+        if config is not None:
+            self._config = config
+        else:
+            self._config = {}
 
-    def create(self, name: EmbeddingType | str) -> Collection:
+    def create(
+        self, name: EmbeddingType | str, model_name: Optional[str] = None
+    ) -> Collection:
         """Create a Chroma collection for the given embedding type.
 
         Arguments:
@@ -27,9 +34,18 @@ class Collections:
             "date_updated": datetime.datetime.now().date().isoformat(),
             "time_updated": datetime.datetime.now().time().isoformat("minutes"),
         }
-        return self._client.create_collection(collection_name, metadata=metadata)
+        if model_name is not None:
+            self._config[collection_name] = model_name
+            model = load_embedding_model(model_name)
+            return self._client.create_collection(
+                collection_name, metadata=metadata, embedding_fn=model
+            )
+        else:
+            return self._client.create_collection(collection_name, metadata=metadata)
 
-    def get_or_create(self, name: EmbeddingType | str) -> Collection:
+    def get_or_create(
+        self, name: EmbeddingType | str, model_name: Optional[str] = None
+    ) -> Collection:
         """Create a Chroma collection for the given embedding type.
 
         Arguments:
@@ -40,7 +56,18 @@ class Collections:
             "date_updated": datetime.datetime.now().date().isoformat(),
             "time_updated": datetime.datetime.now().time().isoformat("minutes"),
         }
-        return self._client.get_or_create_collection(collection_name, metadata=metadata)
+        if collection_name in self._config:
+            model_name = self._config[collection_name]
+        if model_name is not None:
+            self._config[collection_name] = model_name
+            model = load_embedding_model(model_name)
+            return self._client.get_or_create_collection(
+                collection_name, metadata=metadata, embedding_fn=model
+            )
+        else:
+            return self._client.get_or_create_collection(
+                collection_name, metadata=metadata
+            )
 
     def get(self, name: None | EmbeddingType | str = None) -> Sequence[Collection]:
         """Get the Chroma collections.
@@ -61,6 +88,8 @@ class Collections:
             collection_name = name.name.lower()
         else:
             collection_name = name
+        if collection_name in self._config:
+            del self._config[collection_name]
         self._client.delete_collection(collection_name)
 
     def _set_collection_name(self, name: EmbeddingType | str) -> str:

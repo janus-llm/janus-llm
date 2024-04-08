@@ -1,7 +1,7 @@
 import uuid
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Sequence
+from typing import Any, Dict, Optional, Sequence
 
 from chromadb import Client, Collection
 
@@ -14,17 +14,19 @@ from .database import ChromaEmbeddingDatabase
 class Vectorizer(object):
     """Class for creating embeddings/vectors in a specified ChromaDB"""
 
-    def __init__(self, client: Client) -> None:
+    def __init__(self, client: Client, config: Optional[Dict[str, Any]] = None) -> None:
         """Initializes the Vectorizer class
 
         Arguments:
             client: ChromaDB client instance
         """
         self._db = client
-        self._collections = Collections(self._db)
+        self._collections = Collections(self._db, config)
 
-    def create_collection(self, embedding_type: EmbeddingType) -> Collection:
-        return self._collections.create(embedding_type)
+    def create_collection(
+        self, embedding_type: EmbeddingType, model_name: Optional[str] = None
+    ) -> Collection:
+        return self._collections.create(embedding_type, model_name=model_name)
 
     def collections(
         self, name: None | EmbeddingType | str = None
@@ -129,12 +131,18 @@ class Vectorizer(object):
         collection.upsert(ids=ids, documents=texts, metadatas=metadatas)
         return ids
 
+    @property
+    def config(self):
+        return self._collections._config
+
 
 class VectorizerFactory(ABC):
     """Interface for creating a Vectorizer independent of type of ChromaDB client"""
 
     @abstractmethod
-    def create_vectorizer(self, path: str | Path) -> Vectorizer:
+    def create_vectorizer(
+        self, path: str | Path, config: Dict[str, Any] = {}
+    ) -> Vectorizer:
         """Factory method"""
 
 
@@ -144,6 +152,7 @@ class ChromaDBVectorizer(VectorizerFactory):
     def create_vectorizer(
         self,
         path: str | Path = Path.home() / ".janus" / "chroma" / "chroma-data",
+        config: Optional[Dict[str, Any]] = None,
     ) -> Vectorizer:
         """
         Arguments:
@@ -154,4 +163,4 @@ class ChromaDBVectorizer(VectorizerFactory):
                 Vectorizer
         """
         database = ChromaEmbeddingDatabase(path)
-        return Vectorizer(database)
+        return Vectorizer(database, config)
