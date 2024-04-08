@@ -29,7 +29,7 @@ class TestChrF(unittest.TestCase):
             word_order=self.word_order,
             beta=self.beta,
         )
-        expected_score = float(score.score)
+        expected_score = float(score.score) / 100.0
         self.assertEqual(function_score, expected_score)
 
     def test_chrf_invalid_target_type(self):

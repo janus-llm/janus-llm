@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Annotated, Optional
 
 import click
 import typer
@@ -13,23 +13,31 @@ from .metric import metric
 def bleu(
     target: str,
     reference: str,
-    smooth_method: str = typer.Option(
-        default="exp",
-        click_type=click.Choice(["exp", "floor", "add-k", "none"]),
-        help="Smoothing method to use.",
-    ),
-    smooth_value: Optional[float] = typer.Option(
-        default=None,
-        help="Smoothing value (only for 'floor' and 'add-k').",
-    ),
-    lowercase: bool = typer.Option(
-        default=False,
-        help="Whether to lowercase the data.",
-    ),
-    use_effective_order: bool = typer.Option(
-        default=True,
-        help="Whether to use n-gram orders without matches.",
-    ),
+    smooth_method: Annotated[
+        str,
+        typer.Option(
+            click_type=click.Choice(["exp", "floor", "add-k", "none"]),
+            help="Smoothing method to use.",
+        ),
+    ] = "exp",
+    smooth_value: Annotated[
+        Optional[float],
+        typer.Option(
+            help="Smoothing value (only for 'floor' and 'add-k').",
+        ),
+    ] = None,
+    lowercase: Annotated[
+        bool,
+        typer.Option(
+            help="Whether to lowercase the data.",
+        ),
+    ] = False,
+    use_effective_order: Annotated[
+        bool,
+        typer.Option(
+            help="Whether to use n-gram orders without matches.",
+        ),
+    ] = True,
     **kwargs,
 ) -> float:
     """Computes BLEU score using sacrebleu
@@ -53,4 +61,6 @@ def bleu(
         lowercase=lowercase,
         use_effective_order=use_effective_order,
     )
-    return float(score.score)
+    # Dividing by 100 to get the score in the range [0, 1]
+    # sacrebleu gives the score in percentage
+    return float(score.score) / 100.0
