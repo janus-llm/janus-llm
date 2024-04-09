@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-import openai.error
+import openai
 from langchain_community.callbacks import get_openai_callback
 
 from .converter import Converter, run_if_changed
@@ -157,9 +157,9 @@ class Translator(Converter):
             try:
                 out_block = self.translate_file(in_path)
                 total_cost += out_block.total_cost
-            except openai.error.RateLimitError:
+            except openai.RateLimitError:
                 continue
-            except openai.error.InvalidRequestError as e:
+            except openai.InvalidRequestError as e:
                 if str(e).startswith("Detected an error in the prompt"):
                     log.warning("Malformed input, skipping")
                     continue

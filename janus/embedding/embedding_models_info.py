@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Tuple
 
 from dotenv import load_dotenv
-from langchain_community.embeddings import HuggingFaceEmbeddings, OpenAIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_core.embeddings import Embeddings
+from langchain_openai import OpenAIEmbeddings
 
 load_dotenv()
 
