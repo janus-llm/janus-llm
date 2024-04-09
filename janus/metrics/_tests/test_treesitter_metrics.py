@@ -1,9 +1,9 @@
 import unittest
 
-from ..cyclomatic_complexity import cyclomatic_complexity
+from ..complexity_metrics import cyclomatic_complexity, effort
 
 
-class TestCyclomaticComplexity(unittest.TestCase):
+class TestTreesitterMetrics(unittest.TestCase):
     def setUp(self):
         self.target_text = """
                 SAMP1    CSECT
@@ -32,10 +32,15 @@ class TestCyclomaticComplexity(unittest.TestCase):
          """
 
     def test_cyclomatic_complexity(self):
-        """Test the cyclomayfunction with custom parameters."""
+        """Test the cyclomatic complexity function."""
         function_score = cyclomatic_complexity(self.target_text, language="ibmhlasm")
         expected_score = 3
         self.assertEqual(function_score, expected_score)
+
+    def test_halstead_effort(self):
+        """Test the halstead effort."""
+        function_score = effort(self.target_text, language="ibmhlasm")
+        self.assertGreater(function_score, 0)
 
 
 if __name__ == "__main__":

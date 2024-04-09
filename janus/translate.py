@@ -2,8 +2,8 @@ import re
 from pathlib import Path
 from typing import Any, Dict
 
-from langchain.callbacks import get_openai_callback
 from langchain.output_parsers.fix import OutputFixingParser
+from langchain_community.callbacks import get_openai_callback
 from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import BaseOutputParser
 from openai import BadRequestError, RateLimitError

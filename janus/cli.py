@@ -66,6 +66,36 @@ llm = typer.Typer(
 )
 
 
+def version_callback(value: bool) -> None:
+    if value:
+        from . import __version__ as version
+
+        print(f"Janus CLI [blue]v{version}[/blue]")
+        raise typer.Exit()
+
+
+@app.callback()
+def common(
+    ctx: typer.Context,
+    version: bool = typer.Option(
+        None,
+        "--version",
+        "-v",
+        callback=version_callback,
+        help="Print the version and exit.",
+    ),
+) -> None:
+    """A function for getting the app version
+
+    This will call the version_callback function to print the version and exit.
+
+    Arguments:
+        ctx: The typer context
+        version: A boolean flag for the version
+    """
+    pass
+
+
 @app.command(
     help="Translate code from one language to another using an LLM.",
     no_args_is_help=True,
