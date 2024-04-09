@@ -1,9 +1,11 @@
 import json
 import re
 
+from langchain.output_parsers import PydanticOutputParser
 from langchain.output_parsers.json import parse_json_markdown
 from langchain.schema.output_parser import BaseOutputParser
 from langchain_core.exceptions import OutputParserException
+from langchain_core.pydantic_v1 import BaseModel, Field
 
 from ..language.block import CodeBlock
 from ..utils.logger import create_logger
@@ -12,35 +14,39 @@ from .code_parser import JanusParser
 log = create_logger(__name__)
 
 
-class DocumentationParser(BaseOutputParser[str], JanusParser):
+class Docs(BaseModel):
+    docstring: str = Field(
+        description="A Sphinx-style docstring for the code, including a summary "
+        "of its functionality; the name, type, and description of "
+        "any parameters or returns; and any potential exceptions "
+        "that might arise in its execution"
+    )
+    example_usage: str = Field(
+        description="A well-commented minimal example utilizing the given "
+        "code's functionality"
+    )
+    pseudocode: str = Field(
+        description="A Python-stype pseudocode implementation of the module or "
+        "function's behavior"
+    )
+
+
+class DocumentationParser(PydanticOutputParser, JanusParser):
+    block_name: str = ""
+
+    def __init__(self):
+        PydanticOutputParser.__init__(self, pydantic_object=Docs)
+
+    def set_reference(self, block: CodeBlock):
+        self.block_name = block.name
+
     def parse(self, text: str) -> str:
-        """Parse the JSON object, convert keys to lowercase, filter out
-        unexpected keys
-
-        Arguments:
-            text: The output text from the LLM.
-
-        Returns:
-            A parsed version of the text.
-        """
-        description = r'"""(.*?)"""'
-        input_output = r"\[\[(.*?)\]\]"
-        example_code = r"```(.*?)```"
-        documentation = rf"{description}\s*{input_output}\s*{example_code}"
-        match = re.search(documentation, text, re.DOTALL)
-        if match is None:
-            raise OutputParserException("Missing some piece of documentation")
-
-        obj = dict(
-            description=match.group(1).strip(),
-            input_output=match.group(2).strip(),
-            example_code=match.group(3).strip(),
-        )
-        return json.dumps(obj)
+        docs = json.loads(super().parse(text).json())
+        docs["name"] = self.block_name
+        return json.dumps(docs)
 
     def parse_combined_output(self, text: str) -> str:
-        """Parse the JSON object, convert keys to lowercase, filter out
-        unexpected keys, and average the values
+        """Parse the output text from the LLM when multiple inputs are combined.
 
         Arguments:
             text: The output text from the LLM.
@@ -48,21 +54,11 @@ class DocumentationParser(BaseOutputParser[str], JanusParser):
         Returns:
             A parsed version of the text.
         """
-        description = r'"""(.*?)"""'
-        input_output = r"\[\[(.*?)\]\]"
-        example_code = r"```(.*?)```"
-        documentation = rf"{description}\s*{input_output}\s*{example_code}"
-        matches = re.findall(documentation, text, re.DOTALL)
-
         objs = [
-            dict(
-                description=a.strip(),
-                input_output=b.strip(),
-                example_code=c.strip(),
-            )
-            for a, b, c in matches
+            parse_json_markdown(line.strip()) for line in text.split("\n") if line.strip()
         ]
-        return json.dumps(objs)
+        output_obj = {d.pop("name"): d for d in objs}
+        return json.dumps(output_obj)
 
     def get_format_instructions(self) -> str:
         """Get the format instructions for the parser.
@@ -71,10 +67,9 @@ class DocumentationParser(BaseOutputParser[str], JanusParser):
             The format instructions for the LLM.
         """
         return (
-            "Output must contain code description, input/output specification, and "
-            'example code. The description should be enclosed in triple quotes ("""), '
-            "the input/output specification in double brackets ([[]]), and the "
-            "example code in triple backticks (```)."
+            "Output must contain a title, code description, input/output specification, "
+            "and example code, all in a json-formatted string with the following fields: "
+            '"name", "description", "input_output", and "example_code".'
         )
 
     @property

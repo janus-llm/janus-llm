@@ -159,8 +159,8 @@ class Translator(Converter):
                 total_cost += out_block.total_cost
             except RateLimitError:
                 continue
-            except OutputParserException:
-                log.error(f"Failed to parse output for file {in_path.name}, skipping")
+            except OutputParserException as e:
+                log.error(f"Skipping {in_path.name}, failed to parse output: {e}.")
                 continue
             except BadRequestError as e:
                 if str(e).startswith("Detected an error in the prompt"):
@@ -449,12 +449,12 @@ class Translator(Converter):
         If the relevant fields have not been changed since the last time this method was
         called, nothing happens.
         """
-        if "text" == self._target_language and self._parser_type not in {"text", "doc"}:
+        if "text" == self._target_language and self._parser_type != "text":
             raise ValueError(
                 f"Target language ({self._target_language}) suggests target "
                 f"parser should be 'text', but is '{self._parser_type}'"
             )
-        if "eval" == self._parser_type and "json" != self._target_language:
+        if self._parser_type in {"eval", "doc"} and "json" != self._target_language:
             raise ValueError(
                 f"Parser type ({self._parser_type}) suggests target language"
                 f" should be 'json', but is '{self._target_language}'"
@@ -552,7 +552,7 @@ class Documenter(Translator):
             model=model,
             model_arguments=model_arguments,
             source_language=source_language,
-            target_language="text",
+            target_language="json",
             target_version=None,
             max_prompts=max_prompts,
             prompt_template="document",
