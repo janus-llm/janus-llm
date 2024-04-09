@@ -3,6 +3,7 @@ import unittest
 from typer.testing import CliRunner
 
 from ..cli import app
+from ..embedding.embedding_models_info import EMBEDDING_MODEL_CONFIG_DIR
 from ..llm.models_info import MODEL_CONFIG_DIR
 
 
@@ -59,8 +60,40 @@ class TestCli(unittest.TestCase):
         result = self.runner.invoke(app, ["db", "status"])
         self.assertEqual(result.exit_code, 0)
 
+    def test_embedding_add(self):
+        embedding_model_path = (
+            EMBEDDING_MODEL_CONFIG_DIR / "test-embedding-model-name.json"
+        )
+        if embedding_model_path.exists():
+            embedding_model_path.unlink()
+        result = self.runner.invoke(
+            app, ["embedding", "add", "test-embedding-model-name"]
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertTrue(embedding_model_path.exists())
+        embedding_model_path.unlink()
+
     def test_db_add_and_rm(self):
-        result = self.runner.invoke(app, ["db", "add", "test-db-name"])
+        embedding_model_path = (
+            EMBEDDING_MODEL_CONFIG_DIR / "test-embedding-model-name.json"
+        )
+        if embedding_model_path.exists():
+            embedding_model_path.unlink()
+        result = self.runner.invoke(
+            app, ["embedding", "add", "test-embedding-model-name"]
+        )
+        result = self.runner.invoke(
+            app,
+            [
+                "db",
+                "add",
+                "test-db-name",
+                "test-embedding-model-name",
+                "-i",
+                "janus/language/mumps",
+            ],
+        )
+        embedding_model_path.unlink()
         self.assertEqual(result.exit_code, 0)
 
         result = self.runner.invoke(app, ["db", "rm", "test-db-name", "-y"])

@@ -226,7 +226,7 @@ def document(
     input_dir: Annotated[
         Path,
         typer.Option(
-            "--input-dir",
+            "--input",
             "-i",
             help="The directory containing the source code to be translated. "
             "The files should all be in one flat directory.",
@@ -420,19 +420,17 @@ def db_ls(
 @db.command("add", help="Add a collection to the current database.")
 def db_add(
     collection_name: Annotated[str, typer.Argument(help="The name of the collection.")],
-    model_name: Annotated[
-        str, typer.Argument(help="The name of the embedding model to use")
-    ],
+    model_name: Annotated[str, typer.Argument(help="The name of the embedding model.")],
     input_dir: Annotated[
         str,
         typer.Option(
-            "--input-dir",
+            "--input",
             "-i",
             help="The directory containing the source code to be added.",
         ),
     ] = "./",
     input_lang: Annotated[
-        str, typer.Option("--input-lang", "-i", help="The language of the source code.")
+        str, typer.Option("--language", "-l", help="The language of the source code.")
     ] = "python",
     max_tokens: Annotated[
         int,
