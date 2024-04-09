@@ -24,8 +24,7 @@ from .llm.models_info import (
     TOKEN_LIMITS,
 )
 from .metrics.cli import evaluate
-from .parsers.code_parser import PARSER_TYPES
-from .translate import Documenter, MadLibsDocumenter, Translator
+from .translate import PARSER_TYPES, Documenter, MadLibsDocumenter, Translator
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
 
@@ -69,11 +68,41 @@ llm = typer.Typer(
 )
 
 embedding = typer.Typer(
-    help="Embedding Model Commands",
+    help="Embedding model commands",
     add_completion=False,
     no_args_is_help=True,
     context_settings={"help_option_names": ["-h", "--help"]},
 )
+
+
+def version_callback(value: bool) -> None:
+    if value:
+        from . import __version__ as version
+
+        print(f"Janus CLI [blue]v{version}[/blue]")
+        raise typer.Exit()
+
+
+@app.callback()
+def common(
+    ctx: typer.Context,
+    version: bool = typer.Option(
+        None,
+        "--version",
+        "-v",
+        callback=version_callback,
+        help="Print the version and exit.",
+    ),
+) -> None:
+    """A function for getting the app version
+
+    This will call the version_callback function to print the version and exit.
+
+    Arguments:
+        ctx: The typer context
+        version: A boolean flag for the version
+    """
+    pass
 
 
 @app.command(
@@ -222,7 +251,7 @@ def document(
         str,
         typer.Option(
             "--llm",
-            "-n",
+            "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ] = "gpt-3.5-turbo",
@@ -305,13 +334,15 @@ def document(
 
 @db.command("init", help="Connect to or create a database.")
 def db_init(
-    path: Annotated[str, typer.Option(help="The path to the database file.")] = str(
-        janus_dir / "chroma.db"
-    ),
+    path: Annotated[
+        str, typer.Option("--path", "-p", help="The path to the database file.")
+    ] = str(janus_dir / "chroma.db"),
     url: Annotated[
         str,
         typer.Option(
-            help="The URL of the database if the database is running externally."
+            "--url",
+            "-u",
+            help="The URL of the database if the database is running externally.",
         ),
     ] = "",
 ) -> None:
@@ -352,7 +383,7 @@ def db_ls(
     ] = None,
     peek: Annotated[
         Optional[int],
-        typer.Option(help="Peek at N entries for a specific collection."),
+        typer.Option("--peek", "-p", help="Peek at N entries for a specific collection."),
     ] = None,
 ) -> None:
     """List the current database's collections"""
@@ -390,19 +421,25 @@ def db_ls(
 def db_add(
     collection_name: Annotated[str, typer.Argument(help="The name of the collection.")],
     model_name: Annotated[
-        str, typer.Argument(help="The name of the embedding mode to use")
+        str, typer.Argument(help="The name of the embedding model to use")
     ],
     input_dir: Annotated[
         str,
-        typer.Option(help="The directory containing the source code to be added."),
+        typer.Option(
+            "--input-dir",
+            "-i",
+            help="The directory containing the source code to be added.",
+        ),
     ] = "./",
     input_lang: Annotated[
-        str, typer.Option(help="The language of the source code.")
+        str, typer.Option("--input-lang", "-i", help="The language of the source code.")
     ] = "python",
     max_tokens: Annotated[
         int,
         typer.Option(
-            help="The maximum number of tokens for each chunk of input source code."
+            "--max-tokens",
+            "-m",
+            help="The maximum number of tokens for each chunk of input source code.",
         ),
     ] = 4096,
 ) -> None:
@@ -410,8 +447,10 @@ def db_add(
 
     Arguments:
         collection_name: The name of the collection to add
+        model_name: The name of the embedding model to use
         input_dir: The directory containing the source code to be added
         input_lang: The language of the source code
+        max_tokens: The maximum number of tokens for each chunk of input source code
     """
     # TODO: import factory
     console = Console()
@@ -458,26 +497,30 @@ def db_add(
                 collection_name,
                 input_path.name,
             )
+    total_files = len([p for p in Path.glob(input_dir, "**/*") if not p.is_dir()])
     if added_to:
         print(
             f"\nAdded to [bold salmon1]{collection_name}[/bold salmon1]:\n"
+            f"  Embedding Model: [green]{model_name}[/green]\n"
             f"  Input Directory: {input_dir.absolute()}\n"
             f"  {input_lang.capitalize()} [green]*.{suffix}[/green] Files: "
             f"{len(input_paths)}\n"
             "  Other Files (skipped): "
-            f"{len(list(input_dir.iterdir())) - len(input_paths)}\n"
+            f"{total_files - len(input_paths)}\n"
         )
+        [p for p in Path.glob(input_dir, f"**/*.{suffix}") if not p.is_dir()]
     else:
         print(
             f"\nCreated [bold salmon1]{collection_name}[/bold salmon1]:\n"
+            f"  Embedding Model: '{model_name}'\n"
             f"  Input Directory: {input_dir.absolute()}\n"
             f"  {input_lang.capitalize()} [green]*.{suffix}[/green] Files: "
             f"{len(input_paths)}\n"
             "  Other Files (skipped): "
-            f"{len(list(input_dir.iterdir())) - len(input_paths)}\n"
+            f"{total_files - len(input_paths)}\n"
         )
     with open(collections_config_file, "w") as f:
-        json.dump(vectorizer.config, f)
+        json.dump(vectorizer.config, f, indent=2)
 
 
 @db.command(
@@ -485,17 +528,28 @@ def db_add(
     help="Remove a collection from the database.",
 )
 def db_rm(
-    collection_name: Annotated[str, typer.Argument(help="The name of the collection.")]
+    collection_name: Annotated[str, typer.Argument(help="The name of the collection.")],
+    confirm: Annotated[
+        bool,
+        typer.Option(
+            "--yes",
+            "-y",
+            help="Confirm the removal of the collection.",
+        ),
+    ],
 ) -> None:
     """Remove a collection from the database
 
     Arguments:
         collection_name: The name of the collection to remove
     """
-    delete = Confirm.ask(
-        f"\nAre you sure you want to [bold red]remove[/bold red] "
-        f"[bold salmon1]{collection_name}[/bold salmon1]?",
-    )
+    if not confirm:
+        delete = Confirm.ask(
+            f"\nAre you sure you want to [bold red]remove[/bold red] "
+            f"[bold salmon1]{collection_name}[/bold salmon1]?",
+        )
+    else:
+        delete = True
     if not delete:
         raise typer.Abort()
     db = ChromaEmbeddingDatabase(db_loc)
@@ -607,7 +661,7 @@ def llm_add(
 @embedding.command("add", help="Add an embedding model config to janus")
 def embedding_add(
     model_name: Annotated[
-        str, typer.Argument(help="The user's custom name of the model")
+        str, typer.Argument(help="The user's custom name for the model")
     ],
     model_type: Annotated[
         str,

@@ -1,5 +1,6 @@
 import argparse
 import json
+import re
 from pathlib import Path
 
 parser = argparse.ArgumentParser(
@@ -33,6 +34,14 @@ for comment_file in output_dir.rglob("*.json"):
         print(f"Skipping file: {comment_file.name}")
         continue
     obj = json.loads(comment_file.read_text())
+
+    master_obj[key]["comment_types"] = {
+        k: v.lower()
+        for v, k in re.findall(
+            r"<(BLOCK|INLINE)_COMMENT (\w{8})>", master_obj[key]["processed"]
+        )
+    }
+
     valid_keys = set(master_obj[key]["comments"].keys())
     missing_keys = valid_keys.difference(obj.keys())
     invalid_keys = set(obj.keys()).difference(valid_keys)
