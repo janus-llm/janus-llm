@@ -5,7 +5,7 @@ from typing import Any, Dict
 from langchain.output_parsers.fix import OutputFixingParser
 from langchain_community.callbacks import get_openai_callback
 from langchain_core.exceptions import OutputParserException
-from langchain_core.output_parsers import BaseOutputParser
+from langchain_core.output_parsers import BaseOutputParser, StrOutputParser
 from openai import BadRequestError, RateLimitError
 
 from .converter import Converter, run_if_changed
@@ -482,7 +482,7 @@ class Translator(Converter):
             )
         elif "text" == self._parser_type:
             self._parser = JanusParser()
-            self.parser = BaseOutputParser()
+            self.parser = StrOutputParser()
         else:
             raise ValueError(
                 f"Unsupported parser type: {self._parser_type}. Can be: "
