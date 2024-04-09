@@ -1,15 +1,12 @@
 import json
 from pathlib import Path
-from typing import List
 
 from langchain.prompts import ChatPromptTemplate
 from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
     SystemMessagePromptTemplate,
 )
-from langchain.schema.messages import BaseMessage
 
-from ..language.block import CodeBlock
 from ..utils.enums import LANGUAGES
 from ..utils.logger import create_logger
 
@@ -18,12 +15,13 @@ log = create_logger(__name__)
 
 # Prompt names (self.template_map keys) that should output text,
 # regardless of the `output-lang` argument.
-TEXT_OUTPUT = ["document", "requirements"]
+TEXT_OUTPUT = ["requirements"]
+
 # Prompt names (self.template_map keys) that should output the
 # same language as the input, regardless of the `output-lang` argument.
 SAME_OUTPUT = ["document_inline"]
 
-JSON_OUTPUT = ["evaluate"]
+JSON_OUTPUT = ["evaluate", "document", "document_madlibs"]
 
 # Directory containing Janus prompt template directories and files
 JANUS_PROMPT_TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -83,20 +81,7 @@ class PromptEngine:
         variables_path = template_path / PROMPT_VARIABLES_FILENAME
         if variables_path.exists():
             self.variables.update(json.loads(variables_path.read_text()))
-
-    def create(self, code: CodeBlock) -> List[BaseMessage]:
-        """Convert a code block to a Chat GPT prompt.
-
-        Arguments:
-            code: The code block to convert.
-
-        Returns:
-            The converted prompt as a list of messages.
-        """
-        return self.prompt.format_prompt(
-            SOURCE_CODE=code.text,
-            **self.variables,
-        ).to_messages()
+        self.prompt = self.prompt.partial(**self.variables)
 
     @staticmethod
     def get_prompt_template_path(template_name: str) -> Path:

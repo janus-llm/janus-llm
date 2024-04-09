@@ -23,8 +23,7 @@ from .llm.models_info import (
     TOKEN_LIMITS,
 )
 from .metrics.cli import evaluate
-from .parsers.code_parser import PARSER_TYPES
-from .translate import Documenter, MadLibsDocumenter, Translator
+from .translate import PARSER_TYPES, Documenter, MadLibsDocumenter, Translator
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
 
@@ -235,7 +234,7 @@ def document(
         str,
         typer.Option(
             "--llm",
-            "-n",
+            "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ] = "gpt-3.5-turbo",
@@ -309,13 +308,15 @@ def document(
 
 @db.command("init", help="Connect to or create a database.")
 def db_init(
-    path: Annotated[str, typer.Option(help="The path to the database file.")] = str(
-        janus_dir / "chroma.db"
-    ),
+    path: Annotated[
+        str, typer.Option("--path", "-p", help="The path to the database file.")
+    ] = str(janus_dir / "chroma.db"),
     url: Annotated[
         str,
         typer.Option(
-            help="The URL of the database if the database is running externally."
+            "--url",
+            "-u",
+            help="The URL of the database if the database is running externally.",
         ),
     ] = "",
 ) -> None:
@@ -351,7 +352,7 @@ def db_ls(
     ] = None,
     peek: Annotated[
         Optional[int],
-        typer.Option(help="Peek at N entries for a specific collection."),
+        typer.Option("--peek", "-p", help="Peek at N entries for a specific collection."),
     ] = None,
 ) -> None:
     """List the current database's collections"""
@@ -390,15 +391,21 @@ def db_add(
     collection_name: Annotated[str, typer.Argument(help="The name of the collection.")],
     input_dir: Annotated[
         str,
-        typer.Option(help="The directory containing the source code to be added."),
+        typer.Option(
+            "--input-dir",
+            "-i",
+            help="The directory containing the source code to be added.",
+        ),
     ] = "./",
     input_lang: Annotated[
-        str, typer.Option(help="The language of the source code.")
+        str, typer.Option("--input-lang", "-i", help="The language of the source code.")
     ] = "python",
     max_tokens: Annotated[
         int,
         typer.Option(
-            help="The maximum number of tokens for each chunk of input source code."
+            "--max-tokens",
+            "-m",
+            help="The maximum number of tokens for each chunk of input source code.",
         ),
     ] = 4096,
 ) -> None:
@@ -408,6 +415,7 @@ def db_add(
         collection_name: The name of the collection to add
         input_dir: The directory containing the source code to be added
         input_lang: The language of the source code
+        max_tokens: The maximum number of tokens for each chunk of input source code
     """
     # TODO: import factory
     console = Console()
@@ -447,6 +455,7 @@ def db_add(
                 collection_name,
                 input_path.name,
             )
+    total_files = len([p for p in Path.glob(input_dir, "**/*") if not p.is_dir()])
     if added_to:
         print(
             f"\nAdded to [bold salmon1]{collection_name}[/bold salmon1]:\n"
@@ -454,8 +463,9 @@ def db_add(
             f"  {input_lang.capitalize()} [green]*.{suffix}[/green] Files: "
             f"{len(input_paths)}\n"
             "  Other Files (skipped): "
-            f"{len(list(input_dir.iterdir())) - len(input_paths)}\n"
+            f"{total_files - len(input_paths)}\n"
         )
+        [p for p in Path.glob(input_dir, f"**/*.{suffix}") if not p.is_dir()]
     else:
         print(
             f"\nCreated [bold salmon1]{collection_name}[/bold salmon1]:\n"
@@ -463,7 +473,7 @@ def db_add(
             f"  {input_lang.capitalize()} [green]*.{suffix}[/green] Files: "
             f"{len(input_paths)}\n"
             "  Other Files (skipped): "
-            f"{len(list(input_dir.iterdir())) - len(input_paths)}\n"
+            f"{total_files - len(input_paths)}\n"
         )
 
 
@@ -472,17 +482,28 @@ def db_add(
     help="Remove a collection from the database.",
 )
 def db_rm(
-    collection_name: Annotated[str, typer.Argument(help="The name of the collection.")]
+    collection_name: Annotated[str, typer.Argument(help="The name of the collection.")],
+    confirm: Annotated[
+        bool,
+        typer.Option(
+            "--yes",
+            "-y",
+            help="Confirm the removal of the collection.",
+        ),
+    ],
 ) -> None:
     """Remove a collection from the database
 
     Arguments:
         collection_name: The name of the collection to remove
     """
-    delete = Confirm.ask(
-        f"\nAre you sure you want to [bold red]remove[/bold red] "
-        f"[bold salmon1]{collection_name}[/bold salmon1]?",
-    )
+    if not confirm:
+        delete = Confirm.ask(
+            f"\nAre you sure you want to [bold red]remove[/bold red] "
+            f"[bold salmon1]{collection_name}[/bold salmon1]?",
+        )
+    else:
+        delete = True
     if not delete:
         raise typer.Abort()
     db = ChromaEmbeddingDatabase(db_loc)
