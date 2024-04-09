@@ -15,12 +15,9 @@ EMBEDDING_MODEL_TYPE_CONSTRUCTORS: Dict[str, Callable[[Any], Embeddings]] = {
 }
 
 EMBEDDING_MODEL_TYPES: Dict[str, Any] = {
-    "gpt-4": "OpenAI",
-    "gpt-4-32k": "OpenAI",
-    "gpt-4-1106-preview": "OpenAI",
-    "gpt-4-0125-preview": "OpenAI",
-    "gpt-3.5-turbo": "OpenAI",
-    "gpt-3.5-turbo-16k": "OpenAI",
+    "text-embedding-3-small": "OpenAI",
+    "text-embedding-3-large": "OpenAI",
+    "text-embedding-ada-002": "OpenAI",
 }
 
 _open_ai_defaults: Dict[str, Any] = {
@@ -29,12 +26,9 @@ _open_ai_defaults: Dict[str, Any] = {
 }
 
 EMBEDDING_MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
-    "gpt-4": dict(model="gpt-4"),
-    "gpt-4-32k": dict(model="gpt-4-32k"),
-    "gpt-4-1106-preview": dict(model="gpt-4-1106-preview"),
-    "gpt-4-0125-preview": dict(model="gpt-4-0125-preview"),
-    "gpt-3.5-turbo": dict(model="gpt-3.5-turbo"),
-    "gpt-3.5-turbo-16k": dict(model="gpt-3.5-turbo-16k"),
+    "text-embedding-3-small": dict(model="text-embedding-3-small"),
+    "text-embedding-3-large": dict(model="text-embedding-3-large"),
+    "text-embedding-ada-002": dict(model="text-embedding-ada-002"),
 }
 
 DEFAULT_EMBEDDING_MODELS = list(EMBEDDING_MODEL_DEFAULT_ARGUMENTS.keys())
@@ -42,23 +36,15 @@ DEFAULT_EMBEDDING_MODELS = list(EMBEDDING_MODEL_DEFAULT_ARGUMENTS.keys())
 EMBEDDING_MODEL_CONFIG_DIR = Path.home().expanduser() / ".janus" / "embeddings"
 
 EMBEDDING_TOKEN_LIMITS: Dict[str, int] = {
-    "gpt-4": 8192,
-    "gpt-4-32k": 32_768,
-    "gpt-4-1106-preview": 128_000,
-    "gpt-4-0125-preview": 128_000,
-    "gpt-3.5-turbo": 4096,
-    "gpt-3.5-turbo-16k": 16_384,
+    "text-embedding-3-small": 8191,
+    "text-embedding-3-large": 8191,
     "text-embedding-ada-002": 8191,
-    "gpt4all": 16_384,
 }
 
-EMBEDDING_COST_PER_MODEL: Dict[str, Dict[str, float]] = {
-    "gpt-4": {"input": 0.03, "output": 0.06},
-    "gpt-4-32k": {"input": 0.6, "output": 0.12},
-    "gpt-4-1106-preview": {"input": 0.01, "output": 0.03},
-    "gpt-4-0125-preview": {"input": 0.01, "output": 0.03},
-    "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
-    "gpt-3.5-turbo-16k": {"input": 0.003, "output": 0.004},
+EMBEDDING_COST_PER_MODEL: Dict[str, float] = {
+    "text-embedding-3-small": 1.0 / 62500,
+    "text-embedding-3-large": 1.0 / 9615,
+    "text-embedding-ada-002": 1.0 / 12500,
 }
 
 
