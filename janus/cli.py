@@ -37,13 +37,23 @@ if not janus_dir.exists():
     janus_dir.mkdir(parents=True)
 
 db_file = janus_dir / ".db"
-db_dir = janus_dir / ".db_config"
 if not db_file.exists():
     with open(db_file, "w") as f:
         f.write(str(janus_dir / "chroma.db"))
 
 with open(db_file, "r") as f:
     db_loc = f.read()
+
+collections_config_file = Path(db_loc) / "collections.json"
+
+
+def get_collections_config():
+    if collections_config_file.exists():
+        with open(collections_config_file, "r") as f:
+            config = json.load(f)
+    else:
+        config = {}
+    return config
 
 
 app = typer.Typer(
@@ -212,13 +222,7 @@ def translate(
         raise ValueError
 
     model_arguments = dict(temperature=temp)
-    cur_db_dir = db_dir / db_loc
-    collections_config_file = cur_db_dir / "collections.json"
-    if collections_config_file.exists():
-        with open(collections_config_file, "r") as f:
-            collections_config = json.load(f)
-    else:
-        collections_config = {}
+    collections_config = get_collections_config()
     translator = Translator(
         model=llm_name,
         model_arguments=model_arguments,
@@ -318,13 +322,7 @@ def document(
     ] = None,
 ):
     model_arguments = dict(temperature=temperature)
-    cur_db_dir = db_dir / db_loc
-    collections_config_file = cur_db_dir / "collections.json"
-    if collections_config_file.exists():
-        with open(collections_config_file, "r") as f:
-            collections_config = json.load(f)
-    else:
-        collections_config = {}
+    collections_config = get_collections_config()
     if doc_mode == "module":
         documenter = Documenter(
             model=llm_name,
@@ -376,11 +374,6 @@ def db_init(
         db_loc = path
     global embedding_db
     embedding_db = ChromaEmbeddingDatabase(db_loc)
-    if not db_dir.exists():
-        db_dir.mkdir()
-    current_db_dir = db_dir / db_loc
-    if not current_db_dir.exists():
-        current_db_dir.mkdir()
 
 
 @db.command("status", help="Print current database location.")
@@ -470,13 +463,7 @@ def db_add(
     console = Console()
 
     added_to = _check_collection(collection_name, input_dir)
-    cur_db_dir = db_dir / db_loc
-    collections_config_file = cur_db_dir / "collections.json"
-    if collections_config_file.exists():
-        with open(collections_config_file, "r") as f:
-            collections_config = json.load(f)
-    else:
-        collections_config = {}
+    collections_config = get_collections_config()
 
     with console.status(
         f"Adding collection: [bold salmon]{collection_name}[/bold salmon]",

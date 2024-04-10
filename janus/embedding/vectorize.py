@@ -75,6 +75,8 @@ class Vectorizer(object):
                     "cost": 0,  # TranslatedCodeBlock has cost
                 },
             ]
+            if collection_name in self.config:
+                metadatas[0]["embedding_model"] = self.config[collection_name]
             # for now, dealing with missing metadata by skipping it
             if isinstance(code_block, TranslatedCodeBlock):
                 self._add(

@@ -35,6 +35,7 @@ class Collections:
             "time_updated": datetime.datetime.now().time().isoformat("minutes"),
         }
         if model_name is not None:
+            metadata["embedding_model"] = model_name
             self._config[collection_name] = model_name
             model = load_embedding_model(model_name)
             return self._client.create_collection(
@@ -59,8 +60,10 @@ class Collections:
         if collection_name in self._config:
             model_name = self._config[collection_name]
         if model_name is not None:
+            metadata["embedding_model"] = model_name
             self._config[collection_name] = model_name
             model = load_embedding_model(model_name)
+            metadata
             return self._client.get_or_create_collection(
                 collection_name, metadata=metadata, embedding_fn=model
             )
