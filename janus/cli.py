@@ -113,41 +113,53 @@ def translate(
     input_dir: Annotated[
         Path,
         typer.Option(
+            "--input",
+            "-i",
             help="The directory containing the source code to be translated. "
-            "The files should all be in one flat directory."
+            "The files should all be in one flat directory.",
         ),
     ],
     source_lang: Annotated[
         str,
         typer.Option(
+            "--source-language",
+            "-s",
             help="The language of the source code.",
             click_type=click.Choice(sorted(LANGUAGES)),
         ),
     ],
     output_dir: Annotated[
         Path,
-        typer.Option(help="The directory to store the translated code in."),
+        typer.Option(
+            "--output", "-o", help="The directory to store the translated code in."
+        ),
     ],
     target_lang: Annotated[
         str,
         typer.Option(
+            "--target-language",
+            "-t",
             help="The desired output language to translate the source code to. The "
             "format can follow a 'language-version' syntax.  Use 'text' to get plaintext"
             "results as returned by the LLM. Examples: `python-3.10`, `mumps`, `java-10`,"
-            "text."
+            "text.",
         ),
     ],
     llm_name: Annotated[
         str,
         typer.Option(
+            "--llm",
+            "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ] = "gpt-3.5-turbo",
     max_prompts: Annotated[
         int,
         typer.Option(
+            "--max-prompts",
+            "-m",
             help="The maximum number of times to prompt a model on one functional block "
-            "before exiting the application. This is to prevent wasting too much money."
+            "before exiting the application. This is to prevent wasting too much money.",
         ),
     ] = 10,
     overwrite: Annotated[
@@ -159,18 +171,22 @@ def translate(
     ] = False,
     temp: Annotated[
         float,
-        typer.Option(help="Sampling temperature.", min=0, max=2),
+        typer.Option("--temperature", "-T", help="Sampling temperature.", min=0, max=2),
     ] = 0.7,
     prompt_template: Annotated[
         str,
         typer.Option(
+            "--prompt-template",
+            "-p",
             help="Name of the Janus prompt template directory or "
-            "path to a directory containing those template files."
+            "path to a directory containing those template files.",
         ),
     ] = "simple",
     parser_type: Annotated[
         str,
         typer.Option(
+            "--parser",
+            "-P",
             click_type=click.Choice(sorted(PARSER_TYPES)),
             help="The type of parser to use.",
         ),

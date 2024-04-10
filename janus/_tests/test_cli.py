@@ -1,8 +1,9 @@
 import unittest
+from unittest.mock import ANY, patch
 
 from typer.testing import CliRunner
 
-from ..cli import app
+from ..cli import app, translate
 from ..embedding.embedding_models_info import EMBEDDING_MODEL_CONFIG_DIR
 from ..llm.models_info import MODEL_CONFIG_DIR
 
@@ -98,3 +99,26 @@ class TestCli(unittest.TestCase):
 
         result = self.runner.invoke(app, ["db", "rm", "test-db-name", "-y"])
         self.assertEqual(result.exit_code, 0)
+
+    @patch("janus.translate.Translator.translate", autospec=True)
+    def test_translate(self, mock_translate):
+        # Arrange
+        mock_instance = mock_translate.return_value
+        mock_instance.translate.return_value = None  # or whatever you expect
+
+        # Act
+        translate(
+            source_lang="matlab",
+            target_lang="python",
+            input_dir="/tmp/",
+            output_dir="/tmp/",
+            overwrite=True,
+            temp=0.7,
+            prompt_template="simple",
+            parser_type="code",
+            collection=None,
+        )
+
+        # Assert
+        mock_translate.assert_called_once()
+        mock_translate.assert_called_once_with(ANY, "/tmp/", "/tmp/", True, None)
