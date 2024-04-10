@@ -110,8 +110,8 @@ class TestCli(unittest.TestCase):
         translate(
             source_lang="matlab",
             target_lang="python",
-            input_dir="/tmp/",
-            output_dir="/tmp/",
+            input_dir="janus/",
+            output_dir="janus/",
             overwrite=True,
             temp=0.7,
             prompt_template="simple",
@@ -121,4 +121,4 @@ class TestCli(unittest.TestCase):
 
         # Assert
         mock_translate.assert_called_once()
-        mock_translate.assert_called_once_with(ANY, "/tmp/", "/tmp/", True, None)
+        mock_translate.assert_called_once_with(ANY, "janus/", "janus/", True, None)
