@@ -278,7 +278,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
     "ibmhlasm": {
         "comment": "*",
         "suffix": "asm",
-        "url": "https://github.com/janus-llm/tree-sitter-ibmhlasm",
+        "url": "https://github.com/janus-llm/tree-sitter-ibmhlasm.git",
+        "branch": "branch_instructions",
         "example": (
             """
                      TITLE 'Hello, World! Program'
@@ -299,6 +300,9 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
                      END   HELLO
         """
         ),
+        "branch_node_types": ["branch_instruction"],
+        "operation_node_types": ["operation"],
+        "operand_node_types": ["operand"],
     },
     "java": {
         "comment": "//",
@@ -418,6 +422,9 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "example": 'WRITE "Hello, World!"',
         "functional_node_type": "subroutine",
         "comment_node_type": "comment",
+        "branch_node_types": ["if_statement"],
+        "operation_node_types": ["command", "function"],
+        "operand_node_types": ["operand"],
     },
     "nix": {
         "comment": "#",

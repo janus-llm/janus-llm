@@ -1,20 +1,29 @@
+import re
 from pathlib import Path
 from typing import Any, Dict
 
-import openai.error
-from langchain.callbacks import get_openai_callback
+from langchain.output_parsers.fix import OutputFixingParser
+from langchain_community.callbacks import get_openai_callback
+from langchain_core.exceptions import OutputParserException
+from langchain_core.output_parsers import BaseOutputParser, StrOutputParser
+from openai import BadRequestError, RateLimitError
 
 from .converter import Converter, run_if_changed
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.splitter import EmptyTreeError, TokenLimitError
 from .llm import load_model
-from .parsers.code_parser import PARSER_TYPES, CodeParser, EvaluationParser, JanusParser
+from .parsers.code_parser import CodeParser, JanusParser
+from .parsers.doc_parser import DocumentationParser, MadlibsDocumentationParser
+from .parsers.eval_parser import EvaluationParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
 from .utils.enums import LANGUAGES
 from .utils.logger import create_logger
 
 log = create_logger(__name__)
+
+
+PARSER_TYPES: set[str] = {"code", "text", "eval", "doc"}
 
 
 class Translator(Converter):
@@ -60,6 +69,9 @@ class Translator(Converter):
         self._prompt_template_name: None | str
         self._db_path: None | str
 
+        self.parser: None | BaseOutputParser
+        self.max_prompts = max_prompts
+
         self.set_model(model_name=model, **model_arguments)
         self.set_parser_type(parser_type=parser_type)
         self.set_prompt(prompt_template=prompt_template)
@@ -70,8 +82,6 @@ class Translator(Converter):
         self.set_db_path(db_path=db_path)
 
         self._load_parameters()
-
-        self.max_prompts = max_prompts
 
     def _load_parameters(self) -> None:
         self._load_model()
@@ -147,9 +157,12 @@ class Translator(Converter):
             try:
                 out_block = self.translate_file(in_path)
                 total_cost += out_block.total_cost
-            except openai.error.RateLimitError:
+            except RateLimitError:
                 continue
-            except openai.error.InvalidRequestError as e:
+            except OutputParserException as e:
+                log.error(f"Skipping {in_path.name}, failed to parse output: {e}.")
+                continue
+            except BadRequestError as e:
                 if str(e).startswith("Detected an error in the prompt"):
                     log.warning("Malformed input, skipping")
                     continue
@@ -316,11 +329,6 @@ class Translator(Converter):
             block.translated = True
             return
 
-        log.debug(f"[{block.name}] Translating...")
-        log.debug(f"[{block.name}] Input text:\n{block.original.text}")
-        prompt = self._prompt_engine.create(block.original)
-        top_score = -1.0
-
         if self._llm is None:
             message = (
                 "Model not configured correctly, cannot translate. Try setting "
@@ -329,34 +337,14 @@ class Translator(Converter):
             log.error(message)
             raise ValueError(message)
 
-        # Retry the request up to max_prompts times before failing
-        for _ in range(self.max_prompts + 1):
-            output = self._llm.predict_messages(prompt)
-            try:
-                parsed_output = self.parser.parse(output.content)
-            except ValueError as e:
-                log.warning(f"[{block.name}] Failed to parse output: {e}")
-                log.debug(f"[{block.name}] Failed output:\n{output.content}")
-                continue
+        log.debug(f"[{block.name}] Translating...")
+        log.debug(f"[{block.name}] Input text:\n{block.original.text}")
 
-            score = self.parser.score(block.original, parsed_output)
-            if score > top_score:
-                block.text = parsed_output
-                top_score = score
+        self._parser.set_reference(block.original)
 
-            if score >= 1.0:
-                break
+        query_and_parse = self.prompt | self._llm | self.parser
 
-        else:
-            if block.text is None:
-                error_msg = (
-                    f"[{block.name}] Failed to parse output after "
-                    f"{self.max_prompts} retries. Marking as untranslated."
-                )
-                log.warning(error_msg)
-                return
-
-            log.warning(f"[{block.name}] Output not complete")
+        block.text = query_and_parse.invoke({"SOURCE_CODE": block.original.text})
 
         block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
@@ -369,7 +357,8 @@ class Translator(Converter):
         Arguments:
             block: The `CodeBlock` to save to a file.
         """
-        out_text = self.parser.parse_combined_output(block.complete_text)
+        # TODO: can't use output fixer and this system for combining output
+        out_text = self._parser.parse_combined_output(block.complete_text)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(out_text, encoding="utf-8")
 
@@ -465,14 +454,35 @@ class Translator(Converter):
                 f"Target language ({self._target_language}) suggests target "
                 f"parser should be 'text', but is '{self._parser_type}'"
             )
+        if self._parser_type in {"eval", "doc"} and "json" != self._target_language:
+            raise ValueError(
+                f"Parser type ({self._parser_type}) suggests target language"
+                f" should be 'json', but is '{self._target_language}'"
+            )
         if "code" == self._parser_type:
-            self.parser = CodeParser(language=self._target_language)
+            self._parser = CodeParser(language=self._target_language)
+            self.parser = OutputFixingParser.from_llm(
+                llm=self._llm,
+                parser=self._parser,
+                max_retries=self.max_prompts,
+            )
         elif "eval" == self._parser_type:
-            self.parser = EvaluationParser(
-                expected_keys={"syntax", "style", "completeness", "correctness"}
+            self._parser = EvaluationParser()
+            self.parser = OutputFixingParser.from_llm(
+                llm=self._llm,
+                parser=self._parser,
+                max_retries=self.max_prompts,
+            )
+        elif "doc" == self._parser_type:
+            self._parser = DocumentationParser()
+            self.parser = OutputFixingParser.from_llm(
+                llm=self._llm,
+                parser=self._parser,
+                max_retries=self.max_prompts,
             )
         elif "text" == self._parser_type:
-            self.parser = JanusParser()
+            self._parser = JanusParser()
+            self.parser = StrOutputParser()
         else:
             raise ValueError(
                 f"Unsupported parser type: {self._parser_type}. Can be: "
@@ -507,6 +517,7 @@ class Translator(Converter):
             target_version=self._target_version,
             prompt_template=self._prompt_template_name,
         )
+        self.prompt = self._prompt_engine.prompt
 
     @run_if_changed("_db_path")
     def _load_vectorizer(self) -> None:
@@ -541,11 +552,11 @@ class Documenter(Translator):
             model=model,
             model_arguments=model_arguments,
             source_language=source_language,
-            target_language="text",
+            target_language="json",
             target_version=None,
             max_prompts=max_prompts,
             prompt_template="document",
-            parser_type="text",
+            parser_type="doc",
             db_path=db_path,
         )
 
@@ -566,3 +577,69 @@ class Documenter(Translator):
         )
         log.info(f"[{filename}] Input CodeBlock Structure:\n{root.tree_str()}")
         return root
+
+
+class MadLibsDocumenter(Translator):
+    def __init__(
+        self,
+        model: str = "gpt-3.5-turbo",
+        model_arguments: Dict[str, Any] = {},
+        source_language: str = "fortran",
+        max_prompts: int = 10,
+        db_path: str | None = None,
+    ) -> None:
+        """Initialize a Translator instance.
+
+        Arguments:
+            model: The LLM to use for translation. If an OpenAI model, the
+                `OPENAI_API_KEY` environment variable must be set and the
+                `OPENAI_ORG_ID` environment variable should be set if needed.
+            model_arguments: Additional arguments to pass to the LLM constructor.
+            source_language: The source programming language.
+            max_prompts: The maximum number of prompts to try before giving up.
+        """
+        super().__init__(
+            model=model,
+            model_arguments=model_arguments,
+            source_language=source_language,
+            target_language="json",
+            target_version=None,
+            max_prompts=max_prompts,
+            prompt_template="document_madlibs",
+            parser_type="doc",
+            db_path=db_path,
+        )
+
+    @run_if_changed("_parser_type", "_target_language")
+    def _load_parser(self) -> None:
+        """Load the parser according to this instance's attributes.
+
+        If the relevant fields have not been changed since the last time this method was
+        called, nothing happens.
+        """
+        if "json" != self._target_language or "doc" != self._parser_type:
+            raise ValueError(
+                f"Invalid target language ({self._target_language}) or parser type"
+                f" ({self._parser_type}); must be 'json' and 'doc' respectively."
+            )
+        self._parser = MadlibsDocumentationParser()
+        self.parser = OutputFixingParser.from_llm(
+            llm=self._llm,
+            parser=self._parser,
+            max_retries=self.max_prompts,
+        )
+
+    def _add_translation(self, block: TranslatedCodeBlock):
+        if block.original.text:
+            first_comment = re.search(
+                r"<(?:INLINE|BLOCK)_COMMENT \w{8}>",
+                block.original.text,
+            )
+            if first_comment is None:
+                log.info(f"[{block.name}] Skipping commentless block")
+                block.translated = True
+                block.text = None
+                block.complete = True
+                return
+
+        super()._add_translation(block)

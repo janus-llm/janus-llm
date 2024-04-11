@@ -4,11 +4,11 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Tuple
 
 from dotenv import load_dotenv
-from langchain.chat_models import ChatOpenAI
-from langchain.llms import HuggingFaceTextGenInference
-from langchain.schema.language_model import BaseLanguageModel
-from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
+from langchain_community.chat_models import ChatOpenAI
+from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_community.llms.bedrock import Bedrock
+from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
+from langchain_core.language_models import BaseLanguageModel
 
 load_dotenv()
 
@@ -43,7 +43,9 @@ MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
     "gpt-4-0125-preview": dict(model_name="gpt-4-0125-preview"),
     "gpt-3.5-turbo": dict(model_name="gpt-3.5-turbo"),
     "gpt-3.5-turbo-16k": dict(model_name="gpt-3.5-turbo-16k"),
-    "anthropic.claude-3-haiku-20240307-v1:0": dict(model_name="anthropic.claude-3-haiku-20240307-v1:0"),
+    "anthropic.claude-3-haiku-20240307-v1:0": dict(
+        model_name="anthropic.claude-3-haiku-20240307-v1:0"
+    ),
     "meta.llama2-70b-v1": dict(model_name="meta.llama2-70b-v1"),
 }
 

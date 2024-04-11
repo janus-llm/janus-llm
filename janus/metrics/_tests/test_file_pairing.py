@@ -3,7 +3,7 @@
 import unittest
 from pathlib import Path
 
-from janus.metrics.file_pairing import (
+from ..file_pairing import (
     FILE_PAIRING_METHODS,
     pair_by_file,
     pair_by_line,
@@ -33,12 +33,12 @@ class TestFilePairing(unittest.TestCase):
 
     def test_pair_by_file(self):
         expected = [(self.src, self.cmp)]
-        result = pair_by_file(self.src, self.cmp, self.state)
+        result = pair_by_file(self.src, self.cmp)
         self.assertEqual(result, expected)
 
     def test_pair_by_line(self):
         expected = [("Hello", "Hello"), ("World", "Python")]
-        result = pair_by_line(self.src, self.cmp, self.state)
+        result = pair_by_line(self.src, self.cmp)
         self.assertEqual(result, expected)
 
     def test_pair_by_line_comment(self):
@@ -47,7 +47,7 @@ class TestFilePairing(unittest.TestCase):
         # You may need to adjust this test based on your specific use case
         self.target = Path(__file__).parent / "target.py"
         self.reference = Path(__file__).parent / "reference.py"
-        self.state = {
+        kwargs = {
             "token_limit": 100,
             "llm": None,
             "lang": "python",
@@ -55,5 +55,5 @@ class TestFilePairing(unittest.TestCase):
             "reference_file": self.reference,
         }
         expected = [("# Hello\n", "# Hello\n")]
-        result = pair_by_line_comment(self.src, self.cmp, self.state)
+        result = pair_by_line_comment(self.src, self.cmp, **kwargs)
         self.assertEqual(result, expected)

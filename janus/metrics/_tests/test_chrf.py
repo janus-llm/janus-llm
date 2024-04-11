@@ -15,7 +15,7 @@ class TestChrF(unittest.TestCase):
 
     def test_chrf_custom_params(self):
         """Test the chrf function with custom parameters."""
-        function_score = chrf.__wrapped__(
+        function_score = chrf(
             self.target_text,
             self.reference_text,
             self.char_order,
@@ -29,22 +29,18 @@ class TestChrF(unittest.TestCase):
             word_order=self.word_order,
             beta=self.beta,
         )
-        expected_score = float(score.score)
+        expected_score = float(score.score) / 100.0
         self.assertEqual(function_score, expected_score)
 
     def test_chrf_invalid_target_type(self):
         """Test the chrf function with invalid source text type."""
         with self.assertRaises(TypeError):
-            chrf.__wrapped__(
-                123, self.reference_text, self.char_order, self.word_order, self.beta
-            )
+            chrf(123, self.reference_text, self.char_order, self.word_order, self.beta)
 
     def test_chrf_invalid_reference_type(self):
         """Test the chrf function with invalid destination text type."""
         with self.assertRaises(TypeError):
-            chrf.__wrapped__(
-                self.target_text, 123, self.char_order, self.word_order, self.beta
-            )
+            chrf(self.target_text, 123, self.char_order, self.word_order, self.beta)
 
 
 if __name__ == "__main__":

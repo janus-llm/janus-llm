@@ -83,7 +83,7 @@ class CodeBlock:
 
     @property
     def complete_text(self) -> str:
-        return f"{self.prefix}{self.text}{self.suffix}"
+        return f"{self.prefix}{self.text or ''}{self.suffix}"
 
     @property
     def n_descendents(self) -> int:

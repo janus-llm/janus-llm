@@ -4,7 +4,7 @@ from sacrebleu import sentence_chrf
 from .metric import metric
 
 
-@metric(help="chrF score using Torchmetrics")
+@metric(help="chrF score using sacrebleu")
 def chrf(
     target: str,
     reference: str,
@@ -29,6 +29,7 @@ def chrf(
             "importance is equal."
         ),
     ),
+    **kwargs,
 ) -> float:
     """Calculate the chrF Score using Torchmetrics.
 
@@ -49,4 +50,6 @@ def chrf(
         word_order=n_word_order,
         beta=beta,
     )
-    return float(score.score)
+    # Dividing by 100 to get the score in the range [0, 1]
+    # sacrebleu gives the score in percentage
+    return float(score.score) / 100.0

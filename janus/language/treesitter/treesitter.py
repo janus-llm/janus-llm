@@ -2,6 +2,7 @@ import os
 import platform
 from collections import defaultdict
 from pathlib import Path
+from typing import Optional
 
 import tree_sitter
 from git import Repo
@@ -52,14 +53,14 @@ class TreeSitterSplitter(Splitter):
         root = self._node_to_block(root, code)
         return root
 
-    def _set_identifiers(self, root: CodeBlock, path: Path):
+    def _set_identifiers(self, root: CodeBlock, name: str):
         seen_types = defaultdict(int)
         queue = [root]
         while queue:
             node = queue.pop(0)  # BFS order to keep lower IDs toward the root
             node.id = f"{node.node_type}[{seen_types[node.node_type]}]"
             seen_types[node.node_type] += 1
-            node.name = f"{path.name}:{node.id}"
+            node.name = f"{name}:{node.id}"
             queue.extend(node.children)
 
     def _node_to_block(self, node: tree_sitter.Node, original_text: bytes) -> CodeBlock:
@@ -144,14 +145,22 @@ class TreeSitterSplitter(Splitter):
                 message = f"Tree-sitter does not support {self.language} yet."
                 log.error(message)
                 raise ValueError(message)
-            self._git_clone(github_url, lang_dir)
+            if LANGUAGES[self.language].get("branch"):
+                self._git_clone(github_url, lang_dir, LANGUAGES[self.language]["branch"])
+            else:
+                self._git_clone(github_url, lang_dir)
 
         tree_sitter.Language.build_library(str(so_file), [str(lang_dir)])
 
     @staticmethod
-    def _git_clone(repository_url: str, destination_folder: Path | str) -> None:
+    def _git_clone(
+        repository_url: str, destination_folder: Path | str, branch: Optional[str] = None
+    ) -> None:
         try:
-            Repo.clone_from(repository_url, destination_folder)
+            if branch:
+                Repo.clone_from(repository_url, destination_folder, branch=branch)
+            else:
+                Repo.clone_from(repository_url, destination_folder)
             log.debug(f"{repository_url} cloned to {destination_folder}")
         except Exception as e:
             log.error(f"Error: {e}")
