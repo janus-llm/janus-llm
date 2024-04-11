@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import MagicMock
 
 import pytest
+from langchain_community.vectorstores import Chroma
 
 from janus.embedding.collections import Collections
 from janus.utils.enums import EmbeddingType
@@ -24,7 +25,12 @@ class TestCollections(unittest.TestCase):
         }
 
         self._db.create_collection.assert_called_with("pseudo_1", metadata=metadata)
-        self.assertEqual(result, "foo")
+        self.assertEqual(
+            result,
+            Chroma(
+                client=self._db, collection_name="pseudo_1", collection_metadata=metadata
+            ),
+        )
 
     def test_creation_triangulation(self):
         self._db.create_collection.return_value = []

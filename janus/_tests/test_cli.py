@@ -1,3 +1,4 @@
+import traceback
 import unittest
 from unittest.mock import ANY, patch
 
@@ -83,6 +84,7 @@ class TestCli(unittest.TestCase):
         result = self.runner.invoke(
             app, ["embedding", "add", "test-embedding-model-name"]
         )
+        self.assertEqual(result.exit_code, 0)
         result = self.runner.invoke(
             app,
             [
@@ -94,6 +96,7 @@ class TestCli(unittest.TestCase):
                 "janus/language/mumps",
             ],
         )
+        traceback.print_exception(result.exception)
         embedding_model_path.unlink()
         self.assertEqual(result.exit_code, 0)
 

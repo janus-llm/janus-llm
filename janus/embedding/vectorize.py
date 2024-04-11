@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Sequence
 
 from chromadb import Client, Collection
+from langchain_community.vectorstores import Chroma
 
 from ..language.block import CodeBlock, TranslatedCodeBlock
 from ..utils.enums import EmbeddingType
@@ -25,12 +26,12 @@ class Vectorizer(object):
 
     def get_or_create_collection(
         self, name: EmbeddingType | str, model_name: Optional[str] = None
-    ) -> Collection:
+    ) -> Chroma:
         return self._collections.get_or_create(name, model_name=model_name)
 
     def create_collection(
         self, embedding_type: EmbeddingType, model_name: Optional[str] = None
-    ) -> Collection:
+    ) -> Chroma:
         return self._collections.create(embedding_type, model_name=model_name)
 
     def collections(

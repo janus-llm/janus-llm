@@ -12,7 +12,11 @@ from typing_extensions import Annotated
 
 from .embedding.collections import Collections
 from .embedding.database import ChromaEmbeddingDatabase
-from .embedding.embedding_models_info import EMBEDDING_MODEL_CONFIG_DIR
+from .embedding.embedding_models_info import (
+    EMBEDDING_COST_PER_MODEL,
+    EMBEDDING_MODEL_CONFIG_DIR,
+    EMBEDDING_TOKEN_LIMITS,
+)
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.binary import BinarySplitter
 from .language.mumps import MumpsSplitter
@@ -702,14 +706,16 @@ def embedding_add(
             "model_cost": {"input": in_cost, "output": out_cost},
         }
     elif model_type == "OpenAI":
-        model_name = typer.prompt("Enter the model name", default="gpt-3.5-turbo")
+        model_name = typer.prompt(
+            "Enter the model name", default="text-embedding-3-small"
+        )
         params = dict(
             model_name=model_name,
             temperature=0.7,
             n=1,
         )
-        max_tokens = TOKEN_LIMITS[model_name]
-        model_cost = COST_PER_MODEL[model_name]
+        max_tokens = EMBEDDING_TOKEN_LIMITS[model_name]
+        model_cost = EMBEDDING_COST_PER_MODEL[model_name]
         cfg = {
             "model_type": model_type,
             "model_args": params,

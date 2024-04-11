@@ -24,7 +24,7 @@ class Collections:
 
     def create(
         self, name: EmbeddingType | str, model_name: Optional[str] = None
-    ) -> Collection:
+    ) -> Chroma:
         """Create a Chroma collection for the given embedding type.
 
         Arguments:
@@ -51,7 +51,7 @@ class Collections:
 
     def get_or_create(
         self, name: EmbeddingType | str, model_name: Optional[str] = None
-    ) -> Collection:
+    ) -> Chroma:
         """Create a Chroma collection for the given embedding type.
 
         Arguments:
@@ -73,10 +73,15 @@ class Collections:
                 client=self._client,
                 collection_name=collection_name,
                 embedding_function=model,
+                collection_metadata=metadata,
             )
         else:
             self._client.get_or_create_collection(collection_name, metadata=metadata)
-            return Chroma(client=self._client, collection_name=collection_name)
+            return Chroma(
+                client=self._client,
+                collection_name=collection_name,
+                collection_metadata=metadata,
+            )
 
     def get(self, name: None | EmbeddingType | str = None) -> Sequence[Collection]:
         """Get the Chroma collections.
