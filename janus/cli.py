@@ -473,6 +473,7 @@ def db_add(
         vectorizer = vectorizer_factory.create_vectorizer(
             path=db_loc, config=collections_config
         )
+        vectorizer.get_or_create_collection(collection_name, model_name=model_name)
         input_dir = Path(input_dir)
         suffix = LANGUAGES[input_lang]["suffix"]
         source_glob = f"**/*.{suffix}"

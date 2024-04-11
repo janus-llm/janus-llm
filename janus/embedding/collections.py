@@ -3,6 +3,7 @@ import os
 from typing import Dict, Optional, Sequence
 
 from chromadb import Client, Collection
+from langchain_community.vectorstores import Chroma
 
 from ..utils.enums import EmbeddingType
 from .embedding_models_info import load_embedding_model
@@ -36,13 +37,17 @@ class Collections:
         }
         if model_name is not None:
             metadata["embedding_model"] = model_name
+            self._client.create_collection(collection_name, metadata=metadata)
             self._config[collection_name] = model_name
-            model = load_embedding_model(model_name)
-            return self._client.create_collection(
-                collection_name, metadata=metadata, embedding_fn=model
+            model, _, _ = load_embedding_model(model_name)
+            return Chroma(
+                client=self._client,
+                collection_name=collection_name,
+                embedding_function=model,
             )
         else:
-            return self._client.create_collection(collection_name, metadata=metadata)
+            self._client.create_collection(collection_name, metadata=metadata)
+            return Chroma(client=self._client, collection_name=collection_name)
 
     def get_or_create(
         self, name: EmbeddingType | str, model_name: Optional[str] = None
@@ -62,15 +67,16 @@ class Collections:
         if model_name is not None:
             metadata["embedding_model"] = model_name
             self._config[collection_name] = model_name
-            model = load_embedding_model(model_name)
-            metadata
-            return self._client.get_or_create_collection(
-                collection_name, metadata=metadata, embedding_fn=model
+            model, _, _ = load_embedding_model(model_name)
+            self._client.get_or_create_collection(collection_name, metadata=metadata)
+            return Chroma(
+                client=self._client,
+                collection_name=collection_name,
+                embedding_function=model,
             )
         else:
-            return self._client.get_or_create_collection(
-                collection_name, metadata=metadata
-            )
+            self._client.get_or_create_collection(collection_name, metadata=metadata)
+            return Chroma(client=self._client, collection_name=collection_name)
 
     def get(self, name: None | EmbeddingType | str = None) -> Sequence[Collection]:
         """Get the Chroma collections.

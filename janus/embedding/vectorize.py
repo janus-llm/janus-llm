@@ -23,6 +23,11 @@ class Vectorizer(object):
         self._db = client
         self._collections = Collections(self._db, config)
 
+    def get_or_create_collection(
+        self, name: EmbeddingType | str, model_name: Optional[str] = None
+    ) -> Collection:
+        return self._collections.get_or_create(name, model_name=model_name)
+
     def create_collection(
         self, embedding_type: EmbeddingType, model_name: Optional[str] = None
     ) -> Collection:
@@ -130,7 +135,7 @@ class Vectorizer(object):
             # based on the text.
             ids = [str(uuid.uuid3(uuid.NAMESPACE_DNS, text)) for text in texts]
         collection = self._collections.get_or_create(collection_name)
-        collection.upsert(ids=ids, documents=texts, metadatas=metadatas)
+        collection.add_texts(ids=ids, texts=texts, metadatas=metadatas)
         return ids
 
     @property
