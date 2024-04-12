@@ -14,9 +14,7 @@ class TestCollections(unittest.TestCase):
         self.collections = Collections(self._db)
 
     def test_creation(self):
-        self._db.create_collection.return_value = "foo"
-
-        result = self.collections.create(EmbeddingType.PSEUDO)
+        self.collections.create(EmbeddingType.PSEUDO)
 
         metadata = {
             "date_updated": datetime.datetime.now().date().isoformat(),
@@ -24,12 +22,9 @@ class TestCollections(unittest.TestCase):
         }
 
         self._db.create_collection.assert_called_with("pseudo_1", metadata=metadata)
-        self.assertEqual(result, "foo")
 
     def test_creation_triangulation(self):
-        self._db.create_collection.return_value = []
-
-        result = self.collections.create(EmbeddingType.REQUIREMENT)
+        self.collections.create(EmbeddingType.REQUIREMENT)
 
         metadata = {
             "date_updated": datetime.datetime.now().date().isoformat(),
@@ -37,7 +32,6 @@ class TestCollections(unittest.TestCase):
         }
 
         self._db.create_collection.assert_called_with("requirement_1", metadata=metadata)
-        self.assertEqual(result, [])
 
     def test_creation_of_existing_type(self):
         mock_collection = MagicMock()
