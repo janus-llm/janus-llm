@@ -26,7 +26,16 @@ def similarity_score(
         ),
     ] = "cosine",
     **kwargs,
-):
+) -> float:
+    """
+    Computes the similarity score of two strings
+    :param targ target string to evaluate
+    :param ref reference string
+    :param model_name name of embedding model to use
+    :param distance metric name of distance metric to use
+    :param kwargs key word arguments
+
+    """
     embedding_model, _, _ = load_embedding_model(model_name)
     evaluator = load_evaluator(
         "pairwise_embedding_distance",
