@@ -13,10 +13,11 @@ from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.splitter import EmptyTreeError, TokenLimitError
 from .llm import load_model
+from .llm.models_info import MODEL_PROMPT_ENGINES
 from .parsers.code_parser import CodeParser, JanusParser
 from .parsers.doc_parser import DocumentationParser, MadlibsDocumentationParser
 from .parsers.eval_parser import EvaluationParser
-from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
+from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT
 from .utils.enums import LANGUAGES
 from .utils.logger import create_logger
 
@@ -490,7 +491,11 @@ class Translator(Converter):
             )
 
     @run_if_changed(
-        "_prompt_template_name", "_source_language", "_target_language", "_target_version"
+        "_prompt_template_name",
+        "_source_language",
+        "_target_language",
+        "_target_version",
+        "_model_name",
     )
     def _load_prompt_engine(self) -> None:
         """Load the prompt engine according to this instance's attributes.
@@ -511,7 +516,7 @@ class Translator(Converter):
                 f"language should be 'text', but is '{self._target_language}'"
             )
 
-        self._prompt_engine = PromptEngine(
+        self._prompt_engine = MODEL_PROMPT_ENGINES[self._model_name](
             source_language=self._source_language,
             target_language=self._target_language,
             target_version=self._target_version,

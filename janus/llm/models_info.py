@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Callable, Dict, Tuple
+from typing import Any, Callable
 
 from dotenv import load_dotenv
 from langchain_community.chat_models import ChatOpenAI
@@ -9,6 +9,13 @@ from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_community.llms.bedrock import Bedrock
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain_core.language_models import BaseLanguageModel
+
+from janus.prompts.prompt import (
+    ChatGptPromptEngine,
+    ClaudePromptEngine,
+    Llama2PromptEngine,
+    PromptEngine,
+)
 
 load_dotenv()
 
@@ -19,8 +26,19 @@ MODEL_TYPE_CONSTRUCTORS: dict[str, Callable[[Any], BaseLanguageModel]] = {
     "Bedrock": Bedrock,
 }
 
+MODEL_PROMPT_ENGINES: dict[str, type[PromptEngine]] = {
+    "gpt-4": ChatGptPromptEngine,
+    "gpt-4-32k": ChatGptPromptEngine,
+    "gpt-4-1106-preview": ChatGptPromptEngine,
+    "gpt-4-0125-preview": ChatGptPromptEngine,
+    "gpt-3.5-turbo": ChatGptPromptEngine,
+    "gpt-3.5-turbo-16k": ChatGptPromptEngine,
+    "anthropic.claude-3-haiku-20240307-v1:0": ClaudePromptEngine,
+    "meta.llama2-70b-v1": Llama2PromptEngine,
+}
 
-MODEL_TYPES: Dict[str, Any] = {
+
+MODEL_TYPES: dict[str, str] = {
     "gpt-4": "OpenAI",
     "gpt-4-32k": "OpenAI",
     "gpt-4-1106-preview": "OpenAI",
@@ -31,12 +49,12 @@ MODEL_TYPES: Dict[str, Any] = {
     "meta.llama2-70b-v1": "Bedrock",
 }
 
-_open_ai_defaults: Dict[str, Any] = {
+_open_ai_defaults: dict[str, str] = {
     "openai_api_key": os.getenv("OPENAI_API_KEY"),
     "openai_organization": os.getenv("OPENAI_ORG_ID"),
 }
 
-MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
+MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, str]] = {
     "gpt-4": dict(model_name="gpt-4"),
     "gpt-4-32k": dict(model_name="gpt-4-32k"),
     "gpt-4-1106-preview": dict(model_name="gpt-4-1106-preview"),
@@ -53,7 +71,7 @@ DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
 
 MODEL_CONFIG_DIR = Path.home().expanduser() / ".janus" / "llm"
 
-TOKEN_LIMITS: Dict[str, int] = {
+TOKEN_LIMITS: dict[str, int] = {
     "gpt-4": 8192,
     "gpt-4-32k": 32_768,
     "gpt-4-1106-preview": 128_000,
@@ -66,7 +84,7 @@ TOKEN_LIMITS: Dict[str, int] = {
     "meta.llama2-70b-v1": 4096,
 }
 
-COST_PER_MODEL: Dict[str, Dict[str, float]] = {
+COST_PER_MODEL: dict[str, dict[str, float]] = {
     "gpt-4": {"input": 0.03, "output": 0.06},
     "gpt-4-32k": {"input": 0.6, "output": 0.12},
     "gpt-4-1106-preview": {"input": 0.01, "output": 0.03},
@@ -78,7 +96,7 @@ COST_PER_MODEL: Dict[str, Dict[str, float]] = {
 }
 
 
-def load_model(model_name: str) -> Tuple[BaseLanguageModel, int, Dict[str, float]]:
+def load_model(model_name: str) -> tuple[BaseLanguageModel, int, dict[str, float]]:
     if not MODEL_CONFIG_DIR.exists():
         MODEL_CONFIG_DIR.mkdir(parents=True)
     model_config_file = MODEL_CONFIG_DIR / f"{model_name}.json"
