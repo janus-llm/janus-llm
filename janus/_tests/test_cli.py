@@ -82,7 +82,8 @@ class TestCli(unittest.TestCase):
         if embedding_model_path.exists():
             embedding_model_path.unlink()
         result = self.runner.invoke(
-            app, ["embedding", "add", "test-embedding-model-name"]
+            app,
+            ["embedding", "add", "test-embedding-model-name", "-t", "HuggingFaceLocal"],
         )
         self.assertEqual(result.exit_code, 0)
         result = self.runner.invoke(
