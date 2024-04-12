@@ -3,6 +3,7 @@ import os
 from typing import Dict, Optional, Sequence
 
 from chromadb import Client, Collection
+from langchain_community.vectorstores import Chroma
 
 from ..utils.enums import EmbeddingType
 from .embedding_models_info import load_embedding_model
@@ -23,7 +24,7 @@ class Collections:
 
     def create(
         self, name: EmbeddingType | str, model_name: Optional[str] = None
-    ) -> Collection:
+    ) -> Chroma:
         """Create a Chroma collection for the given embedding type.
 
         Arguments:
@@ -35,17 +36,22 @@ class Collections:
             "time_updated": datetime.datetime.now().time().isoformat("minutes"),
         }
         if model_name is not None:
+            metadata["embedding_model"] = model_name
+            self._client.create_collection(collection_name, metadata=metadata)
             self._config[collection_name] = model_name
-            model = load_embedding_model(model_name)
-            return self._client.create_collection(
-                collection_name, metadata=metadata, embedding_fn=model
+            model, _, _ = load_embedding_model(model_name)
+            return Chroma(
+                client=self._client,
+                collection_name=collection_name,
+                embedding_function=model,
             )
         else:
-            return self._client.create_collection(collection_name, metadata=metadata)
+            self._client.create_collection(collection_name, metadata=metadata)
+            return Chroma(client=self._client, collection_name=collection_name)
 
     def get_or_create(
         self, name: EmbeddingType | str, model_name: Optional[str] = None
-    ) -> Collection:
+    ) -> Chroma:
         """Create a Chroma collection for the given embedding type.
 
         Arguments:
@@ -59,14 +65,22 @@ class Collections:
         if collection_name in self._config:
             model_name = self._config[collection_name]
         if model_name is not None:
+            metadata["embedding_model"] = model_name
             self._config[collection_name] = model_name
-            model = load_embedding_model(model_name)
-            return self._client.get_or_create_collection(
-                collection_name, metadata=metadata, embedding_fn=model
+            model, _, _ = load_embedding_model(model_name)
+            self._client.get_or_create_collection(collection_name, metadata=metadata)
+            return Chroma(
+                client=self._client,
+                collection_name=collection_name,
+                embedding_function=model,
+                collection_metadata=metadata,
             )
         else:
-            return self._client.get_or_create_collection(
-                collection_name, metadata=metadata
+            self._client.get_or_create_collection(collection_name, metadata=metadata)
+            return Chroma(
+                client=self._client,
+                collection_name=collection_name,
+                collection_metadata=metadata,
             )
 
     def get(self, name: None | EmbeddingType | str = None) -> Sequence[Collection]:
