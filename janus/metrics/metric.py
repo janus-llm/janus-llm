@@ -1,5 +1,6 @@
 import inspect
 import json
+from pathlib import Path
 from typing import Callable, Optional
 
 import click
@@ -173,6 +174,8 @@ def metric(
                             model_cost=model_cost,
                         )
                     )
+                out_file = Path(out_file)
+                out_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(out_file, "w") as f:
                     json.dump(out, f)
 
@@ -292,6 +295,8 @@ def metric(
                             model_cost=model_cost,
                         )
                     )
+                out_file = Path(out_file)
+                out_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(out_file, "w") as f:
                     json.dump(out, f)
 
