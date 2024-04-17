@@ -3,8 +3,7 @@ import typer
 from langchain.evaluation import EmbeddingDistance, load_evaluator
 from typing_extensions import Annotated
 
-from janus.embedding.embedding_models_info import load_embedding_model
-
+from ..embedding.embedding_models_info import load_embedding_model
 from .metric import metric
 
 
@@ -14,7 +13,7 @@ def similarity_score(
     reference: str,
     model_name: Annotated[
         str,
-        typer.Option("-m", "--model", help="Name of embedding model to use."),
+        typer.Option("-e", "--embedding-model", help="Name of embedding model to use."),
     ] = "text-embedding-3-small",
     distance_metric: Annotated[
         str,

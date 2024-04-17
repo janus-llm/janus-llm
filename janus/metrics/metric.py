@@ -1,5 +1,6 @@
 import inspect
 import json
+from pathlib import Path
 from typing import Callable, Optional
 
 import click
@@ -9,13 +10,16 @@ from typing_extensions import Annotated
 from janus.llm import load_model
 from janus.utils.enums import LANGUAGES
 
+from ..utils.progress import track
 from .cli import evaluate
 from .file_pairing import FILE_PAIRING_METHODS
 from .splitting import SPLITTING_METHODS
 
 
 def metric(
-    name: None | str = None, help: None | str = None, use_reference: bool = True
+    name: None | str = None,
+    help: None | str = None,
+    use_reference: bool = True,
 ) -> Callable:
     """Returns a decorator to add a given metric to the cli
 
@@ -24,6 +28,7 @@ def metric(
     Arguments:
         name: The name of the metric. If None, the function name is used.
         help: The help text for the metric.
+        use_reference: Whether the metric requires a reference string.
 
     Returns:
         The decorator function.
@@ -106,6 +111,15 @@ def metric(
                         help="The custom name of the model set with 'janus llm add'.",
                     ),
                 ] = "gpt-3.5-turbo",
+                progress: Annotated[
+                    bool,
+                    typer.Option(
+                        "--progress",
+                        "-p",
+                        help="Whether to display a progress bar.",
+                        is_flag=True,
+                    ),
+                ] = False,
                 *args,
                 **kwargs,
             ):
@@ -143,7 +157,11 @@ def metric(
                     raise ValueError(
                         "Error, must specify either json or target and reference files"
                     )
-                for src, cmp in pairs:
+                if progress:
+                    loop = track(pairs, description="Evaluating pairs")
+                else:
+                    loop = pairs
+                for src, cmp in loop:
                     out.append(
                         function(
                             src,
@@ -156,6 +174,8 @@ def metric(
                             model_cost=model_cost,
                         )
                     )
+                out_file = Path(out_file)
+                out_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(out_file, "w") as f:
                     json.dump(out, f)
 
@@ -163,7 +183,7 @@ def metric(
             sig2 = inspect.signature(func)
             func.__signature__ = sig2.replace(
                 parameters=tuple(
-                    list(sig2.parameters.values())[:9]
+                    list(sig2.parameters.values())[:10]
                     + list(sig1.parameters.values())[2:-1]
                 )
             )
@@ -222,6 +242,15 @@ def metric(
                         help="The custom name of the model set with 'janus llm add'.",
                     ),
                 ] = "gpt-3.5-turbo",
+                progress: Annotated[
+                    bool,
+                    typer.Option(
+                        "--progress",
+                        "-p",
+                        help="Whether to display a progress bar.",
+                        is_flag=True,
+                    ),
+                ] = False,
                 *args,
                 **kwargs,
             ):
@@ -250,7 +279,11 @@ def metric(
                     raise ValueError(
                         "Error: must specify either json file or target file"
                     )
-                for string in strings:
+                if progress:
+                    loop = track(strings, description="Evaluating strings")
+                else:
+                    loop = strings
+                for string in loop:
                     out.append(
                         function(
                             string,
@@ -262,6 +295,8 @@ def metric(
                             model_cost=model_cost,
                         )
                     )
+                out_file = Path(out_file)
+                out_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(out_file, "w") as f:
                     json.dump(out, f)
 
@@ -269,7 +304,7 @@ def metric(
             sig2 = inspect.signature(func)
             func.__signature__ = sig2.replace(
                 parameters=tuple(
-                    list(sig2.parameters.values())[:7]
+                    list(sig2.parameters.values())[:8]
                     + list(sig1.parameters.values())[1:-1]
                 )
             )

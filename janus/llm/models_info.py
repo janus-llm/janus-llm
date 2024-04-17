@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Tuple
 
 from dotenv import load_dotenv
-from langchain_community.chat_models import ChatOpenAI
 from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain_core.language_models import BaseLanguageModel
+from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
