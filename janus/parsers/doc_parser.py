@@ -91,17 +91,22 @@ class MadlibsDocumentationParser(BaseOutputParser[str], JanusParser):
         try:
             obj = parse_json_markdown(text)
         except json.JSONDecodeError as e:
+            log.debug(f"Invalid JSON object. Output:\n{text}")
             raise OutputParserException(f"Got invalid JSON object. Error: {e}")
 
         seen_keys = set(obj.keys())
         missing_keys = self.expected_keys.difference(obj.keys())
+        invalid_keys = seen_keys.difference(self.expected_keys)
         if missing_keys:
+            log.debug(f"Missing keys: {missing_keys}")
+            if invalid_keys:
+                log.debug(f"Invalid keys: {invalid_keys}")
+            log.debug(f"Missing keys: {missing_keys}")
             raise OutputParserException(
                 f"Got invalid return object. Missing the following expected "
                 f"keys: {missing_keys}"
             )
 
-        invalid_keys = seen_keys.difference(self.expected_keys)
         for key in invalid_keys:
             del obj[key]
 

@@ -147,18 +147,14 @@ class ClaudePromptEngine(PromptEngine):
     def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
         prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
         prompt = prompt_path.read_text()
-        message = PromptTemplate.from_template(f"Human: {prompt}\n\nAssistant: ")
-
-        return ChatPromptTemplate.from_messages([message])
+        return PromptTemplate.from_template(f"\n\nHuman: {prompt}\n\nAssistant: ")
 
 
 class TitanPromptEngine(PromptEngine):
     def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
         prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
         prompt = prompt_path.read_text()
-        message = PromptTemplate.from_template(f"User: {prompt}\n\nAssistant: ")
-
-        return ChatPromptTemplate.from_messages([message])
+        return PromptTemplate.from_template(f"User: {prompt}\n\nAssistant: ")
 
 
 class Llama2PromptEngine(PromptEngine):
@@ -169,8 +165,6 @@ class Llama2PromptEngine(PromptEngine):
         human_prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
         human_prompt = human_prompt_path.read_text()
 
-        message = PromptTemplate.from_template(
+        return PromptTemplate.from_template(
             f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n{human_prompt} [/INST]"
         )
-
-        return ChatPromptTemplate.from_messages([message])
