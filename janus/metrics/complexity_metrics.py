@@ -1,5 +1,5 @@
 import math
-from typing import List
+from typing import List, Optional
 
 from janus.language.block import CodeBlock
 from janus.language.treesitter.treesitter import TreeSitterSplitter
@@ -18,13 +18,15 @@ class TreeSitterMetric:
     def __init__(
         self,
         code: str,
-        language: str,
+        language: Optional[str],
     ):
         """
         Arguments:
             code: The code to get metrics on
             language: The language the code is written in
         """
+        if language is None:
+            raise ValueError("Error: must provide language for tree-sitter metrics")
         self.branch_nodes: List[str] = LANGUAGES[language].get("branch_node_types")
         self.operation_nodes: List[str] = LANGUAGES[language].get("operation_node_types")
         self.operand_nodes: List[str] = LANGUAGES[language].get("operand_node_types")
