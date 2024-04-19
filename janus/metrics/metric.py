@@ -162,18 +162,21 @@ def metric(
                 else:
                     loop = pairs
                 for src, cmp in loop:
-                    out.append(
-                        function(
-                            src,
-                            cmp,
-                            *args,
-                            **kwargs,
-                            language=language,
-                            llm=llm,
-                            token_limit=token_limit,
-                            model_cost=model_cost,
+                    if not (isinstance(src, str) and isinstance(cmp, str)):
+                        out.append(False)
+                    else:
+                        out.append(
+                            function(
+                                src,
+                                cmp,
+                                *args,
+                                **kwargs,
+                                language=language,
+                                llm=llm,
+                                token_limit=token_limit,
+                                model_cost=model_cost,
+                            )
                         )
-                    )
                 out_file = Path(out_file)
                 out_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(out_file, "w") as f:
@@ -284,17 +287,20 @@ def metric(
                 else:
                     loop = strings
                 for string in loop:
-                    out.append(
-                        function(
-                            string,
-                            *args,
-                            **kwargs,
-                            language=language,
-                            llm=llm,
-                            token_limit=token_limit,
-                            model_cost=model_cost,
+                    if not isinstance(string, str):
+                        out.append(False)
+                    else:
+                        out.append(
+                            function(
+                                string,
+                                *args,
+                                **kwargs,
+                                language=language,
+                                llm=llm,
+                                token_limit=token_limit,
+                                model_cost=model_cost,
+                            )
                         )
-                    )
                 out_file = Path(out_file)
                 out_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(out_file, "w") as f:
