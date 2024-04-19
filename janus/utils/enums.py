@@ -724,6 +724,12 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "url": "https://github.com/tree-sitter/tree-sitter-typescript",
         "example": "console.log('Hello, World!');\n",
     },
+    "uml": {
+        "comment": "'",
+        "suffix": "uml",
+        "url": "https://github.com/lyndsysimon/tree-sitter-plantuml",
+        "example": "@startuml\n'Line comments use a single apostrophe\n@enduml",
+    },
     "verilog": {
         "comment": "//",
         "suffix": "v",
