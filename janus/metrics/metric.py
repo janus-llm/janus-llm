@@ -43,14 +43,14 @@ def metric(
                     typer.Option("--out-file", "-o", help="Output JSON file to write."),
                 ],
                 language: Annotated[
-                    str,
+                    Optional[str],
                     typer.Option(
                         "--language",
                         "-l",
                         help="The language of the source code.",
                         click_type=click.Choice(sorted(LANGUAGES)),
                     ),
-                ],
+                ] = None,
                 target: Annotated[
                     Optional[str],
                     typer.Option(
@@ -195,14 +195,14 @@ def metric(
                     typer.Option("--out-file", "-o", help="Output JSON file to write."),
                 ],
                 language: Annotated[
-                    str,
+                    Optional[str],
                     typer.Option(
                         "--language",
                         "-l",
                         help="The language of the source code.",
                         click_type=click.Choice(sorted(LANGUAGES)),
                     ),
-                ],
+                ] = None,
                 target: Annotated[
                     Optional[str],
                     typer.Option("--target", "-t", help="Target file to evaluate."),

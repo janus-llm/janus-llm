@@ -87,6 +87,8 @@ def pair_by_line_comment(
         protected_node_types=(NodeType("comment"),),
         prune_node_types=tuple(),
     )
+    if kwargs["lang"] is None:
+        raise ValueError("Error: must provide language for pair by line comment")
     if kwargs["lang"] in CUSTOM_SPLITTERS:
         if kwargs["lang"] == "mumps":
             splitter = MumpsSplitter(**splitter_kwargs)
