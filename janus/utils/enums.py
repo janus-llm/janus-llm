@@ -728,7 +728,9 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "comment": "'",
         "suffix": "uml",
         "url": "https://github.com/lyndsysimon/tree-sitter-plantuml",
-        "example": "@startuml\n'Line comments use a single apostrophe\n@enduml",
+        "example": "@startuml\nAlice -> Bob: Authentication Request\nBob --> Alice:\
+              Authentication Response\nAlice -> Bob: Another authentication\
+              Request\nAlice <-- Bob: Another authentication Response\n@enduml",
     },
     "verilog": {
         "comment": "//",

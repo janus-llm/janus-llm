@@ -654,3 +654,26 @@ class MadLibsDocumenter(Translator):
                 return
 
         super()._add_translation(block)
+
+
+class DiagramGenerator(Translator):
+    def __init__(
+        self,
+        model: str = "gpt-3.5-turbo",
+        model_arguments: Dict[str, Any] = {},
+        source_language: str = "fortran",
+        max_prompts: int = 10,
+        db_path: str | None = None,
+        db_config: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        super().__init__(
+            model=model,
+            model_arguments=model_arguments,
+            source_language=source_language,
+            target_language="uml",
+            target_version=None,
+            max_prompts=max_prompts,
+            prompt_template="diagram",
+            parser_type="code",
+            db_path=db_path,
+        )
