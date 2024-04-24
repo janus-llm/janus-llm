@@ -619,6 +619,7 @@ class MadLibsDocumenter(Translator):
             prompt_template="document_madlibs",
             parser_type="doc",
             db_path=db_path,
+            db_config=db_config,
         )
 
     @run_if_changed("_parser_type", "_target_language")
@@ -665,6 +666,7 @@ class DiagramGenerator(Translator):
         max_prompts: int = 10,
         db_path: str | None = None,
         db_config: Optional[Dict[str, Any]] = None,
+        diagram_type="Activity",
     ) -> None:
         super().__init__(
             model=model,
@@ -676,4 +678,49 @@ class DiagramGenerator(Translator):
             prompt_template="diagram",
             parser_type="code",
             db_path=db_path,
+            db_config=db_config,
         )
+        self._diagram_type = diagram_type
+
+    def _add_translation(self, block: TranslatedCodeBlock) -> None:
+        """Given an "empty" `TranslatedCodeBlock`, translate the code represented in
+        `block.original`, setting the relevant fields in the translated block. The
+        `TranslatedCodeBlock` is updated in-pace, nothing is returned. Note that this
+        translates *only* the code for this block, not its children.
+
+        Arguments:
+            block: An empty `TranslatedCodeBlock`
+        """
+        if block.translated:
+            return
+
+        if block.original.text is None:
+            block.translated = True
+            return
+
+        if self._llm is None:
+            message = (
+                "Model not configured correctly, cannot translate. Try setting "
+                "the model"
+            )
+            log.error(message)
+            raise ValueError(message)
+
+        log.debug(f"[{block.name}] Translating...")
+        log.debug(f"[{block.name}] Input text:\n{block.original.text}")
+
+        self._parser.set_reference(block.original)
+
+        query_and_parse = self.prompt | self._llm | self.parser
+
+        block.text = query_and_parse.invoke(
+            {
+                "SOURCE_CODE": block.original.text,
+                "DIAGRAM_TYPE": self._diagram_type,
+            }
+        )
+
+        block.tokens = self._llm.get_num_tokens(block.text)
+        block.translated = True
+
+        log.debug(f"[{block.name}] Output code:\n{block.text}")

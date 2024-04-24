@@ -423,6 +423,10 @@ def diagram(
             "collection with the name provided.",
         ),
     ] = None,
+    diagram_type: Annotated[
+        str,
+        typer.Option("--diagram-type", "-dg", help="Diagram type to generate in UML"),
+    ] = "Activity",
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -433,6 +437,7 @@ def diagram(
         max_prompts=max_prompts,
         db_path=db_loc,
         db_config=collections_config,
+        diagram_type=diagram_type,
     )
     diagram_generator.translate(input_dir, output_dir, overwrite, collection)
 
