@@ -658,6 +658,10 @@ class MadLibsDocumenter(Translator):
 
 
 class DiagramGenerator(Translator):
+    """
+    Diagram generator class
+    """
+
     def __init__(
         self,
         model: str = "gpt-3.5-turbo",
@@ -668,6 +672,16 @@ class DiagramGenerator(Translator):
         db_config: Optional[Dict[str, Any]] = None,
         diagram_type="Activity",
     ) -> None:
+        """
+        Init Method
+        :param mode: model name as str
+        :param model_arguments: arguments to pass to model
+        :param source_language: source language to generate diagram from
+        :param max_prompts: maximum number of times to generate prompts
+        :param db_path: path to chroma database
+        :param db_config: database configuraiton
+        :param diagram_type: type of PLANTUML diagram to generate
+        """
         super().__init__(
             model=model,
             model_arguments=model_arguments,
