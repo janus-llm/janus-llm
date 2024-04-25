@@ -4,6 +4,24 @@ import readability
 from .metric import metric
 
 
+def _repeat_text(text):
+    """Repeats a string until its length is over 100 words.
+
+    Arguments:
+        text: The input string.
+
+    Returns:
+        A string repeated to have more than 100 words.
+    """
+
+    # Check if repeated text is long enough, repeat more if needed
+    repeated_text = text
+    while len(repeated_text.split()) < 100:
+        repeated_text += " " + text
+
+    return repeated_text
+
+
 def get_readability(target: str) -> readability.Readability:
     """Create a Readability object from an input string
 
@@ -14,6 +32,7 @@ def get_readability(target: str) -> readability.Readability:
         py-readability-metrics Readability object for that text
     """
     nltk.download("punkt", quiet=True)
+    target = _repeat_text(target)
     return readability.Readability(target)
 
 
