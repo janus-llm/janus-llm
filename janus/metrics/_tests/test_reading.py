@@ -5,7 +5,7 @@ from ..reading import _repeat_text, flesch, gunning_fog
 
 class TestReading(unittest.TestCase):
     def setUp(self):
-        self.text = "This is a sample text for testing readability metrics."
+        self.text = "This is a sample text for testing readability metrics"
 
     def test_repeat_text(self):
         """Test the _repeat_text function."""
