@@ -301,8 +301,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         """
         ),
         "branch_node_types": ["branch_instruction"],
-        "operation_node_types": ["operation"],
-        "operand_node_types": ["operand"],
+        "operation_node_types": ["operation", "branch_operation"],
+        "operand_node_types": ["operands"],
     },
     "java": {
         "comment": "//",
