@@ -13,6 +13,9 @@ def _repeat_text(text):
     Returns:
         A string repeated to have more than 100 words.
     """
+    # Strip to remove a newline
+    text = text.strip()
+
     # Check if the text ends with a period
     if not text.endswith("."):
         text += "."  # Add a period if missing
