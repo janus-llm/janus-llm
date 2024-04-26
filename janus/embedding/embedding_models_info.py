@@ -11,9 +11,12 @@ from langchain_community.embeddings.huggingface import (
 )
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
-from rich import print
+
+from janus.utils.logger import create_logger
 
 load_dotenv()
+
+log = create_logger(__name__)
 
 
 class EmbeddingModelType(MultiValueEnum):
@@ -109,7 +112,9 @@ def load_embedding_model(
                 identifier, {"input": 0, "output": 0}
             ),
         }
-        print(f"Creating new model config file: {model_config_file}")
+        log.log(
+            f"Creating new model config file: {model_config_file} with default config"
+        )
         with open(model_config_file, "w") as f:
             json.dump(model_config, f, indent=2)
     else:
