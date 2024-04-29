@@ -122,13 +122,9 @@ def load_embedding_model(
             model_config = json.load(f)
     model_constructor = EMBEDDING_MODEL_TYPE_CONSTRUCTORS[model_config["model_type"]]
     model_args = model_config["model_args"]
-    if model_config["model_type"] in EmbeddingModelType.OpenAI.values:
-        model_args.update(_open_ai_defaults)
-    elif model_config["model_type"] in EmbeddingModelType.HuggingFaceInferenceAPI.values:
-        model_args.update(_hfia_defaults)
+    if model_config["model_type"] in EmbeddingModelType.HuggingFaceInferenceAPI.values:
         model_args.update({"api_url": model_config["model_identifier"]})
     elif model_config["model_type"] in EmbeddingModelType.HuggingFaceLocal.values:
-        model_args.update(_hfl_defaults)
         model_args.update({"model_name": model_config["model_identifier"]})
     model = model_constructor(**model_args)
     return (
