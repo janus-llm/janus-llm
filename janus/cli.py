@@ -709,10 +709,14 @@ def embedding_add(
         model_id = typer.prompt(
             f"Enter the {hf} model ID", default="all-MiniLM-L6-v2", type=str
         )
-        cache_folder = typer.prompt(
-            "Enter the model's cache folder",
-            default=EMBEDDING_MODEL_CONFIG_DIR / "cache",
-            type=str,
+        cache_folder = str(
+            Path(
+                typer.prompt(
+                    "Enter the model's cache folder",
+                    default=EMBEDDING_MODEL_CONFIG_DIR / "cache",
+                    type=str,
+                )
+            )
         )
         max_tokens = typer.prompt(
             "Enter the model's maximum tokens", default=8191, type=int
