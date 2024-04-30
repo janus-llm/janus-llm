@@ -5,6 +5,7 @@ from typing import Optional
 
 import click
 import typer
+from pydantic import AnyHttpUrl
 from rich import print
 from rich.console import Console
 from rich.prompt import Confirm
@@ -12,6 +13,12 @@ from typing_extensions import Annotated
 
 from .embedding.collections import Collections
 from .embedding.database import ChromaEmbeddingDatabase
+from .embedding.embedding_models_info import (
+    EMBEDDING_COST_PER_MODEL,
+    EMBEDDING_MODEL_CONFIG_DIR,
+    EMBEDDING_TOKEN_LIMITS,
+    EmbeddingModelType,
+)
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.binary import BinarySplitter
 from .language.mumps import MumpsSplitter
@@ -28,7 +35,6 @@ from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
 
 log = create_logger(__name__)
-
 homedir = Path.home().expanduser()
 
 janus_dir = homedir / ".janus"
@@ -42,6 +48,17 @@ if not db_file.exists():
 
 with open(db_file, "r") as f:
     db_loc = f.read()
+
+collections_config_file = Path(db_loc) / "collections.json"
+
+
+def get_collections_config():
+    if collections_config_file.exists():
+        with open(collections_config_file, "r") as f:
+            config = json.load(f)
+    else:
+        config = {}
+    return config
 
 
 app = typer.Typer(
@@ -60,6 +77,13 @@ db = typer.Typer(
 )
 llm = typer.Typer(
     help="LLM commands",
+    add_completion=False,
+    no_args_is_help=True,
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
+
+embedding = typer.Typer(
+    help="Embedding model commands",
     add_completion=False,
     no_args_is_help=True,
     context_settings={"help_option_names": ["-h", "--help"]},
@@ -104,41 +128,53 @@ def translate(
     input_dir: Annotated[
         Path,
         typer.Option(
+            "--input",
+            "-i",
             help="The directory containing the source code to be translated. "
-            "The files should all be in one flat directory."
+            "The files should all be in one flat directory.",
         ),
     ],
     source_lang: Annotated[
         str,
         typer.Option(
+            "--source-language",
+            "-s",
             help="The language of the source code.",
             click_type=click.Choice(sorted(LANGUAGES)),
         ),
     ],
     output_dir: Annotated[
         Path,
-        typer.Option(help="The directory to store the translated code in."),
+        typer.Option(
+            "--output", "-o", help="The directory to store the translated code in."
+        ),
     ],
     target_lang: Annotated[
         str,
         typer.Option(
+            "--target-language",
+            "-t",
             help="The desired output language to translate the source code to. The "
             "format can follow a 'language-version' syntax.  Use 'text' to get plaintext"
             "results as returned by the LLM. Examples: `python-3.10`, `mumps`, `java-10`,"
-            "text."
+            "text.",
         ),
     ],
     llm_name: Annotated[
         str,
         typer.Option(
+            "--llm",
+            "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ] = "gpt-3.5-turbo",
     max_prompts: Annotated[
         int,
         typer.Option(
+            "--max-prompts",
+            "-m",
             help="The maximum number of times to prompt a model on one functional block "
-            "before exiting the application. This is to prevent wasting too much money."
+            "before exiting the application. This is to prevent wasting too much money.",
         ),
     ] = 10,
     overwrite: Annotated[
@@ -150,18 +186,22 @@ def translate(
     ] = False,
     temp: Annotated[
         float,
-        typer.Option(help="Sampling temperature.", min=0, max=2),
+        typer.Option("--temperature", "-T", help="Sampling temperature.", min=0, max=2),
     ] = 0.7,
     prompt_template: Annotated[
         str,
         typer.Option(
+            "--prompt-template",
+            "-p",
             help="Name of the Janus prompt template directory or "
-            "path to a directory containing those template files."
+            "path to a directory containing those template files.",
         ),
     ] = "simple",
     parser_type: Annotated[
         str,
         typer.Option(
+            "--parser",
+            "-P",
             click_type=click.Choice(sorted(PARSER_TYPES)),
             help="The type of parser to use.",
         ),
@@ -187,6 +227,7 @@ def translate(
         raise ValueError
 
     model_arguments = dict(temperature=temp)
+    collections_config = get_collections_config()
     translator = Translator(
         model=llm_name,
         model_arguments=model_arguments,
@@ -197,6 +238,7 @@ def translate(
         prompt_template=prompt_template,
         parser_type=parser_type,
         db_path=db_loc,
+        db_config=collections_config,
     )
     translator.translate(input_dir, output_dir, overwrite, collection)
 
@@ -209,7 +251,7 @@ def document(
     input_dir: Annotated[
         Path,
         typer.Option(
-            "--input-dir",
+            "--input",
             "-i",
             help="The directory containing the source code to be translated. "
             "The files should all be in one flat directory.",
@@ -285,6 +327,7 @@ def document(
     ] = None,
 ):
     model_arguments = dict(temperature=temperature)
+    collections_config = get_collections_config()
     if doc_mode == "module":
         documenter = Documenter(
             model=llm_name,
@@ -292,6 +335,7 @@ def document(
             source_language=language,
             max_prompts=max_prompts,
             db_path=db_loc,
+            db_config=collections_config,
             drop_comments=drop_comments,
         )
     elif doc_mode == "madlibs":
@@ -301,6 +345,7 @@ def document(
             source_language=language,
             max_prompts=max_prompts,
             db_path=db_loc,
+            db_config=collections_config,
         )
 
     documenter.translate(input_dir, output_dir, overwrite, collection)
@@ -389,16 +434,17 @@ def db_ls(
 @db.command("add", help="Add a collection to the current database.")
 def db_add(
     collection_name: Annotated[str, typer.Argument(help="The name of the collection.")],
+    model_name: Annotated[str, typer.Argument(help="The name of the embedding model.")],
     input_dir: Annotated[
         str,
         typer.Option(
-            "--input-dir",
+            "--input",
             "-i",
             help="The directory containing the source code to be added.",
         ),
     ] = "./",
     input_lang: Annotated[
-        str, typer.Option("--input-lang", "-i", help="The language of the source code.")
+        str, typer.Option("--language", "-l", help="The language of the source code.")
     ] = "python",
     max_tokens: Annotated[
         int,
@@ -413,6 +459,7 @@ def db_add(
 
     Arguments:
         collection_name: The name of the collection to add
+        model_name: The name of the embedding model to use
         input_dir: The directory containing the source code to be added
         input_lang: The language of the source code
         max_tokens: The maximum number of tokens for each chunk of input source code
@@ -421,6 +468,7 @@ def db_add(
     console = Console()
 
     added_to = _check_collection(collection_name, input_dir)
+    collections_config = get_collections_config()
 
     with console.status(
         f"Adding collection: [bold salmon]{collection_name}[/bold salmon]",
@@ -428,8 +476,9 @@ def db_add(
     ):
         vectorizer_factory = ChromaDBVectorizer()
         vectorizer = vectorizer_factory.create_vectorizer(
-            path=db_loc,
+            path=db_loc, config=collections_config
         )
+        vectorizer.get_or_create_collection(collection_name, model_name=model_name)
         input_dir = Path(input_dir)
         suffix = LANGUAGES[input_lang]["suffix"]
         source_glob = f"**/*.{suffix}"
@@ -459,6 +508,7 @@ def db_add(
     if added_to:
         print(
             f"\nAdded to [bold salmon1]{collection_name}[/bold salmon1]:\n"
+            f"  Embedding Model: [green]{model_name}[/green]\n"
             f"  Input Directory: {input_dir.absolute()}\n"
             f"  {input_lang.capitalize()} [green]*.{suffix}[/green] Files: "
             f"{len(input_paths)}\n"
@@ -469,12 +519,15 @@ def db_add(
     else:
         print(
             f"\nCreated [bold salmon1]{collection_name}[/bold salmon1]:\n"
+            f"  Embedding Model: '{model_name}'\n"
             f"  Input Directory: {input_dir.absolute()}\n"
             f"  {input_lang.capitalize()} [green]*.{suffix}[/green] Files: "
             f"{len(input_paths)}\n"
             "  Other Files (skipped): "
             f"{total_files - len(input_paths)}\n"
         )
+    with open(collections_config_file, "w") as f:
+        json.dump(vectorizer.config, f, indent=2)
 
 
 @db.command(
@@ -612,9 +665,105 @@ def llm_add(
     print(f"Model config written to {model_cfg}")
 
 
+@embedding.command("add", help="Add an embedding model config to janus")
+def embedding_add(
+    model_name: Annotated[
+        str, typer.Argument(help="The user's custom name for the model")
+    ],
+    model_type: Annotated[
+        str,
+        typer.Option(
+            "--type",
+            "-t",
+            help="The type of the model",
+            click_type=click.Choice(list(val.value for val in EmbeddingModelType)),
+        ),
+    ] = "OpenAI",
+):
+    if not EMBEDDING_MODEL_CONFIG_DIR.exists():
+        EMBEDDING_MODEL_CONFIG_DIR.mkdir(parents=True)
+    model_cfg = EMBEDDING_MODEL_CONFIG_DIR / f"{model_name}.json"
+    if model_type in EmbeddingModelType.HuggingFaceInferenceAPI.values:
+        hf = typer.style("HuggingFaceInferenceAPI", fg="yellow")
+        url = typer.prompt(f"Enter the {hf} model's URL", type=str, value_proc=AnyHttpUrl)
+        api_model_name = typer.prompt("Enter the model's name", type=str, default="")
+        api_key = typer.prompt("Enter the API key", type=str, default="")
+        max_tokens = typer.prompt(
+            "Enter the model's maximum tokens", default=8191, type=int
+        )
+        in_cost = typer.prompt("Enter the cost per input token", default=0, type=float)
+        out_cost = typer.prompt("Enter the cost per output token", default=0, type=float)
+        params = dict(
+            model_name=api_model_name,
+            api_key=api_key,
+        )
+        cfg = {
+            "model_type": model_type,
+            "model_identifier": str(url),
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": {"input": in_cost, "output": out_cost},
+        }
+    elif model_type in EmbeddingModelType.HuggingFaceLocal.values:
+        hf = typer.style("HuggingFace", fg="yellow")
+        model_id = typer.prompt(
+            f"Enter the {hf} model ID", default="all-MiniLM-L6-v2", type=str
+        )
+        cache_folder = typer.prompt(
+            "Enter the model's cache folder",
+            default=EMBEDDING_MODEL_CONFIG_DIR / "cache",
+            type=str,
+        )
+        max_tokens = typer.prompt(
+            "Enter the model's maximum tokens", default=8191, type=int
+        )
+        params = dict(
+            cache_folder=str(cache_folder),
+        )
+        cfg = {
+            "model_type": model_type,
+            "model_identifier": model_id,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": {"input": 0, "output": 0},
+        }
+    elif model_type in EmbeddingModelType.OpenAI.values:
+        available_models = list(EMBEDDING_COST_PER_MODEL.keys())
+
+        open_ai = typer.style("OpenAI", fg="green")
+        prompt = f"Enter the {open_ai} model name"
+
+        model_name = typer.prompt(
+            prompt,
+            default="text-embedding-3-small",
+            type=click.types.Choice(available_models),
+            show_choices=False,
+        )
+        params = dict(
+            model_name=model_name,
+            temperature=0.7,
+            n=1,
+        )
+        max_tokens = EMBEDDING_TOKEN_LIMITS[model_name]
+        model_cost = EMBEDDING_COST_PER_MODEL[model_name]
+        cfg = {
+            "model_type": model_type,
+            "model_identifier": model_name,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": model_cost,
+        }
+    else:
+        raise ValueError(f"Unknown model type {model_type}")
+    with open(model_cfg, "w") as f:
+        json.dump(cfg, f, indent=2)
+    print(f"Model config written to {model_cfg}")
+
+
 app.add_typer(db, name="db")
 app.add_typer(llm, name="llm")
 app.add_typer(evaluate, name="evaluate")
+app.add_typer(embedding, name="embedding")
 
 
 if __name__ == "__main__":

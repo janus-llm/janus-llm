@@ -1,5 +1,5 @@
 import math
-from typing import List
+from typing import List, Optional
 
 from janus.language.block import CodeBlock
 from janus.language.treesitter.treesitter import TreeSitterSplitter
@@ -18,20 +18,23 @@ class TreeSitterMetric:
     def __init__(
         self,
         code: str,
-        language: str,
+        language: Optional[str],
     ):
         """
         Arguments:
             code: The code to get metrics on
             language: The language the code is written in
         """
+        if language is None:
+            raise ValueError("Error: must provide language for tree-sitter metrics")
         self.branch_nodes: List[str] = LANGUAGES[language].get("branch_node_types")
         self.operation_nodes: List[str] = LANGUAGES[language].get("operation_node_types")
         self.operand_nodes: List[str] = LANGUAGES[language].get("operand_node_types")
         self.code = code
         self.language = language
         self.splitter = TreeSitterSplitter(
-            language=language, protected_node_types=("program", "instruction")
+            language=language,
+            protected_node_types=("program", "instruction", "operation", "operands"),
         )
         self.ast = self.splitter.split_string(
             code, name="metrics", prune_unprotected=False
@@ -56,14 +59,16 @@ class TreeSitterMetric:
             raise NodeException(f"No operation nodes are set for {self.language}")
         else:
             return self._count_nodes_of_type(
-                self.ast, self.operation_nodes, distinct=True
-            )
+                self.ast, self.operand_nodes, distinct=True
+            ) + self._count_nodes_of_type(self.ast, self.operation_nodes, distinct=True)
 
     def get_program_length(self) -> int:
         if not self.operation_nodes:
             raise NodeException(f"No operation nodes are set for {self.language}")
         else:
-            return self._count_nodes_of_type(self.ast, self.operation_nodes)
+            return self._count_nodes_of_type(
+                self.ast, self.operation_nodes
+            ) + self._count_nodes_of_type(self.ast, self.operand_nodes)
 
     def get_volume(self) -> float:
         vocabulary = self.get_program_vocabulary()
@@ -76,9 +81,9 @@ class TreeSitterMetric:
 
     def get_difficulty(self) -> float:
         return (
-            self.get_program_vocabulary()
+            self._count_nodes_of_type(self.ast, self.operation_nodes, distinct=True)
             / 2
-            * self._count_nodes_of_type(self.ast, self.operand_nodes)
+            * self._count_nodes_of_type(self.ast, self.operand_nodes, distinct=False)
             / self._count_nodes_of_type(self.ast, self.operand_nodes, distinct=True)
         )
 
@@ -102,29 +107,33 @@ class TreeSitterMetric:
             )
         return max(
             0,
-            171
-            - (5.2 * math.log(volume))
-            - (0.23 * cyclomatic_complexity)
-            - (16.2 * math.log(lines_of_code)) * 100 / 171,
+            (
+                171
+                - (5.2 * math.log(volume))
+                - (0.23 * cyclomatic_complexity)
+                - (16.2 * math.log(lines_of_code))
+            )
+            * 100
+            / 171,
         )
 
     def _count_nodes_of_type(
         self, code_block: CodeBlock, nodes: List[str], distinct=False
     ) -> int:
-        """Recurse through all nodes of a CodeBlock, take count of the number of branch
-        nodes"""
+        """Recurse through all nodes of a CodeBlock,
+        take count of the number of nodes of a specified type"""
         seen_nodes = set()
         count = 0
-        if str(code_block.node_type) in self.branch_nodes:
-            if distinct:
-                if code_block.id not in seen_nodes:
+        nodes_left = [code_block]
+        while nodes_left:
+            node = nodes_left.pop()
+            if str(node.node_type) in nodes:
+                if distinct:
+                    seen_nodes.add(node.text.strip())
+                else:
                     count += 1
-                seen_nodes.add(code_block.id)
-            else:
-                count += 1
-        for item in code_block.children:
-            count += self._count_nodes_of_type(item, nodes, distinct)
-        return count
+            nodes_left.extend(node.children)
+        return len(seen_nodes) if distinct else count
 
 
 @metric(use_reference=False, help="Cyclomatic complexity score")
