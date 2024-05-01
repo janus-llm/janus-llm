@@ -41,7 +41,11 @@ class DocumentationParser(PydanticOutputParser, JanusParser):
         self.block_name = block.name
 
     def parse(self, text: str) -> str:
-        docs = json.loads(super().parse(text).json())
+        try:
+            docs = json.loads(super().parse(text).json())
+        except (OutputParserException, json.JSONDecodeError):
+            log.debug(f"Invalid JSON object. Output:\n{text}")
+            raise
         docs["name"] = self.block_name
         return json.dumps(docs)
 
@@ -67,9 +71,9 @@ class DocumentationParser(PydanticOutputParser, JanusParser):
             The format instructions for the LLM.
         """
         return (
-            "Output must contain a title, code description, input/output specification, "
-            "and example code, all in a json-formatted string with the following fields: "
-            '"name", "description", "input_output", and "example_code".'
+            "Output must contain a sphinx-style docstring, example usage, and "
+            "pseudocode, all in a json-formatted string with the following fields: "
+            '"docstring", "example_usage", and "pseudocode".'
         )
 
     @property
