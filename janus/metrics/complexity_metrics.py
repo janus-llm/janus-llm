@@ -34,11 +34,8 @@ class TreeSitterMetric:
         self.language = language
         self.splitter = TreeSitterSplitter(
             language=language,
-            protected_node_types=("program", "instruction", "operation", "operands"),
         )
-        self.ast = self.splitter.split_string(
-            code, name="metrics", prune_unprotected=False
-        )
+        self.ast = self.splitter._get_ast(code)
 
     def get_cyclomatic_complexity(self) -> int:
         if not self.branch_nodes:
