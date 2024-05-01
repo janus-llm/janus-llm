@@ -707,7 +707,9 @@ def embedding_add(
     elif model_type in EmbeddingModelType.HuggingFaceLocal.values:
         hf = typer.style("HuggingFace", fg="yellow")
         model_id = typer.prompt(
-            f"Enter the {hf} model ID", default="all-MiniLM-L6-v2", type=str
+            f"Enter the {hf} model ID",
+            default="sentence-transformers/all-MiniLM-L6-v2",
+            type=str,
         )
         cache_folder = str(
             Path(
