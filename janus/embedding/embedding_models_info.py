@@ -97,7 +97,7 @@ def load_embedding_model(
                 identifier, {"input": 0, "output": 0}
             ),
         }
-        log.log(
+        log.info(
             f"WARNING: Creating new model config file: \
                 {model_config_file} with default config"
         )
