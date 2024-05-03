@@ -1,5 +1,4 @@
 import json
-import os
 from pathlib import Path
 from typing import Any, Callable, Dict, Tuple
 
@@ -47,20 +46,6 @@ EMBEDDING_MODEL_TYPE_DEFAULT_IDS: Dict[EmbeddingModelType, Dict[str, Any]] = {
     EmbeddingModelType.OpenAI.value: "text-embedding-3-small",
     EmbeddingModelType.HuggingFaceLocal.value: "all-MiniLM-L6-v2",
     EmbeddingModelType.HuggingFaceInferenceAPI.value: "",
-}
-
-_open_ai_defaults: Dict[str, Any] = {
-    "openai_api_key": os.getenv("OPENAI_API_KEY"),
-    "openai_organization": os.getenv("OPENAI_ORG_ID"),
-}
-
-_hfl_defaults: Dict[str, Any] = {
-    "model_kwargs": {"device": "cpu"},
-}
-
-_hfia_defaults: Dict[str, Any] = {
-    "api_key": "",
-    "model_name": "",
 }
 
 EMBEDDING_MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
@@ -113,7 +98,8 @@ def load_embedding_model(
             ),
         }
         log.log(
-            f"Creating new model config file: {model_config_file} with default config"
+            f"WARNING: Creating new model config file: \
+                {model_config_file} with default config"
         )
         with open(model_config_file, "w") as f:
             json.dump(model_config, f, indent=2)

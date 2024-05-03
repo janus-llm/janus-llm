@@ -746,9 +746,7 @@ def embedding_add(
             show_choices=False,
         )
         params = dict(
-            model_name=model_name,
-            temperature=0.7,
-            n=1,
+            model=model_name,
         )
         max_tokens = EMBEDDING_TOKEN_LIMITS[model_name]
         model_cost = EMBEDDING_COST_PER_MODEL[model_name]
