@@ -658,8 +658,9 @@ class MadLibsDocumenter(Translator):
 
 
 class DiagramGenerator(Translator):
-    """
-    Diagram generator class
+    """DiagramGenerator
+
+    A class that translates code from one programming language to a set of diagrams.
     """
 
     def __init__(
