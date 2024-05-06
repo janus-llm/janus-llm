@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from langchain.output_parsers.fix import OutputFixingParser
 from langchain_community.callbacks import get_openai_callback
@@ -32,7 +32,7 @@ class Translator(Converter):
     def __init__(
         self,
         model: str = "gpt-3.5-turbo",
-        model_arguments: Dict[str, Any] = {},
+        model_arguments: dict[str, Any] = {},
         source_language: str = "fortran",
         target_language: str = "python",
         target_version: str | None = "3.10",
@@ -40,7 +40,7 @@ class Translator(Converter):
         prompt_template: str | Path = "simple",
         parser_type: str = "code",
         db_path: str | None = None,
-        db_config: Optional[Dict[str, Any]] = None,
+        db_config: dict[str, Any] | None = None,
     ) -> None:
         """Initialize a Translator instance.
 
@@ -60,18 +60,18 @@ class Translator(Converter):
         """
         super().__init__(source_language=source_language)
 
-        self._parser_type: None | str
-        self._parser: None | JanusParser
-        self._model_name: None | str
-        self._custom_model_arguments: None | Dict[str, Any]
-        self._target_language: None | str
-        self._target_version: None | str
-        self._target_glob: None | str
-        self._prompt_template_name: None | str
-        self._db_path: None | str
-        self._db_config: None | Dict[str, Any]
+        self._parser_type: str | None
+        self._parser: JanusParser | None
+        self._model_name: str | None
+        self._custom_model_arguments: dict[str, Any] | None
+        self._target_language: str | None
+        self._target_version: str | None
+        self._target_glob: str | None
+        self._prompt_template_name: str | None
+        self._db_path: str | None
+        self._db_config: dict[str, Any] | None
 
-        self.parser: None | BaseOutputParser
+        self.parser: BaseOutputParser | None
         self.max_prompts = max_prompts
 
         self.set_model(model_name=model, **model_arguments)
@@ -365,7 +365,7 @@ class Translator(Converter):
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(out_text, encoding="utf-8")
 
-    def set_model(self, model_name: str, **custom_arguments: Dict[str, Any]):
+    def set_model(self, model_name: str, **custom_arguments: dict[str, Any]):
         """Validate and set the model name.
 
         The affected objects will not be updated until translate() is called.
@@ -427,11 +427,11 @@ class Translator(Converter):
     def set_db_path(self, db_path: str) -> None:
         self._db_path = db_path
 
-    def set_db_config(self, db_config: Optional[Dict[str, Any]]):
+    def set_db_config(self, db_config: dict[str, Any] | None) -> None:
         self._db_config = db_config
 
     @run_if_changed("_model_name", "_custom_model_arguments")
-    def _load_model(self):
+    def _load_model(self) -> None:
         """Load the model according to this instance's attributes.
 
         If the relevant fields have not been changed since the last time this method was
@@ -540,11 +540,11 @@ class Documenter(Translator):
     def __init__(
         self,
         model: str = "gpt-3.5-turbo",
-        model_arguments: Dict[str, Any] = {},
+        model_arguments: dict[str, Any] = {},
         source_language: str = "fortran",
         max_prompts: int = 10,
         db_path: str | None = None,
-        db_config: Optional[Dict[str, Any]] = None,
+        db_config: dict[str, Any] | None = None,
         drop_comments: bool = False,
     ) -> None:
         """Initialize a Translator instance.
@@ -593,11 +593,11 @@ class MadLibsDocumenter(Translator):
     def __init__(
         self,
         model: str = "gpt-3.5-turbo",
-        model_arguments: Dict[str, Any] = {},
+        model_arguments: dict[str, Any] = {},
         source_language: str = "fortran",
         max_prompts: int = 10,
         db_path: str | None = None,
-        db_config: Optional[Dict[str, Any]] = None,
+        db_config: dict[str, Any] | None = None,
     ) -> None:
         """Initialize a Translator instance.
 
@@ -665,22 +665,25 @@ class DiagramGenerator(Translator):
     def __init__(
         self,
         model: str = "gpt-3.5-turbo",
-        model_arguments: Dict[str, Any] = {},
+        model_arguments: dict[str, Any] = {},
         source_language: str = "fortran",
         max_prompts: int = 10,
         db_path: str | None = None,
-        db_config: Optional[Dict[str, Any]] = None,
+        db_config: dict[str, Any] | None = None,
         diagram_type="Activity",
     ) -> None:
-        """
-        Init Method
-        :param mode: model name as str
-        :param model_arguments: arguments to pass to model
-        :param source_language: source language to generate diagram from
-        :param max_prompts: maximum number of times to generate prompts
-        :param db_path: path to chroma database
-        :param db_config: database configuraiton
-        :param diagram_type: type of PLANTUML diagram to generate
+        """Initialize the DiagramGenerator class
+
+        Arguments:
+            model: The LLM to use for translation. If an OpenAI model, the
+                `OPENAI_API_KEY` environment variable must be set and the
+                `OPENAI_ORG_ID` environment variable should be set if needed.
+            model_arguments: Additional arguments to pass to the LLM constructor.
+            source_language: The source programming language.
+            max_prompts: The maximum number of prompts to try before giving up.
+            db_path: path to chroma database
+            db_config: database configuraiton
+            diagram_type: type of PLANTUML diagram to generate
         """
         super().__init__(
             model=model,
