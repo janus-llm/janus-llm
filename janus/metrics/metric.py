@@ -9,11 +9,14 @@ from typing_extensions import Annotated
 
 from janus.llm import load_model
 from janus.utils.enums import LANGUAGES
+from janus.utils.logger import create_logger
 
 from ..utils.progress import track
 from .cli import evaluate
 from .file_pairing import FILE_PAIRING_METHODS
 from .splitting import SPLITTING_METHODS
+
+log = create_logger(__name__)
 
 
 def metric(
@@ -43,14 +46,14 @@ def metric(
                     typer.Option("--out-file", "-o", help="Output JSON file to write."),
                 ],
                 language: Annotated[
-                    str,
+                    Optional[str],
                     typer.Option(
                         "--language",
                         "-l",
                         help="The language of the source code.",
                         click_type=click.Choice(sorted(LANGUAGES)),
                     ),
-                ],
+                ] = None,
                 target: Annotated[
                     Optional[str],
                     typer.Option(
@@ -162,22 +165,26 @@ def metric(
                 else:
                     loop = pairs
                 for src, cmp in loop:
-                    out.append(
-                        function(
-                            src,
-                            cmp,
-                            *args,
-                            **kwargs,
-                            language=language,
-                            llm=llm,
-                            token_limit=token_limit,
-                            model_cost=model_cost,
+                    if not (isinstance(src, str) and isinstance(cmp, str)):
+                        out.append(False)
+                    else:
+                        out.append(
+                            function(
+                                src,
+                                cmp,
+                                *args,
+                                **kwargs,
+                                language=language,
+                                llm=llm,
+                                token_limit=token_limit,
+                                model_cost=model_cost,
+                            )
                         )
-                    )
                 out_file = Path(out_file)
                 out_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(out_file, "w") as f:
                     json.dump(out, f)
+                    log.info(f"Saved results to file: {out_file}")
 
             sig1 = inspect.signature(function)
             sig2 = inspect.signature(func)
@@ -195,14 +202,14 @@ def metric(
                     typer.Option("--out-file", "-o", help="Output JSON file to write."),
                 ],
                 language: Annotated[
-                    str,
+                    Optional[str],
                     typer.Option(
                         "--language",
                         "-l",
                         help="The language of the source code.",
                         click_type=click.Choice(sorted(LANGUAGES)),
                     ),
-                ],
+                ] = None,
                 target: Annotated[
                     Optional[str],
                     typer.Option("--target", "-t", help="Target file to evaluate."),
@@ -284,21 +291,25 @@ def metric(
                 else:
                     loop = strings
                 for string in loop:
-                    out.append(
-                        function(
-                            string,
-                            *args,
-                            **kwargs,
-                            language=language,
-                            llm=llm,
-                            token_limit=token_limit,
-                            model_cost=model_cost,
+                    if not isinstance(string, str):
+                        out.append(False)
+                    else:
+                        out.append(
+                            function(
+                                string,
+                                *args,
+                                **kwargs,
+                                language=language,
+                                llm=llm,
+                                token_limit=token_limit,
+                                model_cost=model_cost,
+                            )
                         )
-                    )
                 out_file = Path(out_file)
                 out_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(out_file, "w") as f:
                     json.dump(out, f)
+                    log.info(f"Saved results to file: {out_file}")
 
             sig1 = inspect.signature(function)
             sig2 = inspect.signature(func)

@@ -301,8 +301,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         """
         ),
         "branch_node_types": ["branch_instruction"],
-        "operation_node_types": ["operation"],
-        "operand_node_types": ["operand"],
+        "operation_node_types": ["operation", "branch_operation"],
+        "operand_node_types": ["operands"],
     },
     "java": {
         "comment": "//",
@@ -418,13 +418,13 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
     "mumps": {
         "comment": ";",
         "suffix": "m",
-        "url": None,
+        "url": "https://github.com/janus-llm/tree-sitter-mumps",
         "example": 'WRITE "Hello, World!"',
         "functional_node_type": "subroutine",
         "comment_node_type": "comment",
         "branch_node_types": ["if_statement"],
-        "operation_node_types": ["command", "function"],
-        "operand_node_types": ["operand"],
+        "operation_node_types": ["command", "function_call", "routine_call"],
+        "operand_node_types": ["argument"],
     },
     "nix": {
         "comment": "#",

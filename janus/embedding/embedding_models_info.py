@@ -1,5 +1,4 @@
 import json
-import os
 from pathlib import Path
 from typing import Any, Callable, Dict, Tuple
 
@@ -11,9 +10,12 @@ from langchain_community.embeddings.huggingface import (
 )
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
-from rich import print
+
+from janus.utils.logger import create_logger
 
 load_dotenv()
+
+log = create_logger(__name__)
 
 
 class EmbeddingModelType(MultiValueEnum):
@@ -44,20 +46,6 @@ EMBEDDING_MODEL_TYPE_DEFAULT_IDS: Dict[EmbeddingModelType, Dict[str, Any]] = {
     EmbeddingModelType.OpenAI.value: "text-embedding-3-small",
     EmbeddingModelType.HuggingFaceLocal.value: "all-MiniLM-L6-v2",
     EmbeddingModelType.HuggingFaceInferenceAPI.value: "",
-}
-
-_open_ai_defaults: Dict[str, Any] = {
-    "openai_api_key": os.getenv("OPENAI_API_KEY"),
-    "openai_organization": os.getenv("OPENAI_ORG_ID"),
-}
-
-_hfl_defaults: Dict[str, Any] = {
-    "model_kwargs": {"device": "cpu"},
-}
-
-_hfia_defaults: Dict[str, Any] = {
-    "api_key": "",
-    "model_name": "",
 }
 
 EMBEDDING_MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
@@ -109,7 +97,10 @@ def load_embedding_model(
                 identifier, {"input": 0, "output": 0}
             ),
         }
-        print(f"Creating new model config file: {model_config_file}")
+        log.info(
+            f"WARNING: Creating new model config file: \
+                {model_config_file} with default config"
+        )
         with open(model_config_file, "w") as f:
             json.dump(model_config, f, indent=2)
     else:
@@ -117,13 +108,9 @@ def load_embedding_model(
             model_config = json.load(f)
     model_constructor = EMBEDDING_MODEL_TYPE_CONSTRUCTORS[model_config["model_type"]]
     model_args = model_config["model_args"]
-    if model_config["model_type"] in EmbeddingModelType.OpenAI.values:
-        model_args.update(_open_ai_defaults)
-    elif model_config["model_type"] in EmbeddingModelType.HuggingFaceInferenceAPI.values:
-        model_args.update(_hfia_defaults)
+    if model_config["model_type"] in EmbeddingModelType.HuggingFaceInferenceAPI.values:
         model_args.update({"api_url": model_config["model_identifier"]})
     elif model_config["model_type"] in EmbeddingModelType.HuggingFaceLocal.values:
-        model_args.update(_hfl_defaults)
         model_args.update({"model_name": model_config["model_identifier"]})
     model = model_constructor(**model_args)
     return (

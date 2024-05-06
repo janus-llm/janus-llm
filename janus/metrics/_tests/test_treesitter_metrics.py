@@ -4,48 +4,84 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from ...cli import app
-from ..complexity_metrics import cyclomatic_complexity, effort
+from ..complexity_metrics import (
+    TreeSitterMetric,
+    cyclomatic_complexity,
+    difficulty,
+    effort,
+    maintainability,
+    volume,
+)
 
 
 class TestTreesitterMetrics(unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()
-        self.target_text = """
-                SAMP1    CSECT
-                 STM   14,12,12(13)
-                 BALR  12,0
-                 USING *,12
-                 ST    13,SAVE+4
-                 LA    15,SAVE
-                 ST    15,8(13)
-                 LR    13,15
-        STOP1    LH    3,HALFCON
-        STOP2    A     3,FULLCON
-        STOP3    ST    3,HEXCON
-                 L     13,4(13)
-                 LM    14,12,12(13)
-                 BR    14
-        SAVE     DC    18F'0'
-        ADCON    DC    A(SAVE)
-        FULLCON  DC    F'-1'
-        HEXCON   DC    XL4'FD38'
-        HALFCON  DC    H'32'
-        CHARCON  DC    CL10'TEST EXAMP'
-        PACKCON  DC    PL4'25'
-        BINCON   DC    B'10101100'
-                 END   SAMP1
-         """
+        asm_file = Path(__file__).parent.resolve() / "asm_test_file.asm"
+        self.asm_target_text = asm_file.read_text()
+        mumps_file = Path(__file__).parent.resolve() / "mumps_test_file.m"
+        self.mumps_target_text = mumps_file.read_text()
 
     def test_cyclomatic_complexity(self):
         """Test the cyclomatic complexity function."""
-        function_score = cyclomatic_complexity(self.target_text, language="ibmhlasm")
+        function_score = cyclomatic_complexity(self.asm_target_text, language="ibmhlasm")
         expected_score = 3
         self.assertEqual(function_score, expected_score)
+        function_score = cyclomatic_complexity(self.mumps_target_text, language="mumps")
+        expected_score = 2
+        self.assertEqual(function_score, expected_score)
 
-    def test_halstead_effort(self):
+    def test_length(self):
+        """Test the get_program_vocabulary function."""
+        tsm_asm = TreeSitterMetric(code=self.asm_target_text, language="ibmhlasm")
+        function_score = tsm_asm.get_program_length()
+        expected_score = 18
+        self.assertEqual(function_score, expected_score)
+        tsm_mumps = TreeSitterMetric(code=self.mumps_target_text, language="mumps")
+        function_score = tsm_mumps.get_program_length()
+        expected_score = 8
+        self.assertEqual(function_score, expected_score)
+
+    def test_vocabulary(self):
+        """Test the get_program_vocabulary function."""
+        tsm_asm = TreeSitterMetric(code=self.asm_target_text, language="ibmhlasm")
+        function_score = tsm_asm.get_program_vocabulary()
+        expected_score = 9
+        self.assertEqual(function_score, expected_score)
+        tsm_mumps = TreeSitterMetric(code=self.mumps_target_text, language="mumps")
+        function_score = tsm_mumps.get_program_vocabulary()
+        expected_score = 5
+        self.assertEqual(function_score, expected_score)
+
+    def test_difficulty(self):
+        """Test the get_program_vocabulary function."""
+        function_score = difficulty(self.asm_target_text, language="ibmhlasm")
+        expected_score = 5
+        self.assertEqual(function_score, expected_score)
+        function_score = difficulty(self.mumps_target_text, language="mumps")
+        expected_score = 1.67
+        self.assertAlmostEqual(function_score, expected_score, places=2)
+
+    def test_effort(self):
         """Test the halstead effort."""
-        function_score = effort(self.target_text, language="ibmhlasm")
-        self.assertGreater(function_score, 0)
+        function_score = effort(self.asm_target_text, language="ibmhlasm")
+        self.assertAlmostEqual(function_score, 285.29, places=2)
+        function_score = effort(self.mumps_target_text, language="mumps")
+        self.assertAlmostEqual(function_score, 30.96, places=2)
+
+    def test_volume(self):
+        """Test the halstead volume."""
+        function_score = volume(self.asm_target_text, language="ibmhlasm")
+        self.assertAlmostEqual(function_score, 57.06, places=2)
+        function_score = volume(self.mumps_target_text, language="mumps")
+        self.assertAlmostEqual(function_score, 18.58, places=2)
+
+    def test_maintainability(self):
+        """Test the halstead volume."""
+        function_score = maintainability(self.asm_target_text, language="ibmhlasm")
+        self.assertAlmostEqual(function_score, 65.48, places=2)
+        function_score = maintainability(self.mumps_target_text, language="mumps")
+        self.assertAlmostEqual(function_score, 73.87, places=2)
 
     def test_in_cli(self):
         """Test the function in the CLI."""
