@@ -620,7 +620,6 @@ class MadLibsDocumenter(Translator):
             parser_type="doc",
             db_path=db_path,
             db_config=db_config,
-            db_config=db_config,
         )
 
     @run_if_changed("_parser_type", "_target_language")
