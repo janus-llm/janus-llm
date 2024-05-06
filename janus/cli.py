@@ -707,12 +707,18 @@ def embedding_add(
     elif model_type in EmbeddingModelType.HuggingFaceLocal.values:
         hf = typer.style("HuggingFace", fg="yellow")
         model_id = typer.prompt(
-            f"Enter the {hf} model ID", default="all-MiniLM-L6-v2", type=str
-        )
-        cache_folder = typer.prompt(
-            "Enter the model's cache folder",
-            default=EMBEDDING_MODEL_CONFIG_DIR / "cache",
+            f"Enter the {hf} model ID",
+            default="sentence-transformers/all-MiniLM-L6-v2",
             type=str,
+        )
+        cache_folder = str(
+            Path(
+                typer.prompt(
+                    "Enter the model's cache folder",
+                    default=EMBEDDING_MODEL_CONFIG_DIR / "cache",
+                    type=str,
+                )
+            )
         )
         max_tokens = typer.prompt(
             "Enter the model's maximum tokens", default=8191, type=int
@@ -740,9 +746,7 @@ def embedding_add(
             show_choices=False,
         )
         params = dict(
-            model_name=model_name,
-            temperature=0.7,
-            n=1,
+            model=model_name,
         )
         max_tokens = EMBEDDING_TOKEN_LIMITS[model_name]
         model_cost = EMBEDDING_COST_PER_MODEL[model_name]
