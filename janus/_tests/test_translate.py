@@ -7,7 +7,8 @@ from langchain.schema import Document
 from langchain.schema.embeddings import Embeddings
 from langchain.schema.vectorstore import VST, VectorStore
 
-from ..translate import Translator
+from ..language.block import CodeBlock, TranslatedCodeBlock
+from ..translate import DiagramGenerator, Translator
 
 # from langchain.vectorstores import Chroma
 
@@ -315,6 +316,47 @@ class TestTranslator(unittest.TestCase):
         )
         self.translator.set_prompt("pish posh")
         self.assertRaises(ValueError, self.translator._load_parameters)
+
+
+class TestDiagramGenerator(unittest.TestCase):
+    """Tests for the DiagramGenerator class."""
+
+    def setUp(self):
+        """Set up the tests."""
+        self.diagram_generator = DiagramGenerator(
+            model="gpt-3.5-turbo",
+            source_language="fortran",
+            diagram_type="Activity",
+        )
+
+    def test_init(self):
+        """Test __init__ method."""
+        self.assertEqual(self.diagram_generator._model_name, "gpt-3.5-turbo")
+        self.assertEqual(self.diagram_generator._source_language, "fortran")
+        self.assertEqual(self.diagram_generator._diagram_type, "Activity")
+
+    def test_add_translation(self):
+        """Test _add_translation method."""
+        block = TranslatedCodeBlock(
+            original=CodeBlock(
+                id="test",
+                name="Test Block",
+                node_type="function",
+                language="python",
+                text="print('Hello, World!')",
+                start_point=(0, 0),
+                end_point=(1, 0),
+                start_byte=0,
+                end_byte=1,
+                tokens=5,
+                children=[],
+            ),
+            language="python",
+        )
+        self.diagram_generator._add_translation(block)
+        self.assertTrue(block.translated)
+        self.assertIsNotNone(block.text)
+        self.assertIsNotNone(block.tokens)
 
 
 @pytest.mark.parametrize(
