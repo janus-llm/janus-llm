@@ -423,7 +423,12 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "functional_node_type": "subroutine",
         "comment_node_type": "comment",
         "branch_node_types": ["if_statement"],
-        "operation_node_types": ["command", "function_call", "routine_call"],
+        "operation_node_types": [
+            "command",
+            "function_call",
+            "routine_call",
+            "routine_definition",
+        ],
         "operand_node_types": ["argument"],
     },
     "nix": {
