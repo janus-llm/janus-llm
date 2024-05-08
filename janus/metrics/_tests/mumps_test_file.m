@@ -1,4 +1,4 @@
-  ; Set apples
+FUNC(a, b) ; apples
   set apples=8
   write a,!
   write a,!
