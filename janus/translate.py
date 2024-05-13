@@ -1,4 +1,5 @@
 import json
+import math
 import re
 import time
 from pathlib import Path
@@ -300,13 +301,7 @@ class Translator(Converter):
         while stack:
             translated_block = stack.pop()
 
-            # Track the cost of translating this block
-            #  TODO: If non-OpenAI models with prices are added, this will need
-            #   to be updated.
-            with get_openai_callback() as cb:
-                self._add_translation(translated_block)
-                translated_block.cost = cb.total_cost
-                translated_block.retries = max(0, cb.successful_requests - 1)
+            self._add_translation(translated_block)
 
             # If translating this block was unsuccessful, don't bother with its
             #  children (they wouldn't show up in the final text anyway)
@@ -349,6 +344,9 @@ class Translator(Converter):
         log.debug(f"[{block.name}] Translating...")
         log.debug(f"[{block.name}] Input text:\n{block.original.text}")
 
+        # Track the cost of translating this block
+        #  TODO: If non-OpenAI models with prices are added, this will need
+        #   to be updated.
         with get_openai_callback() as cb:
             t0 = time.time()
             block.text = self._run_chain(block)
@@ -362,17 +360,39 @@ class Translator(Converter):
         log.debug(f"[{block.name}] Output code:\n{block.text}")
 
     def _run_chain(self, block: TranslatedCodeBlock) -> str:
+        """Run the model with three nested error fixing schemes.
+        First, try to fix simple formatting errors by giving the model just
+        the output and the parsing error. After a number of attempts, try
+        giving the model the output, the parsing error, and the original
+        input. Again check/retry this output to solve for formatting errors.
+        If we still haven't succeeded after several attempts, the model may
+        be getting thrown off by a bad initial output; start from scratch
+        and try again.
+
+        The number of tries for each layer of this scheme is roughly equal
+        to the cube root of self.max_retries, so the total calls to the
+        LLM will be roughly as expected (up to sqrt(self.max_retries) over)
+        """
         self.parser.set_reference(block.original)
+
+        # Retries with just the output and the error
+        n1 = round(self.max_prompts ** (1 / 3))
+
+        # Retries with the input, output, and error
+        n2 = round((self.max_prompts // n1) ** (1 / 2))
+
+        # Retries with just the input
+        n3 = math.ceil(self.max_prompts / (n1 * n2))
 
         fix_format = OutputFixingParser.from_llm(
             llm=self._llm,
             parser=self.parser,
-            max_retries=5,
+            max_retries=n1,
         )
         retry = RetryWithErrorOutputParser.from_llm(
             llm=self._llm,
             parser=fix_format,
-            max_retries=self.max_prompts // 5,
+            max_retries=n2,
         )
 
         completion_chain = self.prompt | self._llm
@@ -380,7 +400,13 @@ class Translator(Converter):
             completion=completion_chain, prompt_value=self.prompt
         ) | RunnableLambda(lambda x: retry.parse_with_prompt(**x))
 
-        return chain.invoke({"SOURCE_CODE": block.original.text})
+        for _ in range(n3):
+            try:
+                return chain.invoke({"SOURCE_CODE": block.original.text})
+            except OutputParserException:
+                pass
+
+        raise OutputParserException(f"Failed to parse after {n1*n2*n3} retries")
 
     def _save_to_file(self, block: CodeBlock, out_path: Path) -> None:
         """Save a file to disk.
