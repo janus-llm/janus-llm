@@ -5,6 +5,7 @@ from langchain.output_parsers import PydanticOutputParser
 from langchain.output_parsers.json import parse_json_markdown
 from langchain.schema.output_parser import BaseOutputParser
 from langchain_core.exceptions import OutputParserException
+from langchain_core.messages import AIMessage
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 from ..language.block import CodeBlock
@@ -92,6 +93,8 @@ class MadlibsDocumentationParser(BaseOutputParser[str], JanusParser):
         self.expected_keys = set(comment_ids)
 
     def parse(self, text: str) -> str:
+        if isinstance(text, AIMessage):
+            text = text.content
         try:
             obj = parse_json_markdown(text)
         except json.JSONDecodeError as e:
@@ -113,6 +116,13 @@ class MadlibsDocumentationParser(BaseOutputParser[str], JanusParser):
 
         for key in invalid_keys:
             del obj[key]
+
+        for value in obj.values():
+            if not isinstance(value, str):
+                raise OutputParserException(
+                    f"Got invalid return object. Expected all string values,"
+                    f' but got type "{type(value)}"'
+                )
 
         return json.dumps(obj)
 

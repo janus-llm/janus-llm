@@ -1,11 +1,15 @@
+import json
 import re
+import time
 from pathlib import Path
 from typing import Any
 
+from langchain.output_parsers import RetryWithErrorOutputParser
 from langchain.output_parsers.fix import OutputFixingParser
 from langchain_community.callbacks import get_openai_callback
 from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import BaseOutputParser, StrOutputParser
+from langchain_core.runnables import RunnableLambda, RunnableParallel
 from openai import BadRequestError, RateLimitError
 
 from .converter import Converter, run_if_changed
@@ -245,7 +249,9 @@ class Translator(Converter):
         filename = file.name
 
         input_block = self._split_file(file)
+        t0 = time.time()
         output_block = self._iterative_translate(input_block)
+        output_block.processing_time = time.time() - t0
         if output_block.translated:
             completeness = output_block.translation_completeness
             log.info(
@@ -344,16 +350,38 @@ class Translator(Converter):
         log.debug(f"[{block.name}] Translating...")
         log.debug(f"[{block.name}] Input text:\n{block.original.text}")
 
-        self._parser.set_reference(block.original)
-
-        query_and_parse = self.prompt | self._llm | self.parser
-
-        block.text = query_and_parse.invoke({"SOURCE_CODE": block.original.text})
+        with get_openai_callback() as cb:
+            t0 = time.time()
+            block.text = self._run_chain(block)
+            block.processing_time = time.time() - t0
+            block.cost = cb.total_cost
+            block.retries = max(0, cb.successful_requests - 1)
 
         block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
 
         log.debug(f"[{block.name}] Output code:\n{block.text}")
+
+    def _run_chain(self, block: TranslatedCodeBlock) -> str:
+        self.parser.set_reference(block.original)
+
+        fix_format = OutputFixingParser.from_llm(
+            llm=self._llm,
+            parser=self.parser,
+            max_retries=5,
+        )
+        retry = RetryWithErrorOutputParser.from_llm(
+            llm=self._llm,
+            parser=fix_format,
+            max_retries=self.max_prompts // 5,
+        )
+
+        completion_chain = self.prompt | self._llm
+        chain = RunnableParallel(
+            completion=completion_chain, prompt_value=self.prompt
+        ) | RunnableLambda(lambda x: retry.parse_with_prompt(**x))
+
+        return chain.invoke({"SOURCE_CODE": block.original.text})
 
     def _save_to_file(self, block: CodeBlock, out_path: Path) -> None:
         """Save a file to disk.
@@ -639,12 +667,12 @@ class MadLibsDocumenter(Translator):
                 f"Invalid target language ({self._target_language}) or parser type"
                 f" ({self._parser_type}); must be 'json' and 'doc' respectively."
             )
-        self._parser = MadlibsDocumentationParser()
-        self.parser = OutputFixingParser.from_llm(
-            llm=self._llm,
-            parser=self._parser,
-            max_retries=self.max_prompts,
-        )
+        self.parser = MadlibsDocumentationParser()
+        # self.parser = RetryOutputParser.from_llm(
+        #     llm=self._llm,
+        #     parser=self._parser,
+        #     max_retries=self.max_prompts,
+        # )
 
     def _add_translation(self, block: TranslatedCodeBlock):
         if block.original.text:
@@ -660,6 +688,23 @@ class MadLibsDocumenter(Translator):
                 return
 
         super()._add_translation(block)
+
+    def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
+        """Save a file to disk.
+
+        Arguments:
+            block: The `CodeBlock` to save to a file.
+        """
+        out_text = self.parser.parse_combined_output(block.complete_text)
+        obj = dict(
+            retries=block.total_retries,
+            cost=block.total_cost,
+            processing_time=block.processing_time,
+            comments=json.loads(out_text),
+        )
+
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
 
 
 class DiagramGenerator(Translator):
