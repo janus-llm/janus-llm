@@ -2,6 +2,7 @@ import re
 
 from langchain.schema.output_parser import BaseOutputParser
 from langchain_core.exceptions import OutputParserException
+from langchain_core.output_parsers import StrOutputParser
 
 from ..language.block import CodeBlock
 from ..utils.logger import create_logger
@@ -26,6 +27,10 @@ class JanusParser:
 
     def set_reference(self, block: CodeBlock):
         pass
+
+
+class GenericParser(StrOutputParser, JanusParser):
+    pass
 
 
 class CodeParser(BaseOutputParser[str], JanusParser):

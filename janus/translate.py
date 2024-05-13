@@ -8,7 +8,7 @@ from langchain.output_parsers import RetryWithErrorOutputParser
 from langchain.output_parsers.fix import OutputFixingParser
 from langchain_community.callbacks import get_openai_callback
 from langchain_core.exceptions import OutputParserException
-from langchain_core.output_parsers import BaseOutputParser, StrOutputParser
+from langchain_core.output_parsers import BaseOutputParser
 from langchain_core.runnables import RunnableLambda, RunnableParallel
 from openai import BadRequestError, RateLimitError
 
@@ -18,7 +18,7 @@ from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.splitter import EmptyTreeError, TokenLimitError
 from .llm import load_model
 from .llm.models_info import MODEL_PROMPT_ENGINES
-from .parsers.code_parser import CodeParser, JanusParser
+from .parsers.code_parser import CodeParser, GenericParser
 from .parsers.doc_parser import DocumentationParser, MadlibsDocumentationParser
 from .parsers.eval_parser import EvaluationParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT
@@ -66,7 +66,6 @@ class Translator(Converter):
         super().__init__(source_language=source_language)
 
         self._parser_type: str | None
-        self._parser: JanusParser | None
         self._model_name: str | None
         self._custom_model_arguments: dict[str, Any] | None
         self._target_language: str | None
@@ -390,7 +389,7 @@ class Translator(Converter):
             block: The `CodeBlock` to save to a file.
         """
         # TODO: can't use output fixer and this system for combining output
-        out_text = self._parser.parse_combined_output(block.complete_text)
+        out_text = self.parser.parse_combined_output(block.complete_text)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(out_text, encoding="utf-8")
 
@@ -495,29 +494,13 @@ class Translator(Converter):
                 f" should be 'json', but is '{self._target_language}'"
             )
         if "code" == self._parser_type:
-            self._parser = CodeParser(language=self._target_language)
-            self.parser = OutputFixingParser.from_llm(
-                llm=self._llm,
-                parser=self._parser,
-                max_retries=self.max_prompts,
-            )
+            self.parser = CodeParser(language=self._target_language)
         elif "eval" == self._parser_type:
-            self._parser = EvaluationParser()
-            self.parser = OutputFixingParser.from_llm(
-                llm=self._llm,
-                parser=self._parser,
-                max_retries=self.max_prompts,
-            )
+            self.parser = EvaluationParser()
         elif "doc" == self._parser_type:
-            self._parser = DocumentationParser()
-            self.parser = OutputFixingParser.from_llm(
-                llm=self._llm,
-                parser=self._parser,
-                max_retries=self.max_prompts,
-            )
+            self.parser = DocumentationParser()
         elif "text" == self._parser_type:
-            self._parser = JanusParser()
-            self.parser = StrOutputParser()
+            self.parser = GenericParser()
         else:
             raise ValueError(
                 f"Unsupported parser type: {self._parser_type}. Can be: "
@@ -668,11 +651,6 @@ class MadLibsDocumenter(Translator):
                 f" ({self._parser_type}); must be 'json' and 'doc' respectively."
             )
         self.parser = MadlibsDocumentationParser()
-        # self.parser = RetryOutputParser.from_llm(
-        #     llm=self._llm,
-        #     parser=self._parser,
-        #     max_retries=self.max_prompts,
-        # )
 
     def _add_translation(self, block: TranslatedCodeBlock):
         if block.original.text:
