@@ -1,3 +1,4 @@
+import json
 import re
 from copy import deepcopy
 from pathlib import Path
@@ -711,24 +712,6 @@ class DiagramGenerator(Translator):
         self._model_arguments = model_arguments
         self._max_prompts = max_prompts
 
-    # def translate(
-    #     self,
-    #     input_directory: str | Path,
-    #     output_directory: str | Path | None = None,
-    #     overwrite: bool = False,
-    #     collection_name: str | None = None,
-    # ) -> None:
-    #     if not self._add_documentation:
-    #         super().translate(
-    #             input_directory=input_directory,
-    #             output_directory=output_directory,
-    #             overwrite=overwrite,
-    #             collection_name=collection_name,
-    #         )
-    #     else:
-    #         #TODO: translate into diagram adding generated documentation
-    #         pass
-
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
         """Given an "empty" `TranslatedCodeBlock`, translate the code represented in
         `block.original`, setting the relevant fields in the translated block. The
@@ -754,6 +737,7 @@ class DiagramGenerator(Translator):
                 message = "Error: unable to produce documentation for code block"
                 log.message(message)
                 raise ValueError(message)
+            documentation = json.loads(documentation_block.text)["docstring"]
 
         if self._llm is None:
             message = (
@@ -770,16 +754,12 @@ class DiagramGenerator(Translator):
 
         query_and_parse = self.prompt | self._llm | self.parser
 
-        print(self._add_documentation)
         if self._add_documentation:
-            log.debug("Test Here!!!")
-            print("Test Here!!!")
-            print(documentation_block.text)
             block.text = query_and_parse.invoke(
                 {
                     "SOURCE_CODE": block.original.text,
                     "DIAGRAM_TYPE": self._diagram_type,
-                    "DOCUMENTATION": documentation_block.text,
+                    "DOCUMENTATION": documentation,
                 }
             )
         else:
