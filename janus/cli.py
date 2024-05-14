@@ -358,7 +358,7 @@ def document(
 
 
 @app.command(
-    help="Document input code using an LLM.",
+    help="Diagram input code using an LLM.",
     no_args_is_help=True,
 )
 def diagram(
@@ -425,8 +425,18 @@ def diagram(
     ] = None,
     diagram_type: Annotated[
         str,
-        typer.Option("--diagram-type", "-dg", help="Diagram type to generate in UML"),
+        typer.Option(
+            "--diagram-type", "-dg", help="Diagram type to generate in PLANTUML"
+        ),
     ] = "Activity",
+    add_documentation: Annotated[
+        bool,
+        typer.Option(
+            "--add-documentation/--no-documentation",
+            "-ad",
+            help="Whether to use documentation in generation",
+        ),
+    ] = False,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -438,6 +448,7 @@ def diagram(
         db_path=db_loc,
         db_config=collections_config,
         diagram_type=diagram_type,
+        add_documentation=add_documentation,
     )
     diagram_generator.translate(input_dir, output_dir, overwrite, collection)
 

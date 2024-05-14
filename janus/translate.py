@@ -1,4 +1,5 @@
 import re
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -672,6 +673,7 @@ class DiagramGenerator(Translator):
         db_path: str | None = None,
         db_config: dict[str, Any] | None = None,
         diagram_type="Activity",
+        add_documentation=False,
     ) -> None:
         """Initialize the DiagramGenerator class
 
@@ -686,6 +688,10 @@ class DiagramGenerator(Translator):
             db_config: database configuraiton
             diagram_type: type of PLANTUML diagram to generate
         """
+        if add_documentation:
+            prompt_template = "diagram_with_documentation"
+        else:
+            prompt_template = "diagram"
         super().__init__(
             model=model,
             model_arguments=model_arguments,
@@ -693,12 +699,35 @@ class DiagramGenerator(Translator):
             target_language="uml",
             target_version=None,
             max_prompts=max_prompts,
-            prompt_template="diagram",
+            prompt_template=prompt_template,
             parser_type="code",
             db_path=db_path,
             db_config=db_config,
         )
         self._diagram_type = diagram_type
+        self._add_documentation = add_documentation
+        self._documenter = None
+        self._model = model
+        self._model_arguments = model_arguments
+        self._max_prompts = max_prompts
+
+    # def translate(
+    #     self,
+    #     input_directory: str | Path,
+    #     output_directory: str | Path | None = None,
+    #     overwrite: bool = False,
+    #     collection_name: str | None = None,
+    # ) -> None:
+    #     if not self._add_documentation:
+    #         super().translate(
+    #             input_directory=input_directory,
+    #             output_directory=output_directory,
+    #             overwrite=overwrite,
+    #             collection_name=collection_name,
+    #         )
+    #     else:
+    #         #TODO: translate into diagram adding generated documentation
+    #         pass
 
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
         """Given an "empty" `TranslatedCodeBlock`, translate the code represented in
@@ -716,6 +745,16 @@ class DiagramGenerator(Translator):
             block.translated = True
             return
 
+        if self._add_documentation:
+            if self._documenter is None:
+                self._load_documenter()
+            documentation_block = deepcopy(block)
+            self._documenter._add_translation(documentation_block)
+            if not documentation_block.translated:
+                message = "Error: unable to produce documentation for code block"
+                log.message(message)
+                raise ValueError(message)
+
         if self._llm is None:
             message = (
                 "Model not configured correctly, cannot translate. Try setting "
@@ -731,14 +770,37 @@ class DiagramGenerator(Translator):
 
         query_and_parse = self.prompt | self._llm | self.parser
 
-        block.text = query_and_parse.invoke(
-            {
-                "SOURCE_CODE": block.original.text,
-                "DIAGRAM_TYPE": self._diagram_type,
-            }
-        )
+        print(self._add_documentation)
+        if self._add_documentation:
+            log.debug("Test Here!!!")
+            print("Test Here!!!")
+            print(documentation_block.text)
+            block.text = query_and_parse.invoke(
+                {
+                    "SOURCE_CODE": block.original.text,
+                    "DIAGRAM_TYPE": self._diagram_type,
+                    "DOCUMENTATION": documentation_block.text,
+                }
+            )
+        else:
+            block.text = query_and_parse.invoke(
+                {
+                    "SOURCE_CODE": block.original.text,
+                    "DIAGRAM_TYPE": self._diagram_type,
+                }
+            )
 
         block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
 
         log.debug(f"[{block.name}] Output code:\n{block.text}")
+
+    def _load_documenter(self):
+        self._documenter = Documenter(
+            model=self._model,
+            model_arguments=self._model_arguments,
+            source_language=self._source_language,
+            max_prompts=self._max_prompts,
+            db_path=self._db_path,
+            db_config=self._db_config,
+        )
