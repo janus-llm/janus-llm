@@ -4,21 +4,20 @@ from pathlib import Path
 from typing import Any, Callable
 
 from dotenv import load_dotenv
-from langchain_community.chat_models import ChatOpenAI
+from langchain_community.chat_models import BedrockChat, ChatOpenAI
 from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_community.llms.bedrock import Bedrock
-from langchain_community.chat_models import BedrockChat
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain_core.language_models import BaseLanguageModel
 
 from janus.prompts.prompt import (
     ChatGptPromptEngine,
     ClaudePromptEngine,
+    CoherePromptEngine,
     Llama2PromptEngine,
     Llama3PromptEngine,
-    TitanPromptEngine,
-    CoherePromptEngine,
     PromptEngine,
+    TitanPromptEngine,
 )
 
 load_dotenv()
@@ -58,11 +57,13 @@ MODEL_PROMPT_ENGINES: dict[str, type[PromptEngine]] = {
 
 MODEL_TYPES: dict[str, str] = {
     "gpt-4": "OpenAI",
+    "gpt-4-0613": "OpenAI",
     "gpt-4-32k": "OpenAI",
     "gpt-4-1106-preview": "OpenAI",
     "gpt-4-0125-preview": "OpenAI",
     "gpt-3.5-turbo": "OpenAI",
     "gpt-3.5-turbo-16k": "OpenAI",
+    "gpt-3.5-turbo-0125": "OpenAI",
     "anthropic.claude-v2": "BedrockChat",
     "anthropic.claude-instant-v1": "BedrockChat",
     "anthropic.claude-3-haiku-20240307-v1:0": "BedrockChat",
@@ -140,7 +141,7 @@ TOKEN_LIMITS: dict[str, int] = {
     "amazon.titan-text-express-v1": 8192,
     "ai21.j2-mid-v1": 8192,
     "ai21.j2-ultra-v1": 8192,
-    "cohere.command-r-plus-v1:0":  128_000
+    "cohere.command-r-plus-v1:0": 128_000,
 }
 
 COST_PER_MODEL: dict[str, dict[str, float]] = {
