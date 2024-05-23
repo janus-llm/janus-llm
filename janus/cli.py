@@ -30,7 +30,13 @@ from .llm.models_info import (
     TOKEN_LIMITS,
 )
 from .metrics.cli import evaluate
-from .translate import PARSER_TYPES, Documenter, MadLibsDocumenter, Translator
+from .translate import (
+    PARSER_TYPES,
+    DiagramGenerator,
+    Documenter,
+    MadLibsDocumenter,
+    Translator,
+)
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
 
@@ -349,6 +355,91 @@ def document(
         )
 
     documenter.translate(input_dir, output_dir, overwrite, collection)
+
+
+@app.command(
+    help="Document input code using an LLM.",
+    no_args_is_help=True,
+)
+def diagram(
+    input_dir: Annotated[
+        Path,
+        typer.Option(
+            "--input",
+            "-i",
+            help="The directory containing the source code to be translated. "
+            "The files should all be in one flat directory.",
+        ),
+    ],
+    language: Annotated[
+        str,
+        typer.Option(
+            "--language",
+            "-l",
+            help="The language of the source code.",
+            click_type=click.Choice(sorted(LANGUAGES)),
+        ),
+    ],
+    output_dir: Annotated[
+        Path,
+        typer.Option(
+            "--output-dir", "-o", help="The directory to store the translated code in."
+        ),
+    ],
+    llm_name: Annotated[
+        str,
+        typer.Option(
+            "--llm",
+            "-L",
+            help="The custom name of the model set with 'janus llm add'.",
+        ),
+    ] = "gpt-3.5-turbo",
+    max_prompts: Annotated[
+        int,
+        typer.Option(
+            "--max-prompts",
+            "-m",
+            help="The maximum number of times to prompt a model on one functional block "
+            "before exiting the application. This is to prevent wasting too much money.",
+        ),
+    ] = 10,
+    overwrite: Annotated[
+        bool,
+        typer.Option(
+            "--overwrite/--preserve",
+            help="Whether to overwrite existing files in the output directory",
+        ),
+    ] = False,
+    temperature: Annotated[
+        float,
+        typer.Option("--temperature", "-t", help="Sampling temperature.", min=0, max=2),
+    ] = 0.7,
+    collection: Annotated[
+        str,
+        typer.Option(
+            "--collection",
+            "-c",
+            help="If set, will put the translated result into a Chroma DB "
+            "collection with the name provided.",
+        ),
+    ] = None,
+    diagram_type: Annotated[
+        str,
+        typer.Option("--diagram-type", "-dg", help="Diagram type to generate in UML"),
+    ] = "Activity",
+):
+    model_arguments = dict(temperature=temperature)
+    collections_config = get_collections_config()
+    diagram_generator = DiagramGenerator(
+        model=llm_name,
+        model_arguments=model_arguments,
+        source_language=language,
+        max_prompts=max_prompts,
+        db_path=db_loc,
+        db_config=collections_config,
+        diagram_type=diagram_type,
+    )
+    diagram_generator.translate(input_dir, output_dir, overwrite, collection)
 
 
 @db.command("init", help="Connect to or create a database.")
@@ -707,12 +798,18 @@ def embedding_add(
     elif model_type in EmbeddingModelType.HuggingFaceLocal.values:
         hf = typer.style("HuggingFace", fg="yellow")
         model_id = typer.prompt(
-            f"Enter the {hf} model ID", default="all-MiniLM-L6-v2", type=str
-        )
-        cache_folder = typer.prompt(
-            "Enter the model's cache folder",
-            default=EMBEDDING_MODEL_CONFIG_DIR / "cache",
+            f"Enter the {hf} model ID",
+            default="sentence-transformers/all-MiniLM-L6-v2",
             type=str,
+        )
+        cache_folder = str(
+            Path(
+                typer.prompt(
+                    "Enter the model's cache folder",
+                    default=EMBEDDING_MODEL_CONFIG_DIR / "cache",
+                    type=str,
+                )
+            )
         )
         max_tokens = typer.prompt(
             "Enter the model's maximum tokens", default=8191, type=int
@@ -740,9 +837,7 @@ def embedding_add(
             show_choices=False,
         )
         params = dict(
-            model_name=model_name,
-            temperature=0.7,
-            n=1,
+            model=model_name,
         )
         max_tokens = EMBEDDING_TOKEN_LIMITS[model_name]
         model_cost = EMBEDDING_COST_PER_MODEL[model_name]

@@ -418,13 +418,18 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
     "mumps": {
         "comment": ";",
         "suffix": "m",
-        "url": None,
+        "url": "https://github.com/janus-llm/tree-sitter-mumps",
         "example": 'WRITE "Hello, World!"',
         "functional_node_type": "subroutine",
         "comment_node_type": "comment",
         "branch_node_types": ["if_statement"],
-        "operation_node_types": ["command", "function"],
-        "operand_node_types": ["operand"],
+        "operation_node_types": [
+            "command",
+            "function_call",
+            "routine_call",
+            "routine_definition",
+        ],
+        "operand_node_types": ["argument"],
     },
     "nix": {
         "comment": "#",
@@ -723,6 +728,14 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "suffix": "ts",
         "url": "https://github.com/tree-sitter/tree-sitter-typescript",
         "example": "console.log('Hello, World!');\n",
+    },
+    "uml": {
+        "comment": "'",
+        "suffix": "uml",
+        "url": "https://github.com/lyndsysimon/tree-sitter-plantuml",
+        "example": "@startuml\nAlice -> Bob: Authentication Request\nBob --> Alice:\
+              Authentication Response\nAlice -> Bob: Another authentication\
+              Request\nAlice <-- Bob: Another authentication Response\n@enduml",
     },
     "verilog": {
         "comment": "//",

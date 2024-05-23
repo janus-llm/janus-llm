@@ -9,11 +9,14 @@ from typing_extensions import Annotated
 
 from janus.llm import load_model
 from janus.utils.enums import LANGUAGES
+from janus.utils.logger import create_logger
 
 from ..utils.progress import track
 from .cli import evaluate
 from .file_pairing import FILE_PAIRING_METHODS
 from .splitting import SPLITTING_METHODS
+
+log = create_logger(__name__)
 
 
 def metric(
@@ -181,6 +184,7 @@ def metric(
                 out_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(out_file, "w") as f:
                     json.dump(out, f)
+                    log.info(f"Saved results to file: {out_file}")
 
             sig1 = inspect.signature(function)
             sig2 = inspect.signature(func)
@@ -305,6 +309,7 @@ def metric(
                 out_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(out_file, "w") as f:
                     json.dump(out, f)
+                    log.info(f"Saved results to file: {out_file}")
 
             sig1 = inspect.signature(function)
             sig2 = inspect.signature(func)
