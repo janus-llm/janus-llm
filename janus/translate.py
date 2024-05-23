@@ -659,7 +659,7 @@ class MadLibsDocumenter(Translator):
         super()._add_translation(block)
 
 
-class DiagramGenerator(Translator):
+class DiagramGenerator(Documenter):
     """DiagramGenerator
 
     A class that translates code from one programming language to a set of diagrams.
@@ -689,19 +689,11 @@ class DiagramGenerator(Translator):
             db_config: database configuraiton
             diagram_type: type of PLANTUML diagram to generate
         """
-        if add_documentation:
-            prompt_template = "diagram_with_documentation"
-        else:
-            prompt_template = "diagram"
         super().__init__(
             model=model,
             model_arguments=model_arguments,
             source_language=source_language,
-            target_language="uml",
-            target_version=None,
             max_prompts=max_prompts,
-            prompt_template=prompt_template,
-            parser_type="code",
             db_path=db_path,
             db_config=db_config,
         )
@@ -711,6 +703,10 @@ class DiagramGenerator(Translator):
         self._model = model
         self._model_arguments = model_arguments
         self._max_prompts = max_prompts
+        if add_documentation:
+            self._diagram_prompt_template_name = "diagram_with_documentation"
+        else:
+            self._diagram_prompt_template_name = "diagram"
 
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
         """Given an "empty" `TranslatedCodeBlock`, translate the code represented in
@@ -729,10 +725,8 @@ class DiagramGenerator(Translator):
             return
 
         if self._add_documentation:
-            if self._documenter is None:
-                self._load_documenter()
             documentation_block = deepcopy(block)
-            self._documenter._add_translation(documentation_block)
+            super()._add_translation(documentation_block)
             if not documentation_block.translated:
                 message = "Error: unable to produce documentation for code block"
                 log.message(message)
@@ -775,12 +769,36 @@ class DiagramGenerator(Translator):
 
         log.debug(f"[{block.name}] Output code:\n{block.text}")
 
-    def _load_documenter(self):
-        self._documenter = Documenter(
-            model=self._model,
-            model_arguments=self._model_arguments,
+    @run_if_changed(
+        "_diagram_prompt_template_name",
+        "_source_language",
+    )
+    def _load_diagram_prompt_engine(self) -> None:
+        """Load the prompt engine according to this instance's attributes.
+
+        If the relevant fields have not been changed since the last time this method was
+        called, nothing happens.
+        """
+        if self._diagram_prompt_template_name in SAME_OUTPUT:
+            if self._target_language != self._source_language:
+                raise ValueError(
+                    f"Prompt template ({self._prompt_template_name}) suggests "
+                    f"source and target languages should match, but do not "
+                    f"({self._source_language} != {self._target_language})"
+                )
+        if (
+            self._diagram_prompt_template_name in TEXT_OUTPUT
+            and self._target_language != "text"
+        ):
+            raise ValueError(
+                f"Prompt template ({self._prompt_template_name}) suggests target "
+                f"language should be 'text', but is '{self._target_language}'"
+            )
+
+        self._diagram_prompt_engine = PromptEngine(
             source_language=self._source_language,
-            max_prompts=self._max_prompts,
-            db_path=self._db_path,
-            db_config=self._db_config,
+            target_language=self._target_language,
+            target_version=self._target_version,
+            prompt_template=self._diagram_prompt_template_name,
         )
+        self.diagram_prompt = self._diagram_prompt_engine.prompt
