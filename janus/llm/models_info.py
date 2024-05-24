@@ -22,6 +22,49 @@ from janus.prompts.prompt import (
 
 load_dotenv()
 
+openai_models = [
+    "gpt-4",
+    "gpt-4-32k",
+    "gpt-4-1106-preview",
+    "gpt-4-0125-preview",
+    "gpt-3.5-turbo",
+    "gpt-3.5-turbo-16k",
+    "gpt-3.5-turbo-0125",
+]
+claude_models = [
+    "bedrock-claude-v2",
+    "bedrock-claude-instant-v1",
+    "bedrock-claude-haiku",
+    "bedrock-claude-sonnet",
+]
+llama2_models = [
+    "bedrock-llama2-70b",
+    "bedrock-llama2-70b-chat",
+    "bedrock-llama2-13b",
+    "bedrock-llama2-13b-chat",
+]
+llama3_models = [
+    "bedrock-llama3-8b-instruct",
+    "bedrock-llama3-70b-instruct",
+]
+titan_models = [
+    "bedrock-titan-text-lite",
+    "bedrock-titan-text-express",
+    "bedrock-jurassic-2-mid",
+    "bedrock-jurassic-2-ultra",
+]
+cohere_models = [
+    "bedrock-command-r-plus",
+]
+bedrock_models = [
+    *claude_models,
+    *llama2_models,
+    *llama3_models,
+    *titan_models,
+    *cohere_models,
+]
+all_models = [*openai_models, *bedrock_models]
+
 MODEL_TYPE_CONSTRUCTORS: dict[str, Callable[[Any], BaseLanguageModel]] = {
     "OpenAI": ChatOpenAI,
     "HuggingFace": HuggingFaceTextGenInference,
@@ -30,55 +73,18 @@ MODEL_TYPE_CONSTRUCTORS: dict[str, Callable[[Any], BaseLanguageModel]] = {
     "BedrockChat": BedrockChat,
 }
 
-MODEL_PROMPT_ENGINES: dict[str, type[PromptEngine]] = {
-    "gpt-4": ChatGptPromptEngine,
-    "gpt-4-32k": ChatGptPromptEngine,
-    "gpt-4-1106-preview": ChatGptPromptEngine,
-    "gpt-4-0125-preview": ChatGptPromptEngine,
-    "gpt-3.5-turbo": ChatGptPromptEngine,
-    "gpt-3.5-turbo-16k": ChatGptPromptEngine,
-    "bedrock-claude-v2": ClaudePromptEngine,
-    "bedrock-claude-instant-v1": ClaudePromptEngine,
-    "bedrock-claude-haiku": ClaudePromptEngine,
-    "bedrock-claude-sonnet": ClaudePromptEngine,
-    "bedrock-llama2-70b": Llama2PromptEngine,
-    "bedrock-llama2-70b-chat": Llama2PromptEngine,
-    "bedrock-llama2-13b": Llama2PromptEngine,
-    "bedrock-llama2-13b-chat": Llama2PromptEngine,
-    "bedrock-llama3-8b-instruct": Llama3PromptEngine,
-    "bedrock-llama3-70b-instruct": Llama3PromptEngine,
-    "bedrock-titan-text-lite": TitanPromptEngine,
-    "bedrock-titan-text-express": TitanPromptEngine,
-    "bedrock-jurassic-2-mid": TitanPromptEngine,
-    "bedrock-jurassic-2-ultra": TitanPromptEngine,
-    "bedrock-command-r-plus": CoherePromptEngine,
+MODEL_TYPES: dict[str, type(PromptEngine)] = {
+    **{m: "OpenAI" for m in openai_models},
+    **{m: "BedrockChat" for m in bedrock_models},
 }
 
-
-MODEL_TYPES: dict[str, str] = {
-    "gpt-4": "OpenAI",
-    "gpt-4-0613": "OpenAI",
-    "gpt-4-32k": "OpenAI",
-    "gpt-4-1106-preview": "OpenAI",
-    "gpt-4-0125-preview": "OpenAI",
-    "gpt-3.5-turbo": "OpenAI",
-    "gpt-3.5-turbo-16k": "OpenAI",
-    "gpt-3.5-turbo-0125": "OpenAI",
-    "anthropic.claude-v2": "BedrockChat",
-    "anthropic.claude-instant-v1": "BedrockChat",
-    "anthropic.claude-3-haiku-20240307-v1:0": "BedrockChat",
-    "anthropic.claude-3-sonnet-20240229-v1:0": "BedrockChat",
-    "meta.llama2-70b-v1": "BedrockChat",
-    "meta.llama2-70b-chat-v1": "BedrockChat",
-    "meta.llama2-13b-chat-v1": "BedrockChat",
-    "meta.llama2-13b-v1": "BedrockChat",
-    "meta.llama3-8b-instruct-v1:0": "BedrockChat",
-    "meta.llama3-70b-instruct-v1:0": "BedrockChat",
-    "amazon.titan-text-lite-v1": "BedrockChat",
-    "amazon.titan-text-express-v1": "BedrockChat",
-    "ai21.j2-mid-v1": "Bedrock",
-    "ai21.j2-ultra-v1": "Bedrock",
-    "cohere.command-r-plus-v1:0": "BedrockChat",
+MODEL_PROMPT_ENGINES: dict[str, type(PromptEngine)] = {
+    **{m: ChatGptPromptEngine for m in openai_models},
+    **{m: ClaudePromptEngine for m in claude_models},
+    **{m: Llama2PromptEngine for m in llama2_models},
+    **{m: Llama3PromptEngine for m in llama3_models},
+    **{m: TitanPromptEngine for m in titan_models},
+    **{m: CoherePromptEngine for m in cohere_models},
 }
 
 _open_ai_defaults: dict[str, str] = {
@@ -86,32 +92,27 @@ _open_ai_defaults: dict[str, str] = {
     "openai_organization": os.getenv("OPENAI_ORG_ID"),
 }
 
+model_identifiers = {
+    **{m: m for m in openai_models},
+    "bedrock-claude-v2": "anthropic.claude-v2",
+    "bedrock-claude-instant-v1": "anthropic.claude-instant-v1",
+    "bedrock-claude-haiku": "anthropic.claude-3-haiku-20240307-v1:0",
+    "bedrock-claude-sonnet": "anthropic.claude-3-sonnet-20240229-v1:0",
+    "bedrock-llama2-70b": "meta.llama2-70b-v1",
+    "bedrock-llama2-70b-chat": "meta.llama2-70b-chat-v1",
+    "bedrock-llama2-13b": "meta.llama2-13b-chat-v1",
+    "bedrock-llama2-13b-chat": "meta.llama2-13b-v1",
+    "bedrock-llama3-8b-instruct": "meta.llama3-8b-instruct-v1:0",
+    "bedrock-llama3-70b-instruct": "meta.llama3-70b-instruct-v1:0",
+    "bedrock-titan-text-lite": "amazon.titan-text-lite-v1",
+    "bedrock-titan-text-express": "amazon.titan-text-express-v1",
+    "bedrock-jurassic-2-mid": "ai21.j2-mid-v1",
+    "bedrock-jurassic-2-ultra": "ai21.j2-ultra-v1",
+    "bedrock-command-r-plus": "cohere.command-r-plus-v1:0",
+}
+
 MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, str]] = {
-    "gpt-4": dict(model_name="gpt-4"),
-    "gpt-4-32k": dict(model_name="gpt-4-32k"),
-    "gpt-4-1106-preview": dict(model_name="gpt-4-1106-preview"),
-    "gpt-4-0125-preview": dict(model_name="gpt-4-0125-preview"),
-    "gpt-3.5-turbo": dict(model_name="gpt-3.5-turbo"),
-    "gpt-3.5-turbo-16k": dict(model_name="gpt-3.5-turbo-16k"),
-    "anthropic.claude-v2": dict(model_name="anthropic.claude-v2"),
-    "anthropic.claude-instant-v1": dict(model_name="anthropic.claude-instant-v1"),
-    "anthropic.claude-3-haiku-20240307-v1:0": dict(
-        model_name="anthropic.claude-3-haiku-20240307-v1:0"
-    ),
-    "anthropic.claude-3-sonnet-20240229-v1:0": dict(
-        model_name="anthropic.claude-3-sonnet-20240229-v1:0"
-    ),
-    "meta.llama2-70b-v1": dict(model_name="meta.llama2-70b-v1"),
-    "meta.llama2-70b-chat-v1": dict(model_name="meta.llama2-70b-chat-v1"),
-    "meta.llama2-13b-chat-v1": dict(model_name="meta.llama2-13b-chat-v1"),
-    "meta.llama2-13b-v1": dict(model_name="meta.llama2-13b-v1"),
-    "meta.llama3-8b-instruct-v1:0": dict(model_name="meta.llama3-8b-instruct-v1:0"),
-    "meta.llama3-70b-instruct-v1:0": dict(model_name="meta.llama3-70b-instruct-v1:0"),
-    "amazon.titan-text-lite-v1": dict(model_name="amazon.titan-text-lite-v1"),
-    "amazon.titan-text-express-v1": dict(model_name="amazon.titan-text-express-v1"),
-    "ai21.j2-mid-v1": dict(model_name="ai21.j2-mid-v1"),
-    "ai21.j2-ultra-v1": dict(model_name="ai21.j2-ultra-v1"),
-    "cohere.command-r-plus-v1:0": dict(model_name="cohere.command-r-plus-v1:0"),
+    m: dict(model_name=m) for m in model_identifiers.values()
 }
 
 DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
