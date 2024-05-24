@@ -12,7 +12,9 @@ from langchain_community.callbacks.manager import (
     get_openai_callback,
 )
 from langchain_core.exceptions import OutputParserException
+from langchain_core.language_models import BaseLanguageModel
 from langchain_core.output_parsers import BaseOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableLambda, RunnableParallel
 from openai import BadRequestError, RateLimitError
 
@@ -79,7 +81,10 @@ class Translator(Converter):
         self._db_path: str | None
         self._db_config: dict[str, Any] | None
 
-        self.parser: BaseOutputParser | None
+        self._llm: BaseLanguageModel | None
+        self._parser: BaseOutputParser | None
+        self._prompt: ChatPromptTemplate | None
+
         self.max_prompts = max_prompts
 
         self.set_model(model_name=model, **model_arguments)
@@ -96,7 +101,7 @@ class Translator(Converter):
 
     def _load_parameters(self) -> None:
         self._load_model()
-        self._load_prompt_engine()
+        self._load_prompt()
         self._load_parser()
         self._load_vectorizer()
         super()._load_parameters()  # will call self._changed_attrs.clear()
@@ -376,7 +381,7 @@ class Translator(Converter):
         to the cube root of self.max_retries, so the total calls to the
         LLM will be roughly as expected (up to sqrt(self.max_retries) over)
         """
-        self.parser.set_reference(block.original)
+        self._parser.set_reference(block.original)
 
         # Retries with just the output and the error
         n1 = round(self.max_prompts ** (1 / 3))
@@ -389,7 +394,7 @@ class Translator(Converter):
 
         fix_format = OutputFixingParser.from_llm(
             llm=self._llm,
-            parser=self.parser,
+            parser=self._parser,
             max_retries=n1,
         )
         retry = RetryWithErrorOutputParser.from_llm(
@@ -398,9 +403,9 @@ class Translator(Converter):
             max_retries=n2,
         )
 
-        completion_chain = self.prompt | self._llm
+        completion_chain = self._prompt | self._llm
         chain = RunnableParallel(
-            completion=completion_chain, prompt_value=self.prompt
+            completion=completion_chain, prompt_value=self._prompt
         ) | RunnableLambda(lambda x: retry.parse_with_prompt(**x))
 
         for _ in range(n3):
@@ -423,7 +428,7 @@ class Translator(Converter):
             block: The `CodeBlock` to save to a file.
         """
         # TODO: can't use output fixer and this system for combining output
-        out_text = self.parser.parse_combined_output(block.complete_text)
+        out_text = self._parser.parse_combined_output(block.complete_text)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(out_text, encoding="utf-8")
 
@@ -528,13 +533,13 @@ class Translator(Converter):
                 f" should be 'json', but is '{self._target_language}'"
             )
         if "code" == self._parser_type:
-            self.parser = CodeParser(language=self._target_language)
+            self._parser = CodeParser(language=self._target_language)
         elif "eval" == self._parser_type:
-            self.parser = EvaluationParser()
+            self._parser = EvaluationParser()
         elif "doc" == self._parser_type:
-            self.parser = DocumentationParser()
+            self._parser = DocumentationParser()
         elif "text" == self._parser_type:
-            self.parser = GenericParser()
+            self._parser = GenericParser()
         else:
             raise ValueError(
                 f"Unsupported parser type: {self._parser_type}. Can be: "
@@ -548,11 +553,11 @@ class Translator(Converter):
         "_target_version",
         "_model_name",
     )
-    def _load_prompt_engine(self) -> None:
-        """Load the prompt engine according to this instance's attributes.
+    def _load_prompt(self) -> None:
+        """Load the prompt according to this instance's attributes.
 
-        If the relevant fields have not been changed since the last time this method was
-        called, nothing happens.
+        If the relevant fields have not been changed since the last time this
+        method was called, nothing happens.
         """
         if self._prompt_template_name in SAME_OUTPUT:
             if self._target_language != self._source_language:
@@ -567,13 +572,13 @@ class Translator(Converter):
                 f"language should be 'text', but is '{self._target_language}'"
             )
 
-        self._prompt_engine = MODEL_PROMPT_ENGINES[self._model_name](
+        prompt_engine = MODEL_PROMPT_ENGINES[self._model_name](
             source_language=self._source_language,
             target_language=self._target_language,
             target_version=self._target_version,
             prompt_template=self._prompt_template_name,
         )
-        self.prompt = self._prompt_engine.prompt
+        self._prompt = prompt_engine.prompt
 
     @run_if_changed("_db_path")
     def _load_vectorizer(self) -> None:
@@ -684,7 +689,7 @@ class MadLibsDocumenter(Translator):
                 f"Invalid target language ({self._target_language}) or parser type"
                 f" ({self._parser_type}); must be 'json' and 'doc' respectively."
             )
-        self.parser = MadlibsDocumentationParser()
+        self._parser = MadlibsDocumentationParser()
 
     def _add_translation(self, block: TranslatedCodeBlock):
         if block.original.text:
@@ -707,7 +712,7 @@ class MadLibsDocumenter(Translator):
         Arguments:
             block: The `CodeBlock` to save to a file.
         """
-        out_text = self.parser.parse_combined_output(block.complete_text)
+        out_text = self._parser.parse_combined_output(block.complete_text)
         obj = dict(
             retries=block.total_retries,
             cost=block.total_cost,
@@ -791,7 +796,7 @@ class DiagramGenerator(Translator):
 
         self._parser.set_reference(block.original)
 
-        query_and_parse = self.prompt | self._llm | self.parser
+        query_and_parse = self._prompt | self._llm | self._parser
 
         block.text = query_and_parse.invoke(
             {
