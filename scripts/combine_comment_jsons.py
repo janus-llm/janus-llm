@@ -39,6 +39,9 @@ def parse_madlibs(
 
         obj = json.loads(comment_file.read_text())
 
+        if "retries" not in obj:
+            print(f"Metadata not found in {comment_file}")
+
         valid_keys = set(master_obj[key]["comments"].keys())
         seen_keys = set(obj["comments"].keys())
         missing_keys = valid_keys.difference(seen_keys)

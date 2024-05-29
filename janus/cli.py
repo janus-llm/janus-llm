@@ -311,6 +311,15 @@ def document(
             click_type=click.Choice(["module", "madlibs"]),
         ),
     ] = "madlibs",
+    comments_per_request: Annotated[
+        int,
+        typer.Option(
+            "--comments-per-request",
+            "-c",
+            help="The maximum number of comments to generate per request when using "
+            "MadLibs documentation mode.",
+        ),
+    ] = None,
     drop_comments: Annotated[
         bool,
         typer.Option(
@@ -352,6 +361,7 @@ def document(
             max_prompts=max_prompts,
             db_path=db_loc,
             db_config=collections_config,
+            comments_per_request=comments_per_request,
         )
 
     documenter.translate(input_dir, output_dir, overwrite, collection)

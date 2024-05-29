@@ -2,6 +2,7 @@ import json
 import math
 import re
 import time
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -653,6 +654,7 @@ class MadLibsDocumenter(Translator):
         max_prompts: int = 10,
         db_path: str | None = None,
         db_config: dict[str, Any] | None = None,
+        comments_per_request: int | None = None,
     ) -> None:
         """Initialize a Translator instance.
 
@@ -676,6 +678,7 @@ class MadLibsDocumenter(Translator):
             db_path=db_path,
             db_config=db_config,
         )
+        self.comments_per_request = comments_per_request
 
     @run_if_changed("_parser_type", "_target_language")
     def _load_parser(self) -> None:
@@ -692,26 +695,76 @@ class MadLibsDocumenter(Translator):
         self._parser = MadlibsDocumentationParser()
 
     def _add_translation(self, block: TranslatedCodeBlock):
-        if block.original.text:
-            first_comment = re.search(
-                r"<(?:INLINE|BLOCK)_COMMENT \w{8}>",
+        if block.translated:
+            return
+
+        if block.original.text is None:
+            block.translated = True
+            return
+
+        if self.comments_per_request is None:
+            return super()._add_translation(block)
+
+        comment_pattern = r"<(?:INLINE|BLOCK)_COMMENT \w{8}>"
+        comments = list(
+            re.finditer(
+                comment_pattern,
                 block.original.text,
             )
-            if first_comment is None:
-                log.info(f"[{block.name}] Skipping commentless block")
-                block.translated = True
-                block.text = None
-                block.complete = True
-                return
+        )
 
-        super()._add_translation(block)
+        if not comments:
+            log.info(f"[{block.name}] Skipping commentless block")
+            block.translated = True
+            block.text = None
+            block.complete = True
+            return
 
-    def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
-        """Save a file to disk.
+        if len(comments) <= self.comments_per_request:
+            return super()._add_translation(block)
 
-        Arguments:
-            block: The `CodeBlock` to save to a file.
-        """
+        block.processing_time = 0
+        block.cost = 0
+        block.retries = 0
+        obj = {}
+        for i in range(0, len(comments), self.comments_per_request):
+            # Split the text into the section containing comments of interest,
+            #  all the text prior to those comments, and all the text after them
+            working_comments = comments[i : i + self.comments_per_request]
+            start_idx = working_comments[0].start()
+            end_idx = working_comments[-1].end()
+            prefix = block.original.text[:start_idx]
+            keeper = block.original.text[start_idx:end_idx]
+            suffix = block.original.text[end_idx:]
+
+            # Strip all comment placeholders outside of the section of interest
+            prefix = re.sub(comment_pattern, "", prefix)
+            suffix = re.sub(comment_pattern, "", suffix)
+
+            # Build a new TranslatedBlock using the new working text
+            working_copy = deepcopy(block.original)
+            working_copy.text = prefix + keeper + suffix
+            working_block = TranslatedCodeBlock(working_copy, self._target_language)
+
+            # Run the LLM on the working text
+            super()._add_translation(working_block)
+
+            # Update metadata to include for all runs
+            block.retries += working_block.retries
+            block.cost += working_block.cost
+            block.processing_time += working_block.processing_time
+
+            # Update the output text to merge this section's output in
+            out_text = self._parser.parse_combined_output(working_block.complete_text)
+            obj.update(json.loads(out_text))
+
+        block.text = json.dumps(obj)
+        block.tokens = self._llm.get_num_tokens(block.text)
+        block.translated = True
+
+    def _get_obj(
+        self, block: TranslatedCodeBlock
+    ) -> dict[str, int | float | dict[str, str]]:
         out_text = self._parser.parse_combined_output(block.complete_text)
         obj = dict(
             retries=block.total_retries,
@@ -719,7 +772,15 @@ class MadLibsDocumenter(Translator):
             processing_time=block.processing_time,
             comments=json.loads(out_text),
         )
+        return obj
 
+    def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
+        """Save a file to disk.
+
+        Arguments:
+            block: The `CodeBlock` to save to a file.
+        """
+        obj = self._get_obj(block)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
 
