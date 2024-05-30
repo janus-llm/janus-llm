@@ -25,8 +25,10 @@ load_dotenv()
 openai_models = [
     "gpt-4",
     "gpt-4-32k",
+    "gpt-4-0613",
     "gpt-4-1106-preview",
     "gpt-4-0125-preview",
+    "gpt-4o-2024-05-13",
     "gpt-3.5-turbo",
     "gpt-3.5-turbo-16k",
     "gpt-3.5-turbo-0125",
@@ -122,8 +124,10 @@ MODEL_CONFIG_DIR = Path.home().expanduser() / ".janus" / "llm"
 TOKEN_LIMITS: dict[str, int] = {
     "gpt-4": 8192,
     "gpt-4-32k": 32_768,
+    "gpt-4-0613": 8192,
     "gpt-4-1106-preview": 128_000,
     "gpt-4-0125-preview": 128_000,
+    "gpt-4o-2024-05-13": 128_000,
     "gpt-3.5-turbo": 4096,
     "gpt-3.5-turbo-16k": 16_384,
     "text-embedding-ada-002": 8191,
@@ -147,11 +151,14 @@ TOKEN_LIMITS: dict[str, int] = {
 
 COST_PER_MODEL: dict[str, dict[str, float]] = {
     "gpt-4": {"input": 0.03, "output": 0.06},
-    "gpt-4-32k": {"input": 0.6, "output": 0.12},
+    "gpt-4-32k": {"input": 0.06, "output": 0.12},
+    "gpt-4-0613": {"input": 0.03, "output": 0.06},
     "gpt-4-1106-preview": {"input": 0.01, "output": 0.03},
     "gpt-4-0125-preview": {"input": 0.01, "output": 0.03},
+    "gpt-4o-2024-05-13": {"input": 0.005, "output": 0.015},
     "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
-    "gpt-3.5-turbo-16k": {"input": 0.003, "output": 0.004},
+    "gpt-3.5-turbo-16k": {"input": 0.0005, "output": 0.0015},
+    "gpt-3.5-turbo-0125": {"input": 0.0005, "output": 0.0015},
     "anthropic.claude-v2": {"input": 0.0, "output": 0.0},
     "anthropic.claude-instant-v1": {"input": 0.0, "output": 0.0},
     "anthropic.claude-3-haiku-20240307-v1:0": {"input": 0.00025, "output": 0.00125},
