@@ -24,8 +24,9 @@ def parse_madlibs(
     """
 
     master_obj = json.loads(input_file.read_text())
+    master_obj = {str(Path(k).with_suffix("")): v for k, v in master_obj.items()}
     for comment_file in output_dir.rglob("*.json"):
-        key = comment_file.with_suffix(".m").name
+        key = comment_file.with_suffix("").name
         if key not in master_obj:
             print(f"Skipping file: {comment_file.name}")
             continue
@@ -47,9 +48,15 @@ def parse_madlibs(
         missing_keys = valid_keys.difference(seen_keys)
         invalid_keys = seen_keys.difference(valid_keys)
         if missing_keys:
-            print(f"{comment_file.name} missing keys: {missing_keys}")
+            print(
+                f"{comment_file.relative_to(output_dir)}"
+                f" is missing keys: {missing_keys}"
+            )
         if invalid_keys:
-            print(f"{comment_file.name} has invalid keys (skipping): {invalid_keys}")
+            print(
+                f"{comment_file.relative_to(output_dir)}"
+                f" has invalid keys (skipping): {invalid_keys}"
+            )
 
         for k in invalid_keys:
             del obj["comments"][k]

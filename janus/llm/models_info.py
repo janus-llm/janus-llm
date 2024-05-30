@@ -130,6 +130,7 @@ TOKEN_LIMITS: dict[str, int] = {
     "gpt-4o-2024-05-13": 128_000,
     "gpt-3.5-turbo": 4096,
     "gpt-3.5-turbo-16k": 16_384,
+    "gpt-3.5-turbo-0125": 16_384,
     "text-embedding-ada-002": 8191,
     "gpt4all": 16_384,
     "anthropic.claude-v2": 100_000,
