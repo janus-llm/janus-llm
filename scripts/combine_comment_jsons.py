@@ -50,7 +50,7 @@ def parse_madlibs(
         if missing_keys:
             print(
                 f"{comment_file.relative_to(output_dir)}"
-                f" is missing keys: {missing_keys}"
+                f" is missing {len(missing_keys)} keys: {missing_keys}"
             )
         if invalid_keys:
             print(

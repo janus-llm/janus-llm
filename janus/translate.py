@@ -723,6 +723,13 @@ class MadLibsDocumenter(Translator):
         if len(comments) <= self.comments_per_request:
             return super()._add_translation(block)
 
+        comment_group_indices = list(range(0, len(comments), self.comments_per_request))
+        log.debug(
+            f"[{block.name}] Block contains more than {self.comments_per_request}"
+            f" comments, splitting {len(comments)} comments into"
+            f" {len(comment_group_indices)} groups"
+        )
+
         block.processing_time = 0
         block.cost = 0
         block.retries = 0
@@ -755,10 +762,11 @@ class MadLibsDocumenter(Translator):
             block.processing_time += working_block.processing_time
 
             # Update the output text to merge this section's output in
-            out_text = self._parser.parse_combined_output(working_block.complete_text)
+            out_text = self._parser.parse(working_block.text)
             obj.update(json.loads(out_text))
 
-        block.text = json.dumps(obj)
+        self._parser.set_reference(block.original)
+        block.text = self._parser.parse(json.dumps(obj))
         block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
 
