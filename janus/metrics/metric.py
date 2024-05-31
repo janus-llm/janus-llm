@@ -142,14 +142,9 @@ def metric(
                             if target_key not in model_dict:
                                 continue
                             if model_key not in pairs:
-                                pairs[model_key] = []
+                                pairs[model_key] = {}
                             for k in model_dict[target_key]:
-                                pairs[model_key] += list(
-                                    zip(
-                                        model_dict[target_key][k],
-                                        ref[k],
-                                    )
-                                )
+                                pairs[model_key][k] = (model_dict[target_key][k], ref[k])
                 elif target is not None and reference is not None:
                     with open(target, "r") as f:
                         target_contents = f.read()
@@ -278,7 +273,6 @@ def metric(
                 *args,
                 **kwargs,
             ):
-                out = []
                 llm, token_limit, model_cost = load_model(llm_name)
                 if json_file_name is not None:
                     with open(json_file_name, "r") as f:
@@ -286,16 +280,16 @@ def metric(
                     strings = {}
                     for key in json_obj:
                         doc = json_obj[key]
-                        for model_name in doc:
-                            model_dict = doc[model_name]
+                        for model_key in doc:
+                            model_dict = doc[model_key]
                             if not isinstance(model_dict, dict):
                                 continue
                             if target_key not in model_dict:
                                 continue
-                            if model_name not in strings:
-                                strings[model_name] = []
-                            for k in model_dict:
-                                strings[model_name].append(model_dict[k])
+                            if model_key not in strings:
+                                strings[model_key] = {}
+                            for k in model_dict[target_key]:
+                                strings[model_key][k] = model_dict[target_key][k]
                         # strings += list(json_obj[key][target_key].values())
                 elif target is not None:
                     with open(target, "r") as f:
@@ -379,10 +373,16 @@ def apply_function_pairs(
     **kwargs,
 ):
     out = []
-    if progress:
-        loop = track(pairs, description="Evaluating pairs")
+    pair_keys = None
+    if isinstance(pairs, dict):
+        pair_keys = list(pairs.keys())
+        pair_values = list(pairs.values())
     else:
-        loop = pairs
+        pair_values = pairs
+    if progress:
+        loop = track(pair_values, description="Evaluating pairs")
+    else:
+        loop = pair_values
     for src, cmp in loop:
         if not (isinstance(src, str) and isinstance(cmp, str)):
             out.append(False)
@@ -399,6 +399,8 @@ def apply_function_pairs(
                     model_cost=model_cost,
                 )
             )
+    if pair_keys is not None:
+        return {k: v for k, v in zip(pair_keys, out)}
     return out
 
 
@@ -406,10 +408,16 @@ def apply_function_strings(
     strings, function, progress, language, llm, token_limit, model_cost, *args, **kwargs
 ):
     out = []
-    if progress:
-        loop = track(strings, description="Evaluating strings")
+    string_keys = None
+    if isinstance(strings, dict):
+        string_keys = list(strings.keys())
+        string_values = list(strings.values())
     else:
-        loop = strings
+        string_values = strings
+    if progress:
+        loop = track(string_values, description="Evaluating strings")
+    else:
+        loop = string_values
     for string in loop:
         if not isinstance(string, str):
             out.append(False)
@@ -425,4 +433,6 @@ def apply_function_strings(
                     model_cost=model_cost,
                 )
             )
+    if string_keys is not None:
+        return {k: v for k, v in zip(string_keys, out)}
     return out
