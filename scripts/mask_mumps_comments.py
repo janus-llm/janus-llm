@@ -109,32 +109,23 @@ def consolidate_block_comments(lines: Iterator[LineInfo]) -> Iterator[LineInfo]:
 
             if line.is_label:
                 working_group = [line]
-                continue
-
-            yield line
+            else:
+                yield line
 
         # If the line is solely comment text (and indentation), either add it
         #  to the block comment in process, or start a new block comment
         else:
-            if not working_group:
-                working_group = [line]
-                prefix = line.code
-                continue
-
-            # If there's a block comment in process but no prefix set, this is
-            #  the first non-label comment
-            if prefix is None:
-                working_group.append(line)
-                prefix = line.code
-
-            # If this comment has the same indentation as the block comment in
-            #  process, add it. Otherwise, start a new block comment
-            if prefix == line.code:
-                working_group.append(line)
-            else:
+            # If there's no prefix on the working block, then either this is the
+            #  first line of a block comment, or it's the second line of a
+            #  subroutine block comment. Either way, continue the block.
+            # If there is a prefix and it's different than this comment's
+            #  indentation, then yield the working block and start a new one
+            if prefix is not None and prefix != line.code:
                 yield from merge_comments(working_group)
-                working_group = [line]
-                prefix = line.code
+                working_group = []
+
+            working_group.append(line)
+            prefix = line.code
 
     if working_group:
         yield from merge_comments(working_group)
@@ -188,9 +179,17 @@ def process_directory(input_dir: Path, output_dir: Path):
             for line in lines
             if line.has_comment and not line.is_separator
         }
+        comment_types = {
+            line.uuid: line.comment_type.upper()
+            for line in lines
+            if line.has_comment and not line.is_separator
+        }
 
         obj[input_file.name] = dict(
-            original=code, processed=output_text, comments=comments
+            original=code,
+            processed=output_text,
+            comments=comments,
+            comment_types=comment_types,
         )
 
     (output_dir / "processed.json").write_text(json.dumps(obj, indent=2))

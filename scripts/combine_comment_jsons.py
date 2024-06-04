@@ -31,12 +31,13 @@ def parse_madlibs(
             print(f"Skipping file: {comment_file.name}")
             continue
 
-        master_obj[key]["comment_types"] = {
-            k: v.lower()
-            for v, k in re.findall(
-                r"<(BLOCK|INLINE)_COMMENT (\w{8})>", master_obj[key]["processed"]
-            )
-        }
+        if "comment_types" not in master_obj[key]:
+            master_obj[key]["comment_types"] = {
+                k: v.lower()
+                for v, k in re.findall(
+                    r"<(BLOCK|INLINE)_COMMENT (\w{8})>", master_obj[key]["processed"]
+                )
+            }
 
         obj = json.loads(comment_file.read_text())
 
