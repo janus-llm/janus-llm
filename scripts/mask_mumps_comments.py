@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import argparse
 import json
+import random
 import re
 import uuid
 from itertools import dropwhile, takewhile
@@ -36,22 +39,39 @@ def comment_start(line: str) -> int:
     return -1
 
 
-class LineInfo(object):
-    def __init__(self, line):
+class CommentInfo(object):
+    def __init__(self, line: str, start_byte: int):
         self.code = line
         self.comment = None
-        self.comment_type = "inline"
+        self.comment_offset = None
+        self.comment_start = None
+        self.comment_type = None
+        self.comment_prefix = None
+
+        self.line_start = start_byte
         self.uuid = None
 
         idx = comment_start(line)
         if idx < 0:
             return
 
-        comment = line[idx:]
-        code_line = line[:idx]
+        self.code = line[:idx]
+        self.comment = line[idx:]
+        self.comment_offset = idx
+        self.comment_start = self.line_start + self.comment_offset
 
-        self.code = code_line
-        self.comment = comment
+        if self.is_label:
+            self.comment_type = "block"
+            self.comment_prefix = " ; "
+        elif self.is_separator:
+            self.comment_type = "separator"
+            self.comment_prefix = ";"
+        elif self.has_code:
+            self.comment_type = "inline"
+            self.comment_prefix = ";"
+        else:
+            self.comment_type = "block"
+            self.comment_prefix = self.code + "; "
 
     @property
     def has_comment(self) -> bool:
@@ -63,7 +83,7 @@ class LineInfo(object):
 
     @property
     def is_label(self) -> bool:
-        return self.code[0] not in "; "
+        return self.code and self.code[0] not in "; "
 
     @property
     def is_separator(self) -> bool:
@@ -77,6 +97,21 @@ class LineInfo(object):
             return self.code + self.comment
         return f"{self.code}; <{self.comment_type.upper()}_COMMENT {self.uuid}>"
 
+    def append(self, other: CommentInfo):
+        self.comment += "\n" + other.code + other.comment
+
+    def comment_text(self) -> str:
+        if self.is_separator or not self.has_comment:
+            return ""
+
+        # Remove any prefixes (indentation and comment delimiters) and trailing
+        #  space from each non-separator line, and merge them into a single string
+        return " ".join(
+            line.lstrip(" .;").rstrip(" ")
+            for line in self.comment.split("\n")
+            if re.sub(r"\W+", "", line)
+        )
+
     def string(self, placeholder: bool) -> str:
         if not self.has_comment:
             return self.code
@@ -85,32 +120,36 @@ class LineInfo(object):
         return f"{self.code}; <{self.comment_type.upper()}_COMMENT {self.uuid}>"
 
 
-def consolidate_block_comments(lines: Iterator[LineInfo]) -> Iterator[LineInfo]:
+def consolidate_block_comments(lines: Iterator[CommentInfo]) -> Iterator[CommentInfo]:
     working_group = []
     prefix = None
+    is_subroutine_start = False
     for line in lines:
         # If the line has no comment, complete and yield any block comment in
         #  process, then yield the line
         if not line.has_comment:
             if working_group:
-                yield from merge_comments(working_group)
+                yield from merge_comments(working_group, is_subroutine_start)
                 working_group = []
                 prefix = None
             yield line
+            is_subroutine_start = line.is_label
 
         # If the line has any non-indentation code, complete and yield any block
         #  comment in process, then either yield the line or start a new block
         #  comment (only if the line is a label)
         elif line.has_code:
             if working_group:
-                yield from merge_comments(working_group)
+                yield from merge_comments(working_group, is_subroutine_start)
                 working_group = []
                 prefix = None
 
             if line.is_label:
                 working_group = [line]
+                is_subroutine_start = True
             else:
                 yield line
+                is_subroutine_start = False
 
         # If the line is solely comment text (and indentation), either add it
         #  to the block comment in process, or start a new block comment
@@ -121,45 +160,53 @@ def consolidate_block_comments(lines: Iterator[LineInfo]) -> Iterator[LineInfo]:
             # If there is a prefix and it's different than this comment's
             #  indentation, then yield the working block and start a new one
             if prefix is not None and prefix != line.code:
-                yield from merge_comments(working_group)
+                yield from merge_comments(working_group, is_subroutine_start)
                 working_group = []
+                is_subroutine_start = False
 
             working_group.append(line)
             prefix = line.code
 
     if working_group:
-        yield from merge_comments(working_group)
+        yield from merge_comments(working_group, is_subroutine_start)
 
 
-def merge_comments(lines: list[LineInfo]) -> Iterator[LineInfo]:
-    # Peel any separators from the head and tail of the block
-    prefix_seps = list(takewhile(lambda line: line.is_separator, lines))
-    lines = list(dropwhile(lambda line: line.is_separator, lines))
+def merge_comments(
+    lines: list[CommentInfo], is_subroutine_start: bool = False
+) -> Iterator[CommentInfo]:
+    # Peel any separators from the head the block (unless it starts a subroutine)
+    if not is_subroutine_start:
+        yield from takewhile(lambda line: line.is_separator, lines)
+        lines = list(dropwhile(lambda line: line.is_separator, lines))
+
+    # Peel any separators from the tail of the block
     suffix_seps = list(takewhile(lambda line: line.is_separator, lines[::-1]))[::-1]
     lines = list(dropwhile(lambda line: line.is_separator, lines[::-1]))[::-1]
 
-    yield from prefix_seps
     if lines:
         block = lines[0]
-        block.comment = "\n".join(line.comment for line in lines)
-        block.comment_type = "block"
+        for line in lines[1:]:
+            block.append(line)
         yield block
     yield from suffix_seps
 
 
-def get_lines(code: str) -> list[LineInfo]:
-    lines = (LineInfo(line) for line in code.split("\n"))
-    lines = list(consolidate_block_comments(lines))
+def get_comments(code: str) -> list[CommentInfo]:
+    comments = []
+    start_byte = 0
+    for line in code.split("\n"):
+        comments.append(CommentInfo(line, start_byte))
+        start_byte += len(line) + 1
+    comments = list(consolidate_block_comments(comments))
 
     # Assign unique IDs to lines
-    seen_ids = set()
-    for line in lines:
-        while (cid := str(uuid.uuid4())[:8]) in seen_ids:
-            pass
-        seen_ids.add(cid)
-        line.uuid = cid
+    rnd = random.Random()
+    rnd.seed(code)
+    for comment in comments:
+        if comment.has_comment and not comment.is_separator:
+            comment.uuid = str(uuid.UUID(int=rnd.getrandbits(128), version=4))[:8]
 
-    return lines
+    return comments
 
 
 def process_directory(input_dir: Path, output_dir: Path):
@@ -170,26 +217,27 @@ def process_directory(input_dir: Path, output_dir: Path):
         output_file = output_dir / input_file.relative_to(input_dir)
 
         code = input_file.read_text()
-        lines = get_lines(code)
+        lines = get_comments(code)
+        comment_lines = [
+            line for line in lines if line.has_comment and not line.is_separator
+        ]
 
         output_text = "\n".join(line.string(placeholder=True) for line in lines)
         output_file.write_text(output_text)
-        comments = {
-            line.uuid: line.comment
-            for line in lines
-            if line.has_comment and not line.is_separator
-        }
-        comment_types = {
-            line.uuid: line.comment_type.upper()
-            for line in lines
-            if line.has_comment and not line.is_separator
-        }
+        raw_comments = {line.uuid: line.comment for line in comment_lines}
+        comment_texts = {line.uuid: line.comment_text() for line in comment_lines}
+        comment_types = {line.uuid: line.comment_type.upper() for line in comment_lines}
+        comment_starts = {line.uuid: line.comment_start for line in comment_lines}
+        comment_prefixes = {line.uuid: line.comment_prefix for line in comment_lines}
 
         obj[input_file.name] = dict(
             original=code,
             processed=output_text,
-            comments=comments,
+            raw_comments=raw_comments,
+            comment_texts=comment_texts,
             comment_types=comment_types,
+            comment_starts=comment_starts,
+            comment_prefixes=comment_prefixes,
         )
 
     (output_dir / "processed.json").write_text(json.dumps(obj, indent=2))

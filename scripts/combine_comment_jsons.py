@@ -44,7 +44,7 @@ def parse_madlibs(
         if "retries" not in obj:
             print(f"Metadata not found in {comment_file}")
 
-        valid_keys = set(master_obj[key]["comments"].keys())
+        valid_keys = set(master_obj[key]["raw_comments"].keys())
         seen_keys = set(obj["comments"].keys())
         missing_keys = valid_keys.difference(seen_keys)
         invalid_keys = seen_keys.difference(valid_keys)
@@ -62,10 +62,29 @@ def parse_madlibs(
         for k in invalid_keys:
             del obj["comments"][k]
 
-        obj["generated_comments"] = obj.pop("comments")
-        experiment = str(comment_file.relative_to(output_dir).parent)
+        generated_comments = obj.pop("comments")
+        obj["generated_comment_texts"] = {
+            k: " ".join(
+                line.lstrip(" .;").rstrip(" ")
+                for line in v.split("\n")
+                if re.sub(r"\W+", "", line)
+            )
+            for k, v in generated_comments.items()
+        }
+        obj["raw_generated_comments"] = {
+            k: "\n".join(
+                master_obj[key]["comment_prefixes"][k] + line.lstrip(" .;")
+                if i
+                else line.lstrip(" ;")
+                for i, line in enumerate(v.strip("\n; .").split("\n"))
+            )
+            for k, v in generated_comments.items()
+        }
 
-        master_obj[key][experiment] = obj
+        if "experiments" not in master_obj[key]:
+            master_obj[key]["experiments"] = {}
+        experiment = str(comment_file.relative_to(output_dir).parent)
+        master_obj[key]["experiments"][experiment] = obj
 
     return master_obj
 
