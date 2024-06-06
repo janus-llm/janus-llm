@@ -95,7 +95,7 @@ def llm_evaluate_option(
         None,
         typer.Option(
             "--prompt",
-            "-p",
+            "-P",
             help=("A custom prompt in a .txt file to use for evaluation."),
         ),
     ] = None,
@@ -136,7 +136,7 @@ def llm_evaluate_ref_option(
         None,
         typer.Option(
             "--prompt",
-            "-p",
+            "-P",
             help=("A custom prompt in a .txt file to use for evaluation."),
         ),
     ] = None,
