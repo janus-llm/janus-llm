@@ -109,6 +109,14 @@ def llm_evaluate_option(
             help=("A custom prompt in a .txt file to use for evaluation."),
         ),
     ] = None,
+    num_eval: Annotated[
+        int,
+        typer.Option(
+            "-n",
+            "--num-eval",
+            help="Number of times to run the evaluation",
+        ),
+    ] = 1,
     **kwargs,
 ) -> Any:
     """CLI option to calculate the LLM self evaluation score.
@@ -125,7 +133,13 @@ def llm_evaluate_option(
     prompt_path: Path = (
         Path(prompt) if prompt else Path(__file__).parent / "prompts" / f"{metric}.txt"
     )
-    return evaluate(target, kwargs["language"], kwargs["llm"], prompt_path)
+    if num_eval == 1:
+        return evaluate(target, kwargs["language"], kwargs["llm"], prompt_path)
+    else:
+        return [
+            evaluate(target, kwargs["language"], kwargs["llm"], prompt_path)
+            for _ in range(num_eval)
+        ]
 
 
 @metric(name="llm-ref", help="LLM self-evaluation on a target file and a reference file")
@@ -150,6 +164,14 @@ def llm_evaluate_ref_option(
             help=("A custom prompt in a .txt file to use for evaluation."),
         ),
     ] = None,
+    num_eval: Annotated[
+        int,
+        typer.Option(
+            "-n",
+            "--num-eval",
+            help="Number of times to run evaluation for pair",
+        ),
+    ] = 1,
     **kwargs,
 ) -> Any:
     """CLI option to calculate the LLM self evaluation score, for evaluations which
@@ -167,4 +189,10 @@ def llm_evaluate_ref_option(
     prompt_path: Path = (
         Path(prompt) if prompt else Path(__file__).parent / "prompts" / f"{metric}.txt"
     )
-    return evaluate(target, kwargs["language"], kwargs["llm"], prompt_path, reference)
+    if num_eval == 1:
+        return evaluate(target, kwargs["language"], kwargs["llm"], prompt_path, reference)
+    else:
+        return [
+            evaluate(target, kwargs["language"], kwargs["llm"], prompt_path, reference)
+            for _ in range(num_eval)
+        ]
