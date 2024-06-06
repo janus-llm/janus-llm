@@ -87,7 +87,17 @@ def llm_evaluate_option(
             "--metric",
             "-m",
             help=("The pre-defined metric to use for evaluation."),
-            click_type=click.Choice(["quality", "clarity"]),
+            click_type=click.Choice(
+                [
+                    "quality",
+                    "clarity",
+                    "faithfulness",
+                    "completeness",
+                    "hallucination",
+                    "readability",
+                    "usefulness",
+                ]
+            ),
         ),
     ] = "quality",
     prompt: Annotated[
