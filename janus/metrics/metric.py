@@ -135,8 +135,9 @@ def metric(
                     for key in json_obj:
                         doc = json_obj[key]
                         ref = doc[reference_key]
-                        for model_key in doc:
-                            model_dict = doc[model_key]
+                        experiments = doc["experiments"]
+                        for model_key in experiments:
+                            model_dict = experiments[model_key]
                             if not isinstance(model_dict, dict):
                                 continue
                             if target_key not in model_dict:
@@ -280,8 +281,9 @@ def metric(
                     strings = {}
                     for key in json_obj:
                         doc = json_obj[key]
-                        for model_key in doc:
-                            model_dict = doc[model_key]
+                        experiments = doc["experiments"]
+                        for model_key in experiments:
+                            model_dict = experiments[model_key]
                             if not isinstance(model_dict, dict):
                                 continue
                             if target_key not in model_dict:
