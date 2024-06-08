@@ -3,6 +3,7 @@ from typing import Any
 
 import click
 import typer
+from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import BaseOutputParser, JsonOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
@@ -70,12 +71,15 @@ def evaluate(
     parser = JsonOutputParser(pydantic_object=LLMMetricOutput)
     prompt = load_prompt(prompt_path, language, parser)
     chain = prompt | model | parser
-    output = (
-        chain.invoke(dict(target=target, reference=reference))
-        if reference
-        else chain.invoke(dict(target=target))
-    )
-    return output["value"]
+    try:
+        output = (
+            chain.invoke(dict(target=target, reference=reference))
+            if reference
+            else chain.invoke(dict(target=target))
+        )
+        return output["value"]
+    except OutputParserException:
+        return False
 
 
 @metric(use_reference=False, name="llm", help="LLM self-evaluation on a target file")
