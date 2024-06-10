@@ -101,6 +101,11 @@ class MadlibsDocumentationParser(BaseOutputParser[str], JanusParser):
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise OutputParserException(f"Got invalid JSON object. Error: {e}")
 
+        if not isinstance(obj, dict):
+            raise OutputParserException(
+                f"Got invalid return object. Expected a dictionary, but got {type(obj)}"
+            )
+
         seen_keys = set(obj.keys())
         missing_keys = self.expected_keys.difference(obj.keys())
         invalid_keys = seen_keys.difference(self.expected_keys)
