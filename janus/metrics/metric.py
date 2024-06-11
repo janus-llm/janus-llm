@@ -131,14 +131,21 @@ def metric(
                 if json_file_name is not None:
                     with open(json_file_name, "r") as f:
                         json_obj = json.load(f)
-                    pairs = []
+                    pairs = {}
                     for key in json_obj:
-                        pairs += list(
-                            zip(
-                                json_obj[key][target_key].values(),
-                                json_obj[key][reference_key].values(),
-                            )
-                        )
+                        doc = json_obj[key]
+                        ref = doc[reference_key]
+                        experiments = doc["experiments"]
+                        for model_key in experiments:
+                            model_dict = experiments[model_key]
+                            if not isinstance(model_dict, dict):
+                                continue
+                            if target_key not in model_dict:
+                                continue
+                            if model_key not in pairs:
+                                pairs[model_key] = {}
+                            for k in model_dict[target_key]:
+                                pairs[model_key][k] = (model_dict[target_key][k], ref[k])
                 elif target is not None and reference is not None:
                     with open(target, "r") as f:
                         target_contents = f.read()
@@ -160,26 +167,32 @@ def metric(
                     raise ValueError(
                         "Error, must specify either json or target and reference files"
                     )
-                if progress:
-                    loop = track(pairs, description="Evaluating pairs")
-                else:
-                    loop = pairs
-                for src, cmp in loop:
-                    if not (isinstance(src, str) and isinstance(cmp, str)):
-                        out.append(False)
-                    else:
-                        out.append(
-                            function(
-                                src,
-                                cmp,
-                                *args,
-                                **kwargs,
-                                language=language,
-                                llm=llm,
-                                token_limit=token_limit,
-                                model_cost=model_cost,
-                            )
+                if isinstance(pairs, dict):
+                    out = {}
+                    for k in pairs:
+                        out[k] = apply_function_pairs(
+                            pairs[k],
+                            function,
+                            progress,
+                            language,
+                            llm,
+                            token_limit,
+                            model_cost,
+                            *args,
+                            **kwargs,
                         )
+                else:
+                    out = apply_function_pairs(
+                        pairs,
+                        function,
+                        progress,
+                        language,
+                        llm,
+                        token_limit,
+                        model_cost,
+                        *args,
+                        **kwargs,
+                    )
                 out_file = Path(out_file)
                 out_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(out_file, "w") as f:
@@ -261,14 +274,25 @@ def metric(
                 *args,
                 **kwargs,
             ):
-                out = []
                 llm, token_limit, model_cost = load_model(llm_name)
                 if json_file_name is not None:
                     with open(json_file_name, "r") as f:
                         json_obj = json.load(f)
-                    strings = []
+                    strings = {}
                     for key in json_obj:
-                        strings += list(json_obj[key][target_key].values())
+                        doc = json_obj[key]
+                        experiments = doc["experiments"]
+                        for model_key in experiments:
+                            model_dict = experiments[model_key]
+                            if not isinstance(model_dict, dict):
+                                continue
+                            if target_key not in model_dict:
+                                continue
+                            if model_key not in strings:
+                                strings[model_key] = {}
+                            for k in model_dict[target_key]:
+                                strings[model_key][k] = model_dict[target_key][k]
+                        # strings += list(json_obj[key][target_key].values())
                 elif target is not None:
                     with open(target, "r") as f:
                         target_contents = f.read()
@@ -286,25 +310,32 @@ def metric(
                     raise ValueError(
                         "Error: must specify either json file or target file"
                     )
-                if progress:
-                    loop = track(strings, description="Evaluating strings")
-                else:
-                    loop = strings
-                for string in loop:
-                    if not isinstance(string, str):
-                        out.append(False)
-                    else:
-                        out.append(
-                            function(
-                                string,
-                                *args,
-                                **kwargs,
-                                language=language,
-                                llm=llm,
-                                token_limit=token_limit,
-                                model_cost=model_cost,
-                            )
+                if isinstance(strings, dict):
+                    out = {}
+                    for k in strings:
+                        out[k] = apply_function_strings(
+                            strings[k],
+                            function,
+                            progress,
+                            language,
+                            llm,
+                            token_limit,
+                            model_cost,
+                            *args,
+                            **kwargs,
                         )
+                else:
+                    out = apply_function_strings(
+                        strings,
+                        function,
+                        progress,
+                        language,
+                        llm,
+                        token_limit,
+                        model_cost,
+                        *args,
+                        **kwargs,
+                    )
                 out_file = Path(out_file)
                 out_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(out_file, "w") as f:
@@ -330,3 +361,80 @@ def metric(
         return function
 
     return decorator
+
+
+def apply_function_pairs(
+    pairs,
+    function,
+    progress,
+    language,
+    llm,
+    token_limit,
+    model_cost,
+    *args,
+    **kwargs,
+):
+    out = []
+    pair_keys = None
+    if isinstance(pairs, dict):
+        pair_keys = list(pairs.keys())
+        pair_values = list(pairs.values())
+    else:
+        pair_values = pairs
+    if progress:
+        loop = track(pair_values, description="Evaluating pairs")
+    else:
+        loop = pair_values
+    for src, cmp in loop:
+        if not (isinstance(src, str) and isinstance(cmp, str)):
+            out.append(False)
+        else:
+            out.append(
+                function(
+                    src,
+                    cmp,
+                    *args,
+                    **kwargs,
+                    language=language,
+                    llm=llm,
+                    token_limit=token_limit,
+                    model_cost=model_cost,
+                )
+            )
+    if pair_keys is not None:
+        return {k: v for k, v in zip(pair_keys, out)}
+    return out
+
+
+def apply_function_strings(
+    strings, function, progress, language, llm, token_limit, model_cost, *args, **kwargs
+):
+    out = []
+    string_keys = None
+    if isinstance(strings, dict):
+        string_keys = list(strings.keys())
+        string_values = list(strings.values())
+    else:
+        string_values = strings
+    if progress:
+        loop = track(string_values, description="Evaluating strings")
+    else:
+        loop = string_values
+    for string in loop:
+        if not isinstance(string, str):
+            out.append(False)
+        else:
+            out.append(
+                function(
+                    string,
+                    *args,
+                    **kwargs,
+                    language=language,
+                    llm=llm,
+                    token_limit=token_limit,
+                    model_cost=model_cost,
+                )
+            )
+    if string_keys is not None:
+        return {k: v for k, v in zip(string_keys, out)}
+    return out
