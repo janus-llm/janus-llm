@@ -1,7 +1,6 @@
 from janus.language.block import CodeBlock
+from janus.language.node import NodeType
 from janus.language.splitter import Splitter
-
-from ..node import NodeType
 
 
 class ChunkSplitter(Splitter):
