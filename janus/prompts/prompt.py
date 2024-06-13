@@ -4,7 +4,6 @@ from pathlib import Path
 
 from langchain import PromptTemplate
 from langchain.prompts import ChatPromptTemplate
-#from langchain_core.prompts import ChatPromptTemplate
 from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
     SystemMessagePromptTemplate,
@@ -148,18 +147,14 @@ class ClaudePromptEngine(PromptEngine):
     def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
         prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
         prompt = prompt_path.read_text()
-        #message = PromptTemplate.from_template(f"Human: {prompt}\n\nAssistant: ")
         return PromptTemplate.from_template(f"Human: {prompt}\n\nAssistant: ")
-        #return ChatPromptTemplate.from_messages([message])
 
 
 class TitanPromptEngine(PromptEngine):
     def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
         prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
         prompt = prompt_path.read_text()
-        #message = PromptTemplate.from_template(f"User: {prompt}\n\nAssistant: ")
         return PromptTemplate.from_template(f"User: {prompt}\n\nAssistant: ")
-        #return ChatPromptTemplate.from_messages([message])
 
 
 class Llama2PromptEngine(PromptEngine):
@@ -170,17 +165,14 @@ class Llama2PromptEngine(PromptEngine):
         human_prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
         human_prompt = human_prompt_path.read_text()
 
-        #message = PromptTemplate.from_template(
-        #    f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n{human_prompt} [/INST]"
-        #)
         return PromptTemplate.from_template(
             f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n{human_prompt} [/INST]"
         )
 
-        #return ChatPromptTemplate.from_messages([message])
 
 class Llama3PromptEngine(PromptEngine):
-    #see https://llama.meta.com/docs/model-cards-and-prompt-formats/meta-llama-3/#special-tokens-used-with-meta-llama-3
+    # see https://llama.meta.com/docs/model-cards-and-prompt-formats/meta-llama-3
+    #            /#special-tokens-used-with-meta-llama-3
     def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
         system_prompt_path = template_path / SYSTEM_PROMPT_TEMPLATE_FILENAME
         system_prompt = system_prompt_path.read_text()
@@ -189,11 +181,26 @@ class Llama3PromptEngine(PromptEngine):
         human_prompt = human_prompt_path.read_text()
 
         return PromptTemplate.from_template(
-            f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{human_prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+            f"<|begin_of_text|>"
+            f"<|start_header_id|>"
+            f"system"
+            f"<|end_header_id|>"
+            f"\n\n{system_prompt}"
+            f"<|eot_id|>"
+            f"<|start_header_id|>"
+            f"user"
+            f"<|end_header_id|>"
+            f"\n\n{human_prompt}"
+            f"<|eot_id|>"
+            f"<|start_header_id|>"
+            f"assistant"
+            f"<|end_header_id|>"
+            f"\n\n"
         )
+
 
 class CoherePromptEngine(PromptEngine):
-    #see https://docs.cohere.com/docs/prompting-command-r
+    # see https://docs.cohere.com/docs/prompting-command-r
     def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
         system_prompt_path = template_path / SYSTEM_PROMPT_TEMPLATE_FILENAME
         system_prompt = system_prompt_path.read_text()
@@ -202,10 +209,13 @@ class CoherePromptEngine(PromptEngine):
         human_prompt = human_prompt_path.read_text()
 
         return PromptTemplate.from_template(
-            f"<BOS_TOKEN><|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>{system_prompt}<|END_OF_TURN_TOKEN|><|START_OF_TURN_TOKEN|><|USER_TOKEN|>{human_prompt}<|END_OF_TURN_TOKEN|>"
+            f"<BOS_TOKEN>"
+            f"<|START_OF_TURN_TOKEN|>"
+            f"<|SYSTEM_TOKEN|>"
+            f"{system_prompt}"
+            f"<|END_OF_TURN_TOKEN|>"
+            f"<|START_OF_TURN_TOKEN|>"
+            f"<|USER_TOKEN|>"
+            f"{human_prompt}"
+            f"<|END_OF_TURN_TOKEN|>"
         )
-
-        #message = PromptTemplate.from_template(
-        #    f"<BOS_TOKEN><|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>{system_prompt}<|END_OF_TURN_TOKEN|><|START_OF_TURN_TOKEN|><|USER_TOKEN|>{human_prompt}<|END_OF_TURN_TOKEN|>"
-        #)
-        #return ChatPromptTemplate.from_messages([message])
