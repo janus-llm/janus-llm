@@ -37,7 +37,7 @@ class TestBLEU(unittest.TestCase):
         score_with_s_flag = bleu(
             self.target_text,
             self.reference_text,
-            use_strings=True, # Mimics -S
+            use_strings=True,  # Mimics -S
         )
         self.assertEqual(function_score, score_with_s_flag)
 

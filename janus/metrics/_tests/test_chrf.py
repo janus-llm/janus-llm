@@ -31,7 +31,7 @@ class TestChrF(unittest.TestCase):
         )
         expected_score = float(score.score) / 100.0
         self.assertEqual(function_score, expected_score)
-    
+
     def test_chrf_with_s_flag(self):
         """Test the CHRF score calculation with the -S flag."""
         function_score = sentence_chrf(
@@ -48,7 +48,7 @@ class TestChrF(unittest.TestCase):
             self.char_order,
             self.word_order,
             self.beta,
-            use_strings=True, # Mimics -S
+            use_strings=True,  # Mimics -S
         )
         self.assertEqual(function_score, score_with_s_flag)
 
