@@ -87,7 +87,17 @@ def llm_evaluate_option(
             "--metric",
             "-m",
             help=("The pre-defined metric to use for evaluation."),
-            click_type=click.Choice(["quality", "clarity"]),
+            click_type=click.Choice(
+                [
+                    "quality",
+                    "clarity",
+                    "faithfulness",
+                    "completeness",
+                    "hallucination",
+                    "readability",
+                    "usefulness",
+                ]
+            ),
         ),
     ] = "quality",
     prompt: Annotated[
@@ -95,7 +105,7 @@ def llm_evaluate_option(
         None,
         typer.Option(
             "--prompt",
-            "-p",
+            "-P",
             help=("A custom prompt in a .txt file to use for evaluation."),
         ),
     ] = None,
@@ -136,7 +146,7 @@ def llm_evaluate_ref_option(
         None,
         typer.Option(
             "--prompt",
-            "-p",
+            "-P",
             help=("A custom prompt in a .txt file to use for evaluation."),
         ),
     ] = None,
