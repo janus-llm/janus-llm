@@ -25,6 +25,22 @@ class TestBLEU(unittest.TestCase):
         )
         self.assertEqual(function_score, expected_score)
 
+    def test_bleu_with_s_flag(self):
+        """Test the BLEU score calculation with the -S flag."""
+        function_score = (
+            sentence_bleu(
+                self.target_text,
+                [self.reference_text],
+            ).score
+            / 100.0
+        )
+        score_with_s_flag = bleu(
+            self.target_text,
+            self.reference_text,
+            use_strings=True, # Mimics -S
+        )
+        self.assertEqual(function_score, score_with_s_flag)
+
     def test_bleu_invalid_target_type(self):
         """Test the BLEU score calculation with invalid source text type."""
         with self.assertRaises(TypeError):

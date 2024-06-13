@@ -127,8 +127,8 @@ def metric(
                     bool,
                     typer.Option(
                         "--string",
-                        "-st",
-                        help="Indicate that the target and reference are strings, not files.",
+                        "-S",
+                        help="Indicate that the target and reference are strings",
                         is_flag=True,
                     ),
                 ] = False,
@@ -177,7 +177,7 @@ def metric(
                     )
                 else:
                     raise ValueError(
-                        "Error, must specify either json or target and reference files/strings"
+                        "Error, specify json or target and reference files/strings"
                     )
                 if isinstance(pairs, dict):
                     out = {}
@@ -237,7 +237,9 @@ def metric(
                 ] = None,
                 target: Annotated[
                     Optional[str],
-                    typer.Option("--target", "-t", help="Target file or string to evaluate."),
+                    typer.Option(
+                        "--target", "-t", help="Target file or string to evaluate."
+                    ),
                 ] = None,
                 json_file_name: Annotated[
                     Optional[str],
@@ -287,8 +289,8 @@ def metric(
                     bool,
                     typer.Option(
                         "--string",
-                        "-st",
-                        help="Indicate that the target and reference are strings, not files.",
+                        "-S",
+                        help="Indicate that the target and reference are strings",
                         is_flag=True,
                     ),
                 ] = False,

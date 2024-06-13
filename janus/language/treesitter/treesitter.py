@@ -47,16 +47,14 @@ class TreeSitterSplitter(Splitter):
 
     def _get_ast(self, code: str) -> CodeBlock:
         code = bytes(code, "utf-8")
-
         tree = self.parser.parse(code)
         root = tree.walk().node
         root = self._node_to_block(root, code)
         return root
-    
+
     # Recursively print tree to view parsed output (dev helper function)
     # Example call: self._print_tree(tree.walk(), "")
-    def _print_tree(self, cursor, indent):
-        
+    def _print_tree(self, cursor: tree_sitter.TreeCursor, indent: str) -> None:
         node = cursor.node
         print(f"{indent}{node.type} {node.start_point}-{node.end_point}")
         if cursor.goto_first_child():
