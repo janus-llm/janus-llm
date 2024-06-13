@@ -59,7 +59,7 @@ def metric(
                     typer.Option(
                         "--target",
                         "-t",
-                        help="Target file to evaluate.",
+                        help="Target file or string to evaluate.",
                     ),
                 ] = None,
                 reference: Annotated[
@@ -67,7 +67,7 @@ def metric(
                     typer.Option(
                         "--reference",
                         "-r",
-                        help="Reference file to use as reference/baseline.",
+                        help="Reference file or string to use as reference/baseline.",
                     ),
                 ] = None,
                 json_file_name: Annotated[
@@ -123,6 +123,15 @@ def metric(
                         is_flag=True,
                     ),
                 ] = False,
+                use_strings: Annotated[
+                    bool,
+                    typer.Option(
+                        "--string",
+                        "-S",
+                        help="Indicate that the target and reference are strings",
+                        is_flag=True,
+                    ),
+                ] = False,
                 *args,
                 **kwargs,
             ):
@@ -147,16 +156,19 @@ def metric(
                             for k in model_dict[target_key]:
                                 pairs[model_key][k] = (model_dict[target_key][k], ref[k])
                 elif target is not None and reference is not None:
-                    with open(target, "r") as f:
-                        target_contents = f.read()
-
-                    with open(reference, "r") as f:
-                        reference_contents = f.read()
+                    if use_strings:
+                        target_contents = target
+                        reference_contents = reference
+                    else:
+                        with open(target, "r") as f:
+                            target_contents = f.read()
+                        with open(reference, "r") as f:
+                            reference_contents = f.read()
                     pairs = FILE_PAIRING_METHODS[file_pairing_method](
                         target_contents,
                         reference_contents,
-                        target_file=target,
-                        reference_file=reference,
+                        target_file=None if use_strings else target,
+                        reference_file=None if use_strings else reference,
                         out_file=out_file,
                         lang=language,
                         llm=llm,
@@ -165,7 +177,7 @@ def metric(
                     )
                 else:
                     raise ValueError(
-                        "Error, must specify either json or target and reference files"
+                        "Error, specify json or target and reference files/strings"
                     )
                 if isinstance(pairs, dict):
                     out = {}
@@ -203,7 +215,7 @@ def metric(
             sig2 = inspect.signature(func)
             func.__signature__ = sig2.replace(
                 parameters=tuple(
-                    list(sig2.parameters.values())[:10]
+                    list(sig2.parameters.values())[:11]
                     + list(sig1.parameters.values())[2:-1]
                 )
             )
@@ -225,7 +237,9 @@ def metric(
                 ] = None,
                 target: Annotated[
                     Optional[str],
-                    typer.Option("--target", "-t", help="Target file to evaluate."),
+                    typer.Option(
+                        "--target", "-t", help="Target file or string to evaluate."
+                    ),
                 ] = None,
                 json_file_name: Annotated[
                     Optional[str],
@@ -271,6 +285,15 @@ def metric(
                         is_flag=True,
                     ),
                 ] = False,
+                use_strings: Annotated[
+                    bool,
+                    typer.Option(
+                        "--string",
+                        "-S",
+                        help="Indicate that the target and reference are strings",
+                        is_flag=True,
+                    ),
+                ] = False,
                 *args,
                 **kwargs,
             ):
@@ -294,12 +317,15 @@ def metric(
                                 strings[model_key][k] = model_dict[target_key][k]
                         # strings += list(json_obj[key][target_key].values())
                 elif target is not None:
-                    with open(target, "r") as f:
-                        target_contents = f.read()
+                    if use_strings:
+                        target_contents = target
+                    else:
+                        with open(target, "r") as f:
+                            target_contents = f.read()
 
                     strings = SPLITTING_METHODS[splitting_method](
                         target_contents,
-                        target_file=target,
+                        target_file=target if not use_strings else None,
                         out_file=out_file,
                         lang=language,
                         llm=llm,
@@ -308,7 +334,7 @@ def metric(
                     )
                 else:
                     raise ValueError(
-                        "Error: must specify either json file or target file"
+                        "Error: must specify either json file or target file/string"
                     )
                 if isinstance(strings, dict):
                     out = {}
@@ -346,7 +372,7 @@ def metric(
             sig2 = inspect.signature(func)
             func.__signature__ = sig2.replace(
                 parameters=tuple(
-                    list(sig2.parameters.values())[:8]
+                    list(sig2.parameters.values())[:9]
                     + list(sig1.parameters.values())[1:-1]
                 )
             )
