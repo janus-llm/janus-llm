@@ -1,6 +1,5 @@
 from janus.language.block import CodeBlock
-
-from .chunk_splitter import ChunkSplitter
+from janus.language.naive.chunk_splitter import ChunkSplitter
 
 
 class BasicSplitter(ChunkSplitter):
