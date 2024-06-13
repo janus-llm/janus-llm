@@ -1,20 +1,8 @@
 from janus.language.block import CodeBlock
-from janus.language.node import NodeType
-from janus.language.splitter import Splitter
+
+from .chunk_splitter import ChunkSplitter
 
 
-class BasicSplitter(Splitter):
-    def _get_ast(self, code: str) -> CodeBlock:
-        return CodeBlock(
-            text=code,
-            name="root",
-            id="root",
-            start_point=(0, 0),
-            end_point=(code.count("\n"), 0),
-            start_byte=0,
-            end_byte=len(bytes(code, "utf-8")),
-            node_type=NodeType("program"),
-            children=[],
-            language=self.language,
-            tokens=self._count_tokens(code),
-        )
+class BasicSplitter(ChunkSplitter):
+    def _split_into_lines(self, node: CodeBlock):
+        raise ValueError("Error: File to large for basic splitter")
