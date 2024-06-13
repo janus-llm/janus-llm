@@ -77,6 +77,10 @@ convention = "google"
 # match '*.py' files that don't start with 'test_' or '__init'
 match = '(?![test_|__init]).*\.py'
 
+[tool.bandit]
+# We aren't using pseudo-random numbers for cryptographic purposes
+skips = ["B311"]
+
 [tool.pytest.ini_options]
 markers = [
     "slow: marks tests as slow (select with '-m slow')",
