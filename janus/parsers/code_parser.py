@@ -2,6 +2,8 @@ import re
 
 from langchain.schema.output_parser import BaseOutputParser
 from langchain_core.exceptions import OutputParserException
+from langchain_core.messages import BaseMessage
+from langchain_core.output_parsers import StrOutputParser
 
 from ..language.block import CodeBlock
 from ..utils.logger import create_logger
@@ -19,19 +21,29 @@ class JanusParser:
         Returns:
             A parsed version of the text
         """
+        if isinstance(text, BaseMessage):
+            text = text.content
         return text
 
     def parse_into_block(self, text: str, block: CodeBlock):
+        if isinstance(text, BaseMessage):
+            text = text.content
         block.text = text
 
     def set_reference(self, block: CodeBlock):
         pass
 
 
+class GenericParser(StrOutputParser, JanusParser):
+    pass
+
+
 class CodeParser(BaseOutputParser[str], JanusParser):
     language: str
 
     def parse(self, text: str) -> str:
+        if isinstance(text, BaseMessage):
+            text = text.content
         pattern = rf"```[^\S\r\n]*(?:{self.language}[^\S\r\n]*)?\n?(.*?)\n*```"
         code = re.search(pattern, text, re.DOTALL)
         if code is None:

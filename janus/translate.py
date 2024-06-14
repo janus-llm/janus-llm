@@ -1,13 +1,22 @@
 import json
+import math
 import re
+import time
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
+from langchain.output_parsers import RetryWithErrorOutputParser
 from langchain.output_parsers.fix import OutputFixingParser
-from langchain_community.callbacks import get_openai_callback
+from langchain_community.callbacks.manager import (
+    get_bedrock_anthropic_callback,
+    get_openai_callback,
+)
 from langchain_core.exceptions import OutputParserException
-from langchain_core.output_parsers import BaseOutputParser, StrOutputParser
+from langchain_core.language_models import BaseLanguageModel
+from langchain_core.output_parsers import BaseOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnableLambda, RunnableParallel
 from openai import BadRequestError, RateLimitError
 
 from janus.language.naive.registry import CUSTOM_SPLITTERS
@@ -17,10 +26,11 @@ from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.splitter import EmptyTreeError, TokenLimitError
 from .llm import load_model
-from .parsers.code_parser import CodeParser, JanusParser
+from .llm.models_info import MODEL_PROMPT_ENGINES, MODEL_TYPES
+from .parsers.code_parser import CodeParser, GenericParser
 from .parsers.doc_parser import DocumentationParser, MadlibsDocumentationParser
 from .parsers.eval_parser import EvaluationParser
-from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT, PromptEngine
+from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT
 from .utils.enums import LANGUAGES
 from .utils.logger import create_logger
 
@@ -67,7 +77,6 @@ class Translator(Converter):
         super().__init__(source_language=source_language)
 
         self._parser_type: str | None
-        self._parser: JanusParser | None
         self._model_name: str | None
         self._custom_model_arguments: dict[str, Any] | None
         self._target_language: str | None
@@ -77,7 +86,10 @@ class Translator(Converter):
         self._db_path: str | None
         self._db_config: dict[str, Any] | None
 
-        self.parser: BaseOutputParser | None
+        self._llm: BaseLanguageModel | None
+        self._parser: BaseOutputParser | None
+        self._prompt: ChatPromptTemplate | None
+
         self.max_prompts = max_prompts
 
         self.set_model(model_name=model, **model_arguments)
@@ -94,7 +106,7 @@ class Translator(Converter):
 
     def _load_parameters(self) -> None:
         self._load_model()
-        self._load_prompt_engine()
+        self._load_prompt()
         self._load_parser()
         self._load_vectorizer()
         super()._load_parameters()  # will call self._changed_attrs.clear()
@@ -250,7 +262,9 @@ class Translator(Converter):
         filename = file.name
 
         input_block = self._split_file(file)
+        t0 = time.time()
         output_block = self._iterative_translate(input_block)
+        output_block.processing_time = time.time() - t0
         if output_block.translated:
             completeness = output_block.translation_completeness
             log.info(
@@ -300,13 +314,7 @@ class Translator(Converter):
         while stack:
             translated_block = stack.pop()
 
-            # Track the cost of translating this block
-            #  TODO: If non-OpenAI models with prices are added, this will need
-            #   to be updated.
-            with get_openai_callback() as cb:
-                self._add_translation(translated_block)
-                translated_block.cost = cb.total_cost
-                translated_block.retries = max(0, cb.successful_requests - 1)
+            self._add_translation(translated_block)
 
             # If translating this block was unsuccessful, don't bother with its
             #  children (they wouldn't show up in the final text anyway)
@@ -349,16 +357,74 @@ class Translator(Converter):
         log.debug(f"[{block.name}] Translating...")
         log.debug(f"[{block.name}] Input text:\n{block.original.text}")
 
-        self._parser.set_reference(block.original)
-
-        query_and_parse = self.prompt | self._llm | self.parser
-
-        block.text = query_and_parse.invoke({"SOURCE_CODE": block.original.text})
+        # Track the cost of translating this block
+        #  TODO: If non-OpenAI models with prices are added, this will need
+        #   to be updated.
+        with self._get_model_callback() as cb:
+            t0 = time.time()
+            block.text = self._run_chain(block)
+            block.processing_time = time.time() - t0
+            block.cost = cb.total_cost
+            block.retries = max(0, cb.successful_requests - 1)
 
         block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
 
         log.debug(f"[{block.name}] Output code:\n{block.text}")
+
+    def _run_chain(self, block: TranslatedCodeBlock) -> str:
+        """Run the model with three nested error fixing schemes.
+        First, try to fix simple formatting errors by giving the model just
+        the output and the parsing error. After a number of attempts, try
+        giving the model the output, the parsing error, and the original
+        input. Again check/retry this output to solve for formatting errors.
+        If we still haven't succeeded after several attempts, the model may
+        be getting thrown off by a bad initial output; start from scratch
+        and try again.
+
+        The number of tries for each layer of this scheme is roughly equal
+        to the cube root of self.max_retries, so the total calls to the
+        LLM will be roughly as expected (up to sqrt(self.max_retries) over)
+        """
+        self._parser.set_reference(block.original)
+
+        # Retries with just the output and the error
+        n1 = round(self.max_prompts ** (1 / 3))
+
+        # Retries with the input, output, and error
+        n2 = round((self.max_prompts // n1) ** (1 / 2))
+
+        # Retries with just the input
+        n3 = math.ceil(self.max_prompts / (n1 * n2))
+
+        fix_format = OutputFixingParser.from_llm(
+            llm=self._llm,
+            parser=self._parser,
+            max_retries=n1,
+        )
+        retry = RetryWithErrorOutputParser.from_llm(
+            llm=self._llm,
+            parser=fix_format,
+            max_retries=n2,
+        )
+
+        completion_chain = self._prompt | self._llm
+        chain = RunnableParallel(
+            completion=completion_chain, prompt_value=self._prompt
+        ) | RunnableLambda(lambda x: retry.parse_with_prompt(**x))
+
+        for _ in range(n3):
+            try:
+                return chain.invoke({"SOURCE_CODE": block.original.text})
+            except OutputParserException:
+                pass
+
+        raise OutputParserException(f"Failed to parse after {n1*n2*n3} retries")
+
+    def _get_model_callback(self):
+        if MODEL_TYPES[self._model_name] == "OpenAI":
+            return get_openai_callback()
+        return get_bedrock_anthropic_callback()
 
     def _save_to_file(self, block: CodeBlock, out_path: Path) -> None:
         """Save a file to disk.
@@ -473,28 +539,12 @@ class Translator(Converter):
             )
         if "code" == self._parser_type:
             self._parser = CodeParser(language=self._target_language)
-            self.parser = OutputFixingParser.from_llm(
-                llm=self._llm,
-                parser=self._parser,
-                max_retries=self.max_prompts,
-            )
         elif "eval" == self._parser_type:
             self._parser = EvaluationParser()
-            self.parser = OutputFixingParser.from_llm(
-                llm=self._llm,
-                parser=self._parser,
-                max_retries=self.max_prompts,
-            )
         elif "doc" == self._parser_type:
             self._parser = DocumentationParser()
-            self.parser = OutputFixingParser.from_llm(
-                llm=self._llm,
-                parser=self._parser,
-                max_retries=self.max_prompts,
-            )
         elif "text" == self._parser_type:
-            self._parser = JanusParser()
-            self.parser = StrOutputParser()
+            self._parser = GenericParser()
         else:
             raise ValueError(
                 f"Unsupported parser type: {self._parser_type}. Can be: "
@@ -502,13 +552,17 @@ class Translator(Converter):
             )
 
     @run_if_changed(
-        "_prompt_template_name", "_source_language", "_target_language", "_target_version"
+        "_prompt_template_name",
+        "_source_language",
+        "_target_language",
+        "_target_version",
+        "_model_name",
     )
-    def _load_prompt_engine(self) -> None:
-        """Load the prompt engine according to this instance's attributes.
+    def _load_prompt(self) -> None:
+        """Load the prompt according to this instance's attributes.
 
-        If the relevant fields have not been changed since the last time this method was
-        called, nothing happens.
+        If the relevant fields have not been changed since the last time this
+        method was called, nothing happens.
         """
         if self._prompt_template_name in SAME_OUTPUT:
             if self._target_language != self._source_language:
@@ -523,13 +577,13 @@ class Translator(Converter):
                 f"language should be 'text', but is '{self._target_language}'"
             )
 
-        self._prompt_engine = PromptEngine(
+        prompt_engine = MODEL_PROMPT_ENGINES[self._model_name](
             source_language=self._source_language,
             target_language=self._target_language,
             target_version=self._target_version,
             prompt_template=self._prompt_template_name,
         )
-        self.prompt = self._prompt_engine.prompt
+        self._prompt = prompt_engine.prompt
 
     @run_if_changed("_db_path")
     def _load_vectorizer(self) -> None:
@@ -623,6 +677,7 @@ class MadLibsDocumenter(Translator):
         db_path: str | None = None,
         db_config: dict[str, Any] | None = None,
         custom_splitter: str | None = None,
+        comments_per_request: int | None = None,
     ) -> None:
         """Initialize a Translator instance.
 
@@ -647,6 +702,7 @@ class MadLibsDocumenter(Translator):
             db_config=db_config,
             custom_splitter=custom_splitter,
         )
+        self.comments_per_request = comments_per_request
 
     @run_if_changed("_parser_type", "_target_language")
     def _load_parser(self) -> None:
@@ -661,26 +717,104 @@ class MadLibsDocumenter(Translator):
                 f" ({self._parser_type}); must be 'json' and 'doc' respectively."
             )
         self._parser = MadlibsDocumentationParser()
-        self.parser = OutputFixingParser.from_llm(
-            llm=self._llm,
-            parser=self._parser,
-            max_retries=self.max_prompts,
-        )
 
     def _add_translation(self, block: TranslatedCodeBlock):
-        if block.original.text:
-            first_comment = re.search(
-                r"<(?:INLINE|BLOCK)_COMMENT \w{8}>",
+        if block.translated:
+            return
+
+        if block.original.text is None:
+            block.translated = True
+            return
+
+        if self.comments_per_request is None:
+            return super()._add_translation(block)
+
+        comment_pattern = r"<(?:INLINE|BLOCK)_COMMENT \w{8}>"
+        comments = list(
+            re.finditer(
+                comment_pattern,
                 block.original.text,
             )
-            if first_comment is None:
-                log.info(f"[{block.name}] Skipping commentless block")
-                block.translated = True
-                block.text = None
-                block.complete = True
-                return
+        )
 
-        super()._add_translation(block)
+        if not comments:
+            log.info(f"[{block.name}] Skipping commentless block")
+            block.translated = True
+            block.text = None
+            block.complete = True
+            return
+
+        if len(comments) <= self.comments_per_request:
+            return super()._add_translation(block)
+
+        comment_group_indices = list(range(0, len(comments), self.comments_per_request))
+        log.debug(
+            f"[{block.name}] Block contains more than {self.comments_per_request}"
+            f" comments, splitting {len(comments)} comments into"
+            f" {len(comment_group_indices)} groups"
+        )
+
+        block.processing_time = 0
+        block.cost = 0
+        block.retries = 0
+        obj = {}
+        for i in range(0, len(comments), self.comments_per_request):
+            # Split the text into the section containing comments of interest,
+            #  all the text prior to those comments, and all the text after them
+            working_comments = comments[i : i + self.comments_per_request]
+            start_idx = working_comments[0].start()
+            end_idx = working_comments[-1].end()
+            prefix = block.original.text[:start_idx]
+            keeper = block.original.text[start_idx:end_idx]
+            suffix = block.original.text[end_idx:]
+
+            # Strip all comment placeholders outside of the section of interest
+            prefix = re.sub(comment_pattern, "", prefix)
+            suffix = re.sub(comment_pattern, "", suffix)
+
+            # Build a new TranslatedBlock using the new working text
+            working_copy = deepcopy(block.original)
+            working_copy.text = prefix + keeper + suffix
+            working_block = TranslatedCodeBlock(working_copy, self._target_language)
+
+            # Run the LLM on the working text
+            super()._add_translation(working_block)
+
+            # Update metadata to include for all runs
+            block.retries += working_block.retries
+            block.cost += working_block.cost
+            block.processing_time += working_block.processing_time
+
+            # Update the output text to merge this section's output in
+            out_text = self._parser.parse(working_block.text)
+            obj.update(json.loads(out_text))
+
+        self._parser.set_reference(block.original)
+        block.text = self._parser.parse(json.dumps(obj))
+        block.tokens = self._llm.get_num_tokens(block.text)
+        block.translated = True
+
+    def _get_obj(
+        self, block: TranslatedCodeBlock
+    ) -> dict[str, int | float | dict[str, str]]:
+        out_text = self._parser.parse_combined_output(block.complete_text)
+        obj = dict(
+            retries=block.total_retries,
+            cost=block.total_cost,
+            processing_time=block.processing_time,
+            comments=json.loads(out_text),
+        )
+        return obj
+
+    def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
+        """Save a file to disk.
+
+        Arguments:
+            block: The `CodeBlock` to save to a file.
+        """
+        obj = self._get_obj(block)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
 
 
 class DiagramGenerator(Documenter):
@@ -772,7 +906,7 @@ class DiagramGenerator(Documenter):
 
         self._parser.set_reference(block.original)
 
-        query_and_parse = self.prompt | self._llm | self.parser
+        query_and_parse = self._prompt | self._llm | self._parser
 
         if self._add_documentation:
             block.text = query_and_parse.invoke(
@@ -789,8 +923,11 @@ class DiagramGenerator(Documenter):
                     "DIAGRAM_TYPE": self._diagram_type,
                 }
             )
-
-        block.tokens = self._llm.get_num_tokens(block.text)
+        docstring_tokens = self._llm.get_num_tokens(block.text.docstring)
+        example_usage_tokens = self._llm.get_num_tokens(block.text.example_usage)
+        pseudocode_tokens = self._llm.get_num_tokens(block.text.pseudocode)
+        total_tokens = docstring_tokens + example_usage_tokens + pseudocode_tokens
+        block.tokens = total_tokens
         block.translated = True
 
         log.debug(f"[{block.name}] Output code:\n{block.text}")
@@ -821,7 +958,7 @@ class DiagramGenerator(Documenter):
                 f"language should be 'text', but is '{self._target_language}'"
             )
 
-        self._diagram_prompt_engine = PromptEngine(
+        self._diagram_prompt_engine = MODEL_PROMPT_ENGINES[self._model_name](
             source_language=self._source_language,
             target_language=self._target_language,
             target_version=self._target_version,

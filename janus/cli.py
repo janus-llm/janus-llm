@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from pathlib import Path
 from typing import Optional
@@ -41,6 +42,9 @@ from .translate import (
 )
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
 from .utils.logger import create_logger
+
+httpx_logger = logging.getLogger("httpx")
+httpx_logger.setLevel(logging.WARNING)
 
 log = create_logger(__name__)
 homedir = Path.home().expanduser()
@@ -323,6 +327,15 @@ def document(
             click_type=click.Choice(["module", "madlibs"]),
         ),
     ] = "madlibs",
+    comments_per_request: Annotated[
+        int,
+        typer.Option(
+            "--comments-per-request",
+            "-c",
+            help="The maximum number of comments to generate per request when using "
+            "MadLibs documentation mode.",
+        ),
+    ] = None,
     drop_comments: Annotated[
         bool,
         typer.Option(
@@ -375,6 +388,7 @@ def document(
             db_path=db_loc,
             db_config=collections_config,
             custom_splitter=custom_splitter,
+            comments_per_request=comments_per_request,
         )
 
     documenter.translate(input_dir, output_dir, overwrite, collection)

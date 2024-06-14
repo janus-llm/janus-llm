@@ -1,6 +1,8 @@
 import json
+from abc import ABC, abstractmethod
 from pathlib import Path
 
+from langchain import PromptTemplate
 from langchain.prompts import ChatPromptTemplate
 from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
@@ -32,7 +34,7 @@ HUMAN_PROMPT_TEMPLATE_FILENAME = "human.txt"
 PROMPT_VARIABLES_FILENAME = "variables.json"
 
 
-class PromptEngine:
+class PromptEngine(ABC):
     """A class defining prompting schemes for the LLM."""
 
     def __init__(
@@ -57,22 +59,14 @@ class PromptEngine:
         template_path = self.get_prompt_template_path(prompt_template)
         self._template_path = template_path
         self._template_name = prompt_template
-        system_prompt_path = SystemMessagePromptTemplate.from_template(
-            (template_path / SYSTEM_PROMPT_TEMPLATE_FILENAME).read_text()
-        )
-        human_prompt_path = HumanMessagePromptTemplate.from_template(
-            (template_path / HUMAN_PROMPT_TEMPLATE_FILENAME).read_text()
-        )
-        self.prompt = ChatPromptTemplate.from_messages(
-            [system_prompt_path, human_prompt_path]
-        )
+        self.prompt = self.load_prompt_template(template_path)
 
         # Define variables to be passed in to the prompt formatter
         source_language = source_language.lower()
         target_language = target_language.lower()
         self.variables = dict(
-            SOURCE_LANGUAGE=source_language.lower(),
-            TARGET_LANGUAGE=target_language.lower(),
+            SOURCE_LANGUAGE=source_language,
+            TARGET_LANGUAGE=target_language,
             TARGET_LANGUAGE_VERSION=str(target_version),
             FILE_SUFFIX=LANGUAGES[source_language]["suffix"],
             SOURCE_CODE_EXAMPLE=LANGUAGES[source_language]["example"],
@@ -82,6 +76,10 @@ class PromptEngine:
         if variables_path.exists():
             self.variables.update(json.loads(variables_path.read_text()))
         self.prompt = self.prompt.partial(**self.variables)
+
+    @abstractmethod
+    def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
+        pass
 
     @staticmethod
     def get_prompt_template_path(template_name: str) -> Path:
@@ -131,3 +129,93 @@ class PromptEngine:
                 f"Specified prompt template directory {template_path} is "
                 f"missing a {HUMAN_PROMPT_TEMPLATE_FILENAME}"
             )
+
+
+class ChatGptPromptEngine(PromptEngine):
+    def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
+        system_prompt_path = template_path / SYSTEM_PROMPT_TEMPLATE_FILENAME
+        system_prompt = system_prompt_path.read_text()
+        system_message = SystemMessagePromptTemplate.from_template(system_prompt)
+
+        human_prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
+        human_prompt = human_prompt_path.read_text()
+        human_message = HumanMessagePromptTemplate.from_template(human_prompt)
+        return ChatPromptTemplate.from_messages([system_message, human_message])
+
+
+class ClaudePromptEngine(PromptEngine):
+    def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
+        prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
+        prompt = prompt_path.read_text()
+        return PromptTemplate.from_template(f"Human: {prompt}\n\nAssistant: ")
+
+
+class TitanPromptEngine(PromptEngine):
+    def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
+        prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
+        prompt = prompt_path.read_text()
+        return PromptTemplate.from_template(f"User: {prompt}\n\nAssistant: ")
+
+
+class Llama2PromptEngine(PromptEngine):
+    def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
+        system_prompt_path = template_path / SYSTEM_PROMPT_TEMPLATE_FILENAME
+        system_prompt = system_prompt_path.read_text()
+
+        human_prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
+        human_prompt = human_prompt_path.read_text()
+
+        return PromptTemplate.from_template(
+            f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n{human_prompt} [/INST]"
+        )
+
+
+class Llama3PromptEngine(PromptEngine):
+    # see https://llama.meta.com/docs/model-cards-and-prompt-formats/meta-llama-3
+    #            /#special-tokens-used-with-meta-llama-3
+    def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
+        system_prompt_path = template_path / SYSTEM_PROMPT_TEMPLATE_FILENAME
+        system_prompt = system_prompt_path.read_text()
+
+        human_prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
+        human_prompt = human_prompt_path.read_text()
+
+        return PromptTemplate.from_template(
+            f"<|begin_of_text|>"
+            f"<|start_header_id|>"
+            f"system"
+            f"<|end_header_id|>"
+            f"\n\n{system_prompt}"
+            f"<|eot_id|>"
+            f"<|start_header_id|>"
+            f"user"
+            f"<|end_header_id|>"
+            f"\n\n{human_prompt}"
+            f"<|eot_id|>"
+            f"<|start_header_id|>"
+            f"assistant"
+            f"<|end_header_id|>"
+            f"\n\n"
+        )
+
+
+class CoherePromptEngine(PromptEngine):
+    # see https://docs.cohere.com/docs/prompting-command-r
+    def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
+        system_prompt_path = template_path / SYSTEM_PROMPT_TEMPLATE_FILENAME
+        system_prompt = system_prompt_path.read_text()
+
+        human_prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
+        human_prompt = human_prompt_path.read_text()
+
+        return PromptTemplate.from_template(
+            f"<BOS_TOKEN>"
+            f"<|START_OF_TURN_TOKEN|>"
+            f"<|SYSTEM_TOKEN|>"
+            f"{system_prompt}"
+            f"<|END_OF_TURN_TOKEN|>"
+            f"<|START_OF_TURN_TOKEN|>"
+            f"<|USER_TOKEN|>"
+            f"{human_prompt}"
+            f"<|END_OF_TURN_TOKEN|>"
+        )

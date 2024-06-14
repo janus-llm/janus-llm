@@ -1,8 +1,11 @@
 import argparse
 import json
+import random
 import re
 import uuid
+from itertools import dropwhile, takewhile
 from pathlib import Path
+from typing import Iterator
 
 from janus.language.block import CodeBlock
 from janus.language.combine import Combiner
@@ -10,15 +13,68 @@ from janus.language.treesitter import TreeSitterSplitter
 
 splitter = TreeSitterSplitter(language="ibmhlasm", max_tokens=float("inf"))
 
+rnd = random.Random()
+
+
+class CommentInfo(object):
+    def __init__(self, block: CodeBlock):
+        self.comment = block.text
+        self.comment_start = block.start_byte
+        self.comment_type = None
+        self.prefix = ""
+        if block.node_type == "comment":
+            self.comment_type = "block"
+            self.prefix = "* "
+        elif block.node_type == "remark":
+            self.comment_type = "inline"
+
+        self.uuid = str(uuid.UUID(int=rnd.getrandbits(128), version=4))[:8]
+        self.placeholder = (
+            f"{self.prefix}<{self.comment_type.upper()}_COMMENT {self.uuid}>"
+        )
+
+    @property
+    def is_separator(self) -> bool:
+        return not re.sub(r"\W+", "", self.comment)
+
+    def comment_text(self) -> str:
+        if self.is_separator:
+            return ""
+
+        return " ".join(
+            line.lstrip(" *").rstrip(" ")
+            for line in self.comment.split("\n")
+            if re.sub(r"\W+", "", line)
+        )
+
+    def placeholder(self) -> str:
+        if self.is_separator:
+            return self.comment
+        return f"<{self.comment_type.upper()}_COMMENT {self.uuid}>"
+
 
 def is_separator(comment: str) -> bool:
     return not re.sub(r"\W+", "", comment)
 
 
+def merge_group(nodes: list[CodeBlock]) -> Iterator[CodeBlock]:
+    yield from takewhile(lambda line: is_separator(line.text), nodes)
+    nodes = list(dropwhile(lambda line: is_separator(line.text), nodes))
+
+    prefix_seps = list(takewhile(lambda line: is_separator(line.text), nodes[::-1]))[::1]
+    nodes = list(dropwhile(lambda line: is_separator(line.text), nodes[::-1]))[::-1]
+
+    if nodes:
+        merged = splitter.merge_nodes(nodes)
+        merged.node_type = "comment"
+        yield merged
+    yield from prefix_seps
+
+
 def merge_adjacent_comments(children: list[CodeBlock]) -> list[CodeBlock]:
     new_children: list[CodeBlock] = []
     run = []
-    for child in children:
+    for child in sorted(children, key=lambda node: node.start_byte):
         if child.node_type == "comment":
             run.append(child)
             continue
@@ -26,36 +82,33 @@ def merge_adjacent_comments(children: list[CodeBlock]) -> list[CodeBlock]:
         if len(run) == 1:
             new_children.append(run[0])
         elif len(run) > 1:
-            merged = splitter.merge_nodes(run)
-            merged.node_type = "comment"
-            new_children.append(merged)
+            new_children.extend(merge_group(run))
+        new_children.append(child)
         run = []
 
-        new_children.append(child)
     return new_children
 
 
-def process(code: str) -> tuple[str, list[dict[str, str | int]]]:
+def process(code: str) -> tuple[str, list[CommentInfo]]:
     root = splitter._get_ast(code)
 
-    comments = {}
+    rnd.seed(code)
+
+    comments = []
     stack = [root]
     while stack:
-        node = stack.pop()
+        node = stack.pop(0)
 
         if node.node_type in {"comment", "remark"}:
-            if is_separator(node.text):
-                node.text = ""
+            if node.text is None:
                 continue
 
-            comment_id = next(
-                t for _ in range(1000) if (t := str(uuid.uuid4())[:8]) not in comments
-            )
-            comments[comment_id] = node.text
-            if node.node_type == "comment":
-                node.text = f"* <BLOCK_COMMENT {comment_id}>"
-            else:
-                node.text = f"<INLINE_COMMENT {comment_id}>"
+            comment = CommentInfo(node)
+            if comment.is_separator:
+                continue
+
+            comments.append(comment)
+            node.text = comment.placeholder
 
         elif node.children:
             node.complete = False
@@ -100,7 +153,13 @@ for input_file in input_dir.rglob("*.asm"):
     processed_code, comments = process(code)
 
     obj[input_file.name] = dict(
-        original=code, processed=processed_code, comments=comments
+        original=code,
+        processed=processed_code,
+        raw_comments={c.uuid: c.comment for c in comments},
+        comment_texts={c.uuid: c.comment_text() for c in comments},
+        comment_types={c.uuid: c.comment_type for c in comments},
+        comment_starts={c.uuid: c.comment_start for c in comments},
+        comment_prefixes={c.uuid: c.prefix for c in comments},
     )
 
     output_file.write_text(processed_code)
