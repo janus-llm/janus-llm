@@ -897,8 +897,11 @@ class DiagramGenerator(Documenter):
                     "DIAGRAM_TYPE": self._diagram_type,
                 }
             )
-
-        block.tokens = self._llm.get_num_tokens(block.text)
+        docstring_tokens = self._llm.get_num_tokens(block.text.docstring)
+        example_usage_tokens = self._llm.get_num_tokens(block.text.example_usage)
+        pseudocode_tokens = self._llm.get_num_tokens(block.text.pseudocode)
+        total_tokens = docstring_tokens + example_usage_tokens + pseudocode_tokens
+        block.tokens = total_tokens
         block.translated = True
 
         log.debug(f"[{block.name}] Output code:\n{block.text}")
