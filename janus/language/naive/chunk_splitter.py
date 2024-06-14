@@ -4,6 +4,10 @@ from janus.language.splitter import Splitter
 
 
 class ChunkSplitter(Splitter):
+    """
+    Splits into fixed chunk sizes without parsing
+    """
+
     def _get_ast(self, code: str) -> CodeBlock:
         return CodeBlock(
             text=code,
