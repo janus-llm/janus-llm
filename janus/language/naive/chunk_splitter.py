@@ -1,8 +1,10 @@
 from janus.language.block import CodeBlock
+from janus.language.naive.registry import register_splitter
 from janus.language.node import NodeType
 from janus.language.splitter import Splitter
 
 
+@register_splitter("chunk_splitter")
 class ChunkSplitter(Splitter):
     """
     Splits into fixed chunk sizes without parsing
