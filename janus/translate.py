@@ -10,6 +10,8 @@ from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import BaseOutputParser, StrOutputParser
 from openai import BadRequestError, RateLimitError
 
+from janus.language.naive.registry import CUSTOM_SPLITTERS
+
 from .converter import Converter, run_if_changed
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
@@ -43,6 +45,7 @@ class Translator(Converter):
         parser_type: str = "code",
         db_path: str | None = None,
         db_config: dict[str, Any] | None = None,
+        custom_splitter: str | None = None,
     ) -> None:
         """Initialize a Translator instance.
 
@@ -60,6 +63,7 @@ class Translator(Converter):
             parser_type: The type of parser to use for parsing the LLM output. Valid
                 values are "code" (default), "text", and "eval".
         """
+        self._custom_splitter = custom_splitter
         super().__init__(source_language=source_language)
 
         self._parser_type: str | None
@@ -536,6 +540,20 @@ class Translator(Converter):
         self._vectorizer = vectorizer_factory.create_vectorizer(
             self._db_path, self._db_config
         )
+
+    def _load_splitter(self) -> None:
+        if self._custom_splitter is None:
+            super()._load_splitter()
+        else:
+            kwargs = dict(
+                max_tokens=self._max_tokens,
+                model=self._llm,
+                protected_node_types=self._protected_node_types,
+                prune_node_types=self._prune_node_types,
+            )
+            self._splitter = CUSTOM_SPLITTERS[self._custom_splitter](
+                language=self._source_language, **kwargs
+            )
 
 
 class Documenter(Translator):
