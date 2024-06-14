@@ -11,6 +11,8 @@ from rich.console import Console
 from rich.prompt import Confirm
 from typing_extensions import Annotated
 
+from janus.language.naive.registry import CUSTOM_SPLITTERS as CUSTOM_SPLITTERS_DICT
+
 from .embedding.collections import Collections
 from .embedding.database import ChromaEmbeddingDatabase
 from .embedding.embedding_models_info import (
@@ -221,6 +223,15 @@ def translate(
             "collection with the name provided.",
         ),
     ] = None,
+    custom_splitter: Annotated[
+        Optional[str],
+        typer.Option(
+            "-cs",
+            "--custom-splitter",
+            help="Name of custom splitter to use",
+            click_type=click.Choice(list(CUSTOM_SPLITTERS_DICT.keys())),
+        ),
+    ] = None,
 ):
     try:
         target_language, target_version = target_lang.split("-")
@@ -245,6 +256,7 @@ def translate(
         parser_type=parser_type,
         db_path=db_loc,
         db_config=collections_config,
+        custom_splitter=custom_splitter,
     )
     translator.translate(input_dir, output_dir, overwrite, collection)
 
@@ -331,6 +343,15 @@ def document(
             "collection with the name provided.",
         ),
     ] = None,
+    custom_splitter: Annotated[
+        Optional[str],
+        typer.Option(
+            "-cs",
+            "--custom-splitter",
+            help="Name of custom splitter to use",
+            click_type=click.Choice(list(CUSTOM_SPLITTERS_DICT.keys())),
+        ),
+    ] = None,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -343,6 +364,7 @@ def document(
             db_path=db_loc,
             db_config=collections_config,
             drop_comments=drop_comments,
+            custom_splitter=custom_splitter,
         )
     elif doc_mode == "madlibs":
         documenter = MadLibsDocumenter(
@@ -352,6 +374,7 @@ def document(
             max_prompts=max_prompts,
             db_path=db_loc,
             db_config=collections_config,
+            custom_splitter=custom_splitter,
         )
 
     documenter.translate(input_dir, output_dir, overwrite, collection)
@@ -437,6 +460,15 @@ def diagram(
             help="Whether to use documentation in generation",
         ),
     ] = False,
+    custom_splitter: Annotated[
+        Optional[str],
+        typer.Option(
+            "-cs",
+            "--custom-splitter",
+            help="Name of custom splitter to use",
+            click_type=click.Choice(list(CUSTOM_SPLITTERS_DICT.keys())),
+        ),
+    ] = None,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -449,6 +481,7 @@ def diagram(
         db_config=collections_config,
         diagram_type=diagram_type,
         add_documentation=add_documentation,
+        custom_splitter=custom_splitter,
     )
     diagram_generator.translate(input_dir, output_dir, overwrite, collection)
 

@@ -566,6 +566,7 @@ class Documenter(Translator):
         db_path: str | None = None,
         db_config: dict[str, Any] | None = None,
         drop_comments: bool = False,
+        custom_splitter: str | None = None,
     ) -> None:
         """Initialize a Translator instance.
 
@@ -588,6 +589,7 @@ class Documenter(Translator):
             parser_type="doc",
             db_path=db_path,
             db_config=db_config,
+            custom_splitter=custom_splitter,
         )
 
         module_node_type = LANGUAGES[source_language]["functional_node_type"]
@@ -618,6 +620,7 @@ class MadLibsDocumenter(Translator):
         max_prompts: int = 10,
         db_path: str | None = None,
         db_config: dict[str, Any] | None = None,
+        custom_splitter: str | None = None,
     ) -> None:
         """Initialize a Translator instance.
 
@@ -640,6 +643,7 @@ class MadLibsDocumenter(Translator):
             parser_type="doc",
             db_path=db_path,
             db_config=db_config,
+            custom_splitter=custom_splitter,
         )
 
     @run_if_changed("_parser_type", "_target_language")
@@ -693,6 +697,7 @@ class DiagramGenerator(Documenter):
         db_config: dict[str, Any] | None = None,
         diagram_type="Activity",
         add_documentation=False,
+        custom_splitter: str | None = None,
     ) -> None:
         """Initialize the DiagramGenerator class
 
@@ -714,6 +719,7 @@ class DiagramGenerator(Documenter):
             max_prompts=max_prompts,
             db_path=db_path,
             db_config=db_config,
+            custom_splitter=custom_splitter,
         )
         self._diagram_type = diagram_type
         self._add_documentation = add_documentation
