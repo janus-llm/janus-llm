@@ -551,6 +551,8 @@ class Translator(Converter):
                 protected_node_types=self._protected_node_types,
                 prune_node_types=self._prune_node_types,
             )
+            if self._custom_splitter == "tag_splitter":
+                kwargs["tag"] = "<ITMOD_ALC_SPLIT>"
             self._splitter = CUSTOM_SPLITTERS[self._custom_splitter](
                 language=self._source_language, **kwargs
             )
