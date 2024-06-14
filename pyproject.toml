@@ -16,30 +16,30 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
-rich = "^13.7.1"
-openai = "^1.14.0"
-tiktoken = "^0.6.0"
-tree-sitter = "^0.21.0"
-numpy = "^1.24.3"
-gitpython = "^3.1.32"
-langchain = "0.1.14"
-text-generation = "^0.6.0"
-transformers = "^4.31.0"
-python-dotenv = "^1.0.0"
-chromadb = "^0.4.24"
-gpt4all = "^2.0.2"
-typer = "^0.9.0"
-langchain-community = "^0.0.31"
-sacrebleu = "^2.4.1"
-nltk = "^3.8.1"
-py-readability-metrics = "^1.4.5"
-langchain-core = "^0.1.0"
-py-rouge = "^1.1"
-langchain-openai = "^0.1.1"
-chroma = "^0.2.0"
+python = ">=3.10, <3.12"
 aenum = "^3.1.15"
+chromadb = "^0.5.0"
+gpt4all = "^2.0.2"
+gitpython = "^3.1.32"
+langchain = "^0.2.0"
+langchain-anthropic = "^0.1.15"
+langchain-community = "^0.2.0"
+langchain-core = "^0.2.0"
+nltk = "^3.8.1"
+numpy = "^1.24.3"
+openai = "^1.14.0"
+py-readability-metrics = "^1.4.5"
+py-rouge = "^1.1"
+python-dotenv = "^1.0.0"
+rich = "^13.7.1"
+sacrebleu = "^2.4.1"
 sentence-transformers = "^2.6.1"
+text-generation = "^0.6.0"
+tiktoken = "^0.7.0"
+transformers = "^4.31.0"
+tree-sitter = "^0.21.0"
+typer = "^0.9.0"
+langchain-openai = "^0.1.8"
 
 [tool.poetry.scripts]
 janus = "janus.cli:app"
@@ -76,6 +76,10 @@ exclude = "decompile_script.py"
 convention = "google"
 # match '*.py' files that don't start with 'test_' or '__init'
 match = '(?![test_|__init]).*\.py'
+
+[tool.bandit]
+# We aren't using pseudo-random numbers for cryptographic purposes
+skips = ["B311"]
 
 [tool.pytest.ini_options]
 markers = [
