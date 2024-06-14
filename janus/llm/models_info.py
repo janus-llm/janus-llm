@@ -4,11 +4,12 @@ from pathlib import Path
 from typing import Any, Callable
 
 from dotenv import load_dotenv
-from langchain_community.chat_models import BedrockChat, ChatOpenAI
+from langchain_community.chat_models import BedrockChat
 from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_community.llms.bedrock import Bedrock
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain_core.language_models import BaseLanguageModel
+from langchain_openai import ChatOpenAI
 
 from janus.prompts.prompt import (
     ChatGptPromptEngine,
@@ -75,12 +76,12 @@ MODEL_TYPE_CONSTRUCTORS: dict[str, Callable[[Any], BaseLanguageModel]] = {
     "BedrockChat": BedrockChat,
 }
 
-MODEL_TYPES: dict[str, type(PromptEngine)] = {
+MODEL_TYPES: dict[str, PromptEngine] = {
     **{m: "OpenAI" for m in openai_models},
     **{m: "BedrockChat" for m in bedrock_models},
 }
 
-MODEL_PROMPT_ENGINES: dict[str, type(PromptEngine)] = {
+MODEL_PROMPT_ENGINES: dict[str, PromptEngine] = {
     **{m: ChatGptPromptEngine for m in openai_models},
     **{m: ClaudePromptEngine for m in claude_models},
     **{m: Llama2PromptEngine for m in llama2_models},

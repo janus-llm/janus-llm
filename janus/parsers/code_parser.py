@@ -2,6 +2,7 @@ import re
 
 from langchain.schema.output_parser import BaseOutputParser
 from langchain_core.exceptions import OutputParserException
+from langchain_core.messages import BaseMessage
 from langchain_core.output_parsers import StrOutputParser
 
 from ..language.block import CodeBlock
@@ -37,6 +38,8 @@ class CodeParser(BaseOutputParser[str], JanusParser):
     language: str
 
     def parse(self, text: str) -> str:
+        if isinstance(text, BaseMessage):
+            text = text.content
         pattern = rf"```[^\S\r\n]*(?:{self.language}[^\S\r\n]*)?\n?(.*?)\n*```"
         code = re.search(pattern, text, re.DOTALL)
         if code is None:
