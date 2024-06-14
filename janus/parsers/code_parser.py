@@ -21,9 +21,13 @@ class JanusParser:
         Returns:
             A parsed version of the text
         """
+        if isinstance(text, BaseMessage):
+            text = text.content
         return text
 
     def parse_into_block(self, text: str, block: CodeBlock):
+        if isinstance(text, BaseMessage):
+            text = text.content
         block.text = text
 
     def set_reference(self, block: CodeBlock):
