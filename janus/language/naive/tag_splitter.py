@@ -4,7 +4,7 @@ from janus.language.node import NodeType
 from janus.language.splitter import Splitter
 
 
-@register_splitter("tag_splitter")
+@register_splitter("tag")
 class TagSplitter(Splitter):
     """
     Splits code by tags inserted into code

@@ -3,7 +3,7 @@ from janus.language.naive.chunk_splitter import ChunkSplitter
 from janus.language.naive.registry import register_splitter
 
 
-@register_splitter("file_splitter")
+@register_splitter("file")
 class FileSplitter(ChunkSplitter):
     """
     Splits based on the entire file of the code

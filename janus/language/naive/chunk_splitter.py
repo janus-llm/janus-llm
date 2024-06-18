@@ -4,7 +4,7 @@ from janus.language.node import NodeType
 from janus.language.splitter import Splitter
 
 
-@register_splitter("chunk_splitter")
+@register_splitter("chunk")
 class ChunkSplitter(Splitter):
     """
     Splits into fixed chunk sizes without parsing
