@@ -15,7 +15,7 @@ from .code_parser import JanusParser
 log = create_logger(__name__)
 
 
-class Docs(BaseModel):
+class MultiDoc(BaseModel):
     docstring: str = Field(
         description="A Sphinx-style docstring for the code, including a summary "
         "of its functionality; the name, type, and description of "
@@ -32,11 +32,11 @@ class Docs(BaseModel):
     )
 
 
-class DocumentationParser(PydanticOutputParser, JanusParser):
+class MultiDocumentationParser(PydanticOutputParser, JanusParser):
     block_name: str = ""
 
     def __init__(self):
-        PydanticOutputParser.__init__(self, pydantic_object=Docs)
+        PydanticOutputParser.__init__(self, pydantic_object=MultiDoc)
 
     def set_reference(self, block: CodeBlock):
         self.block_name = block.name

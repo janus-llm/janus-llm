@@ -614,94 +614,38 @@ class Translator(Converter):
 
 class Documenter(Translator):
     def __init__(
-        self,
-        model: str = "gpt-3.5-turbo",
-        model_arguments: dict[str, Any] = {},
-        source_language: str = "fortran",
-        max_prompts: int = 10,
-        db_path: str | None = None,
-        db_config: dict[str, Any] | None = None,
-        drop_comments: bool = False,
-        custom_splitter: str | None = None,
-    ) -> None:
-        """Initialize a Translator instance.
-
-        Arguments:
-            model: The LLM to use for translation. If an OpenAI model, the
-                `OPENAI_API_KEY` environment variable must be set and the
-                `OPENAI_ORG_ID` environment variable should be set if needed.
-            model_arguments: Additional arguments to pass to the LLM constructor.
-            source_language: The source programming language.
-            max_prompts: The maximum number of prompts to try before giving up.
-        """
-        super().__init__(
-            model=model,
-            model_arguments=model_arguments,
+        self, source_language: str = "fortran", drop_comments: bool = True, **kwargs
+    ):
+        kwargs.update(
             source_language=source_language,
             target_language="json",
             target_version=None,
-            max_prompts=max_prompts,
             prompt_template="document",
-            parser_type="doc",
-            db_path=db_path,
-            db_config=db_config,
-            custom_splitter=custom_splitter,
+            parser_type="text",
         )
-
-        module_node_type = LANGUAGES[source_language]["functional_node_type"]
-        self.set_protected_node_types([module_node_type])
+        super().__init__(**kwargs)
 
         if drop_comments:
             comment_node_type = LANGUAGES[source_language]["comment_node_type"]
             self.set_prune_node_types([comment_node_type])
 
-    def _split_file(self, file: Path) -> CodeBlock:
-        filename = file.name
-        log.info(f"[{filename}] Splitting file")
-        root = self._splitter.split(file, prune_unprotected=True)
-        log.info(
-            f"[{filename}] File split into {root.n_descendents:,} blocks, "
-            f"tree of height {root.height}"
-        )
-        log.info(f"[{filename}] Input CodeBlock Structure:\n{root.tree_str()}")
-        return root
+
+class MultiDocumenter(Documenter):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.set_prompt("multidocument")
+        self.set_parser_type("doc")
 
 
-class MadLibsDocumenter(Translator):
+class MadLibsDocumenter(Documenter):
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo",
-        model_arguments: dict[str, Any] = {},
-        source_language: str = "fortran",
-        max_prompts: int = 10,
-        db_path: str | None = None,
-        db_config: dict[str, Any] | None = None,
-        custom_splitter: str | None = None,
         comments_per_request: int | None = None,
+        **kwargs,
     ) -> None:
-        """Initialize a Translator instance.
-
-        Arguments:
-            model: The LLM to use for translation. If an OpenAI model, the
-                `OPENAI_API_KEY` environment variable must be set and the
-                `OPENAI_ORG_ID` environment variable should be set if needed.
-            model_arguments: Additional arguments to pass to the LLM constructor.
-            source_language: The source programming language.
-            max_prompts: The maximum number of prompts to try before giving up.
-        """
-        super().__init__(
-            model=model,
-            model_arguments=model_arguments,
-            source_language=source_language,
-            target_language="json",
-            target_version=None,
-            max_prompts=max_prompts,
-            prompt_template="document_madlibs",
-            parser_type="doc",
-            db_path=db_path,
-            db_config=db_config,
-            custom_splitter=custom_splitter,
-        )
+        kwargs.update(drop_comments=False)
+        super().__init__(**kwargs)
+        self.set_prompt("document_madlibs")
         self.comments_per_request = comments_per_request
 
     @run_if_changed("_parser_type", "_target_language")

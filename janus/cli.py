@@ -38,6 +38,7 @@ from .translate import (
     DiagramGenerator,
     Documenter,
     MadLibsDocumenter,
+    MultiDocumenter,
     Translator,
 )
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
@@ -324,7 +325,7 @@ def document(
             "--doc-mode",
             "-d",
             help="The documentation mode.",
-            click_type=click.Choice(["module", "madlibs"]),
+            click_type=click.Choice(["madlibs", "summary", "multidoc"]),
         ),
     ] = "madlibs",
     comments_per_request: Annotated[
@@ -368,28 +369,23 @@ def document(
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
-    if doc_mode == "module":
-        documenter = Documenter(
-            model=llm_name,
-            model_arguments=model_arguments,
-            source_language=language,
-            max_prompts=max_prompts,
-            db_path=db_loc,
-            db_config=collections_config,
-            drop_comments=drop_comments,
-            custom_splitter=custom_splitter,
-        )
-    elif doc_mode == "madlibs":
+    kwargs = dict(
+        model=llm_name,
+        model_arguments=model_arguments,
+        source_language=language,
+        max_prompts=max_prompts,
+        db_path=db_loc,
+        db_config=collections_config,
+        custom_splitter=custom_splitter,
+    )
+    if doc_mode == "madlibs":
         documenter = MadLibsDocumenter(
-            model=llm_name,
-            model_arguments=model_arguments,
-            source_language=language,
-            max_prompts=max_prompts,
-            db_path=db_loc,
-            db_config=collections_config,
-            custom_splitter=custom_splitter,
-            comments_per_request=comments_per_request,
+            comments_per_request=comments_per_request, **kwargs
         )
+    elif doc_mode == "multidoc":
+        documenter = MultiDocumenter(drop_comments=drop_comments, **kwargs)
+    else:
+        documenter = Documenter(drop_comments=drop_comments, **kwargs)
 
     documenter.translate(input_dir, output_dir, overwrite, collection)
 

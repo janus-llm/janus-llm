@@ -43,6 +43,7 @@ class Splitter(FileManager):
         skip_merge: bool = False,
         protected_node_types: tuple[str] = (),
         prune_node_types: tuple[str] = (),
+        prune_unprotected: bool = False,
     ):
         """
         Arguments:
@@ -55,6 +56,7 @@ class Splitter(FileManager):
                 documentation is preferred.
                 TODO: Maybe instead support something like a list of node types that
                       shouldnt be merged (e.g. functions, classes)?
+            prune_unprotected: Whether to prune unprotected nodes from the tree.
         """
         super().__init__(language=language)
         self.model = model
@@ -64,30 +66,27 @@ class Splitter(FileManager):
         self.max_tokens: int = max_tokens
         self._protected_node_types = set(protected_node_types)
         self._prune_node_types = set(prune_node_types)
+        self.prune_unprotected = prune_unprotected
 
-    def split(self, file: Path | str, prune_unprotected: bool = False) -> CodeBlock:
+    def split(self, file: Path | str) -> CodeBlock:
         """Split the given file into functional code blocks.
 
         Arguments:
             file: The file to split into functional blocks.
-            prune_unprotected: Whether to prune unprotected nodes from the tree.
 
         Returns:
             A `CodeBlock` made up of nested `CodeBlock`s.
         """
         path = Path(file)
         code = path.read_text()
-        return self.split_string(code, path.name, prune_unprotected)
+        return self.split_string(code, path.name)
 
-    def split_string(
-        self, code: str, name: str, prune_unprotected: bool = False
-    ) -> CodeBlock:
+    def split_string(self, code: str, name: str) -> CodeBlock:
         """Split the given code into functional code blocks.
 
         Arguments:
             code: The code as a string to split into functional blocks.
             name: The filename of the code block.
-            prune_unprotected: Whether to prune unprotected nodes from the tree.
 
         Returns:
             A `CodeBlock` made up of nested `CodeBlock`s.
@@ -95,7 +94,7 @@ class Splitter(FileManager):
 
         root = self._get_ast(code)
         self._prune(root)
-        if prune_unprotected:
+        if self.prune_unprotected:
             self._prune_unprotected(root)
         self._set_identifiers(root, name)
         self._segment_leaves(root)
