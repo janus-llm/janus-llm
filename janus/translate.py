@@ -28,7 +28,7 @@ from .language.splitter import EmptyTreeError, TokenLimitError
 from .llm import load_model
 from .llm.models_info import MODEL_PROMPT_ENGINES, MODEL_TYPES
 from .parsers.code_parser import CodeParser, GenericParser
-from .parsers.doc_parser import DocumentationParser, MadlibsDocumentationParser
+from .parsers.doc_parser import MadlibsDocumentationParser, MultiDocumentationParser
 from .parsers.eval_parser import EvaluationParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT
 from .utils.enums import LANGUAGES
@@ -532,7 +532,10 @@ class Translator(Converter):
                 f"Target language ({self._target_language}) suggests target "
                 f"parser should be 'text', but is '{self._parser_type}'"
             )
-        if self._parser_type in {"eval", "doc"} and "json" != self._target_language:
+        if (
+            self._parser_type in {"eval", "multidoc", "madlibs"}
+            and "json" != self._target_language
+        ):
             raise ValueError(
                 f"Parser type ({self._parser_type}) suggests target language"
                 f" should be 'json', but is '{self._target_language}'"
@@ -541,8 +544,10 @@ class Translator(Converter):
             self._parser = CodeParser(language=self._target_language)
         elif "eval" == self._parser_type:
             self._parser = EvaluationParser()
-        elif "doc" == self._parser_type:
-            self._parser = DocumentationParser()
+        elif "multidoc" == self._parser_type:
+            self._parser = MultiDocumentationParser()
+        elif "madlibs" == self._parser_type:
+            self._parser = MadlibsDocumentationParser()
         elif "text" == self._parser_type:
             self._parser = GenericParser()
         else:
@@ -634,7 +639,7 @@ class MultiDocumenter(Documenter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.set_prompt("multidocument")
-        self.set_parser_type("doc")
+        self.set_parser_type("multidoc")
 
 
 class MadLibsDocumenter(Documenter):
@@ -646,21 +651,8 @@ class MadLibsDocumenter(Documenter):
         kwargs.update(drop_comments=False)
         super().__init__(**kwargs)
         self.set_prompt("document_madlibs")
+        self.set_parser_type("madlibs")
         self.comments_per_request = comments_per_request
-
-    @run_if_changed("_parser_type", "_target_language")
-    def _load_parser(self) -> None:
-        """Load the parser according to this instance's attributes.
-
-        If the relevant fields have not been changed since the last time this method was
-        called, nothing happens.
-        """
-        if "json" != self._target_language or "doc" != self._parser_type:
-            raise ValueError(
-                f"Invalid target language ({self._target_language}) or parser type"
-                f" ({self._parser_type}); must be 'json' and 'doc' respectively."
-            )
-        self._parser = MadlibsDocumentationParser()
 
     def _add_translation(self, block: TranslatedCodeBlock):
         if block.translated:
