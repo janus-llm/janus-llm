@@ -81,7 +81,7 @@ MODEL_TYPES: dict[str, PromptEngine] = {
     **{m: "BedrockChat" for m in bedrock_models},
 }
 
-MODEL_PROMPT_ENGINES: dict[str, PromptEngine] = {
+MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
     **{m: ChatGptPromptEngine for m in openai_models},
     **{m: ClaudePromptEngine for m in claude_models},
     **{m: Llama2PromptEngine for m in llama2_models},
