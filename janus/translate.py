@@ -477,7 +477,9 @@ class Translator(Converter):
         """
         self._prompt_template_name = prompt_template
 
-    def set_target_language(self, target_language: str, target_version: str) -> None:
+    def set_target_language(
+        self, target_language: str, target_version: str | None
+    ) -> None:
         """Validate and set the target language.
 
         The affected objects will not be updated until translate() is called.
@@ -624,7 +626,7 @@ class Documenter(Translator):
     ):
         kwargs.update(
             source_language=source_language,
-            target_language="json",
+            target_language="text",
             target_version=None,
             prompt_template="document",
             parser_type="text",
@@ -641,6 +643,7 @@ class MultiDocumenter(Documenter):
         super().__init__(**kwargs)
         self.set_prompt("multidocument")
         self.set_parser_type("multidoc")
+        self.set_target_language("json", None)
 
 
 class MadLibsDocumenter(Documenter):
@@ -653,6 +656,7 @@ class MadLibsDocumenter(Documenter):
         super().__init__(**kwargs)
         self.set_prompt("document_madlibs")
         self.set_parser_type("madlibs")
+        self.set_target_language("json", None)
         self.comments_per_request = comments_per_request
 
     def _add_translation(self, block: TranslatedCodeBlock):
