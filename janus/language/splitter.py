@@ -98,7 +98,8 @@ class Splitter(FileManager):
             self._prune_unprotected(root)
         self._set_identifiers(root, name)
         self._segment_leaves(root)
-        self._merge_tree(root)
+        if not self.skip_merge:
+            self._merge_tree(root)
 
         return root
 

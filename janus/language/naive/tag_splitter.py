@@ -11,8 +11,9 @@ class TagSplitter(Splitter):
     """
 
     def __init__(self, tag: str, *args, **kwargs):
-        self._tag = tag
+        kwargs.update(protected_node_types=("chunk",))
         super().__init__(*args, **kwargs)
+        self._tag = f"\n{tag}\n"
 
     def _get_ast(self, code: str) -> CodeBlock:
         chunks = code.split(self._tag)
@@ -20,10 +21,11 @@ class TagSplitter(Splitter):
         start_line = 0
         start_byte = 0
         for i, chunk in enumerate(chunks):
+            prefix = suffix = self._tag
+            if i == 0:
+                prefix = ""
             if i == len(chunks) - 1:
                 suffix = ""
-            else:
-                suffix = self._tag
             end_byte = start_byte + len(bytes(chunk, "utf-8"))
             end_line = start_line + chunk.count("\n")
             end_char = len(chunk) - chunk.rfind("\n") - 1
@@ -35,7 +37,7 @@ class TagSplitter(Splitter):
                 end_point=(end_line, end_char),
                 start_byte=start_byte,
                 end_byte=end_byte,
-                affixes=(self._tag, suffix),
+                affixes=(prefix, suffix),
                 node_type=NodeType("chunk"),
                 children=[],
                 language=self.language,
