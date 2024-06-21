@@ -23,6 +23,14 @@ from janus.prompts.prompt import (
 
 load_dotenv()
 
+model_reroutes = {
+    "gpt-4o": "gpt-4o-2024-05-13",
+    "gpt-4": "gpt-4-0613",
+    "gpt-4-turbo": "gpt-4-turbo-2024-04-09",
+    "gpt-4-turbo-preview": "gpt-4-0125-preview",
+    "gpt-3.5-turbo": "gpt-3.5-turbo-0125",
+}
+
 openai_models = [
     "gpt-4",
     "gpt-4-32k",
@@ -112,6 +120,11 @@ model_identifiers = {
     "bedrock-jurassic-2-mid": "ai21.j2-mid-v1",
     "bedrock-jurassic-2-ultra": "ai21.j2-ultra-v1",
     "bedrock-command-r-plus": "cohere.command-r-plus-v1:0",
+}
+
+MODEL_TYPES = {
+    **MODEL_TYPES,
+    **{mid: MODEL_TYPES[m] for m, mid in model_identifiers.items()},
 }
 
 MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, str]] = {
