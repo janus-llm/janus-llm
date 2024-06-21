@@ -11,6 +11,7 @@ from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain_core.language_models import BaseLanguageModel
 from langchain_openai import ChatOpenAI
 
+from janus.llm.model_callbacks import COST_PER_1K_TOKENS
 from janus.prompts.prompt import (
     ChatGptPromptEngine,
     ClaudePromptEngine,
@@ -119,7 +120,7 @@ model_identifiers = {
 }
 
 MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, str]] = {
-    m: dict(model_name=m) for m in model_identifiers.values()
+    k: dict(model_id=v) for k, v in model_identifiers.items()
 }
 
 DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
@@ -160,33 +161,6 @@ TOKEN_LIMITS: dict[str, int] = {
     "cohere.command-r-plus-v1:0": 128_000,
 }
 
-COST_PER_MODEL: dict[str, dict[str, float]] = {
-    "gpt-4": {"input": 0.03, "output": 0.06},
-    "gpt-4-32k": {"input": 0.06, "output": 0.12},
-    "gpt-4-0613": {"input": 0.03, "output": 0.06},
-    "gpt-4-1106-preview": {"input": 0.01, "output": 0.03},
-    "gpt-4-0125-preview": {"input": 0.01, "output": 0.03},
-    "gpt-4o-2024-05-13": {"input": 0.005, "output": 0.015},
-    "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
-    "gpt-3.5-turbo-16k": {"input": 0.0005, "output": 0.0015},
-    "gpt-3.5-turbo-0125": {"input": 0.0005, "output": 0.0015},
-    "anthropic.claude-v2": {"input": 0.0, "output": 0.0},
-    "anthropic.claude-instant-v1": {"input": 0.0, "output": 0.0},
-    "anthropic.claude-3-haiku-20240307-v1:0": {"input": 0.00025, "output": 0.00125},
-    "anthropic.claude-3-sonnet-20240229-v1:0": {"input": 0.003, "output": 0.015},
-    "meta.llama2-70b-v1": {"input": 0.00265, "output": 0.0035},
-    "meta.llama2-70b-chat-v1": {"input": 0.00195, "output": 0.00256},
-    "meta.llama2-13b-chat-v1": {"input": 0.00075, "output": 0.001},
-    "meta.llama2-13b-v1": {"input": 0.0, "output": 0.0},
-    "meta.llama3-8b-instruct-v1:0": {"input": 0.0004, "output": 0.0006},
-    "meta.llama3-70b-instruct-v1:0": {"input": 0.00265, "output": 0.0035},
-    "amazon.titan-text-lite-v1": {"input": 0.0, "output": 0.0},
-    "amazon.titan-text-express-v1": {"input": 0.0, "output": 0.0},
-    "ai21.j2-mid-v1": {"input": 0.0125, "output": 0.0125},
-    "ai21.j2-ultra-v1": {"input": 0.0188, "output": 0.0188},
-    "cohere.command-r-plus-v1:0": {"input": 0.003, "output": 0.015},
-}
-
 
 def load_model(model_name: str) -> tuple[BaseLanguageModel, int, dict[str, float]]:
     if not MODEL_CONFIG_DIR.exists():
@@ -198,8 +172,10 @@ def load_model(model_name: str) -> tuple[BaseLanguageModel, int, dict[str, float
         model_config = {
             "model_type": MODEL_TYPES[model_name],
             "model_args": MODEL_DEFAULT_ARGUMENTS[model_name],
-            "token_limit": TOKEN_LIMITS.get(model_name, 4096),
-            "model_cost": COST_PER_MODEL.get(model_name, {"input": 0, "output": 0}),
+            "token_limit": TOKEN_LIMITS.get(model_identifiers[model_name], 4096),
+            "model_cost": COST_PER_1K_TOKENS.get(
+                model_identifiers[model_name], {"input": 0, "output": 0}
+            ),
         }
         with open(model_config_file, "w") as f:
             json.dump(model_config, f)
