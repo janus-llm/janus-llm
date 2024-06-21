@@ -84,10 +84,6 @@ MODEL_TYPE_CONSTRUCTORS: dict[str, Callable[[Any], BaseLanguageModel]] = {
     "BedrockChat": BedrockChat,
 }
 
-MODEL_TYPES: dict[str, PromptEngine] = {
-    **{m: "OpenAI" for m in openai_models},
-    **{m: "BedrockChat" for m in bedrock_models},
-}
 
 MODEL_PROMPT_ENGINES: dict[str, PromptEngine] = {
     **{m: ChatGptPromptEngine for m in openai_models},
@@ -122,11 +118,6 @@ model_identifiers = {
     "bedrock-command-r-plus": "cohere.command-r-plus-v1:0",
 }
 
-MODEL_TYPES = {
-    **MODEL_TYPES,
-    **{mid: MODEL_TYPES[m] for m, mid in model_identifiers.items()},
-}
-
 MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, str]] = {
     m: dict(model_name=m) for m in model_identifiers.values()
 }
@@ -134,6 +125,11 @@ MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, str]] = {
 DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
 
 MODEL_CONFIG_DIR = Path.home().expanduser() / ".janus" / "llm"
+
+MODEL_TYPES: dict[str, PromptEngine] = {
+    **{model_identifiers[m]: "OpenAI" for m in openai_models},
+    **{model_identifiers[m]: "BedrockChat" for m in bedrock_models},
+}
 
 TOKEN_LIMITS: dict[str, int] = {
     "gpt-4": 8192,
@@ -177,7 +173,7 @@ COST_PER_MODEL: dict[str, dict[str, float]] = {
     "anthropic.claude-v2": {"input": 0.0, "output": 0.0},
     "anthropic.claude-instant-v1": {"input": 0.0, "output": 0.0},
     "anthropic.claude-3-haiku-20240307-v1:0": {"input": 0.00025, "output": 0.00125},
-    "anthropic.claude-3-sonnet-20240307-v1:0": {"input": 0.003, "output": 0.015},
+    "anthropic.claude-3-sonnet-20240229-v1:0": {"input": 0.003, "output": 0.015},
     "meta.llama2-70b-v1": {"input": 0.00265, "output": 0.0035},
     "meta.llama2-70b-chat-v1": {"input": 0.00195, "output": 0.00256},
     "meta.llama2-13b-chat-v1": {"input": 0.00075, "output": 0.001},
