@@ -115,7 +115,7 @@ model_identifiers = {
 }
 
 MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, str]] = {
-    m: dict(model_name=m) for m in model_identifiers.values()
+    k: dict(model_id=v) for k,v in model_identifiers.items()
 }
 
 DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
@@ -189,7 +189,7 @@ def load_model(model_name: str) -> tuple[BaseLanguageModel, int, dict[str, float
         model_config = {
             "model_type": MODEL_TYPES[model_name],
             "model_args": MODEL_DEFAULT_ARGUMENTS[model_name],
-            "token_limit": TOKEN_LIMITS.get(model_name, 4096),
+            "token_limit": TOKEN_LIMITS.get(model_identifiers[model_name], 4096),
             "model_cost": COST_PER_MODEL.get(model_name, {"input": 0, "output": 0}),
         }
         with open(model_config_file, "w") as f:
