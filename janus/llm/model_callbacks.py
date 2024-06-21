@@ -3,12 +3,14 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from typing import Any, Generator
 
-from dotenv import load_dotenv
 from langchain_core.callbacks import BaseCallbackHandler
-from langchain_core.outputs import LLMResult
+from langchain_core.messages import AIMessage
+from langchain_core.outputs import ChatGeneration, LLMResult
 from langchain_core.tracers.context import register_configure_hook
 
-load_dotenv()
+from janus.utils.logger import create_logger
+
+log = create_logger(__name__)
 
 
 # Updated 2024-06-21
@@ -21,7 +23,7 @@ COST_PER_1K_TOKENS: dict[str, dict[str, float]] = {
     "anthropic.claude-v2": {"input": 0.008, "output": 0.024},
     "anthropic.claude-instant-v1": {"input": 0.0008, "output": 0.0024},
     "anthropic.claude-3-haiku-20240307-v1:0": {"input": 0.00025, "output": 0.00125},
-    "anthropic.claude-3-sonnet-20240307-v1:0": {"input": 0.003, "output": 0.015},
+    "anthropic.claude-3-sonnet-20240229-v1:0": {"input": 0.003, "output": 0.015},
     "meta.llama2-13b-chat-v1": {"input": 0.00075, "output": 0.001},
     "meta.llama2-70b-chat-v1": {"input": 0.00195, "output": 0.00256},
     "meta.llama2-13b-v1": {"input": 0.0, "output": 0.0},
@@ -54,7 +56,7 @@ def _get_token_cost(
 class TokenUsageCallbackHandler(BaseCallbackHandler):
     """Callback Handler that tracks metadata on model cost, retries, etc.
     Based on https://github.com/langchain-ai/langchain/blob/master/libs
-        /community/langchain_community/callbacks/bedrock_anthropic_callback.py
+                /community/langchain_community/callbacks/openai_info.py
     """
 
     total_tokens: int = 0
@@ -96,30 +98,58 @@ class TokenUsageCallbackHandler(BaseCallbackHandler):
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         """Collect token usage."""
-        if response.llm_output is None:
-            return None
+        # Check for usage_metadata (langchain-core >= 0.2.2)
+        try:
+            generation = response.generations[0][0]
+        except IndexError:
+            generation = None
+        if isinstance(generation, ChatGeneration):
+            try:
+                message = generation.message
+                if isinstance(message, AIMessage):
+                    usage_metadata = message.usage_metadata
+                else:
+                    usage_metadata = None
+            except AttributeError:
+                usage_metadata = None
+        else:
+            usage_metadata = None
+        if usage_metadata:
+            token_usage = {"total_tokens": usage_metadata["total_tokens"]}
+            completion_tokens = usage_metadata["output_tokens"]
+            prompt_tokens = usage_metadata["input_tokens"]
+            if response.llm_output is None:
+                # model name (and therefore cost) is unavailable in
+                # streaming responses
+                model_name = ""
+            else:
+                model_name = response.llm_output.get("model_name", "")
 
-        if "usage" not in response.llm_output:
-            with self._lock:
-                self.successful_requests += 1
-            return None
+        else:
+            if response.llm_output is None:
+                return None
 
-        # compute tokens and cost for this request
-        token_usage = response.llm_output["usage"]
-        completion_tokens = token_usage.get("completion_tokens", 0)
-        prompt_tokens = token_usage.get("prompt_tokens", 0)
-        total_tokens = token_usage.get("total_tokens", 0)
-        model_id = response.llm_output.get("model_id", None)
+            if "token_usage" not in response.llm_output:
+                with self._lock:
+                    self.successful_requests += 1
+                return None
+
+            # compute tokens and cost for this request
+            token_usage = response.llm_output["token_usage"]
+            completion_tokens = token_usage.get("completion_tokens", 0)
+            prompt_tokens = token_usage.get("prompt_tokens", 0)
+            model_name = response.llm_output.get("model_name", "")
+
         total_cost = _get_token_cost(
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
-            model_id=model_id,
+            model_id=model_name,
         )
 
         # update shared state behind lock
         with self._lock:
             self.total_cost += total_cost
-            self.total_tokens += total_tokens
+            self.total_tokens += token_usage.get("total_tokens", 0)
             self.prompt_tokens += prompt_tokens
             self.completion_tokens += completion_tokens
             self.successful_requests += 1
