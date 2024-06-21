@@ -24,6 +24,7 @@ from janus.language.naive.registry import CUSTOM_SPLITTERS
 from .converter import Converter, run_if_changed
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
+from .language.combine import Combiner, JsonCombiner
 from .language.splitter import EmptyTreeError, TokenLimitError
 from .llm import load_model
 from .llm.models_info import MODEL_PROMPT_ENGINES, MODEL_TYPES
@@ -37,7 +38,7 @@ from .utils.logger import create_logger
 log = create_logger(__name__)
 
 
-PARSER_TYPES: set[str] = {"code", "text", "eval", "doc"}
+PARSER_TYPES: set[str] = {"code", "text", "eval", "madlibs", "multidoc"}
 
 
 class Translator(Converter):
@@ -88,6 +89,7 @@ class Translator(Converter):
 
         self._llm: BaseLanguageModel | None
         self._parser: BaseOutputParser | None
+        self._combiner: Combiner | None
         self._prompt: ChatPromptTemplate | None
 
         self.max_prompts = max_prompts
@@ -108,6 +110,7 @@ class Translator(Converter):
         self._load_model()
         self._load_prompt()
         self._load_parser()
+        self._load_combiner()
         self._load_vectorizer()
         super()._load_parameters()  # will call self._changed_attrs.clear()
 
@@ -618,6 +621,13 @@ class Translator(Converter):
             self._splitter = CUSTOM_SPLITTERS[self._custom_splitter](
                 language=self._source_language, **kwargs
             )
+
+    @run_if_changed("_target_language")
+    def _load_combiner(self) -> None:
+        if self._target_language == "json":
+            self._combiner = JsonCombiner()
+        else:
+            self._combiner = Combiner()
 
 
 class Documenter(Translator):
