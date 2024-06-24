@@ -390,5 +390,5 @@ def test_language_combinations(
     assert translator._target_version == expected_target_version  # nosec
     assert translator._parser_type == parser_type  # nosec
     assert translator._splitter.language == source_language  # nosec
-    assert translator._splitter.model.model_name == "gpt-3.5-turbo-0125"  # nosec
+    assert translator._splitter.model.model_name == "gpt-3.5-turbo"  # nosec
     assert translator._prompt_template_name == prompt_template  # nosec
