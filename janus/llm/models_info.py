@@ -117,7 +117,8 @@ model_identifiers = {
 }
 
 MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, str]] = {
-    k: dict(model_id=v) for k, v in model_identifiers.items()
+    k: (dict(model_name=k) if k in openai_models else dict(model_id=v))
+    for k, v in model_identifiers.items()
 }
 
 DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
