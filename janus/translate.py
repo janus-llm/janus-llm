@@ -40,7 +40,7 @@ class Translator(Converter):
 
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo",
+        model: str = "gpt-3.5-turbo-0125",
         model_arguments: dict[str, Any] = {},
         source_language: str = "fortran",
         target_language: str = "python",
@@ -587,7 +587,7 @@ class Translator(Converter):
 class Documenter(Translator):
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo",
+        model: str = "gpt-3.5-turbo-0125",
         model_arguments: dict[str, Any] = {},
         source_language: str = "fortran",
         max_prompts: int = 10,
@@ -640,7 +640,7 @@ class Documenter(Translator):
 class MadLibsDocumenter(Translator):
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo",
+        model: str = "gpt-3.5-turbo-0125",
         model_arguments: dict[str, Any] = {},
         source_language: str = "fortran",
         max_prompts: int = 10,
@@ -793,7 +793,7 @@ class DiagramGenerator(Documenter):
 
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo",
+        model: str = "gpt-3.5-turbo-0125",
         model_arguments: dict[str, Any] = {},
         source_language: str = "fortran",
         max_prompts: int = 10,

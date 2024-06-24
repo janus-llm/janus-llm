@@ -24,23 +24,20 @@ from janus.prompts.prompt import (
 
 load_dotenv()
 
-model_reroutes = {
+openai_model_reroutes = {
     "gpt-4o": "gpt-4o-2024-05-13",
     "gpt-4": "gpt-4-0613",
     "gpt-4-turbo": "gpt-4-turbo-2024-04-09",
     "gpt-4-turbo-preview": "gpt-4-0125-preview",
     "gpt-3.5-turbo": "gpt-3.5-turbo-0125",
+    "gpt-3.5-turbo-16k": "gpt-3.5-turbo-0125",
 }
 
 openai_models = [
-    "gpt-4",
-    "gpt-4-32k",
     "gpt-4-0613",
     "gpt-4-1106-preview",
     "gpt-4-0125-preview",
     "gpt-4o-2024-05-13",
-    "gpt-3.5-turbo",
-    "gpt-3.5-turbo-16k",
     "gpt-3.5-turbo-0125",
 ]
 claude_models = [
@@ -133,14 +130,11 @@ MODEL_TYPES: dict[str, PromptEngine] = {
 }
 
 TOKEN_LIMITS: dict[str, int] = {
-    "gpt-4": 8192,
     "gpt-4-32k": 32_768,
     "gpt-4-0613": 8192,
     "gpt-4-1106-preview": 128_000,
     "gpt-4-0125-preview": 128_000,
     "gpt-4o-2024-05-13": 128_000,
-    "gpt-3.5-turbo": 4096,
-    "gpt-3.5-turbo-16k": 16_384,
     "gpt-3.5-turbo-0125": 16_384,
     "text-embedding-ada-002": 8191,
     "gpt4all": 16_384,
@@ -168,7 +162,10 @@ def load_model(model_name: str) -> tuple[BaseLanguageModel, int, dict[str, float
     model_config_file = MODEL_CONFIG_DIR / f"{model_name}.json"
     if not model_config_file.exists():
         if model_name not in DEFAULT_MODELS:
-            raise ValueError(f"Error: could not find model {model_name}")
+            if model_name in openai_model_reroutes:
+                model_name = openai_model_reroutes[model_name]
+            else:
+                raise ValueError(f"Error: could not find model {model_name}")
         model_config = {
             "model_type": MODEL_TYPES[model_name],
             "model_args": MODEL_DEFAULT_ARGUMENTS[model_name],
