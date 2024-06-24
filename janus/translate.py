@@ -605,6 +605,13 @@ class Translator(Converter):
             self._db_path, self._db_config
         )
 
+    @run_if_changed(
+        "_source_language",
+        "_max_tokens",
+        "_llm",
+        "_protected_node_types",
+        "_prune_node_types",
+    )
     def _load_splitter(self) -> None:
         if self._custom_splitter is None:
             super()._load_splitter()
