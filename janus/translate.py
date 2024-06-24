@@ -644,7 +644,9 @@ class Documenter(Translator):
         super().__init__(**kwargs)
 
         if drop_comments:
-            comment_node_type = LANGUAGES[source_language]["comment_node_type"]
+            comment_node_type = LANGUAGES[source_language].get(
+                "comment_node_type", "comment"
+            )
             self.set_prune_node_types([comment_node_type])
 
 
@@ -818,6 +820,7 @@ class DiagramGenerator(Documenter):
             self._diagram_prompt_template_name = "diagram_with_documentation"
         else:
             self._diagram_prompt_template_name = "diagram"
+        self._load_diagram_prompt_engine()
 
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
         """Given an "empty" `TranslatedCodeBlock`, translate the code represented in
@@ -857,7 +860,7 @@ class DiagramGenerator(Documenter):
 
         self._parser.set_reference(block.original)
 
-        query_and_parse = self._prompt | self._llm | self._parser
+        query_and_parse = self.diagram_prompt | self._llm | self._parser
 
         if self._add_documentation:
             block.text = query_and_parse.invoke(
@@ -874,10 +877,13 @@ class DiagramGenerator(Documenter):
                     "DIAGRAM_TYPE": self._diagram_type,
                 }
             )
-        docstring_tokens = self._llm.get_num_tokens(block.text.docstring)
-        example_usage_tokens = self._llm.get_num_tokens(block.text.example_usage)
-        pseudocode_tokens = self._llm.get_num_tokens(block.text.pseudocode)
-        total_tokens = docstring_tokens + example_usage_tokens + pseudocode_tokens
+        if isinstance(block.text, str):
+            total_tokens = self._llm.get_num_tokens(block.text)
+        else:
+            docstring_tokens = self._llm.get_num_tokens(block.text.docstring)
+            example_usage_tokens = self._llm.get_num_tokens(block.text.example_usage)
+            pseudocode_tokens = self._llm.get_num_tokens(block.text.pseudocode)
+            total_tokens = docstring_tokens + example_usage_tokens + pseudocode_tokens
         block.tokens = total_tokens
         block.translated = True
 
