@@ -24,12 +24,8 @@ from .embedding.vectorize import ChromaDBVectorizer
 from .language.binary import BinarySplitter
 from .language.mumps import MumpsSplitter
 from .language.treesitter import TreeSitterSplitter
-from .llm.models_info import (
-    COST_PER_MODEL,
-    MODEL_CONFIG_DIR,
-    MODEL_TYPE_CONSTRUCTORS,
-    TOKEN_LIMITS,
-)
+from .llm.model_callbacks import COST_PER_1K_TOKENS
+from .llm.models_info import MODEL_CONFIG_DIR, MODEL_TYPE_CONSTRUCTORS, TOKEN_LIMITS
 from .metrics.cli import evaluate
 from .translate import (
     PARSER_TYPES,
@@ -767,7 +763,7 @@ def llm_add(
             n=1,
         )
         max_tokens = TOKEN_LIMITS[model_name]
-        model_cost = COST_PER_MODEL[model_name]
+        model_cost = COST_PER_1K_TOKENS[model_name]
         cfg = {
             "model_type": model_type,
             "model_args": params,
