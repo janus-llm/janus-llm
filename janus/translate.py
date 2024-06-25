@@ -8,10 +8,6 @@ from typing import Any
 
 from langchain.output_parsers import RetryWithErrorOutputParser
 from langchain.output_parsers.fix import OutputFixingParser
-from langchain_community.callbacks.manager import (
-    get_bedrock_anthropic_callback,
-    get_openai_callback,
-)
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.output_parsers import BaseOutputParser
@@ -27,7 +23,8 @@ from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import Combiner, JsonCombiner
 from .language.splitter import EmptyTreeError, TokenLimitError
 from .llm import load_model
-from .llm.models_info import MODEL_PROMPT_ENGINES, MODEL_TYPES
+from .llm.model_callbacks import get_model_callback
+from .llm.models_info import MODEL_PROMPT_ENGINES
 from .parsers.code_parser import CodeParser, GenericParser
 from .parsers.doc_parser import MadlibsDocumentationParser, MultiDocumentationParser
 from .parsers.eval_parser import EvaluationParser
@@ -46,7 +43,7 @@ class Translator(Converter):
 
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo",
+        model: str = "gpt-3.5-turbo-0125",
         model_arguments: dict[str, Any] = {},
         source_language: str = "fortran",
         target_language: str = "python",
@@ -363,7 +360,7 @@ class Translator(Converter):
         # Track the cost of translating this block
         #  TODO: If non-OpenAI models with prices are added, this will need
         #   to be updated.
-        with self._get_model_callback() as cb:
+        with get_model_callback() as cb:
             t0 = time.time()
             block.text = self._run_chain(block)
             block.processing_time = time.time() - t0
@@ -423,11 +420,6 @@ class Translator(Converter):
                 pass
 
         raise OutputParserException(f"Failed to parse after {n1*n2*n3} retries")
-
-    def _get_model_callback(self):
-        if MODEL_TYPES[self._model_name] == "OpenAI":
-            return get_openai_callback()
-        return get_bedrock_anthropic_callback()
 
     def _save_to_file(self, block: CodeBlock, out_path: Path) -> None:
         """Save a file to disk.
@@ -785,7 +777,7 @@ class DiagramGenerator(Documenter):
 
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo",
+        model: str = "gpt-3.5-turbo-0125",
         model_arguments: dict[str, Any] = {},
         source_language: str = "fortran",
         max_prompts: int = 10,

@@ -28,7 +28,7 @@ You'll need to specify at least the source language and the target language as w
 janus translate --source-lang matlab --target-lang python --input-dir janus/language/treesitter/_tests/languages --output-dir python-tests
 ```
 
-This will use the default model (`gpt-3.5-turbo`) to translate the files in the input directory from MATLAB to Python and place the translated files in the output directory.
+This will use the default model (`gpt-3.5-turbo-0125`) to translate the files in the input directory from MATLAB to Python and place the translated files in the output directory.
 
 You can also specify the model we added earlier to use for translation:
 

@@ -113,7 +113,7 @@ def metric(
                         "-L",
                         help="The custom name of the model set with 'janus llm add'.",
                     ),
-                ] = "gpt-3.5-turbo",
+                ] = "gpt-3.5-turbo-0125",
                 progress: Annotated[
                     bool,
                     typer.Option(
@@ -275,7 +275,7 @@ def metric(
                         "-L",
                         help="The custom name of the model set with 'janus llm add'.",
                     ),
-                ] = "gpt-3.5-turbo",
+                ] = "gpt-3.5-turbo-0125",
                 progress: Annotated[
                     bool,
                     typer.Option(

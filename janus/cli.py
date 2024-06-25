@@ -26,12 +26,8 @@ from .embedding.vectorize import ChromaDBVectorizer
 from .language.binary import BinarySplitter
 from .language.mumps import MumpsSplitter
 from .language.treesitter import TreeSitterSplitter
-from .llm.models_info import (
-    COST_PER_MODEL,
-    MODEL_CONFIG_DIR,
-    MODEL_TYPE_CONSTRUCTORS,
-    TOKEN_LIMITS,
-)
+from .llm.model_callbacks import COST_PER_1K_TOKENS
+from .llm.models_info import MODEL_CONFIG_DIR, MODEL_TYPE_CONSTRUCTORS, TOKEN_LIMITS
 from .metrics.cli import evaluate
 from .translate import (
     PARSER_TYPES,
@@ -180,7 +176,7 @@ def translate(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-3.5-turbo",
+    ] = "gpt-3.5-turbo-0125",
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -302,7 +298,7 @@ def document(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-3.5-turbo",
+    ] = "gpt-3.5-turbo-0125",
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -426,7 +422,7 @@ def diagram(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-3.5-turbo",
+    ] = "gpt-3.5-turbo-0125",
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -789,14 +785,14 @@ def llm_add(
             "model_cost": {"input": in_cost, "output": out_cost},
         }
     elif model_type == "OpenAI":
-        model_name = typer.prompt("Enter the model name", default="gpt-3.5-turbo")
+        model_name = typer.prompt("Enter the model name", default="gpt-3.5-turbo-0125")
         params = dict(
             model_name=model_name,
             temperature=0.7,
             n=1,
         )
         max_tokens = TOKEN_LIMITS[model_name]
-        model_cost = COST_PER_MODEL[model_name]
+        model_cost = COST_PER_1K_TOKENS[model_name]
         cfg = {
             "model_type": model_type,
             "model_args": params,
