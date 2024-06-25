@@ -11,7 +11,7 @@ class TestMumpsSplitter(unittest.TestCase):
 
     def setUp(self):
         """Set up the tests."""
-        model_name = "gpt-3.5-turbo"
+        model_name = "gpt-3.5-turbo-0125"
         llm, _, _ = load_model(model_name)
         self.splitter = MumpsSplitter(model=llm)
         self.combiner = Combiner(language="mumps")
