@@ -234,6 +234,15 @@ def translate(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = None,
+    max_tokens: Annotated[
+        int,
+        typer.Option(
+            "--max-tokens",
+            "-M",
+            help="The maximum number of tokens the model will take in. "
+            "If unspecificed, model's default max will be used.",
+        ),
+    ] = None,
 ):
     try:
         target_language, target_version = target_lang.split("-")
@@ -254,6 +263,7 @@ def translate(
         target_language=target_language,
         target_version=target_version,
         max_prompts=max_prompts,
+        max_tokens=max_tokens,
         prompt_template=prompt_template,
         parser_type=parser_type,
         db_path=db_loc,
@@ -363,6 +373,15 @@ def document(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = None,
+    max_tokens: Annotated[
+        int,
+        typer.Option(
+            "--max-tokens",
+            "-M",
+            help="The maximum number of tokens the model will take in. "
+            "If unspecificed, model's default max will be used.",
+        ),
+    ] = None,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -371,6 +390,7 @@ def document(
         model_arguments=model_arguments,
         source_language=language,
         max_prompts=max_prompts,
+        max_tokens=max_tokens,
         db_path=db_loc,
         db_config=collections_config,
         custom_splitter=custom_splitter,
