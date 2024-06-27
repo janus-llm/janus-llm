@@ -20,7 +20,7 @@ from janus.language.naive.registry import CUSTOM_SPLITTERS
 from .converter import Converter, run_if_changed
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
-from .language.combine import Combiner, JsonCombiner
+from .language.combine import ChunkCombiner, Combiner, JsonCombiner
 from .language.splitter import EmptyTreeError, TokenLimitError
 from .llm import load_model
 from .llm.model_callbacks import get_model_callback
@@ -28,6 +28,7 @@ from .llm.models_info import MODEL_PROMPT_ENGINES
 from .parsers.code_parser import CodeParser, GenericParser
 from .parsers.doc_parser import MadlibsDocumentationParser, MultiDocumentationParser
 from .parsers.eval_parser import EvaluationParser
+from .parsers.reqs_parser import RequirementsParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT
 from .utils.enums import LANGUAGES
 from .utils.logger import create_logger
@@ -35,7 +36,7 @@ from .utils.logger import create_logger
 log = create_logger(__name__)
 
 
-PARSER_TYPES: set[str] = {"code", "text", "eval", "madlibs", "multidoc"}
+PARSER_TYPES: set[str] = {"code", "text", "eval", "madlibs", "multidoc", "requirements"}
 
 
 class Translator(Converter):
@@ -547,6 +548,8 @@ class Translator(Converter):
             self._parser = MadlibsDocumentationParser()
         elif "text" == self._parser_type:
             self._parser = GenericParser()
+        elif "requirements" == self._parser_type:
+            self._parser = RequirementsParser()
         else:
             raise ValueError(
                 f"Unsupported parser type: {self._parser_type}. Can be: "
@@ -621,9 +624,11 @@ class Translator(Converter):
                 language=self._source_language, **kwargs
             )
 
-    @run_if_changed("_target_language")
+    @run_if_changed("_target_language", "_parser_type")
     def _load_combiner(self) -> None:
-        if self._target_language == "json":
+        if self._parser_type == "requirements":
+            self._combiner = ChunkCombiner()
+        elif self._target_language == "json":
             self._combiner = JsonCombiner()
         else:
             self._combiner = Combiner()
@@ -876,14 +881,7 @@ class DiagramGenerator(Documenter):
                     "DIAGRAM_TYPE": self._diagram_type,
                 }
             )
-        if isinstance(block.text, str):
-            total_tokens = self._llm.get_num_tokens(block.text)
-        else:
-            docstring_tokens = self._llm.get_num_tokens(block.text.docstring)
-            example_usage_tokens = self._llm.get_num_tokens(block.text.example_usage)
-            pseudocode_tokens = self._llm.get_num_tokens(block.text.pseudocode)
-            total_tokens = docstring_tokens + example_usage_tokens + pseudocode_tokens
-        block.tokens = total_tokens
+        block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
 
         log.debug(f"[{block.name}] Output code:\n{block.text}")
@@ -921,3 +919,43 @@ class DiagramGenerator(Documenter):
             prompt_template=self._diagram_prompt_template_name,
         )
         self.diagram_prompt = self._diagram_prompt_engine.prompt
+
+
+class RequirementsDocumenter(Documenter):
+    """RequirementsGenerator
+
+    A class that translates code from one programming language to its requirements.
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.set_prompt("chunk_requirements")
+        self.set_target_language("json", None)
+        self.set_parser_type("requirements")
+
+    def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
+        """Save a file to disk.
+
+        Arguments:
+            block: The `CodeBlock` to save to a file.
+        """
+        output_list = list()
+        # For each chunk of code, get generation metadata, the text of the code,
+        # and the LLM generated requirements
+        for child in block.children:
+            code = child.original.text
+            requirements = self._parser.parse_combined_output(child.complete_text)
+            metadata = dict(
+                retries=child.total_retries,
+                cost=child.total_cost,
+                processing_time=child.processing_time,
+            )
+            # Put them all in a top level 'output' key
+            output_list.append(
+                dict(metadata=metadata, code=code, requirements=requirements)
+            )
+        obj = dict(
+            output=output_list,
+        )
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")

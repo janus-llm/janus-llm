@@ -17,13 +17,13 @@ log = create_logger(__name__)
 
 # Prompt names (self.template_map keys) that should output text,
 # regardless of the `output-lang` argument.
-TEXT_OUTPUT = ["requirements"]
+TEXT_OUTPUT = []
 
 # Prompt names (self.template_map keys) that should output the
 # same language as the input, regardless of the `output-lang` argument.
 SAME_OUTPUT = ["document_inline"]
 
-JSON_OUTPUT = ["evaluate", "document", "document_madlibs"]
+JSON_OUTPUT = ["evaluate", "document", "document_madlibs", "requirements"]
 
 # Directory containing Janus prompt template directories and files
 JANUS_PROMPT_TEMPLATES_DIR = Path(__file__).parent / "templates"

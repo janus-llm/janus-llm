@@ -79,3 +79,15 @@ class JsonCombiner(Combiner):
             else:
                 block.affixes = ("\n", "\n")
         super(JsonCombiner, JsonCombiner).combine(root)
+
+
+class ChunkCombiner(Combiner):
+    @staticmethod
+    def combine(root: CodeBlock) -> None:
+        """A combiner which doesn't actually combine the code blocks,
+        instead preserving children
+
+        Arguments:
+            root: The functional code block to combine with its children.
+        """
+        return root
