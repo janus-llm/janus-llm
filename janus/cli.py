@@ -12,7 +12,7 @@ from rich.console import Console
 from rich.prompt import Confirm
 from typing_extensions import Annotated
 
-from janus.language.naive.registry import CUSTOM_SPLITTERS as CUSTOM_SPLITTERS_DICT
+from janus.language.naive.registry import CUSTOM_SPLITTERS
 
 from .embedding.collections import Collections
 from .embedding.database import ChromaEmbeddingDatabase
@@ -38,7 +38,7 @@ from .translate import (
     RequirementsDocumenter,
     Translator,
 )
-from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
+from .utils.enums import LANGUAGES
 from .utils.logger import create_logger
 
 httpx_logger = logging.getLogger("httpx")
@@ -231,7 +231,7 @@ def translate(
             "-cs",
             "--custom-splitter",
             help="Name of custom splitter to use",
-            click_type=click.Choice(list(CUSTOM_SPLITTERS_DICT.keys())),
+            click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = None,
 ):
@@ -360,7 +360,7 @@ def document(
             "-cs",
             "--custom-splitter",
             help="Name of custom splitter to use",
-            click_type=click.Choice(list(CUSTOM_SPLITTERS_DICT.keys())),
+            click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = None,
 ):
@@ -475,7 +475,7 @@ def diagram(
             "-cs",
             "--custom-splitter",
             help="Name of custom splitter to use",
-            click_type=click.Choice(list(CUSTOM_SPLITTERS_DICT.keys())),
+            click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = None,
 ):
