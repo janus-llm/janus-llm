@@ -42,6 +42,8 @@ class MultiDocumentationParser(PydanticOutputParser, JanusParser):
         self.block_name = block.name
 
     def parse(self, text: str) -> str:
+        if isinstance(text, AIMessage):
+            text = text.content
         try:
             docs = json.loads(super().parse(text).json())
         except (OutputParserException, json.JSONDecodeError):
