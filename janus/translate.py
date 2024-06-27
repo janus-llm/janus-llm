@@ -14,6 +14,7 @@ from langchain_core.output_parsers import BaseOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableLambda, RunnableParallel
 from openai import BadRequestError, RateLimitError
+from text_generation.errors import ValidationError
 
 from janus.language.naive.registry import CUSTOM_SPLITTERS
 
@@ -50,6 +51,7 @@ class Translator(Converter):
         target_language: str = "python",
         target_version: str | None = "3.10",
         max_prompts: int = 10,
+        max_tokens: int | None = None,
         prompt_template: str | Path = "simple",
         parser_type: str = "code",
         db_path: str | None = None,
@@ -67,6 +69,8 @@ class Translator(Converter):
             target_language: The target programming language.
             target_version: The target version of the target programming language.
             max_prompts: The maximum number of prompts to try before giving up.
+            max_tokens: The maximum number of tokens the model will take in.
+                If unspecificed, model's default max will be used.
             prompt_template: name of prompt template directory
                 (see janus/prompts/templates) or path to a directory.
             parser_type: The type of parser to use for parsing the LLM output. Valid
@@ -91,6 +95,8 @@ class Translator(Converter):
         self._prompt: ChatPromptTemplate | None
 
         self.max_prompts = max_prompts
+        self.override_token_limit = False if max_tokens is None else True
+        self._max_tokens = max_tokens
 
         self.set_model(model_name=model, **model_arguments)
         self.set_parser_type(parser_type=parser_type)
@@ -187,6 +193,15 @@ class Translator(Converter):
             except BadRequestError as e:
                 if str(e).startswith("Detected an error in the prompt"):
                     log.warning("Malformed input, skipping")
+                    continue
+                raise e
+            except ValidationError as e:
+                # Only allow ValidationError to pass if token limit is manually set
+                if self.override_token_limit:
+                    log.warning(
+                        "Current file and manually set token "
+                        "limit is too large for this model"
+                    )
                     continue
                 raise e
             except TokenLimitError:
@@ -516,7 +531,9 @@ class Translator(Converter):
         self._llm, token_limit, self.model_cost = load_model(self._model_name)
         # Set the max_tokens to less than half the model's limit to allow for enough
         # tokens at output
-        self._max_tokens = token_limit // 2.5
+        # Only modify max_tokens if it is not specified by user
+        if not self.override_token_limit:
+            self._max_tokens = token_limit // 2.5
 
     @run_if_changed("_parser_type", "_target_language")
     def _load_parser(self) -> None:
