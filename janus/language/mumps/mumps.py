@@ -46,7 +46,7 @@ class MumpsSplitter(Splitter):
         self,
         model: None | BaseLanguageModel = None,
         max_tokens: int = 4096,
-        protected_node_types: tuple[str] = ("subroutine",),
+        protected_node_types: tuple[str] = ("routine_definition",),
         prune_node_types: tuple[str] = (),
     ):
         """Initialize a MumpsSplitter instance.
@@ -110,7 +110,7 @@ class MumpsSplitter(Splitter):
                 start_byte=start_byte,
                 end_byte=end_byte,
                 affixes=(prefix, suffix),
-                node_type=NodeType("subroutine"),
+                node_type=NodeType("routine_definition"),
                 children=[],
                 language=self.language,
                 tokens=self._count_tokens(chunk),

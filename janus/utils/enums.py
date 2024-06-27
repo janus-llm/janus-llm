@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Set
+from typing import Any, Dict, Set
 
 
 class EmbeddingType(Enum):
@@ -12,7 +12,7 @@ class EmbeddingType(Enum):
 
 CUSTOM_SPLITTERS: Set[str] = {"mumps", "binary"}
 
-LANGUAGES: Dict[str, Dict[str, str]] = {
+LANGUAGES: Dict[str, Dict[str, Any]] = {
     "ada": {
         "comment": "--",
         "suffix": "adb",
@@ -420,7 +420,7 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "suffix": "m",
         "url": "https://github.com/janus-llm/tree-sitter-mumps",
         "example": 'WRITE "Hello, World!"',
-        "functional_node_type": "subroutine",
+        "functional_node_type": "routine_definition",
         "comment_node_type": "comment",
         "branch_node_types": ["if_statement"],
         "operation_node_types": [
