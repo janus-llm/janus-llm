@@ -64,6 +64,15 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
             "    return 0;\n}\n"
         ),
     },
+    "cpp": {
+        "comment": "//",
+        "suffix": "cpp",
+        "url": "https://github.com/tree-sitter/tree-sitter-cpp",
+        "example": (
+            '#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n'
+            "    return 0;\n}\n"
+        ),
+    },
     "capnp": {
         "comment": "#",
         "suffix": "capnp",
