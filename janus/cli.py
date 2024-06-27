@@ -35,6 +35,7 @@ from .translate import (
     Documenter,
     MadLibsDocumenter,
     MultiDocumenter,
+    RequirementsDocumenter,
     Translator,
 )
 from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
@@ -321,7 +322,7 @@ def document(
             "--doc-mode",
             "-d",
             help="The documentation mode.",
-            click_type=click.Choice(["madlibs", "summary", "multidoc"]),
+            click_type=click.Choice(["madlibs", "summary", "multidoc", "requirements"]),
         ),
     ] = "madlibs",
     comments_per_request: Annotated[
@@ -380,6 +381,8 @@ def document(
         )
     elif doc_mode == "multidoc":
         documenter = MultiDocumenter(drop_comments=drop_comments, **kwargs)
+    elif doc_mode == "requirements":
+        documenter = RequirementsDocumenter(drop_comments=drop_comments, **kwargs)
     else:
         documenter = Documenter(drop_comments=drop_comments, **kwargs)
 
