@@ -22,7 +22,7 @@ from .converter import Converter, run_if_changed
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import ChunkCombiner, Combiner, JsonCombiner
-from .language.splitter import EmptyTreeError, TokenLimitError, FileSizeError
+from .language.splitter import EmptyTreeError, FileSizeError, TokenLimitError
 from .llm import load_model
 from .llm.model_callbacks import get_model_callback
 from .llm.models_info import MODEL_PROMPT_ENGINES
