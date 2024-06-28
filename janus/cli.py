@@ -339,7 +339,7 @@ def document(
         int,
         typer.Option(
             "--comments-per-request",
-            "-c",
+            "-rc",
             help="The maximum number of comments to generate per request when using "
             "MadLibs documentation mode.",
         ),
