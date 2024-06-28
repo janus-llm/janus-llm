@@ -22,7 +22,7 @@ from .converter import Converter, run_if_changed
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import ChunkCombiner, Combiner, JsonCombiner
-from .language.splitter import EmptyTreeError, TokenLimitError
+from .language.splitter import EmptyTreeError, FileSizeError, TokenLimitError
 from .llm import load_model
 from .llm.model_callbacks import get_model_callback
 from .llm.models_info import MODEL_PROMPT_ENGINES
@@ -200,7 +200,7 @@ class Translator(Converter):
                 if self.override_token_limit:
                     log.warning(
                         "Current file and manually set token "
-                        "limit is too large for this model"
+                        "limit is too large for this model, skipping"
                     )
                     continue
                 raise e
@@ -211,6 +211,9 @@ class Translator(Converter):
                 log.warning(
                     f'Input file "{in_path.name}" has no nodes of interest, skipping'
                 )
+                continue
+            except FileSizeError:
+                log.warning("Current tile is too large for basic splitter, skipping")
                 continue
 
             # Don't attempt to write files for which translation failed

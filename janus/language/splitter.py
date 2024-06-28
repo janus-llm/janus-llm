@@ -30,6 +30,12 @@ class EmptyTreeError(Exception):
     pass
 
 
+class FileSizeError(Exception):
+    """An exception raised when the file size is too large for the splitter"""
+
+    pass
+
+
 class Splitter(FileManager):
     """A class for splitting code into functional blocks to prompt with for
     transcoding.
