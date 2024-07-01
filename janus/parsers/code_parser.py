@@ -35,7 +35,10 @@ class JanusParser:
 
 
 class GenericParser(StrOutputParser, JanusParser):
-    pass
+    def parse(self, text: str) -> str:
+        if isinstance(text, BaseMessage):
+            return text.content
+        return text
 
 
 class CodeParser(BaseOutputParser[str], JanusParser):
