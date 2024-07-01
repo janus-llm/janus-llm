@@ -28,6 +28,7 @@ class TreeSitterSplitter(Splitter):
         max_tokens: int = 4096,
         protected_node_types: tuple[str] = (),
         prune_node_types: tuple[str] = (),
+        prune_unprotected: bool = False,
     ) -> None:
         """Initialize a TreeSitterSplitter instance.
 
@@ -42,6 +43,7 @@ class TreeSitterSplitter(Splitter):
             max_tokens=max_tokens,
             protected_node_types=protected_node_types,
             prune_node_types=prune_node_types,
+            prune_unprotected=prune_unprotected,
         )
         self._load_parser()
 

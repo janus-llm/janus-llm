@@ -11,14 +11,14 @@ class Combiner(FileManager):
     """
 
     @staticmethod
-    def combine(block: CodeBlock) -> None:
+    def combine(root: CodeBlock) -> None:
         """Combine the given block with its children.
 
         Arguments:
-            block: The functional code block to combine with its children.
+            root: The functional code block to combine with its children.
         """
-        Combiner.combine_children(block)
-        block.omit_prefix = False
+        Combiner.combine_children(root)
+        root.omit_prefix = False
 
     @staticmethod
     def combine_children(block: CodeBlock) -> None:
@@ -60,3 +60,34 @@ class Combiner(FileManager):
 
         block.children = missing_children
         block.complete = children_complete and not missing_children
+
+
+class JsonCombiner(Combiner):
+    @staticmethod
+    def combine(root: CodeBlock) -> None:
+        """Combine the given block with its children.
+
+        Arguments:
+            root: The functional code block to combine with its children.
+        """
+        stack = [root]
+        while stack:
+            block = stack.pop()
+            if block.children:
+                stack.extend(block.children)
+                block.affixes = ("", "")
+            else:
+                block.affixes = ("\n", "\n")
+        super(JsonCombiner, JsonCombiner).combine(root)
+
+
+class ChunkCombiner(Combiner):
+    @staticmethod
+    def combine(root: CodeBlock) -> None:
+        """A combiner which doesn't actually combine the code blocks,
+        instead preserving children
+
+        Arguments:
+            root: The functional code block to combine with its children.
+        """
+        return root

@@ -98,7 +98,7 @@ def pair_by_line_comment(
             splitter = BinarySplitter(**splitter_kwargs)
     else:
         splitter = TreeSitterSplitter(language=kwargs["lang"], **splitter_kwargs)
-    target_tree = splitter.split(kwargs["target_file"], prune_unprotected=False)
+    target_tree = splitter.split(kwargs["target_file"])
     reference_tree = splitter.split(kwargs["reference_file"])
     pairs = []
 

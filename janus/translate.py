@@ -14,17 +14,22 @@ from langchain_core.output_parsers import BaseOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableLambda, RunnableParallel
 from openai import BadRequestError, RateLimitError
+from text_generation.errors import ValidationError
+
+from janus.language.naive.registry import CUSTOM_SPLITTERS
 
 from .converter import Converter, run_if_changed
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
-from .language.splitter import EmptyTreeError, TokenLimitError
+from .language.combine import ChunkCombiner, Combiner, JsonCombiner
+from .language.splitter import EmptyTreeError, FileSizeError, TokenLimitError
 from .llm import load_model
 from .llm.model_callbacks import get_model_callback
 from .llm.models_info import MODEL_PROMPT_ENGINES
 from .parsers.code_parser import CodeParser, GenericParser
-from .parsers.doc_parser import DocumentationParser, MadlibsDocumentationParser
+from .parsers.doc_parser import MadlibsDocumentationParser, MultiDocumentationParser
 from .parsers.eval_parser import EvaluationParser
+from .parsers.reqs_parser import RequirementsParser
 from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT
 from .utils.enums import LANGUAGES
 from .utils.logger import create_logger
@@ -32,7 +37,7 @@ from .utils.logger import create_logger
 log = create_logger(__name__)
 
 
-PARSER_TYPES: set[str] = {"code", "text", "eval", "doc"}
+PARSER_TYPES: set[str] = {"code", "text", "eval", "madlibs", "multidoc", "requirements"}
 
 
 class Translator(Converter):
@@ -46,10 +51,12 @@ class Translator(Converter):
         target_language: str = "python",
         target_version: str | None = "3.10",
         max_prompts: int = 10,
+        max_tokens: int | None = None,
         prompt_template: str | Path = "simple",
         parser_type: str = "code",
         db_path: str | None = None,
         db_config: dict[str, Any] | None = None,
+        custom_splitter: str | None = None,
     ) -> None:
         """Initialize a Translator instance.
 
@@ -62,11 +69,14 @@ class Translator(Converter):
             target_language: The target programming language.
             target_version: The target version of the target programming language.
             max_prompts: The maximum number of prompts to try before giving up.
+            max_tokens: The maximum number of tokens the model will take in.
+                If unspecificed, model's default max will be used.
             prompt_template: name of prompt template directory
                 (see janus/prompts/templates) or path to a directory.
             parser_type: The type of parser to use for parsing the LLM output. Valid
                 values are "code" (default), "text", and "eval".
         """
+        self._custom_splitter = custom_splitter
         super().__init__(source_language=source_language)
 
         self._parser_type: str | None
@@ -81,9 +91,12 @@ class Translator(Converter):
 
         self._llm: BaseLanguageModel | None
         self._parser: BaseOutputParser | None
+        self._combiner: Combiner | None
         self._prompt: ChatPromptTemplate | None
 
         self.max_prompts = max_prompts
+        self.override_token_limit = False if max_tokens is None else True
+        self._max_tokens = max_tokens
 
         self.set_model(model_name=model, **model_arguments)
         self.set_parser_type(parser_type=parser_type)
@@ -101,6 +114,7 @@ class Translator(Converter):
         self._load_model()
         self._load_prompt()
         self._load_parser()
+        self._load_combiner()
         self._load_vectorizer()
         super()._load_parameters()  # will call self._changed_attrs.clear()
 
@@ -181,6 +195,15 @@ class Translator(Converter):
                     log.warning("Malformed input, skipping")
                     continue
                 raise e
+            except ValidationError as e:
+                # Only allow ValidationError to pass if token limit is manually set
+                if self.override_token_limit:
+                    log.warning(
+                        "Current file and manually set token "
+                        "limit is too large for this model, skipping"
+                    )
+                    continue
+                raise e
             except TokenLimitError:
                 log.warning("Ran into irreducible node too large for context, skipping")
                 continue
@@ -188,6 +211,9 @@ class Translator(Converter):
                 log.warning(
                     f'Input file "{in_path.name}" has no nodes of interest, skipping'
                 )
+                continue
+            except FileSizeError:
+                log.warning("Current tile is too large for basic splitter, skipping")
                 continue
 
             # Don't attempt to write files for which translation failed
@@ -465,7 +491,9 @@ class Translator(Converter):
         """
         self._prompt_template_name = prompt_template
 
-    def set_target_language(self, target_language: str, target_version: str) -> None:
+    def set_target_language(
+        self, target_language: str, target_version: str | None
+    ) -> None:
         """Validate and set the target language.
 
         The affected objects will not be updated until translate() is called.
@@ -506,7 +534,9 @@ class Translator(Converter):
         self._llm, token_limit, self.model_cost = load_model(self._model_name)
         # Set the max_tokens to less than half the model's limit to allow for enough
         # tokens at output
-        self._max_tokens = token_limit // 2.5
+        # Only modify max_tokens if it is not specified by user
+        if not self.override_token_limit:
+            self._max_tokens = token_limit // 2.5
 
     @run_if_changed("_parser_type", "_target_language")
     def _load_parser(self) -> None:
@@ -520,7 +550,10 @@ class Translator(Converter):
                 f"Target language ({self._target_language}) suggests target "
                 f"parser should be 'text', but is '{self._parser_type}'"
             )
-        if self._parser_type in {"eval", "doc"} and "json" != self._target_language:
+        if (
+            self._parser_type in {"eval", "multidoc", "madlibs"}
+            and "json" != self._target_language
+        ):
             raise ValueError(
                 f"Parser type ({self._parser_type}) suggests target language"
                 f" should be 'json', but is '{self._target_language}'"
@@ -529,10 +562,14 @@ class Translator(Converter):
             self._parser = CodeParser(language=self._target_language)
         elif "eval" == self._parser_type:
             self._parser = EvaluationParser()
-        elif "doc" == self._parser_type:
-            self._parser = DocumentationParser()
+        elif "multidoc" == self._parser_type:
+            self._parser = MultiDocumentationParser()
+        elif "madlibs" == self._parser_type:
+            self._parser = MadlibsDocumentationParser()
         elif "text" == self._parser_type:
             self._parser = GenericParser()
+        elif "requirements" == self._parser_type:
+            self._parser = RequirementsParser()
         else:
             raise ValueError(
                 f"Unsupported parser type: {self._parser_type}. Can be: "
@@ -583,108 +620,80 @@ class Translator(Converter):
             self._db_path, self._db_config
         )
 
+    @run_if_changed(
+        "_source_language",
+        "_max_tokens",
+        "_llm",
+        "_protected_node_types",
+        "_prune_node_types",
+    )
+    def _load_splitter(self) -> None:
+        if self._custom_splitter is None:
+            super()._load_splitter()
+        else:
+            kwargs = dict(
+                max_tokens=self._max_tokens,
+                model=self._llm,
+                protected_node_types=self._protected_node_types,
+                prune_node_types=self._prune_node_types,
+            )
+            # TODO: This should be configurable
+            if self._custom_splitter == "tag":
+                kwargs["tag"] = "<ITMOD_ALC_SPLIT>"
+            self._splitter = CUSTOM_SPLITTERS[self._custom_splitter](
+                language=self._source_language, **kwargs
+            )
+
+    @run_if_changed("_target_language", "_parser_type")
+    def _load_combiner(self) -> None:
+        if self._parser_type == "requirements":
+            self._combiner = ChunkCombiner()
+        elif self._target_language == "json":
+            self._combiner = JsonCombiner()
+        else:
+            self._combiner = Combiner()
+
 
 class Documenter(Translator):
     def __init__(
-        self,
-        model: str = "gpt-3.5-turbo-0125",
-        model_arguments: dict[str, Any] = {},
-        source_language: str = "fortran",
-        max_prompts: int = 10,
-        db_path: str | None = None,
-        db_config: dict[str, Any] | None = None,
-        drop_comments: bool = False,
-    ) -> None:
-        """Initialize a Translator instance.
-
-        Arguments:
-            model: The LLM to use for translation. If an OpenAI model, the
-                `OPENAI_API_KEY` environment variable must be set and the
-                `OPENAI_ORG_ID` environment variable should be set if needed.
-            model_arguments: Additional arguments to pass to the LLM constructor.
-            source_language: The source programming language.
-            max_prompts: The maximum number of prompts to try before giving up.
-        """
-        super().__init__(
-            model=model,
-            model_arguments=model_arguments,
+        self, source_language: str = "fortran", drop_comments: bool = True, **kwargs
+    ):
+        kwargs.update(
             source_language=source_language,
-            target_language="json",
+            target_language="text",
             target_version=None,
-            max_prompts=max_prompts,
             prompt_template="document",
-            parser_type="doc",
-            db_path=db_path,
-            db_config=db_config,
+            parser_type="text",
         )
-
-        module_node_type = LANGUAGES[source_language]["functional_node_type"]
-        self.set_protected_node_types([module_node_type])
+        super().__init__(**kwargs)
 
         if drop_comments:
-            comment_node_type = LANGUAGES[source_language]["comment_node_type"]
+            comment_node_type = LANGUAGES[source_language].get(
+                "comment_node_type", "comment"
+            )
             self.set_prune_node_types([comment_node_type])
 
-    def _split_file(self, file: Path) -> CodeBlock:
-        filename = file.name
-        log.info(f"[{filename}] Splitting file")
-        root = self._splitter.split(file, prune_unprotected=True)
-        log.info(
-            f"[{filename}] File split into {root.n_descendents:,} blocks, "
-            f"tree of height {root.height}"
-        )
-        log.info(f"[{filename}] Input CodeBlock Structure:\n{root.tree_str()}")
-        return root
+
+class MultiDocumenter(Documenter):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.set_prompt("multidocument")
+        self.set_parser_type("multidoc")
+        self.set_target_language("json", None)
 
 
-class MadLibsDocumenter(Translator):
+class MadLibsDocumenter(Documenter):
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo-0125",
-        model_arguments: dict[str, Any] = {},
-        source_language: str = "fortran",
-        max_prompts: int = 10,
-        db_path: str | None = None,
-        db_config: dict[str, Any] | None = None,
         comments_per_request: int | None = None,
+        **kwargs,
     ) -> None:
-        """Initialize a Translator instance.
-
-        Arguments:
-            model: The LLM to use for translation. If an OpenAI model, the
-                `OPENAI_API_KEY` environment variable must be set and the
-                `OPENAI_ORG_ID` environment variable should be set if needed.
-            model_arguments: Additional arguments to pass to the LLM constructor.
-            source_language: The source programming language.
-            max_prompts: The maximum number of prompts to try before giving up.
-        """
-        super().__init__(
-            model=model,
-            model_arguments=model_arguments,
-            source_language=source_language,
-            target_language="json",
-            target_version=None,
-            max_prompts=max_prompts,
-            prompt_template="document_madlibs",
-            parser_type="doc",
-            db_path=db_path,
-            db_config=db_config,
-        )
+        kwargs.update(drop_comments=False)
+        super().__init__(**kwargs)
+        self.set_prompt("document_madlibs")
+        self.set_parser_type("madlibs")
+        self.set_target_language("json", None)
         self.comments_per_request = comments_per_request
-
-    @run_if_changed("_parser_type", "_target_language")
-    def _load_parser(self) -> None:
-        """Load the parser according to this instance's attributes.
-
-        If the relevant fields have not been changed since the last time this method was
-        called, nothing happens.
-        """
-        if "json" != self._target_language or "doc" != self._parser_type:
-            raise ValueError(
-                f"Invalid target language ({self._target_language}) or parser type"
-                f" ({self._parser_type}); must be 'json' and 'doc' respectively."
-            )
-        self._parser = MadlibsDocumentationParser()
 
     def _add_translation(self, block: TranslatedCodeBlock):
         if block.translated:
@@ -801,6 +810,7 @@ class DiagramGenerator(Documenter):
         db_config: dict[str, Any] | None = None,
         diagram_type="Activity",
         add_documentation=False,
+        custom_splitter: str | None = None,
     ) -> None:
         """Initialize the DiagramGenerator class
 
@@ -822,6 +832,7 @@ class DiagramGenerator(Documenter):
             max_prompts=max_prompts,
             db_path=db_path,
             db_config=db_config,
+            custom_splitter=custom_splitter,
         )
         self._diagram_type = diagram_type
         self._add_documentation = add_documentation
@@ -833,6 +844,7 @@ class DiagramGenerator(Documenter):
             self._diagram_prompt_template_name = "diagram_with_documentation"
         else:
             self._diagram_prompt_template_name = "diagram"
+        self._load_diagram_prompt_engine()
 
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
         """Given an "empty" `TranslatedCodeBlock`, translate the code represented in
@@ -872,7 +884,7 @@ class DiagramGenerator(Documenter):
 
         self._parser.set_reference(block.original)
 
-        query_and_parse = self._prompt | self._llm | self._parser
+        query_and_parse = self.diagram_prompt | self._llm | self._parser
 
         if self._add_documentation:
             block.text = query_and_parse.invoke(
@@ -889,11 +901,7 @@ class DiagramGenerator(Documenter):
                     "DIAGRAM_TYPE": self._diagram_type,
                 }
             )
-        docstring_tokens = self._llm.get_num_tokens(block.text.docstring)
-        example_usage_tokens = self._llm.get_num_tokens(block.text.example_usage)
-        pseudocode_tokens = self._llm.get_num_tokens(block.text.pseudocode)
-        total_tokens = docstring_tokens + example_usage_tokens + pseudocode_tokens
-        block.tokens = total_tokens
+        block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
 
         log.debug(f"[{block.name}] Output code:\n{block.text}")
@@ -931,3 +939,43 @@ class DiagramGenerator(Documenter):
             prompt_template=self._diagram_prompt_template_name,
         )
         self.diagram_prompt = self._diagram_prompt_engine.prompt
+
+
+class RequirementsDocumenter(Documenter):
+    """RequirementsGenerator
+
+    A class that translates code from one programming language to its requirements.
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.set_prompt("chunk_requirements")
+        self.set_target_language("json", None)
+        self.set_parser_type("requirements")
+
+    def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
+        """Save a file to disk.
+
+        Arguments:
+            block: The `CodeBlock` to save to a file.
+        """
+        output_list = list()
+        # For each chunk of code, get generation metadata, the text of the code,
+        # and the LLM generated requirements
+        for child in block.children:
+            code = child.original.text
+            requirements = self._parser.parse_combined_output(child.complete_text)
+            metadata = dict(
+                retries=child.total_retries,
+                cost=child.total_cost,
+                processing_time=child.processing_time,
+            )
+            # Put them all in a top level 'output' key
+            output_list.append(
+                dict(metadata=metadata, code=code, requirements=requirements)
+            )
+        obj = dict(
+            output=output_list,
+        )
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")

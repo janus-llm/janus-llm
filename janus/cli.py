@@ -12,6 +12,8 @@ from rich.console import Console
 from rich.prompt import Confirm
 from typing_extensions import Annotated
 
+from janus.language.naive.registry import CUSTOM_SPLITTERS
+
 from .embedding.collections import Collections
 from .embedding.database import ChromaEmbeddingDatabase
 from .embedding.embedding_models_info import (
@@ -32,9 +34,11 @@ from .translate import (
     DiagramGenerator,
     Documenter,
     MadLibsDocumenter,
+    MultiDocumenter,
+    RequirementsDocumenter,
     Translator,
 )
-from .utils.enums import CUSTOM_SPLITTERS, LANGUAGES
+from .utils.enums import LANGUAGES
 from .utils.logger import create_logger
 
 httpx_logger = logging.getLogger("httpx")
@@ -221,6 +225,24 @@ def translate(
             "collection with the name provided.",
         ),
     ] = None,
+    custom_splitter: Annotated[
+        Optional[str],
+        typer.Option(
+            "-cs",
+            "--custom-splitter",
+            help="Name of custom splitter to use",
+            click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
+        ),
+    ] = None,
+    max_tokens: Annotated[
+        int,
+        typer.Option(
+            "--max-tokens",
+            "-M",
+            help="The maximum number of tokens the model will take in. "
+            "If unspecificed, model's default max will be used.",
+        ),
+    ] = None,
 ):
     try:
         target_language, target_version = target_lang.split("-")
@@ -241,10 +263,12 @@ def translate(
         target_language=target_language,
         target_version=target_version,
         max_prompts=max_prompts,
+        max_tokens=max_tokens,
         prompt_template=prompt_template,
         parser_type=parser_type,
         db_path=db_loc,
         db_config=collections_config,
+        custom_splitter=custom_splitter,
     )
     translator.translate(input_dir, output_dir, overwrite, collection)
 
@@ -308,14 +332,14 @@ def document(
             "--doc-mode",
             "-d",
             help="The documentation mode.",
-            click_type=click.Choice(["module", "madlibs"]),
+            click_type=click.Choice(["madlibs", "summary", "multidoc", "requirements"]),
         ),
     ] = "madlibs",
     comments_per_request: Annotated[
         int,
         typer.Option(
             "--comments-per-request",
-            "-c",
+            "-rc",
             help="The maximum number of comments to generate per request when using "
             "MadLibs documentation mode.",
         ),
@@ -340,29 +364,47 @@ def document(
             "collection with the name provided.",
         ),
     ] = None,
+    custom_splitter: Annotated[
+        Optional[str],
+        typer.Option(
+            "-cs",
+            "--custom-splitter",
+            help="Name of custom splitter to use",
+            click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
+        ),
+    ] = None,
+    max_tokens: Annotated[
+        int,
+        typer.Option(
+            "--max-tokens",
+            "-M",
+            help="The maximum number of tokens the model will take in. "
+            "If unspecificed, model's default max will be used.",
+        ),
+    ] = None,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
-    if doc_mode == "module":
-        documenter = Documenter(
-            model=llm_name,
-            model_arguments=model_arguments,
-            source_language=language,
-            max_prompts=max_prompts,
-            db_path=db_loc,
-            db_config=collections_config,
-            drop_comments=drop_comments,
-        )
-    elif doc_mode == "madlibs":
+    kwargs = dict(
+        model=llm_name,
+        model_arguments=model_arguments,
+        source_language=language,
+        max_prompts=max_prompts,
+        max_tokens=max_tokens,
+        db_path=db_loc,
+        db_config=collections_config,
+        custom_splitter=custom_splitter,
+    )
+    if doc_mode == "madlibs":
         documenter = MadLibsDocumenter(
-            model=llm_name,
-            model_arguments=model_arguments,
-            source_language=language,
-            max_prompts=max_prompts,
-            db_path=db_loc,
-            db_config=collections_config,
-            comments_per_request=comments_per_request,
+            comments_per_request=comments_per_request, **kwargs
         )
+    elif doc_mode == "multidoc":
+        documenter = MultiDocumenter(drop_comments=drop_comments, **kwargs)
+    elif doc_mode == "requirements":
+        documenter = RequirementsDocumenter(drop_comments=drop_comments, **kwargs)
+    else:
+        documenter = Documenter(drop_comments=drop_comments, **kwargs)
 
     documenter.translate(input_dir, output_dir, overwrite, collection)
 
@@ -447,6 +489,15 @@ def diagram(
             help="Whether to use documentation in generation",
         ),
     ] = False,
+    custom_splitter: Annotated[
+        Optional[str],
+        typer.Option(
+            "-cs",
+            "--custom-splitter",
+            help="Name of custom splitter to use",
+            click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
+        ),
+    ] = None,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -459,6 +510,7 @@ def diagram(
         db_config=collections_config,
         diagram_type=diagram_type,
         add_documentation=add_documentation,
+        custom_splitter=custom_splitter,
     )
     diagram_generator.translate(input_dir, output_dir, overwrite, collection)
 

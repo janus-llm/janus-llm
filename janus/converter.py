@@ -4,7 +4,6 @@ from typing import Any
 from langchain.schema.language_model import BaseLanguageModel
 
 from .language.binary import BinarySplitter
-from .language.combine import Combiner
 from .language.mumps import MumpsSplitter
 from .language.splitter import Splitter
 from .language.treesitter import TreeSitterSplitter
@@ -66,8 +65,6 @@ class Converter:
         self._splitter: None | Splitter
         self._llm: None | BaseLanguageModel = None
         self._max_tokens: None | int = max_tokens
-
-        self._combiner: Combiner = Combiner()
 
         self.set_source_language(source_language)
         self.set_protected_node_types(protected_node_types)
