@@ -10,7 +10,7 @@ class EmbeddingType(Enum):
     TARGET = 5  # placeholder embeddings, are these useful for analysis?
 
 
-CUSTOM_SPLITTERS: Set[str] = {"mumps", "binary"}
+CUSTOM_SPLITTERS: Set[str] = {"mumps", "binary", "ibmhlasm"}
 
 LANGUAGES: Dict[str, Dict[str, Any]] = {
     "ada": {
