@@ -85,7 +85,7 @@ class CommentInfo(object):
 
     @property
     def is_label(self) -> bool:
-        return self.code and self.code[0] not in "; "
+        return self.has_code and (self.code[0] not in "; ")
 
     @property
     def is_separator(self) -> bool:
@@ -262,8 +262,8 @@ def process_directory(input_dir: Path, output_dir: Path, exhaustive: bool = Fals
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="Mask MUMPS Comments",
-        description="Replace MUMPS comments with numbers, to be used in MadLibs-style"
-        " automatic documentation evaluation.",
+        description="Replace MUMPS comments with ID'd tags, to be used in MadLibs-style"
+        " automatic documentation generation.",
     )
 
     parser.add_argument(
@@ -283,7 +283,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--exhaustive",
         action="store_true",
-        help="Whether to add comments to every single line",
+        help="Whether to add comments to every line (rather than simply replacing"
+        " existing comments)",
     )
 
     args = parser.parse_args()
