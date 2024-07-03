@@ -192,7 +192,7 @@ bump-version:
   script:
     - echo "Checking the author of the last commit"
     - LAST_COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
-    - if [ "${LAST_COMMIT_AUTHOR}" = "${JANUS_CI_BOT_NAME}" ]; then
+    - if [ "${LAST_COMMIT_AUTHOR}" == "${JANUS_CI_BOT_NAME}" ]; then
         echo "Last commit was made by CI job. Skipping version bump.";
         exit 0;
       fi
@@ -200,11 +200,11 @@ bump-version:
     - COMMIT_MESSAGE=$(git log -1 --pretty=%B)
     - echo "Commit message ${COMMIT_MESSAGE}"
     - >
-      if [[ "${COMMIT_MESSAGE}" =~ "[MAJOR]" ]]; then
+      if [[ "${COMMIT_MESSAGE}" == *"[MAJOR]"* ]]; then
         BUMP_TYPE="major"
-      elif [[ "${COMMIT_MESSAGE}" =~ "[MINOR]" ]]; then
+      elif [[ "${COMMIT_MESSAGE}" == *"[MINOR]"* ]]; then
         BUMP_TYPE="minor"
-      elif [[ "${COMMIT_MESSAGE}" =~ "[PATCH]" ]]; then
+      elif [[ "${COMMIT_MESSAGE}" == *"[PATCH]"* ]]; then
         BUMP_TYPE="patch"
       else
         echo "No version bump keyword found in commit message. Skipping version bump."
@@ -218,7 +218,7 @@ bump-version:
     - rm ${INIT_FILE}.bak  # Clean up the backup file created by sed
     - git config --global user.email "${JANUS_CI_BOT_USER}@mitre.org"
     - git config --global user.name "${JANUS_CI_BOT_NAME}"
-    - git add ${VERSION_FILE}
+    - git add ${VERSION_FILE} ${INIT_FILE}
     - git commit -m "Bump version to ${NEW_VERSION}"
     - git tag "v${NEW_VERSION}"
     - git push origin main --tags  # Pushes both the commit and the tags
