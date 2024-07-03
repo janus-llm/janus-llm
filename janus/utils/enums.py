@@ -63,7 +63,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
             '#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n'
             "    return 0;\n}\n"
         ),
-        "functional_node_type": "function_definition",
+        "functional_node_types": ["function_definition"],
         "comment_node_type": "comment",
     },
     "capnp": {
@@ -206,7 +206,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
         "example": (
             "program HelloWorld\n  print *, 'Hello, World!'\nend program HelloWorld\n"
         ),
-        "functional_node_type": "function",
+        "functional_node_types": ["function"],
         "comment_node_type": "comment",
     },
     "gitattributes": {
@@ -300,6 +300,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
                      END   HELLO
         """
         ),
+        "functional_node_types": ["csect", "dsect"],
         "branch_node_types": ["branch_instruction"],
         "operation_node_types": ["operation", "branch_operation"],
         "operand_node_types": ["operands"],
@@ -420,7 +421,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
         "suffix": "m",
         "url": "https://github.com/janus-llm/tree-sitter-mumps",
         "example": 'WRITE "Hello, World!"',
-        "functional_node_type": "routine_definition",
+        "functional_node_types": ["routine_definition"],
         "comment_node_type": "comment",
         "branch_node_types": ["if_statement"],
         "operation_node_types": [
@@ -512,7 +513,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
         "suffix": "py",
         "url": "https://github.com/tree-sitter/tree-sitter-python",
         "example": "# Hello, World!\nprint('Hello, World!')\n",
-        "functional_node_type": "function_definition",
+        "functional_node_types": ["function_definition"],
         "comment_node_type": "comment",
     },
     "qmljs": {
