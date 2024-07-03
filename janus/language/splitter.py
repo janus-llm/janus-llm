@@ -47,8 +47,8 @@ class Splitter(FileManager):
         model: None | BaseLanguageModel = None,
         max_tokens: int = 4096,
         skip_merge: bool = False,
-        protected_node_types: tuple[str] = (),
-        prune_node_types: tuple[str] = (),
+        protected_node_types: tuple[str, ...] = (),
+        prune_node_types: tuple[str, ...] = (),
         prune_unprotected: bool = False,
     ):
         """
