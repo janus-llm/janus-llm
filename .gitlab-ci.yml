@@ -217,6 +217,7 @@ bump-version:
     - echo "Updating __version__ in ${INIT_FILE}"
     - sed -i.bak 's/__version__ = .*/__version__ = "'${NEW_VERSION}'"/' ${INIT_FILE}
     - rm ${INIT_FILE}.bak  # Clean up the backup file created by sed
+    - git remote remove origin
     - git remote add origin https://oauth2:${CI_TAG_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
     - git config --global user.email "${JANUS_CI_BOT_USER}@mitre.org"
     - git config --global user.name "${JANUS_CI_BOT_NAME}"
