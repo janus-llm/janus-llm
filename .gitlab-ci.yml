@@ -184,10 +184,75 @@ test-release:
       - poetry.lock
       - pyproject.toml
 
+bump-version:
+  stage: Release
+  variables:
+    VERSION_FILE: "${CI_PROJECT_DIR}/pyproject.toml"
+    INIT_FILE: "${CI_PROJECT_DIR}/janus/__init__.py"
+  script:
+    - echo "Checking the author of the last commit"
+    - LAST_COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+    - if [ "${LAST_COMMIT_AUTHOR}" == "${JANUS_CI_BOT_NAME}" ]; then
+        echo "Last commit was made by CI job. Skipping version bump.";
+        exit 0;
+      fi
+    - echo "Checking for version bump type in commit message"
+    - COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+    - echo "Commit message ${COMMIT_MESSAGE}"
+    - >
+      if [[ "${COMMIT_MESSAGE}" == *"[MAJOR]"* ]]; then
+        BUMP_TYPE="major"
+      elif [[ "${COMMIT_MESSAGE}" == *"[MINOR]"* ]]; then
+        BUMP_TYPE="minor"
+      elif [[ "${COMMIT_MESSAGE}" == *"[PATCH]"* ]]; then
+        BUMP_TYPE="patch"
+      else
+        echo "No version bump keyword found in commit message. Skipping version bump."
+        exit 0
+      fi
+    - echo "Bumping version ${BUMP_TYPE}"
+    - poetry version ${BUMP_TYPE}
+    - NEW_VERSION=$(poetry version -s)
+    - echo "Updating __version__ in ${INIT_FILE}"
+    - sed -i.bak 's/__version__ = .*/__version__ = "'${NEW_VERSION}'"/' ${INIT_FILE}
+    - rm ${INIT_FILE}.bak  # Clean up the backup file created by sed
+    - git config --global user.email "${JANUS_CI_BOT_USER}@mitre.org"
+    - git config --global user.name "${JANUS_CI_BOT_NAME}"
+    - git add ${VERSION_FILE} ${INIT_FILE}
+    - git commit -m "Bump version to ${NEW_VERSION}"
+    - git tag "v${NEW_VERSION}"
+    - git push origin main --tags  # Pushes both the commit and the tags
+  needs: []
+  only:
+    - main
+
+release_gitlab:
+  stage: Release
+  tags:
+    - lslab2
+  script:
+    - poetry build
+    - poetry config repositories.mitre-gitlab https://gitlab.mitre.org/api/v4/projects/${CI_PROJECT_ID}/packages/pypi
+    - poetry publish --repository mitre-gitlab -u gitlab-ci-token -p ${CI_JOB_TOKEN}
+  only:
+    - tags
+
+release_artifactory:
+  stage: Release
+  tags:
+    - lslab2
+  script:
+    - poetry build
+    - poetry config repositories.mitre-artifactory https://artifacts.mitre.org/artifactory/api/pypi/python
+    - poetry publish --repository mitre-artifactory -u ${JANUS_CI_BOT_USER} -p ${JANUS_CI_BOT_ARTIFACT_TOKEN}
+  only:
+    - tags
+
+
 #########
 # Dummy #
 #########
-dummy-workflow:
+dummy-job:
   stage: Dummy
   tags:
     - docker
@@ -199,3 +264,4 @@ dummy-workflow:
       - merge_requests
     changes:
       - .github/workflows/**/*
+      - .gitlab-ci.yml
