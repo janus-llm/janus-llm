@@ -36,9 +36,6 @@ class MultiDocumenter(Documenter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.set_prompt("multidocument")
-        self._target_language = "json"
-        self._target_glob = "**/*.json"
-        self._target_suffix = ".json"
         self._combiner = JsonCombiner()
         self._parser = MultiDocumentationParser()
 
@@ -52,9 +49,6 @@ class MadLibsDocumenter(Documenter):
         kwargs.update(drop_comments=False)
         super().__init__(**kwargs)
         self.set_prompt("document_madlibs")
-        self._target_language = "json"
-        self._target_glob = "**/*.json"
-        self._target_suffix = ".json"
         self._combiner = JsonCombiner()
         self._parser = MadlibsDocumentationParser()
 

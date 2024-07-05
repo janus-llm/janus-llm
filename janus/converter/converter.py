@@ -97,8 +97,8 @@ class Converter:
         self._source_language: str
         self._source_suffix: str
 
-        self._target_language: str = "text"
-        self._target_suffix: str = ".txt"
+        self._target_language = "json"
+        self._target_suffix = ".json"
 
         self._protected_node_types: tuple[str, ...] = ()
         self._prune_node_types: tuple[str, ...] = ()

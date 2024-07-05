@@ -65,9 +65,6 @@ class Translator(Converter):
                 f"Invalid target language: {target_language}. "
                 "Valid target languages are found in `janus.utils.enums.LANGUAGES`."
             )
-
-        ext = LANGUAGES[target_language]["suffix"]
-        self._target_suffix = f".{ext}"
         self._target_language = target_language
         self._target_version = target_version
 
