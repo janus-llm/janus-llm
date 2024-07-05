@@ -12,7 +12,7 @@ class FlexibleTreeSitterSplitter(TreeSitterSplitter):
 class StrictTreeSitterSplitter(TreeSitterSplitter):
     def __init__(self, language: str, **kwargs):
         kwargs.update(
-            protected_node_types=(LANGUAGES[language]["functional_node_type"],),
+            protected_node_types=tuple(LANGUAGES[language]["functional_node_types"]),
             prune_unprotected=True,
         )
         super().__init__(language=language, **kwargs)

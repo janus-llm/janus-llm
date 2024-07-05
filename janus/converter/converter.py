@@ -248,7 +248,7 @@ class Converter:
 
         if self._splitter_type == "tag":
             kwargs["tag"] = "<ITMOD_ALC_SPLIT>"
-        if self._splitter_type in {"ast_simple", "ast_flex"}:
+        if self._splitter_type in {"ast-strict", "ast-flex"}:
             kwargs["language"] = self._source_language
 
         self._splitter = CUSTOM_SPLITTERS[self._splitter_type](**kwargs)

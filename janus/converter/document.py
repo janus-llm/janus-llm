@@ -19,14 +19,9 @@ class Documenter(Converter):
     def __init__(
         self, source_language: str = "fortran", drop_comments: bool = True, **kwargs
     ):
-        kwargs.update(
-            source_language=source_language,
-            target_language="text",
-            target_version=None,
-            prompt_template="document",
-            parser_type="text",
-        )
+        kwargs.update(source_language=source_language)
         super().__init__(**kwargs)
+        self.set_prompt("document")
 
         if drop_comments:
             comment_node_type = LANGUAGES[source_language].get(

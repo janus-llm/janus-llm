@@ -12,7 +12,24 @@ from rich.console import Console
 from rich.prompt import Confirm
 from typing_extensions import Annotated
 
+from janus.converter.diagram import DiagramGenerator
+from janus.converter.document import Documenter, MadLibsDocumenter, MultiDocumenter
+from janus.converter.requirements import RequirementsDocumenter
+from janus.converter.translate import Translator
+from janus.embedding.vectorize import ChromaDBVectorizer
+from janus.language.binary import BinarySplitter
+from janus.language.mumps import MumpsSplitter
 from janus.language.naive.registry import CUSTOM_SPLITTERS
+from janus.language.treesitter import TreeSitterSplitter
+from janus.llm.model_callbacks import COST_PER_1K_TOKENS
+from janus.llm.models_info import (
+    MODEL_CONFIG_DIR,
+    MODEL_TYPE_CONSTRUCTORS,
+    TOKEN_LIMITS,
+)
+from janus.metrics.cli import evaluate
+from janus.utils.enums import LANGUAGES
+from janus.utils.logger import create_logger
 
 from .embedding.collections import Collections
 from .embedding.database import ChromaEmbeddingDatabase
@@ -22,24 +39,6 @@ from .embedding.embedding_models_info import (
     EMBEDDING_TOKEN_LIMITS,
     EmbeddingModelType,
 )
-from .embedding.vectorize import ChromaDBVectorizer
-from .language.binary import BinarySplitter
-from .language.mumps import MumpsSplitter
-from .language.treesitter import TreeSitterSplitter
-from .llm.model_callbacks import COST_PER_1K_TOKENS
-from .llm.models_info import MODEL_CONFIG_DIR, MODEL_TYPE_CONSTRUCTORS, TOKEN_LIMITS
-from .metrics.cli import evaluate
-from .translate import (
-    PARSER_TYPES,
-    DiagramGenerator,
-    Documenter,
-    MadLibsDocumenter,
-    MultiDocumenter,
-    RequirementsDocumenter,
-    Translator,
-)
-from .utils.enums import LANGUAGES
-from .utils.logger import create_logger
 
 httpx_logger = logging.getLogger("httpx")
 httpx_logger.setLevel(logging.WARNING)
@@ -207,15 +206,6 @@ def translate(
             "path to a directory containing those template files.",
         ),
     ] = "simple",
-    parser_type: Annotated[
-        str,
-        typer.Option(
-            "--parser",
-            "-P",
-            click_type=click.Choice(sorted(PARSER_TYPES)),
-            help="The type of parser to use.",
-        ),
-    ] = "code",
     collection: Annotated[
         str,
         typer.Option(
@@ -225,15 +215,15 @@ def translate(
             "collection with the name provided.",
         ),
     ] = None,
-    custom_splitter: Annotated[
-        Optional[str],
+    splitter_type: Annotated[
+        str,
         typer.Option(
-            "-cs",
-            "--custom-splitter",
+            "-S",
+            "--splitter",
             help="Name of custom splitter to use",
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
-    ] = None,
+    ] = "file",
     max_tokens: Annotated[
         int,
         typer.Option(
@@ -265,10 +255,9 @@ def translate(
         max_prompts=max_prompts,
         max_tokens=max_tokens,
         prompt_template=prompt_template,
-        parser_type=parser_type,
         db_path=db_loc,
         db_config=collections_config,
-        custom_splitter=custom_splitter,
+        splitter_type=splitter_type,
     )
     translator.translate(input_dir, output_dir, overwrite, collection)
 
@@ -364,15 +353,15 @@ def document(
             "collection with the name provided.",
         ),
     ] = None,
-    custom_splitter: Annotated[
-        Optional[str],
+    splitter_type: Annotated[
+        str,
         typer.Option(
-            "-cs",
-            "--custom-splitter",
+            "-S",
+            "--splitter",
             help="Name of custom splitter to use",
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
-    ] = None,
+    ] = "file",
     max_tokens: Annotated[
         int,
         typer.Option(
@@ -393,7 +382,7 @@ def document(
         max_tokens=max_tokens,
         db_path=db_loc,
         db_config=collections_config,
-        custom_splitter=custom_splitter,
+        splitter_type=splitter_type,
     )
     if doc_mode == "madlibs":
         documenter = MadLibsDocumenter(
@@ -489,15 +478,15 @@ def diagram(
             help="Whether to use documentation in generation",
         ),
     ] = False,
-    custom_splitter: Annotated[
-        Optional[str],
+    splitter_type: Annotated[
+        str,
         typer.Option(
-            "-cs",
-            "--custom-splitter",
+            "-S",
+            "--splitter",
             help="Name of custom splitter to use",
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
-    ] = None,
+    ] = "file",
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -510,7 +499,7 @@ def diagram(
         db_config=collections_config,
         diagram_type=diagram_type,
         add_documentation=add_documentation,
-        custom_splitter=custom_splitter,
+        splitter_type=splitter_type,
     )
     diagram_generator.translate(input_dir, output_dir, overwrite, collection)
 
