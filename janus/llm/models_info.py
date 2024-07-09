@@ -126,8 +126,8 @@ DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
 MODEL_CONFIG_DIR = Path.home().expanduser() / ".janus" / "llm"
 
 MODEL_TYPES: dict[str, PromptEngine] = {
-    **{model_identifiers[m]: "OpenAI" for m in openai_models},
-    **{model_identifiers[m]: "BedrockChat" for m in bedrock_models},
+    **{m: "OpenAI" for m in openai_models},
+    **{m: "BedrockChat" for m in bedrock_models},
 }
 
 TOKEN_LIMITS: dict[str, int] = {
