@@ -14,7 +14,7 @@ class Experimenter:
     partitioning methods and token sizes for mumps code
     """
     def __init__(self,
-                model: str = "bedrock-llama3-70b-instruct",
+                model: str = "gpt-3.5-turbo-1025",
                 TOK_SIZES : list = [512, 1024, 2048, 4096, 8192, 16384, 100000, 200000],
                 RESULT_DIRS : list = [
                                 "ast-strict-results",
@@ -73,7 +73,7 @@ class Experimenter:
             log.info(f"Running AST-FLEX splitting experiment with {TOKS} as max token limit for model.")
             ast_flex_split.translate(
                 input_directory="llm-data/ITMod/documentation-tests/madlibs/mumps-incomplete-records-tracking/exhaustive-inline-comments-input",
-                output_directory=str("ast-flex-results-" + TOKS),
+                output_directory="ast-flex-results-" + str(TOKS),
             )
             log.info(f"AST-FLEX splitting experiment with {TOKS} as max token limit complete.")
 
@@ -81,7 +81,7 @@ class Experimenter:
             log.info(f"Running CHUNK splitting experiment with {TOKS} as max token limit for model.")
             chunk_split.translate(
                 input_directory="llm-data/ITMod/documentation-tests/madlibs/mumps-incomplete-records-tracking/exhaustive-inline-comments-input",
-                output_directory=str("chunk-results-" + TOKS),
+                output_directory="chunk-results-" + str(TOKS),
             )
             log.info(f"CHUNK splitting experiment with {TOKS} as max token limit complete.")
 
@@ -93,7 +93,7 @@ class Experimenter:
             if DIR.startswith("ast-flex", "chunk"):
                 for TOK in self.TOK_SIZES:
                     log.info(f"Combining comment jsons for {DIR}")
-                    output_dir = Path(str(DIR + TOK)).expanduser()
+                    output_dir = Path(DIR + str(TOK)).expanduser()
                     obj = parse_madlibs(input_dir, output_dir)
                     (output_dir / "processed.json").write_text(json.dumps(obj, indent=2))
             else:
