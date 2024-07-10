@@ -119,49 +119,56 @@ def process(code: str) -> tuple[str, list[CommentInfo]]:
     Combiner.combine(root)
     return root.complete_text, comments
 
-
-parser = argparse.ArgumentParser(
-    prog="Mask ASM Comments",
-    description="Replace ASM comments with placeholders, to be used in "
-    "MadLibs-style automatic documentation evaluation.",
-)
-
-parser.add_argument(
-    "--input-dir",
-    type=str,
-    required=True,
-    help="The directory containing the source code to be processed",
-)
-
-parser.add_argument(
-    "--output-dir",
-    type=str,
-    required=True,
-    help="The directory to store the processed code",
-)
-
-args = parser.parse_args()
-input_dir = Path(args.input_dir).expanduser()
-output_dir = Path(args.output_dir).expanduser()
-output_dir.mkdir(parents=True, exist_ok=True)
-
-obj = {}
-for input_file in input_dir.rglob("*.asm"):
-    output_file = output_dir / input_file.relative_to(input_dir)
-
-    code = input_file.read_text()
-    processed_code, comments = process(code)
-
-    obj[input_file.name] = dict(
-        original=code,
-        processed=processed_code,
-        raw_comments={c.uuid: c.comment for c in comments},
-        comment_texts={c.uuid: c.comment_text() for c in comments},
-        comment_types={c.uuid: c.comment_type for c in comments},
-        comment_starts={c.uuid: c.comment_start for c in comments},
-        comment_prefixes={c.uuid: c.prefix for c in comments},
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        prog="Mask ASM Comments",
+        description="Replace ASM comments with placeholders, to be used in "
+        "MadLibs-style automatic documentation evaluation.",
     )
 
-    output_file.write_text(processed_code)
+    parser.add_argument(
+        "--input-dir",
+        type=str,
+        required=True,
+        help="The directory containing the source code to be processed",
+    )
 
-(output_dir / "processed.json").write_text(json.dumps(obj, indent=2))
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        required=True,
+        help="The directory to store the processed code",
+    )
+
+    parser.add_argument(
+        "--exhaustive",
+        action="store_true",
+        help="Whether to add comments to every line (rather than simply replacing"
+        " existing comments)",
+    )
+
+    args = parser.parse_args()
+    input_dir = Path(args.input_dir).expanduser()
+    output_dir = Path(args.output_dir).expanduser()
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    obj = {}
+    for input_file in input_dir.rglob("*.asm"):
+        output_file = output_dir / input_file.relative_to(input_dir)
+
+        code = input_file.read_text()
+        processed_code, comments = process(code)
+
+        obj[input_file.name] = dict(
+            original=code,
+            processed=processed_code,
+            raw_comments={c.uuid: c.comment for c in comments},
+            comment_texts={c.uuid: c.comment_text() for c in comments},
+            comment_types={c.uuid: c.comment_type for c in comments},
+            comment_starts={c.uuid: c.comment_start for c in comments},
+            comment_prefixes={c.uuid: c.prefix for c in comments},
+        )
+
+        output_file.write_text(processed_code)
+
+    (output_dir / "processed.json").write_text(json.dumps(obj, indent=2))
