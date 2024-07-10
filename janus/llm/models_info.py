@@ -4,10 +4,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from dotenv import load_dotenv
-from langchain_community.chat_models import BedrockChat
 from langchain_community.llms import HuggingFaceTextGenInference
-from langchain_community.llms.bedrock import Bedrock
-from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain_core.language_models import BaseLanguageModel
 from langchain_openai import ChatOpenAI
 
@@ -21,6 +18,30 @@ from janus.prompts.prompt import (
     PromptEngine,
     TitanPromptEngine,
 )
+
+from ..utils.logger import create_logger
+
+log = create_logger(__name__)
+
+try:
+    from langchain_community.chat_models import BedrockChat
+    from langchain_community.llms.bedrock import Bedrock
+except ImportError:
+    log.warning(
+        "Could not import LangChain's Bedrock Client. If you would like to use Bedrock "
+        "models, please install LangChain's Bedrock Client by running 'pip install "
+        "janus-llm[bedrock]' or poetry install -E bedrock."
+    )
+
+try:
+    from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
+except ImportError:
+    log.warning(
+        "Could not import LangChain's HuggingFace Pipeline Client. If you would like to "
+        "use HuggingFace models, please install LangChain's HuggingFace Pipeline Client "
+        "by running 'pip install janus-llm[hf-local]' or poetry install -E hf-local."
+    )
+
 
 load_dotenv()
 
@@ -77,10 +98,18 @@ all_models = [*openai_models, *bedrock_models]
 MODEL_TYPE_CONSTRUCTORS: dict[str, Callable[[Any], BaseLanguageModel]] = {
     "OpenAI": ChatOpenAI,
     "HuggingFace": HuggingFaceTextGenInference,
-    "HuggingFaceLocal": HuggingFacePipeline.from_model_id,
-    "Bedrock": Bedrock,
-    "BedrockChat": BedrockChat,
 }
+
+try:
+    MODEL_TYPE_CONSTRUCTORS.update(
+        {
+            "HuggingFaceLocal": HuggingFacePipeline.from_model_id,
+            "Bedrock": Bedrock,
+            "BedrockChat": BedrockChat,
+        }
+    )
+except NameError:
+    pass
 
 
 MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
