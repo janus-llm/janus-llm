@@ -9,7 +9,7 @@ before_script:
 
 .install_dev:
   script:
-    - poetry install --without docs
+    - poetry install --without docs --all-extras
 
 stages:
   - Static Analysis
@@ -100,7 +100,7 @@ coverage:
     "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
     "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
   script:
-    - poetry install --with coverage
+    - poetry install --with coverage --all-extras
     - poetry run python -m coverage run -m pytest -v -m translate janus
     - poetry run python -m coverage report -i
     - poetry run python -m coverage xml -i

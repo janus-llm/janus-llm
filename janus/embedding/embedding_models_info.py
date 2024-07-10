@@ -4,18 +4,25 @@ from typing import Any, Callable, Dict, Tuple
 
 from aenum import MultiValueEnum
 from dotenv import load_dotenv
-from langchain_community.embeddings.huggingface import (
-    HuggingFaceEmbeddings,
-    HuggingFaceInferenceAPIEmbeddings,
-)
+from langchain_community.embeddings.huggingface import HuggingFaceInferenceAPIEmbeddings
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
 
-from janus.utils.logger import create_logger
+from ..utils.logger import create_logger
 
 load_dotenv()
 
 log = create_logger(__name__)
+
+try:
+    from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
+except ImportError:
+    log.warning(
+        "Could not import LangChain's HuggingFace Embeddings Client. If you would like "
+        "to use HuggingFace models, please install LangChain's HuggingFace Embeddings "
+        "Client by running 'pip install janus-embedding[hf-local]' or poetry install "
+        "-E hf-local."
+    )
 
 
 class EmbeddingModelType(MultiValueEnum):
@@ -38,7 +45,10 @@ for model_type in EmbeddingModelType:
         if model_type == EmbeddingModelType.OpenAI:
             EMBEDDING_MODEL_TYPE_CONSTRUCTORS[value] = OpenAIEmbeddings
         elif model_type == EmbeddingModelType.HuggingFaceLocal:
-            EMBEDDING_MODEL_TYPE_CONSTRUCTORS[value] = HuggingFaceEmbeddings
+            try:
+                EMBEDDING_MODEL_TYPE_CONSTRUCTORS[value] = HuggingFaceEmbeddings
+            except NameError:
+                pass
         elif model_type == EmbeddingModelType.HuggingFaceInferenceAPI:
             EMBEDDING_MODEL_TYPE_CONSTRUCTORS[value] = HuggingFaceInferenceAPIEmbeddings
 
