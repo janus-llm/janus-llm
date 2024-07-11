@@ -956,7 +956,7 @@ class RequirementsDocumenter(Documenter):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.set_prompt("chunk_requirements")
+        self.set_prompt("requirements")
         self.set_target_language("json", None)
         self.set_parser_type("requirements")
 
