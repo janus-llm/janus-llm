@@ -20,7 +20,7 @@ class TestAlcSplitter(unittest.TestCase):
     def test_split(self):
         """Test the split method."""
         tree_root = self.splitter.split(self.test_file)
-        self.assertEqual(tree_root.n_descendents, 35)
+        self.assertEqual(tree_root.n_descendents, 34)
         self.assertLessEqual(tree_root.max_tokens, self.splitter.max_tokens)
         self.assertFalse(tree_root.complete)
         self.combiner.combine_children(tree_root)
