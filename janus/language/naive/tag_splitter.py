@@ -1,7 +1,7 @@
-from janus.language.block import CodeBlock
-from janus.language.naive.registry import register_splitter
-from janus.language.node import NodeType
-from janus.language.splitter import Splitter
+from ..block import CodeBlock
+from ..node import NodeType
+from ..splitter import Splitter
+from .registry import register_splitter
 
 
 @register_splitter("tag")

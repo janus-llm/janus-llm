@@ -1,10 +1,9 @@
 import math
 from typing import List, Optional
 
-from janus.language.block import CodeBlock
-from janus.language.treesitter.treesitter import TreeSitterSplitter
-from janus.utils.enums import LANGUAGES
-
+from ..language.block import CodeBlock
+from ..language.treesitter.treesitter import TreeSitterSplitter
+from ..utils.enums import LANGUAGES
 from .metric import metric
 
 

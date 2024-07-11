@@ -16,12 +16,11 @@ from langchain_core.runnables import RunnableLambda, RunnableParallel
 from openai import BadRequestError, RateLimitError
 from text_generation.errors import ValidationError
 
-from janus.language.naive.registry import CUSTOM_SPLITTERS
-
 from .converter import Converter, run_if_changed
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import ChunkCombiner, Combiner, JsonCombiner
+from .language.naive.registry import CUSTOM_SPLITTERS
 from .language.splitter import EmptyTreeError, FileSizeError, TokenLimitError
 from .llm import load_model
 from .llm.model_callbacks import get_model_callback
@@ -30,7 +29,12 @@ from .parsers.code_parser import CodeParser, GenericParser
 from .parsers.doc_parser import MadlibsDocumentationParser, MultiDocumentationParser
 from .parsers.eval_parser import EvaluationParser
 from .parsers.reqs_parser import RequirementsParser
-from .prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT
+from .prompts.prompt import (
+    SAME_OUTPUT,
+    TEXT_OUTPUT,
+    retry_with_error_and_output_prompt,
+    retry_with_output_prompt,
+)
 from .utils.enums import LANGUAGES
 from .utils.logger import create_logger
 
@@ -407,10 +411,10 @@ class Translator(Converter):
         """
         self._parser.set_reference(block.original)
 
-        # Retries with just the output and the error
+        # Retries with just the format instructions, the output, and the error
         n1 = round(self.max_prompts ** (1 / 3))
 
-        # Retries with the input, output, and error
+        # Retries with the input, the output, and the error
         n2 = round((self.max_prompts // n1) ** (1 / 2))
 
         # Retries with just the input
@@ -420,11 +424,13 @@ class Translator(Converter):
             llm=self._llm,
             parser=self._parser,
             max_retries=n1,
+            prompt=retry_with_output_prompt,
         )
         retry = RetryWithErrorOutputParser.from_llm(
             llm=self._llm,
             parser=fix_format,
             max_retries=n2,
+            prompt=retry_with_error_and_output_prompt,
         )
 
         completion_chain = self._prompt | self._llm
