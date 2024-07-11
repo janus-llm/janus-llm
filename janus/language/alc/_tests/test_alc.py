@@ -1,9 +1,9 @@
 import unittest
 from pathlib import Path
 
-from janus.language.alc import AlcSplitter
-from janus.language.combine import Combiner
-from janus.llm import load_model
+from ....llm import load_model
+from ...combine import Combiner
+from ..alc import AlcSplitter
 
 
 class TestAlcSplitter(unittest.TestCase):

@@ -3,8 +3,7 @@ from typing import Any
 
 from langchain.schema.language_model import BaseLanguageModel
 
-from janus.language.alc.alc import AlcSplitter
-
+from .language.alc.alc import AlcSplitter
 from .language.binary import BinarySplitter
 from .language.mumps import MumpsSplitter
 from .language.splitter import Splitter

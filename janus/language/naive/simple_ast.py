@@ -1,8 +1,8 @@
-from janus.language.alc.alc import AlcSplitter
-from janus.language.mumps.mumps import MumpsSplitter
-from janus.language.naive.registry import register_splitter
-from janus.language.treesitter import TreeSitterSplitter
-from janus.utils.enums import LANGUAGES
+from ...utils.enums import LANGUAGES
+from ..alc.alc import AlcSplitter
+from ..mumps.mumps import MumpsSplitter
+from ..treesitter import TreeSitterSplitter
+from .registry import register_splitter
 
 
 @register_splitter("ast-flex")

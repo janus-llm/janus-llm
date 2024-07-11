@@ -16,12 +16,11 @@ from langchain_core.runnables import RunnableLambda, RunnableParallel
 from openai import BadRequestError, RateLimitError
 from text_generation.errors import ValidationError
 
-from janus.language.naive.registry import CUSTOM_SPLITTERS
-
 from .converter import Converter, run_if_changed
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.block import CodeBlock, TranslatedCodeBlock
 from .language.combine import ChunkCombiner, Combiner, JsonCombiner
+from .language.naive.registry import CUSTOM_SPLITTERS
 from .language.splitter import EmptyTreeError, FileSizeError, TokenLimitError
 from .llm import load_model
 from .llm.model_callbacks import get_model_callback
