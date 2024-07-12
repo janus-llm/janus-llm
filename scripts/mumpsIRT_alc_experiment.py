@@ -14,7 +14,9 @@ class Experimenter:
     partitioning methods and token sizes for mumps code
     """
     def __init__(self,
-                model: str = "gpt-3.5-turbo-1025",
+                input_dir: str | None=None,
+                source_language: str | None=None,
+                model: str = "bedrock-llama3-70b-instruct",
                 TOK_SIZES : list = [512, 1024, 2048, 4096, 8192, 16384, 100000, 200000],
                 RESULT_DIRS : list = [
                                 "ast-strict-results",
@@ -24,6 +26,8 @@ class Experimenter:
                                 "chunk-results-",
                             ]
                 ):
+        self.input_dir = input_dir
+        self.source_language = source_language
         self.model = model
         self.TOK_SIZES = TOK_SIZES
         self.RESULT_DIRS = RESULT_DIRS
@@ -31,7 +35,7 @@ class Experimenter:
     def run(self):
         kwargs = dict(
             model=self.model,
-            source_language="mumps",
+            source_language=self.source_language,
             max_prompts=10,
             max_tokens=1000000,
             comments_per_request=100,
@@ -39,56 +43,56 @@ class Experimenter:
 
         # Documenters with fixed 1,000,000 token limit
         ast_strict_split = MadLibsDocumenter(custom_splitter="ast-strict", **kwargs)
-        file_split = MadLibsDocumenter(custom_splitter="file", **kwargs)
-        tag_split = MadLibsDocumenter(custom_splitter="tag", **kwargs)
 
         log.info("Running AST-STRICT splitting experiment.")
         ast_strict_split.translate(
-            input_directory="llm-data/ITMod/documentation-tests/madlibs/mumps-incomplete-records-tracking/exhaustive-inline-comments-input",
+            input_directory=self.input_dir,
             output_directory="ast-strict-results",
         )
         log.info("AST-STRICT splitting experiment complete.")
 
-        log.info("Running NO (FILE) splitting experiment.")
-        file_split.translate(
-            input_directory="llm-data/ITMod/documentation-tests/madlibs/mumps-incomplete-records-tracking/exhaustive-inline-comments-input",
-            output_directory="file-results",
-        )
-        log.info("NO (FILE) experiment complete")
+        # Only run FILE and TAG split if source language is mumps
+        if self.source_language == "mumps":
+            file_split = MadLibsDocumenter(custom_splitter="file", **kwargs)
+            log.info("Running NO (FILE) splitting experiment.")
+            file_split.translate(
+                input_directory=self.input_dir,
+                output_directory="file-results",
+            )
+            log.info("NO (FILE) splitting experiment complete")
 
-        log.info("Running TAG splitting experiment.")
-        tag_split.translate(
-            input_directory="llm-data/ITMod/documentation-tests/madlibs/mumps-incomplete-records-tracking/exhaustive-inline-comments-input",
-            output_directory="tag-results",
-        )
-        log.info("TAG splitting experiment complete.")
+            tag_split = MadLibsDocumenter(custom_splitter="tag", **kwargs)
+            log.info("Running TAG splitting experiment.")
+            tag_split.translate(
+                input_directory=self.input_dir,
+                output_directory="tag-results",
+            )
+            log.info("TAG splitting experiment complete.")
 
-        # Documenters that require varying token limits
+        # For running documenters that require varying token limits
         for TOKS in self.TOK_SIZES:
             kwargs["max_tokens"] = TOKS
-            print(kwargs)
-            ast_flex_split = MadLibsDocumenter(custom_splitter="ast-flex", **kwargs)
-            chunk_split = MadLibsDocumenter(custom_splitter="chunk", **kwargs)
 
+            ast_flex_split = MadLibsDocumenter(custom_splitter="ast-flex", **kwargs)
             log.info(f"Running AST-FLEX splitting experiment with {TOKS} as max token limit for model.")
             ast_flex_split.translate(
-                input_directory="llm-data/ITMod/documentation-tests/madlibs/mumps-incomplete-records-tracking/exhaustive-inline-comments-input",
+                input_directory=self.input_dir,
                 output_directory="ast-flex-results-" + str(TOKS),
             )
             log.info(f"AST-FLEX splitting experiment with {TOKS} as max token limit complete.")
 
-
-            log.info(f"Running CHUNK splitting experiment with {TOKS} as max token limit for model.")
-            chunk_split.translate(
-                input_directory="llm-data/ITMod/documentation-tests/madlibs/mumps-incomplete-records-tracking/exhaustive-inline-comments-input",
-                output_directory="chunk-results-" + str(TOKS),
-            )
-            log.info(f"CHUNK splitting experiment with {TOKS} as max token limit complete.")
+            # Only run CHUNK split if source language is MUMPS
+            if self.source_language == "mumps":
+                chunk_split = MadLibsDocumenter(custom_splitter="chunk", **kwargs)
+                log.info(f"Running CHUNK splitting experiment with {TOKS} as max token limit for model.")
+                chunk_split.translate(
+                    input_directory=self.input_dir,
+                    output_directory="chunk-results-" + str(TOKS),
+                )
+                log.info(f"CHUNK splitting experiment with {TOKS} as max token limit complete.")
 
     def process_dirs(self):
-        input_dir = Path(
-            "llm-data/ITMod/documentation-tests/madlibs/mumps-incomplete-records-tracking/exhaustive-inline-comments-input/processed.json"
-        ).expanduser()
+        input_dir = Path(self.input_dir).expanduser()
         for DIR in self.RESULT_DIRS:
             if DIR.startswith("ast-flex", "chunk"):
                 for TOK in self.TOK_SIZES:
@@ -110,21 +114,34 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--input-dir",
+        type=str,
+        # required=True, #! TESTING PURPOSE..RM CMT
+        default="/Users/ppoudel/Documents/modern_eval/llm-data/ITMod/documentation-tests/madlibs/alc-walmart/comments-removed" #! TESTING PURPOSE..RM
+    )
+
+    parser.add_argument(
+        "--source-language",
+        tyoe=str,
+        # required=True, #! TESTING PURPOSE RM CMT
+        default='alc' #! TESTING PURPOSE RM 
+    )
+
+    parser.add_argument(
         "--model",
         type=str,
         default="bedrock-llama3-70b-instruct",
-        help="The LLM model to be used for comment generation"
+        help="The LLM model to be used for comment generation",
     )
 
     parser.add_argument(
         "--max-token-sizes",
         nargs="+",
         type=int,
-        default=[512, 1024, 2048, 4096, 8192, 16384, 100000, 200000]
+        default=[512, 1024, 2048, 4096, 8192, 16384, 100000, 200000],
     )
 
-    # TODO: RESULTING DRS ARG... NECESSARY?
     args = parser.parse_args()
-    experiment = Experimenter(args.model, args.max_token_sizes)
+    experiment = Experimenter(args.input_dir, args.source_language, args.model, args.max_token_sizes)
     experiment.run()
     experiment.process_dirs()
