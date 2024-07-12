@@ -52,6 +52,9 @@ class Experimenter:
             self.RESULT_DIRS = ["file-results", "chunk-results-"]
 
     def run(self):
+        """
+        Runs experiment and produces folders and output for each splitting experiment.
+        """
         kwargs = dict(
             model=self.model,
             source_language=self.source_language,
@@ -112,6 +115,10 @@ class Experimenter:
                 )
 
     def process_dirs(self):
+        """
+        Combine all of generated json outputs from experiment running into the
+        processed.json format
+        """
         input_file = Path(self.input_dir + "/processed.json").expanduser()
         for DIR in self.RESULT_DIRS:
             if "ast-flex" in DIR or "chunk" in DIR:
