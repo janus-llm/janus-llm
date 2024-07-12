@@ -4,8 +4,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from janus.embedding.collections import Collections
-from janus.utils.enums import EmbeddingType
+from ...utils.enums import EmbeddingType
+from ..collections import Collections
 
 
 class TestCollections(unittest.TestCase):

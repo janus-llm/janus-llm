@@ -3,8 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from janus.llm.models_info import load_model
-
+from ...llm.models_info import load_model
 from ..llm_metrics import llm_evaluate_option, llm_evaluate_ref_option
 
 
@@ -40,7 +39,7 @@ class TestLLMMetrics(unittest.TestCase):
         print("'Hello, world!")
         """
 
-    @patch("janus.llm.models_info.load_model")
+    @patch(".llm.models_info.load_model")
     @patch("janus.metrics.llm_metrics.llm_evaluate")
     @pytest.mark.llm_eval
     def test_llm_self_eval_quality(self, mock_llm_evaluate, mock_load_model):
