@@ -1,11 +1,13 @@
 import argparse
 import json
 from pathlib import Path
-from scripts.combine_comment_jsons import parse_madlibs
-from janus.utils.logger import create_logger
+
 from janus.translate import MadLibsDocumenter
+from janus.utils.logger import create_logger
+from scripts.combine_comment_jsons import parse_madlibs
 
 log = create_logger(__name__)
+
 
 class Experimenter:
 
@@ -13,21 +15,22 @@ class Experimenter:
     A class that conducts a series of comment generation experiments using different
     partitioning methods and token sizes for mumps or alc code.
     """
-    def __init__(self,
-                input_dir: str | None=None,
-                source_language: str | None=None,
-                model: str = "gpt-3.5-turbo-0125",
-                TOK_SIZES : list = [512, 1024, 2048, 4096, 8192, 16384, 100000, 200000],
-                RESULT_DIRS : list = [
-                                "ast-strict-results",
-                                "file-results",
-                                "ast-flex-results-",
-                                "chunk-results-",
-                            ]
-                ):
-        
+
+    def __init__(
+        self,
+        input_dir: str | None = None,
+        source_language: str | None = None,
+        model: str = "gpt-3.5-turbo-0125",
+        TOK_SIZES: list = [512, 1024, 2048, 4096, 8192, 16384, 100000, 200000],
+        RESULT_DIRS: list = [
+            "ast-strict-results",
+            "file-results",
+            "ast-flex-results-",
+            "chunk-results-",
+        ],
+    ):
         """
-        Initialize an Experimenter instance. 
+        Initialize an Experimenter instance.
 
         Arguments:
             input_dir: Directory containing the input source code files.
@@ -35,8 +38,8 @@ class Experimenter:
                 NOTE: If doing alc experiment, source langauge should be ibmhlasm
             model: The LLM to use for comment generation.
             TOK_SIZES: The varying tokens limits which certain splitting methods require.
-                NOTE: Only the AST-FLEX and CHUNK splitting methods use varying token limits
-                and that is hard coded into this script
+                NOTE: Only the AST-FLEX and CHUNK splitting methods use varying token
+                limits and that is hard coded into this script
             RESULT_DIRS: The names of the resulting output directories
         """
         self.input_dir = input_dir
@@ -44,12 +47,9 @@ class Experimenter:
         self.model = model
         self.TOK_SIZES = TOK_SIZES
         if source_language == "mumps":
-            self.RESULT_DIRS = RESULT_DIRS 
+            self.RESULT_DIRS = RESULT_DIRS
         else:
-            self.RESULT_DIRS = [ 
-                "file-results",
-                "chunk-results-"
-            ]
+            self.RESULT_DIRS = ["file-results", "chunk-results-"]
 
     def run(self):
         kwargs = dict(
@@ -77,27 +77,39 @@ class Experimenter:
             )
             log.info("AST-STRICT splitting experiment complete.")
 
-
         # For running documenters that require varying token limits
         for TOKS in self.TOK_SIZES:
             kwargs["max_tokens"] = TOKS
-        
+
             chunk_split = MadLibsDocumenter(custom_splitter="chunk", **kwargs)
-            log.info(f"Running CHUNK splitting experiment with {TOKS} as max token limit for model.")
+            log.info(
+                f"Running CHUNK splitting experiment with {TOKS}"
+                "as max token limit for model."
+            )
             chunk_split.translate(
                 input_directory=self.input_dir,
                 output_directory=self.source_language + "-chunk-results-" + str(TOKS),
             )
-            log.info(f"CHUNK splitting experiment with {TOKS} as max token limit complete.")
+            log.info(
+                f"CHUNK splitting experiment with {TOKS} as max token limit complete."
+            )
 
             if self.source_language == "mumps":
                 ast_flex_split = MadLibsDocumenter(custom_splitter="ast-flex", **kwargs)
-                log.info(f"Running AST-FLEX splitting experiment with {TOKS} as max token limit for model.")
+                log.info(
+                    f"Running AST-FLEX splitting experiment with {TOKS}"
+                    "as max token limit for model."
+                )
                 ast_flex_split.translate(
                     input_directory=self.input_dir,
-                    output_directory=self.source_language + "-ast-flex-results-" + str(TOKS),
+                    output_directory=self.source_language
+                    + "-ast-flex-results-"
+                    + str(TOKS),
                 )
-                log.info(f"AST-FLEX splitting experiment with {TOKS} as max token limit complete.")
+                log.info(
+                    f"AST-FLEX splitting experiment with {TOKS}"
+                    "as max token limit complete."
+                )
 
     def process_dirs(self):
         input_file = Path(self.input_dir + "/processed.json").expanduser()
@@ -105,7 +117,9 @@ class Experimenter:
             if "ast-flex" in DIR or "chunk" in DIR:
                 for TOK in self.TOK_SIZES:
                     log.info(f"Combining comment jsons for {DIR}-{TOK}")
-                    output_dir = Path(f"{self.source_language}-{DIR}" + str(TOK)).expanduser()
+                    output_dir = Path(
+                        f"{self.source_language}-{DIR}" + str(TOK)
+                    ).expanduser()
                     obj = parse_madlibs(input_file, output_dir)
                     (output_dir / "processed.json").write_text(json.dumps(obj, indent=2))
             else:
@@ -113,6 +127,7 @@ class Experimenter:
                 output_dir = Path(f"{self.source_language}-{DIR}").expanduser()
                 obj = parse_madlibs(input_file, output_dir)
                 (output_dir / "processed.json").write_text(json.dumps(obj, indent=2))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -132,7 +147,8 @@ if __name__ == "__main__":
         "--source-language",
         type=str,
         required=True,
-        help="If doing alc experiment, source langauge should be ibmhlasm, otherwise use mumps.",
+        help="If doing alc experiment, source langauge should be ibmhlasm, "
+        "otherwise use mumps.",
     )
 
     parser.add_argument(
@@ -147,10 +163,13 @@ if __name__ == "__main__":
         nargs="+",
         type=int,
         default=[512, 1024, 2048, 4096, 8192, 16384, 100000, 200000],
-        help="Specify the varyingmax tokens sizes for the ast-flex and chunk splitting method"
+        help="Specify the varying max tokens sizes for the ast-flex "
+        "and chunk splitting method",
     )
 
     args = parser.parse_args()
-    experiment = Experimenter(args.input_dir, args.source_language, args.model, args.max_token_sizes)
+    experiment = Experimenter(
+        args.input_dir, args.source_language, args.model, args.max_token_sizes
+    )
     experiment.run()
     experiment.process_dirs()
