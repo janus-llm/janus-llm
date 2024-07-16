@@ -119,7 +119,7 @@ class TokenUsageCallbackHandler(BaseCallbackHandler):
             elif hasattr(generation, "message"):
                 if isinstance(generation.message, AIMessage):
                     usage_metadata = generation.message.usage_metadata
-            
+
         completion_tokens = 0
         prompt_tokens = 0
         total_tokens = 0
