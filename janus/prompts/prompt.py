@@ -254,7 +254,7 @@ class CoherePromptEngine(PromptEngine):
             f"<|END_OF_TURN_TOKEN|>"
         )
 
-        
+
 class MistralPromptEngine(PromptEngine):
     def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
         system_prompt_path = template_path / SYSTEM_PROMPT_TEMPLATE_FILENAME

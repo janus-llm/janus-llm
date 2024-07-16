@@ -14,9 +14,9 @@ from ..prompts.prompt import (
     CoherePromptEngine,
     Llama2PromptEngine,
     Llama3PromptEngine,
+    MistralPromptEngine,
     PromptEngine,
     TitanPromptEngine,
-    MistralPromptEngine,
 )
 from ..utils.logger import create_logger
 from .model_callbacks import COST_PER_1K_TOKENS
