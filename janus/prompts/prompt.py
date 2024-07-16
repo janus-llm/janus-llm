@@ -34,6 +34,40 @@ HUMAN_PROMPT_TEMPLATE_FILENAME = "human.txt"
 PROMPT_VARIABLES_FILENAME = "variables.json"
 
 
+retry_with_output_prompt_text = """Instructions:
+--------------
+{instructions}
+--------------
+Completion:
+--------------
+{input}
+--------------
+
+Above, the Completion did not satisfy the constraints given in the Instructions.
+Error:
+--------------
+{error}
+--------------
+
+Please try again. Please only respond with an answer that satisfies the
+constraints laid out in the Instructions:"""
+
+
+retry_with_error_and_output_prompt_text = """Prompt:
+{prompt}
+Completion:
+{input}
+
+Above, the Completion did not satisfy the constraints given in the Prompt.
+Details: {error}
+Please try again:"""
+
+retry_with_output_prompt = PromptTemplate.from_template(retry_with_output_prompt_text)
+retry_with_error_and_output_prompt = PromptTemplate.from_template(
+    retry_with_error_and_output_prompt_text
+)
+
+
 class PromptEngine(ABC):
     """A class defining prompting schemes for the LLM."""
 

@@ -1,6 +1,6 @@
 import unittest
 
-from janus.metrics.rouge_score import rouge
+from ..rouge_score import rouge
 
 
 class TestRouge(unittest.TestCase):

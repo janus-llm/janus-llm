@@ -8,7 +8,7 @@ from langchain_core.messages import AIMessage
 from langchain_core.outputs import ChatGeneration, LLMResult
 from langchain_core.tracers.context import register_configure_hook
 
-from janus.utils.logger import create_logger
+from ..utils.logger import create_logger
 
 log = create_logger(__name__)
 
@@ -106,53 +106,47 @@ class TokenUsageCallbackHandler(BaseCallbackHandler):
             generation = response.generations[0][0]
         except IndexError:
             generation = None
-        if isinstance(generation, ChatGeneration):
-            try:
-                message = generation.message
-                if isinstance(message, AIMessage):
-                    usage_metadata = message.usage_metadata
-                else:
-                    usage_metadata = None
-            except AttributeError:
-                usage_metadata = None
-        else:
-            usage_metadata = None
+
+        model_id = ""
+        usage_metadata = None
+        if hasattr(response, "llm_output") and response.llm_output is not None:
+            model_id = response.llm_output.get("model_id", model_id)
+            model_id = response.llm_output.get("model_name", model_id)
+            usage_metadata = response.llm_output.get("usage", usage_metadata)
+            usage_metadata = response.llm_output.get("token_usage", usage_metadata)
+        elif isinstance(generation, ChatGeneration):
+            if hasattr(generation, "response_metadata"):
+                model_id = generation.response_metadata.get("model_id", model_id)
+                model_id = generation.response_metadata.get("model_name", model_id)
+                usage_metadata = generation.response_metadata.get("usage", usage_metadata)
+            elif hasattr(generation, "message"):
+                if isinstance(generation.message, AIMessage):
+                    usage_metadata = generation.message.usage_metadata
+
+        completion_tokens = 0
+        prompt_tokens = 0
+        total_tokens = 0
         if usage_metadata:
-            token_usage = {"total_tokens": usage_metadata["total_tokens"]}
-            completion_tokens = usage_metadata["output_tokens"]
-            prompt_tokens = usage_metadata["input_tokens"]
-            if response.llm_output is None:
-                # model name (and therefore cost) is unavailable in
-                # streaming responses
-                model_name = ""
-            else:
-                model_name = response.llm_output.get("model_name", "")
-
+            prompt_tokens = usage_metadata.get("prompt_tokens", prompt_tokens)
+            prompt_tokens = usage_metadata.get("input_tokens", prompt_tokens)
+            completion_tokens = usage_metadata.get("completion_tokens", completion_tokens)
+            completion_tokens = usage_metadata.get("output_tokens", completion_tokens)
+            total_tokens = usage_metadata.get("total_tokens", total_tokens)
         else:
-            if response.llm_output is None:
-                return None
-
-            if "token_usage" not in response.llm_output:
-                with self._lock:
-                    self.successful_requests += 1
-                return None
-
-            # compute tokens and cost for this request
-            token_usage = response.llm_output["token_usage"]
-            completion_tokens = token_usage.get("completion_tokens", 0)
-            prompt_tokens = token_usage.get("prompt_tokens", 0)
-            model_name = response.llm_output.get("model_name", "")
+            with self._lock:
+                self.successful_requests += 1
+            return None
 
         total_cost = _get_token_cost(
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
-            model_id=model_name,
+            model_id=model_id,
         )
 
         # update shared state behind lock
         with self._lock:
             self.total_cost += total_cost
-            self.total_tokens += token_usage.get("total_tokens", 0)
+            self.total_tokens += total_tokens
             self.prompt_tokens += prompt_tokens
             self.completion_tokens += completion_tokens
             self.successful_requests += 1
