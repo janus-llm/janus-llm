@@ -14,6 +14,7 @@ from ..prompts.prompt import (
     CoherePromptEngine,
     Llama2PromptEngine,
     Llama3PromptEngine,
+    MistralPromptEngine,
     PromptEngine,
     TitanPromptEngine,
 )
@@ -85,12 +86,18 @@ titan_models = [
 cohere_models = [
     "bedrock-command-r-plus",
 ]
+mistral_models = [
+    "bedrock-mistral-7b-instruct",
+    "bedrock-mistral-large",
+    "bedrock-mixtral",
+]
 bedrock_models = [
     *claude_models,
     *llama2_models,
     *llama3_models,
     *titan_models,
     *cohere_models,
+    *mistral_models,
 ]
 all_models = [*openai_models, *bedrock_models]
 
@@ -118,6 +125,7 @@ MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
     **{m: Llama3PromptEngine for m in llama3_models},
     **{m: TitanPromptEngine for m in titan_models},
     **{m: CoherePromptEngine for m in cohere_models},
+    **{m: MistralPromptEngine for m in mistral_models},
 }
 
 _open_ai_defaults: dict[str, str] = {
@@ -142,6 +150,9 @@ model_identifiers = {
     "bedrock-jurassic-2-mid": "ai21.j2-mid-v1",
     "bedrock-jurassic-2-ultra": "ai21.j2-ultra-v1",
     "bedrock-command-r-plus": "cohere.command-r-plus-v1:0",
+    "bedrock-mixtral": "mistral.mixtral-8x7b-instruct-v0:1",
+    "bedrock-mistral-7b-instruct": "mistral.mistral-7b-instruct-v0:2",
+    "bedrock-mistral-large": "mistral.mistral-large-2402-v1:0",
 }
 
 MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, str]] = {
@@ -182,6 +193,9 @@ TOKEN_LIMITS: dict[str, int] = {
     "ai21.j2-mid-v1": 8192,
     "ai21.j2-ultra-v1": 8192,
     "cohere.command-r-plus-v1:0": 128_000,
+    "mistral.mixtral-8x7b-instruct-v0:1": 32_000,
+    "mistral.mistral-7b-instruct-v0:2": 32_000,
+    "mistral.mistral-large-2402-v1:0": 32_000,
 }
 
 
