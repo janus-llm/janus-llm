@@ -253,3 +253,16 @@ class CoherePromptEngine(PromptEngine):
             f"{human_prompt}"
             f"<|END_OF_TURN_TOKEN|>"
         )
+
+
+class MistralPromptEngine(PromptEngine):
+    def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
+        system_prompt_path = template_path / SYSTEM_PROMPT_TEMPLATE_FILENAME
+        system_prompt = system_prompt_path.read_text()
+
+        human_prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
+        human_prompt = human_prompt_path.read_text()
+
+        return PromptTemplate.from_template(
+            f"<s>[INST] {system_prompt} [/INST] </s>[INST] {human_prompt}  [/INST]"
+        )

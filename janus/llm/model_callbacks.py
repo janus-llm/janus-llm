@@ -35,6 +35,9 @@ COST_PER_1K_TOKENS: dict[str, dict[str, float]] = {
     "ai21.j2-mid-v1": {"input": 0.0125, "output": 0.0125},
     "ai21.j2-ultra-v1": {"input": 0.0188, "output": 0.0188},
     "cohere.command-r-plus-v1:0": {"input": 0.003, "output": 0.015},
+    "mistral.mistral-7b-instruct-v0:2": {"input": 0.00015, "output": 0.0002},
+    "mistral.mixtral-8x7b-instruct-v0:1": {"input": 0.00045, "output": 0.0007},
+    "mistral.mistral-large-2402-v1:0": {"input": 0.004, "output": 0.012},
 }
 
 
