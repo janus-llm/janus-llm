@@ -1,7 +1,28 @@
+import re
+
 import nltk
 import readability
+from nltk.tokenize import TweetTokenizer
 
 from .metric import metric
+
+
+def word_count(text):
+    """Calculates word count exactly how readability package does
+
+    Arguments:
+        text: The input string.
+
+    Returns:
+        Word Count
+    """
+    tokenizer = TweetTokenizer()
+    word_count = 0
+    tokens = tokenizer.tokenize(text)
+    for t in tokens:
+        if not re.match(r"^[.,\/#!$%'\^&\*;:{}=\-_`~()]+$", t):
+            word_count += 1
+    return word_count
 
 
 def _repeat_text(text):
@@ -20,11 +41,10 @@ def _repeat_text(text):
     if not text.endswith("."):
         text += "."  # Add a period if missing
 
-    # Check if repeated text is long enough, repeat more if needed
     repeated_text = text
-    while len(repeated_text.split()) < 100:
-        repeated_text += " " + text
 
+    while word_count(repeated_text) < 100:
+        repeated_text += " " + text
     return repeated_text
 
 
@@ -52,7 +72,8 @@ def flesch(target: str, **kwargs) -> float:
     Returns:
         The Flesch score.
     """
-
+    if not target.strip():  # Check if the target text is blank
+        return None
     return get_readability(target).flesch().score
 
 
@@ -66,5 +87,6 @@ def gunning_fog(target: str, **kwargs) -> float:
     Returns:
         The Gunning-Fog score.
     """
-
+    if not target.strip():  # Check if the target text is blank
+        return None
     return get_readability(target).gunning_fog().score

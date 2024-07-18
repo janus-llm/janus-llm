@@ -44,7 +44,6 @@ class Combiner(FileManager):
         if block.text is None:
             children = sorted(block.children)
             block.text = "".join([c.complete_text for c in children])
-            block.children = []
             block.complete = children_complete
             return
 

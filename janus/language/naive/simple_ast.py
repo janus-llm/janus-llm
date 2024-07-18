@@ -1,18 +1,29 @@
-from janus.language.naive.registry import register_splitter
-from janus.language.treesitter import TreeSitterSplitter
-from janus.utils.enums import LANGUAGES
+from ...utils.enums import LANGUAGES
+from ..alc.alc import AlcSplitter
+from ..mumps.mumps import MumpsSplitter
+from ..treesitter import TreeSitterSplitter
+from .registry import register_splitter
 
 
 @register_splitter("ast-flex")
-class FlexibleTreeSitterSplitter(TreeSitterSplitter):
-    pass
+def get_flexible_ast(language: str, **kwargs):
+    if language == "ibmhlasm":
+        return AlcSplitter(**kwargs)
+    elif language == "mumps":
+        return MumpsSplitter(**kwargs)
+    else:
+        return TreeSitterSplitter(language=language, **kwargs)
 
 
 @register_splitter("ast-strict")
-class StrictTreeSitterSplitter(TreeSitterSplitter):
-    def __init__(self, language: str, **kwargs):
-        kwargs.update(
-            protected_node_types=(LANGUAGES[language]["functional_node_type"],),
-            prune_unprotected=True,
-        )
-        super().__init__(language=language, **kwargs)
+def get_strict_ast(language: str, **kwargs):
+    kwargs.update(
+        protected_node_types=LANGUAGES[language]["functional_node_types"],
+        prune_unprotected=True,
+    )
+    if language == "ibmhlasm":
+        return AlcSplitter(**kwargs)
+    elif language == "mumps":
+        return MumpsSplitter(**kwargs)
+    else:
+        return TreeSitterSplitter(language=language, **kwargs)

@@ -9,6 +9,8 @@ from itertools import dropwhile, takewhile
 from pathlib import Path
 from typing import Iterator
 
+RNG = random.Random()
+
 
 def comment_start(line: str) -> int:
     first_semicolon = line.find(";")
@@ -49,7 +51,7 @@ class CommentInfo(object):
         self.comment_prefix = None
 
         self.line_start = start_byte
-        self.uuid = None
+        self.uuid = str(uuid.UUID(int=RNG.getrandbits(128), version=4))[:8]
 
         idx = comment_start(line)
         if idx < 0:
@@ -83,11 +85,11 @@ class CommentInfo(object):
 
     @property
     def is_label(self) -> bool:
-        return self.code and self.code[0] not in "; "
+        return self.has_code and (self.code[0] not in "; ")
 
     @property
     def is_separator(self) -> bool:
-        return not re.sub(r"\W+", "", self.comment)
+        return not (self.has_code or re.sub(r"\W+", "", self.comment))
 
     @property
     def placeholder(self) -> str:
@@ -99,6 +101,14 @@ class CommentInfo(object):
 
     def append(self, other: CommentInfo):
         self.comment += "\n" + other.code + other.comment
+
+    def add_dummy_comment(self):
+        if not self.has_comment:
+            self.comment = ""
+            self.comment_offset = len(self.code)
+            self.comment_start = self.line_start + self.comment_offset
+            self.comment_type = "inline"
+            self.comment_prefix = " ; "
 
     def comment_text(self) -> str:
         if self.is_separator or not self.has_comment:
@@ -192,6 +202,8 @@ def merge_comments(
 
 
 def get_comments(code: str) -> list[CommentInfo]:
+    RNG.seed(code)
+
     comments = []
     start_byte = 0
     for line in code.split("\n"):
@@ -199,17 +211,18 @@ def get_comments(code: str) -> list[CommentInfo]:
         start_byte += len(line) + 1
     comments = list(consolidate_block_comments(comments))
 
-    # Assign unique IDs to lines
-    rnd = random.Random()
-    rnd.seed(code)
-    for comment in comments:
-        if comment.has_comment and not comment.is_separator:
-            comment.uuid = str(uuid.UUID(int=rnd.getrandbits(128), version=4))[:8]
-
     return comments
 
 
-def process_directory(input_dir: Path, output_dir: Path):
+def get_exhaustive_inline_comments(code: str) -> list[CommentInfo]:
+    comments = get_comments(code)
+    comments = [c for c in comments if c.has_code]
+    for c in comments:
+        c.add_dummy_comment()
+    return comments
+
+
+def process_directory(input_dir: Path, output_dir: Path, exhaustive: bool = False):
     output_dir.mkdir(parents=True, exist_ok=True)
 
     obj = {}
@@ -217,7 +230,10 @@ def process_directory(input_dir: Path, output_dir: Path):
         output_file = output_dir / input_file.relative_to(input_dir)
 
         code = input_file.read_text()
-        lines = get_comments(code)
+        if exhaustive:
+            lines = get_exhaustive_inline_comments(code)
+        else:
+            lines = get_comments(code)
         comment_lines = [
             line for line in lines if line.has_comment and not line.is_separator
         ]
@@ -246,8 +262,8 @@ def process_directory(input_dir: Path, output_dir: Path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="Mask MUMPS Comments",
-        description="Replace MUMPS comments with numbers, to be used in MadLibs-style"
-        " automatic documentation evaluation.",
+        description="Replace MUMPS comments with ID'd tags, to be used in MadLibs-style"
+        " automatic documentation generation.",
     )
 
     parser.add_argument(
@@ -264,8 +280,15 @@ if __name__ == "__main__":
         help="The directory to store the processed code",
     )
 
+    parser.add_argument(
+        "--exhaustive",
+        action="store_true",
+        help="Whether to add comments to every line (rather than simply replacing"
+        " existing comments)",
+    )
+
     args = parser.parse_args()
     input_dir = Path(args.input_dir).expanduser()
     output_dir = Path(args.output_dir).expanduser()
 
-    process_directory(input_dir, output_dir)
+    process_directory(input_dir, output_dir, args.exhaustive)

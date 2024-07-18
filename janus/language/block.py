@@ -152,9 +152,11 @@ class CodeBlock:
         Returns:
             A string representation of the tree with this block as the root
         """
+        tokens = self.tokens
         identifier = self.id
         if self.text is None:
             identifier = f"({identifier})"
+            tokens = self.total_tokens
         elif not self.complete:
             identifier += "*"
         if self.start_point is not None and self.end_point is not None:
@@ -165,7 +167,7 @@ class CodeBlock:
             seg = ""
         return "\n".join(
             [
-                f"{'| '*depth}{identifier}{seg}",
+                f"{'| '*depth}{identifier}{seg}  ({tokens:,d} tokens)",
                 *[c.tree_str(depth + 1) for c in self.children],
             ]
         )

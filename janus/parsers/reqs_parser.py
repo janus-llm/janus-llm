@@ -62,9 +62,10 @@ class RequirementsParser(BaseOutputParser[str], JanusParser):
             The format instructions for the LLM.
         """
         return (
-            "Output must contain an ieee style requirements specification "
-            "all in a json-formatted string, including the following field: "
-            '"requirements".'
+            "Output must contain a requirements specification "
+            "in a JSON-formatted string. The only key should be "
+            "'requirements' and its value should be a JSON-formatted list "
+            "containing the requirements."
         )
 
     @property

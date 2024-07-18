@@ -7,10 +7,9 @@ import click
 import typer
 from typing_extensions import Annotated
 
-from janus.llm import load_model
-from janus.utils.enums import LANGUAGES
-from janus.utils.logger import create_logger
-
+from ..llm import load_model
+from ..utils.enums import LANGUAGES
+from ..utils.logger import create_logger
 from ..utils.progress import track
 from .cli import evaluate
 from .file_pairing import FILE_PAIRING_METHODS

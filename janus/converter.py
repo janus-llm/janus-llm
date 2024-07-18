@@ -3,6 +3,7 @@ from typing import Any
 
 from langchain.schema.language_model import BaseLanguageModel
 
+from .language.alc.alc import AlcSplitter
 from .language.binary import BinarySplitter
 from .language.mumps import MumpsSplitter
 from .language.splitter import Splitter
@@ -152,6 +153,8 @@ class Converter:
         if self._source_language in CUSTOM_SPLITTERS:
             if self._source_language == "mumps":
                 self._splitter = MumpsSplitter(**kwargs)
+            elif self._source_language == "ibmhlasm":
+                self._splitter = AlcSplitter(**kwargs)
             elif self._source_language == "binary":
                 self._splitter = BinarySplitter(**kwargs)
         else:
