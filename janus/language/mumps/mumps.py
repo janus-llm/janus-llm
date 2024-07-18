@@ -48,6 +48,7 @@ class MumpsSplitter(Splitter):
         max_tokens: int = 4096,
         protected_node_types: tuple[str] = ("routine_definition",),
         prune_node_types: tuple[str] = (),
+        prune_unprotected: bool = False,
     ):
         """Initialize a MumpsSplitter instance.
 
@@ -60,10 +61,8 @@ class MumpsSplitter(Splitter):
             max_tokens=max_tokens,
             protected_node_types=protected_node_types,
             prune_node_types=prune_node_types,
+            prune_unprotected=prune_unprotected,
         )
-
-        # MUMPS code tends to take about 2/3 the space of Python
-        self.max_tokens: int = int(max_tokens * 2 / 5)
 
     def _set_identifiers(self, root: CodeBlock, name: str):
         stack = [root]

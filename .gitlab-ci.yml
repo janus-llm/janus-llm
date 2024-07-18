@@ -9,7 +9,7 @@ before_script:
 
 .install_dev:
   script:
-    - poetry install --without docs
+    - poetry install --without docs --all-extras
 
 stages:
   - Static Analysis
@@ -100,7 +100,7 @@ coverage:
     "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
     "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
   script:
-    - poetry install --with coverage
+    - poetry install --with coverage --all-extras
     - poetry run python -m coverage run -m pytest -v -m translate janus
     - poetry run python -m coverage report -i
     - poetry run python -m coverage xml -i
@@ -232,7 +232,7 @@ bump-version:
 release_gitlab:
   stage: Release
   tags:
-    - lslab2
+    - docker
   script:
     - poetry build
     - poetry config repositories.mitre-gitlab https://gitlab.mitre.org/api/v4/projects/${CI_PROJECT_ID}/packages/pypi
@@ -243,7 +243,7 @@ release_gitlab:
 release_artifactory:
   stage: Release
   tags:
-    - lslab2
+    - docker
   script:
     - poetry build
     - poetry config repositories.mitre-artifactory https://artifacts.mitre.org/artifactory/api/pypi/python

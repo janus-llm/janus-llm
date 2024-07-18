@@ -12,8 +12,6 @@ from rich.console import Console
 from rich.prompt import Confirm
 from typing_extensions import Annotated
 
-from janus.language.naive.registry import CUSTOM_SPLITTERS
-
 from .embedding.collections import Collections
 from .embedding.database import ChromaEmbeddingDatabase
 from .embedding.embedding_models_info import (
@@ -25,6 +23,7 @@ from .embedding.embedding_models_info import (
 from .embedding.vectorize import ChromaDBVectorizer
 from .language.binary import BinarySplitter
 from .language.mumps import MumpsSplitter
+from .language.naive.registry import CUSTOM_SPLITTERS
 from .language.treesitter import TreeSitterSplitter
 from .llm.model_callbacks import COST_PER_1K_TOKENS
 from .llm.models_info import MODEL_CONFIG_DIR, MODEL_TYPE_CONSTRUCTORS, TOKEN_LIMITS

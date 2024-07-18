@@ -26,8 +26,8 @@ class TreeSitterSplitter(Splitter):
         language: str,
         model: None | BaseLanguageModel = None,
         max_tokens: int = 4096,
-        protected_node_types: tuple[str] = (),
-        prune_node_types: tuple[str] = (),
+        protected_node_types: tuple[str, ...] = (),
+        prune_node_types: tuple[str, ...] = (),
         prune_unprotected: bool = False,
     ) -> None:
         """Initialize a TreeSitterSplitter instance.
@@ -48,10 +48,10 @@ class TreeSitterSplitter(Splitter):
         self._load_parser()
 
     def _get_ast(self, code: str) -> CodeBlock:
-        code = bytes(code, "utf-8")
-        tree = self.parser.parse(code)
+        code_bytes = bytes(code, "utf-8")
+        tree = self.parser.parse(code_bytes)
         root = tree.walk().node
-        root = self._node_to_block(root, code)
+        root = self._node_to_block(root, code_bytes)
         return root
 
     # Recursively print tree to view parsed output (dev helper function)
@@ -98,7 +98,7 @@ class TreeSitterSplitter(Splitter):
 
         text = node.text.decode()
         children = [self._node_to_block(child, original_text) for child in node.children]
-        node = CodeBlock(
+        return CodeBlock(
             id=node.id,
             name=str(node.id),
             text=text,
@@ -112,7 +112,6 @@ class TreeSitterSplitter(Splitter):
             language=self.language,
             tokens=self._count_tokens(text),
         )
-        return node
 
     def _load_parser(self) -> None:
         """Load the parser for the given language.
