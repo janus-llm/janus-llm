@@ -47,8 +47,8 @@ class Splitter(FileManager):
         model: None | BaseLanguageModel = None,
         max_tokens: int = 4096,
         skip_merge: bool = False,
-        protected_node_types: tuple[str] = (),
-        prune_node_types: tuple[str] = (),
+        protected_node_types: tuple[str, ...] = (),
+        prune_node_types: tuple[str, ...] = (),
         prune_unprotected: bool = False,
     ):
         """
@@ -340,7 +340,10 @@ class Splitter(FileManager):
         # Double check length (in theory this should never be an issue)
         tokens = self._count_tokens(text)
         if tokens > self.max_tokens:
-            log.error(f"Merged node ({name}) too long for context!")
+            log.error(
+                f"Merged node ({name}) too long for context!"
+                f" ({tokens} > {self.max_tokens})"
+            )
 
         return CodeBlock(
             text=text,
@@ -420,7 +423,10 @@ class Splitter(FileManager):
             name = f"{node.name}-L#{node_line}"
             tokens = self._count_tokens(line)
             if tokens > self.max_tokens:
-                raise TokenLimitError(r"Irreducible node too large for context!")
+                raise TokenLimitError(
+                    "Irreducible node too large for context!"
+                    f" ({tokens} > {self.max_tokens})"
+                )
 
             node.children.append(
                 CodeBlock(

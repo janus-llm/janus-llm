@@ -4,23 +4,44 @@ from pathlib import Path
 from typing import Any, Callable
 
 from dotenv import load_dotenv
-from langchain_community.chat_models import BedrockChat
 from langchain_community.llms import HuggingFaceTextGenInference
-from langchain_community.llms.bedrock import Bedrock
-from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain_core.language_models import BaseLanguageModel
 from langchain_openai import ChatOpenAI
 
-from janus.llm.model_callbacks import COST_PER_1K_TOKENS
-from janus.prompts.prompt import (
+from ..prompts.prompt import (
     ChatGptPromptEngine,
     ClaudePromptEngine,
     CoherePromptEngine,
     Llama2PromptEngine,
     Llama3PromptEngine,
+    MistralPromptEngine,
     PromptEngine,
     TitanPromptEngine,
 )
+from ..utils.logger import create_logger
+from .model_callbacks import COST_PER_1K_TOKENS
+
+log = create_logger(__name__)
+
+try:
+    from langchain_community.chat_models import BedrockChat
+    from langchain_community.llms.bedrock import Bedrock
+except ImportError:
+    log.warning(
+        "Could not import LangChain's Bedrock Client. If you would like to use Bedrock "
+        "models, please install LangChain's Bedrock Client by running 'pip install "
+        "janus-llm[bedrock]' or poetry install -E bedrock."
+    )
+
+try:
+    from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
+except ImportError:
+    log.warning(
+        "Could not import LangChain's HuggingFace Pipeline Client. If you would like to "
+        "use HuggingFace models, please install LangChain's HuggingFace Pipeline Client "
+        "by running 'pip install janus-llm[hf-local]' or poetry install -E hf-local."
+    )
+
 
 load_dotenv()
 
@@ -65,22 +86,36 @@ titan_models = [
 cohere_models = [
     "bedrock-command-r-plus",
 ]
+mistral_models = [
+    "bedrock-mistral-7b-instruct",
+    "bedrock-mistral-large",
+    "bedrock-mixtral",
+]
 bedrock_models = [
     *claude_models,
     *llama2_models,
     *llama3_models,
     *titan_models,
     *cohere_models,
+    *mistral_models,
 ]
 all_models = [*openai_models, *bedrock_models]
 
 MODEL_TYPE_CONSTRUCTORS: dict[str, Callable[[Any], BaseLanguageModel]] = {
     "OpenAI": ChatOpenAI,
     "HuggingFace": HuggingFaceTextGenInference,
-    "HuggingFaceLocal": HuggingFacePipeline.from_model_id,
-    "Bedrock": Bedrock,
-    "BedrockChat": BedrockChat,
 }
+
+try:
+    MODEL_TYPE_CONSTRUCTORS.update(
+        {
+            "HuggingFaceLocal": HuggingFacePipeline.from_model_id,
+            "Bedrock": Bedrock,
+            "BedrockChat": BedrockChat,
+        }
+    )
+except NameError:
+    pass
 
 
 MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
@@ -90,6 +125,7 @@ MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
     **{m: Llama3PromptEngine for m in llama3_models},
     **{m: TitanPromptEngine for m in titan_models},
     **{m: CoherePromptEngine for m in cohere_models},
+    **{m: MistralPromptEngine for m in mistral_models},
 }
 
 _open_ai_defaults: dict[str, str] = {
@@ -114,6 +150,9 @@ model_identifiers = {
     "bedrock-jurassic-2-mid": "ai21.j2-mid-v1",
     "bedrock-jurassic-2-ultra": "ai21.j2-ultra-v1",
     "bedrock-command-r-plus": "cohere.command-r-plus-v1:0",
+    "bedrock-mixtral": "mistral.mixtral-8x7b-instruct-v0:1",
+    "bedrock-mistral-7b-instruct": "mistral.mistral-7b-instruct-v0:2",
+    "bedrock-mistral-large": "mistral.mistral-large-2402-v1:0",
 }
 
 MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, str]] = {
@@ -126,8 +165,8 @@ DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
 MODEL_CONFIG_DIR = Path.home().expanduser() / ".janus" / "llm"
 
 MODEL_TYPES: dict[str, PromptEngine] = {
-    **{model_identifiers[m]: "OpenAI" for m in openai_models},
-    **{model_identifiers[m]: "BedrockChat" for m in bedrock_models},
+    **{m: "OpenAI" for m in openai_models},
+    **{m: "BedrockChat" for m in bedrock_models},
 }
 
 TOKEN_LIMITS: dict[str, int] = {
@@ -154,6 +193,9 @@ TOKEN_LIMITS: dict[str, int] = {
     "ai21.j2-mid-v1": 8192,
     "ai21.j2-ultra-v1": 8192,
     "cohere.command-r-plus-v1:0": 128_000,
+    "mistral.mixtral-8x7b-instruct-v0:1": 32_000,
+    "mistral.mistral-7b-instruct-v0:2": 32_000,
+    "mistral.mistral-large-2402-v1:0": 32_000,
 }
 
 

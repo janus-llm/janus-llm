@@ -16,6 +16,14 @@ from janus.converter.diagram import DiagramGenerator
 from janus.converter.document import Documenter, MadLibsDocumenter, MultiDocumenter
 from janus.converter.requirements import RequirementsDocumenter
 from janus.converter.translate import Translator
+from janus.embedding.collections import Collections
+from janus.embedding.database import ChromaEmbeddingDatabase
+from janus.embedding.embedding_models_info import (
+    EMBEDDING_COST_PER_MODEL,
+    EMBEDDING_MODEL_CONFIG_DIR,
+    EMBEDDING_TOKEN_LIMITS,
+    EmbeddingModelType,
+)
 from janus.embedding.vectorize import ChromaDBVectorizer
 from janus.language.binary import BinarySplitter
 from janus.language.mumps import MumpsSplitter
@@ -30,15 +38,6 @@ from janus.llm.models_info import (
 from janus.metrics.cli import evaluate
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
-
-from .embedding.collections import Collections
-from .embedding.database import ChromaEmbeddingDatabase
-from .embedding.embedding_models_info import (
-    EMBEDDING_COST_PER_MODEL,
-    EMBEDDING_MODEL_CONFIG_DIR,
-    EMBEDDING_TOKEN_LIMITS,
-    EmbeddingModelType,
-)
 
 httpx_logger = logging.getLogger("httpx")
 httpx_logger.setLevel(logging.WARNING)

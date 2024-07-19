@@ -1,7 +1,7 @@
-from janus.language.block import CodeBlock
-from janus.language.naive.chunk_splitter import ChunkSplitter
-from janus.language.naive.registry import register_splitter
-from janus.language.splitter import FileSizeError
+from ..block import CodeBlock
+from ..naive.chunk_splitter import ChunkSplitter
+from ..naive.registry import register_splitter
+from ..splitter import FileSizeError
 
 
 @register_splitter("file")

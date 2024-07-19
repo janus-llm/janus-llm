@@ -34,6 +34,40 @@ HUMAN_PROMPT_TEMPLATE_FILENAME = "human.txt"
 PROMPT_VARIABLES_FILENAME = "variables.json"
 
 
+retry_with_output_prompt_text = """Instructions:
+--------------
+{instructions}
+--------------
+Completion:
+--------------
+{input}
+--------------
+
+Above, the Completion did not satisfy the constraints given in the Instructions.
+Error:
+--------------
+{error}
+--------------
+
+Please try again. Please only respond with an answer that satisfies the
+constraints laid out in the Instructions:"""
+
+
+retry_with_error_and_output_prompt_text = """Prompt:
+{prompt}
+Completion:
+{input}
+
+Above, the Completion did not satisfy the constraints given in the Prompt.
+Details: {error}
+Please try again:"""
+
+retry_with_output_prompt = PromptTemplate.from_template(retry_with_output_prompt_text)
+retry_with_error_and_output_prompt = PromptTemplate.from_template(
+    retry_with_error_and_output_prompt_text
+)
+
+
 class PromptEngine(ABC):
     """A class defining prompting schemes for the LLM."""
 
@@ -221,4 +255,17 @@ class CoherePromptEngine(PromptEngine):
             f"<|USER_TOKEN|>"
             f"{human_prompt}"
             f"<|END_OF_TURN_TOKEN|>"
+        )
+
+
+class MistralPromptEngine(PromptEngine):
+    def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
+        system_prompt_path = template_path / SYSTEM_PROMPT_TEMPLATE_FILENAME
+        system_prompt = system_prompt_path.read_text()
+
+        human_prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
+        human_prompt = human_prompt_path.read_text()
+
+        return PromptTemplate.from_template(
+            f"<s>[INST] {system_prompt} [/INST] </s>[INST] {human_prompt}  [/INST]"
         )
