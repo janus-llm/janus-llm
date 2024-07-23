@@ -72,7 +72,8 @@ class Experimenter:
         log.info("Running AST-STRICT splitting experiment.")
         ast_strict_split.translate(
             input_directory=self.input_dir,
-            output_directory=self.source_language + "-ast-strict-results",
+            output_directory=self.source_language
+            + f"{self.model}-{self.source_language}-ast-strict-results",
         )
         log.info("AST-STRICT splitting experiment complete.")
 
@@ -87,7 +88,9 @@ class Experimenter:
             )
             chunk_split.translate(
                 input_directory=self.input_dir,
-                output_directory=self.source_language + "-chunk-results-" + str(TOKS),
+                output_directory=self.source_language
+                + f"{self.model}-{self.source_language}-chunk-results-"
+                + str(TOKS),
             )
             log.info(
                 f"CHUNK splitting experiment with {TOKS} as max token limit complete."
@@ -100,7 +103,9 @@ class Experimenter:
             )
             ast_flex_split.translate(
                 input_directory=self.input_dir,
-                output_directory=self.source_language + "-ast-flex-results-" + str(TOKS),
+                output_directory=self.source_language
+                + f"{self.model}-{self.source_language}-ast-flex-results-"
+                + str(TOKS),
             )
             log.info(
                 f"AST-FLEX splitting experiment with {TOKS}"
