@@ -46,10 +46,7 @@ class Experimenter:
         self.source_language = source_language
         self.model = model
         self.TOK_SIZES = TOK_SIZES
-        if source_language == "mumps":
-            self.RESULT_DIRS = RESULT_DIRS
-        else:
-            self.RESULT_DIRS = ["file-results", "chunk-results-"]
+        self.RESULT_DIRS = RESULT_DIRS
 
     def run(self):
         """
@@ -67,18 +64,17 @@ class Experimenter:
         log.info("Running NO (FILE) splitting experiment.")
         file_split.translate(
             input_directory=self.input_dir,
-            output_directory=self.source_language + "-file-results",
+            output_directory=f"{self.model}-{self.source_language}-file-results",
         )
         log.info("NO (FILE) splitting experiment complete")
 
-        if self.source_language == "mumps":
-            ast_strict_split = MadLibsDocumenter(custom_splitter="ast-strict", **kwargs)
-            log.info("Running AST-STRICT splitting experiment.")
-            ast_strict_split.translate(
-                input_directory=self.input_dir,
-                output_directory=self.source_language + "-ast-strict-results",
-            )
-            log.info("AST-STRICT splitting experiment complete.")
+        ast_strict_split = MadLibsDocumenter(custom_splitter="ast-strict", **kwargs)
+        log.info("Running AST-STRICT splitting experiment.")
+        ast_strict_split.translate(
+            input_directory=self.input_dir,
+            output_directory=self.source_language + "-ast-strict-results",
+        )
+        log.info("AST-STRICT splitting experiment complete.")
 
         # For running documenters that require varying token limits
         for TOKS in self.TOK_SIZES:
@@ -97,22 +93,19 @@ class Experimenter:
                 f"CHUNK splitting experiment with {TOKS} as max token limit complete."
             )
 
-            if self.source_language == "mumps":
-                ast_flex_split = MadLibsDocumenter(custom_splitter="ast-flex", **kwargs)
-                log.info(
-                    f"Running AST-FLEX splitting experiment with {TOKS}"
-                    "as max token limit for model."
-                )
-                ast_flex_split.translate(
-                    input_directory=self.input_dir,
-                    output_directory=self.source_language
-                    + "-ast-flex-results-"
-                    + str(TOKS),
-                )
-                log.info(
-                    f"AST-FLEX splitting experiment with {TOKS}"
-                    "as max token limit complete."
-                )
+            ast_flex_split = MadLibsDocumenter(custom_splitter="ast-flex", **kwargs)
+            log.info(
+                f"Running AST-FLEX splitting experiment with {TOKS}"
+                "as max token limit for model."
+            )
+            ast_flex_split.translate(
+                input_directory=self.input_dir,
+                output_directory=self.source_language + "-ast-flex-results-" + str(TOKS),
+            )
+            log.info(
+                f"AST-FLEX splitting experiment with {TOKS}"
+                "as max token limit complete."
+            )
 
     def process_dirs(self):
         """
