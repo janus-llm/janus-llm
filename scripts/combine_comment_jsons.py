@@ -103,6 +103,7 @@ def parse_module(output_dir: Path) -> dict[str, dict[str, str]]:
     """
     pass
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="Mask MUMPS Comments",
