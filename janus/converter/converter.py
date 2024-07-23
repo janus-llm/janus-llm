@@ -240,6 +240,7 @@ class Converter:
         called, nothing happens.
         """
         kwargs: dict[str, Any] = dict(
+            language=self._source_language,
             max_tokens=self._max_tokens,
             model=self._llm,
             protected_node_types=self._protected_node_types,
@@ -248,8 +249,6 @@ class Converter:
 
         if self._splitter_type == "tag":
             kwargs["tag"] = "<ITMOD_ALC_SPLIT>"
-        if self._splitter_type in {"ast-strict", "ast-flex"}:
-            kwargs["language"] = self._source_language
 
         self._splitter = CUSTOM_SPLITTERS[self._splitter_type](**kwargs)
 

@@ -5,7 +5,6 @@ from janus.converter.converter import run_if_changed
 from janus.converter.document import Documenter
 from janus.language.block import TranslatedCodeBlock
 from janus.llm.models_info import MODEL_PROMPT_ENGINES
-from janus.prompts.prompt import SAME_OUTPUT, TEXT_OUTPUT
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -116,26 +115,10 @@ class DiagramGenerator(Documenter):
         If the relevant fields have not been changed since the last time this method was
         called, nothing happens.
         """
-        if self._diagram_prompt_template_name in SAME_OUTPUT:
-            if self._target_language != self._source_language:
-                raise ValueError(
-                    f"Prompt template ({self._prompt_template_name}) suggests "
-                    f"source and target languages should match, but do not "
-                    f"({self._source_language} != {self._target_language})"
-                )
-        if (
-            self._diagram_prompt_template_name in TEXT_OUTPUT
-            and self._target_language != "text"
-        ):
-            raise ValueError(
-                f"Prompt template ({self._prompt_template_name}) suggests target "
-                f"language should be 'text', but is '{self._target_language}'"
-            )
-
         self._diagram_prompt_engine = MODEL_PROMPT_ENGINES[self._model_name](
             source_language=self._source_language,
-            target_language=self._target_language,
-            target_version=self._target_version,
+            target_language="text",
+            target_version=None,
             prompt_template=self._diagram_prompt_template_name,
         )
         self.diagram_prompt = self._diagram_prompt_engine.prompt
