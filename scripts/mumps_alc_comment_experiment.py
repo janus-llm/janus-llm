@@ -25,8 +25,8 @@ class Experimenter:
         RESULT_DIRS: list = [
             "ast-strict-results",
             "file-results",
-            "ast-flex-results-",
-            "chunk-results-",
+            "ast-flex-results",
+            "chunk-results",
         ],
     ):
         """
@@ -61,19 +61,18 @@ class Experimenter:
         )
         # Documenters with fixed 1,000,000 token limit
         file_split = MadLibsDocumenter(custom_splitter="file", **kwargs)
-        log.info("Running NO (FILE) splitting experiment.")
+        log.info("Running FILE splitting experiment.")
         file_split.translate(
             input_directory=self.input_dir,
-            output_directory=f"{self.model}-{self.source_language}-file-results",
+            output_directory=f"{self.model}-{self.source_language}" "-file-results",
         )
-        log.info("NO (FILE) splitting experiment complete")
+        log.info("FILE splitting experiment complete")
 
         ast_strict_split = MadLibsDocumenter(custom_splitter="ast-strict", **kwargs)
         log.info("Running AST-STRICT splitting experiment.")
         ast_strict_split.translate(
             input_directory=self.input_dir,
-            output_directory=self.source_language
-            + f"{self.model}-{self.source_language}-ast-strict-results",
+            output_directory=f"{self.model}-{self.source_language}" "-ast-strict-results",
         )
         log.info("AST-STRICT splitting experiment complete.")
 
@@ -83,14 +82,13 @@ class Experimenter:
 
             chunk_split = MadLibsDocumenter(custom_splitter="chunk", **kwargs)
             log.info(
-                f"Running CHUNK splitting experiment with {TOKS}"
+                f"Running CHUNK splitting experiment with {TOKS} "
                 "as max token limit for model."
             )
             chunk_split.translate(
                 input_directory=self.input_dir,
-                output_directory=self.source_language
-                + f"{self.model}-{self.source_language}-chunk-results-"
-                + str(TOKS),
+                output_directory=f"{self.model}-{self.source_language}"
+                f"-chunk-results-{TOKS}",
             )
             log.info(
                 f"CHUNK splitting experiment with {TOKS} as max token limit complete."
@@ -98,17 +96,16 @@ class Experimenter:
 
             ast_flex_split = MadLibsDocumenter(custom_splitter="ast-flex", **kwargs)
             log.info(
-                f"Running AST-FLEX splitting experiment with {TOKS}"
+                f"Running AST-FLEX splitting experiment with {TOKS} "
                 "as max token limit for model."
             )
             ast_flex_split.translate(
                 input_directory=self.input_dir,
-                output_directory=self.source_language
-                + f"{self.model}-{self.source_language}-ast-flex-results-"
-                + str(TOKS),
+                output_directory=f"{self.model}-{self.source_language}"
+                f"-ast-flex-results-{TOKS}",
             )
             log.info(
-                f"AST-FLEX splitting experiment with {TOKS}"
+                f"AST-FLEX splitting experiment with {TOKS} "
                 "as max token limit complete."
             )
 
@@ -123,13 +120,15 @@ class Experimenter:
                 for TOK in self.TOK_SIZES:
                     log.info(f"Combining comment jsons for {DIR}-{TOK}")
                     output_dir = Path(
-                        f"{self.source_language}-{DIR}" + str(TOK)
+                        f"{self.model}-{self.source_language}-{DIR}-{TOK}"
                     ).expanduser()
                     obj = parse_madlibs(input_file, output_dir)
                     (output_dir / "processed.json").write_text(json.dumps(obj, indent=2))
             else:
                 log.info(f"Combining comment jsons for {DIR}")
-                output_dir = Path(f"{self.source_language}-{DIR}").expanduser()
+                output_dir = Path(
+                    f"{self.model}-{self.source_language}-{DIR}"
+                ).expanduser()
                 obj = parse_madlibs(input_file, output_dir)
                 (output_dir / "processed.json").write_text(json.dumps(obj, indent=2))
 
