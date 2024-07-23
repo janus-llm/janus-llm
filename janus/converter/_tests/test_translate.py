@@ -7,8 +7,10 @@ from langchain.schema import Document
 from langchain.schema.embeddings import Embeddings
 from langchain.schema.vectorstore import VST, VectorStore
 
-from ..language.block import CodeBlock, TranslatedCodeBlock
-from ..translate import DiagramGenerator, Translator
+from janus.language.block import CodeBlock, TranslatedCodeBlock
+
+from ..diagram import DiagramGenerator
+from ..translate import Translator
 
 # from langchain.vectorstores import Chroma
 
@@ -273,11 +275,6 @@ class TestTranslator(unittest.TestCase):
         # print_query_results(QUERY_STRING, n_results)
         # self.assertTrue(len(n_results) == 1, "Was splitting changed?")
 
-    def test_output_as_requirements(self):
-        """Is output type requirements?"""
-        self.assertFalse(self.translator.outputting_requirements())
-        self.assertTrue(self.req_translator.outputting_requirements())
-
     # @pytest.mark.slow
     # def test_document_embeddings_added_by_translate(self):
     #     vector_store = self.req_translator.embeddings(EmbeddingType.REQUIREMENT)
@@ -310,7 +307,6 @@ class TestTranslator(unittest.TestCase):
         self.assertRaises(
             ValueError, self.translator.set_target_language, "gobbledy", "goobledy"
         )
-        self.assertRaises(ValueError, self.translator.set_parser_type, "blah")
         self.assertRaises(
             ValueError, self.translator.set_source_language, "scribbledy-doop"
         )
