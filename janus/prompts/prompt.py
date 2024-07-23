@@ -40,7 +40,7 @@ retry_with_output_prompt_text = """Instructions:
 --------------
 Completion:
 --------------
-{input}
+{completion}
 --------------
 
 Above, the Completion did not satisfy the constraints given in the Instructions.
@@ -54,13 +54,23 @@ constraints laid out in the Instructions:"""
 
 
 retry_with_error_and_output_prompt_text = """Prompt:
+--------------
 {prompt}
+--------------
 Completion:
-{input}
+--------------
+{completion}
+--------------
 
 Above, the Completion did not satisfy the constraints given in the Prompt.
-Details: {error}
-Please try again:"""
+Error:
+--------------
+{error}
+--------------
+
+Please try again. Please only respond with an answer that satisfies the
+constraints laid out in the Prompt:"""
+
 
 retry_with_output_prompt = PromptTemplate.from_template(retry_with_output_prompt_text)
 retry_with_error_and_output_prompt = PromptTemplate.from_template(
