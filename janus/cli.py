@@ -825,6 +825,22 @@ def llm_add(
             "token_limit": max_tokens,
             "model_cost": model_cost,
         }
+    elif model_type == "BedrockChat" or model_type == "Bedrock":
+        model_name = typer.prompt(
+            "Enter the model name", default="anthropic.claude-3-sonnet-20240229-v1:0"
+        )
+        params = dict(
+            model_id=model_name,
+            model_kwargs={"temperature": 0.7, "n": 1},
+        )
+        max_tokens = TOKEN_LIMITS[model_name]
+        model_cost = COST_PER_1K_TOKENS[model_name]
+        cfg = {
+            "model_type": model_type,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": model_cost,
+        }
     else:
         raise ValueError(f"Unknown model type {model_type}")
     with open(model_cfg, "w") as f:
