@@ -71,10 +71,14 @@ def get_collections_config():
 
 
 app = typer.Typer(
-    help="Choose a command",
+    help=(
+        "[bold][dark_orange]Janus[/dark_orange] is a CLI for translating, "
+        "documenting, and diagramming code using large language models.[/bold]"
+    ),
     add_completion=False,
     no_args_is_help=True,
     context_settings={"help_option_names": ["-h", "--help"]},
+    rich_markup_mode="rich",
 )
 
 

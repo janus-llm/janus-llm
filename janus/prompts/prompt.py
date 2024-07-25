@@ -2,12 +2,12 @@ import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from langchain import PromptTemplate
 from langchain.prompts import ChatPromptTemplate
 from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
     SystemMessagePromptTemplate,
 )
+from langchain_core.prompts import PromptTemplate
 
 from ..utils.enums import LANGUAGES
 from ..utils.logger import create_logger
@@ -40,7 +40,7 @@ retry_with_output_prompt_text = """Instructions:
 --------------
 Completion:
 --------------
-{input}
+{completion}
 --------------
 
 Above, the Completion did not satisfy the constraints given in the Instructions.
@@ -54,13 +54,23 @@ constraints laid out in the Instructions:"""
 
 
 retry_with_error_and_output_prompt_text = """Prompt:
+--------------
 {prompt}
+--------------
 Completion:
-{input}
+--------------
+{completion}
+--------------
 
 Above, the Completion did not satisfy the constraints given in the Prompt.
-Details: {error}
-Please try again:"""
+Error:
+--------------
+{error}
+--------------
+
+Please try again. Please only respond with an answer that satisfies the
+constraints laid out in the Prompt:"""
+
 
 retry_with_output_prompt = PromptTemplate.from_template(retry_with_output_prompt_text)
 retry_with_error_and_output_prompt = PromptTemplate.from_template(
