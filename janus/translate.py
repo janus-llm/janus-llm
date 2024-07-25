@@ -14,7 +14,7 @@ from langchain_core.output_parsers import BaseOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableLambda, RunnableParallel
 from openai import BadRequestError, RateLimitError
-from text_generation.errors import ValidationError
+from pydantic import ValidationError
 
 from .converter import Converter, run_if_changed
 from .embedding.vectorize import ChromaDBVectorizer
