@@ -22,16 +22,25 @@ class CommentInfo(object):
         self.comment_start = block.start_byte
         self.comment_type = None
         self.prefix = ""
-        if block.node_type == "comment":
-            self.comment_type = "block"
-            self.prefix = "* "
-        elif block.node_type == "remark":
-            self.comment_type = "inline"
-
         self.uuid = str(uuid.UUID(int=rnd.getrandbits(128), version=4))[:8]
-        self.placeholder = (
-            f"{self.prefix}<{self.comment_type.upper()}_COMMENT {self.uuid}>"
-        )
+
+        # This is for the exhaustive inline comment generation case ONLY
+        if "instruction" in block.node_type:
+            self.comment_type = "inline"
+            self.comment = ""
+            self.placeholder = (
+                f"{block.text} <{self.comment_type.upper()}_COMMENT {self.uuid}>"
+            )
+        else:
+            if block.node_type == "comment":
+                self.comment_type = "block"
+                self.prefix = "* "
+            elif block.node_type == "remark":
+                self.comment_type = "inline"
+
+            self.placeholder = (
+                f"{self.prefix}<{self.comment_type.upper()}_COMMENT {self.uuid}>"
+            )
 
     @property
     def is_separator(self) -> bool:
@@ -119,6 +128,69 @@ def process(code: str) -> tuple[str, list[CommentInfo]]:
     Combiner.combine(root)
     return root.complete_text, comments
 
+
+def process_exhaustive(code: str) -> tuple[str, list[CommentInfo]]:
+    root = splitter._get_ast(code)
+
+    rnd.seed(code)
+
+    comments = []
+    stack = [root]
+
+    while stack:
+        node = stack.pop(0)
+
+        if node.node_type == "comment":
+            node.text = ""
+        elif node.node_type == "remark":
+            if node.text is None:
+                continue
+
+            comment = CommentInfo(node)
+            if comment.is_separator:
+                continue
+
+            comments.append(comment)
+            node.text = comment.placeholder
+
+        elif (
+            "instruction" in node.node_type
+            and node.children
+            and not node.children[-1].node_type == "remark"
+        ):
+            line = CommentInfo(node)
+            comments.append(line)
+            node.text = line.placeholder
+
+        elif node.children:
+            node.complete = False
+            node.text = None
+            node.children = merge_adjacent_comments(node.children)
+            stack.extend(node.children)
+
+    Combiner.combine(root)
+
+    # Remove blank lines from the processed code
+    processed_code_lines = root.complete_text.splitlines()
+    non_blank_lines = [line for line in processed_code_lines if line.strip()]
+
+    # Ensure comment tags do not exceed column 72
+    adjusted_lines = []
+    for line in non_blank_lines:
+        if "<INLINE_COMMENT" in line and len(line) > 72:
+            parts = line.split("<INLINE_COMMENT")
+            base_line = parts[0].rstrip()
+            comment_tag = "<INLINE_COMMENT" + parts[1]
+            adjusted_lines.append(base_line)
+            adjusted_lines.append(" " * 15 + comment_tag)
+        else:
+            adjusted_lines.append(line)
+
+    processed_code = "\n".join(adjusted_lines)
+
+    return processed_code, comments
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="Mask ASM Comments",
@@ -157,7 +229,10 @@ if __name__ == "__main__":
         output_file = output_dir / input_file.relative_to(input_dir)
 
         code = input_file.read_text()
-        processed_code, comments = process(code)
+        if args.exhaustive:
+            processed_code, comments = process_exhaustive(code)
+        else:
+            processed_code, comments = process(code)
 
         obj[input_file.name] = dict(
             original=code,
