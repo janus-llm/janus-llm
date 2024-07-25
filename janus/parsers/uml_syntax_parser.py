@@ -3,13 +3,12 @@ import subprocess
 from pathlib import Path
 from typing import List, Tuple
 
-from langchain.schema.output_parser import BaseOutputParser
 from langchain_core.exceptions import OutputParserException
 
-from .code_parser import JanusParser
+from .code_parser import CodeParser
 
 
-class UMLSyntaxParser(BaseOutputParser, JanusParser):
+class UMLSyntaxParser(CodeParser):
     def _get_uml_output(self, file: str) -> Tuple[str, str]:
         res = subprocess.run(
             ["plantuml", file], stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -22,6 +21,7 @@ class UMLSyntaxParser(BaseOutputParser, JanusParser):
         return [x.group() for x in re.finditer(r"Error: (.*)\n")]
 
     def parse(self, text: str) -> str:
+        text = super().parse(text)
         temp_file_path = Path("~/.janus/tmp.txt")
         with open(temp_file_path, "w") as f:
             f.write(text)
