@@ -1,7 +1,10 @@
+import re
 import subprocess
-from typing import Tuple
+from pathlib import Path
+from typing import List, Tuple
 
 from langchain.schema.output_parser import BaseOutputParser
+from langchain_core.exceptions import OutputParserException
 
 from .code_parser import JanusParser
 
@@ -15,5 +18,17 @@ class UMLSyntaxParser(BaseOutputParser, JanusParser):
         stderr = res.stderr.decode("utf-8")
         return stdout, stderr
 
+    def _get_errs(self, s: str) -> List[str]:
+        return [x.group() for x in re.finditer(r"Error: (.*)\n")]
+
     def parse(self, text: str) -> str:
-        pass
+        temp_file_path = Path("~/.janus/tmp.txt")
+        with open(temp_file_path, "w") as f:
+            f.write(text)
+        uml_std_out, uml_std_err = self._get_uml_output(temp_file_path)
+        uml_errs = self._get_errs(uml_std_out) + self._get_errs(uml_std_err)
+        if len(uml_errs) > 0:
+            raise OutputParserException(
+                "Error: Received UML Errors:\n" + "\n".join(uml_errs)
+            )
+        return text
