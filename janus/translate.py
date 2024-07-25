@@ -219,6 +219,16 @@ class Translator(Converter):
             except FileSizeError:
                 log.warning("Current tile is too large for basic splitter, skipping")
                 continue
+            except ValueError as e:
+                if str(e).startswith(
+                    "Error raised by bedrock service"
+                ) and "maxmium context length" in str(e):
+                    log.warning(
+                        "Current file and manually set token "
+                        "limit is too large for this model, skipping"
+                    )
+                    continue
+                raise e
 
             # Don't attempt to write files for which translation failed
             if not out_block.translated:
