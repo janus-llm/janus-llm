@@ -2,12 +2,12 @@ import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from langchain import PromptTemplate
 from langchain.prompts import ChatPromptTemplate
 from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
     SystemMessagePromptTemplate,
 )
+from langchain_core.prompts import PromptTemplate
 
 from ..utils.enums import LANGUAGES
 from ..utils.logger import create_logger
