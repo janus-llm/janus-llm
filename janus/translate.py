@@ -222,10 +222,9 @@ class Translator(Converter):
             except ValueError as e:
                 if str(e).startswith(
                     "Error raised by bedrock service"
-                ) and "maxmium context length" in str(e):
+                ) and "maximum context length" in str(e):
                     log.warning(
-                        "Current file and manually set token "
-                        "limit is too large for this model, skipping"
+                        "Input is too large for this model's context length, skipping"
                     )
                     continue
                 raise e
