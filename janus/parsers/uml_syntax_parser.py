@@ -18,11 +18,11 @@ class UMLSyntaxParser(CodeParser):
         return stdout, stderr
 
     def _get_errs(self, s: str) -> List[str]:
-        return [x.group() for x in re.finditer(r"Error: (.*)\n")]
+        return [x.group() for x in re.finditer(r"Error: (.*)\n", s)]
 
     def parse(self, text: str) -> str:
         text = super().parse(text)
-        temp_file_path = Path("~/.janus/tmp.txt")
+        temp_file_path = Path.home().expanduser() / Path(".janus/tmp.txt")
         with open(temp_file_path, "w") as f:
             f.write(text)
         uml_std_out, uml_std_err = self._get_uml_output(temp_file_path)
