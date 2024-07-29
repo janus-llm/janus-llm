@@ -18,7 +18,7 @@ class UMLSyntaxParser(CodeParser):
         return stdout, stderr
 
     def _get_errs(self, s: str) -> List[str]:
-        return [x.group() for x in re.finditer(r"Error: (.*)\n", s)]
+        return [x.group() for x in re.finditer(r"Error (.*)\n", s)]
 
     def parse(self, text: str) -> str:
         text = super().parse(text)
