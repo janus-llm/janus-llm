@@ -29,6 +29,7 @@ from .parsers.code_parser import CodeParser, GenericParser
 from .parsers.doc_parser import MadlibsDocumentationParser, MultiDocumentationParser
 from .parsers.eval_parser import EvaluationParser
 from .parsers.reqs_parser import RequirementsParser
+from .parsers.uml_syntax_parser import UMLSyntaxParser
 from .prompts.prompt import (
     SAME_OUTPUT,
     TEXT_OUTPUT,
@@ -846,6 +847,7 @@ class DiagramGenerator(Documenter):
         self._model = model
         self._model_arguments = model_arguments
         self._max_prompts = max_prompts
+        self._diagram_parser = UMLSyntaxParser(language="plantuml")
         if add_documentation:
             self._diagram_prompt_template_name = "diagram_with_documentation"
         else:
@@ -890,7 +892,7 @@ class DiagramGenerator(Documenter):
 
         self._parser.set_reference(block.original)
 
-        query_and_parse = self.diagram_prompt | self._llm | self._parser
+        query_and_parse = self.diagram_prompt | self._llm | self._diagram_parser
 
         if self._add_documentation:
             block.text = query_and_parse.invoke(
