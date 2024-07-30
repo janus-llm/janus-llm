@@ -39,7 +39,7 @@ class Experimenter:
                 NOTE: Ensure directory is language specific
                 (e.g. data/mumps-irt-20240730/generated-comments)
             source_langauge: The language of the source code files.
-                NOTE: If doing alc experiment, source langauge should be ibmhlasm
+                NOTE: Only alc and mumps is supported at this time.
             model: The LLM to use for comment generation.
             TOK_SIZES: The varying tokens limits which certain splitting methods require.
                 NOTE: Only the AST-FLEX and CHUNK splitting methods use varying token
@@ -48,10 +48,14 @@ class Experimenter:
         """
         self.input_dir = input_dir
         self.output_dir = output_dir
-        self.source_language = source_language
         self.model = model
         self.TOK_SIZES = TOK_SIZES
         self.RESULT_DIRS = RESULT_DIRS
+
+        if source_language == "alc":
+            self.source_language = "ibmhlasm"
+        else:
+            self.source_language = source_language
 
     def run(self):
         """
@@ -160,8 +164,7 @@ if __name__ == "__main__":
         "--source-language",
         type=str,
         required=True,
-        help="If doing alc experiment, source langauge should be ibmhlasm, "
-        "otherwise use mumps.",
+        help="Currently only support 'alc' or 'mumps'",
     )
 
     parser.add_argument(
