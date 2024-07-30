@@ -2,8 +2,8 @@ import warnings
 
 from langchain_core._api.deprecation import LangChainDeprecationWarning
 
+from .converter.translate import Translator
 from .metrics import *  # noqa: F403
-from .translate import Translator
 
 __version__ = "2.2.4"
 
