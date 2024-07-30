@@ -45,6 +45,7 @@ class CodeBlock:
         children: list[ForwardRef("CodeBlock")],
         embedding_id: Optional[str] = None,
         affixes: Tuple[str, str] = ("", ""),
+        context_tags: dict[str, str] = {},
     ) -> None:
         self.id: Hashable = id
         self.name: Optional[str] = name
@@ -59,6 +60,7 @@ class CodeBlock:
         self.children: list[ForwardRef("CodeBlock")] = sorted(children)
         self.embedding_id: Optional[str] = embedding_id
         self.affixes: Tuple[str, str] = affixes
+        self.context_tags: dict[str, str] = context_tags
 
         self.complete = True
         self.omit_prefix = True
