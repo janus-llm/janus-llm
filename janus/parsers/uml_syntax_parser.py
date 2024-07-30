@@ -13,8 +13,11 @@ class UMLSyntaxParser(CodeParser):
         # NOTE: running subprocess with shell=False, added nosec to label that we know
         # risk exists
         try:
+            plantuml_path = Path.home().expanduser() / ".janus/lib/plantuml.jar"
             res = subprocess.run(
-                ["plantuml", file], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                ["java", "-jar", plantuml_path, file],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )  # nosec
             stdout = res.stdout.decode("utf-8")
             stderr = res.stderr.decode("utf-8")
