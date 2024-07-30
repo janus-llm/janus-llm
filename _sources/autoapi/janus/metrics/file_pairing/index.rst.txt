@@ -1,0 +1,76 @@
+janus.metrics.file_pairing
+==========================
+
+.. py:module:: janus.metrics.file_pairing
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   janus.metrics.file_pairing.FILE_PAIRING_METHODS
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   janus.metrics.file_pairing.register_pairing_method
+   janus.metrics.file_pairing.pair_by_file
+   janus.metrics.file_pairing.pair_by_line
+   janus.metrics.file_pairing.pair_by_line_comment
+
+
+Module Contents
+---------------
+
+.. py:data:: FILE_PAIRING_METHODS
+   :type:  dict[str, Callable[[str, str], list[tuple[str, str]]]]
+
+.. py:function:: register_pairing_method(name = None)
+
+   Registers a pairing method for pairing strings between files
+
+   :param name: The name of the pairing method. If None, the function name is used.
+   :param help: The help text for the pairing method.
+
+   :returns: The decorator function.
+
+
+.. py:function:: pair_by_file(target, reference, **kwargs)
+
+   Pairs the entire contents of a file together
+
+   :param target: The target file text.
+   :param reference: The reference file text.
+   :param state: The current evaluation state.
+
+   :returns: A list of tuples of the target and reference file text.
+
+
+.. py:function:: pair_by_line(target, reference, **kwargs)
+
+   Pairs the contents of a file together by line
+
+   :param target: The target file text.
+   :param reference: The reference file text.
+   :param state: The current evaluation state.
+
+   :returns: A list of tuples of the target and reference file text.
+
+
+.. py:function:: pair_by_line_comment(target, reference, **kwargs)
+
+   Pairs the comments of a file together by line
+
+   **WARNING**: Do not use, as this method is extremely brittle.
+
+   :param target: The target file text.
+   :param reference: The reference/reference file text.
+   :param state: The current evaluation state.
+
+   :returns: A list of tuples of the target and reference file text.
+
+

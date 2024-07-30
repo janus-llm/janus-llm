@@ -1,38 +1,36 @@
-:py:mod:`janus.language.combine`
-================================
+janus.language.combine
+======================
 
 .. py:module:: janus.language.combine
 
 
-Module Contents
----------------
-
-Classes
-~~~~~~~
-
-.. autoapisummary::
-
-   janus.language.combine.Combiner
-
-
-
-
 Attributes
-~~~~~~~~~~
+----------
 
 .. autoapisummary::
 
    janus.language.combine.log
 
 
-.. py:data:: log
+Classes
+-------
 
-   
+.. autoapisummary::
+
+   janus.language.combine.Combiner
+   janus.language.combine.JsonCombiner
+   janus.language.combine.ChunkCombiner
+
+
+Module Contents
+---------------
+
+.. py:data:: log
 
 .. py:class:: Combiner(language = 'python')
 
-
    Bases: :py:obj:`janus.language.file.FileManager`
+
 
    Combine files that have been split into functional blocks back into
    a single file.
@@ -41,46 +39,71 @@ Attributes
 
    :param language: The name of the language to manage.
 
-   .. py:method:: combine(block)
+
+   .. py:method:: combine(root)
       :staticmethod:
+
 
       Combine the given block with its children.
 
-      :param block: The functional code block to combine with its children.
+      :param root: The functional code block to combine with its children.
+
 
 
    .. py:method:: combine_children(block)
       :staticmethod:
+
 
       Recursively combine block code with children code.
 
       :param block: The functional code block to recursively replace children.
 
 
-   .. py:method:: contains_child(code, child)
+
+.. py:class:: JsonCombiner(language = 'python')
+
+   Bases: :py:obj:`Combiner`
+
+
+   Combine files that have been split into functional blocks back into
+   a single file.
+
+   Initialize a FileManager instance.
+
+   :param language: The name of the language to manage.
+
+
+   .. py:method:: combine(root)
       :staticmethod:
 
-      Determine whether the given code contains a placeholder for the given
-      child block.
 
-      :param code: The code to check for the placeholder
-      :param child: The child block to check for
+      Combine the given block with its children.
 
-      :returns: Whether the given code contains a placeholder for the given child
-                block.
+      :param root: The functional code block to combine with its children.
 
 
-   .. py:method:: count_missing(input_block, output_code)
+
+.. py:class:: ChunkCombiner(language = 'python')
+
+   Bases: :py:obj:`Combiner`
+
+
+   Combine files that have been split into functional blocks back into
+   a single file.
+
+   Initialize a FileManager instance.
+
+   :param language: The name of the language to manage.
+
+
+   .. py:method:: combine(root)
       :staticmethod:
 
-      Return the number of children of input_block who are not represented
-      in output_code with a placeholder
 
-      :param input_block: The block to check for missing children
-      :param output_code: The code to check for placeholders
+      A combiner which doesn't actually combine the code blocks,
+      instead preserving children
 
-      :returns: The number of children of input_block who are not represented in
-                output_code with a placeholder
+      :param root: The functional code block to combine with its children.
 
 
 

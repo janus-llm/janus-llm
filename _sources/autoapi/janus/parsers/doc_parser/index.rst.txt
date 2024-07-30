@@ -1,0 +1,114 @@
+janus.parsers.doc_parser
+========================
+
+.. py:module:: janus.parsers.doc_parser
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   janus.parsers.doc_parser.log
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.parsers.doc_parser.MultiDoc
+   janus.parsers.doc_parser.MultiDocumentationParser
+   janus.parsers.doc_parser.MadlibsDocumentationParser
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+
+.. py:class:: MultiDoc
+
+   Bases: :py:obj:`langchain_core.pydantic_v1.BaseModel`
+
+
+   .. py:attribute:: docstring
+      :type:  str
+
+
+   .. py:attribute:: example_usage
+      :type:  str
+
+
+   .. py:attribute:: pseudocode
+      :type:  str
+
+
+.. py:class:: MultiDocumentationParser
+
+   Bases: :py:obj:`langchain.output_parsers.PydanticOutputParser`, :py:obj:`janus.parsers.code_parser.JanusParser`
+
+
+   .. py:attribute:: block_name
+      :type:  str
+      :value: ''
+
+
+
+   .. py:method:: set_reference(block)
+
+
+   .. py:method:: parse(text)
+
+
+   .. py:method:: parse_combined_output(text)
+
+      Parse the output text from the LLM when multiple inputs are combined.
+
+      :param text: The output text from the LLM.
+
+      :returns: A parsed version of the text.
+
+
+
+   .. py:method:: get_format_instructions()
+
+      Get the format instructions for the parser.
+
+      :returns: The format instructions for the LLM.
+
+
+
+.. py:class:: MadlibsDocumentationParser
+
+   Bases: :py:obj:`langchain.schema.output_parser.BaseOutputParser`\ [\ :py:obj:`str`\ ], :py:obj:`janus.parsers.code_parser.JanusParser`
+
+
+   .. py:attribute:: expected_keys
+      :type:  set[str]
+
+
+   .. py:method:: set_reference(block)
+
+
+   .. py:method:: parse(text)
+
+
+   .. py:method:: parse_combined_output(text)
+
+      Parse the output text from the LLM when multiple inputs are combined.
+
+      :param text: The output text from the LLM.
+
+      :returns: A parsed version of the text.
+
+
+
+   .. py:method:: get_format_instructions()
+
+      Get the format instructions for the parser.
+
+      :returns: The format instructions for the LLM.
+
+
+

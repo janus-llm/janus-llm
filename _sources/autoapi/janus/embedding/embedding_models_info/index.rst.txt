@@ -1,0 +1,88 @@
+janus.embedding.embedding_models_info
+=====================================
+
+.. py:module:: janus.embedding.embedding_models_info
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   janus.embedding.embedding_models_info.log
+   janus.embedding.embedding_models_info.EMBEDDING_MODEL_TYPE_CONSTRUCTORS
+   janus.embedding.embedding_models_info.EMBEDDING_MODEL_TYPE_DEFAULT_IDS
+   janus.embedding.embedding_models_info.EMBEDDING_MODEL_DEFAULT_ARGUMENTS
+   janus.embedding.embedding_models_info.EMBEDDING_MODEL_CONFIG_DIR
+   janus.embedding.embedding_models_info.EMBEDDING_TOKEN_LIMITS
+   janus.embedding.embedding_models_info.EMBEDDING_COST_PER_MODEL
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.embedding.embedding_models_info.EmbeddingModelType
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   janus.embedding.embedding_models_info.load_embedding_model
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+
+.. py:class:: EmbeddingModelType
+
+   Bases: :py:obj:`aenum.MultiValueEnum`
+
+
+   .. py:attribute:: OpenAI
+      :value: ('OpenAI', 'openai', 'open-ai', 'oai')
+
+
+
+   .. py:attribute:: HuggingFaceLocal
+      :value: ('HuggingFaceLocal', 'huggingfacelocal', 'huggingface-local', 'hfl')
+
+
+
+   .. py:attribute:: HuggingFaceInferenceAPI
+      :value: ('HuggingFaceInferenceAPI', 'huggingfaceinferenceapi', 'huggingface-inference-api', 'hfia')
+
+
+
+.. py:data:: EMBEDDING_MODEL_TYPE_CONSTRUCTORS
+   :type:  Dict[EmbeddingModelType, Callable[[Any], langchain_core.embeddings.Embeddings]]
+
+.. py:data:: EMBEDDING_MODEL_TYPE_DEFAULT_IDS
+   :type:  Dict[EmbeddingModelType, Dict[str, Any]]
+
+.. py:data:: EMBEDDING_MODEL_DEFAULT_ARGUMENTS
+   :type:  Dict[str, Dict[str, Any]]
+
+.. py:data:: EMBEDDING_MODEL_CONFIG_DIR
+
+.. py:data:: EMBEDDING_TOKEN_LIMITS
+   :type:  Dict[str, int]
+
+.. py:data:: EMBEDDING_COST_PER_MODEL
+   :type:  Dict[str, float]
+
+.. py:function:: load_embedding_model(model_name)
+
+   Load an embedding model from the configuration file or create a new one
+
+   :param model_name: The user-given name of the model to load.
+   :param model_type: The type of the model to load.
+   :param identifier: The identifier for the model (e.g. the name, URL, or HuggingFace
+                      path).
+
+

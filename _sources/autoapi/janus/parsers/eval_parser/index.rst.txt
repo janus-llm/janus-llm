@@ -1,0 +1,71 @@
+janus.parsers.eval_parser
+=========================
+
+.. py:module:: janus.parsers.eval_parser
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   janus.parsers.eval_parser.log
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.parsers.eval_parser.Eval
+   janus.parsers.eval_parser.EvaluationParser
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+
+.. py:class:: Eval
+
+   Bases: :py:obj:`langchain_core.pydantic_v1.BaseModel`
+
+
+   .. py:attribute:: syntax
+      :type:  float
+
+
+   .. py:attribute:: style
+      :type:  float
+
+
+   .. py:attribute:: completeness
+      :type:  float
+
+
+   .. py:attribute:: correctness
+      :type:  float
+
+
+   .. py:method:: score_is_valid(v)
+
+
+.. py:class:: EvaluationParser
+
+   Bases: :py:obj:`langchain.output_parsers.PydanticOutputParser`, :py:obj:`janus.parsers.code_parser.JanusParser`
+
+
+   .. py:method:: parse(text)
+
+
+   .. py:method:: parse_combined_output(text)
+
+      Parse the JSON object, convert keys to lowercase, filter out
+      unexpected keys, and average the values
+
+      :param text: The output text from the LLM.
+
+      :returns: A parsed version of the text.
+
+
+

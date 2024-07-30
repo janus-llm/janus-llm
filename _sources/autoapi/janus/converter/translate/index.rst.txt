@@ -1,0 +1,61 @@
+janus.converter.translate
+=========================
+
+.. py:module:: janus.converter.translate
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   janus.converter.translate.log
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.converter.translate.Translator
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+
+.. py:class:: Translator(target_language = 'python', target_version = '3.10', **kwargs)
+
+   Bases: :py:obj:`janus.converter.converter.Converter`
+
+
+   A class that translates code from one programming language to another.
+
+   Initialize a Translator instance.
+
+   :param model: The LLM to use for translation. If an OpenAI model, the
+                 `OPENAI_API_KEY` environment variable must be set and the
+                 `OPENAI_ORG_ID` environment variable should be set if needed.
+   :param model_arguments: Additional arguments to pass to the LLM constructor.
+   :param source_language: The source programming language.
+   :param target_language: The target programming language.
+   :param target_version: The target version of the target programming language.
+   :param max_prompts: The maximum number of prompts to try before giving up.
+   :param max_tokens: The maximum number of tokens the model will take in.
+                      If unspecificed, model's default max will be used.
+   :param prompt_template: name of prompt template directory
+                           (see janus/prompts/templates) or path to a directory.
+
+
+   .. py:method:: set_target_language(target_language, target_version)
+
+      Validate and set the target language.
+
+      The affected objects will not be updated until translate() is called.
+
+      :param target_language: The target programming language.
+      :param target_version: The target version of the target programming language.
+
+
+

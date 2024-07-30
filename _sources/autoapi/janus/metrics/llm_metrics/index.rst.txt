@@ -1,0 +1,92 @@
+janus.metrics.llm_metrics
+=========================
+
+.. py:module:: janus.metrics.llm_metrics
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.metrics.llm_metrics.LLMMetricOutput
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   janus.metrics.llm_metrics.load_prompt
+   janus.metrics.llm_metrics.evaluate
+   janus.metrics.llm_metrics.llm_evaluate_option
+   janus.metrics.llm_metrics.llm_evaluate_ref_option
+
+
+Module Contents
+---------------
+
+.. py:class:: LLMMetricOutput
+
+   Bases: :py:obj:`langchain_core.pydantic_v1.BaseModel`
+
+
+   The output of an LLM evaluation metric.
+
+
+   .. py:attribute:: thought
+      :type:  str
+
+
+   .. py:attribute:: value
+      :type:  str | float | int
+
+
+.. py:function:: load_prompt(path, language, parser)
+
+   Load a default prompt from a file.
+
+   :param path: The path to the file.
+   :param language: The language of the prompt.
+   :param pydantic_model: The Pydantic model to use for parsing the output.
+
+   :returns: The prompt text.
+
+
+.. py:function:: evaluate(target, language, model, prompt_path, reference = None)
+
+   Calculate the LLM self evaluation score.
+
+   :param target: The target text.
+   :param language: The language that the target code is written in.
+   :param prompt_path: The filepath of the prompt text
+   :param reference: The reference text.
+
+   :returns: The LLM Evaluation score.
+
+
+.. py:function:: llm_evaluate_option(target, metric = 'quality', prompt = None, num_eval = 1, **kwargs)
+
+   CLI option to calculate the LLM self evaluation score.
+
+   :param target: The target text.
+   :param reference: The reference text.
+   :param metric: The pre-defined metric to use for evaluation.
+   :param prompt: The prompt text.
+
+   :returns: The LLM Evaluation score.
+
+
+.. py:function:: llm_evaluate_ref_option(target, reference, metric = 'faithfulness', prompt = None, num_eval = 1, **kwargs)
+
+   CLI option to calculate the LLM self evaluation score, for evaluations which
+   require a reference file (e.g. faithfulness)
+
+   :param target: The target text.
+   :param reference: The reference text.
+   :param metric: The pre-defined metric to use for evaluation.
+   :param prompt: The prompt text.
+
+   :returns: The LLM Evaluation score.
+
+

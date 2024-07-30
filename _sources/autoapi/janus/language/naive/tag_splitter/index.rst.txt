@@ -1,0 +1,36 @@
+janus.language.naive.tag_splitter
+=================================
+
+.. py:module:: janus.language.naive.tag_splitter
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.language.naive.tag_splitter.TagSplitter
+
+
+Module Contents
+---------------
+
+.. py:class:: TagSplitter(tag, *args, **kwargs)
+
+   Bases: :py:obj:`janus.language.splitter.Splitter`
+
+
+   Splits code by tags inserted into code
+
+   :param language: The name of the language to split.
+   :param model: The name of the model to use for counting tokens. If the model is None,
+                 will use tiktoken's default tokenizer to count tokens.
+   :param max_tokens: The maximum number of tokens to use for each functional block.
+   :param skip_merge: Whether to merge child nodes up to the max_token length.
+                      May be used for situations like documentation where function-level
+                      documentation is preferred.
+                      TODO: Maybe instead support something like a list of node types that
+                            shouldnt be merged (e.g. functions, classes)?
+   :param prune_unprotected: Whether to prune unprotected nodes from the tree.
+
+

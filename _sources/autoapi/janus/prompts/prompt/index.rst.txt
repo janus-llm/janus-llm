@@ -1,24 +1,11 @@
-:py:mod:`janus.prompts.prompt`
-==============================
+janus.prompts.prompt
+====================
 
 .. py:module:: janus.prompts.prompt
 
 
-Module Contents
----------------
-
-Classes
-~~~~~~~
-
-.. autoapisummary::
-
-   janus.prompts.prompt.PromptEngine
-
-
-
-
 Attributes
-~~~~~~~~~~
+----------
 
 .. autoapisummary::
 
@@ -30,47 +17,131 @@ Attributes
    janus.prompts.prompt.SYSTEM_PROMPT_TEMPLATE_FILENAME
    janus.prompts.prompt.HUMAN_PROMPT_TEMPLATE_FILENAME
    janus.prompts.prompt.PROMPT_VARIABLES_FILENAME
+   janus.prompts.prompt.retry_with_output_prompt_text
+   janus.prompts.prompt.retry_with_error_and_output_prompt_text
+   janus.prompts.prompt.retry_with_output_prompt
+   janus.prompts.prompt.retry_with_error_and_output_prompt
 
+
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.prompts.prompt.PromptEngine
+   janus.prompts.prompt.ChatGptPromptEngine
+   janus.prompts.prompt.ClaudePromptEngine
+   janus.prompts.prompt.TitanPromptEngine
+   janus.prompts.prompt.Llama2PromptEngine
+   janus.prompts.prompt.Llama3PromptEngine
+   janus.prompts.prompt.CoherePromptEngine
+   janus.prompts.prompt.MistralPromptEngine
+
+
+Module Contents
+---------------
 
 .. py:data:: log
 
-   
-
 .. py:data:: TEXT_OUTPUT
-   :value: ['document', 'requirements']
+   :value: []
 
-   
 
 .. py:data:: SAME_OUTPUT
    :value: ['document_inline']
 
-   
 
 .. py:data:: JSON_OUTPUT
-   :value: ['evaluate']
+   :value: ['evaluate', 'document', 'document_madlibs', 'requirements']
 
-   
 
 .. py:data:: JANUS_PROMPT_TEMPLATES_DIR
-
-   
 
 .. py:data:: SYSTEM_PROMPT_TEMPLATE_FILENAME
    :value: 'system.txt'
 
-   
 
 .. py:data:: HUMAN_PROMPT_TEMPLATE_FILENAME
    :value: 'human.txt'
 
-   
 
 .. py:data:: PROMPT_VARIABLES_FILENAME
    :value: 'variables.json'
 
-   
 
-.. py:class:: PromptEngine(source_language, target_language, target_version, prompt_template)
+.. py:data:: retry_with_output_prompt_text
+   :value: Multiline-String
+
+   .. raw:: html
+
+      <details><summary>Show Value</summary>
+
+   .. code-block:: python
+
+      """Instructions:
+      --------------
+      {instructions}
+      --------------
+      Completion:
+      --------------
+      {completion}
+      --------------
+      
+      Above, the Completion did not satisfy the constraints given in the Instructions.
+      Error:
+      --------------
+      {error}
+      --------------
+      
+      Please try again. Please only respond with an answer that satisfies the
+      constraints laid out in the Instructions:"""
+
+   .. raw:: html
+
+      </details>
+
+
+
+.. py:data:: retry_with_error_and_output_prompt_text
+   :value: Multiline-String
+
+   .. raw:: html
+
+      <details><summary>Show Value</summary>
+
+   .. code-block:: python
+
+      """Prompt:
+      --------------
+      {prompt}
+      --------------
+      Completion:
+      --------------
+      {completion}
+      --------------
+      
+      Above, the Completion did not satisfy the constraints given in the Prompt.
+      Error:
+      --------------
+      {error}
+      --------------
+      
+      Please try again. Please only respond with an answer that satisfies the
+      constraints laid out in the Prompt:"""
+
+   .. raw:: html
+
+      </details>
+
+
+
+.. py:data:: retry_with_output_prompt
+
+.. py:data:: retry_with_error_and_output_prompt
+
+.. py:class:: PromptEngine(source_language, prompt_template, target_language = None, target_version = None)
+
+   Bases: :py:obj:`abc.ABC`
 
 
    A class defining prompting schemes for the LLM.
@@ -85,17 +156,15 @@ Attributes
                            "requirements", or a path to a custom directory containing system.txt and
                            human.txt files.
 
-   .. py:method:: create(code)
 
-      Convert a code block to a Chat GPT prompt.
+   .. py:method:: load_prompt_template(template_path)
+      :abstractmethod:
 
-      :param code: The code block to convert.
-
-      :returns: The converted prompt as a list of messages.
 
 
    .. py:method:: get_prompt_template_path(template_name)
       :staticmethod:
+
 
       Raises an exception if the specified prompt template path
       is not a directory containing system.txt and human.txt files.
@@ -104,5 +173,152 @@ Attributes
                             Can be one of "simple", "document", "document_inline", or "requirements",
                             or a path to a custom directory containing system.txt and human.txt files.
 
+
+
+.. py:class:: ChatGptPromptEngine(source_language, prompt_template, target_language = None, target_version = None)
+
+   Bases: :py:obj:`PromptEngine`
+
+
+   A class defining prompting schemes for the LLM.
+
+   Initialize a PromptEngine instance.
+
+   :param source_language: The language to translate from
+   :param target_language: The language to translate to
+   :param target_version: The version of the target language
+   :param prompt_template: The name of the Janus prompt template directory to use.
+                           Can be one of "simple", "document", "document_inline", "pseudocode", or
+                           "requirements", or a path to a custom directory containing system.txt and
+                           human.txt files.
+
+
+   .. py:method:: load_prompt_template(template_path)
+
+
+.. py:class:: ClaudePromptEngine(source_language, prompt_template, target_language = None, target_version = None)
+
+   Bases: :py:obj:`PromptEngine`
+
+
+   A class defining prompting schemes for the LLM.
+
+   Initialize a PromptEngine instance.
+
+   :param source_language: The language to translate from
+   :param target_language: The language to translate to
+   :param target_version: The version of the target language
+   :param prompt_template: The name of the Janus prompt template directory to use.
+                           Can be one of "simple", "document", "document_inline", "pseudocode", or
+                           "requirements", or a path to a custom directory containing system.txt and
+                           human.txt files.
+
+
+   .. py:method:: load_prompt_template(template_path)
+
+
+.. py:class:: TitanPromptEngine(source_language, prompt_template, target_language = None, target_version = None)
+
+   Bases: :py:obj:`PromptEngine`
+
+
+   A class defining prompting schemes for the LLM.
+
+   Initialize a PromptEngine instance.
+
+   :param source_language: The language to translate from
+   :param target_language: The language to translate to
+   :param target_version: The version of the target language
+   :param prompt_template: The name of the Janus prompt template directory to use.
+                           Can be one of "simple", "document", "document_inline", "pseudocode", or
+                           "requirements", or a path to a custom directory containing system.txt and
+                           human.txt files.
+
+
+   .. py:method:: load_prompt_template(template_path)
+
+
+.. py:class:: Llama2PromptEngine(source_language, prompt_template, target_language = None, target_version = None)
+
+   Bases: :py:obj:`PromptEngine`
+
+
+   A class defining prompting schemes for the LLM.
+
+   Initialize a PromptEngine instance.
+
+   :param source_language: The language to translate from
+   :param target_language: The language to translate to
+   :param target_version: The version of the target language
+   :param prompt_template: The name of the Janus prompt template directory to use.
+                           Can be one of "simple", "document", "document_inline", "pseudocode", or
+                           "requirements", or a path to a custom directory containing system.txt and
+                           human.txt files.
+
+
+   .. py:method:: load_prompt_template(template_path)
+
+
+.. py:class:: Llama3PromptEngine(source_language, prompt_template, target_language = None, target_version = None)
+
+   Bases: :py:obj:`PromptEngine`
+
+
+   A class defining prompting schemes for the LLM.
+
+   Initialize a PromptEngine instance.
+
+   :param source_language: The language to translate from
+   :param target_language: The language to translate to
+   :param target_version: The version of the target language
+   :param prompt_template: The name of the Janus prompt template directory to use.
+                           Can be one of "simple", "document", "document_inline", "pseudocode", or
+                           "requirements", or a path to a custom directory containing system.txt and
+                           human.txt files.
+
+
+   .. py:method:: load_prompt_template(template_path)
+
+
+.. py:class:: CoherePromptEngine(source_language, prompt_template, target_language = None, target_version = None)
+
+   Bases: :py:obj:`PromptEngine`
+
+
+   A class defining prompting schemes for the LLM.
+
+   Initialize a PromptEngine instance.
+
+   :param source_language: The language to translate from
+   :param target_language: The language to translate to
+   :param target_version: The version of the target language
+   :param prompt_template: The name of the Janus prompt template directory to use.
+                           Can be one of "simple", "document", "document_inline", "pseudocode", or
+                           "requirements", or a path to a custom directory containing system.txt and
+                           human.txt files.
+
+
+   .. py:method:: load_prompt_template(template_path)
+
+
+.. py:class:: MistralPromptEngine(source_language, prompt_template, target_language = None, target_version = None)
+
+   Bases: :py:obj:`PromptEngine`
+
+
+   A class defining prompting schemes for the LLM.
+
+   Initialize a PromptEngine instance.
+
+   :param source_language: The language to translate from
+   :param target_language: The language to translate to
+   :param target_version: The version of the target language
+   :param prompt_template: The name of the Janus prompt template directory to use.
+                           Can be one of "simple", "document", "document_inline", "pseudocode", or
+                           "requirements", or a path to a custom directory containing system.txt and
+                           human.txt files.
+
+
+   .. py:method:: load_prompt_template(template_path)
 
 

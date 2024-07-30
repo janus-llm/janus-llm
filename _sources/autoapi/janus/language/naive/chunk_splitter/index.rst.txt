@@ -1,0 +1,36 @@
+janus.language.naive.chunk_splitter
+===================================
+
+.. py:module:: janus.language.naive.chunk_splitter
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.language.naive.chunk_splitter.ChunkSplitter
+
+
+Module Contents
+---------------
+
+.. py:class:: ChunkSplitter(language, model = None, max_tokens = 4096, skip_merge = False, protected_node_types = (), prune_node_types = (), prune_unprotected = False)
+
+   Bases: :py:obj:`janus.language.splitter.Splitter`
+
+
+   Splits into fixed chunk sizes without parsing
+
+   :param language: The name of the language to split.
+   :param model: The name of the model to use for counting tokens. If the model is None,
+                 will use tiktoken's default tokenizer to count tokens.
+   :param max_tokens: The maximum number of tokens to use for each functional block.
+   :param skip_merge: Whether to merge child nodes up to the max_token length.
+                      May be used for situations like documentation where function-level
+                      documentation is preferred.
+                      TODO: Maybe instead support something like a list of node types that
+                            shouldnt be merged (e.g. functions, classes)?
+   :param prune_unprotected: Whether to prune unprotected nodes from the tree.
+
+

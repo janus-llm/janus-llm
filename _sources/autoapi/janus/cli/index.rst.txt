@@ -1,99 +1,113 @@
-:py:mod:`janus.cli`
-===================
+janus.cli
+=========
 
 .. py:module:: janus.cli
 
 
-Module Contents
----------------
-
-
-Functions
-~~~~~~~~~
+Attributes
+----------
 
 .. autoapisummary::
 
+   janus.cli.httpx_logger
+   janus.cli.log
+   janus.cli.homedir
+   janus.cli.janus_dir
+   janus.cli.db_file
+   janus.cli.db_loc
+   janus.cli.collections_config_file
+   janus.cli.app
+   janus.cli.db
+   janus.cli.llm
+   janus.cli.embedding
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   janus.cli.get_collections_config
+   janus.cli.version_callback
+   janus.cli.common
    janus.cli.translate
+   janus.cli.document
+   janus.cli.diagram
    janus.cli.db_init
    janus.cli.db_status
    janus.cli.db_ls
    janus.cli.db_add
    janus.cli.db_rm
    janus.cli.llm_add
+   janus.cli.embedding_add
 
 
+Module Contents
+---------------
 
-Attributes
-~~~~~~~~~~
-
-.. autoapisummary::
-
-   janus.cli.log
-   janus.cli.homedir
-   janus.cli.janus_dir
-   janus.cli.db_file
-   janus.cli.db_loc
-   janus.cli.app
-   janus.cli.db
-   janus.cli.llm
-
+.. py:data:: httpx_logger
 
 .. py:data:: log
 
-   
-
 .. py:data:: homedir
-
-   
 
 .. py:data:: janus_dir
 
-   
-
 .. py:data:: db_file
-
-   
 
 .. py:data:: db_loc
 
-   
+.. py:data:: collections_config_file
+
+.. py:function:: get_collections_config()
 
 .. py:data:: app
 
-   
-
 .. py:data:: db
-
-   
 
 .. py:data:: llm
 
-   
+.. py:data:: embedding
 
-.. py:function:: translate(input_dir, source_lang, output_dir, target_lang, llm_name = 'gpt-3.5-turbo', max_prompts = 10, overwrite = False, temp = 0.7, prompt_template = 'simple', parser_type = 'code', collection = None)
+.. py:function:: version_callback(value)
 
+.. py:function:: common(ctx, version = typer.Option(None, '--version', '-v', callback=version_callback, help='Print the version and exit.'))
+
+   A function for getting the app version
+
+   This will call the version_callback function to print the version and exit.
+
+   :param ctx: The typer context
+   :param version: A boolean flag for the version
+
+
+.. py:function:: translate(input_dir, source_lang, output_dir, target_lang, llm_name = 'gpt-3.5-turbo-0125', max_prompts = 10, overwrite = False, temp = 0.7, prompt_template = 'simple', collection = None, splitter_type = 'file', max_tokens = None)
+
+.. py:function:: document(input_dir, language, output_dir, llm_name = 'gpt-3.5-turbo-0125', max_prompts = 10, overwrite = False, doc_mode = 'madlibs', comments_per_request = None, drop_comments = False, temperature = 0.7, collection = None, splitter_type = 'file', max_tokens = None)
+
+.. py:function:: diagram(input_dir, language, output_dir, llm_name = 'gpt-3.5-turbo-0125', max_prompts = 10, overwrite = False, temperature = 0.7, collection = None, diagram_type = 'Activity', add_documentation = False, splitter_type = 'file')
 
 .. py:function:: db_init(path = str(janus_dir / 'chroma.db'), url = '')
 
-
 .. py:function:: db_status()
-
 
 .. py:function:: db_ls(collection_name = None, peek = None)
 
    List the current database's collections
 
 
-.. py:function:: db_add(collection_name, input_dir = './', input_lang = 'python', max_tokens = 4096)
+.. py:function:: db_add(collection_name, model_name, input_dir = './', input_lang = 'python', max_tokens = 4096)
 
    Add a collection to the database
 
    :param collection_name: The name of the collection to add
+   :param model_name: The name of the embedding model to use
    :param input_dir: The directory containing the source code to be added
    :param input_lang: The language of the source code
+   :param max_tokens: The maximum number of tokens for each chunk of input source code
 
 
-.. py:function:: db_rm(collection_name)
+.. py:function:: db_rm(collection_name, confirm)
 
    Remove a collection from the database
 
@@ -102,4 +116,5 @@ Attributes
 
 .. py:function:: llm_add(model_name, model_type = 'OpenAI')
 
+.. py:function:: embedding_add(model_name, model_type = 'OpenAI')
 

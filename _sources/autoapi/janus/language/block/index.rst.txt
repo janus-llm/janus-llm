@@ -1,14 +1,19 @@
-:py:mod:`janus.language.block`
-==============================
+janus.language.block
+====================
 
 .. py:module:: janus.language.block
 
 
-Module Contents
----------------
+Attributes
+----------
+
+.. autoapisummary::
+
+   janus.language.block.log
+
 
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
@@ -16,22 +21,12 @@ Classes
    janus.language.block.TranslatedCodeBlock
 
 
-
-
-Attributes
-~~~~~~~~~~
-
-.. autoapisummary::
-
-   janus.language.block.log
-
+Module Contents
+---------------
 
 .. py:data:: log
 
-   
-
-.. py:class:: CodeBlock(id, name, type, language, text, start_point, end_point, start_byte, end_byte, tokens, children, embedding_id = None, affixes = ('', ''))
-
+.. py:class:: CodeBlock(id, name, node_type, language, text, start_point, end_point, start_byte, end_byte, tokens, children, embedding_id = None, affixes = ('', ''))
 
    A class that represents a functional block of code.
 
@@ -43,7 +38,7 @@ Attributes
 
       Descriptive name of node
 
-   .. attribute:: type
+   .. attribute:: node_type
 
       The type of the code block ('function', 'module', etc.). Defined in the
       language-specific modules.
@@ -93,24 +88,20 @@ Attributes
       Rolls up self and children's complete status, incomplete means a child
       is missing.
 
+
    .. py:property:: prefix
       :type: str
+
 
 
    .. py:property:: suffix
       :type: str
 
 
+
    .. py:property:: complete_text
       :type: str
 
-
-   .. py:property:: placeholder
-      :type: str
-
-
-   .. py:property:: complete_placeholder
-      :type: str
 
 
    .. py:property:: n_descendents
@@ -120,6 +111,7 @@ Attributes
 
       :returns: The total number of descendents of this block
 
+
    .. py:property:: height
       :type: int
 
@@ -127,12 +119,14 @@ Attributes
 
       :returns: The number of edges between this node and a leaf
 
+
    .. py:property:: max_tokens
       :type: int
 
       The maximum number of tokens in this block or any of its descendents
 
       :returns: The maximum number of tokens in this block or any of  its descendents
+
 
    .. py:property:: total_tokens
       :type: int
@@ -142,16 +136,22 @@ Attributes
       :returns: The total number of tokens represented by this block and all its
                 descendents
 
+
    .. py:method:: pop_prefix()
 
       Get this block's prefix and remove it from the block. This may be used
       to transfer the prefix from the first child of a node to its parent.
 
 
+
    .. py:method:: pop_suffix()
 
       Get this block's suffix and remove it from the block. This may be used
       to transfer the suffix from the first child of a node to its parent.
+
+
+
+   .. py:method:: rebuild_text_from_children()
 
 
    .. py:method:: tree_str(depth = 0)
@@ -164,8 +164,8 @@ Attributes
 
 .. py:class:: TranslatedCodeBlock(original, language)
 
-
    Bases: :py:obj:`CodeBlock`
+
 
    A class that represents the translated functional block of code.
 
@@ -193,12 +193,14 @@ Attributes
    :returns: A `TranslatedCodeBlock` with the same attributes as the original, except
              for `text`, `path`, `complete`, `language`, `tokens`, and `children`
 
+
    .. py:property:: total_cost
       :type: float
 
       The total cost spent translating this block and all its descendents
 
       :returns: The total cost spent translating this block and all its descendents
+
 
    .. py:property:: total_retries
       :type: int
@@ -208,6 +210,7 @@ Attributes
 
       :returns: The total number of retries that were required to translate this block and
 
+
    .. py:property:: total_input_tokens
       :type: int
 
@@ -215,6 +218,7 @@ Attributes
       successfully-translated descendents
 
       :returns: The total number of input tokens represented by this block and all its
+
 
    .. py:property:: translation_completeness
       :type: float

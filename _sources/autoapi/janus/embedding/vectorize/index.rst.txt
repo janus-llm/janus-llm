@@ -1,14 +1,11 @@
-:py:mod:`janus.embedding.vectorize`
-===================================
+janus.embedding.vectorize
+=========================
 
 .. py:module:: janus.embedding.vectorize
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
@@ -17,12 +14,13 @@ Classes
    janus.embedding.vectorize.ChromaDBVectorizer
 
 
+Module Contents
+---------------
 
-
-.. py:class:: Vectorizer(client)
-
+.. py:class:: Vectorizer(client, config = None)
 
    Bases: :py:obj:`object`
+
 
    Class for creating embeddings/vectors in a specified ChromaDB
 
@@ -30,7 +28,11 @@ Classes
 
    :param client: ChromaDB client instance
 
-   .. py:method:: create_collection(embedding_type)
+
+   .. py:method:: get_or_create_collection(name, model_name = None)
+
+
+   .. py:method:: create_collection(embedding_type, model_name = None)
 
 
    .. py:method:: collections(name = None)
@@ -43,6 +45,7 @@ Classes
       :param code_block: CodeBlock to embed
       :param collection_name: Collection to add to
       :param file_name: Name of file containing `code_block`
+
 
 
    .. py:method:: add_text(collection_name, texts, metadatas, ids = None)
@@ -60,15 +63,20 @@ Classes
 
 
 
-.. py:class:: VectorizerFactory
+   .. py:property:: config
 
+
+.. py:class:: VectorizerFactory
 
    Bases: :py:obj:`abc.ABC`
 
+
    Interface for creating a Vectorizer independent of type of ChromaDB client
 
-   .. py:method:: create_vectorizer(path)
+
+   .. py:method:: create_vectorizer(path, config = {})
       :abstractmethod:
+
 
       Factory method
 
@@ -76,12 +84,13 @@ Classes
 
 .. py:class:: ChromaDBVectorizer
 
-
    Bases: :py:obj:`VectorizerFactory`
+
 
    Factory for Vectorizer that uses ChromaEmbeddingDatabase
 
-   .. py:method:: create_vectorizer(path = Path.home() / '.janus' / 'chroma' / 'chroma-data')
+
+   .. py:method:: create_vectorizer(path = Path.home() / '.janus' / 'chroma' / 'chroma-data', config = None)
 
       :param path: The path to the ChromaDB. Can be either a string of a URL or path or a
                    Path object

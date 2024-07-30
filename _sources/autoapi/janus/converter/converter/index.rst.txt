@@ -1,0 +1,155 @@
+janus.converter.converter
+=========================
+
+.. py:module:: janus.converter.converter
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   janus.converter.converter.log
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.converter.converter.Converter
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   janus.converter.converter.run_if_changed
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+
+.. py:function:: run_if_changed(*tracked_vars)
+
+   Wrapper to skip function calls if the given instance attributes haven't
+   been updated. Requires the _changed_attrs set to exist, and the __setattr__
+   method to be overridden to track parameter updates in _changed_attrs.
+
+
+.. py:class:: Converter(model = 'gpt-3.5-turbo-0125', model_arguments = {}, source_language = 'fortran', max_prompts = 10, max_tokens = None, prompt_template = 'simple', db_path = None, db_config = None, protected_node_types = (), prune_node_types = (), splitter_type = 'file')
+
+   Parent class that converts code into something else.
+
+   Children will determine what the code gets converted into. Whether that's translated
+   into another language, into pseudocode, requirements, documentation, etc., or
+   converted into embeddings
+
+   Initialize a Converter instance.
+
+   :param source_language: The source programming language.
+   :param parser_type: The type of parser to use for parsing the LLM output. Valid
+                       values are `"code"`, `"text"`, `"eval"`, and `None` (default). If `None`,
+                       the `Converter` assumes you won't be parsing an output (i.e., adding to an
+                       embedding DB).
+
+
+   .. py:method:: set_model(model_name, **custom_arguments)
+
+      Validate and set the model name.
+
+      The affected objects will not be updated until translate() is called.
+
+      :param model_name: The name of the model to use. Valid models are found in
+                         `janus.llm.models_info.MODEL_CONSTRUCTORS`.
+      :param custom_arguments: Additional arguments to pass to the model constructor.
+
+
+
+   .. py:method:: set_prompt(prompt_template)
+
+      Validate and set the prompt template name.
+
+      The affected objects will not be updated until translate() is called.
+
+      :param prompt_template: name of prompt template directory
+                              (see janus/prompts/templates) or path to a directory.
+
+
+
+   .. py:method:: set_splitter(splitter_type)
+
+      Validate and set the prompt template name.
+
+      The affected objects will not be updated until translate() is called.
+
+      :param prompt_template: name of prompt template directory
+                              (see janus/prompts/templates) or path to a directory.
+
+
+
+   .. py:method:: set_source_language(source_language)
+
+      Validate and set the source language.
+
+      The affected objects will not be updated until _load_parameters() is called.
+
+      :param source_language: The source programming language.
+
+
+
+   .. py:method:: set_protected_node_types(protected_node_types)
+
+      Set the protected (non-mergeable) node types. This will often be structures
+      like functions, classes, or modules which you might want to keep separate
+
+      The affected objects will not be updated until _load_parameters() is called.
+
+      :param protected_node_types: A set of node types that aren't to be merged
+
+
+
+   .. py:method:: set_prune_node_types(prune_node_types)
+
+      Set the node types to prune. This will often be structures
+      like comments or whitespace which you might want to keep out of the LLM
+
+      The affected objects will not be updated until _load_parameters() is called.
+
+      :param prune_node_types: A set of node types which should be pruned
+
+
+
+   .. py:method:: set_db_path(db_path)
+
+
+   .. py:method:: set_db_config(db_config)
+
+
+   .. py:method:: translate(input_directory, output_directory = None, overwrite = False, collection_name = None)
+
+      Convert code in the input directory from the source language to the target
+      language, and write the resulting files to the output directory.
+
+      :param input_directory: The directory containing the code to translate.
+      :param output_directory: The directory to write the translated code to.
+      :param overwrite: Whether to overwrite existing files (vs skip them)
+      :param collection_name: Collection to add to
+
+
+
+   .. py:method:: translate_file(file)
+
+      Translate a single file.
+
+      :param file: Input path to file
+
+      :returns: A `TranslatedCodeBlock` object. This block does not have a path set, and its
+                code is not guaranteed to be consolidated. To amend this, run
+                `Combiner.combine_children` on the block.
+
+
+

@@ -1,0 +1,112 @@
+janus.llm.model_callbacks
+=========================
+
+.. py:module:: janus.llm.model_callbacks
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   janus.llm.model_callbacks.log
+   janus.llm.model_callbacks.COST_PER_1K_TOKENS
+   janus.llm.model_callbacks.token_usage_callback_var
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.llm.model_callbacks.TokenUsageCallbackHandler
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   janus.llm.model_callbacks.get_model_callback
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+
+.. py:data:: COST_PER_1K_TOKENS
+   :type:  dict[str, dict[str, float]]
+
+.. py:class:: TokenUsageCallbackHandler
+
+   Bases: :py:obj:`langchain_core.callbacks.BaseCallbackHandler`
+
+
+   Callback Handler that tracks metadata on model cost, retries, etc.
+   Based on https://github.com/langchain-ai/langchain/blob/master/libs
+               /community/langchain_community/callbacks/openai_info.py
+
+
+   .. py:attribute:: total_tokens
+      :type:  int
+      :value: 0
+
+
+
+   .. py:attribute:: prompt_tokens
+      :type:  int
+      :value: 0
+
+
+
+   .. py:attribute:: completion_tokens
+      :type:  int
+      :value: 0
+
+
+
+   .. py:attribute:: successful_requests
+      :type:  int
+      :value: 0
+
+
+
+   .. py:attribute:: total_cost
+      :type:  float
+      :value: 0.0
+
+
+
+   .. py:property:: always_verbose
+      :type: bool
+
+      Whether to call verbose callbacks even if verbose is False.
+
+
+   .. py:method:: on_chat_model_start(*args, **kwargs)
+
+
+   .. py:method:: on_llm_start(serialized, prompts, **kwargs)
+
+      Print out the prompts.
+
+
+
+   .. py:method:: on_llm_new_token(token, **kwargs)
+
+      Print out the token.
+
+
+
+   .. py:method:: on_llm_end(response, **kwargs)
+
+      Collect token usage.
+
+
+
+.. py:data:: token_usage_callback_var
+   :type:  contextvars.ContextVar[TokenUsageCallbackHandler | None]
+
+.. py:function:: get_model_callback()
+

@@ -1,38 +1,44 @@
-:py:mod:`janus.language.splitter`
-=================================
+janus.language.splitter
+=======================
 
 .. py:module:: janus.language.splitter
 
 
-Module Contents
----------------
-
-Classes
-~~~~~~~
-
-.. autoapisummary::
-
-   janus.language.splitter.Splitter
-
-
-
-
 Attributes
-~~~~~~~~~~
+----------
 
 .. autoapisummary::
 
    janus.language.splitter.log
 
 
-.. py:data:: log
+Exceptions
+----------
 
-   
+.. autoapisummary::
+
+   janus.language.splitter.TokenLimitError
+   janus.language.splitter.EmptyTreeError
+   janus.language.splitter.FileSizeError
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.language.splitter.Splitter
+
+
+Module Contents
+---------------
+
+.. py:data:: log
 
 .. py:exception:: TokenLimitError
 
-
    Bases: :py:obj:`Exception`
+
 
    An exception raised when the token limit is exceeded and the code cannot be
    split into smaller blocks.
@@ -40,10 +46,31 @@ Attributes
    Initialize self.  See help(type(self)) for accurate signature.
 
 
-.. py:class:: Splitter(language, model = None, max_tokens = 4096, use_placeholders = True, skip_merge = False)
+.. py:exception:: EmptyTreeError
 
+   Bases: :py:obj:`Exception`
+
+
+   An exception raised when the tree is empty or does not exist (can happen
+   when there are no nodes of interest in the tree)
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+
+.. py:exception:: FileSizeError
+
+   Bases: :py:obj:`Exception`
+
+
+   An exception raised when the file size is too large for the splitter
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+
+.. py:class:: Splitter(language, model = None, max_tokens = 4096, skip_merge = False, protected_node_types = (), prune_node_types = (), prune_unprotected = False)
 
    Bases: :py:obj:`janus.language.file.FileManager`
+
 
    A class for splitting code into functional blocks to prompt with for
    transcoding.
@@ -52,12 +79,13 @@ Attributes
    :param model: The name of the model to use for counting tokens. If the model is None,
                  will use tiktoken's default tokenizer to count tokens.
    :param max_tokens: The maximum number of tokens to use for each functional block.
-   :param use_placeholders: Whether to use placeholders when splitting the code.
    :param skip_merge: Whether to merge child nodes up to the max_token length.
                       May be used for situations like documentation where function-level
                       documentation is preferred.
                       TODO: Maybe instead support something like a list of node types that
                             shouldnt be merged (e.g. functions, classes)?
+   :param prune_unprotected: Whether to prune unprotected nodes from the tree.
+
 
    .. py:method:: split(file)
 
@@ -66,6 +94,18 @@ Attributes
       :param file: The file to split into functional blocks.
 
       :returns: A `CodeBlock` made up of nested `CodeBlock`s.
+
+
+
+   .. py:method:: split_string(code, name)
+
+      Split the given code into functional code blocks.
+
+      :param code: The code as a string to split into functional blocks.
+      :param name: The filename of the code block.
+
+      :returns: A `CodeBlock` made up of nested `CodeBlock`s.
+
 
 
    .. py:method:: merge_nodes(nodes)
