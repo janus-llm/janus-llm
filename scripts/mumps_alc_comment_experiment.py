@@ -2,7 +2,7 @@ import argparse
 import json
 from pathlib import Path
 
-from janus.translate import MadLibsDocumenter
+from janus.converter.document import MadLibsDocumenter
 from janus.utils.logger import create_logger
 from scripts.combine_comment_jsons import parse_madlibs
 
@@ -24,10 +24,10 @@ class Experimenter:
         model: str = "gpt-3.5-turbo-0125",
         TOK_SIZES: list = [512, 1024, 2048, 4096, 8192, 16384, 100000, 200000],
         RESULT_DIRS: list = [
-            "ast-strict-results",
-            "file-results",
-            "ast-flex-results",
-            "chunk-results",
+            "ast-strict",
+            "file",
+            "ast-flex",
+            "chunk",
         ],
     ):
         """
@@ -37,7 +37,7 @@ class Experimenter:
             input_dir: Directory containing the input source code files.
             output_dir: Directory to store experiment results.
                 NOTE: Ensure directory is language specific
-                (e.g. data/mumps-irt-20240730)
+                (e.g. data/mumps-irt-20240730/generated-comments)
             source_langauge: The language of the source code files.
                 NOTE: If doing alc experiment, source langauge should be ibmhlasm
             model: The LLM to use for comment generation.
@@ -70,7 +70,7 @@ class Experimenter:
         log.info("Running FILE splitting experiment.")
         file_split.translate(
             input_directory=self.input_dir,
-            output_directory=f"{self.model}-{self.source_language}" "-file-results",
+            output_directory=f"{self.output_dir}/{self.model}/file",
         )
         log.info("FILE splitting experiment complete")
 
@@ -78,7 +78,7 @@ class Experimenter:
         log.info("Running AST-STRICT splitting experiment.")
         ast_strict_split.translate(
             input_directory=self.input_dir,
-            output_directory=f"{self.model}-{self.source_language}" "-ast-strict-results",
+            output_directory=f"{self.output_dir}/{self.model}/ast-strict",
         )
         log.info("AST-STRICT splitting experiment complete.")
 
@@ -93,8 +93,7 @@ class Experimenter:
             )
             chunk_split.translate(
                 input_directory=self.input_dir,
-                output_directory=f"{self.model}-{self.source_language}"
-                f"-chunk-results-{TOKS}",
+                output_directory=f"{self.output_dir}/{self.model}/chunk/{TOKS}",
             )
             log.info(
                 f"CHUNK splitting experiment with {TOKS} as max token limit complete."
@@ -107,8 +106,7 @@ class Experimenter:
             )
             ast_flex_split.translate(
                 input_directory=self.input_dir,
-                output_directory=f"{self.model}-{self.source_language}"
-                f"-ast-flex-results-{TOKS}",
+                output_directory=f"{self.output_dir}/{self.model}/ast-flex/{TOKS}",
             )
             log.info(
                 f"AST-FLEX splitting experiment with {TOKS} "
@@ -126,15 +124,13 @@ class Experimenter:
                 for TOK in self.TOK_SIZES:
                     log.info(f"Combining comment jsons for {DIR}-{TOK}")
                     output_dir = Path(
-                        f"{self.model}-{self.source_language}-{DIR}-{TOK}"
+                        f"{self.output_dir}/{self.model}/{DIR}/{TOK}"
                     ).expanduser()
                     obj = parse_madlibs(input_file, output_dir)
                     (output_dir / "processed.json").write_text(json.dumps(obj, indent=2))
             else:
                 log.info(f"Combining comment jsons for {DIR}")
-                output_dir = Path(
-                    f"{self.model}-{self.source_language}-{DIR}"
-                ).expanduser()
+                output_dir = Path(f"{self.output_dir}/{self.model}/{DIR}").expanduser()
                 obj = parse_madlibs(input_file, output_dir)
                 (output_dir / "processed.json").write_text(json.dumps(obj, indent=2))
 
@@ -157,7 +153,7 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="Directory to store experiment results. Ensure directory is language "
-        "specific (e.g. data/mumps-irt-20240730).",
+        "specific (e.g. data/mumps-irt-20240730/generated-comments).",
     )
 
     parser.add_argument(
