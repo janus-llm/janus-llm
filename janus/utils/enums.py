@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Set
+from typing import Any, Dict, Set
 
 
 class EmbeddingType(Enum):
@@ -10,9 +10,9 @@ class EmbeddingType(Enum):
     TARGET = 5  # placeholder embeddings, are these useful for analysis?
 
 
-CUSTOM_SPLITTERS: Set[str] = {"mumps", "binary"}
+CUSTOM_SPLITTERS: Set[str] = {"mumps", "binary", "ibmhlasm"}
 
-LANGUAGES: Dict[str, Dict[str, str]] = {
+LANGUAGES: Dict[str, Dict[str, Any]] = {
     "ada": {
         "comment": "--",
         "suffix": "adb",
@@ -63,6 +63,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
             '#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n'
             "    return 0;\n}\n"
         ),
+        "functional_node_types": ["function_definition"],
+        "comment_node_type": "comment",
     },
     "capnp": {
         "comment": "#",
@@ -204,6 +206,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "example": (
             "program HelloWorld\n  print *, 'Hello, World!'\nend program HelloWorld\n"
         ),
+        "functional_node_types": ["function"],
+        "comment_node_type": "comment",
     },
     "gitattributes": {
         "comment": "#",
@@ -274,7 +278,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
     "ibmhlasm": {
         "comment": "*",
         "suffix": "asm",
-        "url": "https://github.com/janus-llm/tree-sitter-ibmhlasm",
+        "url": "https://github.com/janus-llm/tree-sitter-ibmhlasm.git",
+        "branch": "metrics",
         "example": (
             """
                      TITLE 'Hello, World! Program'
@@ -295,6 +300,10 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
                      END   HELLO
         """
         ),
+        "functional_node_types": ["csect", "dsect"],
+        "branch_node_types": ["branch_instruction"],
+        "operation_node_types": ["operation", "branch_operation"],
+        "operand_node_types": ["operands"],
     },
     "java": {
         "comment": "//",
@@ -410,8 +419,18 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
     "mumps": {
         "comment": ";",
         "suffix": "m",
-        "url": None,
+        "url": "https://github.com/janus-llm/tree-sitter-mumps",
         "example": 'WRITE "Hello, World!"',
+        "functional_node_types": ["routine_definition"],
+        "comment_node_type": "comment",
+        "branch_node_types": ["if_statement"],
+        "operation_node_types": [
+            "command",
+            "function_call",
+            "routine_call",
+            "routine_definition",
+        ],
+        "operand_node_types": ["argument"],
     },
     "nix": {
         "comment": "#",
@@ -494,6 +513,8 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "suffix": "py",
         "url": "https://github.com/tree-sitter/tree-sitter-python",
         "example": "# Hello, World!\nprint('Hello, World!')\n",
+        "functional_node_types": ["function_definition"],
+        "comment_node_type": "comment",
     },
     "qmljs": {
         "comment": "//",
@@ -708,6 +729,14 @@ LANGUAGES: Dict[str, Dict[str, str]] = {
         "suffix": "ts",
         "url": "https://github.com/tree-sitter/tree-sitter-typescript",
         "example": "console.log('Hello, World!');\n",
+    },
+    "uml": {
+        "comment": "'",
+        "suffix": "uml",
+        "url": "https://github.com/lyndsysimon/tree-sitter-plantuml",
+        "example": "@startuml\nAlice -> Bob: Authentication Request\nBob --> Alice:\
+              Authentication Response\nAlice -> Bob: Another authentication\
+              Request\nAlice <-- Bob: Another authentication Response\n@enduml",
     },
     "verilog": {
         "comment": "//",

@@ -1,78 +1,221 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Callable
 
 from dotenv import load_dotenv
-from langchain.chat_models import ChatOpenAI
-from langchain.llms import HuggingFaceTextGenInference
-from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
+from langchain_community.llms import HuggingFaceTextGenInference
+from langchain_core.language_models import BaseLanguageModel
+from langchain_openai import ChatOpenAI
+
+from ..prompts.prompt import (
+    ChatGptPromptEngine,
+    ClaudePromptEngine,
+    CoherePromptEngine,
+    Llama2PromptEngine,
+    Llama3PromptEngine,
+    MistralPromptEngine,
+    PromptEngine,
+    TitanPromptEngine,
+)
+from ..utils.logger import create_logger
+from .model_callbacks import COST_PER_1K_TOKENS
+
+log = create_logger(__name__)
+
+try:
+    from langchain_community.chat_models import BedrockChat
+    from langchain_community.llms.bedrock import Bedrock
+except ImportError:
+    log.warning(
+        "Could not import LangChain's Bedrock Client. If you would like to use Bedrock "
+        "models, please install LangChain's Bedrock Client by running 'pip install "
+        "janus-llm[bedrock]' or poetry install -E bedrock."
+    )
+
+try:
+    from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
+except ImportError:
+    log.warning(
+        "Could not import LangChain's HuggingFace Pipeline Client. If you would like to "
+        "use HuggingFace models, please install LangChain's HuggingFace Pipeline Client "
+        "by running 'pip install janus-llm[hf-local]' or poetry install -E hf-local."
+    )
+
 
 load_dotenv()
 
-MODEL_TYPE_CONSTRUCTORS = {
+openai_model_reroutes = {
+    "gpt-4o": "gpt-4o-2024-05-13",
+    "gpt-4": "gpt-4-0613",
+    "gpt-4-turbo": "gpt-4-turbo-2024-04-09",
+    "gpt-4-turbo-preview": "gpt-4-0125-preview",
+    "gpt-3.5-turbo": "gpt-3.5-turbo-0125",
+    "gpt-3.5-turbo-16k": "gpt-3.5-turbo-0125",
+}
+
+openai_models = [
+    "gpt-4-0613",
+    "gpt-4-1106-preview",
+    "gpt-4-0125-preview",
+    "gpt-4o-2024-05-13",
+    "gpt-3.5-turbo-0125",
+]
+claude_models = [
+    "bedrock-claude-v2",
+    "bedrock-claude-instant-v1",
+    "bedrock-claude-haiku",
+    "bedrock-claude-sonnet",
+]
+llama2_models = [
+    "bedrock-llama2-70b",
+    "bedrock-llama2-70b-chat",
+    "bedrock-llama2-13b",
+    "bedrock-llama2-13b-chat",
+]
+llama3_models = [
+    "bedrock-llama3-8b-instruct",
+    "bedrock-llama3-70b-instruct",
+]
+titan_models = [
+    "bedrock-titan-text-lite",
+    "bedrock-titan-text-express",
+    "bedrock-jurassic-2-mid",
+    "bedrock-jurassic-2-ultra",
+]
+cohere_models = [
+    "bedrock-command-r-plus",
+]
+mistral_models = [
+    "bedrock-mistral-7b-instruct",
+    "bedrock-mistral-large",
+    "bedrock-mixtral",
+]
+bedrock_models = [
+    *claude_models,
+    *llama2_models,
+    *llama3_models,
+    *titan_models,
+    *cohere_models,
+    *mistral_models,
+]
+all_models = [*openai_models, *bedrock_models]
+
+MODEL_TYPE_CONSTRUCTORS: dict[str, Callable[[Any], BaseLanguageModel]] = {
     "OpenAI": ChatOpenAI,
     "HuggingFace": HuggingFaceTextGenInference,
-    "HuggingFaceLocal": HuggingFacePipeline.from_model_id,
 }
 
+try:
+    MODEL_TYPE_CONSTRUCTORS.update(
+        {
+            "HuggingFaceLocal": HuggingFacePipeline.from_model_id,
+            "Bedrock": Bedrock,
+            "BedrockChat": BedrockChat,
+        }
+    )
+except NameError:
+    pass
 
-MODEL_TYPES: Dict[str, Any] = {
-    "gpt-4": "OpenAI",
-    "gpt-4-32k": "OpenAI",
-    "gpt-4-1106-preview": "OpenAI",
-    "gpt-3.5-turbo": "OpenAI",
-    "gpt-3.5-turbo-16k": "OpenAI",
+
+MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
+    **{m: ChatGptPromptEngine for m in openai_models},
+    **{m: ClaudePromptEngine for m in claude_models},
+    **{m: Llama2PromptEngine for m in llama2_models},
+    **{m: Llama3PromptEngine for m in llama3_models},
+    **{m: TitanPromptEngine for m in titan_models},
+    **{m: CoherePromptEngine for m in cohere_models},
+    **{m: MistralPromptEngine for m in mistral_models},
 }
 
-_open_ai_defaults: Dict[str, Any] = {
+_open_ai_defaults: dict[str, str] = {
     "openai_api_key": os.getenv("OPENAI_API_KEY"),
     "openai_organization": os.getenv("OPENAI_ORG_ID"),
 }
 
-MODEL_DEFAULT_ARGUMENTS: Dict[str, Dict[str, Any]] = {
-    "gpt-4": dict(model_name="gpt-4"),
-    "gpt-4-32k": dict(model_name="gpt-4-32k"),
-    "gpt-4-1106-preview": dict(model_name="gpt-4-1106-preview"),
-    "gpt-3.5-turbo": dict(model_name="gpt-3.5-turbo"),
-    "gpt-3.5-turbo-16k": dict(model_name="gpt-3.5-turbo-16k"),
+model_identifiers = {
+    **{m: m for m in openai_models},
+    "bedrock-claude-v2": "anthropic.claude-v2",
+    "bedrock-claude-instant-v1": "anthropic.claude-instant-v1",
+    "bedrock-claude-haiku": "anthropic.claude-3-haiku-20240307-v1:0",
+    "bedrock-claude-sonnet": "anthropic.claude-3-sonnet-20240229-v1:0",
+    "bedrock-llama2-70b": "meta.llama2-70b-v1",
+    "bedrock-llama2-70b-chat": "meta.llama2-70b-chat-v1",
+    "bedrock-llama2-13b": "meta.llama2-13b-chat-v1",
+    "bedrock-llama2-13b-chat": "meta.llama2-13b-v1",
+    "bedrock-llama3-8b-instruct": "meta.llama3-8b-instruct-v1:0",
+    "bedrock-llama3-70b-instruct": "meta.llama3-70b-instruct-v1:0",
+    "bedrock-titan-text-lite": "amazon.titan-text-lite-v1",
+    "bedrock-titan-text-express": "amazon.titan-text-express-v1",
+    "bedrock-jurassic-2-mid": "ai21.j2-mid-v1",
+    "bedrock-jurassic-2-ultra": "ai21.j2-ultra-v1",
+    "bedrock-command-r-plus": "cohere.command-r-plus-v1:0",
+    "bedrock-mixtral": "mistral.mixtral-8x7b-instruct-v0:1",
+    "bedrock-mistral-7b-instruct": "mistral.mistral-7b-instruct-v0:2",
+    "bedrock-mistral-large": "mistral.mistral-large-2402-v1:0",
+}
+
+MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, str]] = {
+    k: (dict(model_name=k) if k in openai_models else dict(model_id=v))
+    for k, v in model_identifiers.items()
 }
 
 DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
 
 MODEL_CONFIG_DIR = Path.home().expanduser() / ".janus" / "llm"
 
-TOKEN_LIMITS: Dict[str, int] = {
-    "gpt-4": 8192,
+MODEL_TYPES: dict[str, PromptEngine] = {
+    **{m: "OpenAI" for m in openai_models},
+    **{m: "BedrockChat" for m in bedrock_models},
+}
+
+TOKEN_LIMITS: dict[str, int] = {
     "gpt-4-32k": 32_768,
+    "gpt-4-0613": 8192,
     "gpt-4-1106-preview": 128_000,
-    "gpt-3.5-turbo": 4096,
-    "gpt-3.5-turbo-16k": 16_384,
+    "gpt-4-0125-preview": 128_000,
+    "gpt-4o-2024-05-13": 128_000,
+    "gpt-3.5-turbo-0125": 16_384,
     "text-embedding-ada-002": 8191,
     "gpt4all": 16_384,
+    "anthropic.claude-v2": 100_000,
+    "anthropic.claude-instant-v1": 100_000,
+    "anthropic.claude-3-haiku-20240307-v1:0": 248_000,
+    "anthropic.claude-3-sonnet-20240229-v1:0": 248_000,
+    "meta.llama2-70b-v1": 4096,
+    "meta.llama2-70b-chat-v1": 4096,
+    "meta.llama2-13b-chat-v1": 4096,
+    "meta.llama2-13b-v1": 4096,
+    "meta.llama3-8b-instruct-v1:0": 8000,
+    "meta.llama3-70b-instruct-v1:0": 8000,
+    "amazon.titan-text-lite-v1": 4096,
+    "amazon.titan-text-express-v1": 8192,
+    "ai21.j2-mid-v1": 8192,
+    "ai21.j2-ultra-v1": 8192,
+    "cohere.command-r-plus-v1:0": 128_000,
+    "mistral.mixtral-8x7b-instruct-v0:1": 32_000,
+    "mistral.mistral-7b-instruct-v0:2": 32_000,
+    "mistral.mistral-large-2402-v1:0": 32_000,
 }
 
-COST_PER_MODEL: Dict[str, Dict[str, float]] = {
-    "gpt-4": {"input": 0.03, "output": 0.06},
-    "gpt-4-32k": {"input": 0.6, "output": 0.12},
-    "gpt-4-1106-preview": {"input": 0.01, "output": 0.03},
-    "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
-    "gpt-3.5-turbo-16k": {"input": 0.003, "output": 0.004},
-}
 
-
-def load_model(model_name: str) -> Tuple[Any, int, Dict[str, float]]:
+def load_model(model_name: str) -> tuple[BaseLanguageModel, int, dict[str, float]]:
     if not MODEL_CONFIG_DIR.exists():
         MODEL_CONFIG_DIR.mkdir(parents=True)
     model_config_file = MODEL_CONFIG_DIR / f"{model_name}.json"
     if not model_config_file.exists():
         if model_name not in DEFAULT_MODELS:
-            raise ValueError(f"Error: could not find model {model_name}")
+            if model_name in openai_model_reroutes:
+                model_name = openai_model_reroutes[model_name]
+            else:
+                raise ValueError(f"Error: could not find model {model_name}")
         model_config = {
             "model_type": MODEL_TYPES[model_name],
             "model_args": MODEL_DEFAULT_ARGUMENTS[model_name],
-            "token_limit": TOKEN_LIMITS.get(model_name, 4096),
-            "model_cost": COST_PER_MODEL.get(model_name, {"input": 0, "output": 0}),
+            "token_limit": TOKEN_LIMITS.get(model_identifiers[model_name], 4096),
+            "model_cost": COST_PER_1K_TOKENS.get(
+                model_identifiers[model_name], {"input": 0, "output": 0}
+            ),
         }
         with open(model_config_file, "w") as f:
             json.dump(model_config, f)

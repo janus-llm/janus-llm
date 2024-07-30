@@ -7,6 +7,10 @@ from langchain.schema import Document
 from langchain.schema.embeddings import Embeddings
 from langchain.schema.vectorstore import VST, VectorStore
 
+from janus.language.block import CodeBlock, TranslatedCodeBlock
+
+from ..diagram import DiagramGenerator
+from ..requirements import RequirementsDocumenter
 from ..translate import Translator
 
 # from langchain.vectorstores import Chroma
@@ -75,7 +79,7 @@ class TestTranslator(unittest.TestCase):
     def setUp(self):
         """Set up the tests."""
         self.translator = Translator(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo-0125",
             source_language="fortran",
             target_language="python",
             target_version="3.10",
@@ -83,14 +87,10 @@ class TestTranslator(unittest.TestCase):
         self.test_file = Path("janus/language/treesitter/_tests/languages/fortran.f90")
         self.TEST_FILE_EMBEDDING_COUNT = 14
 
-        self.req_translator = Translator(
-            model="gpt-3.5-turbo",
-            # embeddings_override=MockEmbeddingsFactory(),
+        self.req_translator = RequirementsDocumenter(
+            model="gpt-3.5-turbo-0125",
             source_language="fortran",
-            target_language="text",
-            target_version="3.10",
             prompt_template="requirements",
-            parser_type="text",
         )
 
     @pytest.mark.translate
@@ -272,11 +272,6 @@ class TestTranslator(unittest.TestCase):
         # print_query_results(QUERY_STRING, n_results)
         # self.assertTrue(len(n_results) == 1, "Was splitting changed?")
 
-    def test_output_as_requirements(self):
-        """Is output type requirements?"""
-        self.assertFalse(self.translator.outputting_requirements())
-        self.assertTrue(self.req_translator.outputting_requirements())
-
     # @pytest.mark.slow
     # def test_document_embeddings_added_by_translate(self):
     #     vector_store = self.req_translator.embeddings(EmbeddingType.REQUIREMENT)
@@ -309,7 +304,6 @@ class TestTranslator(unittest.TestCase):
         self.assertRaises(
             ValueError, self.translator.set_target_language, "gobbledy", "goobledy"
         )
-        self.assertRaises(ValueError, self.translator.set_parser_type, "blah")
         self.assertRaises(
             ValueError, self.translator.set_source_language, "scribbledy-doop"
         )
@@ -317,14 +311,54 @@ class TestTranslator(unittest.TestCase):
         self.assertRaises(ValueError, self.translator._load_parameters)
 
 
+class TestDiagramGenerator(unittest.TestCase):
+    """Tests for the DiagramGenerator class."""
+
+    def setUp(self):
+        """Set up the tests."""
+        self.diagram_generator = DiagramGenerator(
+            model="gpt-3.5-turbo-0125",
+            source_language="fortran",
+            diagram_type="Activity",
+        )
+
+    def test_init(self):
+        """Test __init__ method."""
+        self.assertEqual(self.diagram_generator._model_name, "gpt-3.5-turbo-0125")
+        self.assertEqual(self.diagram_generator._source_language, "fortran")
+        self.assertEqual(self.diagram_generator._diagram_type, "Activity")
+
+    def test_add_translation(self):
+        """Test _add_translation method."""
+        block = TranslatedCodeBlock(
+            original=CodeBlock(
+                id="test",
+                name="Test Block",
+                node_type="function",
+                language="python",
+                text="print('Hello, World!')",
+                start_point=(0, 0),
+                end_point=(1, 0),
+                start_byte=0,
+                end_byte=1,
+                tokens=5,
+                children=[],
+            ),
+            language="python",
+        )
+        self.diagram_generator._add_translation(block)
+        self.assertTrue(block.translated)
+        self.assertIsNotNone(block.text)
+        self.assertIsNotNone(block.tokens)
+
+
 @pytest.mark.parametrize(
-    "source_language,prompt_template,expected_target_language,expected_target_version,"
-    "parser_type",
+    "source_language,prompt_template,expected_target_language,expected_target_version,",
     [
-        ("python", "document_inline", "python", "3.10", "code"),
-        ("fortran", "document", "text", None, "text"),
-        ("mumps", "requirements", "text", None, "text"),
-        ("python", "simple", "javascript", "es6", "code"),
+        ("python", "document_inline", "python", "3.10"),
+        ("fortran", "document", "text", None),
+        ("mumps", "requirements", "text", None),
+        ("python", "simple", "javascript", "es6"),
     ],
 )
 def test_language_combinations(
@@ -332,21 +366,18 @@ def test_language_combinations(
     prompt_template: str,
     expected_target_language: str,
     expected_target_version: str,
-    parser_type: str,
 ):
     """Tests that translator target language settings are consistent
     with prompt template expectations.
     """
-    translator = Translator(model="gpt-3.5-turbo")
-    translator.set_model("gpt-3.5-turbo-16k")
+    translator = Translator(model="gpt-3.5-turbo-0125")
+    translator.set_model("gpt-3.5-turbo-0125")
     translator.set_source_language(source_language)
     translator.set_target_language(expected_target_language, expected_target_version)
-    translator.set_parser_type(parser_type)
     translator.set_prompt(prompt_template)
     translator._load_parameters()
     assert translator._target_language == expected_target_language  # nosec
     assert translator._target_version == expected_target_version  # nosec
-    assert translator._parser_type == parser_type  # nosec
     assert translator._splitter.language == source_language  # nosec
-    assert translator._splitter.model.model_name == "gpt-3.5-turbo-16k"  # nosec
-    assert translator._prompt_engine._template_name == prompt_template  # nosec
+    assert translator._splitter.model.model_name == "gpt-3.5-turbo-0125"  # nosec
+    assert translator._prompt_template_name == prompt_template  # nosec

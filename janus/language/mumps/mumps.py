@@ -1,5 +1,4 @@
 import re
-from pathlib import Path
 
 from langchain.schema.language_model import BaseLanguageModel
 
@@ -43,7 +42,14 @@ class MumpsSplitter(Splitter):
         re.VERBOSE | re.DOTALL,
     )
 
-    def __init__(self, model: None | BaseLanguageModel = None, max_tokens: int = 4096):
+    def __init__(
+        self,
+        model: None | BaseLanguageModel = None,
+        max_tokens: int = 4096,
+        protected_node_types: tuple[str] = ("routine_definition",),
+        prune_node_types: tuple[str] = (),
+        prune_unprotected: bool = False,
+    ):
         """Initialize a MumpsSplitter instance.
 
         Arguments:
@@ -53,17 +59,16 @@ class MumpsSplitter(Splitter):
             language="mumps",
             model=model,
             max_tokens=max_tokens,
-            use_placeholders=False,
+            protected_node_types=protected_node_types,
+            prune_node_types=prune_node_types,
+            prune_unprotected=prune_unprotected,
         )
 
-        # MUMPS code tends to take about 2/3 the space of Python
-        self.max_tokens: int = int(max_tokens * 2 / 5)
-
-    def _set_identifiers(self, root: CodeBlock, path: Path):
+    def _set_identifiers(self, root: CodeBlock, name: str):
         stack = [root]
         while stack:
             node = stack.pop()
-            node.name = f"{path.name}:{node.id}"
+            node.name = f"{name}:{node.id}"
             stack.extend(node.children)
 
     def _get_ast(self, code: str) -> CodeBlock:
@@ -104,15 +109,19 @@ class MumpsSplitter(Splitter):
                 start_byte=start_byte,
                 end_byte=end_byte,
                 affixes=(prefix, suffix),
-                type=NodeType("subroutine"),
+                node_type=NodeType("routine_definition"),
                 children=[],
                 language=self.language,
                 tokens=self._count_tokens(chunk),
             )
+            self._split_into_lines(node)
+            for line_node in node.children:
+                self._split_comment(line_node)
+
             children.append(node)
 
-            start_byte = end_byte + len(bytes(suffix, "utf-8"))
-            start_line = end_line + suffix.count("\n")
+            start_byte = end_byte
+            start_line = end_line
 
         return CodeBlock(
             text=code,
@@ -122,8 +131,82 @@ class MumpsSplitter(Splitter):
             end_point=(code.count("\n"), 0),
             start_byte=0,
             end_byte=len(bytes(code, "utf-8")),
-            type=NodeType("routine"),
+            node_type=NodeType("routine"),
             children=children,
             language=self.language,
             tokens=self._count_tokens(code),
         )
+
+    @staticmethod
+    def comment_start(line: str) -> int:
+        first_semicolon = line.find(";")
+        if first_semicolon < 0:
+            return first_semicolon
+
+        # In mumps, quotes are escaped by doubling them (""). Single quote
+        #  characters are logical not operators, not quotes
+        n_quotes = line[:first_semicolon].replace('""', "").count('"')
+
+        # If the number of quotes prior to the first semicolon is even, then
+        #  that semicolon is not part of a quote (and therefore starts a comment)
+        if n_quotes % 2 == 0:
+            return first_semicolon
+
+        last_semicolon = first_semicolon
+        while (next_semicolon := line.find(";", last_semicolon + 1)) > 0:
+            n_quotes = line[last_semicolon:next_semicolon].replace('""', "").count('"')
+
+            # If the number of quotes in this chunk is odd, the total number
+            #  of them up to this point is even, and the next semicolon begins
+            #  the comment
+            if n_quotes % 2:
+                return next_semicolon
+
+            last_semicolon = next_semicolon
+
+        return -1
+
+    def _split_comment(self, line_node: CodeBlock):
+        comment_start = self.comment_start(line_node.text)
+        if comment_start < 0:
+            line_node.node_type = NodeType("code_line")
+            return
+
+        code = line_node.text[:comment_start]
+        if not code.strip():
+            line_node.node_type = NodeType("comment")
+            return
+
+        comment = line_node.text[comment_start:]
+        (l0, c0), (l1, c1) = line_node.start_point, line_node.end_point
+        prefix, suffix = line_node.affixes
+        code_bytes = len(bytes(code, "utf-8"))
+
+        line_node.children = [
+            CodeBlock(
+                text=code,
+                name=f"{line_node.name}-code",
+                id=f"{line_node.name}-code",
+                start_point=(l0, c0),
+                end_point=(l1, comment_start),
+                start_byte=line_node.start_byte,
+                end_byte=line_node.start_byte + code_bytes,
+                node_type=NodeType("code_line"),
+                children=[],
+                language=line_node.language,
+                tokens=self._count_tokens(code),
+            ),
+            CodeBlock(
+                text=comment,
+                name=f"{line_node.name}-comment",
+                id=f"{line_node.name}-comment",
+                start_point=(l0, c0 + comment_start),
+                end_point=(l1, c1),
+                start_byte=line_node.start_byte + code_bytes,
+                end_byte=line_node.end_byte,
+                node_type=NodeType("comment"),
+                children=[],
+                language=self.language,
+                tokens=self._count_tokens(comment),
+            ),
+        ]

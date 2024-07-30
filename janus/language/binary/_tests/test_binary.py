@@ -1,6 +1,7 @@
 import os
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -12,11 +13,25 @@ class TestBinarySplitter(unittest.TestCase):
     """Tests for the BinarySplitter class."""
 
     def setUp(self):
-        model_name = "gpt-3.5-turbo"
+        model_name = "gpt-3.5-turbo-0125"
         self.binary_file = Path("janus/language/binary/_tests/hello")
         self.llm, _, _ = load_model(model_name)
         self.splitter = BinarySplitter(model=self.llm)
         os.environ["GHIDRA_INSTALL_PATH"] = "~/programs/ghidra_10.4_PUBLIC"
+
+    def test_setup(self):
+        """Test that the setup sets the environment variable correctly."""
+        with patch("os.getenv") as mock_getenv:
+            mock_getenv.return_value = "~/programs/ghidra_10.4_PUBLIC"
+            self.assertEqual(
+                os.getenv("GHIDRA_INSTALL_PATH"), "~/programs/ghidra_10.4_PUBLIC"
+            )
+            mock_getenv.assert_called_once_with("GHIDRA_INSTALL_PATH")
+
+    def test_initialization(self):
+        """Test that BinarySplitter is initialized correctly."""
+        self.assertIsInstance(self.splitter, BinarySplitter)
+        self.assertEqual(self.splitter.model, self.llm)
 
     @pytest.mark.ghidra(
         reason=(

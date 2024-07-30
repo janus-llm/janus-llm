@@ -11,14 +11,14 @@ class Combiner(FileManager):
     """
 
     @staticmethod
-    def combine(block: CodeBlock) -> None:
+    def combine(root: CodeBlock) -> None:
         """Combine the given block with its children.
 
         Arguments:
-            block: The functional code block to combine with its children.
+            root: The functional code block to combine with its children.
         """
-        Combiner.combine_children(block)
-        block.omit_prefix = False
+        Combiner.combine_children(root)
+        root.omit_prefix = False
 
     @staticmethod
     def combine_children(block: CodeBlock) -> None:
@@ -44,20 +44,14 @@ class Combiner(FileManager):
         if block.text is None:
             children = sorted(block.children)
             block.text = "".join([c.complete_text for c in children])
-            block.children = []
             block.complete = children_complete
             return
 
-        # Replace all placeholders
         missing_children = []
         for child in block.children:
             if isinstance(block, TranslatedCodeBlock) and not child.translated:
                 missing_children.append(child)
                 continue
-            if not Combiner.contains_child(block.text, child):
-                missing_children.append(child)
-                continue
-            block.text = block.text.replace(child.placeholder, child.text)
 
         if missing_children:
             missing_ids = [c.id for c in missing_children]
@@ -66,36 +60,33 @@ class Combiner(FileManager):
         block.children = missing_children
         block.complete = children_complete and not missing_children
 
+
+class JsonCombiner(Combiner):
     @staticmethod
-    def contains_child(code: str, child: CodeBlock) -> bool:
-        """Determine whether the given code contains a placeholder for the given
-        child block.
+    def combine(root: CodeBlock) -> None:
+        """Combine the given block with its children.
 
         Arguments:
-            code: The code to check for the placeholder
-            child: The child block to check for
-
-        Returns:
-            Whether the given code contains a placeholder for the given child
-            block.
+            root: The functional code block to combine with its children.
         """
-        return code is None or child.placeholder in code
+        stack = [root]
+        while stack:
+            block = stack.pop()
+            if block.children:
+                stack.extend(block.children)
+                block.affixes = ("", "")
+            else:
+                block.affixes = ("\n", "\n")
+        super(JsonCombiner, JsonCombiner).combine(root)
 
+
+class ChunkCombiner(Combiner):
     @staticmethod
-    def count_missing(input_block: CodeBlock, output_code: str) -> int:
-        """Return the number of children of input_block who are not represented
-        in output_code with a placeholder
+    def combine(root: CodeBlock) -> None:
+        """A combiner which doesn't actually combine the code blocks,
+        instead preserving children
 
         Arguments:
-            input_block: The block to check for missing children
-            output_code: The code to check for placeholders
-
-        Returns:
-            The number of children of input_block who are not represented in
-            output_code with a placeholder
+            root: The functional code block to combine with its children.
         """
-        missing_children = 0
-        for child in input_block.children:
-            if not Combiner.contains_child(output_code, child):
-                missing_children += 1
-        return missing_children
+        return root

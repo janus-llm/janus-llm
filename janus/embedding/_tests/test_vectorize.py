@@ -54,5 +54,5 @@ class TestVectorize(unittest.TestCase):
             self.test_block, embedding_type, self.test_file.name
         )
         self.database.get_or_create_collection.assert_called_with(
-            "source_1", metadata=metadata
+            name="source_1", embedding_function=None, metadata=metadata
         )

@@ -1,9 +1,10 @@
 import uuid
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Sequence
+from typing import Any, Dict, Optional, Sequence
 
 from chromadb import Client, Collection
+from langchain_community.vectorstores import Chroma
 
 from ..language.block import CodeBlock, TranslatedCodeBlock
 from ..utils.enums import EmbeddingType
@@ -14,17 +15,24 @@ from .database import ChromaEmbeddingDatabase
 class Vectorizer(object):
     """Class for creating embeddings/vectors in a specified ChromaDB"""
 
-    def __init__(self, client: Client) -> None:
+    def __init__(self, client: Client, config: Optional[Dict[str, Any]] = None) -> None:
         """Initializes the Vectorizer class
 
         Arguments:
             client: ChromaDB client instance
         """
         self._db = client
-        self._collections = Collections(self._db)
+        self._collections = Collections(self._db, config)
 
-    def create_collection(self, embedding_type: EmbeddingType) -> Collection:
-        return self._collections.create(embedding_type)
+    def get_or_create_collection(
+        self, name: EmbeddingType | str, model_name: Optional[str] = None
+    ) -> Chroma:
+        return self._collections.get_or_create(name, model_name=model_name)
+
+    def create_collection(
+        self, embedding_type: EmbeddingType, model_name: Optional[str] = None
+    ) -> Chroma:
+        return self._collections.create(embedding_type, model_name=model_name)
 
     def collections(
         self, name: None | EmbeddingType | str = None
@@ -64,7 +72,7 @@ class Vectorizer(object):
         if code_block.text:
             metadatas = [
                 {
-                    "type": code_block.type,
+                    "type": code_block.node_type,
                     "id": code_block.id,
                     "name": code_block.name,
                     "language": code_block.language,
@@ -73,6 +81,8 @@ class Vectorizer(object):
                     "cost": 0,  # TranslatedCodeBlock has cost
                 },
             ]
+            if collection_name in self.config:
+                metadatas[0]["embedding_model"] = self.config[collection_name]
             # for now, dealing with missing metadata by skipping it
             if isinstance(code_block, TranslatedCodeBlock):
                 self._add(
@@ -126,15 +136,21 @@ class Vectorizer(object):
             # based on the text.
             ids = [str(uuid.uuid3(uuid.NAMESPACE_DNS, text)) for text in texts]
         collection = self._collections.get_or_create(collection_name)
-        collection.upsert(ids=ids, documents=texts, metadatas=metadatas)
+        collection.add_texts(ids=ids, texts=texts, metadatas=metadatas)
         return ids
+
+    @property
+    def config(self):
+        return self._collections._config
 
 
 class VectorizerFactory(ABC):
     """Interface for creating a Vectorizer independent of type of ChromaDB client"""
 
     @abstractmethod
-    def create_vectorizer(self, path: str | Path) -> Vectorizer:
+    def create_vectorizer(
+        self, path: str | Path, config: Dict[str, Any] = {}
+    ) -> Vectorizer:
         """Factory method"""
 
 
@@ -144,6 +160,7 @@ class ChromaDBVectorizer(VectorizerFactory):
     def create_vectorizer(
         self,
         path: str | Path = Path.home() / ".janus" / "chroma" / "chroma-data",
+        config: Optional[Dict[str, Any]] = None,
     ) -> Vectorizer:
         """
         Arguments:
@@ -154,4 +171,4 @@ class ChromaDBVectorizer(VectorizerFactory):
                 Vectorizer
         """
         database = ChromaEmbeddingDatabase(path)
-        return Vectorizer(database)
+        return Vectorizer(database, config)

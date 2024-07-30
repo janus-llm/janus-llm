@@ -11,7 +11,7 @@ class TestMumpsSplitter(unittest.TestCase):
 
     def setUp(self):
         """Set up the tests."""
-        model_name = "gpt-3.5-turbo"
+        model_name = "gpt-3.5-turbo-0125"
         llm, _, _ = load_model(model_name)
         self.splitter = MumpsSplitter(model=llm)
         self.combiner = Combiner(language="mumps")
@@ -20,7 +20,7 @@ class TestMumpsSplitter(unittest.TestCase):
     def test_split(self):
         """Test the split method."""
         tree_root = self.splitter.split(self.test_file)
-        self.assertEqual(len(tree_root.children), 6)
+        self.assertEqual(len(tree_root.children), 22)
         self.assertLessEqual(tree_root.max_tokens, self.splitter.max_tokens)
         self.assertFalse(tree_root.complete)
         self.combiner.combine_children(tree_root)

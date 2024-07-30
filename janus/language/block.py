@@ -14,7 +14,7 @@ class CodeBlock:
     Attributes:
         id: The id of the code block in the AST
         name: Descriptive name of node
-        type: The type of the code block ('function', 'module', etc.). Defined in the
+        node_type: The type of the code block ('function', 'module', etc.). Defined in the
             language-specific modules.
         language: The language of the code block.
         text: The code block.
@@ -34,7 +34,7 @@ class CodeBlock:
         self,
         id: Hashable,
         name: Optional[str],
-        type: NodeType,
+        node_type: NodeType,
         language: str,
         text: Optional[str],
         start_point: Optional[Tuple[int, int]],
@@ -48,7 +48,7 @@ class CodeBlock:
     ) -> None:
         self.id: Hashable = id
         self.name: Optional[str] = name
-        self.type: NodeType = type
+        self.node_type: NodeType = node_type
         self.language: str = language
         self.text: Optional[str] = text
         self.start_point: Optional[Tuple[int, int]] = start_point
@@ -83,15 +83,7 @@ class CodeBlock:
 
     @property
     def complete_text(self) -> str:
-        return f"{self.prefix}{self.text}{self.suffix}"
-
-    @property
-    def placeholder(self) -> str:
-        return f"<<<{self.id}>>>"
-
-    @property
-    def complete_placeholder(self) -> str:
-        return f"{self.prefix}<<<{self.id}>>>{self.suffix}"
+        return f"{self.prefix}{self.text or ''}{self.suffix}"
 
     @property
     def n_descendents(self) -> int:
@@ -146,15 +138,25 @@ class CodeBlock:
         self.affixes = (self.affixes[0], "")
         return suffix
 
+    def rebuild_text_from_children(self):
+        if self.children:
+            prefix = self.affixes[0] + self.children[0].pop_prefix()
+            suffix = self.children[-1].pop_suffix() + self.affixes[1]
+            self.text = "".join(c.complete_text for c in self.children)
+            self.affixes = (prefix, suffix)
+            self.tokens = sum(c.tokens for c in self.children)
+
     def tree_str(self, depth: int = 0) -> str:
         """A string representation of the tree with this block as the root
 
         Returns:
             A string representation of the tree with this block as the root
         """
+        tokens = self.tokens
         identifier = self.id
         if self.text is None:
             identifier = f"({identifier})"
+            tokens = self.total_tokens
         elif not self.complete:
             identifier += "*"
         if self.start_point is not None and self.end_point is not None:
@@ -165,7 +167,7 @@ class CodeBlock:
             seg = ""
         return "\n".join(
             [
-                f"{'| '*depth}{identifier}{seg}",
+                f"{'| '*depth}{identifier}{seg}  ({tokens:,d} tokens)",
                 *[c.tree_str(depth + 1) for c in self.children],
             ]
         )
@@ -195,7 +197,7 @@ class TranslatedCodeBlock(CodeBlock):
         super().__init__(
             id=original.id,
             name=original.name,
-            type=original.type,
+            node_type=original.node_type,
             language=language,
             text=None,
             start_point=original.start_point,
@@ -214,6 +216,7 @@ class TranslatedCodeBlock(CodeBlock):
         self.translated = False
         self.cost = 0.0
         self.retries = 0
+        self.processing_time = 0.0
 
     @property
     def total_cost(self) -> float:
