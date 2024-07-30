@@ -84,9 +84,9 @@ class PromptEngine(ABC):
     def __init__(
         self,
         source_language: str,
-        target_language: str,
-        target_version: str,
         prompt_template: str,
+        target_language: str | None = None,
+        target_version: str | None = None,
     ) -> None:
         """Initialize a PromptEngine instance.
 
@@ -107,15 +107,18 @@ class PromptEngine(ABC):
 
         # Define variables to be passed in to the prompt formatter
         source_language = source_language.lower()
-        target_language = target_language.lower()
         self.variables = dict(
             SOURCE_LANGUAGE=source_language,
-            TARGET_LANGUAGE=target_language,
-            TARGET_LANGUAGE_VERSION=str(target_version),
             FILE_SUFFIX=LANGUAGES[source_language]["suffix"],
             SOURCE_CODE_EXAMPLE=LANGUAGES[source_language]["example"],
-            TARGET_CODE_EXAMPLE=LANGUAGES[target_language]["example"],
         )
+        if target_language is not None:
+            target_language = target_language.lower()
+            self.variables.update(
+                TARGET_LANGUAGE=target_language,
+                TARGET_CODE_EXAMPLE=LANGUAGES[target_language]["example"],
+            )
+            self.variables.update(TARGET_LANGUAGE_VERSION=str(target_version))
         variables_path = template_path / PROMPT_VARIABLES_FILENAME
         if variables_path.exists():
             self.variables.update(json.loads(variables_path.read_text()))
