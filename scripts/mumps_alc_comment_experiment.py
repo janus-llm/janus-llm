@@ -19,6 +19,7 @@ class Experimenter:
     def __init__(
         self,
         input_dir: str | None = None,
+        output_dir: str | None = None,
         source_language: str | None = None,
         model: str = "gpt-3.5-turbo-0125",
         TOK_SIZES: list = [512, 1024, 2048, 4096, 8192, 16384, 100000, 200000],
@@ -34,6 +35,9 @@ class Experimenter:
 
         Arguments:
             input_dir: Directory containing the input source code files.
+            output_dir: Directory to store experiment results.
+                NOTE: Ensure directory is language specific
+                (e.g. data/mumps-irt-20240730)
             source_langauge: The language of the source code files.
                 NOTE: If doing alc experiment, source langauge should be ibmhlasm
             model: The LLM to use for comment generation.
@@ -43,6 +47,7 @@ class Experimenter:
             RESULT_DIRS: The names of the resulting output directories
         """
         self.input_dir = input_dir
+        self.output_dir = output_dir
         self.source_language = source_language
         self.model = model
         self.TOK_SIZES = TOK_SIZES
@@ -146,6 +151,13 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="Input directory of source code files.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        required=True,
+        help="Directory to store experiment results. Ensure directory is language "
+        "specific (e.g. data/mumps-irt-20240730).",
     )
 
     parser.add_argument(
