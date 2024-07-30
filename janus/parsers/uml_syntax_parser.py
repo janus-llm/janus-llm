@@ -1,5 +1,5 @@
 import re
-import subprocess
+import subprocess  # nosec
 from pathlib import Path
 from typing import List, Tuple
 
