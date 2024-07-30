@@ -66,7 +66,7 @@ class Experimenter:
         )
 
         # Documenters with fixed 1,000,000 token limit
-        file_split = MadLibsDocumenter(custom_splitter="file", **kwargs)
+        file_split = MadLibsDocumenter(splitter_type="file", **kwargs)
         log.info("Running FILE splitting experiment.")
         file_split.translate(
             input_directory=self.input_dir,
@@ -74,7 +74,7 @@ class Experimenter:
         )
         log.info("FILE splitting experiment complete")
 
-        ast_strict_split = MadLibsDocumenter(custom_splitter="ast-strict", **kwargs)
+        ast_strict_split = MadLibsDocumenter(splitter_type="ast-strict", **kwargs)
         log.info("Running AST-STRICT splitting experiment.")
         ast_strict_split.translate(
             input_directory=self.input_dir,
@@ -86,7 +86,7 @@ class Experimenter:
         for TOKS in self.TOK_SIZES:
             kwargs["max_tokens"] = TOKS
 
-            chunk_split = MadLibsDocumenter(custom_splitter="chunk", **kwargs)
+            chunk_split = MadLibsDocumenter(splitter_type="chunk", **kwargs)
             log.info(
                 f"Running CHUNK splitting experiment with {TOKS} "
                 "as max token limit for model."
@@ -99,7 +99,7 @@ class Experimenter:
                 f"CHUNK splitting experiment with {TOKS} as max token limit complete."
             )
 
-            ast_flex_split = MadLibsDocumenter(custom_splitter="ast-flex", **kwargs)
+            ast_flex_split = MadLibsDocumenter(splitter_type="ast-flex", **kwargs)
             log.info(
                 f"Running AST-FLEX splitting experiment with {TOKS} "
                 "as max token limit for model."
@@ -182,7 +182,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     experiment = Experimenter(
-        args.input_dir, args.source_language, args.model, args.max_token_sizes
+        args.input_dir,
+        args.output_dir,
+        args.source_language,
+        args.model,
+        args.max_token_sizes,
     )
     experiment.run()
     experiment.process_dirs()
