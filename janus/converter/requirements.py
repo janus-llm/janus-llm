@@ -31,13 +31,14 @@ class RequirementsDocumenter(Documenter):
         output_list = list()
         # For each chunk of code, get generation metadata, the text of the code,
         # and the LLM generated requirements
-        for child in block.children:
-            code = child.original.text
-            requirements = self._parser.parse_combined_output(child.complete_text)
+        blocks = [block for block in block.children] if len(block.children) else [block]
+        for block in blocks:
+            code = block.original.text
+            requirements = self._parser.parse_combined_output(block.complete_text)
             metadata = dict(
-                retries=child.total_retries,
-                cost=child.total_cost,
-                processing_time=child.processing_time,
+                retries=block.total_retries,
+                cost=block.total_cost,
+                processing_time=block.processing_time,
             )
             # Put them all in a top level 'output' key
             output_list.append(
