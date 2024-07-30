@@ -22,7 +22,10 @@ class UMLSyntaxParser(CodeParser):
 
     def parse(self, text: str) -> str:
         text = super().parse(text)
-        temp_file_path = Path.home().expanduser() / Path(".janus/tmp.txt")
+        janus_path = Path.home().expanduser() / Path(".janus")
+        if not janus_path.exists():
+            janus_path.mkdir()
+        temp_file_path = janus_path / "tmp.txt"
         with open(temp_file_path, "w") as f:
             f.write(text)
         uml_std_out, uml_std_err = self._get_uml_output(temp_file_path)
