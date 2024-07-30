@@ -12,11 +12,16 @@ class UMLSyntaxParser(CodeParser):
     def _get_uml_output(self, file: str) -> Tuple[str, str]:
         # NOTE: running subprocess with shell=False, added nosec to label that we know
         # risk exists
-        res = subprocess.run(
-            ["plantuml", file], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )  # nosec
-        stdout = res.stdout.decode("utf-8")
-        stderr = res.stderr.decode("utf-8")
+        try:
+            res = subprocess.run(
+                ["plantuml", file], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )  # nosec
+            stdout = res.stdout.decode("utf-8")
+            stderr = res.stderr.decode("utf-8")
+        except FileNotFoundError:
+            print("Plant UML executable not found, skipping syntax check")
+            stdout = ""
+            stderr = ""
         return stdout, stderr
 
     def _get_errs(self, s: str) -> List[str]:
