@@ -55,10 +55,11 @@ class Experimenter:
         kwargs = dict(
             model=self.model,
             source_language=self.source_language,
-            max_prompts=10,
+            max_prompts=125,
             max_tokens=1000000,
-            comments_per_request=100,
+            comments_per_request=10,
         )
+
         # Documenters with fixed 1,000,000 token limit
         file_split = MadLibsDocumenter(custom_splitter="file", **kwargs)
         log.info("Running FILE splitting experiment.")
