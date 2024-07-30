@@ -1,6 +1,7 @@
 import os
 import platform
 from collections import defaultdict
+from ctypes import c_void_p, cdll
 from pathlib import Path
 from typing import Optional
 
@@ -138,7 +139,25 @@ class TreeSitterSplitter(Splitter):
 
         # Load the parser using the generated .so file
         self.parser: tree_sitter.Parser = tree_sitter.Parser()
-        self.parser.set_language(tree_sitter.Language(so_file, self.language))
+        pointer = self._so_to_pointer(so_file)
+        self.parser.set_language(tree_sitter.Language(pointer, self.language))
+
+    def _so_to_pointer(self, so_file: str) -> int:
+        """Convert the .so file to a pointer.
+
+        Taken from `treesitter.Language.__init__` to get past deprecated warning.
+
+        Arguments:
+            so_file: The path to the so file for the language.
+
+        Returns:
+            The pointer to the language.
+        """
+        lib = cdll.LoadLibrary(os.fspath(so_file))
+        language_function = getattr(lib, f"tree_sitter_{self.language}")
+        language_function.restype = c_void_p
+        pointer = language_function()
+        return pointer
 
     def _create_parser(self, so_file: Path | str) -> None:
         """Create the parser for the given language.

@@ -104,7 +104,7 @@ class TestCli(unittest.TestCase):
         result = self.runner.invoke(app, ["db", "rm", "test-db-name", "-y"])
         self.assertEqual(result.exit_code, 0)
 
-    @patch("janus.translate.Translator.translate", autospec=True)
+    @patch("janus.converter.translate.Translator.translate", autospec=True)
     def test_translate(self, mock_translate):
         # Arrange
         mock_instance = mock_translate.return_value
@@ -119,7 +119,6 @@ class TestCli(unittest.TestCase):
             overwrite=True,
             temp=0.7,
             prompt_template="simple",
-            parser_type="code",
             collection=None,
         )
 

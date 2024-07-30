@@ -216,7 +216,7 @@ class TranslatedCodeBlock(CodeBlock):
         self.translated = False
         self.cost = 0.0
         self.retries = 0
-        self.processing_time = 0
+        self.processing_time = 0.0
 
     @property
     def total_cost(self) -> float:
