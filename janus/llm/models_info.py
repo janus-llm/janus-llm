@@ -55,11 +55,12 @@ openai_model_reroutes = {
 }
 
 openai_models = [
-    "gpt-4-0613",
-    "gpt-4-1106-preview",
-    "gpt-4-0125-preview",
-    "gpt-4o-2024-05-13",
-    "gpt-3.5-turbo-0125",
+    "gpt-4o",
+    "gpt-4",
+    "gpt-4-turbo",
+    "gpt-4-turbo-preview",
+    "gpt-3.5-turbo",
+    "gpt-3.5-turbo-16k",
 ]
 claude_models = [
     "bedrock-claude-v2",
@@ -133,8 +134,8 @@ _open_ai_defaults: dict[str, str] = {
     "openai_organization": os.getenv("OPENAI_ORG_ID"),
 }
 
-model_identifiers = {
-    **{m: m for m in openai_models},
+MODEL_ID_TO_LONG_ID = {
+    **{m: mr for m, mr in openai_model_reroutes.items()},
     "bedrock-claude-v2": "anthropic.claude-v2",
     "bedrock-claude-instant-v1": "anthropic.claude-instant-v1",
     "bedrock-claude-haiku": "anthropic.claude-3-haiku-20240307-v1:0",
@@ -157,7 +158,7 @@ model_identifiers = {
 
 MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, str]] = {
     k: (dict(model_name=k) if k in openai_models else dict(model_id=v))
-    for k, v in model_identifiers.items()
+    for k, v in MODEL_ID_TO_LONG_ID.items()
 }
 
 DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
@@ -199,22 +200,30 @@ TOKEN_LIMITS: dict[str, int] = {
 }
 
 
-def load_model(model_name: str) -> tuple[BaseLanguageModel, int, dict[str, float]]:
+def get_available_model_names() -> list[str]:
+    avaialable_models = []
+    for file in MODEL_CONFIG_DIR.iterdir():
+        if file.is_file():
+            avaialable_models.append(MODEL_CONFIG_DIR.stem)
+    return avaialable_models
+
+
+def load_model(user_model_name: str) -> tuple[BaseLanguageModel, int, dict[str, float]]:
     if not MODEL_CONFIG_DIR.exists():
         MODEL_CONFIG_DIR.mkdir(parents=True)
-    model_config_file = MODEL_CONFIG_DIR / f"{model_name}.json"
+    model_config_file = MODEL_CONFIG_DIR / f"{user_model_name}.json"
     if not model_config_file.exists():
-        if model_name not in DEFAULT_MODELS:
-            if model_name in openai_model_reroutes:
-                model_name = openai_model_reroutes[model_name]
+        if user_model_name not in DEFAULT_MODELS:
+            if user_model_name in openai_model_reroutes:
+                model_id = openai_model_reroutes[user_model_name]
             else:
-                raise ValueError(f"Error: could not find model {model_name}")
+                raise ValueError(f"Error: could not find model {user_model_name}")
         model_config = {
-            "model_type": MODEL_TYPES[model_name],
-            "model_args": MODEL_DEFAULT_ARGUMENTS[model_name],
-            "token_limit": TOKEN_LIMITS.get(model_identifiers[model_name], 4096),
+            "model_type": MODEL_TYPES[model_id],
+            "model_args": MODEL_DEFAULT_ARGUMENTS[model_id],
+            "token_limit": TOKEN_LIMITS.get(MODEL_ID_TO_LONG_ID[model_id], 4096),
             "model_cost": COST_PER_1K_TOKENS.get(
-                model_identifiers[model_name], {"input": 0, "output": 0}
+                MODEL_ID_TO_LONG_ID[model_id], {"input": 0, "output": 0}
             ),
         }
         with open(model_config_file, "w") as f:
@@ -227,4 +236,9 @@ def load_model(model_name: str) -> tuple[BaseLanguageModel, int, dict[str, float
     if model_config["model_type"] == "OpenAI":
         model_args.update(_open_ai_defaults)
     model = model_constructor(**model_args)
-    return model, model_config["token_limit"], model_config["model_cost"]
+    return (
+        model,
+        model_config["model_id"],
+        model_config["token_limit"],
+        model_config["model_cost"],
+    )

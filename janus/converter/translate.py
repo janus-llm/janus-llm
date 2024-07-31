@@ -90,7 +90,7 @@ class Translator(Converter):
                     f"({self._source_language} != {self._target_language})"
                 )
 
-        prompt_engine = MODEL_PROMPT_ENGINES[self._model_name](
+        prompt_engine = MODEL_PROMPT_ENGINES[self._model_id](
             source_language=self._source_language,
             target_language=self._target_language,
             target_version=self._target_version,
