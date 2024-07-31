@@ -5,7 +5,7 @@ from janus.converter.converter import run_if_changed
 from janus.converter.document import Documenter
 from janus.language.block import TranslatedCodeBlock
 from janus.llm.models_info import MODEL_PROMPT_ENGINES
-from janus.parsers.uml_syntax_parser import UMLSyntaxParser
+from janus.parsers.uml import UMLSyntaxParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
