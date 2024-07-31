@@ -5,7 +5,11 @@ from typing import List, Tuple
 
 from langchain_core.exceptions import OutputParserException
 
+from janus.utils.logger import create_logger
+
 from .code_parser import CodeParser
+
+log = create_logger(__name__)
 
 
 class UMLSyntaxParser(CodeParser):
@@ -22,7 +26,7 @@ class UMLSyntaxParser(CodeParser):
             stdout = res.stdout.decode("utf-8")
             stderr = res.stderr.decode("utf-8")
         except FileNotFoundError:
-            print("Plant UML executable not found, skipping syntax check")
+            log.warning("Plant UML executable not found, skipping syntax check")
             stdout = ""
             stderr = ""
         return stdout, stderr
