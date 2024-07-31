@@ -29,6 +29,7 @@ from janus.llm import load_model
 from janus.llm.model_callbacks import get_model_callback
 from janus.llm.models_info import MODEL_PROMPT_ENGINES
 from janus.parsers.code_parser import GenericParser
+from janus.refiners.refiner import Refiner
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
@@ -75,6 +76,7 @@ class Converter:
         protected_node_types: tuple[str, ...] = (),
         prune_node_types: tuple[str, ...] = (),
         splitter_type: str = "file",
+        refiner_type: str = "basic",
     ) -> None:
         """Initialize a Converter instance.
 
@@ -115,7 +117,11 @@ class Converter:
         self._parser: BaseOutputParser = GenericParser()
         self._combiner: Combiner = Combiner()
 
+        self._refiner_type: str
+        self._refiner: Refiner
+
         self.set_splitter(splitter_type=splitter_type)
+        self.set_refiner(refiner_type=refiner_type)
         self.set_model(model_name=model, **model_arguments)
         self.set_prompt(prompt_template=prompt_template)
         self.set_source_language(source_language)
@@ -177,6 +183,16 @@ class Converter:
                 (see janus/prompts/templates) or path to a directory.
         """
         self._splitter_type = splitter_type
+
+    def set_refiner(self, refiner_type: str) -> None:
+        """
+        Validate and set the refiner name
+
+        The affected objects will not be updated until translate is called
+        Arguments
+            refiner_type: the name of the refiner to use
+        """
+        self._refiner_type = refiner_type
 
     def set_source_language(self, source_language: str) -> None:
         """Validate and set the source language.
@@ -251,6 +267,10 @@ class Converter:
             kwargs["tag"] = "<ITMOD_ALC_SPLIT>"
 
         self._splitter = CUSTOM_SPLITTERS[self._splitter_type](**kwargs)
+
+    @run_if_changed("_refiner_type")
+    def _load_refiner(self) -> None:
+        pass
 
     @run_if_changed("_model_name", "_custom_model_arguments")
     def _load_model(self) -> None:
