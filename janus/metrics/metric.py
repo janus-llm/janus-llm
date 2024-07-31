@@ -112,7 +112,7 @@ def metric(
                         "-L",
                         help="The custom name of the model set with 'janus llm add'.",
                     ),
-                ] = "gpt-3.5-turbo-0125",
+                ] = "gpt-4o",
                 progress: Annotated[
                     bool,
                     typer.Option(
@@ -135,7 +135,7 @@ def metric(
                 **kwargs,
             ):
                 out = []
-                llm, token_limit, model_cost = load_model(llm_name)
+                llm, _, token_limit, model_cost = load_model(llm_name)
                 if json_file_name is not None:
                     with open(json_file_name, "r") as f:
                         json_obj = json.load(f)
@@ -274,7 +274,7 @@ def metric(
                         "-L",
                         help="The custom name of the model set with 'janus llm add'.",
                     ),
-                ] = "gpt-3.5-turbo-0125",
+                ] = "gpt-4o",
                 progress: Annotated[
                     bool,
                     typer.Option(
@@ -296,7 +296,7 @@ def metric(
                 *args,
                 **kwargs,
             ):
-                llm, token_limit, model_cost = load_model(llm_name)
+                llm, _, token_limit, model_cost = load_model(llm_name)
                 if json_file_name is not None:
                     with open(json_file_name, "r") as f:
                         json_obj = json.load(f)

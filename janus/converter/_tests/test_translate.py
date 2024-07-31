@@ -79,7 +79,7 @@ class TestTranslator(unittest.TestCase):
     def setUp(self):
         """Set up the tests."""
         self.translator = Translator(
-            model="gpt-3.5-turbo-0125",
+            model="gpt-4o",
             source_language="fortran",
             target_language="python",
             target_version="3.10",
@@ -88,7 +88,7 @@ class TestTranslator(unittest.TestCase):
         self.TEST_FILE_EMBEDDING_COUNT = 14
 
         self.req_translator = RequirementsDocumenter(
-            model="gpt-3.5-turbo-0125",
+            model="gpt-4o",
             source_language="fortran",
             prompt_template="requirements",
         )
@@ -317,14 +317,14 @@ class TestDiagramGenerator(unittest.TestCase):
     def setUp(self):
         """Set up the tests."""
         self.diagram_generator = DiagramGenerator(
-            model="gpt-3.5-turbo-0125",
+            model="gpt-4o",
             source_language="fortran",
             diagram_type="Activity",
         )
 
     def test_init(self):
         """Test __init__ method."""
-        self.assertEqual(self.diagram_generator._model_name, "gpt-3.5-turbo-0125")
+        self.assertEqual(self.diagram_generator._model_name, "gpt-4o")
         self.assertEqual(self.diagram_generator._source_language, "fortran")
         self.assertEqual(self.diagram_generator._diagram_type, "Activity")
 
@@ -370,8 +370,8 @@ def test_language_combinations(
     """Tests that translator target language settings are consistent
     with prompt template expectations.
     """
-    translator = Translator(model="gpt-3.5-turbo-0125")
-    translator.set_model("gpt-3.5-turbo-0125")
+    translator = Translator(model="gpt-4o")
+    translator.set_model("gpt-4o")
     translator.set_source_language(source_language)
     translator.set_target_language(expected_target_language, expected_target_version)
     translator.set_prompt(prompt_template)
@@ -379,5 +379,5 @@ def test_language_combinations(
     assert translator._target_language == expected_target_language  # nosec
     assert translator._target_version == expected_target_version  # nosec
     assert translator._splitter.language == source_language  # nosec
-    assert translator._splitter.model.model_name == "gpt-3.5-turbo-0125"  # nosec
+    assert translator._splitter.model.model_name == "gpt-4o"  # nosec
     assert translator._prompt_template_name == prompt_template  # nosec

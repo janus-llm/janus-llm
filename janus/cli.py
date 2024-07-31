@@ -182,7 +182,7 @@ def translate(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-3.5-turbo-0125",
+    ] = "gpt-4o",
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -304,7 +304,7 @@ def document(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-3.5-turbo-0125",
+    ] = "gpt-4o",
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -440,7 +440,7 @@ def diagram(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-3.5-turbo-0125",
+    ] = "gpt-4o",
     max_prompts: Annotated[
         int,
         typer.Option(

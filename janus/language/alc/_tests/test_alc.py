@@ -11,8 +11,8 @@ class TestAlcSplitter(unittest.TestCase):
 
     def setUp(self):
         """Set up the tests."""
-        model_name = "gpt-3.5-turbo-0125"
-        llm, _, _ = load_model(model_name)
+        model_name = "gpt-4o"
+        llm, _, _, _ = load_model(model_name)
         self.splitter = AlcSplitter(model=llm)
         self.combiner = Combiner(language="ibmhlasm")
         self.test_file = Path("janus/language/alc/_tests/alc.asm")
@@ -20,7 +20,7 @@ class TestAlcSplitter(unittest.TestCase):
     def test_split(self):
         """Test the split method."""
         tree_root = self.splitter.split(self.test_file)
-        self.assertEqual(tree_root.n_descendents, 34)
+        self.assertEqual(tree_root.n_descendents, 35)
         self.assertLessEqual(tree_root.max_tokens, self.splitter.max_tokens)
         self.assertFalse(tree_root.complete)
         self.combiner.combine_children(tree_root)

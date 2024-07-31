@@ -213,13 +213,13 @@ def load_model(user_model_name: str) -> tuple[BaseLanguageModel, int, dict[str, 
         MODEL_CONFIG_DIR.mkdir(parents=True)
     model_config_file = MODEL_CONFIG_DIR / f"{user_model_name}.json"
     if not model_config_file.exists():
+        model_id = user_model_name
         if user_model_name not in DEFAULT_MODELS:
-            if user_model_name in openai_model_reroutes:
-                model_id = openai_model_reroutes[user_model_name]
-            else:
-                raise ValueError(f"Error: could not find model {user_model_name}")
+            log.warning(f"Model {user_model_name} not found. Defaulting to gpt-4o.")
+            model_id = "gpt-4o"
         model_config = {
             "model_type": MODEL_TYPES[model_id],
+            "model_id": model_id,
             "model_args": MODEL_DEFAULT_ARGUMENTS[model_id],
             "token_limit": TOKEN_LIMITS.get(MODEL_ID_TO_LONG_ID[model_id], 4096),
             "model_cost": COST_PER_1K_TOKENS.get(
