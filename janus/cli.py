@@ -16,6 +16,7 @@ from janus.converter.diagram import DiagramGenerator
 from janus.converter.document import Documenter, MadLibsDocumenter, MultiDocumenter
 from janus.converter.requirements import RequirementsDocumenter
 from janus.converter.translate import Translator
+from janus.converter.evaluate import Evaluator
 from janus.embedding.collections import Collections
 from janus.embedding.database import ChromaEmbeddingDatabase
 from janus.embedding.embedding_models_info import (
@@ -505,6 +506,125 @@ def diagram(
         splitter_type=splitter_type,
     )
     diagram_generator.translate(input_dir, output_dir, overwrite, collection)
+
+@app.command(
+    help="LLM self evaluation",
+    no_args_is_help=True,
+)
+def llm_self_eval(
+    input_dir: Annotated[
+        Path,
+        typer.Option(
+            "--input",
+            "-i",
+            help="The directory containing the source code to be evaluated. "
+            "The files should all be in one flat directory.",
+        ),
+    ],
+    language: Annotated[
+        str,
+        typer.Option(
+            "--language",
+            "-l",
+            help="The language of the source code.",
+            click_type=click.Choice(sorted(LANGUAGES)),
+        ),
+    ],
+    output_dir: Annotated[
+        Path,
+        typer.Option(
+            "--output-dir", "-o", help="The directory to store the evaluations in."
+        ),
+    ],
+    llm_name: Annotated[
+        str,
+        typer.Option(
+            "--llm",
+            "-L",
+            help="The custom name of the model set with 'janus llm add'.",
+        ),
+    ] = "gpt-3.5-turbo-0125",
+    max_prompts: Annotated[
+        int,
+        typer.Option(
+            "--max-prompts",
+            "-m",
+            help="The maximum number of times to prompt a model on one functional block "
+            "before exiting the application. This is to prevent wasting too much money.",
+        ),
+    ] = 10,
+    overwrite: Annotated[
+        bool,
+        typer.Option(
+            "--overwrite/--preserve",
+            help="Whether to overwrite existing files in the output directory",
+        ),
+    ] = False,
+    temperature: Annotated[
+        float,
+        typer.Option("--temperature", "-t", help="Sampling temperature.", min=0, max=2),
+    ] = 0.7,
+    collection: Annotated[
+        str,
+        typer.Option(
+            "--collection",
+            "-c",
+            help="If set, will put the translated result into a Chroma DB "
+            "collection with the name provided.",
+        ),
+    ] = None,
+    diagram_type: Annotated[
+        str,
+        typer.Option(
+            "--diagram-type", "-dg", help="Diagram type to generate in PLANTUML"
+        ),
+    ] = "Activity",
+    add_documentation: Annotated[
+        bool,
+        typer.Option(
+            "--add-documentation/--no-documentation",
+            "-ad",
+            help="Whether to use documentation in generation",
+        ),
+    ] = False,
+    splitter_type: Annotated[
+        str,
+        typer.Option(
+            "-S",
+            "--splitter",
+            help="Name of custom splitter to use",
+            click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
+        ),
+    ] = "file",
+    multi_prompt_dir: Annotated[
+        Path,
+        typer.Option(
+            "-MP",
+            "--multi-prompt",
+            help="Name of directory for multiple prompts to be used in evaluations",
+        ),
+    ] = None,
+    prompt: Annotated[
+        Path,
+        typer.Option(
+            "-P",
+            "--prompt",
+            help="Prompt to be used in evaluation",
+        ),
+    ] = None,
+):
+    model_arguments = dict(temperature=temperature)
+    collections_config = get_collections_config()
+    diagram_generator = Evaluator(
+        model=llm_name,
+        model_arguments=model_arguments,
+        source_language=language,
+        max_prompts=max_prompts,
+        splitter_type=splitter_type,
+        multi_prompt_dir=multi_prompt_dir,
+        prompt = prompt
+    )
+    diagram_generator._self_test(multi_prompt_dir, input_dir, output_dir, prompt)
 
 
 @db.command("init", help="Connect to or create a database.")
