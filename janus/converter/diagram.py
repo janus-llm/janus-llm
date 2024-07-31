@@ -5,6 +5,7 @@ from janus.converter.converter import run_if_changed
 from janus.converter.document import Documenter
 from janus.language.block import TranslatedCodeBlock
 from janus.llm.models_info import MODEL_PROMPT_ENGINES
+from janus.parsers.uml import UMLSyntaxParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -39,6 +40,7 @@ class DiagramGenerator(Documenter):
         self._diagram_type = diagram_type
         self._add_documentation = add_documentation
         self._documenter = None
+        self._diagram_parser = UMLSyntaxParser(language="plantuml")
         if add_documentation:
             self._diagram_prompt_template_name = "diagram_with_documentation"
         else:
@@ -83,7 +85,7 @@ class DiagramGenerator(Documenter):
 
         self._parser.set_reference(block.original)
 
-        query_and_parse = self.diagram_prompt | self._llm | self._parser
+        query_and_parse = self.diagram_prompt | self._llm | self._diagram_parser
 
         if self._add_documentation:
             block.text = query_and_parse.invoke(
