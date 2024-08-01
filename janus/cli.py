@@ -34,6 +34,7 @@ from janus.llm.models_info import (
     MODEL_CONFIG_DIR,
     MODEL_ID_TO_LONG_ID,
     MODEL_TYPE_CONSTRUCTORS,
+    MODEL_TYPES,
     TOKEN_LIMITS,
     bedrock_models,
     openai_models,
@@ -804,7 +805,7 @@ def llm_add(
         }
     elif model_type == "OpenAI":
         model_id = typer.prompt(
-            "Enter the model name",
+            "Enter the model ID (list model IDs with `janus llm ls -a`)",
             default="gpt-4o",
             type=click.Choice(openai_models),
             show_choices=False,
@@ -826,7 +827,7 @@ def llm_add(
         }
     elif model_type == "BedrockChat" or model_type == "Bedrock":
         model_id = typer.prompt(
-            "Enter the model ID",
+            "Enter the model ID (list model IDs with `janus llm ls -a`)",
             default="bedrock-claude-sonnet",
             type=click.Choice(bedrock_models),
             show_choices=False,
@@ -853,12 +854,28 @@ def llm_add(
 
 
 @llm.command("ls", help="List all of the user-configured models")
-def llm_ls():
+def llm_ls(
+    all: Annotated[
+        bool,
+        typer.Option(
+            "--all",
+            "-a",
+            is_flag=True,
+            help="List all models, including the default model IDs.",
+            click_type=click.Choice(sorted(list(MODEL_TYPE_CONSTRUCTORS.keys()))),
+        ),
+    ] = False,
+):
     print("\n[green]User-configured models[/green]:")
     for model_cfg in MODEL_CONFIG_DIR.glob("*.json"):
         with open(model_cfg, "r") as f:
             cfg = json.load(f)
         print(f"\t[blue]{model_cfg.stem}[/blue]: [purple]{cfg['model_type']}[/purple]")
+
+    if all:
+        print("\n[green]Available model IDs[/green]:")
+        for model_id, model_type in MODEL_TYPES.items():
+            print(f"\t[blue]{model_id}[/blue]: [purple]{model_type}[/purple]")
 
 
 @embedding.command("add", help="Add an embedding model config to janus")

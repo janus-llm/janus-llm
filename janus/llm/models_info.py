@@ -213,10 +213,18 @@ def load_model(user_model_name: str) -> tuple[BaseLanguageModel, int, dict[str, 
         MODEL_CONFIG_DIR.mkdir(parents=True)
     model_config_file = MODEL_CONFIG_DIR / f"{user_model_name}.json"
     if not model_config_file.exists():
+        log.warning(
+            f"Model {user_model_name} not found in user-defined models, searching "
+            f"default models for {user_model_name}."
+        )
         model_id = user_model_name
         if user_model_name not in DEFAULT_MODELS:
-            log.warning(f"Model {user_model_name} not found. Defaulting to gpt-4o.")
-            model_id = "gpt-4o"
+            message = (
+                f"Model {user_model_name} not found in default models. Make sure to run "
+                "`janus llm add` first."
+            )
+            log.error(message)
+            raise ValueError(message)
         model_config = {
             "model_type": MODEL_TYPES[model_id],
             "model_id": model_id,
