@@ -13,9 +13,9 @@ class TestBinarySplitter(unittest.TestCase):
     """Tests for the BinarySplitter class."""
 
     def setUp(self):
-        model_name = "gpt-3.5-turbo-0125"
+        model_name = "gpt-4o"
         self.binary_file = Path("janus/language/binary/_tests/hello")
-        self.llm, _, _ = load_model(model_name)
+        self.llm, _, _, _ = load_model(model_name)
         self.splitter = BinarySplitter(model=self.llm)
         os.environ["GHIDRA_INSTALL_PATH"] = "~/programs/ghidra_10.4_PUBLIC"
 

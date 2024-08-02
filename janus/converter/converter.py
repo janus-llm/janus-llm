@@ -64,7 +64,7 @@ class Converter:
 
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo-0125",
+        model: str = "gpt-4o",
         model_arguments: dict[str, Any] = {},
         source_language: str = "fortran",
         max_prompts: int = 10,
@@ -92,6 +92,7 @@ class Converter:
         self.override_token_limit: bool = max_tokens is not None
 
         self._model_name: str
+        self._model_id: str
         self._custom_model_arguments: dict[str, Any]
 
         self._source_language: str
@@ -265,7 +266,9 @@ class Converter:
         # model_arguments.update(self._custom_model_arguments)
 
         # Load the model
-        self._llm, token_limit, self.model_cost = load_model(self._model_name)
+        self._llm, self._model_id, token_limit, self.model_cost = load_model(
+            self._model_name
+        )
         # Set the max_tokens to less than half the model's limit to allow for enough
         # tokens at output
         # Only modify max_tokens if it is not specified by user
@@ -283,7 +286,7 @@ class Converter:
         If the relevant fields have not been changed since the last time this
         method was called, nothing happens.
         """
-        prompt_engine = MODEL_PROMPT_ENGINES[self._model_name](
+        prompt_engine = MODEL_PROMPT_ENGINES[self._model_id](
             source_language=self._source_language,
             prompt_template=self._prompt_template_name,
         )
