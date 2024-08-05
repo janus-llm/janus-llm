@@ -2,79 +2,64 @@ import json
 
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.pydantic_v1 import BaseModel, Field, validator
+from typing import Literal
 
+from ..language.block import CodeBlock
 from ..utils.logger import create_logger
 from .code_parser import JanusParser
+import json
+import re
+
+from langchain.output_parsers.json import parse_json_markdown
+from langchain_core.exceptions import OutputParserException
+from langchain_core.messages import AIMessage
 
 log = create_logger(__name__)
 
 
 class Eval(BaseModel):
-    syntax: float = Field(description="A numeric score (0-4) for code syntax")
-    style: float = Field(description="A numeric score (0-4) for code style")
-    completeness: float = Field(description="A numeric score (0-4) for code completeness")
-    correctness: float = Field(description="A numeric score (0-4) for code correctness")
+    c1_necessary: Literal['pass', 'fail'] = Field(description="A score of either pass or fail for if the requirement is necessary")
+    c2_appropriate: Literal['pass', 'fail'] = Field(description="A score of either pass or fail for if the requirement is appropriate")
+    c3_unambiguous: Literal['pass', 'fail'] = Field(description="A score of either pass or fail for if the requirement is unambiguous")
+    c4_complete: Literal['pass', 'fail'] = Field(description="A score of either pass or fail for if the requirement is complete")
+    c5_singular: Literal['pass', 'fail'] = Field(description="A score of either pass or fail for if the requirement is singular")
+    c6_feasible: Literal['pass', 'fail'] = Field(description="A score of either pass or fail for if the requirement is feasible")
+    c7_verifiable: Literal['pass', 'fail'] = Field(description="A score of either pass or fail for if the requirement is verifiable")
+    c8_correct: Literal['pass', 'fail'] = Field(description="A score of either pass or fail for if the requirement is correct")
+    c9_conforming: Literal['pass', 'fail'] = Field(description="A score of either pass or fail for if the requirement is conforming")
 
     # You can add custom validation logic easily with Pydantic.
-    @validator("*")
-    def score_is_valid(cls, v: float | int):
-        try:
-            v = float(v)
-        except ValueError:
-            raise ValueError("must be a number")
+    # @validator("*")
+    # def score_is_valid(cls, v: str):
+    #     valid_scores = ["pass", "fail"]
 
-        if not 0 <= v <= 4:
-            raise ValueError("must be a value between 0 and 4 inclusive")
+    #     if v.lower() not in valid_scores:
+    #         raise ValueError("Score must be either 'pass' or 'fail'")
 
-        return v
-
-    def __add__(self, other):
-        if isinstance(other, int) and other == 0:
-            return self.copy()
-        return Eval.construct(
-            syntax=self.syntax + other.syntax,
-            style=self.style + other.style,
-            correctness=self.correctness + other.correctness,
-            completeness=self.completeness + other.completeness,
-        )
-
-    def __radd__(self, other):
-        return self.__add__(other)
-
-    def __truediv__(self, other):
-        if isinstance(other, int):
-            return Eval.construct(
-                syntax=self.syntax / other,
-                style=self.style / other,
-                correctness=self.correctness / other,
-                completeness=self.completeness / other,
-            )
-        return Eval.construct(
-            syntax=self.syntax / other.syntax,
-            style=self.style / other.style,
-            correctness=self.correctness / other.correctness,
-            completeness=self.completeness / other.completeness,
-        )
-
+    #     return v.lower()
 
 class EvaluationParser(PydanticOutputParser, JanusParser):
+    block_name: str = ""
+
     def __init__(self):
         PydanticOutputParser.__init__(self, pydantic_object=Eval)
 
-    def parse(self, text: str) -> str:
-        eval = super().parse(text)
-        return json.dumps(eval.json())
+    def set_reference(self, block: CodeBlock):
+        self.block_name = block.name
 
-    def parse_combined_output(self, text: str) -> str:
-        """Parse the JSON object, convert keys to lowercase, filter out
-        unexpected keys, and average the values
+    def parse(self, text: str):
+        if isinstance(text, AIMessage):
+            text = text.content
+        text = text.lstrip("```json")
+        text = text.rstrip("```")
+        try:
+            obj = parse_json_markdown(text)
+        except json.JSONDecodeError as e:
+            log.debug(f"Invalid JSON object. Output:\n{text}")
+            raise OutputParserException(f"Got invalid JSON object. Error: {e}")
 
-        Arguments:
-            text: The output text from the LLM.
-
-        Returns:
-            A parsed version of the text.
-        """
-        objs = [super().parse(line.strip()) for line in text.split("\n")]
-        avg_obj = sum(objs) / len(objs)
-        return json.dumps(avg_obj.json())
+        if not isinstance(obj, dict):
+            raise OutputParserException(
+                f"Got invalid return object. Expected a dictionary, but got {type(obj)}"
+            )
+        return json.dumps(obj)

@@ -7,7 +7,6 @@ import os
 
 log = create_logger(__name__)
 
-
 class Evaluator(Converter):
     """Evaluator
 
@@ -15,8 +14,8 @@ class Evaluator(Converter):
     """
     def __init__(
         self,
-        multi_prompt_dir = None,
-        prompt = None,  
+        # multi_prompt_dir = None,
+        # prompt = None,  
          **kwargs)->None:
         """Initialize the Evaluator class
 
@@ -32,21 +31,17 @@ class Evaluator(Converter):
         self._combiner = JsonCombiner()
         self._parser = EvaluationParser()
         self._load_parameters()
-        self.multi_prompt_dir = multi_prompt_dir
-        self._prompt = prompt
+        # self.multi_prompt_dir = multi_prompt_dir
 
     def _self_test(self, multi_prompt_dir: Path, in_path: Path,  out_path: Path, prompt: Path) -> None:
-        print("IT WORKED!!!")
-        print(out_path)
-        print(in_path)
-        print(multi_prompt_dir)
-        print(prompt)
+        print("Prompt path: ",  out_path)
+        print("Input path: ",  in_path)
+        
         if multi_prompt_dir is not None: 
-            print("multi prompt")
-            read_prompt_files(multi_prompt_dir)
-        elif prompt is not None:
-            print("single prompt")
-            print(prompt)
+            print("Multiprompt path: ",  multi_prompt_dir)
+            # read_prompt_files(multi_prompt_dir)
+        if prompt is Path:
+            print("Single prompt: ",  prompt)
         # else:
         #     raise ValueError(
         #             f"Prompt direcotry or file not given. \n"
@@ -54,9 +49,17 @@ class Evaluator(Converter):
         #         )
         return
     
-def read_prompt_files(directory_path):
-        files_data = []
+    def read_prompt_files(self):
+        """Reads in a directory of prompts and parses out the name and the prompt content and stores in an object. 
 
+        Arguments:
+            directory_path: Path to direcotry of multiple txt files containing prompts
+        
+        Return:
+            An array of objects with prompt name (file name) and the prompt (file content)
+        """
+        directory_path = self.multi_prompt_dir
+        multi_prompt_data = []
         for filename in os.listdir(directory_path):
             if filename.endswith(".txt"):
                 # Get the file name without extension
@@ -67,11 +70,13 @@ def read_prompt_files(directory_path):
                     content = file.read()
                 # Create a dictionary object with file name and content
                 file_data = {
-                    "file_name": file_name_without_extension,
-                    "content": content
+                    "prompt_name": file_name_without_extension,
+                    "prompt": content
                 }
-                files_data.append(file_data)
+                multi_prompt_data.append(file_data)
 
         # Print the list of file data objects
-        for file_data in files_data[:3]:
-            print(files_data)
+        # for data in multi_prompt_data:
+        #     print(data['prompt_name'])
+        #     print(data['prompt'])
+        return multi_prompt_data

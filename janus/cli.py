@@ -507,6 +507,7 @@ def diagram(
     )
     diagram_generator.translate(input_dir, output_dir, overwrite, collection)
 
+
 @app.command(
     help="LLM self evaluation",
     no_args_is_help=True,
@@ -573,20 +574,6 @@ def llm_self_eval(
             "collection with the name provided.",
         ),
     ] = None,
-    diagram_type: Annotated[
-        str,
-        typer.Option(
-            "--diagram-type", "-dg", help="Diagram type to generate in PLANTUML"
-        ),
-    ] = "Activity",
-    add_documentation: Annotated[
-        bool,
-        typer.Option(
-            "--add-documentation/--no-documentation",
-            "-ad",
-            help="Whether to use documentation in generation",
-        ),
-    ] = False,
     splitter_type: Annotated[
         str,
         typer.Option(
@@ -596,35 +583,52 @@ def llm_self_eval(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
-    multi_prompt_dir: Annotated[
-        Path,
-        typer.Option(
-            "-MP",
-            "--multi-prompt",
-            help="Name of directory for multiple prompts to be used in evaluations",
-        ),
-    ] = None,
-    prompt: Annotated[
-        Path,
-        typer.Option(
-            "-P",
-            "--prompt",
-            help="Prompt to be used in evaluation",
-        ),
-    ] = None,
+    # multi_prompt_dir: Annotated[
+    #     Path,
+    #     typer.Option(
+    #         "-MP",
+    #         "--multi-prompt",
+    #         help="Name of directory for multiple prompts to be used in evaluations",
+    #     ),
+    # ] = None,
+    # prompt: Annotated[
+    #     Path,
+    #     typer.Option(
+    #         "-P",
+    #         "--prompt",
+    #         help="Prompt to be used in evaluation",
+    #     ),
+    # ] = None,
 ):
     model_arguments = dict(temperature=temperature)
-    collections_config = get_collections_config()
-    diagram_generator = Evaluator(
+    # collections_config = get_collections_config()
+    self_evaluation_generator = Evaluator(
         model=llm_name,
         model_arguments=model_arguments,
         source_language=language,
         max_prompts=max_prompts,
         splitter_type=splitter_type,
-        multi_prompt_dir=multi_prompt_dir,
-        prompt = prompt
+        # multi_prompt_dir=multi_prompt_dir,
+        # prompt = prompt
     )
-    diagram_generator._self_test(multi_prompt_dir, input_dir, output_dir, prompt)
+    # If Multi prompt direcotry 
+    # if multi_prompt_dir:
+    #     prompts_data = self_evaluation_generator.read_prompt_files()
+    #     for data in prompts_data[:1]:
+    #         print(data['prompt_name'])
+    #         print(data['prompt'])
+    
+    # Loop through each prompt and generate self eval score 
+        # for data in prompts_data:
+            # set_prompt = data['prompt']
+
+            # run evaluation self_evaluation_generator.translate(input_dir, output_dir, overwrite, collection)?
+            # Append each score to results file for given output path
+
+    # print("PROMPT: ", self_evaluation_generator._prompt)
+    # print("LLM: ", self_evaluation_generator._llm)
+    self_evaluation_generator.translate(input_dir, output_dir, overwrite, collection)
+    # self_evaluation_generator._self_test(multi_prompt_dir, input_dir, output_dir, prompt)
 
 
 @db.command("init", help="Connect to or create a database.")
