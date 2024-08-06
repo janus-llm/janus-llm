@@ -29,7 +29,7 @@ from janus.llm import load_model
 from janus.llm.model_callbacks import get_model_callback
 from janus.llm.models_info import MODEL_PROMPT_ENGINES
 from janus.parsers.code_parser import GenericParser
-from janus.refiners.refiner import Refiner
+from janus.refiners.refiner import BasicRefiner, Refiner
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
@@ -268,9 +268,12 @@ class Converter:
 
         self._splitter = CUSTOM_SPLITTERS[self._splitter_type](**kwargs)
 
-    @run_if_changed("_refiner_type")
+    @run_if_changed("_refiner_type", "_model_name")
     def _load_refiner(self) -> None:
-        pass
+        if self._refiner_type == "basic":
+            self._refiner = BasicRefiner("basic_refinement", self._model_name)
+        else:
+            raise ValueError(f"Error: unknown refiner type {self._refiner_type}")
 
     @run_if_changed("_model_name", "_custom_model_arguments")
     def _load_model(self) -> None:
@@ -588,12 +591,10 @@ class Converter:
             parser=fix_format,
             max_retries=n2,
         )
-
         completion_chain = self._prompt | self._llm
         chain = RunnableParallel(
             completion=completion_chain, prompt_value=self._prompt
         ) | RunnableLambda(lambda x: retry.parse_with_prompt(**x))
-
         for _ in range(n3):
             try:
                 return chain.invoke({"SOURCE_CODE": block.original.text})

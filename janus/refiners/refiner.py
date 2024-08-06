@@ -29,4 +29,9 @@ class BasicRefiner:
             original_output=original_output,
             errors=errors,
         )
-        return prompt_engine.prompt
+        prompt_arguments = {
+            "ORIGINAL_PROMPT": original_prompt,
+            "ORIGINAL_OUTPUT": original_output,
+            "ERRORS": errors,
+        }
+        return prompt_engine.prompt, prompt_arguments
