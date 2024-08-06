@@ -1,6 +1,6 @@
 import unittest
 
-from ..code_parser import CodeParser, JanusParser
+from janus.parsers.code_parser import CodeParser, JanusParser
 
 
 class TestJanusParser(unittest.TestCase):

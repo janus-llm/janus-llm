@@ -1,6 +1,6 @@
-from ..utils.logger import create_logger
-from .block import CodeBlock, TranslatedCodeBlock
-from .file import FileManager
+from janus.language.block import CodeBlock, TranslatedCodeBlock
+from janus.language.file import FileManager
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 

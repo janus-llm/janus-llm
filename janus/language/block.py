@@ -1,8 +1,8 @@
 from functools import total_ordering
 from typing import ForwardRef, Hashable, Optional, Tuple
 
-from ..utils.logger import create_logger
-from .node import NodeType
+from janus.language.node import NodeType
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 

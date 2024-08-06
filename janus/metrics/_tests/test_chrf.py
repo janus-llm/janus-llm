@@ -2,7 +2,7 @@ import unittest
 
 from sacrebleu import sentence_chrf
 
-from ..chrf import chrf
+from janus.metrics.chrf import chrf
 
 
 class TestChrF(unittest.TestCase):

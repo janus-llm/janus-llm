@@ -4,7 +4,7 @@ import click
 import typer
 from sacrebleu import sentence_bleu
 
-from .metric import metric
+from janus.metrics.metric import metric
 
 # from sacrebleu import sentence_chrf
 

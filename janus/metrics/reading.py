@@ -4,7 +4,7 @@ import nltk
 import readability
 from nltk.tokenize import TweetTokenizer
 
-from .metric import metric
+from janus.metrics.metric import metric
 
 
 def word_count(text):

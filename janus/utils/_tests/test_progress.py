@@ -1,6 +1,6 @@
 import unittest
 
-from ..progress import track
+from janus.utils.progress import track
 
 
 class TestProgress(unittest.TestCase):

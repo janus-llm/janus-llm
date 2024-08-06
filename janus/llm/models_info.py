@@ -8,7 +8,8 @@ from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_core.language_models import BaseLanguageModel
 from langchain_openai import ChatOpenAI
 
-from ..prompts.prompt import (
+from janus.llm.model_callbacks import COST_PER_1K_TOKENS
+from janus.prompts.prompt import (
     ChatGptPromptEngine,
     ClaudePromptEngine,
     CoherePromptEngine,
@@ -18,8 +19,7 @@ from ..prompts.prompt import (
     PromptEngine,
     TitanPromptEngine,
 )
-from ..utils.logger import create_logger
-from .model_callbacks import COST_PER_1K_TOKENS
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 

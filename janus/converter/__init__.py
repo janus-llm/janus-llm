@@ -1,6 +1,6 @@
-from .converter import Converter
-from .diagram import DiagramGenerator
-from .document import Documenter, MadLibsDocumenter, MultiDocumenter
-from .evaluate import Evaluator
-from .requirements import RequirementsDocumenter
-from .translate import Translator
+from janus.converter.converter import Converter
+from janus.converter.diagram import DiagramGenerator
+from janus.converter.document import Documenter, MadLibsDocumenter, MultiDocumenter
+from janus.converter.evaluate import Evaluator
+from janus.converter.requirements import RequirementsDocumenter
+from janus.converter.translate import Translator

@@ -1,6 +1,6 @@
 import unittest
 
-from ..combine import CodeBlock, Combiner, TranslatedCodeBlock
+from janus.language.combine import CodeBlock, Combiner, TranslatedCodeBlock
 
 
 class TestCombiner(unittest.TestCase):

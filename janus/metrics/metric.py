@@ -7,13 +7,13 @@ import click
 import typer
 from typing_extensions import Annotated
 
-from ..llm import load_model
-from ..utils.enums import LANGUAGES
-from ..utils.logger import create_logger
-from ..utils.progress import track
-from .cli import evaluate
-from .file_pairing import FILE_PAIRING_METHODS
-from .splitting import SPLITTING_METHODS
+from janus.llm import load_model
+from janus.metrics.cli import evaluate
+from janus.metrics.file_pairing import FILE_PAIRING_METHODS
+from janus.metrics.splitting import SPLITTING_METHODS
+from janus.utils.enums import LANGUAGES
+from janus.utils.logger import create_logger
+from janus.utils.progress import track
 
 log = create_logger(__name__)
 

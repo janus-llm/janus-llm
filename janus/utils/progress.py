@@ -10,7 +10,7 @@ from rich.progress import (
     TimeRemainingColumn,
 )
 
-from .logger import create_logger
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 

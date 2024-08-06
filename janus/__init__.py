@@ -2,8 +2,8 @@ import warnings
 
 from langchain_core._api.deprecation import LangChainDeprecationWarning
 
-from .converter.translate import Translator
-from .metrics import *  # noqa: F403
+from janus.converter.translate import Translator
+from janus.metrics import *  # noqa: F403
 
 __version__ = "3.2.0"
 
