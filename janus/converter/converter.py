@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any
 
 from langchain.output_parsers import RetryWithErrorOutputParser
-from langchain.output_parsers.fix import OutputFixingParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.output_parsers import BaseOutputParser
@@ -29,6 +28,7 @@ from janus.llm import load_model
 from janus.llm.model_callbacks import get_model_callback
 from janus.llm.models_info import MODEL_PROMPT_ENGINES
 from janus.parsers.code_parser import GenericParser
+from janus.parsers.refiner_parser import RefinerParser
 from janus.refiners.refiner import BasicRefiner, Refiner
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
@@ -581,9 +581,15 @@ class Converter:
         # Retries with just the input
         n3 = math.ceil(self.max_prompts / (n1 * n2))
 
-        fix_format = OutputFixingParser.from_llm(
-            llm=self._llm,
+        # fix_format = OutputFixingParser.from_llm(
+        #     llm=self._llm,
+        #     parser=self._parser,
+        #     max_retries=n1,
+        # )
+        fix_format = RefinerParser(
             parser=self._parser,
+            initial_prompt=self._prompt.format({"SOURCE_CODE": block.original.text}),
+            refiner=self._refiner,
             max_retries=n1,
         )
         retry = RetryWithErrorOutputParser.from_llm(
