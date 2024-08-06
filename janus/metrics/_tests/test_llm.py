@@ -53,7 +53,7 @@ class TestLLMMetrics(unittest.TestCase):
             self.bad_code,
             metric="quality",
             language="python",
-            llm=load_model("gpt-3.5-turbo-0125")[0],
+            llm=load_model("gpt-4o")[0],
         )
         self.assertLess(bad_code_quality, 5)
 
@@ -63,7 +63,7 @@ class TestLLMMetrics(unittest.TestCase):
             self.impressive_code,
             metric="quality",
             language="python",
-            llm=load_model("gpt-3.5-turbo-0125")[0],
+            llm=load_model("gpt-4o")[0],
         )
         self.assertGreater(impressive_code_quality, 5)
 
@@ -81,7 +81,7 @@ class TestLLMMetrics(unittest.TestCase):
             self.impressive_code_reference,
             metric="faithfulness",
             language="python",
-            llm=load_model("gpt-3.5-turbo-0125")[0],
+            llm=load_model("gpt-4o")[0],
         )
         self.assertGreater(faithfulness, 8)
 
