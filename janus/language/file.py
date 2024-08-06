@@ -1,5 +1,5 @@
-from ..utils.enums import LANGUAGES
-from ..utils.logger import create_logger
+from janus.utils.enums import LANGUAGES
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 

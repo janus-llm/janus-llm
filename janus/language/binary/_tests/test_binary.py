@@ -5,8 +5,8 @@ from unittest.mock import patch
 
 import pytest
 
-from ....llm import load_model
-from ..binary import BinarySplitter
+from janus.language.binary import BinarySplitter
+from janus.llm import load_model
 
 
 class TestBinarySplitter(unittest.TestCase):

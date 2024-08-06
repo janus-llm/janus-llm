@@ -7,11 +7,11 @@ from pathlib import Path
 import tree_sitter
 from langchain.schema.language_model import BaseLanguageModel
 
-from ...utils.enums import LANGUAGES
-from ...utils.logger import create_logger
-from ..block import CodeBlock
-from ..combine import Combiner
-from ..treesitter import TreeSitterSplitter
+from janus.language.block import CodeBlock
+from janus.language.combine import Combiner
+from janus.language.treesitter import TreeSitterSplitter
+from janus.utils.enums import LANGUAGES
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 

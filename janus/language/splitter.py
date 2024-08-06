@@ -6,10 +6,10 @@ from typing import List
 import tiktoken
 from langchain.schema.language_model import BaseLanguageModel
 
-from ..utils.logger import create_logger
-from .block import CodeBlock
-from .file import FileManager
-from .node import NodeType
+from janus.language.block import CodeBlock
+from janus.language.file import FileManager
+from janus.language.node import NodeType
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 

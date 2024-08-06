@@ -1,6 +1,6 @@
 from typing import Callable, Dict
 
-from ..splitter import Splitter
+from janus.language.splitter import Splitter
 
 CUSTOM_SPLITTERS: Dict[str, Callable[..., Splitter]] = dict()
 

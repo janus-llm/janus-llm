@@ -9,10 +9,10 @@ import tree_sitter
 from git import Repo
 from langchain.schema.language_model import BaseLanguageModel
 
-from ...utils.enums import LANGUAGES
-from ...utils.logger import create_logger
-from ..block import CodeBlock, NodeType
-from ..splitter import Splitter
+from janus.language.block import CodeBlock, NodeType
+from janus.language.splitter import Splitter
+from janus.utils.enums import LANGUAGES
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 

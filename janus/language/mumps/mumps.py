@@ -2,11 +2,11 @@ import re
 
 from langchain.schema.language_model import BaseLanguageModel
 
-from ...utils.logger import create_logger
-from ..block import CodeBlock
-from ..combine import Combiner
-from ..node import NodeType
-from ..splitter import Splitter
+from janus.language.block import CodeBlock
+from janus.language.combine import Combiner
+from janus.language.node import NodeType
+from janus.language.splitter import Splitter
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 

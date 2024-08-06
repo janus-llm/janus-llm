@@ -3,8 +3,8 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from ...cli import app
-from ..complexity_metrics import (
+from janus.cli import app
+from janus.metrics.complexity_metrics import (
     TreeSitterMetric,
     cyclomatic_complexity,
     difficulty,

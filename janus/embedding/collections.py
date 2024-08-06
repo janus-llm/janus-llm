@@ -5,8 +5,8 @@ from typing import Dict, Optional, Sequence
 from chromadb import Client, Collection
 from langchain_community.vectorstores import Chroma
 
-from ..utils.enums import EmbeddingType
-from .embedding_models_info import load_embedding_model
+from janus.embedding.embedding_models_info import load_embedding_model
+from janus.utils.enums import EmbeddingType
 
 # See https://docs.trychroma.com/telemetry#in-chromas-backend-using-environment-variables
 os.environ["ANONYMIZED_TELEMETRY"] = "False"

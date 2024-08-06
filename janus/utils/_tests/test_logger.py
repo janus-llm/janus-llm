@@ -3,7 +3,7 @@ import os
 import unittest
 from unittest.mock import patch
 
-from ..logger import LogFilter, create_logger
+from janus.utils.logger import LogFilter, create_logger
 
 
 class TestLogger(unittest.TestCase):

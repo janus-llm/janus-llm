@@ -3,8 +3,8 @@ import typer
 from langchain.evaluation import EmbeddingDistance, load_evaluator
 from typing_extensions import Annotated
 
-from ..embedding.embedding_models_info import load_embedding_model
-from .metric import metric
+from janus.embedding.embedding_models_info import load_embedding_model
+from janus.metrics.metric import metric
 
 
 @metric(name="similarity-score", help="Distance between embeddings of strings.")

@@ -1,1 +1,1 @@
-from .models_info import load_model
+from janus.llm.models_info import load_model

@@ -6,9 +6,9 @@ from langchain.schema.output_parser import BaseOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import AIMessage
 
-from ..language.block import CodeBlock
-from ..utils.logger import create_logger
-from .code_parser import JanusParser
+from janus.language.block import CodeBlock
+from janus.parsers.code_parser import JanusParser
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 

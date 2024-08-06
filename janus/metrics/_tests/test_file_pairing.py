@@ -3,7 +3,7 @@
 import unittest
 from pathlib import Path
 
-from ..file_pairing import (
+from janus.metrics.file_pairing import (
     FILE_PAIRING_METHODS,
     pair_by_file,
     pair_by_line,
