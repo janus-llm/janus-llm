@@ -1,8 +1,14 @@
+from typing import Dict, Tuple
+
+from langchain_core.prompts import ChatPromptTemplate
+
 from janus.llm.models_info import MODEL_PROMPT_ENGINES
 
 
 class Refiner:
-    def refine(self, original_prompt: str, original_output: str, errors: str, **kwargs):
+    def refine(
+        self, original_prompt: str, original_output: str, errors: str, **kwargs
+    ) -> Tuple[ChatPromptTemplate, Dict[str, str]]:
         """
         Creates a new prompt based on feedback from original results
         Arguments:
