@@ -18,6 +18,7 @@ log = create_logger(__name__)
 
 
 class Eval(BaseModel):
+    requirement: str = Field(description="The original requirment in the array")
     c1_necessary: Literal['pass', 'fail'] = Field(description="A score of either pass or fail for if the requirement is necessary")
     c2_appropriate: Literal['pass', 'fail'] = Field(description="A score of either pass or fail for if the requirement is appropriate")
     c3_unambiguous: Literal['pass', 'fail'] = Field(description="A score of either pass or fail for if the requirement is unambiguous")
@@ -37,6 +38,8 @@ class Eval(BaseModel):
     #         raise ValueError("Score must be either 'pass' or 'fail'")
 
     #     return v.lower()
+
+    # TODO: include reasoning 
 
 class EvaluationParser(PydanticOutputParser, JanusParser):
     block_name: str = ""
