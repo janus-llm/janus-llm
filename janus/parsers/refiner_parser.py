@@ -1,15 +1,17 @@
-from typing import Any
-
 from langchain.schema.output_parser import BaseOutputParser
 from langchain_core.exceptions import OutputParserException
+from langchain_core.language_models import BaseLanguageModel
+from langchain_core.prompts import ChatPromptTemplate
+
+from janus.refiners.refiner import Refiner
 
 
 class RefinerParser(BaseOutputParser):
-    llm: Any
-    parser: Any
-    initial_prompt: Any
-    refiner: Any
-    max_retries: Any
+    llm: BaseLanguageModel
+    parser: BaseOutputParser
+    initial_prompt: ChatPromptTemplate
+    refiner: Refiner
+    max_retries: int
 
     def parse(self, text: str) -> str:
         last_prompt = self.initial_prompt

@@ -2,7 +2,7 @@ from janus.llm.models_info import MODEL_PROMPT_ENGINES
 
 
 class Refiner:
-    def refine(self, original_prompt, original_output, errors, **kwargs):
+    def refine(self, original_prompt: str, original_output: str, errors: str, **kwargs):
         """
         Creates a new prompt based on feedback from original results
         Arguments:
@@ -22,7 +22,7 @@ class BasicRefiner:
         self._prompt_name = prompt_name
         self._model_name = model_name
 
-    def refine(self, original_prompt, original_output, errors, **kwargs):
+    def refine(self, original_prompt: str, original_output: str, errors: str, **kwargs):
         prompt_engine = MODEL_PROMPT_ENGINES[self._model_name](
             prompt_template=self._prompt_name,
             original_prompt=original_prompt,
