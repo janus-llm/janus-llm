@@ -147,6 +147,7 @@ class Converter:
         self._load_prompt()
         self._load_splitter()
         self._load_vectorizer()
+        self._load_refiner()
         self._changed_attrs.clear()
 
     def set_model(self, model_name: str, **custom_arguments: dict[str, Any]):
@@ -581,20 +582,16 @@ class Converter:
         # Retries with just the input
         n3 = math.ceil(self.max_prompts / (n1 * n2))
 
-        # fix_format = OutputFixingParser.from_llm(
-        #     llm=self._llm,
-        #     parser=self._parser,
-        #     max_retries=n1,
-        # )
-        fix_format = RefinerParser(
+        refine_output = RefinerParser(
             parser=self._parser,
-            initial_prompt=self._prompt.format({"SOURCE_CODE": block.original.text}),
+            initial_prompt=self._prompt.format(**{"SOURCE_CODE": block.original.text}),
             refiner=self._refiner,
             max_retries=n1,
+            llm=self._llm,
         )
         retry = RetryWithErrorOutputParser.from_llm(
             llm=self._llm,
-            parser=fix_format,
+            parser=refine_output,
             max_retries=n2,
         )
         completion_chain = self._prompt | self._llm
