@@ -22,6 +22,13 @@ class RequirementsDocumenter(Documenter):
         self._combiner = ChunkCombiner()
         self._parser = RequirementsParser()
 
+    @staticmethod
+    def _get_prompt_replacements(block):
+        prompt_replacements = {"SOURCE_CODE": block.original.text}
+        if "alc_section" in block.context_tags.keys():
+            prompt_replacements["SECTION"] = block.context_tags["alc_section"]
+        return prompt_replacements
+
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
         """Save a file to disk.
 

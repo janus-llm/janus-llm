@@ -579,7 +579,7 @@ class Converter:
 
         for _ in range(n3):
             try:
-                return chain.invoke({"SOURCE_CODE": block.original.text})
+                return chain.invoke(self._get_prompt_replacements(block))
             except OutputParserException:
                 pass
 
@@ -605,6 +605,10 @@ class Converter:
             ),
             output=output,
         )
+
+    @staticmethod
+    def _get_prompt_replacements(block):
+        return {"SOURCE_CODE": block.original.text}
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
         """Save a file to disk.
