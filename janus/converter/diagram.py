@@ -64,7 +64,7 @@ class DiagramGenerator(Documenter):
         if self._add_documentation:
             documentation_text = super()._run_chain(block)
             refine_output = RefinerParser(
-                parser=self._parser,
+                parser=self._diagram_parser,
                 initial_prompt=self._diagram_prompt.format(
                     **{
                         "SOURCE_CODE": block.original.text,
@@ -78,7 +78,7 @@ class DiagramGenerator(Documenter):
             )
         else:
             refine_output = RefinerParser(
-                parser=self._parser,
+                parser=self._diagram_parser,
                 initial_prompt=self._diagram_prompt.format(
                     **{
                         "SOURCE_CODE": block.original.text,

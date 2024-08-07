@@ -272,7 +272,9 @@ class Converter:
     @run_if_changed("_refiner_type", "_model_name")
     def _load_refiner(self) -> None:
         if self._refiner_type == "basic":
-            self._refiner = BasicRefiner("basic_refinement", self._model_name)
+            self._refiner = BasicRefiner(
+                "basic_refinement", self._model_name, self._source_language
+            )
         else:
             raise ValueError(f"Error: unknown refiner type {self._refiner_type}")
 

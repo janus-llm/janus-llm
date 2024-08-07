@@ -1,15 +1,27 @@
 from langchain.schema.output_parser import BaseOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import ChatPromptTemplate
 
 from janus.refiners.refiner import Refiner
 
 
 class RefinerParser(BaseOutputParser):
+    """
+    Parser for performing refinement with a refiner
+    Properties:
+        llm: the language model to use
+        parser: the parser to use for parsing llm output
+        initial_prompt: initial prompt used to generate output
+        refiner: refiner that gives new subsequent prompts
+        max_retires: maximum number of times to attempt refining
+    """
+
+    class Config:
+        arbitrary_types_allowed = True
+
     llm: BaseLanguageModel
     parser: BaseOutputParser
-    initial_prompt: ChatPromptTemplate
+    initial_prompt: str
     refiner: Refiner
     max_retries: int
 
