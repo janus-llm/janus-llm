@@ -45,16 +45,17 @@ class TestTranslator(unittest.TestCase):
     def setUp(self):
         """Set up the tests."""
         self.translator = Translator(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             source_language="fortran",
             target_language="python",
             target_version="3.10",
+            splitter_type="ast-flex",
         )
         self.test_file = Path("janus/language/treesitter/_tests/languages/fortran.f90")
         self.TEST_FILE_EMBEDDING_COUNT = 14
 
         self.req_translator = RequirementsDocumenter(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             source_language="fortran",
             prompt_template="requirements",
         )
