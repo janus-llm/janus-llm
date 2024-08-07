@@ -86,6 +86,17 @@ class Converter:
                 values are `"code"`, `"text"`, `"eval"`, and `None` (default). If `None`,
                 the `Converter` assumes you won't be parsing an output (i.e., adding to an
                 embedding DB).
+            max_prompts: The maximum number of prompts to try before giving up.
+            max_tokens: The maximum number of tokens to use in the LLM. If `None`, the
+                converter will use half the model's token limit.
+            prompt_template: The name of the prompt template to use.
+            db_path: The path to the database to use for vectorization.
+            db_config: The configuration for the database.
+            protected_node_types: A set of node types that aren't to be merged.
+            prune_node_types: A set of node types which should be pruned.
+            splitter_type: The type of splitter to use. Valid values are `"file"`,
+                `"tag"`, `"chunk"`, `"ast-strict"`, and `"ast-flex"`.
+            refiner_type: The type of refiner to use. Valid values are `"basic"`.
         """
         self._changed_attrs: set = set()
 
@@ -187,11 +198,11 @@ class Converter:
         self._splitter_type = splitter_type
 
     def set_refiner(self, refiner_type: str) -> None:
-        """
-        Validate and set the refiner name
+        """Validate and set the refiner name
 
         The affected objects will not be updated until translate is called
-        Arguments
+
+        Arguments:
             refiner_type: the name of the refiner to use
         """
         self._refiner_type = refiner_type
@@ -266,12 +277,17 @@ class Converter:
         )
 
         if self._splitter_type == "tag":
-            kwargs["tag"] = "<ITMOD_ALC_SPLIT>"
+            kwargs["tag"] = "<ITMOD_ALC_SPLIT>"  # Hardcoded for now
 
         self._splitter = CUSTOM_SPLITTERS[self._splitter_type](**kwargs)
 
     @run_if_changed("_refiner_type", "_model_name")
     def _load_refiner(self) -> None:
+        """Load the refiner according to this instance's attributes.
+
+        If the relevant fields have not been changed since the last time this method was
+        called, nothing happens.
+        """
         if self._refiner_type == "basic":
             self._refiner = BasicRefiner(
                 "basic_refinement", self._model_name, self._source_language
