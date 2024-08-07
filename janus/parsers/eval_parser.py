@@ -3,8 +3,8 @@ import json
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.pydantic_v1 import BaseModel, Field, validator
 
-from ..utils.logger import create_logger
-from .code_parser import JanusParser
+from janus.parsers.code_parser import JanusParser
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 

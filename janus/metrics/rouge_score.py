@@ -4,7 +4,7 @@ import typer
 from rouge import Rouge
 from typing_extensions import Annotated
 
-from .metric import metric
+from janus.metrics.metric import metric
 
 
 @metric(help="ROUGE score")

@@ -5,9 +5,9 @@ from unittest.mock import MagicMock
 
 from chromadb.api.client import Client
 
-from ...language.treesitter import TreeSitterSplitter
-from ...utils.enums import EmbeddingType
-from ..vectorize import Vectorizer, VectorizerFactory
+from janus.embedding.vectorize import Vectorizer, VectorizerFactory
+from janus.language.treesitter import TreeSitterSplitter
+from janus.utils.enums import EmbeddingType
 
 
 class MockDBVectorizer(VectorizerFactory):

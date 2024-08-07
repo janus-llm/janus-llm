@@ -4,9 +4,9 @@ from unittest.mock import ANY, patch
 
 from typer.testing import CliRunner
 
-from ..cli import app, translate
-from ..embedding.embedding_models_info import EMBEDDING_MODEL_CONFIG_DIR
-from ..llm.models_info import MODEL_CONFIG_DIR
+from janus.cli import app, translate
+from janus.embedding.embedding_models_info import EMBEDDING_MODEL_CONFIG_DIR
+from janus.llm.models_info import MODEL_CONFIG_DIR
 
 
 class TestCli(unittest.TestCase):

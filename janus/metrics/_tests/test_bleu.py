@@ -2,7 +2,7 @@ import unittest
 
 from sacrebleu import sentence_bleu
 
-from ..bleu import bleu
+from janus.metrics.bleu import bleu
 
 
 class TestBLEU(unittest.TestCase):

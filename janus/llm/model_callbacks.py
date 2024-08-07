@@ -8,7 +8,7 @@ from langchain_core.messages import AIMessage
 from langchain_core.outputs import ChatGeneration, LLMResult
 from langchain_core.tracers.context import register_configure_hook
 
-from ..utils.logger import create_logger
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 

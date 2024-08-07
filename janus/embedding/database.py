@@ -5,7 +5,7 @@ from urllib.request import url2pathname
 
 import chromadb
 
-from ..utils.logger import create_logger
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 

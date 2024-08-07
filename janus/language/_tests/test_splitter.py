@@ -1,6 +1,6 @@
 import unittest
 
-from ..splitter import Splitter
+from janus.language.splitter import Splitter
 
 
 class TestSplitter(unittest.TestCase):
