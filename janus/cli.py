@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-import subprocess
+import subprocess  # nosec
 from pathlib import Path
 from typing import Optional
 
@@ -1008,7 +1008,7 @@ def render(
         with open(output_file, "w") as f:
             f.write(data["output"])
         jar_path = homedir / ".janus/lib/plantuml.jar"
-        subprocess.run(["java", "-jar", jar_path, output_file])
+        subprocess.run(["java", "-jar", jar_path, output_file])  # nosec
         output_file.unlink()
 
 
