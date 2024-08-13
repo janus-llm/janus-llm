@@ -579,7 +579,7 @@ class Converter:
 
         for _ in range(n3):
             try:
-                return chain.invoke(self._get_prompt_replacements(block))
+                return chain.invoke(self.get_prompt_replacements(block))
             except OutputParserException:
                 pass
 
@@ -607,8 +607,22 @@ class Converter:
         )
 
     @staticmethod
-    def _get_prompt_replacements(block):
+    def get_prompt_replacements(block):
+        """Get mapping of prompt placeholders to respective replacements.
+
+        Arguments:
+            block: The `TranslatedCodeBlock` to save to a file.
+        """
         return {"SOURCE_CODE": block.original.text}
+
+    @staticmethod
+    def get_prompt_additions(block):
+        """Get list of prompt additions to append to the top of the file.
+
+        Arguments:
+            block: The `TranslatedCodeBlock` to get prompt additions for.
+        """
+        return None
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
         """Save a file to disk.

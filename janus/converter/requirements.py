@@ -23,7 +23,7 @@ class RequirementsDocumenter(Documenter):
         self._parser = RequirementsParser()
 
     @staticmethod
-    def _get_prompt_replacements(block):
+    def get_prompt_replacements(block):
         prompt_replacements = {"SOURCE_CODE": block.original.text}
         if "alc_section" in block.context_tags.keys():
             prompt_replacements["SECTION"] = block.context_tags["alc_section"]
