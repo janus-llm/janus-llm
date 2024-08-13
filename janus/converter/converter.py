@@ -291,6 +291,7 @@ class Converter:
         If the relevant fields have not been changed since the last time this method was
         called, nothing happens.
         """
+        self._refiner_type = "basic"
         if self._refiner_type == "basic":
             self._refiner = BasicRefiner(
                 "basic_refinement", self._model_name, self._source_language
@@ -609,7 +610,9 @@ class Converter:
         refine_output = RefinerParser(
             parser=self._parser,
             initial_prompt=self._prompt.format(**{"SOURCE_CODE": block.original.text}),
-            refiner=self._refiner,
+            refiner=BasicRefiner(
+                self._prompt_template_name, self._model_name, self._source_language
+            ),
             max_retries=n1,
             llm=self._llm,
         )
