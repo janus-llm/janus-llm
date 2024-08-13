@@ -627,7 +627,7 @@ class Converter:
         ) | RunnableLambda(lambda x: retry.parse_with_prompt(**x))
         for _ in range(n3):
             try:
-                return chain.invoke({"SOURCE_CODE": block.original.text})
+                return chain.invoke(self.get_prompt_replacements(block))
             except OutputParserException:
                 pass
 
