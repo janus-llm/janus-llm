@@ -272,6 +272,7 @@ class Converter:
         """
         kwargs: dict[str, Any] = dict(
             language=self._source_language,
+            alc_listing=self._alc_listing,
             max_tokens=self._max_tokens,
             model=self._llm,
             protected_node_types=self._protected_node_types,

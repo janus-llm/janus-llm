@@ -124,7 +124,6 @@ class AlcListingSplitter(AlcSplitter):
         # The string to mark the end of the left margin
         self.left_margin_indicator_str: str = "Stmt"
         super().__init__(
-            language="ibmhlasm",
             model=model,
             max_tokens=max_tokens,
             protected_node_types=protected_node_types,

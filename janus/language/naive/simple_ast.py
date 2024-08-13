@@ -6,9 +6,9 @@ from janus.utils.enums import LANGUAGES
 
 
 @register_splitter("ast-flex")
-def get_flexible_ast(language: str, listing: bool, **kwargs):
+def get_flexible_ast(language: str, alc_listing: bool, **kwargs):
     if language == "ibmhlasm":
-        if listing:
+        if alc_listing:
             return AlcSplitter(**kwargs)
         else:
             return AlcListingSplitter(**kwargs)
