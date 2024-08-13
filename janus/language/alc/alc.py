@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 
 from langchain.schema.language_model import BaseLanguageModel
 
@@ -132,8 +133,27 @@ class AlcListingSplitter(AlcSplitter):
         )
 
     def _get_ast(self, code: str) -> CodeBlock:
+        active_usings = self.get_active_usings(code)
         code = self.preproccess_assembly(code)
-        return super()._get_ast(code)
+        ast: CodeBlock = super()._get_ast(code)
+        ast.context_tags["active_usings"] = active_usings
+        return ast
+
+    def preproccess_assembly(self, code: str) -> str:
+        """Remove non-essential lines from an assembly snippet"""
+
+        lines = code.splitlines()
+        lines = self.strip_header_and_left(lines)
+        lines = self.strip_addresses(lines)
+        return "".join(str(line) for line in lines)
+
+    def get_active_usings(self, code: str) -> Optional[str]:
+        """Look for 'active usings' in the ALC listing header"""
+        lines = code.splitlines()
+        for line in lines:
+            if "Active Usings:" in line:
+                return line.split("Active Usings:")[1]
+        return None
 
     def strip_header_and_left(
         self,
@@ -166,11 +186,3 @@ class AlcListingSplitter(AlcSplitter):
     def strip_footer(self, lines: list[str]):
         """Strip the footer from the assembly snippet"""
         return NotImplementedError
-
-    def preproccess_assembly(self, code: str):
-        """Remove non-essential lines from an assembly snippet"""
-
-        lines = code.splitlines()
-        lines = self.strip_header_and_left(lines)
-        lines = self.strip_addresses(lines)
-        return "".join(str(line) for line in lines)
