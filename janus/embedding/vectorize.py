@@ -6,10 +6,10 @@ from typing import Any, Dict, Optional, Sequence
 from chromadb import Client, Collection
 from langchain_community.vectorstores import Chroma
 
-from ..language.block import CodeBlock, TranslatedCodeBlock
-from ..utils.enums import EmbeddingType
-from .collections import Collections
-from .database import ChromaEmbeddingDatabase
+from janus.embedding.collections import Collections
+from janus.embedding.database import ChromaEmbeddingDatabase
+from janus.language.block import CodeBlock, TranslatedCodeBlock
+from janus.utils.enums import EmbeddingType
 
 
 class Vectorizer(object):
@@ -59,7 +59,7 @@ class Vectorizer(object):
         self,
         code_block: CodeBlock,
         collection_name: EmbeddingType | str,
-        filename: str  # perhaps this should be a relative path from the source, but for
+        filename: str,  # perhaps this should be a relative path from the source, but for
         # now we're all in 1 directory
     ) -> None:
         """Calculate `code_block` embedding, returning success & storing in `embedding_id`

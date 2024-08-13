@@ -5,9 +5,8 @@ from typing import List, Tuple
 
 from langchain_core.exceptions import OutputParserException
 
+from janus.parsers.code_parser import CodeParser
 from janus.utils.logger import create_logger
-
-from .code_parser import CodeParser
 
 log = create_logger(__name__)
 

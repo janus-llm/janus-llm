@@ -1,9 +1,9 @@
 import unittest
 from pathlib import Path
 
-from ....llm import load_model
-from ...combine import Combiner
-from ..mumps import MumpsSplitter
+from janus.language.combine import Combiner
+from janus.language.mumps import MumpsSplitter
+from janus.llm import load_model
 
 
 class TestMumpsSplitter(unittest.TestCase):

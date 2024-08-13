@@ -1,7 +1,7 @@
 import typer
 from sacrebleu import sentence_chrf
 
-from .metric import metric
+from janus.metrics.metric import metric
 
 
 @metric(help="chrF score using sacrebleu")

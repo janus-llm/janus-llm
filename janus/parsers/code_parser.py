@@ -5,8 +5,8 @@ from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
 from langchain_core.output_parsers import StrOutputParser
 
-from ..language.block import CodeBlock
-from ..utils.logger import create_logger
+from janus.language.block import CodeBlock
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 

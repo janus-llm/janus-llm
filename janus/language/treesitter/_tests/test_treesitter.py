@@ -1,9 +1,9 @@
 import unittest
 from pathlib import Path
 
-from ....llm import load_model
-from ...combine import Combiner
-from ..treesitter import TreeSitterSplitter
+from janus.language.combine import Combiner
+from janus.language.treesitter import TreeSitterSplitter
+from janus.llm import load_model
 
 
 class TestTreeSitterSplitter(unittest.TestCase):

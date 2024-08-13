@@ -8,7 +8,8 @@ from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_core.language_models import BaseLanguageModel
 from langchain_openai import ChatOpenAI
 
-from ..prompts.prompt import (
+from janus.llm.model_callbacks import COST_PER_1K_TOKENS
+from janus.prompts.prompt import (
     ChatGptPromptEngine,
     ClaudePromptEngine,
     CoherePromptEngine,
@@ -18,8 +19,7 @@ from ..prompts.prompt import (
     PromptEngine,
     TitanPromptEngine,
 )
-from ..utils.logger import create_logger
-from .model_callbacks import COST_PER_1K_TOKENS
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 
@@ -47,6 +47,7 @@ load_dotenv()
 
 openai_model_reroutes = {
     "gpt-4o": "gpt-4o-2024-05-13",
+    "gpt-4o-mini": "gpt-4o-mini",
     "gpt-4": "gpt-4-0613",
     "gpt-4-turbo": "gpt-4-turbo-2024-04-09",
     "gpt-4-turbo-preview": "gpt-4-0125-preview",
@@ -56,6 +57,7 @@ openai_model_reroutes = {
 
 openai_models = [
     "gpt-4o",
+    "gpt-4o-mini",
     "gpt-4",
     "gpt-4-turbo",
     "gpt-4-turbo-preview",

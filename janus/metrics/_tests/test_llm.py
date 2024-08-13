@@ -3,8 +3,8 @@ from unittest.mock import patch
 
 import pytest
 
-from ...llm.models_info import load_model
-from ..llm_metrics import llm_evaluate_option, llm_evaluate_ref_option
+from janus.llm.models_info import load_model
+from janus.metrics.llm_metrics import llm_evaluate_option, llm_evaluate_ref_option
 
 
 class TestLLMMetrics(unittest.TestCase):

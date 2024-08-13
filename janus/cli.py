@@ -108,7 +108,7 @@ embedding = typer.Typer(
 
 def version_callback(value: bool) -> None:
     if value:
-        from . import __version__ as version
+        from janus import __version__ as version
 
         print(f"Janus CLI [blue]v{version}[/blue]")
         raise typer.Exit()
