@@ -23,10 +23,8 @@ class RequirementsDocumenter(Documenter):
         self._parser = RequirementsParser()
 
     @staticmethod
-    def get_prompt_replacements(block):
-        prompt_replacements = {"SOURCE_CODE": block.original.text}
-        if "alc_section" in block.context_tags.keys():
-            prompt_replacements["SECTION"] = block.context_tags["alc_section"]
+    def get_prompt_replacements(block) -> dict[str, str]:
+        prompt_replacements: dict[str, str] = {"SOURCE_CODE": block.original.text}
         return prompt_replacements
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:

@@ -682,7 +682,7 @@ class Converter:
         )
 
     @staticmethod
-    def _get_prompt_replacements(block):
+    def _get_prompt_replacements(block) -> dict[str, str]:
         """Get mapping of prompt placeholders to respective replacements.
 
         Arguments:
@@ -697,9 +697,7 @@ class Converter:
         Arguments:
             block: The `TranslatedCodeBlock` to save to a file.
         """
-        log.warning(block.context_tags)
         return [(key, item) for key, item in block.context_tags.items()]
-        return [block.context_tags["active_usings"]]
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
         """Save a file to disk.
