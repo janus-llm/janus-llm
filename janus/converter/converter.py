@@ -98,7 +98,6 @@ class Converter:
                 `"tag"`, `"chunk"`, `"ast-strict"`, and `"ast-flex"`.
             refiner_type: The type of refiner to use. Valid values are `"basic"`.
         """
-        self._refiner = None
         self._changed_attrs: set = set()
 
         self.max_prompts: int = max_prompts
@@ -610,9 +609,7 @@ class Converter:
         refine_output = RefinerParser(
             parser=self._parser,
             initial_prompt=self._prompt.format(**{"SOURCE_CODE": block.original.text}),
-            refiner=BasicRefiner(
-                self._prompt_template_name, self._model_name, self._source_language
-            ),
+            refiner=self._refiner,
             max_retries=n1,
             llm=self._llm,
         )
