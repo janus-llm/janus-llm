@@ -3,7 +3,7 @@ import json
 import math
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, List, Optional
 
 from langchain.output_parsers import RetryWithErrorOutputParser
 from langchain_core.exceptions import OutputParserException
@@ -607,6 +607,9 @@ class Converter:
         # Retries with just the input
         n3 = math.ceil(self.max_prompts / (n1 * n2))
 
+        # Make replacements in the prompt
+        self._make_prompt_additions(block)
+
         refine_output = RefinerParser(
             parser=self._parser,
             initial_prompt=self._prompt.format(**{"SOURCE_CODE": block.original.text}),
@@ -627,11 +630,18 @@ class Converter:
         ) | RunnableLambda(lambda x: retry.parse_with_prompt(**x))
         for _ in range(n3):
             try:
-                return chain.invoke(self.get_prompt_replacements(block))
+                return chain.invoke({"SOURCE_CODE": block.original.text})
             except OutputParserException:
                 pass
 
         raise OutputParserException(f"Failed to parse after {n1*n2*n3} retries")
+
+    def _make_prompt_additions(self, block):
+        prompt_additions = self._get_prompt_additions(block)
+        if prompt_additions:
+            for prompt_addition in prompt_additions:
+                log.warning(prompt_addition)
+                self._prompt.append(prompt_addition)
 
     def _get_output_obj(
         self, block: TranslatedCodeBlock
@@ -655,7 +665,7 @@ class Converter:
         )
 
     @staticmethod
-    def get_prompt_replacements(block):
+    def _get_prompt_replacements(block):
         """Get mapping of prompt placeholders to respective replacements.
 
         Arguments:
@@ -664,13 +674,14 @@ class Converter:
         return {"SOURCE_CODE": block.original.text}
 
     @staticmethod
-    def get_prompt_additions(block):
-        """Get list of prompt additions to append to the top of the file.
+    def _get_prompt_additions(block) -> Optional[List[str]]:
+        """Get a list of strings to append to the prompt.
 
         Arguments:
-            block: The `TranslatedCodeBlock` to get prompt additions for.
+            block: The `TranslatedCodeBlock` to save to a file.
         """
-        return None
+        log.warning(block.context_tags)
+        return [block.context_tags["active_usings"]]
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
         """Save a file to disk.
