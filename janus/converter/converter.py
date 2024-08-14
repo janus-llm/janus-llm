@@ -630,36 +630,6 @@ class Converter:
 
         raise OutputParserException(f"Failed to parse after {n1*n2*n3} retries")
 
-    def _make_prompt_additions(self, block: CodeBlock) -> ChatPromptTemplate:
-        existing_messages = self._prompt.messages
-
-        updated_messages = []
-        system_prompt_found = False
-
-        for message in existing_messages:
-            if (
-                isinstance(message, SystemMessagePromptTemplate)
-                and not system_prompt_found
-            ):
-                updated_system_message = SystemMessagePromptTemplate.from_template(
-                    message.prompt.template
-                    + " "
-                    + " ".join(
-                        [
-                            f"{context_tag}: {context}"
-                            for context_tag, context in self._get_prompt_additions(block)
-                        ]
-                    )
-                )
-                updated_messages.append(updated_system_message)
-                system_prompt_found = True
-            else:
-                updated_messages.append(message)
-
-        self._prompt = ChatPromptTemplate.from_messages(updated_messages)
-
-        log.warning(self._prompt.format(**{"SOURCE_CODE": block.original.text}))
-
     def _get_output_obj(
         self, block: TranslatedCodeBlock
     ) -> dict[str, int | float | str | dict[str, str]]:
@@ -698,6 +668,34 @@ class Converter:
             block: The `TranslatedCodeBlock` to save to a file.
         """
         return [(key, item) for key, item in block.context_tags.items()]
+
+    def _make_prompt_additions(self, block: CodeBlock) -> ChatPromptTemplate:
+        existing_messages = self._prompt.messages
+
+        updated_messages = []
+        system_prompt_found = False
+
+        for message in existing_messages:
+            if (
+                isinstance(message, SystemMessagePromptTemplate)
+                and not system_prompt_found
+            ):
+                updated_system_message = SystemMessagePromptTemplate.from_template(
+                    message.prompt.template
+                    + ""
+                    + "".join(
+                        [
+                            f"{context_tag}: {context}\n"
+                            for context_tag, context in self._get_prompt_additions(block)
+                        ]
+                    )
+                )
+                updated_messages.append(updated_system_message)
+                system_prompt_found = True
+            else:
+                updated_messages.append(message)
+
+        self._prompt = ChatPromptTemplate.from_messages(updated_messages)
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
         """Save a file to disk.
