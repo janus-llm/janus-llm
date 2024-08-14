@@ -64,13 +64,12 @@ class AlcSplitter(TreeSitterSplitter):
             #  next csect or dsect instruction
             sects: list[list[CodeBlock]] = [[]]
             for c in block.children:
-                if c.node_type in sect_types:
+                if c.node_type == "csect_instruction":
+                    c.context_tags["alc_section"] = "CSECT"
                     sects.append([c])
-                    # Add a context tag based on section type
-                    if c.node_type == "csect_instruction":
-                        c.context_tags["alc_section"] = "CSECT"
-                    elif c.node_type == "dsect_instruction":
-                        c.context_tags["alc_section"] = "DSECT"
+                elif c.node_type == "dsect_instruction":
+                    c.context_tags["alc_section"] = "DSECT"
+                    sects.append([c])
                 else:
                     sects[-1].append(c)
 
