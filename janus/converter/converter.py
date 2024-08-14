@@ -3,13 +3,13 @@ import json
 import math
 import time
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple
 
 from langchain.output_parsers import RetryWithErrorOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.output_parsers import BaseOutputParser
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate
 from langchain_core.runnables import RunnableLambda, RunnableParallel
 from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
@@ -636,12 +636,47 @@ class Converter:
 
         raise OutputParserException(f"Failed to parse after {n1*n2*n3} retries")
 
-    def _make_prompt_additions(self, block):
-        prompt_additions = self._get_prompt_additions(block)
-        if prompt_additions:
-            for prompt_addition in prompt_additions:
-                log.warning(prompt_addition)
-                self._prompt.append(prompt_addition)
+    # def _make_prompt_additions(self, block):
+    #     prompt_additions = self._get_prompt_additions(block)
+    #     existing_messages = self._prompt.messages
+    #     updates_messages = []
+    #     if prompt_additions:
+    #         for context_tag, context in prompt_additions:
+    #             log.warning(f"context_tag: {context_tag}, context: {context}")
+    #             new_message += f"{context_tag}: {context}"
+    #     updated_messages = [new_message] + existing_messages
+    #     self._prompt = ChatPromptTemplate.from_messages(updated_messages)
+    #     log.warning(self._prompt.format(**{"SOURCE_CODE": block.original.text}))
+
+    def _make_prompt_additions(self, block: CodeBlock) -> ChatPromptTemplate:
+        existing_messages = self._prompt.messages
+
+        updated_messages = []
+        system_prompt_found = False
+
+        for message in existing_messages:
+            if (
+                isinstance(message, SystemMessagePromptTemplate)
+                and not system_prompt_found
+            ):
+                updated_system_message = SystemMessagePromptTemplate.from_template(
+                    message.prompt.template
+                    + " "
+                    + " ".join(
+                        [
+                            f"{context_tag}: {context}"
+                            for context_tag, context in self._get_prompt_additions(block)
+                        ]
+                    )
+                )
+                updated_messages.append(updated_system_message)
+                system_prompt_found = True
+            else:
+                updated_messages.append(message)
+
+        self._prompt = ChatPromptTemplate.from_messages(updated_messages)
+
+        log.warning(self._prompt.format(**{"SOURCE_CODE": block.original.text}))
 
     def _get_output_obj(
         self, block: TranslatedCodeBlock
@@ -674,13 +709,14 @@ class Converter:
         return {"SOURCE_CODE": block.original.text}
 
     @staticmethod
-    def _get_prompt_additions(block) -> Optional[List[str]]:
+    def _get_prompt_additions(block) -> Optional[List[Tuple[str, str]]]:
         """Get a list of strings to append to the prompt.
 
         Arguments:
             block: The `TranslatedCodeBlock` to save to a file.
         """
         log.warning(block.context_tags)
+        return [(key, item) for key, item in block.context_tags.items()]
         return [block.context_tags["active_usings"]]
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
