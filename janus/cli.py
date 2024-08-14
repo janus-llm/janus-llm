@@ -378,14 +378,6 @@ def document(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
-    alc_listing: Annotated[
-        bool,
-        typer.Option(
-            "--alc_listing",
-            "-al",
-            help="Prune non-instructions in IBMHLASM source code",
-        ),
-    ] = False,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -398,7 +390,6 @@ def document(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
-        alc_listing=alc_listing,
     )
     if doc_mode == "madlibs":
         documenter = MadLibsDocumenter(

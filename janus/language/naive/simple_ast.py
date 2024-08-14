@@ -1,3 +1,5 @@
+import logging
+
 from janus.language.alc.alc import AlcListingSplitter, AlcSplitter
 from janus.language.mumps.mumps import MumpsSplitter
 from janus.language.naive.registry import register_splitter
@@ -6,12 +8,9 @@ from janus.utils.enums import LANGUAGES
 
 
 @register_splitter("ast-flex")
-def get_flexible_ast(language: str, alc_listing: bool, **kwargs):
+def get_flexible_ast(language: str, **kwargs):
     if language == "ibmhlasm":
-        if alc_listing:
-            return AlcSplitter(**kwargs)
-        else:
-            return AlcListingSplitter(**kwargs)
+        return AlcSplitter(**kwargs)
     elif language == "mumps":
         return MumpsSplitter(**kwargs)
     else:
@@ -19,17 +18,36 @@ def get_flexible_ast(language: str, alc_listing: bool, **kwargs):
 
 
 @register_splitter("ast-strict")
-def get_strict_ast(language: str, listing: bool, **kwargs):
+def get_strict_ast(language: str, **kwargs):
     kwargs.update(
         protected_node_types=LANGUAGES[language]["functional_node_types"],
         prune_unprotected=True,
     )
     if language == "ibmhlasm":
-        if listing:
-            return AlcSplitter(**kwargs)
-        else:
-            return AlcListingSplitter(**kwargs)
+        return AlcSplitter(**kwargs)
     elif language == "mumps":
         return MumpsSplitter(**kwargs)
     else:
+        return TreeSitterSplitter(language=language, **kwargs)
+
+
+@register_splitter("ast-strict-listing")
+def get_strict_listing_ast(language: str, **kwargs):
+    kwargs.update(
+        protected_node_types=LANGUAGES[language]["functional_node_types"],
+        prune_unprotected=True,
+    )
+    if language == "ibmhlasm":
+        return AlcListingSplitter(**kwargs)
+    else:
+        logging.warning("Listing splitter is only intended for use with IBMHLASM!")
+        return TreeSitterSplitter(language=language, **kwargs)
+
+
+@register_splitter("ast-flex-listing")
+def get_flexible_listing_ast(language: str, **kwargs):
+    if language == "ibmhlasm":
+        return AlcListingSplitter(**kwargs)
+    else:
+        logging.warning("Listing splitter is only intended for use with IBMHLASM!")
         return TreeSitterSplitter(language=language, **kwargs)

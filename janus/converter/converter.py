@@ -76,7 +76,6 @@ class Converter:
         protected_node_types: tuple[str, ...] = (),
         prune_node_types: tuple[str, ...] = (),
         splitter_type: str = "file",
-        alc_listing: bool = False,
         refiner_type: str = "basic",
     ) -> None:
         """Initialize a Converter instance.
@@ -126,8 +125,6 @@ class Converter:
         self._splitter: Splitter
         self._llm: BaseLanguageModel
         self._prompt: ChatPromptTemplate
-
-        self._alc_listing: bool = False
 
         self._parser: BaseOutputParser = GenericParser()
         self._combiner: Combiner = Combiner()
@@ -272,7 +269,6 @@ class Converter:
         """
         kwargs: dict[str, Any] = dict(
             language=self._source_language,
-            alc_listing=self._alc_listing,
             max_tokens=self._max_tokens,
             model=self._llm,
             protected_node_types=self._protected_node_types,
