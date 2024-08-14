@@ -98,6 +98,7 @@ class Converter:
                 `"tag"`, `"chunk"`, `"ast-strict"`, and `"ast-flex"`.
             refiner_type: The type of refiner to use. Valid values are `"basic"`.
         """
+        self._refiner = None
         self._changed_attrs: set = set()
 
         self.max_prompts: int = max_prompts
@@ -159,6 +160,7 @@ class Converter:
         self._load_prompt()
         self._load_splitter()
         self._load_vectorizer()
+        self._load_refiner()
         self._changed_attrs.clear()
 
     def set_model(self, model_name: str, **custom_arguments: dict[str, Any]):
@@ -287,7 +289,6 @@ class Converter:
         If the relevant fields have not been changed since the last time this method was
         called, nothing happens.
         """
-        self._refiner_type = "basic"
         if self._refiner_type == "basic":
             self._refiner = BasicRefiner(
                 "basic_refinement", self._model_name, self._source_language
@@ -631,18 +632,6 @@ class Converter:
                 pass
 
         raise OutputParserException(f"Failed to parse after {n1*n2*n3} retries")
-
-    # def _make_prompt_additions(self, block):
-    #     prompt_additions = self._get_prompt_additions(block)
-    #     existing_messages = self._prompt.messages
-    #     updates_messages = []
-    #     if prompt_additions:
-    #         for context_tag, context in prompt_additions:
-    #             log.warning(f"context_tag: {context_tag}, context: {context}")
-    #             new_message += f"{context_tag}: {context}"
-    #     updated_messages = [new_message] + existing_messages
-    #     self._prompt = ChatPromptTemplate.from_messages(updated_messages)
-    #     log.warning(self._prompt.format(**{"SOURCE_CODE": block.original.text}))
 
     def _make_prompt_additions(self, block: CodeBlock) -> ChatPromptTemplate:
         existing_messages = self._prompt.messages

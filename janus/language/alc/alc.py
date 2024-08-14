@@ -66,7 +66,6 @@ class AlcSplitter(TreeSitterSplitter):
             for c in block.children:
                 if c.node_type in sect_types:
                     sects.append([c])
-                    log.warning(f"Adding context tags! {c.node_type}")
                     # Add a context tag based on section type
                     if c.node_type == "csect_instruction":
                         c.context_tags["alc_section"] = "CSECT"
