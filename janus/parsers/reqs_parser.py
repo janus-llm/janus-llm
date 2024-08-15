@@ -2,29 +2,28 @@ import json
 import re
 
 from langchain.output_parsers.json import parse_json_markdown
-from langchain.schema.output_parser import BaseOutputParser
 from langchain_core.exceptions import OutputParserException
-from langchain_core.messages import AIMessage
+from langchain_core.messages import BaseMessage
 
-from janus.language.block import CodeBlock
-from janus.parsers.code_parser import JanusParser
+from janus.parsers.parser import JanusParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 
 
-class RequirementsParser(BaseOutputParser[str], JanusParser):
-    block_name: str = ""
+class RequirementsParser(JanusParser):
+    expected_keys: set[str]
 
     def __init__(self):
         super().__init__(expected_keys=[])
 
-    def set_reference(self, block: CodeBlock):
-        self.block_name = block.name
+    def parse(self, text: str | BaseMessage) -> str:
+        if isinstance(text, BaseMessage):
+            text = str(text.content)
 
-    def parse(self, text: str) -> str:
-        if isinstance(text, AIMessage):
-            text = text.content
+        # TODO: This is an incorrect implementation (lstrip and rstrip take character
+        #       lists and strip any instances of those characters, not the full str)
+        #       Should be replaced with a regex search, see CodeParser
         text = text.lstrip("```json")
         text = text.rstrip("```")
         try:
@@ -70,4 +69,4 @@ class RequirementsParser(BaseOutputParser[str], JanusParser):
 
     @property
     def _type(self) -> str:
-        return self.__class__.name
+        return str(self.__class__.name)

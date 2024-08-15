@@ -8,7 +8,6 @@ from typing import Any
 from langchain.output_parsers import RetryWithErrorOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.output_parsers import BaseOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableLambda, RunnableParallel
 from openai import BadRequestError, RateLimitError
@@ -27,7 +26,7 @@ from janus.language.splitter import (
 from janus.llm import load_model
 from janus.llm.model_callbacks import get_model_callback
 from janus.llm.models_info import MODEL_PROMPT_ENGINES
-from janus.parsers.code_parser import GenericParser
+from janus.parsers.parser import GenericParser, JanusParser
 from janus.parsers.refiner_parser import RefinerParser
 from janus.refiners.refiner import BasicRefiner, Refiner
 from janus.utils.enums import LANGUAGES
@@ -126,7 +125,7 @@ class Converter:
         self._llm: BaseLanguageModel
         self._prompt: ChatPromptTemplate
 
-        self._parser: BaseOutputParser = GenericParser()
+        self._parser: JanusParser = GenericParser()
         self._combiner: Combiner = Combiner()
 
         self._refiner_type: str
@@ -321,6 +320,7 @@ class Converter:
         "_prompt_template_name",
         "_source_language",
         "_model_name",
+        "_parser",
     )
     def _load_prompt(self) -> None:
         """Load the prompt according to this instance's attributes.
@@ -333,6 +333,9 @@ class Converter:
             prompt_template=self._prompt_template_name,
         )
         self._prompt = prompt_engine.prompt
+        self._prompt = self._prompt.partial(
+            format_instructions=self._parser.get_format_instructions()
+        )
 
     @run_if_changed("_db_path", "_db_config")
     def _load_vectorizer(self) -> None:
@@ -592,7 +595,7 @@ class Converter:
         to the cube root of self.max_retries, so the total calls to the
         LLM will be roughly as expected (up to sqrt(self.max_retries) over)
         """
-        self._parser.set_reference(block.original)
+        input = self._parser.parse_input(block.original)
 
         # Retries with just the output and the error
         n1 = round(self.max_prompts ** (1 / 3))
@@ -621,7 +624,7 @@ class Converter:
         ) | RunnableLambda(lambda x: retry.parse_with_prompt(**x))
         for _ in range(n3):
             try:
-                return chain.invoke({"SOURCE_CODE": block.original.text})
+                return chain.invoke({"SOURCE_CODE": input})
             except OutputParserException:
                 pass
 
