@@ -632,7 +632,7 @@ class Converter:
 
     def _get_output_obj(
         self, block: TranslatedCodeBlock
-    ) -> dict[str, int | float | str | dict[str, str]]:
+    ) -> dict[str, str | dict[str, Any]]:
         output_str = self._parser.parse_combined_output(block.complete_text)
 
         output: str | dict[str, str]
@@ -642,7 +642,7 @@ class Converter:
             output = output_str
 
         return dict(
-            input=block.original.text,
+            input=str(block.original.text),
             metadata=dict(
                 retries=block.total_retries,
                 cost=block.total_cost,
