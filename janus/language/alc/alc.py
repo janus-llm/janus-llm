@@ -95,8 +95,8 @@ class AlcSplitter(TreeSitterSplitter):
 
 
 class AlcListingSplitter(AlcSplitter):
-    """A class for splitting ALC code into functional blocks to prompt
-    with for transcoding.
+    """A class for splitting ALC listing code into functional blocks to
+    prompt with for transcoding.
     """
 
     def __init__(
