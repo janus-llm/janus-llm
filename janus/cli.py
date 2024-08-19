@@ -480,6 +480,14 @@ def partition(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
+    partition_token_limit: Annotated[
+        int,
+        typer.Option(
+            "--partition-tokens",
+            "-pt",
+            help="The limit on the number of tokens per partition.",
+        ),
+    ] = 8192,
 ):
     model_arguments = dict(temperature=temperature)
     kwargs = dict(
@@ -489,6 +497,7 @@ def partition(
         max_prompts=max_prompts,
         max_tokens=max_tokens,
         splitter_type=splitter_type,
+        partition_token_limit=partition_token_limit,
     )
     partitioner = Partitioner(**kwargs)
     partitioner.translate(input_dir, output_dir, overwrite)

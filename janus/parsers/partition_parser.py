@@ -4,6 +4,7 @@ import uuid
 
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException
+from langchain_core.language_models import BaseLanguageModel
 from langchain_core.messages import BaseMessage
 from langchain_core.pydantic_v1 import BaseModel, Field
 
@@ -37,12 +38,16 @@ class PartitionList(BaseModel):
 
 class PartitionParser(JanusParser, PydanticOutputParser):
     token_limit: int
+    model: BaseLanguageModel
     lines: list[str] = []
     line_id_to_index: dict[str, int] = {}
 
-    def __init__(self, token_limit: int):
+    def __init__(self, token_limit: int, model: BaseLanguageModel):
         PydanticOutputParser.__init__(
-            self, token_limit=token_limit, pydantic_object=PartitionList
+            self,
+            pydantic_object=PartitionList,
+            model=model,
+            token_limit=token_limit,
         )
 
     def parse_input(self, block: CodeBlock) -> str:
@@ -73,16 +78,31 @@ class PartitionParser(JanusParser, PydanticOutputParser):
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise
 
+        index_to_line_id = {0: "START", -1: "END"}
         split_points = {0}
         for partition in out.__root__:
             if partition.location not in self.line_id_to_index:
                 raise OutputParserException(
                     f"Line ID not found in input: {partition.location}"
                 )
-            split_points.add(self.line_id_to_index[partition.location])
+            index = self.line_id_to_index[partition.location]
+            index_to_line_id[index] = partition.location
+            split_points.add(index)
 
         split_points = sorted(split_points) + [-1]
         chunks = [
             "\n".join(self.lines[i0:i1]) for i0, i1 in zip(split_points, split_points[1:])
         ]
+
+        chunks = []
+        for i0, i1 in zip(split_points, split_points[1:]):
+            chunk = "\n".join(self.lines[i0:i1])
+            tokens = self.model.get_num_tokens(chunk)
+            if tokens > self.token_limit:
+                raise OutputParserException(
+                    f"Chunk between {index_to_line_id[i0]} and {index_to_line_id[i1]} "
+                    "exceeds token limit! Must be further subdivided."
+                )
+            chunks.append(chunk)
+
         return "\n<JANUS_PARTITION>\n".join(chunks)
