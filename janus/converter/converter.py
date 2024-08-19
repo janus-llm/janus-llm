@@ -608,7 +608,7 @@ class Converter:
 
         refine_output = RefinerParser(
             parser=self._parser,
-            initial_prompt=self._prompt.format(**{"SOURCE_CODE": block.original.text}),
+            initial_prompt=self._prompt.format(**{"SOURCE_CODE": input}),
             refiner=self._refiner,
             max_retries=n1,
             llm=self._llm,
