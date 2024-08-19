@@ -544,7 +544,7 @@ def llm_self_eval(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-3.5-turbo-0125",
+    ] = "gpt-4o-2024-05-13",
     max_prompts: Annotated[
         int,
         typer.Option(
