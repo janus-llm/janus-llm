@@ -48,4 +48,4 @@ class GenericParser(JanusParser, StrOutputParser):
         return text
 
     def get_format_instructions(self) -> str:
-        return super().get_format_instructions()
+        return "Output should be a string"
