@@ -1,5 +1,6 @@
 from langchain.schema.output_parser import BaseOutputParser
 from langchain_core.messages import BaseMessage
+from langchain_core.output_parsers import StrOutputParser
 
 from janus.language.block import CodeBlock
 from janus.language.splitter import EmptyTreeError
@@ -40,8 +41,11 @@ class JanusParser(BaseOutputParser[str]):
         block.text = text
 
 
-class GenericParser(JanusParser):
+class GenericParser(JanusParser, StrOutputParser):
     def parse(self, text: str | BaseMessage) -> str:
         if isinstance(text, BaseMessage):
             text = str(text.content)
         return text
+
+    def get_format_instructions(self) -> str:
+        return super().get_format_instructions()
