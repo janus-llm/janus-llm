@@ -52,7 +52,7 @@ class DiagramGenerator(Documenter):
         self._load_diagram_prompt_engine()
 
     def _run_chain(self, block: TranslatedCodeBlock) -> str:
-        self._parser.set_reference(block.original)
+        input = self._parser.parse_input(block.original)
         n1 = round(self.max_prompts ** (1 / 3))
 
         # Retries with the input, output, and error
@@ -67,7 +67,7 @@ class DiagramGenerator(Documenter):
                 parser=self._diagram_parser,
                 initial_prompt=self._diagram_prompt.format(
                     **{
-                        "SOURCE_CODE": block.original.text,
+                        "SOURCE_CODE": input,
                         "DOCUMENTATION": documentation_text,
                         "DIAGRAM_TYPE": self._diagram_type,
                     }
@@ -81,7 +81,7 @@ class DiagramGenerator(Documenter):
                 parser=self._diagram_parser,
                 initial_prompt=self._diagram_prompt.format(
                     **{
-                        "SOURCE_CODE": block.original.text,
+                        "SOURCE_CODE": input,
                         "DIAGRAM_TYPE": self._diagram_type,
                     }
                 ),
@@ -103,7 +103,7 @@ class DiagramGenerator(Documenter):
                 if self._add_documentation:
                     return chain.invoke(
                         {
-                            "SOURCE_CODE": block.original.text,
+                            "SOURCE_CODE": input,
                             "DOCUMENTATION": documentation_text,
                             "DIAGRAM_TYPE": self._diagram_type,
                         }
@@ -111,7 +111,7 @@ class DiagramGenerator(Documenter):
                 else:
                     return chain.invoke(
                         {
-                            "SOURCE_CODE": block.original.text,
+                            "SOURCE_CODE": input,
                             "DIAGRAM_TYPE": self._diagram_type,
                         }
                     )
