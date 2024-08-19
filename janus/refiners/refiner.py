@@ -5,7 +5,12 @@ from janus.llm.models_info import MODEL_PROMPT_ENGINES
 
 class Refiner:
     def refine(
-        self, original_prompt: str, original_output: str, errors: str, **kwargs
+        self,
+        original_prompt: str,
+        previous_prompt: str,
+        previous_output: str,
+        errors: str,
+        **kwargs,
     ) -> tuple[ChatPromptTemplate, dict[str, str]]:
         """Creates a new prompt based on feedback from original results
 
@@ -39,7 +44,12 @@ class BasicRefiner(Refiner):
         self._source_language = source_language
 
     def refine(
-        self, original_prompt: str, original_output: str, errors: str, **kwargs
+        self,
+        original_prompt: str,
+        previous_prompt: str,
+        previous_output: str,
+        errors: str,
+        **kwargs,
     ) -> tuple[ChatPromptTemplate, dict[str, str]]:
         """Creates a new prompt based on feedback from original results
 
@@ -57,7 +67,7 @@ class BasicRefiner(Refiner):
         )
         prompt_arguments = {
             "ORIGINAL_PROMPT": original_prompt,
-            "OUTPUT": original_output,
+            "OUTPUT": previous_output,
             "ERRORS": errors,
         }
         return prompt_engine.prompt, prompt_arguments
