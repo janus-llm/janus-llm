@@ -1,9 +1,9 @@
 import unittest
 from pathlib import Path
 
-from ....llm import load_model
-from ...combine import Combiner
-from ..mumps import MumpsSplitter
+from janus.language.combine import Combiner
+from janus.language.mumps import MumpsSplitter
+from janus.llm import load_model
 
 
 class TestMumpsSplitter(unittest.TestCase):
@@ -11,8 +11,8 @@ class TestMumpsSplitter(unittest.TestCase):
 
     def setUp(self):
         """Set up the tests."""
-        model_name = "gpt-3.5-turbo-0125"
-        llm, _, _ = load_model(model_name)
+        model_name = "gpt-4o"
+        llm, _, _, _ = load_model(model_name)
         self.splitter = MumpsSplitter(model=llm)
         self.combiner = Combiner(language="mumps")
         self.test_file = Path("janus/language/mumps/_tests/mumps.m")

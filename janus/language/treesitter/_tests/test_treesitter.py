@@ -1,9 +1,9 @@
 import unittest
 from pathlib import Path
 
-from ....llm import load_model
-from ...combine import Combiner
-from ..treesitter import TreeSitterSplitter
+from janus.language.combine import Combiner
+from janus.language.treesitter import TreeSitterSplitter
+from janus.llm import load_model
 
 
 class TestTreeSitterSplitter(unittest.TestCase):
@@ -11,9 +11,9 @@ class TestTreeSitterSplitter(unittest.TestCase):
 
     def setUp(self):
         """Set up the tests."""
-        model_name = "gpt-3.5-turbo-0125"
+        model_name = "gpt-4o"
         self.maxDiff = None
-        self.llm, _, _ = load_model(model_name)
+        self.llm, _, _, _ = load_model(model_name)
 
     def _split(self):
         """Split the test file."""

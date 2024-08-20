@@ -1,6 +1,6 @@
 import unittest
 
-from ..similarity import similarity_score
+from janus.metrics.similarity import similarity_score
 
 
 class TestSimilarityScore(unittest.TestCase):

@@ -7,13 +7,13 @@ import click
 import typer
 from typing_extensions import Annotated
 
-from ..llm import load_model
-from ..utils.enums import LANGUAGES
-from ..utils.logger import create_logger
-from ..utils.progress import track
-from .cli import evaluate
-from .file_pairing import FILE_PAIRING_METHODS
-from .splitting import SPLITTING_METHODS
+from janus.llm import load_model
+from janus.metrics.cli import evaluate
+from janus.metrics.file_pairing import FILE_PAIRING_METHODS
+from janus.metrics.splitting import SPLITTING_METHODS
+from janus.utils.enums import LANGUAGES
+from janus.utils.logger import create_logger
+from janus.utils.progress import track
 
 log = create_logger(__name__)
 
@@ -112,7 +112,7 @@ def metric(
                         "-L",
                         help="The custom name of the model set with 'janus llm add'.",
                     ),
-                ] = "gpt-3.5-turbo-0125",
+                ] = "gpt-4o",
                 progress: Annotated[
                     bool,
                     typer.Option(
@@ -135,7 +135,7 @@ def metric(
                 **kwargs,
             ):
                 out = []
-                llm, token_limit, model_cost = load_model(llm_name)
+                llm, _, token_limit, model_cost = load_model(llm_name)
                 if json_file_name is not None:
                     with open(json_file_name, "r") as f:
                         json_obj = json.load(f)
@@ -274,7 +274,7 @@ def metric(
                         "-L",
                         help="The custom name of the model set with 'janus llm add'.",
                     ),
-                ] = "gpt-3.5-turbo-0125",
+                ] = "gpt-4o",
                 progress: Annotated[
                     bool,
                     typer.Option(
@@ -296,7 +296,7 @@ def metric(
                 *args,
                 **kwargs,
             ):
-                llm, token_limit, model_cost = load_model(llm_name)
+                llm, _, token_limit, model_cost = load_model(llm_name)
                 if json_file_name is not None:
                     with open(json_file_name, "r") as f:
                         json_obj = json.load(f)

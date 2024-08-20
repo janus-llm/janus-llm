@@ -1,6 +1,6 @@
 import unittest
 
-from ..reading import _repeat_text, flesch, gunning_fog
+from janus.metrics.reading import _repeat_text, flesch, gunning_fog
 
 
 class TestReading(unittest.TestCase):

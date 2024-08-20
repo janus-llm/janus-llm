@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from ..database import ChromaEmbeddingDatabase, uri_to_path
+from janus.embedding.database import ChromaEmbeddingDatabase, uri_to_path
 
 
 class TestDatabase(unittest.TestCase):

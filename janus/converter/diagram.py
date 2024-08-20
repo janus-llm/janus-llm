@@ -1,10 +1,15 @@
-import json
-from copy import deepcopy
+import math
+
+from langchain.output_parsers import RetryWithErrorOutputParser
+from langchain_core.exceptions import OutputParserException
+from langchain_core.runnables import RunnableLambda, RunnableParallel
 
 from janus.converter.converter import run_if_changed
 from janus.converter.document import Documenter
 from janus.language.block import TranslatedCodeBlock
 from janus.llm.models_info import MODEL_PROMPT_ENGINES
+from janus.parsers.refiner_parser import RefinerParser
+from janus.parsers.uml import UMLSyntaxParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -39,71 +44,81 @@ class DiagramGenerator(Documenter):
         self._diagram_type = diagram_type
         self._add_documentation = add_documentation
         self._documenter = None
+        self._diagram_parser = UMLSyntaxParser(language="plantuml")
         if add_documentation:
             self._diagram_prompt_template_name = "diagram_with_documentation"
         else:
             self._diagram_prompt_template_name = "diagram"
         self._load_diagram_prompt_engine()
 
-    def _add_translation(self, block: TranslatedCodeBlock) -> None:
-        """Given an "empty" `TranslatedCodeBlock`, translate the code represented in
-        `block.original`, setting the relevant fields in the translated block. The
-        `TranslatedCodeBlock` is updated in-pace, nothing is returned. Note that this
-        translates *only* the code for this block, not its children.
+    def _run_chain(self, block: TranslatedCodeBlock) -> str:
+        input = self._parser.parse_input(block.original)
+        n1 = round(self.max_prompts ** (1 / 3))
 
-        Arguments:
-            block: An empty `TranslatedCodeBlock`
-        """
-        if block.translated:
-            return
+        # Retries with the input, output, and error
+        n2 = round((self.max_prompts // n1) ** (1 / 2))
 
-        if block.original.text is None:
-            block.translated = True
-            return
+        # Retries with just the input
+        n3 = math.ceil(self.max_prompts / (n1 * n2))
 
         if self._add_documentation:
-            documentation_block = deepcopy(block)
-            super()._add_translation(documentation_block)
-            if not documentation_block.translated:
-                message = "Error: unable to produce documentation for code block"
-                log.info(message)
-                raise ValueError(message)
-            documentation = json.loads(documentation_block.text)["docstring"]
-
-        if self._llm is None:
-            message = (
-                "Model not configured correctly, cannot translate. Try setting "
-                "the model"
-            )
-            log.error(message)
-            raise ValueError(message)
-
-        log.debug(f"[{block.name}] Translating...")
-        log.debug(f"[{block.name}] Input text:\n{block.original.text}")
-
-        self._parser.set_reference(block.original)
-
-        query_and_parse = self.diagram_prompt | self._llm | self._parser
-
-        if self._add_documentation:
-            block.text = query_and_parse.invoke(
-                {
-                    "SOURCE_CODE": block.original.text,
-                    "DIAGRAM_TYPE": self._diagram_type,
-                    "DOCUMENTATION": documentation,
-                }
+            documentation_text = super()._run_chain(block)
+            refine_output = RefinerParser(
+                parser=self._diagram_parser,
+                initial_prompt=self._diagram_prompt.format(
+                    **{
+                        "SOURCE_CODE": input,
+                        "DOCUMENTATION": documentation_text,
+                        "DIAGRAM_TYPE": self._diagram_type,
+                    }
+                ),
+                refiner=self._refiner,
+                max_retries=n1,
+                llm=self._llm,
             )
         else:
-            block.text = query_and_parse.invoke(
-                {
-                    "SOURCE_CODE": block.original.text,
-                    "DIAGRAM_TYPE": self._diagram_type,
-                }
+            refine_output = RefinerParser(
+                parser=self._diagram_parser,
+                initial_prompt=self._diagram_prompt.format(
+                    **{
+                        "SOURCE_CODE": input,
+                        "DIAGRAM_TYPE": self._diagram_type,
+                    }
+                ),
+                refiner=self._refiner,
+                max_retries=n1,
+                llm=self._llm,
             )
-        block.tokens = self._llm.get_num_tokens(block.text)
-        block.translated = True
+        retry = RetryWithErrorOutputParser.from_llm(
+            llm=self._llm,
+            parser=refine_output,
+            max_retries=n2,
+        )
+        completion_chain = self._prompt | self._llm
+        chain = RunnableParallel(
+            completion=completion_chain, prompt_value=self._diagram_prompt
+        ) | RunnableLambda(lambda x: retry.parse_with_prompt(**x))
+        for _ in range(n3):
+            try:
+                if self._add_documentation:
+                    return chain.invoke(
+                        {
+                            "SOURCE_CODE": input,
+                            "DOCUMENTATION": documentation_text,
+                            "DIAGRAM_TYPE": self._diagram_type,
+                        }
+                    )
+                else:
+                    return chain.invoke(
+                        {
+                            "SOURCE_CODE": input,
+                            "DIAGRAM_TYPE": self._diagram_type,
+                        }
+                    )
+            except OutputParserException:
+                pass
 
-        log.debug(f"[{block.name}] Output code:\n{block.text}")
+        raise OutputParserException(f"Failed to parse after {n1*n2*n3} retries")
 
     @run_if_changed(
         "_diagram_prompt_template_name",
@@ -121,4 +136,4 @@ class DiagramGenerator(Documenter):
             target_version=None,
             prompt_template=self._diagram_prompt_template_name,
         )
-        self.diagram_prompt = self._diagram_prompt_engine.prompt
+        self._diagram_prompt = self._diagram_prompt_engine.prompt

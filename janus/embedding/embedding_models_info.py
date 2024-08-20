@@ -8,7 +8,7 @@ from langchain_community.embeddings.huggingface import HuggingFaceInferenceAPIEm
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
 
-from ..utils.logger import create_logger
+from janus.utils.logger import create_logger
 
 load_dotenv()
 

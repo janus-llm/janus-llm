@@ -39,6 +39,10 @@ class IncoseParser(PydanticOutputParser, JanusParser):
     def __init__(self):
         PydanticOutputParser.__init__(self, pydantic_object=Requirement)
 
+    # need to parse off input and get the number of inputs and then then check to see if List[requirements].size matches
+    # def set_reference(self, block: CodeBlock):
+        # self.block_name = block.name
+
     def parse(self, text: str):
         if isinstance(text, AIMessage):
             text = text.content
