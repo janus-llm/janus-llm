@@ -602,7 +602,6 @@ class Converter:
 
         # Retries with just the input
         n3 = math.ceil(self.max_prompts / (n1 * n2))
-
         # Make replacements in the prompt
         self._make_prompt_additions(block)
 
@@ -660,33 +659,25 @@ class Converter:
         """
         return [(key, item) for key, item in block.context_tags.items()]
 
-    def _make_prompt_additions(self, block: CodeBlock) -> ChatPromptTemplate:
-        existing_messages = self._prompt.messages
+    def _make_prompt_additions(self, block: CodeBlock):
+        # Prepare the additional context to prepend
+        additional_context = "".join(
+            [
+                f"{context_tag}: {context}\n"
+                for context_tag, context in self._get_prompt_additions(block)
+            ]
+        )
 
-        updated_messages = []
-        system_prompt_found = False
-
-        for message in existing_messages:
-            if (
-                isinstance(message, SystemMessagePromptTemplate)
-                and not system_prompt_found
-            ):
+        # Iterate through existing messages to find and update the system message
+        for i, message in enumerate(self._prompt.messages):
+            if isinstance(message, SystemMessagePromptTemplate):
+                # Prepend the additional context to the system message
                 updated_system_message = SystemMessagePromptTemplate.from_template(
-                    message.prompt.template
-                    + ""
-                    + "".join(
-                        [
-                            f"{context_tag}: {context}\n"
-                            for context_tag, context in self._get_prompt_additions(block)
-                        ]
-                    )
+                    additional_context + message.prompt.template
                 )
-                updated_messages.append(updated_system_message)
-                system_prompt_found = True
-            else:
-                updated_messages.append(message)
-
-        self._prompt = ChatPromptTemplate.from_messages(updated_messages)
+                # Directly modify the message in the list
+                self._prompt.messages[i] = updated_system_message
+                break  # Assuming there's only one system message to update
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
         """Save a file to disk.
