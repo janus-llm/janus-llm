@@ -77,6 +77,7 @@ class Converter:
         prune_node_types: tuple[str, ...] = (),
         splitter_type: str = "file",
         refiner_type: str = "basic",
+        skip_context: bool = False,
     ) -> None:
         """Initialize a Converter instance.
 
@@ -141,6 +142,8 @@ class Converter:
         self.set_prune_node_types(prune_node_types)
         self.set_db_path(db_path=db_path)
         self.set_db_config(db_config=db_config)
+
+        self.skip_context = skip_context
 
         # Child class must call this. Should we enforce somehow?
         # self._load_parameters()
@@ -603,7 +606,8 @@ class Converter:
         # Retries with just the input
         n3 = math.ceil(self.max_prompts / (n1 * n2))
         # Make replacements in the prompt
-        self._make_prompt_additions(block)
+        if not self.skip_context:
+            self._make_prompt_additions(block)
 
         refine_output = RefinerParser(
             parser=self._parser,
