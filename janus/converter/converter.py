@@ -652,15 +652,6 @@ class Converter:
         )
 
     @staticmethod
-    def _get_prompt_replacements(block) -> dict[str, str]:
-        """Get mapping of prompt placeholders to respective replacements.
-
-        Arguments:
-            block: The `TranslatedCodeBlock` to save to a file.
-        """
-        return {"SOURCE_CODE": block.original.text}
-
-    @staticmethod
     def _get_prompt_additions(block) -> Optional[List[Tuple[str, str]]]:
         """Get a list of strings to append to the prompt.
 
