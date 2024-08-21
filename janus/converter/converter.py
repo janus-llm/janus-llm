@@ -1,6 +1,5 @@
 import functools
 import json
-import math
 import time
 from pathlib import Path
 from typing import Any
@@ -77,6 +76,7 @@ class Converter:
         prune_node_types: tuple[str, ...] = (),
         splitter_type: str = "file",
         refiner_type: str = "basic",
+        use_refiner: bool = True,
     ) -> None:
         """Initialize a Converter instance.
 
@@ -131,6 +131,8 @@ class Converter:
 
         self._refiner_type: str
         self._refiner: Refiner
+
+        self._use_refiner = use_refiner
 
         self.set_splitter(splitter_type=splitter_type)
         self.set_refiner(refiner_type=refiner_type)
@@ -595,37 +597,39 @@ class Converter:
         self._parser.set_reference(block.original)
 
         # Retries with just the output and the error
-        n1 = round(self.max_prompts ** (1 / 3))
+        n1 = round(self.max_prompts ** (1 / 2))
 
         # Retries with the input, output, and error
-        n2 = round((self.max_prompts // n1) ** (1 / 2))
+        n2 = round(self.max_prompts // n1)
 
         # Retries with just the input
-        n3 = math.ceil(self.max_prompts / (n1 * n2))
-
-        refine_output = RefinerParser(
-            parser=self._parser,
-            initial_prompt=self._prompt.format(**{"SOURCE_CODE": block.original.text}),
-            refiner=self._refiner,
-            max_retries=n1,
-            llm=self._llm,
-        )
-        retry = RetryWithErrorOutputParser.from_llm(
-            llm=self._llm,
-            parser=refine_output,
-            max_retries=n2,
-        )
+        if self._use_refiner:
+            refine_output = RefinerParser(
+                parser=self._parser,
+                initial_prompt=self._prompt.format(
+                    **{"SOURCE_CODE": block.original.text}
+                ),
+                refiner=self._refiner,
+                max_retries=n1,
+                llm=self._llm,
+            )
+        else:
+            refine_output = RetryWithErrorOutputParser.from_llm(
+                llm=self._llm,
+                parser=self._parser,
+                max_retries=n1,
+            )
         completion_chain = self._prompt | self._llm
         chain = RunnableParallel(
             completion=completion_chain, prompt_value=self._prompt
-        ) | RunnableLambda(lambda x: retry.parse_with_prompt(**x))
-        for _ in range(n3):
+        ) | RunnableLambda(lambda x: refine_output.parse_with_prompt(**x))
+        for _ in range(n2):
             try:
                 return chain.invoke({"SOURCE_CODE": block.original.text})
             except OutputParserException:
                 pass
 
-        raise OutputParserException(f"Failed to parse after {n1*n2*n3} retries")
+        raise OutputParserException(f"Failed to parse after {n1*n2} retries")
 
     def _get_output_obj(
         self, block: TranslatedCodeBlock
