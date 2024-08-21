@@ -3,13 +3,13 @@ import json
 import math
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, List, Optional, Tuple
 
 from langchain.output_parsers import RetryWithErrorOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.output_parsers import BaseOutputParser
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate
 from langchain_core.runnables import RunnableLambda, RunnableParallel
 from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
@@ -77,6 +77,7 @@ class Converter:
         prune_node_types: tuple[str, ...] = (),
         splitter_type: str = "file",
         refiner_type: str = "basic",
+        skip_context: bool = False,
     ) -> None:
         """Initialize a Converter instance.
 
@@ -141,6 +142,8 @@ class Converter:
         self.set_prune_node_types(prune_node_types)
         self.set_db_path(db_path=db_path)
         self.set_db_config(db_config=db_config)
+
+        self.skip_context = skip_context
 
         # Child class must call this. Should we enforce somehow?
         # self._load_parameters()
@@ -602,6 +605,9 @@ class Converter:
 
         # Retries with just the input
         n3 = math.ceil(self.max_prompts / (n1 * n2))
+        # Make replacements in the prompt
+        if not self.skip_context:
+            self._make_prompt_additions(block)
 
         refine_output = RefinerParser(
             parser=self._parser,
@@ -647,6 +653,35 @@ class Converter:
             ),
             output=output,
         )
+
+    @staticmethod
+    def _get_prompt_additions(block) -> Optional[List[Tuple[str, str]]]:
+        """Get a list of strings to append to the prompt.
+
+        Arguments:
+            block: The `TranslatedCodeBlock` to save to a file.
+        """
+        return [(key, item) for key, item in block.context_tags.items()]
+
+    def _make_prompt_additions(self, block: CodeBlock):
+        # Prepare the additional context to prepend
+        additional_context = "".join(
+            [
+                f"{context_tag}: {context}\n"
+                for context_tag, context in self._get_prompt_additions(block)
+            ]
+        )
+
+        # Iterate through existing messages to find and update the system message
+        for i, message in enumerate(self._prompt.messages):
+            if isinstance(message, SystemMessagePromptTemplate):
+                # Prepend the additional context to the system message
+                updated_system_message = SystemMessagePromptTemplate.from_template(
+                    additional_context + message.prompt.template
+                )
+                # Directly modify the message in the list
+                self._prompt.messages[i] = updated_system_message
+                break  # Assuming there's only one system message to update
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
         """Save a file to disk.
