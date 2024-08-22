@@ -290,7 +290,7 @@ class Converter:
         """
         if self._refiner_type == "basic":
             self._refiner = BasicRefiner(
-                "basic_refinement", self._model_name, self._source_language
+                "basic_refinement", self._model_id, self._source_language
             )
         else:
             raise ValueError(f"Error: unknown refiner type {self._refiner_type}")
