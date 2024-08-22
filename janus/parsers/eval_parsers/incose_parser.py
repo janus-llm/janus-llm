@@ -64,12 +64,14 @@ class IncoseParser(PydanticOutputParser, JanusParser):
             input_length = self.input_length  # Retrieve the input length
             print(f"Input length (from parse_input): {input_length}")  
             # Compare input length and output length
-            if output_length != input_length:
-                log.debug(f"Array sizes of input and output do not match You must evaluate and return all of the original requirements:\n{text}")
-                raise OutputParserException(f"The input requirements array of size ({input_length}) and output requirements array of size ({output_length}) do not match. You must evaluate and return all of the original requirements")
+        #     if output_length != input_length:
+        #         log.debug(f"Array sizes of input and output do not match You must evaluate and return all of the original requirements:\n{text}")
+        #         raise OutputParserException(f"The input requirements array of size ({input_length}) and output requirements array of size ({output_length}) do not match. You must evaluate and return all of the original requirements")
         return text
 
     def parse(self, text: str):
+        output_length: int = 0 
+
         print("Parsing text...")
         log.info("Parsing text...")
         if isinstance(text, AIMessage):
@@ -86,7 +88,20 @@ class IncoseParser(PydanticOutputParser, JanusParser):
             raise OutputParserException(
                 f"Got invalid return object. Expected a dictionary, but got {type(obj)}"
             )
+        
+        if 'requirements' in obj and isinstance(obj['requirements'], list):
+            output_length = len(obj['requirements'])  # Count the number of requirements returned in output
+            print(f"Output length: {output_length}")
+
+        input_length = self.input_length  # Retrieve the input length
+        if output_length != input_length:
+            log.debug(f"Array sizes of input and output do not match You must evaluate and return all of the original requirements:\n{text}")
+            log.info("The input requirements array of size ({input_length}) and output requirements array of size ({output_length})")
+            raise OutputParserException(f"The input requirements array of size ({input_length}) and output requirements array of size ({output_length}) do not match. You must evaluate and return all of the original requirements. continue generating response. ")
+       
+        # move the check into this method 
         return json.dumps(obj)
+    
 
     def get_format_instructions(self) -> str:
         """Get the format instructions for the parser."""
@@ -95,4 +110,5 @@ class IncoseParser(PydanticOutputParser, JanusParser):
             "in a JSON-formatted string. For each and every requirement there should be evaluated criteria C1-C9 each including: "
             "1) The LLM reasoning behind the score. "
             "2) The 'Score' of either a 'pass' or 'fail'."
+            "Continue generating your response until all requirements have been returned. "
         )
