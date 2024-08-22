@@ -544,11 +544,11 @@ def llm_self_eval(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-4-0125-preview",
+    ] = "gpt-4o",
     evaluation_type: Annotated[
         str,
         typer.Option(
-            "--evaluation_type",
+            "--evaluation-type",
             "-e",
             help="Type that is being evaluated. ['incose', 'incose_set', 'comments', 'comments_set']",
         ),
