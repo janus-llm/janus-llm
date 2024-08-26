@@ -9,12 +9,10 @@ class Aggregator(Converter):
     def __init__(
         self,
         intermediate_converters: List[Converter],
-        block_separator: str = "\n-------------\n",
         separator: str = "\n==============\n",
         **kwargs,
     ):
         self._intermediate_converters = intermediate_converters
-        self._block_separator = block_separator
         self._separator = separator
         super().__init__(**kwargs)
         self._load_parameters()
@@ -27,9 +25,7 @@ class Aggregator(Converter):
         if len(root.children) > 0:
             for c in root.children:
                 self._recursive_translate(c)
-            root.original.text = self._combine_blocks(
-                root.children, self._block_separator
-            )
+            root.original.text = self._combine_blocks(root.children, self._separator)
         else:
             int_reps = [
                 ic._add_translation(deepcopy(root))
