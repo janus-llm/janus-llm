@@ -1,25 +1,42 @@
+from copy import deepcopy
 from typing import List
 
 from janus.converter.converter import Converter
+from janus.language.block import CodeBlock, TranslatedCodeBlock
 
 
 class Aggregator(Converter):
     def __init__(
         self,
-        aggregator_prompt: str,
         intermediate_converters: List[Converter],
+        block_separator: str = "\n-------------\n",
         separator: str = "\n==============\n",
         **kwargs,
     ):
-        self._aggregator_prompt_name = aggregator_prompt
         self._intermediate_converters = intermediate_converters
+        self._block_separator = block_separator
         self._separator = separator
         super().__init__(**kwargs)
         self._load_parameters()
 
-    def _load_agregator_prompt(self):
-        pass
+    def _iterative_translate(self, root: CodeBlock) -> TranslatedCodeBlock:
+        res = TranslatedCodeBlock(root)
+        self._recursive_translate(res)
 
-    def _load_parameters(self) -> None:
-        super()._load_parameters()
-        self._load_agregator_prompt()
+    def _recursive_translate(self, root: TranslatedCodeBlock) -> None:
+        if len(root.children) > 0:
+            for c in root.children:
+                self._recursive_translate(c)
+            root.original.text = self._combine_blocks(
+                root.children, self._block_separator
+            )
+        else:
+            int_reps = [
+                ic._add_translation(deepcopy(root))
+                for ic in self._intermediate_converters
+            ]
+            root.original.text = self._combine_blocks(int_reps, self._separator)
+        self._add_translation(root)
+
+    def _combine_blocks(self, blocks: List[TranslatedCodeBlock], separator: str) -> str:
+        return separator.join([block.text for block in blocks])
