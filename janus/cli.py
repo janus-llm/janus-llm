@@ -200,6 +200,14 @@ def translate(
             help="Whether to overwrite existing files in the output directory",
         ),
     ] = False,
+    skip_context: Annotated[
+        bool,
+        typer.Option(
+            "--skip-context",
+            help="Prompts will include any context information associated with source"
+            " code blocks, unless this option is specified",
+        ),
+    ] = False,
     temp: Annotated[
         float,
         typer.Option("--temperature", "-T", help="Sampling temperature.", min=0, max=2),
@@ -240,11 +248,11 @@ def translate(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
-    use_refiner: Annotated[
+    skip_refiner: Annotated[
         bool,
         typer.Option(
-            "--disable-refiner/--use-refiner",
-            help="Whether to use the refiner for generating output",
+            "--skip-refiner",
+            help="Whether to skip the refiner for generating output",
         ),
     ] = True,
 ):
@@ -272,7 +280,8 @@ def translate(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
-        use_refiner=use_refiner,
+        skip_context=skip_context,
+        skip_refiner=skip_refiner,
     )
     translator.translate(input_dir, output_dir, overwrite, collection)
 
@@ -328,6 +337,14 @@ def document(
         typer.Option(
             "--overwrite/--preserve",
             help="Whether to overwrite existing files in the output directory",
+        ),
+    ] = False,
+    skip_context: Annotated[
+        bool,
+        typer.Option(
+            "--skip-context",
+            help="Prompts will include any context information associated with source"
+            " code blocks, unless this option is specified",
         ),
     ] = False,
     doc_mode: Annotated[
@@ -386,11 +403,11 @@ def document(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
-    use_refiner: Annotated[
+    skip_refiner: Annotated[
         bool,
         typer.Option(
-            "--disable-refiner/--use-refiner",
-            help="Whether to use the refiner for generating output",
+            "--skip-refiner",
+            help="Whether to skip the refiner for generating output",
         ),
     ] = True,
 ):
@@ -405,7 +422,8 @@ def document(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
-        use_refiner=use_refiner,
+        skip_refiner=skip_refiner,
+        skip_context=skip_context,
     )
     if doc_mode == "madlibs":
         documenter = MadLibsDocumenter(
@@ -474,6 +492,14 @@ def diagram(
             help="Whether to overwrite existing files in the output directory",
         ),
     ] = False,
+    skip_context: Annotated[
+        bool,
+        typer.Option(
+            "--skip-context",
+            help="Prompts will include any context information associated with source"
+            " code blocks, unless this option is specified",
+        ),
+    ] = False,
     temperature: Annotated[
         float,
         typer.Option("--temperature", "-t", help="Sampling temperature.", min=0, max=2),
@@ -510,11 +536,11 @@ def diagram(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
-    use_refiner: Annotated[
+    skip_refiner: Annotated[
         bool,
         typer.Option(
-            "--disable-refiner/--use-refiner",
-            help="Whether to use the refiner for generating output",
+            "--skip-refiner",
+            help="Whether to skip the refiner for generating output",
         ),
     ] = True,
 ):
@@ -530,7 +556,8 @@ def diagram(
         diagram_type=diagram_type,
         add_documentation=add_documentation,
         splitter_type=splitter_type,
-        use_refiner=use_refiner,
+        skip_refiner=skip_refiner,
+        skip_context=skip_context,
     )
     diagram_generator.translate(input_dir, output_dir, overwrite, collection)
 
