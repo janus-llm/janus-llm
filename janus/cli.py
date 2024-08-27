@@ -248,6 +248,13 @@ def translate(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
+    skip_refiner: Annotated[
+        bool,
+        typer.Option(
+            "--skip-refiner",
+            help="Whether to skip the refiner for generating output",
+        ),
+    ] = True,
 ):
     try:
         target_language, target_version = target_lang.split("-")
@@ -274,6 +281,7 @@ def translate(
         db_config=collections_config,
         splitter_type=splitter_type,
         skip_context=skip_context,
+        skip_refiner=skip_refiner,
     )
     translator.translate(input_dir, output_dir, overwrite, collection)
 
@@ -395,6 +403,13 @@ def document(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
+    skip_refiner: Annotated[
+        bool,
+        typer.Option(
+            "--skip-refiner",
+            help="Whether to skip the refiner for generating output",
+        ),
+    ] = True,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -407,6 +422,7 @@ def document(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
+        skip_refiner=skip_refiner,
         skip_context=skip_context,
     )
     if doc_mode == "madlibs":
@@ -520,6 +536,13 @@ def diagram(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    skip_refiner: Annotated[
+        bool,
+        typer.Option(
+            "--skip-refiner",
+            help="Whether to skip the refiner for generating output",
+        ),
+    ] = True,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -533,6 +556,7 @@ def diagram(
         diagram_type=diagram_type,
         add_documentation=add_documentation,
         splitter_type=splitter_type,
+        skip_refiner=skip_refiner,
         skip_context=skip_context,
     )
     diagram_generator.translate(input_dir, output_dir, overwrite, collection)

@@ -1,6 +1,5 @@
 import functools
 import json
-import math
 import time
 from pathlib import Path
 from typing import Any, List, Optional, Tuple
@@ -77,6 +76,7 @@ class Converter:
         prune_node_types: tuple[str, ...] = (),
         splitter_type: str = "file",
         refiner_type: str = "basic",
+        skip_refiner: bool = True,
         skip_context: bool = False,
     ) -> None:
         """Initialize a Converter instance.
@@ -98,6 +98,8 @@ class Converter:
             splitter_type: The type of splitter to use. Valid values are `"file"`,
                 `"tag"`, `"chunk"`, `"ast-strict"`, and `"ast-flex"`.
             refiner_type: The type of refiner to use. Valid values are `"basic"`.
+            skip_refiner: Whether to skip the refiner.
+            skip_context: Whether to skip adding context to the prompt.
         """
         self._changed_attrs: set = set()
 
@@ -132,6 +134,8 @@ class Converter:
 
         self._refiner_type: str
         self._refiner: Refiner
+
+        self.skip_refiner = skip_refiner
 
         self.set_splitter(splitter_type=splitter_type)
         self.set_refiner(refiner_type=refiner_type)
@@ -293,7 +297,7 @@ class Converter:
         """
         if self._refiner_type == "basic":
             self._refiner = BasicRefiner(
-                "basic_refinement", self._model_name, self._source_language
+                "basic_refinement", self._model_id, self._source_language
             )
         else:
             raise ValueError(f"Error: unknown refiner type {self._refiner_type}")
@@ -598,40 +602,41 @@ class Converter:
         self._parser.set_reference(block.original)
 
         # Retries with just the output and the error
-        n1 = round(self.max_prompts ** (1 / 3))
+        n1 = round(self.max_prompts ** (1 / 2))
 
         # Retries with the input, output, and error
-        n2 = round((self.max_prompts // n1) ** (1 / 2))
+        n2 = round(self.max_prompts // n1)
 
         # Retries with just the input
-        n3 = math.ceil(self.max_prompts / (n1 * n2))
-        # Make replacements in the prompt
         if not self.skip_context:
             self._make_prompt_additions(block)
-
-        refine_output = RefinerParser(
-            parser=self._parser,
-            initial_prompt=self._prompt.format(**{"SOURCE_CODE": block.original.text}),
-            refiner=self._refiner,
-            max_retries=n1,
-            llm=self._llm,
-        )
-        retry = RetryWithErrorOutputParser.from_llm(
-            llm=self._llm,
-            parser=refine_output,
-            max_retries=n2,
-        )
+        if not self.skip_refiner:  # Make replacements in the prompt
+            refine_output = RefinerParser(
+                parser=self._parser,
+                initial_prompt=self._prompt.format(
+                    **{"SOURCE_CODE": block.original.text}
+                ),
+                refiner=self._refiner,
+                max_retries=n1,
+                llm=self._llm,
+            )
+        else:
+            refine_output = RetryWithErrorOutputParser.from_llm(
+                llm=self._llm,
+                parser=self._parser,
+                max_retries=n1,
+            )
         completion_chain = self._prompt | self._llm
         chain = RunnableParallel(
             completion=completion_chain, prompt_value=self._prompt
-        ) | RunnableLambda(lambda x: retry.parse_with_prompt(**x))
-        for _ in range(n3):
+        ) | RunnableLambda(lambda x: refine_output.parse_with_prompt(**x))
+        for _ in range(n2):
             try:
                 return chain.invoke({"SOURCE_CODE": block.original.text})
             except OutputParserException:
                 pass
 
-        raise OutputParserException(f"Failed to parse after {n1*n2*n3} retries")
+        raise OutputParserException(f"Failed to parse after {n1*n2} retries")
 
     def _get_output_obj(
         self, block: TranslatedCodeBlock
