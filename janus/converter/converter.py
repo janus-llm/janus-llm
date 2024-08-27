@@ -628,7 +628,7 @@ class Converter:
             )
         completion_chain = self._prompt | self._llm
         chain = RunnableParallel(
-            completion=completion_chain, prompt=self._prompt
+            completion=completion_chain, prompt_value=self._prompt
         ) | RunnableLambda(lambda x: refine_output.parse_with_prompt(**x))
         for _ in range(n2):
             try:
