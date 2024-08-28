@@ -677,6 +677,10 @@ class Converter:
             ]
         )
 
+        if not hasattr(self._prompt, "messages"):
+            log.debug("Skipping additions to prompt, no messages found on prompt object!")
+            return
+
         # Iterate through existing messages to find and update the system message
         for i, message in enumerate(self._prompt.messages):
             if isinstance(message, SystemMessagePromptTemplate):
