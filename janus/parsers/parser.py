@@ -12,7 +12,7 @@ log = create_logger(__name__)
 class JanusParser(BaseOutputParser[str]):
     def parse_input(self, block: CodeBlock) -> str:
         """Parse the input block into raw string input ready to be passed to
-            an LLM. Also perform any processing or saving of metadata.
+        an LLM. Also perform any processing or saving of metadata.
 
         Arguments:
             block: The CodeBlock to be processed

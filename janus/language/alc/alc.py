@@ -1,3 +1,6 @@
+import re
+from typing import Optional
+
 from langchain.schema.language_model import BaseLanguageModel
 
 from janus.language.block import CodeBlock
@@ -61,7 +64,11 @@ class AlcSplitter(TreeSitterSplitter):
             #  next csect or dsect instruction
             sects: list[list[CodeBlock]] = [[]]
             for c in block.children:
-                if c.node_type in sect_types:
+                if c.node_type == "csect_instruction":
+                    c.context_tags["alc_section"] = "CSECT"
+                    sects.append([c])
+                elif c.node_type == "dsect_instruction":
+                    c.context_tags["alc_section"] = "DSECT"
                     sects.append([c])
                 else:
                     sects[-1].append(c)
@@ -85,3 +92,94 @@ class AlcSplitter(TreeSitterSplitter):
             queue.extend(block.children)
 
         return root
+
+
+class AlcListingSplitter(AlcSplitter):
+    """A class for splitting ALC listing code into functional blocks to
+    prompt with for transcoding.
+    """
+
+    def __init__(
+        self,
+        model: None | BaseLanguageModel = None,
+        max_tokens: int = 4096,
+        protected_node_types: tuple[str, ...] = (),
+        prune_node_types: tuple[str, ...] = (),
+        prune_unprotected: bool = False,
+    ):
+        """Initialize a AlcSplitter instance.
+
+
+        Arguments:
+            max_tokens: The maximum number of tokens supported by the model
+        """
+        # The string to mark the end of the listing header
+        self.header_indicator_str: str = (
+            "Loc  Object Code    Addr1 Addr2  Stmt   Source Statement"
+        )
+        # How many characters to trim from the right side to remove the address column
+        self.address_column_chars: int = 10
+        # The string to mark the end of the left margin
+        self.left_margin_indicator_str: str = "Stmt"
+        super().__init__(
+            model=model,
+            max_tokens=max_tokens,
+            protected_node_types=protected_node_types,
+            prune_node_types=prune_node_types,
+            prune_unprotected=prune_unprotected,
+        )
+
+    def _get_ast(self, code: str) -> CodeBlock:
+        active_usings = self.get_active_usings(code)
+        code = self.preproccess_assembly(code)
+        ast: CodeBlock = super()._get_ast(code)
+        ast.context_tags["active_usings"] = active_usings
+        return ast
+
+    def preproccess_assembly(self, code: str) -> str:
+        """Remove non-essential lines from an assembly snippet"""
+
+        lines = code.splitlines()
+        lines = self.strip_header_and_left(lines)
+        lines = self.strip_addresses(lines)
+        return "".join(str(line) for line in lines)
+
+    def get_active_usings(self, code: str) -> Optional[str]:
+        """Look for 'active usings' in the ALC listing header"""
+        lines = code.splitlines()
+        for line in lines:
+            if "Active Usings:" in line:
+                return line.split("Active Usings:")[1]
+        return None
+
+    def strip_header_and_left(
+        self,
+        lines: list[str],
+    ) -> list[str]:
+        """Remove the header and the left panel from the assembly sample"""
+
+        esd_regex = re.compile(f".*{self.header_indicator_str}.*")
+
+        header_end_index: int = [
+            i for i, item in enumerate(lines) if re.search(esd_regex, item)
+        ][0]
+
+        left_content_end_column = lines[header_end_index].find(
+            self.left_margin_indicator_str
+        )
+        hori_output_lines = lines[(header_end_index + 1) :]
+
+        left_output_lines = [
+            line[left_content_end_column + 5 :] for line in hori_output_lines
+        ]
+        return left_output_lines
+
+    def strip_addresses(self, lines: list[str]) -> list[str]:
+        """Strip the addresses which run down the right side of the assembly snippet"""
+
+        stripped_lines = [line[: -self.address_column_chars] for line in lines]
+        return stripped_lines
+
+    def strip_footer(self, lines: list[str]):
+        """Strip the footer from the assembly snippet"""
+        return NotImplementedError
