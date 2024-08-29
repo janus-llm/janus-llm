@@ -34,7 +34,9 @@ class RefinerParser(JanusParser):
                 return self.parser.parse(text)
             except OutputParserException as oe:
                 err = str(oe)
-                new_prompt, prompt_arguments = self.refiner.refine(last_prompt, text, err)
+                new_prompt, prompt_arguments = self.refiner.refine(
+                    self.initial_prompt, last_prompt, text, err
+                )
                 new_chain = new_prompt | self.llm
                 text = new_chain.invoke(prompt_arguments)
                 last_prompt = new_prompt.format(**prompt_arguments)
