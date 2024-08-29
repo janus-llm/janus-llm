@@ -591,6 +591,14 @@ def llm_self_eval(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    eval_items_per_request: Annotated[
+        int,
+        typer.Option(
+            "--eval-items-per-request",
+            "-rc",
+            help="The maximum number of evaluation items per request",
+        ),
+    ] = None,
 ):
     model_arguments = dict(temperature=temperature)
     self_evaluation_generator = Evaluator(
@@ -599,7 +607,8 @@ def llm_self_eval(
         source_language=language,
         max_prompts=max_prompts,
         splitter_type=splitter_type,
-        evaluation_type=evaluation_type
+        evaluation_type=evaluation_type,
+        eval_items_per_request=eval_items_per_request
     )
     self_evaluation_generator.translate(input_dir, output_dir, overwrite, collection)
 
