@@ -210,7 +210,9 @@ def get_available_model_names() -> list[str]:
     return avaialable_models
 
 
-def load_model(user_model_name: str) -> tuple[BaseLanguageModel, int, dict[str, float]]:
+def load_model(
+    user_model_name: str,
+) -> tuple[BaseLanguageModel, str, int, dict[str, float]]:
     if not MODEL_CONFIG_DIR.exists():
         MODEL_CONFIG_DIR.mkdir(parents=True)
     model_config_file = MODEL_CONFIG_DIR / f"{user_model_name}.json"

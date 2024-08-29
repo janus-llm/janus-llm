@@ -1,11 +1,12 @@
 import unittest
 
-from janus.parsers.code_parser import CodeParser, JanusParser
+from janus.parsers.code_parser import CodeParser
+from janus.parsers.parser import GenericParser
 
 
 class TestJanusParser(unittest.TestCase):
     def setUp(self):
-        self.parser = JanusParser()
+        self.parser = GenericParser()
 
     def test_parse_combined_output(self):
         text = "test text"
