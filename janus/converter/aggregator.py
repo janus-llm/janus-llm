@@ -22,6 +22,7 @@ class Aggregator(Converter):
         return self._recursive_translate(res)
 
     def _recursive_translate(self, root: TranslatedCodeBlock) -> None:
+        original_text = root.original.text
         if len(root.children) > 0:
             for c in root.children:
                 self._recursive_translate(c)
@@ -32,6 +33,7 @@ class Aggregator(Converter):
                 ic._add_translation(r)
             root.original.text = self._combine_blocks(int_reps, self._separator)
         self._add_translation(root)
+        root.original.text = original_text
         return root
 
     def _combine_blocks(self, blocks: List[TranslatedCodeBlock], separator: str) -> str:
