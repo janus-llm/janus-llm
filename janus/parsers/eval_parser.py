@@ -1,9 +1,10 @@
 import json
 
 from langchain.output_parsers import PydanticOutputParser
+from langchain_core.messages import BaseMessage
 from langchain_core.pydantic_v1 import BaseModel, Field, validator
 
-from janus.parsers.code_parser import JanusParser
+from janus.parsers.parser import JanusParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -28,7 +29,7 @@ class Eval(BaseModel):
 
         return v
 
-    def __add__(self, other):
+    def __add__(self, other: "Eval"):
         if isinstance(other, int) and other == 0:
             return self.copy()
         return Eval.construct(
@@ -38,10 +39,10 @@ class Eval(BaseModel):
             completeness=self.completeness + other.completeness,
         )
 
-    def __radd__(self, other):
+    def __radd__(self, other) -> "Eval":
         return self.__add__(other)
 
-    def __truediv__(self, other):
+    def __truediv__(self, other) -> "Eval":
         if isinstance(other, int):
             return Eval.construct(
                 syntax=self.syntax / other,
@@ -57,11 +58,13 @@ class Eval(BaseModel):
         )
 
 
-class EvaluationParser(PydanticOutputParser, JanusParser):
+class EvaluationParser(JanusParser, PydanticOutputParser):
     def __init__(self):
         PydanticOutputParser.__init__(self, pydantic_object=Eval)
 
-    def parse(self, text: str) -> str:
+    def parse(self, text: str | BaseMessage) -> str:
+        if isinstance(text, BaseMessage):
+            text = str(text.content)
         eval = super().parse(text)
         return json.dumps(eval.json())
 
@@ -75,6 +78,6 @@ class EvaluationParser(PydanticOutputParser, JanusParser):
         Returns:
             A parsed version of the text.
         """
-        objs = [super().parse(line.strip()) for line in text.split("\n")]
-        avg_obj = sum(objs) / len(objs)
+        objs: list[Eval] = [super().parse(line.strip()) for line in text.split("\n")]
+        avg_obj: Eval = sum(objs) / len(objs)
         return json.dumps(avg_obj.json())

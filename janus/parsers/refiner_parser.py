@@ -1,11 +1,13 @@
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseLanguageModel
+from langchain_core.messages import BaseMessage
 from langchain_core.output_parsers import BaseOutputParser
 
+from janus.parsers.parser import JanusParser
 from janus.refiners.refiner import Refiner
 
 
-class RefinerParser(BaseOutputParser):
+class RefinerParser(JanusParser):
     """Parser for performing refinement with a refiner
 
     Properties:
@@ -25,25 +27,20 @@ class RefinerParser(BaseOutputParser):
     refiner: Refiner
     max_retries: int
 
-    def parse(self, text: str) -> str:
-        """Parses the text using the refiner
-
-        Arguments:
-            text: text to parse
-
-        Returns:
-            Parsed text
-        """
+    def parse(self, text: str | BaseMessage) -> str:
         last_prompt = self.initial_prompt
         for _ in range(self.max_retries):
             try:
                 return self.parser.parse(text)
             except OutputParserException as oe:
                 err = str(oe)
-                new_prompt, prompt_arguments = self.refiner.refine(last_prompt, text, err)
+                new_prompt, prompt_arguments = self.refiner.refine(
+                    self.initial_prompt, last_prompt, text, err
+                )
                 new_chain = new_prompt | self.llm
                 text = new_chain.invoke(prompt_arguments)
                 last_prompt = new_prompt.format(**prompt_arguments)
+
         raise OutputParserException(
             f"Error: unable to correct output after {self.max_retries} attempts"
         )
