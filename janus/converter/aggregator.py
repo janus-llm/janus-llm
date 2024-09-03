@@ -12,6 +12,12 @@ class Aggregator(Converter):
         separator: str = "\n==============\n",
         **kwargs,
     ):
+        """
+        Initialization Method
+        Arguments:
+            intermediate_converters - list of converters to use
+            separator: separator string to partition different outputs before combination
+        """
         self._intermediate_converters = intermediate_converters
         self._separator = separator
         super().__init__(**kwargs)
@@ -22,6 +28,9 @@ class Aggregator(Converter):
         return self._recursive_translate(res)
 
     def _recursive_translate(self, root: TranslatedCodeBlock) -> None:
+        """
+        Recursively translates code blocks from a bottom up approach
+        """
         original_text = root.original.text
         if len(root.children) > 0:
             for c in root.children:
@@ -37,4 +46,7 @@ class Aggregator(Converter):
         return root
 
     def _combine_blocks(self, blocks: List[TranslatedCodeBlock], separator: str) -> str:
+        """
+        Combines code blocks into a single piece of text
+        """
         return separator.join([block.text for block in blocks])
