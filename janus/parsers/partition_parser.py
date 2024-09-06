@@ -78,31 +78,59 @@ class PartitionParser(JanusParser, PydanticOutputParser):
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise
 
+        # Locate any invalid line IDs, raise exception if any found
+        invalid_splits = [
+            partition.location
+            for partition in out.__root__
+            if partition.location not in self.line_id_to_index
+        ]
+        if invalid_splits:
+            err_msg = (
+                f"{len(invalid_splits)} line ID(s) not found in input: "
+                + ", ".join(invalid_splits)
+            )
+            log.warning(err_msg)
+            raise OutputParserException(err_msg)
+
+        # Map line IDs to indices (so they can be sorted and lines indexed)
         index_to_line_id = {0: "START", -1: "END"}
         split_points = {0}
         for partition in out.__root__:
-            if partition.location not in self.line_id_to_index:
-                raise OutputParserException(
-                    f"Line ID not found in input: {partition.location}"
-                )
             index = self.line_id_to_index[partition.location]
             index_to_line_id[index] = partition.location
             split_points.add(index)
 
+        # Get partition start/ends, chunks, chunk lengths
         split_points = sorted(split_points) + [-1]
-        chunks = [
-            "\n".join(self.lines[i0:i1]) for i0, i1 in zip(split_points, split_points[1:])
+        partition_indices = list(zip(split_points, split_points[1:]))
+        partition_points = [
+            (index_to_line_id[i0], index_to_line_id[i1]) for i0, i1 in partition_indices
         ]
+        chunks = ["\n".join(self.lines[i0:i1]) for i0, i1 in partition_indices]
+        chunk_tokens = list(map(self.model.get_num_tokens, chunks))
 
-        chunks = []
-        for i0, i1 in zip(split_points, split_points[1:]):
-            chunk = "\n".join(self.lines[i0:i1])
-            tokens = self.model.get_num_tokens(chunk)
-            if tokens > self.token_limit:
-                raise OutputParserException(
-                    f"Chunk between {index_to_line_id[i0]} and {index_to_line_id[i1]} "
-                    "exceeds token limit! Must be further subdivided."
-                )
-            chunks.append(chunk)
+        # Collect any chunks that exceed token limit
+        oversized_indices: list[int] = [
+            i for i, n in enumerate(chunk_tokens) if n > self.token_limit
+        ]
+        if oversized_indices:
+            data = list(zip(partition_points, chunks, chunk_tokens))
+            data = [data[i] for i in oversized_indices]
+
+            problem_points = "\n".join(
+                [
+                    f"{i0} to {i1} ({t / self.token_limit:.1f}x maximum length)"
+                    for (i0, i1), _, t in data
+                ]
+            )
+            log.warning(f"Found {len(data)} oversized chunks:\n{problem_points}")
+            log.debug(
+                "Oversized chunks:\n"
+                + "\n#############\n".join(chunk for _, chunk, _ in data)
+            )
+            raise OutputParserException(
+                f"The following segments are too long and must be "
+                f"further subdivided:\n{problem_points}"
+            )
 
         return "\n<JANUS_PARTITION>\n".join(chunks)
