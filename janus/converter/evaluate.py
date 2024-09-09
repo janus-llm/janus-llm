@@ -8,6 +8,7 @@ from janus.language.block import TranslatedCodeBlock
 
 # Parsers
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
+from janus.parsers.eval_parsers.comment_parser import CommentParser
 
 log = create_logger(__name__)
 
@@ -17,7 +18,7 @@ class Evaluator(Converter):
     A class that performs an LLM self evaluation on an input target, with an associated prompt.
 
     Current valid evaluation types:
-    ['incose']
+    ['incose', 'comments']
 
     TODO:
     ['incose_set', 'comments', 'comments_set']
@@ -45,6 +46,8 @@ class Evaluator(Converter):
         # Setting parser type here
         if evaluation_type == "incose":
             self._parser = IncoseParser()
+        if evaluation_type == "comments":
+            self._parser = CommentParser()
 
         else:
             raise ValueError("Parser not found. Please make sure the evaluation type is correct and the parser and prompt exsists.")

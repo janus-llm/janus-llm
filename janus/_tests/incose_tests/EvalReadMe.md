@@ -46,6 +46,9 @@ janus llm-self-eval -i _tests/incose_tests/input/ -l json -o testOutput/ -e "inc
 
  - In ```janus/prompts/eval_prompts```
  - Create a new directory with the name of your evaluation type. **Note: The name that you use is how you will call the evaluation type eg** ```-e "incose"```
+ - `human.txt`  - this is the main prompt that contains the scoring rubric and the commands for the llm to follow 
+ - `system.txt`  - the initial instructions for the evaluating llm 
+- `variables.json`  - contains the structure for what the returned evaluation should look like 
 
 #### 3. Update ```evaluate.py```
 1. Import your new parser
