@@ -72,7 +72,6 @@ class IncoseParser(PydanticOutputParser, JanusParser):
     def parse(self, text: str):
         output_length: int = 0 
 
-        print("Parsing text...")
         log.info("Parsing text...")
         if isinstance(text, AIMessage):
             text = text.content
