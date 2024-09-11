@@ -8,7 +8,11 @@ from langchain.output_parsers import RetryWithErrorOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate
-from langchain_core.runnables import RunnableLambda, RunnableParallel
+from langchain_core.runnables import (
+    RunnableLambda,
+    RunnableParallel,
+    RunnablePassthrough,
+)
 from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
 
@@ -28,6 +32,7 @@ from janus.llm.models_info import MODEL_PROMPT_ENGINES
 from janus.parsers.parser import GenericParser, JanusParser
 from janus.parsers.refiner_parser import RefinerParser
 from janus.refiners.refiner import BasicRefiner, Refiner
+from janus.retrievers.retriever import ActiveUsingsRetriever, JanusRetriever
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
@@ -75,6 +80,7 @@ class Converter:
         prune_node_types: tuple[str, ...] = (),
         splitter_type: str = "file",
         refiner_type: str = "basic",
+        retriever_type: str = "basic",
         skip_refiner: bool = True,
         skip_context: bool = False,
     ) -> None:
@@ -134,6 +140,9 @@ class Converter:
         self._refiner_type: str
         self._refiner: Refiner
 
+        self._retriever_type: str = retriever_type
+        self._retriever: JanusRetriever
+
         self.skip_refiner = skip_refiner
 
         self.set_splitter(splitter_type=splitter_type)
@@ -166,6 +175,7 @@ class Converter:
         self._load_splitter()
         self._load_vectorizer()
         self._load_refiner()
+        self._load_retriever()
         self._changed_attrs.clear()
 
     def set_model(self, model_name: str, **custom_arguments: dict[str, Any]):
@@ -353,6 +363,13 @@ class Converter:
         self._vectorizer = vectorizer_factory.create_vectorizer(
             self._db_path, self._db_config
         )
+
+    @run_if_changed("_retriever_type")
+    def _load_retriever(self):
+        if self._retriever_type == "active_usings":
+            self._retriever = ActiveUsingsRetriever()
+        else:
+            self._retriever = JanusRetriever()
 
     def translate(
         self,
@@ -619,8 +636,6 @@ class Converter:
         # Retries with the input, output, and error
         n2 = round(self.max_prompts // n1)
 
-        if not self.skip_context:
-            self._make_prompt_additions(block)
         if not self.skip_refiner:  # Make replacements in the prompt
             refine_output = RefinerParser(
                 parser=self._parser,
@@ -636,13 +651,21 @@ class Converter:
                 max_retries=n1,
             )
 
-        completion_chain = self._prompt | self._llm
-        chain = RunnableParallel(
-            completion=completion_chain, prompt_value=self._prompt
-        ) | RunnableLambda(lambda x: refine_output.parse_with_prompt(**x))
+        chain = (
+            RunnableParallel(
+                SOURCE_CODE=self._parser.parse_input,
+                context=self._retriever,
+            )
+            | self._prompt
+            | RunnableParallel(
+                completion=self._llm,
+                prompt_value=RunnablePassthrough(),
+            )
+            | RunnableLambda(lambda x: refine_output.parse_with_prompt(**x))
+        )
         for _ in range(n2):
             try:
-                return chain.invoke({"SOURCE_CODE": input})
+                return chain.invoke(block.original)
             except OutputParserException:
                 pass
 
