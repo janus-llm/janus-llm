@@ -92,7 +92,7 @@ class MadlibsDocumentationParser(JanusParser):
     def __init__(self):
         super().__init__(expected_keys=[])
 
-    def parse_input(self, block: CodeBlock):
+    def parse_input(self, block: CodeBlock) -> str:
         # TODO: Perform comment stripping/placeholding here rather than in script
         text = super().parse_input(block)
         comment_ids = re.findall(r"<(?:BLOCK|INLINE)_COMMENT (\w{8})>", text)
