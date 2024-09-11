@@ -97,6 +97,7 @@ class MadlibsDocumentationParser(JanusParser):
         text = super().parse_input(block)
         comment_ids = re.findall(r"<(?:BLOCK|INLINE)_COMMENT (\w{8})>", text)
         self.expected_keys = set(comment_ids)
+        return text
 
     def parse(self, text: str | BaseMessage) -> str:
         if isinstance(text, BaseMessage):

@@ -125,7 +125,7 @@ class MadLibsDocumenter(Documenter):
             out_text = self._parser.parse(working_block.text)
             obj.update(json.loads(out_text))
 
-        self._parser.set_reference(block.original)
+        self._parser.parse_input(block.original)
         block.text = self._parser.parse(json.dumps(obj))
         block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
