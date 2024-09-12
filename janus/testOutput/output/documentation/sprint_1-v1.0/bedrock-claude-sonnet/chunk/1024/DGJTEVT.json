@@ -1,0 +1,727 @@
+{
+  "input": "{\n  \"comments\": [\n    \"41132e2c:  ;\\n ;DGJTEVT - EVENT DRIVER\\n ;\",\n    \"e2bb87c1: ;Initialize variables: CA, DGPMA, DGPMP, DGPMT\",\n    \"bd8b71d8: ;Initialize DGONE flag indicating new records to be updated\",\n    \"1caca2f8: ;Loop through utility global processing event data: Start processing\",\n    \"71dc9c6a: ;Clean up variables and quit\",\n    \"94ad8e9f: ;Quit\",\n    \"10c7ae46:  ;\\n ;START - Process event data\\n ;\",\n    \"664b8d5a: ;Get current admission from DGPMP or DGPMA\",\n    \"b505d0a5: ;Get event type from DGPMP or DGPMA\",\n    \"4a1527f9: ;If event type is 1 (add) and DGPMA is null, then update incomplete records\",\n    \"e0e163ae: ;Print message if not quiet mode\",\n    \"4b1dc4d2: ;Reset DGONE flag\",\n    \"37371ed1: ;Call DIK to update records\",\n    \"3f772026: ;Call WARD^DGJTUTL to get ward and division\",\n    \"5803c285: ;If X is numeric, get ward and division from file 42\",\n    \"7f38ea2e: ;If there is no date on file or the date on file is 0, quit.\",\n    \"c7987c58: ;If this is a new record and we are not running in quiet mode, write a status message.\",\n    \"a3ee0e7c: ;Get the IFN of the 6th node of the DGPM utility file.\",\n    \"1f018286: ;Call the DIS routine to determine if a new record needs to be created.\",\n    \"64d9cce9: ;Delete all subentries for this record.\",\n    \"d547cc0e: ;Clean up variables.\",\n    \"5437dc15: ;\\n .;Determine if a new record needs to be created for this admission.\\n .;If there is an existing record for this admission, set DGJTDA to\\n .;the IEN of that record.\\n .;\\n .;If this is a transfer and the admission has changed, call the CHNG\\n .;routine to update the record.\\n .;\\n .;If this is a new admission or a re-admission, create a new record\\n .;and update it with any data that may have changed.\\n .;\",\n    \"6f3fd896: ;Initialize variable to hold DD array for FileMan calls.\",\n    \"abe5ac3b: ;Get the admission IEN and quit if there is none.\",\n    \"11ba6567: ;Find an existing record for this admission.\",\n    \"d199a159: ;If a record was found, set DGJTDA to its IEN.\",\n    \"a56de695: ;If this is a transfer and the admission has changed, call the CHNG routine.\",\n    \"d34d01a5: ;If this is a new admission or re-admission, create a new record if needed and update it.\",\n    \"06b57fda: If prompt is to delete entry from file 393, perform delete operation.\",\n    \"28e7c93d: If prompt is to change entry and movement types differ, set flag and call check and change routines.\",\n    \"d89d9fec: If prompt is to add new movement and movement types differ, set new movement type, set flag, and call change routine.\",\n    \"6ff41b08: If prompt is to add new movement, no new movement type specified, but previous type exists, set new movement type and call new routine.\",\n    \"dc0b68d2: If prompt is to add new movement, do nothing else.\",\n    \"3950b482: If changing existing entry and prompt is to change movement type, set flag.\",\n    \"3bf5d4da: If changing existing entry and proposed movement type differs from current type, call change routine.\",\n    \"72ee6368: If changing existing entry, movement types match, but movement reasons differ, call change routine.\",\n    \"7c9454be: ;Kill all variables used in this routine\",\n    \"b96e53ef:  ;\\n ;Initialize variables related to patient's movement data\\n ;\",\n    \"bbcaa8b5: ;Get DGPM entry for patient's current admission\",\n    \"003936cf: ;Get date/time entry for patient's transfer division\",\n    \"c8b796f1: ;Get ward type of patient's current ward\",\n    \"80a6c453: ;Get service for patient's current ward\",\n    \"4b7c0a70: ;If no service found, get default service\",\n    \"8c84f29b: ;Get patient movement type (8) and bed status (2) description\",\n    \"062e8940: ;Get patient movement type (19) and bed status (4) description if transfer division is A&A or non-A&A and census-on move\",\n    \"d372d185: ;If movement type is transfer or disposition, quit\",\n    \"8823ff76: ;If already checked census array, quit\",\n    \"793f8fdb: ;Create or re-use entry in VAS(393 file for patient\",\n    \"64db8615: ;Get IEN of 'INCOMPLETE' entry in DG CENSUS STATUS file (#393.2)\",\n    \"e02fe899: ;If new entry created, set DIE, DA and DGJTDA\",\n    \"c3b947cc: ;Sets field values for the new Assignment Entry\",\n    \"0def0681: Call ^DIE to update the file if Y is greater than 0.\",\n    \"73934e3f: Call the DISQ routine to perform any necessary cleanup or post-processing after updating the file.\",\n    \"c1d07288: If the payment type (DGPMT) is 1, 2, or 3, set the corresponding fields (.05, .06) in the DR string with the values of DGJTWD and DGJTDIV.\",\n    \"b340475c: Set the remaining fields (.07, .08, .09, .1) in the DR string with the corresponding values (DGJT(9), DGJTSV, DGJT9, DGJT10 or '@') and call ^DIE to update the file.\",\n    \"a1061950: Call the DISQ routine again, likely for additional cleanup or post-processing.\",\n    \"b54f525f: Exit the routine.\",\n    \"84f43d29: ;\\nThis block comment likely contains an explanation or documentation\\nfor the DOC routine or section of code.\\n;\",\n    \"a02f53ea: Set X to the piece of DGJTP corresponding to the DGJY index.\",\n    \"f839ffb4: Set X based on the value of the previous X: if 'A', set it to DGJT(19), if 'N', set it to an empty string, otherwise set it to DGJT(8).\",\n    \"ff45c4fd: Exit the DOC routine.\",\n    \"c9455d00: Set DGJI to the value of I, call the NEW routine, set the DIE global root and DA to the DGJI value, and call the FILE routine to update the file.\",\n    \"c11b0ecf: If the DGJJ node in the DGPM global does not exist, exit the routine. Otherwise, if the 17th piece of the DGJJ node is empty, set DGJTTM to the value of DGPMA.\",\n    \"add86427: If the 17th piece of the DGJJ node is not empty, set X to that value. If the node corresponding to X in the DGPM global exists, set DGJTTM to the value of that node.\",\n    \"a89280cb: Set the .03 field in the DR string to the value of DGJTTM.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 90.59652805328369
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "41132e2c:  ;\n ;DGJTEVT - EVENT DRIVER\n ;",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, with proper formatting and spacing.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the event driver, which helps an expert programmer understand the code context.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e2bb87c1: ;Initialize variables: CA, DGPMA, DGPMP, DGPMT",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, directly stating the action and the variables involved.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the initialization step better, making it quite useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bd8b71d8: ;Initialize DGONE flag indicating new records to be updated",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, describing the purpose of the DGONE flag.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific role of the DGONE flag, which is beneficial for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1caca2f8: ;Loop through utility global processing event data: Start processing",
+        "readability": {
+          "reasoning": "The comment is clear but could be more concise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the start of a processing loop, but it is somewhat trivial.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "71dc9c6a: ;Clean up variables and quit",
+        "readability": {
+          "reasoning": "The comment is clear, concise, and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the final steps of the procedure, relevant to both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "94ad8e9f: ;Quit",
+        "readability": {
+          "reasoning": "The comment is straightforward and uses simple language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a termination point which is useful but not complex.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "10c7ae46:  ;\n ;START - Process event data\n ;",
+        "readability": {
+          "reasoning": "The comment is clear, but the formatting with extra semicolons may be slightly distracting.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment marks the start of an important section which helps in understanding the code structure.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "664b8d5a: ;Get current admission from DGPMP or DGPMA",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides necessary information for understanding the code functionality related to admissions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b505d0a5: ;Get event type from DGPMP or DGPMA",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides necessary information for understanding the code functionality related to event types.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4a1527f9: ;If event type is 1 (add) and DGPMA is null, then update incomplete records",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action, which is very useful for understanding the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e0e163ae: ;Print message if not quiet mode",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies the condition under which a message is printed, which is useful to an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4b1dc4d2: ;Reset DGONE flag",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies an action being taken on a flag, which is useful to an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "37371ed1: ;Call DIK to update records",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates the purpose of a function call, which is useful to an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3f772026: ;Call WARD^DGJTUTL to get ward and division",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of a function call, which is useful to an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5803c285: ;If X is numeric, get ward and division from file 42",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional action, which is helpful to an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7f38ea2e: ;If there is no date on file or the date on file is 0, quit.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, with no spelling or grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains a specific condition for quitting.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c7987c58: ;If this is a new record and we are not running in quiet mode, write a status message.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about when a status message is written.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a3ee0e7c: ;Get the IFN of the 6th node of the DGPM utility file.",
+        "readability": {
+          "reasoning": "The comment is straightforward and without any language issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it specifies what data is being retrieved from the file.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1f018286: ;Call the DIS routine to determine if a new record needs to be created.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the purpose of calling the DIS routine.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "64d9cce9: ;Delete all subentries for this record.",
+        "readability": {
+          "reasoning": "The comment is simple and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but documents only a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d547cc0e: ;Clean up variables.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, but it documents only a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "5437dc15: ;\n .;Determine if a new record needs to be created for this admission.\n .;If there is an existing record for this admission, set DGJTDA to\n .;the IEN of that record.\n .;\n .;If this is a transfer and the admission has changed, call the CHNG\n .;routine to update the record.\n .;\n .;If this is a new admission or a re-admission, create a new record\n .;and update it with any data that may have changed.\n .;",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, despite its length.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it explains the logic behind multiple scenarios in detail.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6f3fd896: ;Initialize variable to hold DD array for FileMan calls.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the purpose of the variable in the context of FileMan calls, which may not be immediately obvious.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "abe5ac3b: ;Get the admission IEN and quit if there is none.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, providing basic information about the operation being performed.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "11ba6567: ;Find an existing record for this admission.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, describing a single action that is not overly complex.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d199a159: ;If a record was found, set DGJTDA to its IEN.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific action that is important for understanding the code's functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a56de695: ;If this is a transfer and the admission has changed, call the CHNG routine.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about when a specific routine should be called.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d34d01a5: ;If this is a new admission or re-admission, create a new record if needed and update it.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It gives detailed instructions on what to do in specific scenarios, aiding understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "06b57fda: If prompt is to delete entry from file 393, perform delete operation.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but missing a semicolon.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It explains the action to take for a specific prompt, which is useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "28e7c93d: If prompt is to change entry and movement types differ, set flag and call check and change routines.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides clear instructions on what to do in a specific situation, aiding code comprehension.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d89d9fec: If prompt is to add new movement and movement types differ, set new movement type, set flag, and call change routine.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides specific instructions and context that help understand the code behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6ff41b08: If prompt is to add new movement, no new movement type specified, but previous type exists, set new movement type and call new routine.",
+        "readability": {
+          "reasoning": "The comment is clear but slightly more complex to follow.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It gives specific conditions and actions to take which aid in understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "dc0b68d2: If prompt is to add new movement, do nothing else.",
+        "readability": {
+          "reasoning": "The comment is simple and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes a possible code path but lacks detail on why nothing else is to be done.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3950b482: If changing existing entry and prompt is to change movement type, set flag.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about a specific code behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3bf5d4da: If changing existing entry and proposed movement type differs from current type, call change routine.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It gives precise instructions that are useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "72ee6368: If changing existing entry, movement types match, but movement reasons differ, call change routine.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific instructions that would help an expert programmer understand the conditions under which to call a specific routine.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7c9454be: ;Kill all variables used in this routine",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides necessary information about the cleanup process in the routine, which is useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b96e53ef:  ;\n ;Initialize variables related to patient's movement data\n ;",
+        "readability": {
+          "reasoning": "The comment is clear, though a bit redundant with the multiple semicolons.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful in understanding the initialization step but could be considered somewhat trivial.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bbcaa8b5: ;Get DGPM entry for patient's current admission",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about what the subsequent code is doing, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "003936cf: ;Get date/time entry for patient's transfer division",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information that helps in understanding the purpose of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c8b796f1: ;Get ward type of patient's current ward",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps programmers understand the specific function of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "80a6c453: ;Get service for patient's current ward",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about what the code does.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4b7c0a70: ;If no service found, get default service",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a fallback mechanism, which is useful for understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8c84f29b: ;Get patient movement type (8) and bed status (2) description",
+        "readability": {
+          "reasoning": "The comment is clear but includes technical details that might require context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides relevant information about the data being processed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "062e8940: ;Get patient movement type (19) and bed status (4) description if transfer division is A&A or non-A&A and census-on move",
+        "readability": {
+          "reasoning": "The comment is long and slightly complex, but still readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment contains detailed conditions which are important for understanding the code, but might be overwhelming for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d372d185: ;If movement type is transfer or disposition, quit",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about the conditions under which the code should terminate.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8823ff76: ;If already checked census array, quit",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps understand a conditional check in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "793f8fdb: ;Create or re-use entry in VAS(393 file for patient",
+        "readability": {
+          "reasoning": "The comment is mostly clear but could be slightly improved for readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It explains a significant operation related to patient data.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "64db8615: ;Get IEN of 'INCOMPLETE' entry in DG CENSUS STATUS file (#393.2)",
+        "readability": {
+          "reasoning": "The comment is detailed and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides specific and useful details about retrieving a particular entry.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e02fe899: ;If new entry created, set DIE, DA and DGJTDA",
+        "readability": {
+          "reasoning": "The comment is clear but contains abbreviations that might need explanation.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It explains what happens when a new entry is created, but the abbreviations reduce its usefulness.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c3b947cc: ;Sets field values for the new Assignment Entry",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides an understanding of what the code block does, which is useful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0def0681: Call ^DIE to update the file if Y is greater than 0.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional action, which is useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "73934e3f: Call the DISQ routine to perform any necessary cleanup or post-processing after updating the file.",
+        "readability": {
+          "reasoning": "The comment is clear and provides enough detail.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It specifies an important step in the process, aiding both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c1d07288: If the payment type (DGPMT) is 1, 2, or 3, set the corresponding fields (.05, .06) in the DR string with the values of DGJTWD and DGJTDIV.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides specific information about conditional field assignments, helpful for understanding complex code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b340475c: Set the remaining fields (.07, .08, .09, .1) in the DR string with the corresponding values (DGJT(9), DGJTSV, DGJT9, DGJT10 or '@') and call ^DIE to update the file.",
+        "readability": {
+          "reasoning": "The comment is lengthy but clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It gives detailed instructions on setting multiple fields and updating the file, useful for understanding specific code operations.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a1061950: Call the DISQ routine again, likely for additional cleanup or post-processing.",
+        "readability": {
+          "reasoning": "The comment is clear, concise, and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Explains why the DISQ routine is called again, which is helpful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b54f525f: Exit the routine.",
+        "readability": {
+          "reasoning": "The comment is simple and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides basic information that is somewhat trivial but still necessary.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "84f43d29: ;\nThis block comment likely contains an explanation or documentation\nfor the DOC routine or section of code.\n;",
+        "readability": {
+          "reasoning": "The comment is readable but has unnecessary formatting characters.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It suggests the purpose of a block of code, which can be helpful but is somewhat vague.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a02f53ea: Set X to the piece of DGJTP corresponding to the DGJY index.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific operation on variables, which helps in understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f839ffb4: Set X based on the value of the previous X: if 'A', set it to DGJT(19), if 'N', set it to an empty string, otherwise set it to DGJT(8).",
+        "readability": {
+          "reasoning": "The comment is detailed and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Clearly explains the logic for setting a variable, which is very useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ff45c4fd: Exit the DOC routine.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear operation but lacks detailed context for an expert.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c9455d00: Set DGJI to the value of I, call the NEW routine, set the DIE global root and DA to the DGJI value, and call the FILE routine to update the file.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, but a bit lengthy.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It describes multiple operations in detail, which is very useful for understanding the sequence of actions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c11b0ecf: If the DGJJ node in the DGPM global does not exist, exit the routine. Otherwise, if the 17th piece of the DGJJ node is empty, set DGJTTM to the value of DGPMA.",
+        "readability": {
+          "reasoning": "The comment is clear and explains the conditional logic well.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a conditional check and assignment, providing useful context for understanding the logic flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "add86427: If the 17th piece of the DGJJ node is not empty, set X to that value. If the node corresponding to X in the DGPM global exists, set DGJTTM to the value of that node.",
+        "readability": {
+          "reasoning": "The comment is clear but a bit complex due to nested conditions.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides details on nested conditional logic which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a89280cb: Set the .03 field in the DR string to the value of DGJTTM.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a specific field assignment, which is useful but somewhat trivial.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,1882 @@
+{
+  "input": "{\n  \"comments\": [\n    \"8ac54eec:  ;\\n ;Routine to edit patient profiles in file #393.\\n ;\",\n    \"2853b8b8: ;Jump to the start of the editing process.\",\n    \"3c4279e2: ;Initialize variables for editing.\",\n    \"8cbb7711: ;Populate fields with existing data from the entry.\",\n    \"c235a6a7: ;Clean up.\",\n    \"0722edbf: ;Write out the data label.\",\n    \"52334f71: ;Exit the Write code.\",\n    \"37aace19: ;Call standard line editor to handle output.\",\n    \"1e73fc64: ;Check if field is read-only, if so display message.\",\n    \"31fe101b: ;Get user's response.\",\n    \"f99f6250: ;If user timed out, set X to up-arrow.\",\n    \"4e0a280e: ;Exit the reader code.\",\n    \"f352390d: ;Increment DQ to get next field sequence #.\",\n    \"66ad25c0: ;Branch to code for the appropriate field sequence #.\",\n    \"4ceae63e: ;Edit an existing value or ask for one if new entry.\",\n    \"a0051f2a: ;If null response, check for a KEY in DD, QUIT if one.\",\n    \"909fc1e2: ;Handle entry of question mark and branching.\",\n    \"ba0d420c: ;If entry was just @, go to viewer.\",\n    \"df0e5711: ;If response blank, allow import of last entered value.\",\n    \"638eb2a4: ;Validate response, set Y=X if valid, and pass it on.\",\n    \"929acb68: 1\",\n    \"499673dc: 1\",\n    \"f7018dd1: 1\",\n    \"bc7354c3: 1\",\n    \"852bd9a9: 1\",\n    \"faa5446b: 1\",\n    \"9df34d86: 1\",\n    \"87d226b9: 1\",\n    \"b57e3dc7: 1\",\n    \"bcf91637: 1\",\n    \"2ab3eaa8: 1\",\n    \"2345aff9: 1\",\n    \"7baf4563: 1\",\n    \"85c1b7ec: 1\",\n    \"362f88dd: 1\",\n    \"c58d0c66: 1\",\n    \"264ca46a: 1\",\n    \"69901e26: 1\",\n    \"c0c28838: 1\",\n    \"453facce: 1\",\n    \"c26c4ae4: ;Prevents writes to the global if prompting for edits.\",\n    \"7bdac131: ;Sets the value of the field to the response from the DIR call.\",\n    \"cf384c13: ;Returns from the SET^DIR subroutine call.\",\n    \"43096ca2: ;Saves the original value of the field in the temp global.\",\n    \"6438e5ba: ;Clears the multi-line data node if it exists.\",\n    \"3743164e: ;Deletes the multi-line data node.\",\n    \"8f78edb3: ;Returns from the SAVEVALS subroutine.\",\n    \"96251ac9: ;Displays an error message if a required key field is not entered.\",\n    \"70c780d3: ;Checks if the key integrity is maintained based on the KEY condition.\",\n    \"9397dedc: ;Sets up routine and environment variables.\",\n    \"f41610b4: ;Gets a temporary global reference and sets other variables.\",\n    \"37ddb654: ;Initializes variables for trigger code execution.\",\n    \"d2637843: ;Sets up internal entry number and other variables.\",\n    \"473dcae3: ;The main program control loop. Branches based on DG(DQ) values.\",\n    \"90fda27a: ;Kills the DGJTUP variable used as a flag.\",\n    \"52ec2e2b: ;Returns from the X1^DGJXE subroutine.\",\n    \"75a437ab: ;Branches to @1 based on DGJTNUM if not a discharge summary.\",\n    \"bf41745d: ;Sets Y=@1 if DGJTNUM is not discharge summary.\",\n    \"6552ff18: ;Returns from the X2^DGJXE subroutine.\",\n    \"b197272b: ;Sets up variables for the TYPE OF DEFICIENCY field (.02).\",\n    \"54e1ba5c: ; Set up variable to reference VAS(393.3 cross-reference.\",\n    \"96fe3886: ; Get TYPE OF DEFICIENCY value from file 393.\",\n    \"15ce671e: ; Set TYPE OF DEFICIENCY value into Y for processing.\",\n    \"8676e61c: ; If TYPE OF DEFICIENCY is valid, process it.\",\n    \"5df10359: ; If TYPE OF DEFICIENCY is '@', go to reader, else continue.\",\n    \"b7b919c1: ; Quit out of CODE 3.\",\n    \"5dbc58b7: ; Check if additional processing is required.\",\n    \"f5aeb499: ; If TYPE OF DEFICIENCY is 1, get LOCATION value and branch to CODE 5.\",\n    \"7c3f1f37: ; Quit out of CODE 4.\",\n    \"f00168ec: ; Set up variables for the EVENT DATE field.\",\n    \"83209a30: ; Set up cross-reference logic for EVENT DATE field.\",\n    \"33810784: ; Go to reader if required.\",\n    \"ee01e4ca: ; If EVENT DATE value is defined, kill cross-reference nodes.\",\n    \"94b4bbc9: ; Set DIC to current file for cross-reference operations.\",\n    \"22594424: ; Kill 'C' cross-reference for old EVENT DATE value.\",\n    \"511573a1: ; If new EVENT DATE is null, branch to additional logic.\",\n    \"99bb02e6: ; Set DIC to current file for cross-reference operations. \",\n    \"8a1c9030: ; Set up 'C' cross-reference for new EVENT DATE value.\",\n    \"1c1ca738: ; Exit EVENT DATE cross-reference logic.\",\n    \"f501559c: ; Validate EVENT DATE is within valid range.\",\n    \"025254a3: Set to the current date if date is valid.\",\n    \"90ef9bff: Every 5th node uses the code between DQ=7 and DQ=8.\\nAnother method of tracking records by date.\",\n    \"f2cceaab: If field 2 is a discharge summary go to field 3 where its type is edited.\",\n    \"ab49fe4a: Go to field 3 where type of deficiency is edited.\",\n    \"69c17219: End of trigger logic for 'ADM' cross-reference.\",\n    \"82131aab: Every 5th node uses the code between DQ=8 and DQ=9.\\nIf field 4 is null go to field 3 to edit type of deficiency.\",\n    \"f022653a: If field 4 (admission movement) is null go to field 3 to edit type.\",\n    \"c8471afe: End of code segment for DQ=8.\",\n    \"ec470596: Field .04 ADMISSION.\",\n    \"bc9a004d: Trigger to update/delete cross-reference 'ADM'.\",\n    \"4112778a: Prefix of global reference for looking up admission data.\",\n    \"77c10f75: Standard code.\",\n    \"039a1700: If removing existing data, kill cross-reference first.\",\n    \"c1845da3: Set up variables for cross-reference builder call.\",\n    \"273f3bf6: Set up variables for cross-reference builder call.\",\n    \"27e31845: Kill previous cross-reference entries for this record.\",\n    \"00868c1d: If null value, remove cross-reference entries.\",\n    \"8ee6c271: Call cross-reference builder to update new entries.\",\n    \"13d4b948: After builder updates cross-reference, set new value.\",\n    \"8870f9c5: After updates, set new cross-reference entries.\",\n    \"7d0c5af1: ;Set cross-reference of admission by admission date\",\n    \"4597767a: ;Kill cross-reference\",\n    \"da16c3d1: ;Validate admission against the disposition DGPM\",\n    \"be9691b9: ;Quit\",\n    \"a4784344:  .;\\n .;Add discharge summary special processing\\n .;\\n .;If type of deficiency is discharge summary\\n .;set code to ask additional questions\\n .;related to processing discharge summaries\",\n    \"442b5bdf: ;Check if discharge summary type\",\n    \"e1942a12: ;If discharge summary, ask additional questions\",\n    \"0b081119: ;Quit\",\n    \"4b475776: ;Location field\",\n    \"7e3daf17: ;File for location\",\n    \"24426057: ;Validate location against the division, either Ward or Clinic location\",\n    \"7a8a4a7b: ;Validate location against the division, either Ward or Clinic location\",\n    \"3b39e2a3: ;Quit\",\n    \"192b4884: ;Save location to be used later\",\n    \"be2c3eab: ;Save location\",\n    \"ff91c629: ;Quit\",\n    \"d8c9d67a:  .;\\n .;Division field\\n .;\\n .;If location a Ward location use division\\n .;associated with ward.  If clinic use division\\n .;associated with clinic\",\n    \"a3b5035c: ;Division field\",\n    \"5e2cc1a4: ;File for division\",\n    \"b81fb61e: ;Get previously saved location\",\n    \"edb40dca: Set Y to the value of the division field for this record\",\n    \"90cf747c: If a value is present, set X to that value, otherwise ask the user\",\n    \"03b2ee65: If the user entered '@', go to the reader\",\n    \"3c41cf20: No further code needed for this cross-reference\",\n    \"61ed293c: Set the next node for processing the division\",\n    \"cb00e129: Get the division IEN if it exists, otherwise set to 0\",\n    \"0bdafb90: No further code needed for setting the division IEN\",\n    \"de9dbe3c: Set the next node for processing the service\",\n    \"f99e1332: Get the service IEN from the division file\",\n    \"5c9e459b: No further code needed for getting the service IEN\",\n    \"029e3115: Set up the SERVICE field\",\n    \"5eb3d86d: Set the INPUT transform for the SERVICE field\",\n    \"db245a3d: Set the global file for the SERVICE field\",\n    \"0ad573e1: Set the initial value for the SERVICE field to the service IEN\",\n    \"5a91594f: Set Y to the initial value for the SERVICE field\",\n    \"53ec8dee: If a value is present, set X to that value, otherwise ask the user\",\n    \"8c0080be: Go to the reader if the user didn't make an entry\",\n    \"978647e4: Set up cross-reference logic for SERVICE field\",\n    \"48140bf2: Kill the 'AC' cross-reference if the value is changing\",\n    \"8bf22ab5: Set the 'AC' cross-reference for the new value\",\n    \"13296367: ;Set the 'AC' cross-reference for this service.\",\n    \"7e247a64: ;Store the service in the 'AC' cross-reference.\",\n    \"82e785b6: ;Kill the 'AC' cross-reference for the old service.\",\n    \"1adf6e6d: ;Quit.\",\n    \"8bc96c06: ;Quit.\",\n    \"db14c4cc: ;Set the physician responsible for this event.\",\n    \"cfc2d757: ;Kill the old physician responsible cross-reference.\",\n    \"b5138760: ;Set the new file for the physician responsible lookup.\",\n    \"50e526fc: ;Branch to standard code.\",\n    \"af42c99a: ;If there is an existing physician responsible value.\",\n    \"f989f4cd: ;Kill the old physician responsible value.\",\n    \"663bd63c: ;If setting a new physician responsible value.\",\n    \"aad9a301: ;Set the physician responsible value.\",\n    \"149b4a0a: ;Call code to set physician responsible cross-references.\",\n    \"fba2912c: ;Quit.\",\n    \"8ca5f35c: ;Quit.\",\n    \"c7bdf9a6: ;Set flag to update cross-references later.\",\n    \"6aa66a6a: ;Set flag for cross-reference updates.\",\n    \"036c0f84: ;Quit.\",\n    \"f21aa993: ;\\n;If this is a discharge summary event, branch to set some values.\\n;Discharge summary logic.\\n;\",\n    \"fc52d400: ; If the deficiency is a Discharge Summary\",\n    \"b3664ff3: ; Default assignment of discharge provider must be made.\",\n    \"081f68c5: \",\n    \"4512cbdd: ; If the deficiency is a Discharge Summary\",\n    \"605d2dd4: ; Remove discharge provider assignment.\",\n    \"1ad14b42: \",\n    \"880f4b93: ; If the deficiency is not a Discharge Summary\",\n    \"b2dd596d: ; Default assignment of service/person must be made.\",\n    \"1bef5f9c: \",\n    \"592cfdbe: ; Continue processing in DGJXE1\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 185.61767721176147
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "8ac54eec:  ;\n ;Routine to edit patient profiles in file #393.\n ;",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information on the functionality of the routine for both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2853b8b8: ;Jump to the start of the editing process.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful guidance on where the editing process begins.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3c4279e2: ;Initialize variables for editing.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the purpose of the code segment, though it's somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8cbb7711: ;Populate fields with existing data from the entry.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information regarding data handling for both average and expert programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c235a6a7: ;Clean up.",
+        "readability": {
+          "reasoning": "The comment is very brief but still clear.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides minimal information, mainly useful for understanding the end of a process.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "0722edbf: ;Write out the data label.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It gives a clear indication of what the code does, useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "52334f71: ;Exit the Write code.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps in understanding the code flow, especially for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "37aace19: ;Call standard line editor to handle output.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about the function being called, assisting both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1e73fc64: ;Check if field is read-only, if so display message.",
+        "readability": {
+          "reasoning": "The comment is clear and detailed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes a specific condition and action, useful for understanding code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "31fe101b: ;Get user's response.",
+        "readability": {
+          "reasoning": "The comment is simple and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial functionality, which is still useful for understanding the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f99f6250: ;If user timed out, set X to up-arrow.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of setting X to up-arrow after a timeout.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4e0a280e: ;Exit the reader code.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the functionality at a high level, which can be useful to understand the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f352390d: ;Increment DQ to get next field sequence #.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of incrementing DQ.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "66ad25c0: ;Branch to code for the appropriate field sequence #.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the branching logic based on field sequence.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4ceae63e: ;Edit an existing value or ask for one if new entry.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the dual functionality of editing or asking for a new value.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a0051f2a: ;If null response, check for a KEY in DD, QUIT if one.",
+        "readability": {
+          "reasoning": "The comment is clear but contains some domain-specific terminology.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action which is useful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "909fc1e2: ;Handle entry of question mark and branching.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific user interaction and its handling, which is useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ba0d420c: ;If entry was just @, go to viewer.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies a particular user input and its consequence, which helps in understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "df0e5711: ;If response blank, allow import of last entered value.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a fallback mechanism, which is useful for understanding the code's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "638eb2a4: ;Validate response, set Y=X if valid, and pass it on.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a validation process and assignment, which is useful for understanding the code's logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "929acb68: 1",
+        "readability": {
+          "reasoning": "The comment is unclear and seems to be a hash followed by a number.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information to understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "499673dc: 1",
+        "readability": {
+          "reasoning": "The comment is again a hash followed by a number, making it unclear and unreadable.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "It lacks any useful content to help understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "f7018dd1: 1",
+        "readability": {
+          "reasoning": "Similar to the others, this comment is not clear and appears to be a hash and a number.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "There is no useful information to be derived from this comment.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "bc7354c3: 1",
+        "readability": {
+          "reasoning": "This comment is also unclear and seems to be a hash followed by a number.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information for understanding the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "852bd9a9: 1",
+        "readability": {
+          "reasoning": "The comment is not clear and appears to be a hash followed by a number.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "It does not offer any useful information to comprehend the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "faa5446b: 1",
+        "readability": {
+          "reasoning": "The comment is very short and uses a cryptic identifier, making it unclear.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any meaningful or useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "9df34d86: 1",
+        "readability": {
+          "reasoning": "Similar to the previous comment, it is very short and cryptic.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment is not informative or useful in understanding the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "87d226b9: 1",
+        "readability": {
+          "reasoning": "It is short and unclear due to the use of a cryptic identifier.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment does not add any value in understanding the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "b57e3dc7: 1",
+        "readability": {
+          "reasoning": "The format is unclear and cryptic.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "It does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "bcf91637: 1",
+        "readability": {
+          "reasoning": "The comment is short and uses a cryptic identifier, making it unclear.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment does not help in understanding the code at all.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "2ab3eaa8: 1",
+        "readability": {
+          "reasoning": "The comment is very short and appears to be a hash or identifier, which makes it cryptic and difficult to understand.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code, its functionality, or its purpose.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "2345aff9: 1",
+        "readability": {
+          "reasoning": "Similar to the first comment, this one is also cryptic and seems to be a hash or identifier, making it unclear.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not offer any useful context or information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "7baf4563: 1",
+        "readability": {
+          "reasoning": "This comment is also a cryptic identifier or hash, which makes it hard to read.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "It does not provide any helpful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "85c1b7ec: 1",
+        "readability": {
+          "reasoning": "Again, this comment is a cryptic identifier or hash, making it difficult to understand.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it does not convey any meaningful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "362f88dd: 1",
+        "readability": {
+          "reasoning": "This comment is another cryptic identifier or hash, which is not clear.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information that would help understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "c58d0c66: 1",
+        "readability": {
+          "reasoning": "The comment is unclear and appears to be a code snippet rather than an explanatory comment.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it does not provide any meaningful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "264ca46a: 1",
+        "readability": {
+          "reasoning": "The comment is unclear and appears to be a code snippet rather than an explanatory comment.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it does not provide any meaningful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "69901e26: 1",
+        "readability": {
+          "reasoning": "The comment is unclear and appears to be a code snippet rather than an explanatory comment.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it does not provide any meaningful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "c0c28838: 1",
+        "readability": {
+          "reasoning": "The comment is unclear and appears to be a code snippet rather than an explanatory comment.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it does not provide any meaningful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "453facce: 1",
+        "readability": {
+          "reasoning": "The comment is unclear and appears to be a code snippet rather than an explanatory comment.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it does not provide any meaningful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "c26c4ae4: ;Prevents writes to the global if prompting for edits.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand the purpose of the code segment.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7bdac131: ;Sets the value of the field to the response from the DIR call.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides specific information helpful to both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cf384c13: ;Returns from the SET^DIR subroutine call.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific action, useful for understanding the flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "43096ca2: ;Saves the original value of the field in the temp global.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is useful for understanding variable handling in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6438e5ba: ;Clears the multi-line data node if it exists.",
+        "readability": {
+          "reasoning": "The comment is well-written and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific action taken by the code, useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3743164e: ;Deletes the multi-line data node.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the specific function of the code, which is useful for understanding the purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8f78edb3: ;Returns from the SAVEVALS subroutine.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action taken by the code, which is useful for understanding its flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "96251ac9: ;Displays an error message if a required key field is not entered.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the specific condition under which the error message is displayed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "70c780d3: ;Checks if the key integrity is maintained based on the KEY condition.",
+        "readability": {
+          "reasoning": "The comment is clear and provides sufficient detail.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an important validation step, which is useful for understanding the code's logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9397dedc: ;Sets up routine and environment variables.",
+        "readability": {
+          "reasoning": "The comment is concise but clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the initial setup process of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f41610b4: ;Gets a temporary global reference and sets other variables.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly explains the operations performed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful in understanding the specific actions taken in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "37ddb654: ;Initializes variables for trigger code execution.",
+        "readability": {
+          "reasoning": "The comment is clearly written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment effectively describes the purpose of the variable initialization.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d2637843: ;Sets up internal entry number and other variables.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the setup of specific variables.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "473dcae3: ;The main program control loop. Branches based on DG(DQ) values.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides valuable insight into the main control flow of the program.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "90fda27a: ;Kills the DGJTUP variable used as a flag.",
+        "readability": {
+          "reasoning": "The comment is clearly written and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the purpose of the variable being killed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "52ec2e2b: ;Returns from the X1^DGJXE subroutine.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the purpose of the subroutine.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "75a437ab: ;Branches to @1 based on DGJTNUM if not a discharge summary.",
+        "readability": {
+          "reasoning": "The comment is clear to read and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the conditional branching logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bf41745d: ;Sets Y=@1 if DGJTNUM is not discharge summary.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the assignment logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6552ff18: ;Returns from the X2^DGJXE subroutine.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the purpose of the subroutine.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b197272b: ;Sets up variables for the TYPE OF DEFICIENCY field (.02).",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the variable setup.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "54e1ba5c: ; Set up variable to reference VAS(393.3 cross-reference.",
+        "readability": {
+          "reasoning": "The comment is clear but slightly technical with the term 'VAS(393.3 cross-reference'.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific setup that could be useful for understanding the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "96fe3886: ; Get TYPE OF DEFICIENCY value from file 393.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains an action that helps understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "15ce671e: ; Set TYPE OF DEFICIENCY value into Y for processing.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific and useful action within the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8676e61c: ; If TYPE OF DEFICIENCY is valid, process it.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional logic which is useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5df10359: ; If TYPE OF DEFICIENCY is '@', go to reader, else continue.",
+        "readability": {
+          "reasoning": "The comment is clear but the term 'go to reader' might be ambiguous.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific conditional branch which is useful but could be clearer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b7b919c1: ; Quit out of CODE 3.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the functionality in a straightforward manner, useful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5dbc58b7: ; Check if additional processing is required.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides clarity on a conditional check, which is useful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f5aeb499: ; If TYPE OF DEFICIENCY is 1, get LOCATION value and branch to CODE 5.",
+        "readability": {
+          "reasoning": "The comment is detailed and clearly explains a specific condition and action.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an expert programmer understand a specific branching logic in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7c3f1f37: ; Quit out of CODE 4.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the functionality in a straightforward manner, useful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f00168ec: ; Set up variables for the EVENT DATE field.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about variable initialization, which is helpful for understanding the setup of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "83209a30: ; Set up cross-reference logic for EVENT DATE field.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the purpose of the code regarding the EVENT DATE field.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "33810784: ; Go to reader if required.",
+        "readability": {
+          "reasoning": "The comment is clear but a bit vague.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks specific details on how or why to go to the reader.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ee01e4ca: ; If EVENT DATE value is defined, kill cross-reference nodes.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context about the conditional logic applied to the EVENT DATE field.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "94b4bbc9: ; Set DIC to current file for cross-reference operations.",
+        "readability": {
+          "reasoning": "The comment is clear and well-phrased.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides valuable information about setting DIC, aiding in understanding the operation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "22594424: ; Kill 'C' cross-reference for old EVENT DATE value.",
+        "readability": {
+          "reasoning": "The comment is clear and direct.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is informative about the specific action taken on the 'C' cross-reference.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "511573a1: ; If new EVENT DATE is null, branch to additional logic.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the specific condition in the code, aiding understanding for both expert and average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "99bb02e6: ; Set DIC to current file for cross-reference operations.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies the purpose of setting DIC, which is helpful for understanding the code's functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8a1c9030: ; Set up 'C' cross-reference for new EVENT DATE value.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives specific information about the cross-reference setup, which is useful for understanding the code's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1c1ca738: ; Exit EVENT DATE cross-reference logic.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates an action in the code, which is useful for tracking the flow of logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f501559c: ; Validate EVENT DATE is within valid range.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies a validation check, which is crucial information for understanding the code's constraints.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "025254a3: Set to the current date if date is valid.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand the condition being checked.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "90ef9bff: Every 5th node uses the code between DQ=7 and DQ=8.\nAnother method of tracking records by date.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but could be slightly confusing due to jargon.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the logic but might be too specific for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f2cceaab: If field 2 is a discharge summary go to field 3 where its type is edited.",
+        "readability": {
+          "reasoning": "The comment is clear but could be split into two sentences for better readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the logic flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ab49fe4a: Go to field 3 where type of deficiency is edited.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides straightforward guidance on what the code does.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "69c17219: End of trigger logic for 'ADM' cross-reference.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly marks the end of a specific section, which is useful for navigation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "82131aab: Every 5th node uses the code between DQ=8 and DQ=9.\nIf field 4 is null go to field 3 to edit type of deficiency.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but could be more concise and structured.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the code logic, especially for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f022653a: If field 4 (admission movement) is null go to field 3 to edit type.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific condition in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c8471afe: End of code segment for DQ=8.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it marks the end of a segment but provides no additional insight.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ec470596: Field .04 ADMISSION.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment identifies a specific field but does not provide much additional context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "bc9a004d: Trigger to update/delete cross-reference 'ADM'.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of a specific trigger.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4112778a: Prefix of global reference for looking up admission data.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the purpose of a specific reference, which can be useful for both expert and average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "77c10f75: Standard code.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is too vague to provide meaningful insight into the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "039a1700: If removing existing data, kill cross-reference first.",
+        "readability": {
+          "reasoning": "The comment is clear and provides a specific instruction.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides important information about the sequence of operations, useful for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c1845da3: Set up variables for cross-reference builder call.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a preparatory step in the code, which is useful for understanding the setup process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "273f3bf6: Set up variables for cross-reference builder call.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a preparatory step in the code, which is useful for understanding the setup process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "27e31845: Kill previous cross-reference entries for this record.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action taken on cross-reference entries, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "00868c1d: If null value, remove cross-reference entries.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a conditional action, which is helpful for understanding the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8ee6c271: Call cross-reference builder to update new entries.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a function call, which aids in understanding the flow of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "13d4b948: After builder updates cross-reference, set new value.",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies the sequence of operations, which is useful for following the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8870f9c5: After updates, set new cross-reference entries.",
+        "readability": {
+          "reasoning": "The comment is clear and readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides information on the sequence of actions, which is helpful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7d0c5af1: ;Set cross-reference of admission by admission date",
+        "readability": {
+          "reasoning": "The comment is concise and clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it describes a specific action taken in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4597767a: ;Kill cross-reference",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful, indicating a specific action of deleting a cross-reference.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "da16c3d1: ;Validate admission against the disposition DGPM",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains a specific validation process.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "be9691b9: ;Quit",
+        "readability": {
+          "reasoning": "The comment is very short but clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat trivial, documenting a basic action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a4784344:  .;\n .;Add discharge summary special processing\n .;\n .;If type of deficiency is discharge summary\n .;set code to ask additional questions\n .;related to processing discharge summaries",
+        "readability": {
+          "reasoning": "The comment is clear but somewhat verbose with redundant information.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it describes a specific case and subsequent actions, but could be more concise.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "442b5bdf: ;Check if discharge summary type",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific check, which aids in understanding the code's purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e1942a12: ;If discharge summary, ask additional questions",
+        "readability": {
+          "reasoning": "The comment is clear and easily understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about conditional logic in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0b081119: ;Quit",
+        "readability": {
+          "reasoning": "The comment is brief but clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial action, making it less useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "4b475776: ;Location field",
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a field, which is somewhat useful but not highly detailed.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7e3daf17: ;File for location",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a brief description of a file's purpose, which is useful for understanding its role.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "24426057: ;Validate location against the division, either Ward or Clinic location",
+        "readability": {
+          "reasoning": "The comment is well-written and free of grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7a8a4a7b: ;Validate location against the division, either Ward or Clinic location",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful in documenting the functionality for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3b39e2a3: ;Quit",
+        "readability": {
+          "reasoning": "The comment is very short but clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "192b4884: ;Save location to be used later",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the future use of a location variable.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "be2c3eab: ;Save location",
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides basic information but is less informative than it could be.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ff91c629: ;Quit",
+        "readability": {
+          "reasoning": "The comment is clear and simple to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial action in the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d8c9d67a:  .;\n .;Division field\n .;\n .;If location a Ward location use division\n .;associated with ward.  If clinic use division\n .;associated with clinic",
+        "readability": {
+          "reasoning": "The comment has a few readability issues due to formatting and slight grammatical errors.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context about how divisions are determined in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a3b5035c: ;Division field",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial aspect of the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "5e2cc1a4: ;File for division",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides basic information regarding file usage for a division.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "b81fb61e: ;Get previously saved location",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a useful action, helping understand the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "edb40dca: Set Y to the value of the division field for this record",
+        "readability": {
+          "reasoning": "The comment is very clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific operation that would help an average programmer understand the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "90cf747c: If a value is present, set X to that value, otherwise ask the user",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the logic behind a piece of code, which is useful to an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "03b2ee65: If the user entered '@', go to the reader",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific condition, which is helpful for understanding the code's flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3c41cf20: No further code needed for this cross-reference",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates that no additional code is required, which can help avoid confusion.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "61ed293c: Set the next node for processing the division",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific operation, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cb00e129: Get the division IEN if it exists, otherwise set to 0",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, providing a straightforward explanation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the code block.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0bdafb90: No further code needed for setting the division IEN",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies that no additional action is required, which can be useful but somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "de9dbe3c: Set the next node for processing the service",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the sequence of operations in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f99e1332: Get the service IEN from the division file",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains the purpose of the code block, aiding in understanding the functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5c9e459b: No further code needed for getting the service IEN",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment notes the absence of additional requirements, which is somewhat useful but not highly informative.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "029e3115: Set up the SERVICE field",
+        "readability": {
+          "reasoning": "The comment is concise and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is useful for understanding what the code is doing at a high level.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5eb3d86d: Set the INPUT transform for the SERVICE field",
+        "readability": {
+          "reasoning": "The comment is clear and specific.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a precise description of what the code is doing, which is useful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "db245a3d: Set the global file for the SERVICE field",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It gives a clear indication of what the code does, which is useful for understanding the scope.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0ad573e1: Set the initial value for the SERVICE field to the service IEN",
+        "readability": {
+          "reasoning": "The comment is well-written and detailed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the initial value setting in detail, useful for any programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5a91594f: Set Y to the initial value for the SERVICE field",
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes what is being set but lacks context about 'Y', reducing its usefulness.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "53ec8dee: If a value is present, set X to that value, otherwise ask the user",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand but lacks a bit of specificity.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the functionality but is somewhat generic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8c0080be: Go to the reader if the user didn't make an entry",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful in understanding the flow control based on user input.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "978647e4: Set up cross-reference logic for SERVICE field",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the code regarding the SERVICE field.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "48140bf2: Kill the 'AC' cross-reference if the value is changing",
+        "readability": {
+          "reasoning": "The comment is clear and specific.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very helpful in understanding a specific action taken by the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8bf22ab5: Set the 'AC' cross-reference for the new value",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the update process of the 'AC' cross-reference.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "13296367: ;Set the 'AC' cross-reference for this service.",
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a precise description of what the code does, which is useful for understanding the functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7e247a64: ;Store the service in the 'AC' cross-reference.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an important part of the code, which is helpful for understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "82e785b6: ;Kill the 'AC' cross-reference for the old service.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains what the code is doing in sufficient detail.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1adf6e6d: ;Quit.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but only describes a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8bc96c06: ;Quit.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but only describes a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "db14c4cc: ;Set the physician responsible for this event.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains the purpose of the code segment, which is helpful for understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cfc2d757: ;Kill the old physician responsible cross-reference.",
+        "readability": {
+          "reasoning": "The comment is clear and has no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action being taken, which is useful for understanding the code's intent.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b5138760: ;Set the new file for the physician responsible lookup.",
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly describes the operation, aiding in understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "50e526fc: ;Branch to standard code.",
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but does not provide much detail about the standard code being referred to.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "af42c99a: ;If there is an existing physician responsible value.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains a conditional check in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f989f4cd: ;Kill the old physician responsible value.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains an important operation in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "663bd63c: ;If setting a new physician responsible value.",
+        "readability": {
+          "reasoning": "The comment is straightforward but slightly less clear due to the conditional 'If'.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, but could be more specific about the condition.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "aad9a301: ;Set the physician responsible value.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is moderately useful as it documents a straightforward action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "149b4a0a: ;Call code to set physician responsible cross-references.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it indicates a specific and potentially complex operation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fba2912c: ;Quit.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is too brief and not very informative.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8ca5f35c: ;Quit.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c7bdf9a6: ;Set flag to update cross-references later.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of setting the flag.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6aa66a6a: ;Set flag for cross-reference updates.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of setting the flag.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "036c0f84: ;Quit.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f21aa993: ;\n;If this is a discharge summary event, branch to set some values.\n;Discharge summary logic.\n;",
+        "readability": {
+          "reasoning": "The comment is clear and provides context.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the logic and branching conditions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fc52d400: ; If the deficiency is a Discharge Summary",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides context that helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b3664ff3: ; Default assignment of discharge provider must be made.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information that helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "081f68c5: ",
+        "readability": {
+          "reasoning": "The comment is empty and provides no information.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is empty and provides no useful information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "4512cbdd: ; If the deficiency is a Discharge Summary",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides context that helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "605d2dd4: ; Remove discharge provider assignment.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information that helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1ad14b42: ",
+        "readability": {
+          "reasoning": "The comment is just a code or identifier with no descriptive text.",
+          "score": "1"
+        },
+        "usefulness": {
+          "reasoning": "The comment provides no useful information about the code.",
+          "score": "1"
+        }
+      },
+      {
+        "comment": "880f4b93: ; If the deficiency is not a Discharge Summary",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment provides context about a specific condition in the code.",
+          "score": "4"
+        }
+      },
+      {
+        "comment": "b2dd596d: ; Default assignment of service/person must be made.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an action that must occur, which is useful for understanding the code.",
+          "score": "4"
+        }
+      },
+      {
+        "comment": "1bef5f9c: ",
+        "readability": {
+          "reasoning": "The comment is just a code or identifier with no descriptive text.",
+          "score": "1"
+        },
+        "usefulness": {
+          "reasoning": "The comment provides no useful information about the code.",
+          "score": "1"
+        }
+      },
+      {
+        "comment": "592cfdbe: ; Continue processing in DGJXE1",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment explains what the code will do next, which is useful for understanding the flow.",
+          "score": "4"
+        }
+      }
+    ]
+  }
+}

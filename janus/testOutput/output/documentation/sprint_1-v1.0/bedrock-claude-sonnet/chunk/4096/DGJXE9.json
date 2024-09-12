@@ -1,0 +1,650 @@
+{
+  "input": "{\n  \"comments\": [\n    \"0846dcdf:  ;\\n ;This routine is the input transform for the 'DATE DICTATED' field #10.01\\n ;in File #393, Question Tracking.\\n ;\\n ;This routine performs the following actions:\\n ;1. Checks if date is entered and date is in future.\\n ;2. Stamps DATE DICTATED field with entry date and adds/updates required \\n ; fields. \\n ;3. Generates a notice to track incomplete date entries.\\n ;4. Provides edit checks for DATE DICTATED field.\\n ;5. Allows jump to another routine if dictation date is in the past.\",\n    \"ea95d62b: ;Call DIE driver code\",\n    \"7ad3ca17: ;Initialize variables for DIEDIT\",\n    \"60fcc61d: ;See if DATE DICTATED already has a value and preserve it\",\n    \"45c85c27: ;Housekeeping after preserving old DATE DICTATED value\",\n    \"96b18b44: ;Write prompt\",\n    \"a2f3a677: ;Quit writer\",\n    \"25e8fb60: ;Allow word-wrapping of prompt text\",\n    \"a1a6d765: ;Check variable type and call word-wrapping routine if needed\",\n    \"f6f24ad4: ;No editing allowed for DATE DICTATED if entry already has value\",\n    \"98846359: ;Read user's response, allowing timeout\",\n    \"936eb742: ;Quit reader\",\n    \"f8623d0b: ;Increment DQ pointer for branching\",\n    \"3b998cc3: ;Branch to X+DQ label\",\n    \"f4ea8f5e: ;Re-edit if DE array has existing value, else read new response\",\n    \"c99beb48: ;Check for null response and take appropriate action\",\n    \"26323fcc: ;Handle entry of '?' and '^' characters\",\n    \"4782c9fd: ;Send user to ZOOM if '@' entered\",\n    \"9dffcf3c: ;If user enters space, allow lookup of previous value if defined\",\n    \"168bda44: ;Primary reader logic to match input against ^ piece of data\",\n    \"955d8c74: \",\n    \"355f555a: \",\n    \"83b8f819: \",\n    \"3c11bf38: \",\n    \"0a4ce97f: \",\n    \"c000bad9: \",\n    \"80293f67: \",\n    \"4ab29f98: \",\n    \"e54c79dc: \",\n    \"dc53515f: \",\n    \"b0b3e6be: \",\n    \"9e2d61fc: \",\n    \"a24e94f1: \",\n    \"46f13a15: \",\n    \"8fa5250c: \",\n    \"be1166d5: \",\n    \"3c4587cd: \",\n    \"4962ddcd: \",\n    \"594350d3: \",\n    \"e91b91e0: \",\n    \"37abd7f4: ; This routine is used to update the DATE DICTATED field in the DICTATION file (393).\",\n    \"2ceb9bee: ; Set variables for field and file attributes.\",\n    \"7f1f87e6: ; Branch to field input logic.\",\n    \"77dac7ef: ; Get current date/time and store in X.\",\n    \"a5e842fb: ; Quit if date is invalid.\",\n    \"c3351154: ; If valid date, branch to check/update related fields.\",\n    \"ded28fe2: ; If field is deleted, clear related date/time subfields.\",\n    \"6ff95061: ; Quit.\",\n    \"081a1a99: ; If date deleted, branch to update DICTATION STATUS field.\",\n    \"20907637: ; Set DICTATION STATUS to 'INCOMPLETE' if DATE DICTATED deleted.\",\n    \"c1e83531: ; Quit.\",\n    \"bc9e3874: ; Get EVENT DATE from parent PROGRESS NOTE file.\",\n    \"531d111f: ; Store EVENT DATE in DGJTDDT for date comparison.\",\n    \"4a21296f: ; Quit.\",\n    \"8196b1ae: ; Compare input DATE DICTATED to EVENT DATE.\",\n    \"0d2f1681: ; If DATE DICTATED is before EVENT DATE, delete it and display error message.\",\n    \"cfea1cac: ; Quit.\",\n    \"7bbde3a5: ; Branch to next input template.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 72.04437398910522
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "0846dcdf:  ;\n ;This routine is the input transform for the 'DATE DICTATED' field #10.01\n ;in File #393, Question Tracking.\n ;\n ;This routine performs the following actions:\n ;1. Checks if date is entered and date is in future.\n ;2. Stamps DATE DICTATED field with entry date and adds/updates required \n ; fields. \n ;3. Generates a notice to track incomplete date entries.\n ;4. Provides edit checks for DATE DICTATED field.\n ;5. Allows jump to another routine if dictation date is in the past.",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of the routine's purpose and actions, which helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ea95d62b: ;Call DIE driver code",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment briefly describes the action being taken, which is moderately useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7ad3ca17: ;Initialize variables for DIEDIT",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a basic and necessary action, which is useful for both average and expert programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "60fcc61d: ;See if DATE DICTATED already has a value and preserve it",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action that is useful for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "45c85c27: ;Housekeeping after preserving old DATE DICTATED value",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a general action, which is moderately useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "96b18b44: ;Write prompt",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful in indicating a general action, but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a2f3a677: ;Quit writer",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding the specific action being performed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "25e8fb60: ;Allow word-wrapping of prompt text",
+        "readability": {
+          "reasoning": "The comment is clear and specific, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about a specific functionality, aiding comprehension.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a1a6d765: ;Check variable type and call word-wrapping routine if needed",
+        "readability": {
+          "reasoning": "The comment is well-detailed and clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful as it describes both a check and a conditional call, aiding in code understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f6f24ad4: ;No editing allowed for DATE DICTATED if entry already has value",
+        "readability": {
+          "reasoning": "The comment is clear and specific, ensuring readability.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it describes a specific condition that affects functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "98846359: ;Read user's response, allowing timeout",
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand the purpose of the code related to user response and timeout.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "936eb742: ;Quit reader",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment documents a specific action that is easy to understand.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f8623d0b: ;Increment DQ pointer for branching",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand the function of incrementing the DQ pointer for branching.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3b998cc3: ;Branch to X+DQ label",
+        "readability": {
+          "reasoning": "The comment is simple and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment documents a specific branching action that is useful for understanding the flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f4ea8f5e: ;Re-edit if DE array has existing value, else read new response",
+        "readability": {
+          "reasoning": "The comment is well-written and explains the condition clearly.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an expert programmer understand the conditional logic related to the DE array and user response.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c99beb48: ;Check for null response and take appropriate action",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about handling null responses, which is valuable for programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "26323fcc: ;Handle entry of '?' and '^' characters",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains how specific characters are handled, which is useful for understanding input handling.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4782c9fd: ;Send user to ZOOM if '@' entered",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about a specific behavior triggered by a special character.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9dffcf3c: ;If user enters space, allow lookup of previous value if defined",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives useful details about handling spaces and retrieving previous values, aiding in understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "168bda44: ;Primary reader logic to match input against ^ piece of data",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a key part of the logic, helping in understanding the primary reader's function.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "955d8c74: ",
+        "readability": {
+          "reasoning": "The comment is simply a hexadecimal string with no context or explanation.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any meaningful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "355f555a: ",
+        "readability": {
+          "reasoning": "The comment is just another hexadecimal string without context or explanation.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "It does not help in understanding the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "83b8f819: ",
+        "readability": {
+          "reasoning": "Another hexadecimal string with no additional information.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "This comment is not useful for understanding the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "3c11bf38: ",
+        "readability": {
+          "reasoning": "Yet another hexadecimal string without context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "Provides no useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "0a4ce97f: ",
+        "readability": {
+          "reasoning": "A final hexadecimal string that lacks clarity or context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "Does not help in understanding the code at all.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "c000bad9: ",
+        "readability": {
+          "reasoning": "The comment is just a series of characters and lacks any explanation.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "80293f67: ",
+        "readability": {
+          "reasoning": "This comment is just a string of characters, making it unclear.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not give any meaningful information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "4ab29f98: ",
+        "readability": {
+          "reasoning": "The comment is a sequence of characters without context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "It does not offer any useful explanation or documentation.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "e54c79dc: ",
+        "readability": {
+          "reasoning": "This comment is just characters and isn't clear.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment fails to provide any useful information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "dc53515f: ",
+        "readability": {
+          "reasoning": "The comment is a string of characters with no readable context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "It does not document or explain anything about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "b0b3e6be: ",
+        "readability": {
+          "reasoning": "The comment consists of what seems to be a hash or identifier, which does not provide any context or information.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not contribute to understanding the code; it appears to be a random or meaningless string.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "9e2d61fc: ",
+        "readability": {
+          "reasoning": "Similar to the previous comment, it appears to be a hash or identifier without any context or explanation.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "This comment provides no useful information for understanding the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "a24e94f1: ",
+        "readability": {
+          "reasoning": "This comment also appears to be a hash or identifier with no additional context or explanation.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "It does not help in understanding the code and seems meaningless.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "46f13a15: ",
+        "readability": {
+          "reasoning": "Like the other comments, it appears to be a hash or identifier without context, making it unclear and unhelpful.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "This comment does not provide any useful information for understanding the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "8fa5250c: ",
+        "readability": {
+          "reasoning": "This comment is similar to the others, consisting of what seems to be a hash or identifier without context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "It does not contribute to understanding the code and is not useful.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "be1166d5: ",
+        "readability": {
+          "reasoning": "The comment consists only of a string of characters and a colon, making it very unclear.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "3c4587cd: ",
+        "readability": {
+          "reasoning": "Similar to the previous comment, it is just a string of characters followed by a colon, which is not clear.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "This does not help in understanding the code at all.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "4962ddcd: ",
+        "readability": {
+          "reasoning": "Again, this is just a string of characters with a colon, making it unreadable.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "It provides no information about the code's functionality.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "594350d3: ",
+        "readability": {
+          "reasoning": "This comment is also just a string of characters and a colon, which is not comprehensible.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "There is no useful information provided about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "e91b91e0: ",
+        "readability": {
+          "reasoning": "Like the other comments, it is just a string of characters followed by a colon, making it unreadable.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "This does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "37abd7f4: ; This routine is used to update the DATE DICTATED field in the DICTATION file (393).",
+        "readability": {
+          "reasoning": "The comment is well-structured and clearly describes the purpose of the routine.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context about the functionality of the routine, helpful for both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2ceb9bee: ; Set variables for field and file attributes.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read, with no apparent issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a general idea of what the code does, useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7f1f87e6: ; Branch to field input logic.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, giving a basic indication of code behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "77dac7ef: ; Get current date/time and store in X.",
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality, but it is still useful for understanding variable assignment.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a5e842fb: ; Quit if date is invalid.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear condition for the code's behavior, useful for understanding control flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c3351154: ; If valid date, branch to check/update related fields.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific condition and subsequent action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ded28fe2: ; If field is deleted, clear related date/time subfields.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific condition and subsequent action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6ff95061: ; Quit.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "081a1a99: ; If date deleted, branch to update DICTATION STATUS field.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific condition and subsequent action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "20907637: ; Set DICTATION STATUS to 'INCOMPLETE' if DATE DICTATED deleted.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific condition and subsequent action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c1e83531: ; Quit.",
+        "readability": {
+          "reasoning": "The comment is very short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is trivial as it only indicates a termination point.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "bc9e3874: ; Get EVENT DATE from parent PROGRESS NOTE file.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about where an important variable is being sourced from.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "531d111f: ; Store EVENT DATE in DGJTDDT for date comparison.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the purpose of storing a value in a variable.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4a21296f: ; Quit.",
+        "readability": {
+          "reasoning": "The comment is very short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is trivial as it only indicates a termination point.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8196b1ae: ; Compare input DATE DICTATED to EVENT DATE.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains a comparison operation between two dates.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0d2f1681: ; If DATE DICTATED is before EVENT DATE, delete it and display error message.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with proper grammar and structure.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional operation and its result, which is useful for understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cfea1cac: ; Quit.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a simple action, which is not very useful for understanding complex functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7bbde3a5: ; Branch to next input template.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the control flow of the code, which is useful for understanding the code's behavior.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

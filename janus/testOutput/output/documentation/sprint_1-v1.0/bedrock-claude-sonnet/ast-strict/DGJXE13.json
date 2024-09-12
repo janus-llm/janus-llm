@@ -1,0 +1,617 @@
+{
+  "input": "{\n  \"comments\": [\n    \"91f6d0e1: ;\\n ;\\n ;\\n ;\",\n    \"8d484868: ;Determine starting node.\",\n    \"bb950e4c: ;If there are no entries in the VAS MULTIPLE BUILD file for this record, quit the routine.\",\n    \"0fc1219f: ;If there is a DATE/TIME field value, retrieve the 5th piece of data from that field and store it in DE(1).\",\n    \"ee0f42f8: ;Clean up the local variable used and quit the routine.\",\n    \"6e43d4b7: Loop through characters and write non-numeric characters, write \\\": \\\" if character is numeric\",\n    \"070c3627: Quit from routine\",\n    \"c064b6ca: If the line length exceeds 45 characters, wrap to the next line with an indent of 9 spaces.\",\n    \"24a83c32: If the value of Y is longer than 19 characters, and DV is not defined or doesn't contain 'I', and DV contains 'F' or 'K', then go to the RW^DIR2 routine.\",\n    \"77675e1b: If Y is not empty, write '// ' before it. If DV is not defined, and DV contains 'I', and the DE(DQ) node exists, set X to an empty string and write '  (No Editing)' and quit.\",\n    \"6f628945: ; Set DTOUT and X to $CHAR(7) if timeout.\",\n    \"1f59404d: ; Exit routine.\",\n    \"be728a66: ;Increment the DQ counter after killing the DQ array.\",\n    \"27854c34: ;Execute the code at the specified entry reference in ^DIC(.\",\n    \"bab2679c: ;If the data element is required and present, write it to the output and transpose it.\",\n    \"2d6446b3: ;Checks if the Data Value (DV) contains 'R' and the variable X is empty. If DV doesn't contain 'R' and X is empty, it goes to the label 'A'. If DV contains 'R' or X is not empty, it continues execution. If the current Date/Time (D) is less than or equal to 0, it goes to the label 'A'.\",\n    \"833a22ce: ;If the user enters a question mark, explain the current field; if the user enters an up-arrow, quit the input and return to the SELECTOR utility; otherwise, proceed to the data validator for the current field.\",\n    \"6534e9bc: ;If the user enters an at-sign, quit the input and jump to the UPDATER utility for the current file.\",\n    \"4292d75f: ;If the user enters a space, and the field is a date/time word-processing field with a locally defined input transform stored for the user, retrieve the defined transform and (if not a date or set of values) echo it to the screen.\",\n    \"dff32ccf: If the variable Y is not null and there's a condition stored in DIC(\\\"S\\\") then evaluate it. If the condition is true then write the value of % (text after the \\\":\\\" separator) unless DB(DQ) is defined (database integration).\",\n    \"80fe24c6: Loop through each potential value of Y by splitting the parameter DU on \\\";\\\" delimiters. If the value of Y contains the user input X (separated by \\\":\\\" delimiter), then execute DIC(\\\"S\\\") if defined and break out of the loop if the condition is true. If DG is 0 then move on to the next iteration.\",\n    \"fb5d004e: If DB(DQ) is not defined (database integration), write the remaining text after the \\\":X\\\" portion of the current YS value. Then set X to the text before the \\\":\\\" delimiter in YS.\",\n    \"8192cc5a: If DV does not contain asterisk, call ^DIC to update/create entry. If entry already exists, set X to IEN, else go to X label.\",\n    \"7be99933: If DV does not contain 'N', call D label. If length of decimal portion of X is > 24, kill X and go to Z label.\",\n    \"7188fdde: If second piece of DV contains a comma and X has a decimal, and 5th piece of data global node does not contain '$', remove leading zeros from X and remove trailing zeros from decimal portion of X. If decimal portion is blank after stripping trailing zeros, convert X to integer.\",\n    \"c9e89f58: ;Execute data operations, then clear out $TEST variable.\",\n    \"bd6e85b6: If input variable X is defined and not null, store its value in DG(DW). If DV contains 'd', store X in ^DISV(DUZ,\\\"DIE\\\",DLB) and go to label A.\",\n    \"009383df: ;Don't start editing if another user is editing the same record.\",\n    \"75df8305: ;Set variable X to '?BAD' indicating an error condition.\",\n    \"5313d5d0: Store the input parameter in DZ, call the D routine, call the QQ^DIEQ routine, and go to label B.\",\n    \"6b8ab585: ;Checks if a field exists and loads the developer's data into the variable DQ.\",\n    \"942131c0: ;Check if input parameter array DE(DQ) is defined. If not, execute subroutine O and go to label RD if input parameter X is not '@'. If parameter DV does not contain 'R' and X is '@', go to label A. If X is '@', set X to value of Y and go to label N.\",\n    \"d56bf501: ;Get the piece at subscript 2 of the executable routine node for data entry block DQ.\",\n    \"f069e59b: ;Extract data for a Fileman file.\",\n    \"f07bdb6f: ;Extract data for a Fileman sub-file.\",\n    \"5a6c8faa: ;Implement other data extraction behaviors.\",\n    \"560da793: ;If there is no error, execute the DR string. If certain conditions are met, branch to labels A or N^DIE17.\",\n    \"c314035d: If the value of DV is numeric (doesn't contain 'I' or '#'), go to the label RD.\",\n    \"f1d16f7c: Call the subroutine E^DIE0. If the variable X is defined after the call, go to the label RD. Otherwise, go to the label PR.\",\n    \"7cced0fd: Quit the routine.\",\n    \"a30bfa90: Initialize variable DNM with the value 'DGJXE13' and variable DQ with the value 1\",\n    \"780cd545: ;Initialize variables for document definition\",\n    \"a88fe71e: ;Go to the code block labeled 'RE'\",\n    \"eef01f63: ; Converts external date to internal FileMan date/time format\",\n    \"e6d44edf: ; Returns the internal FileMan date/time format\",\n    \"5427ea7d: ;If the input array DG contains more than 9 nodes, execute the FileMan utility routine DIE17 to handle the input, store the result in Y, and set the input variable DQ to 2. If Y is undefined or the up-arrow delimiter, branch to label A. Otherwise, store Y in X, set the DIC(0) parameter to 'F' for FileMan, and set the variable DW to the value of DQ. Finally, execute the OUT^DIE17 routine.\",\n    \"cfd9cccd: Clear the transfer field in the DT field when there is no value for X.\",\n    \"4fba6844: Exit the routine.\",\n    \"78ebe037: ;Retrieve record (if valid) which calls ^DIE17 to edit it, then branch accordingly\",\n    \"4db3333b: ;Display an error message if the new date is earlier than the existing DATE DICTATED and reset the DATE COMPLETED field to null.\",\n    \"3f31ed81: ;Exit the input transformation code for this field.\",\n    \"e1195c90: ;If the variable DG exists and has a value greater than 9, execute the entry point F^DIE17. Then, set variable Y to the code for the up-arrow, set DQ to 4, and execute code at the X4 label. If Y is undefined or equal to the up-arrow, go to label A. Otherwise, set variable X to Y, set DIC(0) to 'F', set DW to DQ, and go to the label OUT^DIE17.\",\n    \"6a28cdae: ;If the input string X is empty, set DGJTST to 'TRANSCRIBED' and Y to '@2'\",\n    \"f46425ab: ;Exit (quit) the routine\",\n    \"0b174af3: ;Call the update routine if the update flag is set to greater than 9\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 76.01409578323364
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "91f6d0e1: ;\n ;\n ;\n ;",
+        "readability": {
+          "reasoning": "The comment is empty and does not provide any readable content.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "8d484868: ;Determine starting node.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better by specifying the action being performed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bb950e4c: ;If there are no entries in the VAS MULTIPLE BUILD file for this record, quit the routine.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about a condition that affects the flow of the routine, aiding in understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0fc1219f: ;If there is a DATE/TIME field value, retrieve the 5th piece of data from that field and store it in DE(1).",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific operation involving data retrieval, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ee0f42f8: ;Clean up the local variable used and quit the routine.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it describes the cleanup operation, which is important for resource management and understanding the code's lifecycle.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6e43d4b7: Loop through characters and write non-numeric characters, write \": \" if character is numeric",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read, but the wording could be slightly improved for better flow.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the logic of handling characters based on their type, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "070c3627: Quit from routine",
+        "readability": {
+          "reasoning": "The comment is very brief but clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment conveys a trivial action which is self-explanatory in the context of programming.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c064b6ca: If the line length exceeds 45 characters, wrap to the next line with an indent of 9 spaces.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action which is useful for understanding how text wrapping is handled.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "24a83c32: If the value of Y is longer than 19 characters, and DV is not defined or doesn't contain 'I', and DV contains 'F' or 'K', then go to the RW^DIR2 routine.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, though it is somewhat long and complex.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of conditions and actions, which is very useful for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "77675e1b: If Y is not empty, write '// ' before it. If DV is not defined, and DV contains 'I', and the DE(DQ) node exists, set X to an empty string and write '  (No Editing)' and quit.",
+        "readability": {
+          "reasoning": "The comment is clear but very detailed, which makes it a bit harder to follow at first glance.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of multiple conditions and actions, which is very useful for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6f628945: ; Set DTOUT and X to $CHAR(7) if timeout.",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific action taken in the code, which is helpful to understand the logic during a timeout.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1f59404d: ; Exit routine.",
+        "readability": {
+          "reasoning": "The comment is very short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates the end of a routine, which is useful for understanding control flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "be728a66: ;Increment the DQ counter after killing the DQ array.",
+        "readability": {
+          "reasoning": "The comment is clear with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides information on a specific sequence of operations, which is useful to understand the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "27854c34: ;Execute the code at the specified entry reference in ^DIC(.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding what the following code will do, which is useful for navigation in a complex codebase.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bab2679c: ;If the data element is required and present, write it to the output and transpose it.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional operation which is useful for understanding the logic involving data handling.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2d6446b3: ;Checks if the Data Value (DV) contains 'R' and the variable X is empty. If DV doesn't contain 'R' and X is empty, it goes to the label 'A'. If DV contains 'R' or X is not empty, it continues execution. If the current Date/Time (D) is less than or equal to 0, it goes to the label 'A'.",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear, though a bit lengthy.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of the conditional logic, which would be very useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "833a22ce: ;If the user enters a question mark, explain the current field; if the user enters an up-arrow, quit the input and return to the SELECTOR utility; otherwise, proceed to the data validator for the current field.",
+        "readability": {
+          "reasoning": "The comment is concise and clear, using simple language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains user input handling, which is essential for understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6534e9bc: ;If the user enters an at-sign, quit the input and jump to the UPDATER utility for the current file.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains a specific user input action, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4292d75f: ;If the user enters a space, and the field is a date/time word-processing field with a locally defined input transform stored for the user, retrieve the defined transform and (if not a date or set of values) echo it to the screen.",
+        "readability": {
+          "reasoning": "The comment is clear but slightly complex due to the technical details.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific user input scenario and provides detailed information on the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "dff32ccf: If the variable Y is not null and there's a condition stored in DIC(\"S\") then evaluate it. If the condition is true then write the value of % (text after the \":\" separator) unless DB(DQ) is defined (database integration).",
+        "readability": {
+          "reasoning": "The comment is understandable but somewhat convoluted due to nested conditions.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about conditional evaluation and database integration.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "80fe24c6: Loop through each potential value of Y by splitting the parameter DU on \";\" delimiters. If the value of Y contains the user input X (separated by \":\" delimiter), then execute DIC(\"S\") if defined and break out of the loop if the condition is true. If DG is 0 then move on to the next iteration.",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear, explaining the logic and conditions step-by-step.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of the logic behind the loop, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fb5d004e: If DB(DQ) is not defined (database integration), write the remaining text after the \":X\" portion of the current YS value. Then set X to the text before the \":\" delimiter in YS.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but could benefit from more context or examples.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains specific actions taken when a condition is met, but it's somewhat situational and might not be obvious to all readers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8192cc5a: If DV does not contain asterisk, call ^DIC to update/create entry. If entry already exists, set X to IEN, else go to X label.",
+        "readability": {
+          "reasoning": "The comment is concise and clear, but it could give more detail about what ^DIC does.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a key part of the logic, but assumes understanding of certain terms and functions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7be99933: If DV does not contain 'N', call D label. If length of decimal portion of X is > 24, kill X and go to Z label.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, describing the conditions and actions succinctly.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the control flow, especially for handling specific conditions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7188fdde: If second piece of DV contains a comma and X has a decimal, and 5th piece of data global node does not contain '$', remove leading zeros from X and remove trailing zeros from decimal portion of X. If decimal portion is blank after stripping trailing zeros, convert X to integer.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, but it's somewhat complex and could be broken down further.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific set of data manipulations, though it could be too detailed for some contexts.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c9e89f58: ;Execute data operations, then clear out $TEST variable.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the sequence of operations being performed, which is useful for understanding code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bd6e85b6: If input variable X is defined and not null, store its value in DG(DW). If DV contains 'd', store X in ^DISV(DUZ,\"DIE\",DLB) and go to label A.",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific conditions and actions which help an average programmer understand the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "009383df: ;Don't start editing if another user is editing the same record.",
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a condition that is important for maintaining data integrity.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "75df8305: ;Set variable X to '?BAD' indicating an error condition.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes an error handling mechanism, which is useful for debugging purposes.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5313d5d0: Store the input parameter in DZ, call the D routine, call the QQ^DIEQ routine, and go to label B.",
+        "readability": {
+          "reasoning": "The comment is clear but somewhat verbose.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment outlines a sequence of operations, which is helpful for understanding the code structure.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6b8ab585: ;Checks if a field exists and loads the developer's data into the variable DQ.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear understanding of the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "942131c0: ;Check if input parameter array DE(DQ) is defined. If not, execute subroutine O and go to label RD if input parameter X is not '@'. If parameter DV does not contain 'R' and X is '@', go to label A. If X is '@', set X to value of Y and go to label N.",
+        "readability": {
+          "reasoning": "The comment is comprehensive but a bit lengthy, which could make it slightly harder to follow.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the different conditions and actions taken, which is helpful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d56bf501: ;Get the piece at subscript 2 of the executable routine node for data entry block DQ.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action in the code, which is useful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f069e59b: ;Extract data for a Fileman file.",
+        "readability": {
+          "reasoning": "The comment is very clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat generic and does not provide much detail beyond the obvious.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f07bdb6f: ;Extract data for a Fileman sub-file.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is slightly more specific than the previous one but still lacks detailed information.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "5a6c8faa: ;Implement other data extraction behaviors.",
+        "readability": {
+          "reasoning": "The comment is clear but somewhat vague about what specific behaviors are meant.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "Provides a general idea of what the code should do but lacks specific details.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "560da793: ;If there is no error, execute the DR string. If certain conditions are met, branch to labels A or N^DIE17.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, explaining the control flow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand the branching logic in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c314035d: If the value of DV is numeric (doesn't contain 'I' or '#'), go to the label RD.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is useful for understanding a specific conditional check in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f1d16f7c: Call the subroutine E^DIE0. If the variable X is defined after the call, go to the label RD. Otherwise, go to the label PR.",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment provides useful information about the subroutine and subsequent control flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7cced0fd: Quit the routine.",
+        "readability": {
+          "reasoning": "The comment is very clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is useful for indicating the end of the routine, though it is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a30bfa90: Initialize variable DNM with the value 'DGJXE13' and variable DQ with the value 1",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains the initialization of two variables, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "780cd545: ;Initialize variables for document definition",
+        "readability": {
+          "reasoning": "The comment is clear but lacks details.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a general idea of the purpose but is not specific enough to be highly useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a88fe71e: ;Go to the code block labeled 'RE'",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies a control flow operation, which is useful for understanding the code structure.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "eef01f63: ; Converts external date to internal FileMan date/time format",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful as it explains a specific conversion function, which is important for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e6d44edf: ; Returns the internal FileMan date/time format",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it documents the return value of a function, aiding in understanding its purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5427ea7d: ;If the input array DG contains more than 9 nodes, execute the FileMan utility routine DIE17 to handle the input, store the result in Y, and set the input variable DQ to 2. If Y is undefined or the up-arrow delimiter, branch to label A. Otherwise, store Y in X, set the DIC(0) parameter to 'F' for FileMan, and set the variable DW to the value of DQ. Finally, execute the OUT^DIE17 routine.",
+        "readability": {
+          "reasoning": "The comment is well-written and clearly explains each step of the process.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information that would help an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cfd9cccd: Clear the transfer field in the DT field when there is no value for X.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains non-trivial functionality that would help an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4fba6844: Exit the routine.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "78ebe037: ;Retrieve record (if valid) which calls ^DIE17 to edit it, then branch accordingly",
+        "readability": {
+          "reasoning": "The comment is mostly clear but could be slightly more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better but lacks some detail for experts.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4db3333b: ;Display an error message if the new date is earlier than the existing DATE DICTATED and reset the DATE COMPLETED field to null.",
+        "readability": {
+          "reasoning": "The comment is clear and detailed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information that helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3f31ed81: ;Exit the input transformation code for this field.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the function of this section of code, helping both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e1195c90: ;If the variable DG exists and has a value greater than 9, execute the entry point F^DIE17. Then, set variable Y to the code for the up-arrow, set DQ to 4, and execute code at the X4 label. If Y is undefined or equal to the up-arrow, go to label A. Otherwise, set variable X to Y, set DIC(0) to 'F', set DW to DQ, and go to the label OUT^DIE17.",
+        "readability": {
+          "reasoning": "The comment is lengthy but clearly written with detailed instructions.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is very detailed, providing step-by-step instructions that can help an average programmer understand a complex sequence.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6a28cdae: ;If the input string X is empty, set DGJTST to 'TRANSCRIBED' and Y to '@2'",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action that would be useful for understanding this part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f46425ab: ;Exit (quit) the routine",
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides basic information that is somewhat useful but rather trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "0b174af3: ;Call the update routine if the update flag is set to greater than 9",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the condition under which a routine is called, which is useful for understanding this part of the code.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

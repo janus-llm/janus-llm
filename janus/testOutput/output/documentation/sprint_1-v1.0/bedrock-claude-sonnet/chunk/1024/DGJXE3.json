@@ -1,0 +1,925 @@
+{
+  "input": "{\n  \"comments\": [\n    \"4e4afee7: ;\\n;This local routine extract and loads message text.\\n;\",\n    \"642caab6: Call the DE routine to extract data, then jump to BEGIN label\",\n    \"e60f5e50: Set up variables for FileMan call\",\n    \"4bcba806: If message has ID (field 11), save in local array DE\",\n    \"b328d75b: If message text exists (multiple MSG), save in local array DE\",\n    \"fe638793: Clean up %Z temporary variable\",\n    \"f735e30e: Write prompt\",\n    \"ba7b0528: Quit\",\n    \"78f4e671: Write data value Y wrapped at margin 45\",\n    \"72c6da54: If value long and wordwrapping indicated, branch to FileMan rtn\",\n    \"b30688c9: If no editing allowed (DV[I) and data exists (DE(DQ)#2) display message\",\n    \"5297ae08: Read response into X, set timeout, allow up-arrow exit\",\n    \"0f40d775: Return and quit.\",\n    \"b65e9bb7: Increment the data queue counter.\",\n    \"0cf04c83: Transfer control to another label indicated by the current value of DQ.\",\n    \"0bf0bc32: If the current input is defined in the DE array for the current value of DQ, go to the PR label. Otherwise, execute the W and TR subroutines.\",\n    \"78914a29: If X is empty:\\n  - If the current field has a 'KEY' cross-reference defined, go to the NKEY label.\\n  - If the data validation does not allow nulls, go to the A label.\\n  - If the data validation allows nulls and X is null, go to the X label.\\n  - If the data validation allows nulls, the current internal value is greater than 0, and X is not null, go to the A label.\",\n    \"b0d9e80c: If X is a question mark, go to the QS label. If X starts with '^', execute the D subroutine and transfer control to the ^DIE17 entry point.\",\n    \"a888b907: If X is '@', execute the D subroutine and transfer control to the Z^DIE2 entry point.\",\n    \"e879ddbe: If X is a space, the data validation includes a date ('d'), and the data validation does not include a 'P' code, and the user has a default value defined in the ^DISV global for the current application and field, set X to that default value. If the data validation does not allow nulls and does not allow word-processing, write the default value to the screen.\",\n    \"32649b15: If the data validation indicates the input should be validated (DV):\\n  - Go to the M^DIE17 entry point.\\nElse if the data validation indicates the input should be a value from a list (DV[\\\"V\\\"]):\\n  - Go to the ^DIE3 entry point.\\nElse if the data validation does not indicate the input should be set (DV'[\\\"S\\\"]):\\n  - Go to the P label.\\nIf a computed field code exists for the current field, execute it.\\nIf X is in the canonical form for the data type:\\n  - Execute the SET subroutine.\\n  - If there is a screen for the input field data, execute it.\\n  - If no database errors have occurred for the current input, write the processed input value to the screen.\\nGo to the V label.\",\n    \"3e66bca9: Kill the variable 'DDER' and branch to the routine labeled 'X'.\",\n    \"f256fc09: If the data source for the lookup is a pointer (DV contains 'P'), set up the lookup parameters. Call the NOSCR^DIED routine to reset some flags. If the lookup value is less than 0, branch to the routine labeled 'X'. If not, set X to the lookup value and DIC to the global root for editing, then branch to the routine labeled 'X'.\",\n    \"c0886704: If the data source is not numeric (DV does not contain 'N'), branch to the routine labeled 'V'. Otherwise, execute the routine 'D'. If the value in X has more than 24 decimal places, kill X and branch to the routine labeled 'Z'.\",\n    \"46851909: Convert input X to a number if it is in the form '-nnn.nnn' or 'nnn.nnn' and the 5th piece of DQ(DQ) does not contain a $.\",\n    \"27634b2a: Execute code pointed to by DQ and then kill array YS.\",\n    \"b275e14a: If X is defined and not null, and DW has an index, then call SAVEVALS. If KEYCHK fails, go to UNIQFERR^DIE17. Store X in DG(DW). If DV contains 'd', store X in ^DISV for this user. Go to label A.\",\n    \"7c6b4bc2: If ZTQUEUED is undefined, write a '??' bell character. If DB(DQ) is defined, go to Z^DIE17.\",\n    \"6621705d: Set X to '?BAD', which will trigger an error later\",\n    \"3f505849: Store the value of X in DZ, call subroutine D, call ^DIEQ with label QQ, then go to label B\",\n    \"7fcf1be7: Set D to DIFLD (Input field's number), DQ(DQ) to DLB_U_DV_U_DU_U_DW_U_<text after 2nd space in routine X>. This stores field attributes.\",\n    \"1eb4398a: If DE(DQ) is undefined, execute O and go to RD if X doesn't start with '@', go to A if DV doesn't contain 'R' and X='@', else go to X if X='@'. Set X to Y and go to N.\",\n    \"f5a38c68: Set DG to DV (field specifier), Y to DE(DQ) (external field value), X to DU (input value). If DQ(DQ,2) exists, execute it. Go to RP.\",\n    \"4a80f5a5: If DG contains 'P' and X is a file/subfile number that exists, set X to IEN from 0 node. Go to RP if there's no Y node, else set Y to value and X to .01 specifier from data dictionary, DG to global data node. Recurse.\",\n    \"3a59669a: If DG contains 'V', Y is a value, Y is 'file;ien(#)', and the global node exists, set X to IEN. Go to RP if no Y node, else set Y to value. If DD has .01 specifier, set DG & X from DD. Go to R to recurse.\",\n    \"97f50d29: ;If input transform evaluates to data delimited string, extract piece.\",\n    \"f5d89035: ;If null input value, get default response. Quit if field is read only, quit if field has DIEDIT prompt and it is a multiple, otherwise go to extended read.\",\n    \"44df83b7: ;If field is not WORD-PROCESSING or a COMPUTED EXPRESSION, perform standard read.\",\n    \"0f5fe163: ;Perform WORD-PROCESSING/COMPUTED EXPRESSION read. Go to standard read if successful, otherwise prompt again.\",\n    \"3f1f2a3e: ;Quit.\",\n    \"82f4ae08: ;Set up DIR array for reader. Turn OFF echo if database is open.\",\n    \"486e2534: ;If database is open and silent mode is not on, set silent mode on.\",\n    \"02819790: ;If the call to DIR^DICC does not return an error, set X to the result and % to the internal representation.\",\n    \"7bf3653a: ;Exit the routine.\",\n    \"2d068f29: ;Save the old value of the field in the temporary storage location before editing.\",\n    \"8fb3493e: ;If the 'WRITE' access code for the field is defined, clear the flag that tracks whether the field has been edited.\",\n    \"1b241e73: ;Kill node for record\",\n    \"4ecb5cde: ;Exit point\",\n    \"326dadc5: ;Required key field is missing\",\n    \"1cd9aefa: ;Check key field\",\n    \"a4983604: ;Begin Input Transform\",\n    \"80fd731c: ;Field 11 (STATUS) of File 393.2\",\n    \"3f430f4f: ;Set data location\",\n    \"b42c2b55: ;Set X=DGJTST\",\n    \"012ea62b: ;Set Y=X\",\n    \"c90d3c3f: ;Standard DIE calls\",\n    \"4172be52: ;Read next entry\",\n    \"c542fc41: ;Exit point\",\n    \"a8b52adf: ;Field help text for field 11\",\n    \"c2d0c52e: ;Set help text\",\n    \"97c22c6e: ;Exit point\",\n    \"f1f43dbb:      ;\\n     ;Begin output transform\\n     ;\",\n    \"26063036: ;Field 11 (STATUS) of File 393.2\",\n    \"fc1b4466: ;Set data location\",\n    \"70e18c14: ;Resume standard DIE processing\",\n    \"739531e2: If the user doesn't select an entry from the list, clear X and quit.\",\n    \"b75b1f3d: Quit.\",\n    \"a7f57384: If data is being updated, process the user's selection by executing DIE17 routines and take additional actions based on the value of Y.\",\n    \"075f5901: Set a flag indicating the user is updating data.\",\n    \"bff7c0ae: Quit.\",\n    \"0511b54f: ;\\nIf adding a new comment, set DQ to 7 to indicate 'add new record' mode.;\\n\",\n    \"78e8a80b: If adding a new comment, process the new entry by executing DIE17 routines and take additional actions based on the value of Y.\",\n    \"3b1cf0a1: If the record number doesn't end with '4', clear the user's input by setting Y to an empty string.\",\n    \"589db55b: Quit.\",\n    \"810d8736: Set properties for the 'COMMENTS' field (#20.01) in preparation for data entry.\",\n    \"775f9ce9: Jump to the 'RE' label for further processing.\",\n    \"e51acc05: If the user's input is longer than 200 characters or shorter than 3, clear the input X.\",\n    \"cb6c0c64: If the user's input contains non-alphanumeric characters, clear the input X.\",\n    \"4679a33f: Quit.\",\n    \"e86086fb: ;Exit and re-entry point for input transformation.\",\n    \"34889d67: ;Flag to indicate journal is updated.\",\n    \"7bed2301: ;Return from subroutine X9.\",\n    \"d926f6a1: ;Unconditional transfer to entry point 0 in routine DIE17.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 137.1660521030426
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "4e4afee7: ;\n;This local routine extract and loads message text.\n;",
+        "readability": {
+          "reasoning": "The comment is clear to read but has a minor grammatical error.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a high-level overview of the routine's purpose, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "642caab6: Call the DE routine to extract data, then jump to BEGIN label",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes the function of the code, which is useful for both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e60f5e50: Set up variables for FileMan call",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a basic but essential step, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4bcba806: If message has ID (field 11), save in local array DE",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific and valuable information about the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b328d75b: If message text exists (multiple MSG), save in local array DE",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific and valuable information about the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fe638793: Clean up %Z temporary variable",
+        "readability": {
+          "reasoning": "The comment is concise and clearly describes the action being taken.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand that a temporary variable is being cleaned up.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f735e30e: Write prompt",
+        "readability": {
+          "reasoning": "The comment is very brief but understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a trivial action of writing a prompt.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ba7b0528: Quit",
+        "readability": {
+          "reasoning": "The comment is extremely brief and lacks context.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality of quitting, offering little insight.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "78f4e671: Write data value Y wrapped at margin 45",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, describing the action taken.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about how data is being written and wrapped, aiding understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "72c6da54: If value long and wordwrapping indicated, branch to FileMan rtn",
+        "readability": {
+          "reasoning": "The comment is clear and detailed, though a bit technical.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful branching logic, aiding an expert programmer's understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b30688c9: If no editing allowed (DV[I) and data exists (DE(DQ)#2) display message",
+        "readability": {
+          "reasoning": "The comment is mostly clear but the abbreviations and code references make it slightly harder to read.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context about conditions under which a message is displayed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5297ae08: Read response into X, set timeout, allow up-arrow exit",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains multiple actions the code performs.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0f40d775: Return and quit.",
+        "readability": {
+          "reasoning": "The comment is very clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is trivial as it describes a very basic operation.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "b65e9bb7: Increment the data queue counter.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a single, straightforward operation.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "0cf04c83: Transfer control to another label indicated by the current value of DQ.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides valuable information about the program flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0bf0bc32: If the current input is defined in the DE array for the current value of DQ, go to the PR label. Otherwise, execute the W and TR subroutines.",
+        "readability": {
+          "reasoning": "The comment is well-written with clear instructions and proper punctuation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the logic flow, which can help an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "78914a29: If X is empty:\n  - If the current field has a 'KEY' cross-reference defined, go to the NKEY label.\n  - If the data validation does not allow nulls, go to the A label.\n  - If the data validation allows nulls and X is null, go to the X label.\n  - If the data validation allows nulls, the current internal value is greater than 0, and X is not null, go to the A label.",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to follow thanks to the bullet points.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about various conditions, which can help an average programmer understand the data validation logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b0d9e80c: If X is a question mark, go to the QS label. If X starts with '^', execute the D subroutine and transfer control to the ^DIE17 entry point.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps clarify the control flow, which is useful for an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a888b907: If X is '@', execute the D subroutine and transfer control to the Z^DIE2 entry point.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about a specific control flow, which can help an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e879ddbe: If X is a space, the data validation includes a date ('d'), and the data validation does not include a 'P' code, and the user has a default value defined in the ^DISV global for the current application and field, set X to that default value. If the data validation does not allow nulls and does not allow word-processing, write the default value to the screen.",
+        "readability": {
+          "reasoning": "The comment is long and complex, making it slightly harder to follow.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about multiple conditions, which can help an average programmer understand the validation logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "32649b15: If the data validation indicates the input should be validated (DV):\n  - Go to the M^DIE17 entry point.\nElse if the data validation indicates the input should be a value from a list (DV[\"V\"]):\n  - Go to the ^DIE3 entry point.\nElse if the data validation does not indicate the input should be set (DV['S']):\n  - Go to the P label.\nIf a computed field code exists for the current field, execute it.\nIf X is in the canonical form for the data type:\n  - Execute the SET subroutine.\n  - If there is a screen for the input field data, execute it.\n  - If no database errors have occurred for the current input, write the processed input value to the screen.\nGo to the V label.",
+        "readability": {
+          "reasoning": "The comment is detailed and uses consistent terminology, but it is quite dense and may be difficult to quickly understand.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a comprehensive guide through the logic of the code, which helps even an expert programmer understand the flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3e66bca9: Kill the variable 'DDER' and branch to the routine labeled 'X'.",
+        "readability": {
+          "reasoning": "The comment is short and clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear action but lacks context about why these actions are necessary, which limits its usefulness for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f256fc09: If the data source for the lookup is a pointer (DV contains 'P'), set up the lookup parameters. Call the NOSCR^DIED routine to reset some flags. If the lookup value is less than 0, branch to the routine labeled 'X'. If not, set X to the lookup value and DIC to the global root for editing, then branch to the routine labeled 'X'.",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear, making it easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed flow of the logic, which helps an average programmer understand the steps involved.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c0886704: If the data source is not numeric (DV does not contain 'N'), branch to the routine labeled 'V'. Otherwise, execute the routine 'D'. If the value in X has more than 24 decimal places, kill X and branch to the routine labeled 'Z'.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear logic paths and conditions, which helps an average programmer understand the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "46851909: Convert input X to a number if it is in the form '-nnn.nnn' or 'nnn.nnn' and the 5th piece of DQ(DQ) does not contain a $.",
+        "readability": {
+          "reasoning": "The comment is clear but a bit concise, which could make it slightly harder to understand for a novice programmer.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific conversion condition, which is useful for understanding that part of the code but does not provide comprehensive context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "27634b2a: Execute code pointed to by DQ and then kill array YS.",
+        "readability": {
+          "reasoning": "The comment is clear and concise without any grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains what the code does, which is useful for understanding the code's function.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b275e14a: If X is defined and not null, and DW has an index, then call SAVEVALS. If KEYCHK fails, go to UNIQFERR^DIE17. Store X in DG(DW). If DV contains 'd', store X in ^DISV for this user. Go to label A.",
+        "readability": {
+          "reasoning": "The comment is well-written and detailed, making it easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a step-by-step explanation of the code's logic, which is very helpful for understanding the flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7c6b4bc2: If ZTQUEUED is undefined, write a '??' bell character. If DB(DQ) is defined, go to Z^DIE17.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, with no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes the code's conditions and outcomes, aiding in understanding the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6621705d: Set X to '?BAD', which will trigger an error later",
+        "readability": {
+          "reasoning": "The comment is simple and clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of a specific line of code, which is useful for debugging.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3f505849: Store the value of X in DZ, call subroutine D, call ^DIEQ with label QQ, then go to label B",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear sequence of actions, aiding in understanding the code's flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7fcf1be7: Set D to DIFLD (Input field's number), DQ(DQ) to DLB_U_DV_U_DU_U_DW_U_<text after 2nd space in routine X>. This stores field attributes.",
+        "readability": {
+          "reasoning": "The comment is clear but uses many abbreviations and specific terminology that might not be immediately understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents what the code does in a detailed manner, which could help an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1eb4398a: If DE(DQ) is undefined, execute O and go to RD if X doesn't start with '@', go to A if DV doesn't contain 'R' and X='@', else go to X if X='@'. Set X to Y and go to N.",
+        "readability": {
+          "reasoning": "The comment is dense and packed with conditions, making it hard to follow.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed logic that helps in understanding the flow but might be too complex for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f5a38c68: Set DG to DV (field specifier), Y to DE(DQ) (external field value), X to DU (input value). If DQ(DQ,2) exists, execute it. Go to RP.",
+        "readability": {
+          "reasoning": "The comment is moderately clear but still uses many abbreviations that might not be intuitive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents the sequence of assignments and conditions, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4a80f5a5: If DG contains 'P' and X is a file/subfile number that exists, set X to IEN from 0 node. Go to RP if there's no Y node, else set Y to value and X to .01 specifier from data dictionary, DG to global data node. Recurse.",
+        "readability": {
+          "reasoning": "The comment is fairly detailed but could be clearer with better structuring.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a complex conditional sequence, which is very useful for an experienced programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3a59669a: If DG contains 'V', Y is a value, Y is 'file;ien(#)', and the global node exists, set X to IEN. Go to RP if no Y node, else set Y to value. If DD has .01 specifier, set DG & X from DD. Go to R to recurse.",
+        "readability": {
+          "reasoning": "The comment is concise but a bit dense due to the multiple conditions and abbreviations.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of conditions, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "97f50d29: ;If input transform evaluates to data delimited string, extract piece.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific condition and action in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f5d89035: ;If null input value, get default response. Quit if field is read only, quit if field has DIEDIT prompt and it is a multiple, otherwise go to extended read.",
+        "readability": {
+          "reasoning": "The comment is clear but quite long and complex.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It details multiple conditions and actions, useful for understanding specific logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "44df83b7: ;If field is not WORD-PROCESSING or a COMPUTED EXPRESSION, perform standard read.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains an important condition for performing a standard read.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0f5fe163: ;Perform WORD-PROCESSING/COMPUTED EXPRESSION read. Go to standard read if successful, otherwise prompt again.",
+        "readability": {
+          "reasoning": "The comment is clear and provides sequential instructions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific process and subsequent actions based on the outcome.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3f1f2a3e: ;Quit.",
+        "readability": {
+          "reasoning": "The comment is very simple and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It states a trivial action that is obvious from the code itself.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "82f4ae08: ;Set up DIR array for reader. Turn OFF echo if database is open.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about setting up the DIR array and turning off echo, which could help both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "486e2534: ;If database is open and silent mode is not on, set silent mode on.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a conditional action related to the database and silent mode, which is useful for understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "02819790: ;If the call to DIR^DICC does not return an error, set X to the result and % to the internal representation.",
+        "readability": {
+          "reasoning": "The comment is well-written and provides clear instructions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the outcome of a function call and what variables are set, which is useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7bf3653a: ;Exit the routine.",
+        "readability": {
+          "reasoning": "The comment is very brief but clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial action (exiting the routine), which is not very useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "2d068f29: ;Save the old value of the field in the temporary storage location before editing.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains an important step of saving the old value before editing, which is useful for understanding data integrity.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8fb3493e: ;If the 'WRITE' access code for the field is defined, clear the flag that tracks whether the field has been edited.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific functionality that adds clarity to the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1b241e73: ;Kill node for record",
+        "readability": {
+          "reasoning": "The comment is clear but a bit terse.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents what the code does but lacks detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4ecb5cde: ;Exit point",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but provides minimal information.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "326dadc5: ;Required key field is missing",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific error condition, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1cd9aefa: ;Check key field",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but provides minimal information.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a4983604: ;Begin Input Transform",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It indicates the start of an input transformation which is helpful for understanding the code structure.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "80fd731c: ;Field 11 (STATUS) of File 393.2",
+        "readability": {
+          "reasoning": "The comment is clear and specifies the field and file number.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about a specific field in a file, helping to understand the context and structure.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3f430f4f: ;Set data location",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It gives a general idea about setting a data location but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "b42c2b55: ;Set X=DGJTST",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a simple assignment operation which is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "012ea62b: ;Set Y=X",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a basic assignment operation which is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c90d3c3f: ;Standard DIE calls",
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a high-level description that is useful for understanding the section of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4172be52: ;Read next entry",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action taking place, which is useful for following the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c542fc41: ;Exit point",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment identifies a crucial part of the code, which is helpful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a8b52adf: ;Field help text for field 11",
+        "readability": {
+          "reasoning": "The comment is clear and specific.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies the purpose of a field, which is useful for understanding the code's context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c2d0c52e: ;Set help text",
+        "readability": {
+          "reasoning": "The comment is readable but vague.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial function without much detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "97c22c6e: ;Exit point",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It indicates an important part of the code, helping to understand the flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f1f43dbb: ;\n ;Begin output transform\n ;",
+        "readability": {
+          "reasoning": "The comment is clear but has unnecessary line breaks.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It indicates the start of a specific process, which is helpful to understand the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "26063036: ;Field 11 (STATUS) of File 393.2",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides specific information about a field, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fc1b4466: ;Set data location",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear indication of what the code does, useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "70e18c14: ;Resume standard DIE processing",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It indicates a specific action, which helps in understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "739531e2: If the user doesn't select an entry from the list, clear X and quit.",
+        "readability": {
+          "reasoning": "The comment is well-written with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains a conditional action that would help an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b75b1f3d: Quit.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is too brief to provide substantial context, making it less useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a7f57384: If data is being updated, process the user's selection by executing DIE17 routines and take additional actions based on the value of Y.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear, with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of the process, which would help an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "075f5901: Set a flag indicating the user is updating data.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a simple action that would help an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bff7c0ae: Quit.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is too brief to provide substantial context, making it less useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "0511b54f: ;\nIf adding a new comment, set DQ to 7 to indicate 'add new record' mode.;\n",
+        "readability": {
+          "reasoning": "The comment is clear and concise with a slight issue of extra semicolons.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides specific instructions about setting a variable for a particular mode, which is useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "78e8a80b: If adding a new comment, process the new entry by executing DIE17 routines and take additional actions based on the value of Y.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides detailed information about the process and conditions, which is valuable for understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3b1cf0a1: If the record number doesn't end with '4', clear the user's input by setting Y to an empty string.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific condition and action clearly, which is beneficial for understanding the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "589db55b: Quit.",
+        "readability": {
+          "reasoning": "The comment is very brief but clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial action, which may not be very useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "810d8736: Set properties for the 'COMMENTS' field (#20.01) in preparation for data entry.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful context about a specific field and its purpose, aiding in understanding the setup.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "775f9ce9: Jump to the 'RE' label for further processing.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of jumping to a label, which is useful for understanding the control flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e51acc05: If the user's input is longer than 200 characters or shorter than 3, clear the input X.",
+        "readability": {
+          "reasoning": "The comment is clear but could be slightly more concise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the validation criteria for user input, which is useful but fairly basic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cb6c0c64: If the user's input contains non-alphanumeric characters, clear the input X.",
+        "readability": {
+          "reasoning": "The comment is clear but could be slightly more concise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the validation criteria for user input, which is useful but fairly basic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4679a33f: Quit.",
+        "readability": {
+          "reasoning": "The comment is very concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the functionality of quitting, which is trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e86086fb: ;Exit and re-entry point for input transformation.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of an exit and re-entry point, which helps understand the control flow better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "34889d67: ;Flag to indicate journal is updated.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a flag's purpose, which helps both average and expert programmers understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7bed2301: ;Return from subroutine X9.",
+        "readability": {
+          "reasoning": "The comment is brief but clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a return statement, which is somewhat useful but generally understood by most programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d926f6a1: ;Unconditional transfer to entry point 0 in routine DIE17.",
+        "readability": {
+          "reasoning": "The comment is clear and detailed, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the transfer statement, which helps both average and expert programmers understand the code better.",
+          "score": 4
+        }
+      }
+    ]
+  }
+}

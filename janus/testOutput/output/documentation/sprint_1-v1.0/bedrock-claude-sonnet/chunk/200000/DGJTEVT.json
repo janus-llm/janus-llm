@@ -1,0 +1,1247 @@
+{
+  "input": "{\n  \"comments\": [\n    \"41132e2c:  ;\\n ;Scheduling a new PTF assignment;\\n ;\\n ;Variables:\\n ;   CA = Effective date/time of current assignment\\n ;   DGPMA = Prev. assignment; DGPMP = Curr. assignment\\n ;   DGPMT = Action: (1=add, 2=edit, 3=late edit)\\n ;   DGJTCA = IEN of previous active assignment\\n ;   DGJTDA = IEN of new assignment\\n ;   DGONE = Flag to indicate incomplete records need updating;\\n ;           (DGQUIET is external variable)\\n ;   DGPMDA = IEN of Patient Movement event\",\n    \"e2bb87c1: ;Initialize variables\",\n    \"bd8b71d8: ;Flag to indicate incomplete records need updating\",\n    \"1caca2f8:  ;Process the Patient Movement event.\\n ;  DGPMA= prev assign.; DGPMP= curr. assign.\\n ;  DGPMT indicates the action to take (add, edit, late edit)\\n ;  Start processing at the line labeled Start\",\n    \"71dc9c6a: ; Cleanup variables and quit\",\n    \"94ad8e9f: ;Quit routine\",\n    \"10c7ae46:  ; Compute:\\n ;   CA = Assignment effective date/time\\n ;   DGPMT = Action required\\n ;   If DGPMT=1 and DGPMA=null,\\n ;     then delete incomplete record and quit\\n ;   Else determine ward and division\\n ;   If new admit and DGPMT not 6 or 2,\\n ;     then create new PTF assignment\",\n    \"664b8d5a: ; Effective date/time of current or previous assignment\",\n    \"b505d0a5: ; Action code (1=add, 2=edit, 3=late edit)\",\n    \"4a1527f9: ;If adding new record and previous record was incomplete, delete it\",\n    \"e0e163ae: ;If DGONE is true, display message about updating incomplete records\",\n    \"4b1dc4d2: ;Reset DGONE flag after displaying message\",\n    \"37371ed1: ;Delete the incomplete record\",\n    \"3f772026: ; Determine ward and division from DG Movement event\",\n    \"5803c285:  ; DGJTWARD and DGJTDIV now hold the ward and division IENs, respectively\\n ;    based on the current movement destination\",\n    \"7f38ea2e: ;If the sub-facility has no activation date, skip this iteration.\",\n    \"c7987c58: ;If this is the first iteration, and DGQUIET is not defined, print a status message and set DGONE to 0.\",\n    \"a3ee0e7c: ;If there is a record in the 6th node of ^UTILITY(\\\"DGPM\\\",$J), set DGJTSIFN to the index of that record.\",\n    \"1f018286: ;Call the DIS routine.\",\n    \"64d9cce9: ;Delete all existing Incomplete Records entries for the current admission.\",\n    \"d547cc0e: ;Clean up variables.\",\n    \"5437dc15: ;\\n ;This block processes existing Incomplete Records entries for the current\\n ;admission and updates or creates new entries as needed based on the\\n ;values in DGPMA and DGPMP.\\n ;\",\n    \"6f3fd896: ;Initialize DR variable.\",\n    \"abe5ac3b: ;If there is no admission date, go to DISQ label.\",\n    \"11ba6567: ;Find the first existing Incomplete Records entry for the current admission.\",\n    \"d199a159: ;If an existing entry was found, set DGJTDA to its internal entry number.\",\n    \"a56de695: ;If DGPMT is 2 (change), an existing entry was found, and DGPMA and DGPMP differ, and there is no record in the 6th node, call CHNG.\",\n    \"d34d01a5: ;If DGPMT is 1 (new) or 3 (new/admit), and DGPMA exists but no existing entry was found, create a new entry. If DGPMT is 3, quit after creating the new entry. Otherwise, update the new entry and quit.\",\n    \"06b57fda: ;If DGPMT is 1 (new), DGPMP exists but DGPMA does not, and an existing entry was found, delete the existing entry.\",\n    \"28e7c93d: ;If DGPMT is 1 (new), an existing entry was found, and DGPMA and DGPMP differ, set DGJTCA to the existing entry number, call CK and CHNG, and quit.\",\n    \"d89d9fec: If the movement is an admission, get the patient movement to use for the new admission.\",\n    \"6ff41b08: If movement is an admission and no previous movement exists, get the previous movement data to use for the new admission.\",\n    \"dc0b68d2: If the movement is a transfer, quit (no new admission created).\",\n    \"3950b482: If there is an existing admission and the movement is an admission, save the existing admission IEN.\",\n    \"3bf5d4da: If there is an existing admission and the new movement data is different than the existing movement data, change the existing admission.\",\n    \"72ee6368: If there is an existing admission, the movement data matches, but the disposition location has changed, change the existing admission.\",\n    \"7c9454be: Kill all temporary variables used in processing.\",\n    \"b96e53ef: Get data for a new admission:\\n .;Get the most recent previous admission for the patient.\\n .;Get the treating specialty for the new admission ward.\\n .;Get the service for the new admission ward.\\n .;Get the data required for new admission from files.\\n .;Check if disposition remarks are required based on disposition location.\\n .;Check if copy/upload is required based on disposition location.\\n .;If not creating a new admission, quit.\\n .;If there is an existing admission being replaced, quit.\\n .;Call Fileman to create a new admission record.\\n .;Set the admission status to 'Incomplete'.\\n .;Set the fields of the new admission with data obtained previously.\",\n    \"bbcaa8b5: Get the previous admission data to use for this new admission.\",\n    \"003936cf: Get the disposition location parameters for this new admission.\",\n    \"c8b796f1: Get the treating specialty for this new admission.\",\n    \"80a6c453: Get the service for this new admission.\",\n    \"4b7c0a70: If no service found, use the default service.\",\n    \"8c84f29b: Get the admission disposition remarks code for this new admission.\",\n    \"062e8940: Get the copy/upload requirements code based on disposition location parameters.\",\n    \"d372d185: ;If admission or the transfer only quit.\",\n    \"8823ff76: ;If we already have the PTF Case file entry quit.\",\n    \"793f8fdb: ;File a new PTF case entry.\",\n    \"64db8615: ;Get the ien for 'INCOMPLETE' PTF case status.\",\n    \"e02fe899: ;Get the PTF case ien.\",\n    \"c3b947cc: ;Set up fields: Status, Patient, Admission Date, Ward Location, Division, Date of Transfer to Intermediate Care, Service, Admission Reason, Disposition Reason, Status Date, and Admission Reason Date.\",\n    \"0def0681: ;Update the PTF case entry.\",\n    \"73934e3f: ;Quit.\",\n    \"c1d07288: ;Set up fields: Ward Location and Division.\",\n    \"b340475c: ;Set up fields: Date of Transfer to Intermediate Care, Service, Admission Reason, and Disposition Reason.\",\n    \"a1061950: ;Quit.\",\n    \"b54f525f: ;Quit.\",\n    \"84f43d29: ;\\n .;Set X to the appropriate text from the DGPMT array\\n .;based on the value of DGJTP.\",\n    \"a02f53ea: ;Get the Yth piece of the Date/Location multiple in DGPMT.\",\n    \"f839ffb4: ;Set X to the appropriate field value from the DGPM 0 node based on the value from DGPMT.\",\n    \"ff45c4fd: ;Determine the appropriate value for the REMARKS field\",\n    \"c9455d00: ;If a record exists, edit it. Otherwise, create a new one.\",\n    \"c11b0ecf: ;If there's no value for TRANSFER DATE FROM in DGPM, use the DATE MOVEMENT OCCURRED as the TRANSFER DATE TO value\",\n    \"add86427: ;If there is a value for TRANSFER DATE FROM in DGPM, get the DATE MOVEMENT OCCURRED from that movement and use it as the TRANSFER DATE TO value\",\n    \"a89280cb: ;Set the TRANSFER DATE TO into DR for later use\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 111.34086298942566
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "41132e2c:  ;\n ;Scheduling a new PTF assignment;\n ;\n ;Variables:\n ;   CA = Effective date/time of current assignment\n ;   DGPMA = Prev. assignment; DGPMP = Curr. assignment\n ;   DGPMT = Action: (1=add, 2=edit, 3=late edit)\n ;   DGJTCA = IEN of previous active assignment\n ;   DGJTDA = IEN of new assignment\n ;   DGONE = Flag to indicate incomplete records need updating;\n ;           (DGQUIET is external variable)\n ;   DGPMDA = IEN of Patient Movement event",
+        "completeness": {
+          "reasoning": "The comment documents all the essential variables used in the context of scheduling a new PTF assignment.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "All the information provided in the comment is accurate and corresponds to the variables listed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides crucial information for understanding the variables involved, which is useful for an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e2bb87c1: ;Initialize variables",
+        "completeness": {
+          "reasoning": "The comment only mentions the initialization of variables without specifying which ones.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some context but lacks detail that would be more useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "bd8b71d8: ;Flag to indicate incomplete records need updating",
+        "completeness": {
+          "reasoning": "The comment specifies the purpose of a single flag but does not provide a complete picture.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of a specific flag but limited in scope.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "1caca2f8:  ;Process the Patient Movement event.\n ;  DGPMA= prev assign.; DGPMP= curr. assign.\n ;  DGPMT indicates the action to take (add, edit, late edit)\n ;  Start processing at the line labeled Start",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality of processing a Patient Movement event.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and corresponds to the code context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides essential information that aids in understanding the code, useful for an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "71dc9c6a: ; Cleanup variables and quit",
+        "completeness": {
+          "reasoning": "The comment provides a brief overview of the final step but lacks detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but vague.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some context but lacks detail that would be more useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "94ad8e9f: ;Quit routine",
+        "completeness": {
+          "reasoning": "The comment briefly describes the routine but lacks detail about its functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate but provides minimal information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks depth for an expert programmer.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "10c7ae46:  ; Compute:\n ;   CA = Assignment effective date/time\n ;   DGPMT = Action required\n ;   If DGPMT=1 and DGPMA=null,\n ;     then delete incomplete record and quit\n ;   Else determine ward and division\n ;   If new admit and DGPMT not 6 or 2,\n ;     then create new PTF assignment",
+        "completeness": {
+          "reasoning": "The comment covers multiple aspects of the computation process.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided seems accurate and detailed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the logic of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "664b8d5a: ; Effective date/time of current or previous assignment",
+        "completeness": {
+          "reasoning": "The comment provides a clear but narrow focus on a single aspect.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate but limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but doesn't offer comprehensive insight.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "b505d0a5: ; Action code (1=add, 2=edit, 3=late edit)",
+        "completeness": {
+          "reasoning": "The comment documents only the action codes without further context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate but limited.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the action codes but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4a1527f9: ;If adding new record and previous record was incomplete, delete it",
+        "completeness": {
+          "reasoning": "The comment addresses a specific scenario but lacks detail on other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for a specific condition but doesn't provide a comprehensive understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e0e163ae: ;If DGONE is true, display message about updating incomplete records",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of displaying a message if DGONE is true.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the conditional display logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4b1dc4d2: ;Reset DGONE flag after displaying message",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of resetting the DGONE flag.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the sequence of operations.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "37371ed1: ;Delete the incomplete record",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of deleting an incomplete record.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the purpose of the operation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3f772026: ; Determine ward and division from DG Movement event",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of determining the ward and division.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the context of the operation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5803c285:  ; DGJTWARD and DGJTDIV now hold the ward and division IENs, respectively\n ;    based on the current movement destination",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality and explains the variables' roles.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the assignment of variables.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7f38ea2e: ;If the sub-facility has no activation date, skip this iteration.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition for skipping an iteration but does not cover all functionalities of the relevant code block.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the condition for skipping the iteration.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding why the iteration is skipped.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c7987c58: ;If this is the first iteration, and DGQUIET is not defined, print a status message and set DGONE to 0.",
+        "completeness": {
+          "reasoning": "The comment covers multiple conditions and actions within the iteration, addressing a significant portion of the functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate regarding the conditions and actions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but slightly complex due to the multiple conditions.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the initial setup and conditions for printing a status message.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a3ee0e7c: ;If there is a record in the 6th node of ^UTILITY(\"DGPM\",$J), set DGJTSIFN to the index of that record.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of setting a variable based on a condition, but does not cover all aspects of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate about the condition and the action taken.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific condition and action taken within the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1f018286: ;Call the DIS routine.",
+        "completeness": {
+          "reasoning": "The comment is very brief and does not provide any detailed information about the DIS routine or its functionalities.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate in stating that the DIS routine is called.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides minimal information, making it less useful for understanding the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "64d9cce9: ;Delete all existing Incomplete Records entries for the current admission.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of deleting incomplete records but does not cover any other potential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate about the deletion of incomplete records.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific action taken in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d547cc0e: ;Clean up variables.",
+        "completeness": {
+          "reasoning": "The comment is too brief and does not address what specific variables are being cleaned up or how the cleanup is performed.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment likely refers to a true operation but lacks any detail to verify.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful as it lacks details.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "5437dc15: ;\n ;This block processes existing Incomplete Records entries for the current\n ;admission and updates or creates new entries as needed based on the\n ;values in DGPMA and DGPMP.\n ;",
+        "completeness": {
+          "reasoning": "The comment thoroughly explains what the block of code does, including the relevant variables.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears true and relevant.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the functionality of the block of code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6f3fd896: ;Initialize DR variable.",
+        "completeness": {
+          "reasoning": "The comment addresses what is done but not how or why.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment likely provides true information but lacks context to confirm.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides basic information but lacks depth.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "abe5ac3b: ;If there is no admission date, go to DISQ label.",
+        "completeness": {
+          "reasoning": "The comment explains a specific conditional action but does not provide broader context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment likely provides true information based on its specificity.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "11ba6567: ;Find the first existing Incomplete Records entry for the current admission.",
+        "completeness": {
+          "reasoning": "The comment explains what is being done but does not provide details on how.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment likely provides true information but lacks context to confirm.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful for understanding a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d199a159: ;If an existing entry was found, set DGJTDA to its internal entry number.",
+        "completeness": {
+          "reasoning": "The comment addresses one specific functionality but does not cover other possible conditions or actions.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true for the mentioned condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding what happens when an existing entry is found.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a56de695: ;If DGPMT is 2 (change), an existing entry was found, and DGPMA and DGPMP differ, and there is no record in the 6th node, call CHNG.",
+        "completeness": {
+          "reasoning": "The comment thoroughly documents the conditions under which CHNG is called.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided matches the described conditions and actions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but slightly complex due to multiple conditions.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it specifies a particular set of conditions that trigger a function call.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d34d01a5: ;If DGPMT is 1 (new) or 3 (new/admit), and DGPMA exists but no existing entry was found, create a new entry. If DGPMT is 3, quit after creating the new entry. Otherwise, update the new entry and quit.",
+        "completeness": {
+          "reasoning": "The comment covers multiple scenarios and actions in detail.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate for the described conditions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and explains the conditions and actions well.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is extremely useful for understanding how to handle new and admit entries.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "06b57fda: ;If DGPMT is 1 (new), DGPMP exists but DGPMA does not, and an existing entry was found, delete the existing entry.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but does not cover other possible actions.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true for the specified condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding when an existing entry should be deleted.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "28e7c93d: ;If DGPMT is 1 (new), an existing entry was found, and DGPMA and DGPMP differ, set DGJTCA to the existing entry number, call CK and CHNG, and quit.",
+        "completeness": {
+          "reasoning": "The comment thoroughly documents the conditions and actions.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true for the described conditions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but a bit complex due to multiple conditions and actions.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it specifies a set of conditions and subsequent actions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d89d9fec: If the movement is an admission, get the patient movement to use for the new admission.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality related to admissions but doesn't cover other potential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and directly relates to the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code related to admissions better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6ff41b08: If movement is an admission and no previous movement exists, get the previous movement data to use for the new admission.",
+        "completeness": {
+          "reasoning": "The comment covers a specific scenario for admissions but does not address other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true and matches the functionality described.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding specific admission scenarios, especially for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dc0b68d2: If the movement is a transfer, quit (no new admission created).",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality related to transfers but does not cover other scenarios.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and directly relevant.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the handling of transfers, particularly for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3950b482: If there is an existing admission and the movement is an admission, save the existing admission IEN.",
+        "completeness": {
+          "reasoning": "The comment explains a specific scenario but doesn't address other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true and relevant.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding how existing admissions are handled.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3bf5d4da: If there is an existing admission and the new movement data is different than the existing movement data, change the existing admission.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific scenario but does not cover other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and directly relevant.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding changes in admission data.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "72ee6368: If there is an existing admission, the movement data matches, but the disposition location has changed, change the existing admission.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific scenario but does not cover all capabilities of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but very specific.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific condition but lacks context for the entire functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7c9454be: Kill all temporary variables used in processing.",
+        "completeness": {
+          "reasoning": "The comment does not cover all the code's functionality, only mentioning the cleanup process.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but very limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward but somewhat vague.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it mentions an important step but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "b96e53ef: Get data for a new admission:\n .;Get the most recent previous admission for the patient.\n .;Get the treating specialty for the new admission ward.\n .;Get the service for the new admission ward.\n .;Get the data required for new admission from files.\n .;Check if disposition remarks are required based on disposition location.\n .;Check if copy/upload is required based on disposition location.\n .;If not creating a new admission, quit.\n .;If there is an existing admission being replaced, quit.\n .;Call Fileman to create a new admission record.\n .;Set the admission status to 'Incomplete'.\n .;Set the fields of the new admission with data obtained previously.",
+        "completeness": {
+          "reasoning": "The comment documents all essential functionality related to creating a new admission.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate and detailed information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the process of creating a new admission.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bbcaa8b5: Get the previous admission data to use for this new admission.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover all aspects of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but limited to one part of the process.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "003936cf: Get the disposition location parameters for this new admission.",
+        "completeness": {
+          "reasoning": "The comment covers a specific functionality but does not provide a comprehensive overview.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate but limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific aspect but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c8b796f1: Get the treating specialty for this new admission.",
+        "completeness": {
+          "reasoning": "The comment focuses on a specific functionality without covering other aspects.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a non-trivial aspect of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "80a6c453: Get the service for this new admission.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but lacks coverage of other code capabilities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4b7c0a70: If no service found, use the default service.",
+        "completeness": {
+          "reasoning": "The comment addresses a conditional functionality but does not cover all aspects of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the conditional logic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding an important condition in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8c84f29b: Get the admission disposition remarks code for this new admission.",
+        "completeness": {
+          "reasoning": "The comment focuses on a specific functionality without mentioning other aspects.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "062e8940: Get the copy/upload requirements code based on disposition location parameters.",
+        "completeness": {
+          "reasoning": "The comment covers a specific functionality but doesn't address the entire code's capabilities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information based on the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d372d185: ;If admission or the transfer only quit.",
+        "completeness": {
+          "reasoning": "The comment does not cover all essential functionality of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true but very limited information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but somewhat ambiguous.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8823ff76: ;If we already have the PTF Case file entry quit.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific scenario but not all essential functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but not comprehensive.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "793f8fdb: ;File a new PTF case entry.",
+        "completeness": {
+          "reasoning": "The comment is straightforward but lacks detailed context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful in a specific context but not comprehensive.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "64db8615: ;Get the ien for 'INCOMPLETE' PTF case status.",
+        "completeness": {
+          "reasoning": "The comment explains a specific part of the functionality but not all of it.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific task.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e02fe899: ;Get the PTF case ien.",
+        "completeness": {
+          "reasoning": "The comment is very brief and lacks detailed explanation.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but very limited in scope.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c3b947cc: ;Set up fields: Status, Patient, Admission Date, Ward Location, Division, Date of Transfer to Intermediate Care, Service, Admission Reason, Disposition Reason, Status Date, and Admission Reason Date.",
+        "completeness": {
+          "reasoning": "The comment documents a comprehensive list of fields being set up.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately lists the fields without introducing any false information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very detailed and helps an expert programmer understand the setup process better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0def0681: ;Update the PTF case entry.",
+        "completeness": {
+          "reasoning": "The comment is brief and does not provide details on what aspects of the PTF case entry are being updated.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is truthful but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides minimal information and does not significantly aid in understanding the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "73934e3f: ;Quit.",
+        "completeness": {
+          "reasoning": "The comment addresses the action of quitting but lacks comprehensive context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very clear but overly terse.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is minimal and does not add much value.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c1d07288: ;Set up fields: Ward Location and Division.",
+        "completeness": {
+          "reasoning": "The comment specifies only two fields and may not cover all essential functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate but incomplete.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but does not provide a complete picture.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b340475c: ;Set up fields: Date of Transfer to Intermediate Care, Service, Admission Reason, and Disposition Reason.",
+        "completeness": {
+          "reasoning": "The comment covers a subset of fields but not all essential functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately lists the fields mentioned.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but only partially complete.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a1061950: ;Quit.",
+        "completeness": {
+          "reasoning": "The comment addresses a single function, but does not provide further detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate, though minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, but extremely limited in scope.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "b54f525f: ;Quit.",
+        "completeness": {
+          "reasoning": "The comment addresses a single function, but does not provide further detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate, though minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, but extremely limited in scope.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "84f43d29: ;\n .;Set X to the appropriate text from the DGPMT array\n .;based on the value of DGJTP.",
+        "completeness": {
+          "reasoning": "The comment provides a clear explanation of a specific functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to provide accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific functionality mentioned.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a02f53ea: ;Get the Yth piece of the Date/Location multiple in DGPMT.",
+        "completeness": {
+          "reasoning": "The comment specifies a particular function but lacks detail on the operation.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to provide accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific functionality mentioned.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f839ffb4: ;Set X to the appropriate field value from the DGPM 0 node based on the value from DGPMT.",
+        "completeness": {
+          "reasoning": "The comment provides a clear explanation of a specific functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to provide accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific functionality mentioned.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ff45c4fd: ;Determine the appropriate value for the REMARKS field",
+        "completeness": {
+          "reasoning": "The comment only addresses a single functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about determining the REMARKS field.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about what the code does, but only for a single functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c9455d00: ;If a record exists, edit it. Otherwise, create a new one.",
+        "completeness": {
+          "reasoning": "The comment addresses two major functionalities: editing and creating records.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the conditional actions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the conditional logic in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c11b0ecf: ;If there's no value for TRANSFER DATE FROM in DGPM, use the DATE MOVEMENT OCCURRED as the TRANSFER DATE TO value",
+        "completeness": {
+          "reasoning": "The comment addresses a specific conditional functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about handling the TRANSFER DATE.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding how the TRANSFER DATE is determined in specific cases.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "add86427: ;If there is a value for TRANSFER DATE FROM in DGPM, get the DATE MOVEMENT OCCURRED from that movement and use it as the TRANSFER DATE TO value",
+        "completeness": {
+          "reasoning": "The comment addresses a specific conditional functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about handling the TRANSFER DATE.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding how the TRANSFER DATE is determined in specific cases.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a89280cb: ;Set the TRANSFER DATE TO into DR for later use",
+        "completeness": {
+          "reasoning": "The comment addresses a single action in the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting the TRANSFER DATE.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific action in the code.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

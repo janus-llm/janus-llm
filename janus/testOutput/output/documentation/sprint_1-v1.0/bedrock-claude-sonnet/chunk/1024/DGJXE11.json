@@ -1,0 +1,617 @@
+{
+  "input": "{\n  \"comments\": [\n    \"c9747f82: \",\n    \"71533cd9: \",\n    \"ad5bd8a4: \",\n    \"44dc55a5: \",\n    \"f519c80a: \",\n    \"3f30400e: \",\n    \"5987b00b: \",\n    \"18a3151d: \",\n    \"23d356ce: \",\n    \"cf93391f: \",\n    \"6f6a4725: \",\n    \"7211dcc8: This line starts an endless loop. This is the entry point of the code.\",\n    \"37ec3ae4: This line initializes a counter variable DQ and increments it by 1.\",\n    \"3629ef71: This line performs a MUMPS transfer of control based on the value of the DQ variable.\",\n    \"e1092087: This line transfers control to label PR if the entry in the DE array for the current DQ value exists, otherwise it calls the W and TR routines.\",\n    \"01c6ff54: This line checks the value of X and performs different actions based on its value and the values of DV, D, and DV['R']. It transfers control to label A in certain cases.\",\n    \"6afec3d5: This line checks if X starts with '?'. If so, it transfers control to label QS. If X contains '^', it calls routine D and then transfers control to ^DIE17.\",\n    \"240673ec: This line checks if X is '@'. If so, it calls routine D and then transfers control to Z^DIE2.\",\n    \"49b943a7: This line checks if X is a space character, if DV contains 'd' but not 'P', and if the DIE user preference for the current DLB exists. If all conditions are met, it sets X to the value of the user preference and displays it if DV doesn't contain 'D' or 'S'.\",\n    \"c9b770df: This line performs various actions based on the value of DV. If DV is not defined, it transfers control to M^DIE17. If DV contains 'V', it transfers control to ^DIE3. If DV doesn't contain 'S', it transfers control to label P. If the DIFLD field in the DD global has a computed field expression, it executes it. It then sets Y to X and executes the DIC('S') input transform if it exists. Finally, it writes the transformed value to the terminal if DB(DQ) is not defined and transfers control to label V.\",\n    \"ddf62630: ;If the input value matches a value in the list, execute the Screen logic.\",\n    \"486a650a: ;Write the remainder of the input value and set X to the initial portion before the colon.\",\n    \"6dc75443: ;If DV contains 'P', set DIC to the file and execute the Lookup^DIC to get the IEN. If successful, set X to the IEN and DIE to the file global root.\",\n    \"45315784: ;If DV does not contain 'N', check if the input value is a date and set an error if the date is invalid.\",\n    \"2458b46f: ;If the input value is a decimal number with more than 2 decimal places, remove trailing zeros and the decimal point if there are no fractional digits.\",\n    \"85ecee8d: ;Kill array YS, set DIC('S') and DLAYGO to null.\",\n    \"e5e37eae: ;If X is defined and not null, store X in DG(DW). If DV contains 'd', store X in ^DISV(DUZ,'DIE',DLB). Go to label A.\",\n    \"c584cc1f: ;If DB(DQ) array is defined, go to label Z^DIE17. Otherwise, issue a beep and error message.\",\n    \"e90394ba: ;Set X to '?BAD'.\",\n    \"41b072c8: ;Set DZ to X, call routine D, call QQ^DIEQ. Go to label B.\",\n    \"b95786bf: ;Set D to DIFLD, set DQ(DQ) to a string containing DLB, DV, DU, DW, and the text description of the current input variable. Quit.\",\n    \"29538536: ;If DE(DQ) is undefined, call routine O. If X is not '@', go to label RD. If DV does not contain 'R' and X is '@', go to label A. If X is '@', set X to Y and go to label N.\",\n    \"5c44c3c9: ;Set DG to DV, Y to DE(DQ), X to DU. If DQ(DQ,2) is defined, execute code in DQ(DQ,2). Go to label RP.\",\n    \"32e1f77a: ;If DG contains 'P' and the global root ^X(0) is defined, set X to the second piece of ^X(0). If ^X(Y,0) is undefined, go to RP. Otherwise, set Y and DG from ^X(Y,0), and X from the .01 field of DD(X,0). Go to label R.\",\n    \"f1d859be: ;If DG contains 'V', Y is numeric, and the 2nd piece of Y (delimited by ';') contains '(', and the global root specified by that piece is defined, set X to the 2nd piece of that global's 0 node. If the global root ^(+Y,0) is undefined, go to RP. Otherwise, set Y to the value of ^(+Y,0). If DD(+X,.01,0) is defined, set DG and X from that node. Go to label R.\",\n    \"f1ecb773: If the data global is a DD global and the input variable starts with S (most likely 'set') then set the Y variable to the piece after the semicolon.\",\n    \"79170193: If X is null, set it to the value from the corresponding DD field definition. If DV is 1, or if DV is 2 (meaning multiple values allowed) and DC is less than 2, exit with the error code in ^DIE17. If none of these conditions are met, continue execution.\",\n    \"88dad622: If DV does not contain an I (Input transform) or a # (MUMPS cross reference), skip input validation.\",\n    \"66b32b00: Call the Input transform and MUMPS cross reference routines. If X is defined after this, return to the calling routine, otherwise continue processing.\",\n    \"ca16cb1a: Exit the routine.\",\n    \"48841eca: Initialize variables for the routine. DNM is the routine name, and DQ is a placeholder for the main loop variable.\",\n    \"010fbf2a: Set field-level variables for field 10.03 (DATE TRANSCRIBED) in file DT (#3). DW is the file/field specification, DV is the name of the input variable, DU is for uneditable data, DLB is the field label, and DIFLD is the field number.\",\n    \"fb791173: Go to the re-entry section of the code.\",\n    \"ecbf0f0e: Set the current date/time in variable X and kill X if it's less than 1.\",\n    \"81cb9e58: Exit the current process.\",\n    \"2835fa5f: If DG is defined and has a value greater than 9, call F^DIE17 and DE subroutines. Set Y to the up-arrow character and DQ to 2. Call X2 subroutine. If Y is either undefined or equal to up-arrow, go to label A. Otherwise, set X to Y, DIC(0) to 'F', and DW to DQ. Then call OUT^DIE17.\",\n    \"b2ca964f: ;If the date dictated is blank, clear the transcription date.\",\n    \"68147bf4: ;Quit\",\n    \"f3b4e302: ;Input transform for Date Dictated field. If data is supplied, check the date against the Date Dictated field. If the date is earlier than Date Dictated, issue an error message and blank the Transcription Date field. Call the DIEFIRE^DIE17 utility to handle any additional validation.\",\n    \"5e3d028e: ;If the date is later than the Date Dictated, issue an error message and blank the Transcription Date field.\",\n    \"2840e0b1: ;Quit\",\n    \"4f9b4c91: ;Input transform for Transcription Date field. If data is supplied, validate it. Call the DIEFIRE^DIE17 utility to handle any additional validation.\",\n    \"58c5c7a3: ;If Transcription Date is blank, set DGJTST to 'DICTATED' and set Y to the help prompt code.\",\n    \"f8e792b5: ;Quit\",\n    \"f286ebde: ;Call some additional validation logic in ^DGJXE12.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 89.7276201248169
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "c9747f82: ",
+        "readability": {
+          "reasoning": "The comment is not written in a meaningful way; it's just a string of characters.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "71533cd9: ",
+        "readability": {
+          "reasoning": "The comment is not written in a meaningful way; it's just a string of characters.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "ad5bd8a4: ",
+        "readability": {
+          "reasoning": "The comment is not written in a meaningful way; it's just a string of characters.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "44dc55a5: ",
+        "readability": {
+          "reasoning": "The comment is not written in a meaningful way; it's just a string of characters.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "f519c80a: ",
+        "readability": {
+          "reasoning": "The comment is not written in a meaningful way; it's just a string of characters.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "3f30400e: ",
+        "readability": {
+          "reasoning": "The comment consists of a string that appears to be a hexadecimal identifier without additional context, making it unclear.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information to understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "5987b00b: ",
+        "readability": {
+          "reasoning": "Similar to the first comment, this appears to be a hexadecimal identifier without context, rendering it unclear.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not offer any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "18a3151d: ",
+        "readability": {
+          "reasoning": "Again, this is a hexadecimal identifier without context, making it difficult to understand.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "No useful information is provided to understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "23d356ce: ",
+        "readability": {
+          "reasoning": "This comment is another hexadecimal identifier without context, making it unclear.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not help in understanding the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "cf93391f: ",
+        "readability": {
+          "reasoning": "This comment, like the others, is a hexadecimal identifier without context, making it difficult to read.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "No useful information is provided to help understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "6f6a4725: ",
+        "readability": {
+          "reasoning": "The comment contains only an identifier and has no readable content.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "7211dcc8: This line starts an endless loop. This is the entry point of the code.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the code's functionality and entry point.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "37ec3ae4: This line initializes a counter variable DQ and increments it by 1.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the code's function, specifically the initialization and incrementation of a variable.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3629ef71: This line performs a MUMPS transfer of control based on the value of the DQ variable.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific and non-trivial functionality, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e1092087: This line transfers control to label PR if the entry in the DE array for the current DQ value exists, otherwise it calls the W and TR routines.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about conditional control transfer, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "01c6ff54: This line checks the value of X and performs different actions based on its value and the values of DV, D, and DV['R']. It transfers control to label A in certain cases.",
+        "readability": {
+          "reasoning": "The comment is well-structured and clearly explains the conditions and actions performed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation that helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6afec3d5: This line checks if X starts with '?'. If so, it transfers control to label QS. If X contains '^', it calls routine D and then transfers control to ^DIE17.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains specific conditions and actions, aiding an average programmer in understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "240673ec: This line checks if X is '@'. If so, it calls routine D and then transfers control to Z^DIE2.",
+        "readability": {
+          "reasoning": "The comment is very clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "49b943a7: This line checks if X is a space character, if DV contains 'd' but not 'P', and if the DIE user preference for the current DLB exists. If all conditions are met, it sets X to the value of the user preference and displays it if DV doesn't contain 'D' or 'S'.",
+        "readability": {
+          "reasoning": "The comment is detailed and clearly written, though a bit lengthy.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides comprehensive information that helps an expert programmer understand complex conditions and actions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c9b770df: This line performs various actions based on the value of DV. If DV is not defined, it transfers control to M^DIE17. If DV contains 'V', it transfers control to ^DIE3. If DV doesn't contain 'S', it transfers control to label P. If the DIFLD field in the DD global has a computed field expression, it executes it. It then sets Y to X and executes the DIC('S') input transform if it exists. Finally, it writes the transformed value to the terminal if DB(DQ) is not defined and transfers control to label V.",
+        "readability": {
+          "reasoning": "The comment is very detailed but still readable, though it could be slightly overwhelming due to its length.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment thoroughly explains multiple conditions and actions, making it very useful for expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ddf62630: ;If the input value matches a value in the list, execute the Screen logic.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action taken if a condition is met, which is helpful for understanding the code's flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "486a650a: ;Write the remainder of the input value and set X to the initial portion before the colon.",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about how the input value is processed, aiding in understanding the code's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6dc75443: ;If DV contains 'P', set DIC to the file and execute the Lookup^DIC to get the IEN. If successful, set X to the IEN and DIE to the file global root.",
+        "readability": {
+          "reasoning": "The comment is detailed but clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful as it explains multiple steps and conditions that are critical for understanding the code's logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "45315784: ;If DV does not contain 'N', check if the input value is a date and set an error if the date is invalid.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the error-checking mechanism related to date validation.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2458b46f: ;If the input value is a decimal number with more than 2 decimal places, remove trailing zeros and the decimal point if there are no fractional digits.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information regarding the processing of decimal numbers, which is important for understanding the code's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "85ecee8d: ;Kill array YS, set DIC('S') and DLAYGO to null.",
+        "readability": {
+          "reasoning": "The comment is brief and uses standard terminology, making it clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding specific actions taken in the code, especially for an expert.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e5e37eae: ;If X is defined and not null, store X in DG(DW). If DV contains 'd', store X in ^DISV(DUZ,'DIE',DLB). Go to label A.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, though slightly complex.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains multiple conditions and actions, which helps an average programmer understand the logic better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c584cc1f: ;If DB(DQ) array is defined, go to label Z^DIE17. Otherwise, issue a beep and error message.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies control flow and error handling, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e90394ba: ;Set X to '?BAD'.",
+        "readability": {
+          "reasoning": "The comment is very short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial assignment, offering limited insight.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "41b072c8: ;Set DZ to X, call routine D, call QQ^DIEQ. Go to label B.",
+        "readability": {
+          "reasoning": "The comment is clear but somewhat terse.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment outlines the sequence of operations, which helps in understanding the flow but lacks depth.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b95786bf: ;Set D to DIFLD, set DQ(DQ) to a string containing DLB, DV, DU, DW, and the text description of the current input variable. Quit.",
+        "readability": {
+          "reasoning": "The comment is written in clear English with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of what the code is doing, but might be slightly overwhelming for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "29538536: ;If DE(DQ) is undefined, call routine O. If X is not '@', go to label RD. If DV does not contain 'R' and X is '@', go to label A. If X is '@', set X to Y and go to label N.",
+        "readability": {
+          "reasoning": "The comment is clear but contains multiple conditions that might be a bit complex to follow.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it describes various conditions and their corresponding actions, aiding in understanding the code's flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5c44c3c9: ;Set DG to DV, Y to DE(DQ), X to DU. If DQ(DQ,2) is defined, execute code in DQ(DQ,2). Go to label RP.",
+        "readability": {
+          "reasoning": "The comment is concise but may be too terse for some readers.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the assignments and conditions clearly.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "32e1f77a: ;If DG contains 'P' and the global root ^X(0) is defined, set X to the second piece of ^X(0). If ^X(Y,0) is undefined, go to RP. Otherwise, set Y and DG from ^X(Y,0), and X from the .01 field of DD(X,0). Go to label R.",
+        "readability": {
+          "reasoning": "The comment is detailed but might be challenging to follow due to its length and complexity.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it explains multiple conditions and their outcomes, aiding in understanding complex logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f1d859be: ;If DG contains 'V', Y is numeric, and the 2nd piece of Y (delimited by ';') contains '(', and the global root specified by that piece is defined, set X to the 2nd piece of that global's 0 node. If the global root ^(+Y,0) is undefined, go to RP. Otherwise, set Y to the value of ^(+Y,0). If DD(+X,.01,0) is defined, set DG and X from that node. Go to label R.",
+        "readability": {
+          "reasoning": "The comment is long and complex, which might make it harder to read and understand.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a very detailed explanation of the code's functionality, which is useful for understanding complex logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f1ecb773: If the data global is a DD global and the input variable starts with S (most likely 'set') then set the Y variable to the piece after the semicolon.",
+        "readability": {
+          "reasoning": "The comment is well-written and clearly explains the condition and action to be taken.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific condition and action taken, which may not be immediately obvious.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "79170193: If X is null, set it to the value from the corresponding DD field definition. If DV is 1, or if DV is 2 (meaning multiple values allowed) and DC is less than 2, exit with the error code in ^DIE17. If none of these conditions are met, continue execution.",
+        "readability": {
+          "reasoning": "The comment is clear but a bit lengthy, which might make it harder to parse quickly.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed conditions and actions that help an average programmer understand the logic in complex scenarios.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "88dad622: If DV does not contain an I (Input transform) or a # (MUMPS cross reference), skip input validation.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains a specific condition for skipping input validation, which is useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "66b32b00: Call the Input transform and MUMPS cross reference routines. If X is defined after this, return to the calling routine, otherwise continue processing.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the purpose of calling specific routines and subsequent actions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ca16cb1a: Exit the routine.",
+        "readability": {
+          "reasoning": "The comment is clear and very concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality that is usually obvious from the code itself.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "48841eca: Initialize variables for the routine. DNM is the routine name, and DQ is a placeholder for the main loop variable.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, explaining the purpose of the variables.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides valuable context for understanding initialization, beneficial for both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "010fbf2a: Set field-level variables for field 10.03 (DATE TRANSCRIBED) in file DT (#3). DW is the file/field specification, DV is the name of the input variable, DU is for uneditable data, DLB is the field label, and DIFLD is the field number.",
+        "readability": {
+          "reasoning": "The comment is detailed and clearly explains various abbreviations used in the code.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding specific field-level variables and their purposes, aiding both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fb791173: Go to the re-entry section of the code.",
+        "readability": {
+          "reasoning": "The comment is simple and straightforward but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but does not provide much context or detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ecbf0f0e: Set the current date/time in variable X and kill X if it's less than 1.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but could have elaborated on what 'kill X' means.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides basic information about the variable X, but the term 'kill' might be unclear to some programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "81cb9e58: Exit the current process.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but documents a trivial functionality, i.e., exiting a process.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "2835fa5f: If DG is defined and has a value greater than 9, call F^DIE17 and DE subroutines. Set Y to the up-arrow character and DQ to 2. Call X2 subroutine. If Y is either undefined or equal to up-arrow, go to label A. Otherwise, set X to Y, DIC(0) to 'F', and DW to DQ. Then call OUT^DIE17.",
+        "readability": {
+          "reasoning": "The comment is detailed and well-structured, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment thoroughly explains the conditions and subroutines, which is very useful for expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b2ca964f: ;If the date dictated is blank, clear the transcription date.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action, which is useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "68147bf4: ;Quit",
+        "readability": {
+          "reasoning": "The comment is very short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment states an obvious and trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f3b4e302: ;Input transform for Date Dictated field. If data is supplied, check the date against the Date Dictated field. If the date is earlier than Date Dictated, issue an error message and blank the Transcription Date field. Call the DIEFIRE^DIE17 utility to handle any additional validation.",
+        "readability": {
+          "reasoning": "The comment is well-detailed and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides in-depth information about the functionality, which is very useful for expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5e3d028e: ;If the date is later than the Date Dictated, issue an error message and blank the Transcription Date field.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action, which is useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2840e0b1: ;Quit",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is too brief and does not provide useful information beyond a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "4f9b4c91: ;Input transform for Transcription Date field. If data is supplied, validate it. Call the DIEFIRE^DIE17 utility to handle any additional validation.",
+        "readability": {
+          "reasoning": "The comment is well-written with clear instructions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed and useful information about the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "58c5c7a3: ;If Transcription Date is blank, set DGJTST to 'DICTATED' and set Y to the help prompt code.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the specific conditions and actions taken in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f8e792b5: ;Quit",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is too brief and does not provide useful information beyond a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f286ebde: ;Call some additional validation logic in ^DGJXE12.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the code's purpose but could be more detailed.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

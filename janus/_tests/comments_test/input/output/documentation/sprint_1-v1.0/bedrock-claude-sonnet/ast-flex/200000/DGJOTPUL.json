@@ -1,0 +1,27 @@
+{
+  "comments": [
+    "bca39a19: ;\nInitialization of variables used in calculating report turnaround times.\nIFN is the visit file (#393) internal entry number.\nDGJTPAR will store the processing timelimits from file (#40.8) pertaining to IFN.",
+    "3c833e84: Builds the DGJTPAR parameter string from file #40.8 to contain timelimits for dictation, transcription and signature.",
+    "fef34871: Gets date/time data if present for current visit in file #393.",
+    "caab9f97: Computes current date/time and initializes a delay days counter.",
+    "6c7ccfec: Checks if current visit status matches that in the 11th node of file #393. If so, sets a flag DGJTREC and calls a PROC routine.",
+    "f4baee1d: End of initialization. Returns control.",
+    "368a604f: ;\nSets flags, delay days, and delay percentage by status type:\n\nINCOMPLETE: Checks if report became delinquent based on site parameter timeframe from date/time of initial visit, sets flags/delay accordingly and computes totals.",
+    "20b4aa95: DICTATED: Checks from date/time dictation was completed, sets flags/delay accordingly and computes totals.",
+    "4d735e7f: TRANSCRIBED: Checks from date/time transcription was completed against site parameter timeframe, sets flags/delay accordingly and computes totals.",
+    "052ce069: SIGNED: Checks from date/time signature was completed against site parameter timeframe, sets flags/delay accordingly and computes totals.",
+    "96626cb7: ;Quit if no transcription or release date.",
+    "a53db662: ;Calculates days late.",
+    "d1ecaa78: ;Calculates total days for dictated, printed & completed. DGJTFLLG flag set if no provider code.",
+    "93dfb691: ;Set dashes for transcription & printed if no dictation date.",
+    "71f6de36: ;Accumulate days for dictation.",
+    "a694080a: ;Accumulate days for transcription and set the printed figure with a *.",
+    "f5f43f20: ;If transcribed, get provider code.",
+    "ee1e7fd5: ;If transcribed, calculate total time to complete and set the completed figure.",
+    "fb4b18dc: ;Quit.",
+    "db7bbb90: ;Look up provider code, set DGJTFLLG flag if not found.",
+    "90d2190a: ;If the provider's code does not map to a valid coding system, set the flag to indicate that data is missing.",
+    "5a8d5039: ;Quit the COD procedure.",
+    "294e4a1b: ;Set the appropriate counters and output variables for the dictated, transcribed, and completed times, taking into account whether data is missing or not."
+  ]
+}

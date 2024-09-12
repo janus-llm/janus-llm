@@ -1,0 +1,672 @@
+{
+  "input": "{\n  \"comments\": [\n    \"70f4c8d9:  ;\\n ;Compute service summary for a patient admission\\n ;\",\n    \"d9a54d1b:  ;\\n ;Check whether the patient has an existing discharge summary \\n ;record and if not, add a new record.\\n ; \\n ;Input:\\n ;  DFN     = Patient internal entry number\\n ;  DGJTDT  = Discharge date/time\\n ;  DGJPARM = Service parameter array\\n ;  DGJIRTDA= IRT record internal entry number (pass by reference)\\n ;  DGJT    = Array containing admission details\\n ;  DGJFLG  = Flag indicating if record was added/updated (pass by reference)\\n ;  DGJTYP  = Type of summary (optional)\\n ;\",\n    \"e80b5266: ;Flag to indicate if record was added/updated\",\n    \"aee77029: ;Get service parameter array\",\n    \"7d4752d2: ;Quit if no service parameters defined\",\n    \"e0cd6ac8: ;Set default summary type to 'DISCHARGE SUMMARY'\",\n    \"33897e25: ;If IRT record exists but has no completion date, set flag and quit\",\n    \"5446a70f: ;If IRT record exists, quit\",\n    \"7b552386:  ;Search for existing IRT record\\n ;If found, check if it matches the current admission\\n ;If matched, set flag and quit\\n ;\",\n    \"993c1182: ;Check if IRT record matches current admission details\",\n    \"79eea9f6: ;If no existing IRT record found, call ADD to create a new one\",\n    \"4fd1a771: ;Quit\",\n    \"f53d4995:  ;\\n ;Add a new discharge summary record\\n ;\",\n    \"9d79c912: ;Initialize variables\",\n    \"cb8b184a:  ;Get ward service code\\n ;If no ward service, set to default service\\n ;\",\n    \"48147690: If ward cannot be determined based on transfer/service Pointer, use default service.\",\n    \"cd564392: Get current patient's admission movements and derive service.\",\n    \"93254169: Get provider for attending physician.\",\n    \"dd8aac1d: If parameter indicates transcriptionist needs to be included, get transcriptionist.\",\n    \"35b53276: Get event date (admission or discharge date) and ward location.\",\n    \"56cb13c3: Create new Summary record in VAS(393) file.\",\n    \"87a7e99c: Quit if no new record created.\",\n    \"f941e208: Lock Summary record for editing.\",\n    \"561b49a0: Initialize Summary record fields.\",\n    \"872c1bc2: Update Summary record using FileMan.\",\n    \"2dcf4627: Unlock Summary record.\",\n    \"ea0f9b67: Set flag indicating new record added.\",\n    \"471fca2e: Edit Summary record to include validation dates/times and approved by\\nfields. Lock record, update fields using FileMan, unlock record.\",\n    \"8f6c290b: Lock Summary record for editing.\",\n    \"4509d56f: Set validation fields in Summary record.\",\n    \"98e6fbb5: ;Update the visit date fields and wipe values for dictator and transcriptionist fields\",\n    \"f6de194c: ;Release the lock on the record\",\n    \"665ab386: ;Exit the routine\",\n    \"36aaa27d:  .;\\n .;Delete values for the visit date, dictator, transcriptionist and\\n .;signer/reviewer fields of a DCS record\\n .\",\n    \"a75cd078: ;Lock the record\",\n    \"ebc89854: ;Clear the visit date, dictator, transcriptionist and signer/reviewer fields\",\n    \"0f8d0bb3: ;Execute the field updates and call STAT1 to update the status field\",\n    \"947cf24a: ;Release the lock on the record\",\n    \"5b79313f: ;Exit the routine\",\n    \"d226777b:  .;\\n .;Update the dictator, transcriptionist and signer/reviewer fields\\n .;of a DCS record\\n .\",\n    \"d5e9397a: ;Lock the record\",\n    \"e214345a: ;Set values for dictator, transcriptionist and signer/reviewer fields\",\n    \"b69017fc: ;Execute the field updates and call STAT1 to update the status field\",\n    \"334566d6: ;Release the lock on the record\",\n    \"3733bbe6: ;Exit the routine\",\n    \"3f8e1d4f: ;\\n ;Update the status based on the values of the nodes in the \\\"DT\\\" field.\\n ;\",\n    \"2f3784a3: ;Get the \\\"DT\\\" node for the current DCS record.\",\n    \"7450ebc8: ;If DT node doesn't exist or date field is blank, set status to \\\"INCOMPLETE\\\".\",\n    \"1d2a3221: ;If date field exists but dictated date/time is blank, set status to \\\"DICTATED\\\".\",\n    \"d443207a: ;If dictated date/time exists but transcribed date/time is blank, set status to \\\"TRANSCRIBED\\\".\",\n    \"75942ac9: ;If transcribed date/time exists and review bit is not set, set status to \\\"SIGNED NO REVIEW\\\".\",\n    \"dac04369: ;If reviewed date/time exists and review bit is set, set status to \\\"SIGNED\\\".\",\n    \"ff7f009a: ;If reviewed date/time exists and review bit is set, set status to \\\"REVIEWED\\\".\",\n    \"08ce7333: ;Set the status field in the VAS(393 record.\",\n    \"8d04382e: ;Quit the STAT1 subroutine.\",\n    \"59b8510d: ;This is the DOC subroutine to retrieve values from the DGPM file.\",\n    \"a23c4e9a: ;\\n ;Get the value to be stored in the .09 or .1 fields based on the\\n ;DCS divisional parameter and values in the DGPM file.\\n ;\",\n    \"78260e0d: ;Get the 2nd or 4th piece of the divisional parameter.\",\n    \"cf98c30b: ;If 2nd piece, get 19th piece of DGPM(0) node, if 4th piece get 8th piece of DGPM(0) node, else \\\"\\\".\",\n    \"f38c122e: ;Quit the DOC subroutine.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 83.56109595298767
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "70f4c8d9:  ;\n ;Compute service summary for a patient admission\n ;",
+        "readability": {
+          "reasoning": "The comment is short and clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment briefly explains the purpose of the code, which is useful for understanding its functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d9a54d1b:  ;\n ;Check whether the patient has an existing discharge summary \n ;record and if not, add a new record.\n ; \n ;Input:\n ;  DFN     = Patient internal entry number\n ;  DGJTDT  = Discharge date/time\n ;  DGJPARM = Service parameter array\n ;  DGJIRTDA= IRT record internal entry number (pass by reference)\n ;  DGJT    = Array containing admission details\n ;  DGJFLG  = Flag indicating if record was added/updated (pass by reference)\n ;  DGJTYP  = Type of summary (optional)\n ;",
+        "readability": {
+          "reasoning": "The comment is detailed and well-organized, making it very clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the functionality and input parameters, which is highly useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e80b5266: ;Flag to indicate if record was added/updated",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific flag, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "aee77029: ;Get service parameter array",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action in the code, which is somewhat useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7d4752d2: ;Quit if no service parameters defined",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a condition for quitting the code execution, which is useful for understanding the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e0cd6ac8: ;Set default summary type to 'DISCHARGE SUMMARY'",
+        "readability": {
+          "reasoning": "The comment is clear and concise, with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment explains the purpose of the code line, which is helpful for understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "33897e25: ;If IRT record exists but has no completion date, set flag and quit",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains a specific condition and the corresponding action.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5446a70f: ;If IRT record exists, quit",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains a condition for exiting the process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7b552386:  ;Search for existing IRT record\n ;If found, check if it matches the current admission\n ;If matched, set flag and quit\n ;",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, each step is easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful as it outlines multiple steps in the logic, making the code easier to understand.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "993c1182: ;Check if IRT record matches current admission details",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it describes a specific check within the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "79eea9f6: ;If no existing IRT record found, call ADD to create a new one",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action taken when no existing record is found, which is useful for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4fd1a771: ;Quit",
+        "readability": {
+          "reasoning": "The comment is clear but very short.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is trivial and does not provide much insight into the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f53d4995:  ;\n ;Add a new discharge summary record\n ;",
+        "readability": {
+          "reasoning": "The comment is clear but contains unnecessary line breaks, making it slightly less readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a non-trivial action, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9d79c912: ;Initialize variables",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a common and trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "cb8b184a:  ;Get ward service code\n ;If no ward service, set to default service\n ;",
+        "readability": {
+          "reasoning": "The comment is clear but contains unnecessary line breaks, making it slightly less readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional action, which is useful for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "48147690: If ward cannot be determined based on transfer/service Pointer, use default service.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a fallback mechanism, which is useful for understanding the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cd564392: Get current patient's admission movements and derive service.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes the purpose of the code clearly, helping understand its functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "93254169: Get provider for attending physician.",
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the specific task of the code, which is useful for understanding its purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dd8aac1d: If parameter indicates transcriptionist needs to be included, get transcriptionist.",
+        "readability": {
+          "reasoning": "The comment is clear and precise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a specific condition and action, aiding in code comprehension.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "35b53276: Get event date (admission or discharge date) and ward location.",
+        "readability": {
+          "reasoning": "The comment is simple and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes what the code retrieves, which is useful for understanding its functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "56cb13c3: Create new Summary record in VAS(393) file.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly states the purpose of the code, which is useful for understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "87a7e99c: Quit if no new record created.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an important conditional action in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f941e208: Lock Summary record for editing.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a critical operation related to data integrity.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "561b49a0: Initialize Summary record fields.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes an essential step in setting up the record.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "872c1bc2: Update Summary record using FileMan.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the method being used for the update, which is useful for understanding the implementation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2dcf4627: Unlock Summary record.",
+        "readability": {
+          "reasoning": "The comment is concise and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear action that is being performed, helpful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ea0f9b67: Set flag indicating new record added.",
+        "readability": {
+          "reasoning": "The comment is straightforward and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the purpose of setting a flag, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "471fca2e: Edit Summary record to include validation dates/times and approved by fields. Lock record, update fields using FileMan, unlock record.",
+        "readability": {
+          "reasoning": "The comment is detailed but clear, with a minor readability issue due to its length.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment comprehensively explains a multi-step process, very useful for understanding complex code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8f6c290b: Lock Summary record for editing.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about locking the record, which is helpful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4509d56f: Set validation fields in Summary record.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes a specific action being taken, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "98e6fbb5: ;Update the visit date fields and wipe values for dictator and transcriptionist fields",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the action being performed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f6de194c: ;Release the lock on the record",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the code's functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "665ab386: ;Exit the routine",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it indicates the end of a routine.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "36aaa27d:  .;\n .;Delete values for the visit date, dictator, transcriptionist and\n .;signer/reviewer fields of a DCS record\n .",
+        "readability": {
+          "reasoning": "The comment is mostly clear but the formatting could be better.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the fields being deleted, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a75cd078: ;Lock the record",
+        "readability": {
+          "reasoning": "The comment is simple and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the action being performed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ebc89854: ;Clear the visit date, dictator, transcriptionist and signer/reviewer fields",
+        "readability": {
+          "reasoning": "The comment is clear and concise, providing a straightforward explanation of what fields are being cleared.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains which specific fields are being cleared, which is valuable for understanding the function's effect.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0f8d0bb3: ;Execute the field updates and call STAT1 to update the status field",
+        "readability": {
+          "reasoning": "The comment is clear and detailed, making it easy to understand the steps being taken.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful, as it specifies both the action of field updates and the subsequent call to update the status field, aiding comprehension.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "947cf24a: ;Release the lock on the record",
+        "readability": {
+          "reasoning": "The comment is very clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it indicates an important operation: releasing a lock, which is critical in concurrent programming.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5b79313f: ;Exit the routine",
+        "readability": {
+          "reasoning": "The comment is short and clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it indicates the end of a routine, although this might be evident from the code itself.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d226777b:  .;\n .;Update the dictator, transcriptionist and signer/reviewer fields\n .;of a DCS record\n .",
+        "readability": {
+          "reasoning": "The comment is fragmented and includes unnecessary periods, which slightly hinders readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it specifies the fields being updated and the context (a DCS record), but the fragmented format reduces its clarity.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d5e9397a: ;Lock the record",
+        "readability": {
+          "reasoning": "The comment is concise and well-written, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly indicates a non-trivial action of locking the record, which is useful for understanding the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e214345a: ;Set values for dictator, transcriptionist and signer/reviewer fields",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful in understanding what specific values are being set, which is valuable for the average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b69017fc: ;Execute the field updates and call STAT1 to update the status field",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific function call and its purpose, which is useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "334566d6: ;Release the lock on the record",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a non-trivial action of releasing a lock, useful for understanding the code's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3733bbe6: ;Exit the routine",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it indicates the end of a routine, but this is relatively trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3f8e1d4f: ;\n ;Update the status based on the values of the nodes in the \"DT\" field.\n ;",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context about the code's functionality to both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2f3784a3: ;Get the \"DT\" node for the current DCS record.",
+        "readability": {
+          "reasoning": "The comment is direct and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the specific operation being performed, which is useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7450ebc8: ;If DT node doesn't exist or date field is blank, set status to \"INCOMPLETE\".",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional operation which is useful for understanding the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1d2a3221: ;If date field exists but dictated date/time is blank, set status to \"DICTATED\".",
+        "readability": {
+          "reasoning": "The comment is straightforward and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies a specific condition and action, aiding in understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d443207a: ;If dictated date/time exists but transcribed date/time is blank, set status to \"TRANSCRIBED\".",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition which is helpful for understanding the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "75942ac9: ;If transcribed date/time exists and review bit is not set, set status to \"SIGNED NO REVIEW\".",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific conditions and the resulting action, which helps an expert programmer understand the status-setting logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "dac04369: ;If reviewed date/time exists and review bit is set, set status to \"SIGNED\".",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and resulting action, aiding an expert programmer in understanding the logic behind setting the status.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ff7f009a: ;If reviewed date/time exists and review bit is set, set status to \"REVIEWED\".",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment details conditions and actions, providing valuable information for understanding the status-setting logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "08ce7333: ;Set the status field in the VAS(393 record.",
+        "readability": {
+          "reasoning": "The comment is short and clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates the purpose of a specific action but is somewhat general, which is useful for average programmers but less so for experts.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8d04382e: ;Quit the STAT1 subroutine.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial action in the code, which is of limited usefulness.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "59b8510d: ;This is the DOC subroutine to retrieve values from the DGPM file.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context about what the subroutine does.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a23c4e9a: ;\n ;Get the value to be stored in the .09 or .1 fields based on the\n ;DCS divisional parameter and values in the DGPM file.\n ;",
+        "readability": {
+          "reasoning": "The comment is clear but slightly verbose.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific details useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "78260e0d: ;Get the 2nd or 4th piece of the divisional parameter.",
+        "readability": {
+          "reasoning": "The comment is short and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies which pieces of the parameter are being referred to.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cf98c30b: ;If 2nd piece, get 19th piece of DGPM(0) node, if 4th piece get 8th piece of DGPM(0) node, else \"\".",
+        "readability": {
+          "reasoning": "The comment is somewhat complex but still clear.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of the logic, which is helpful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f38c122e: ;Quit the DOC subroutine.",
+        "readability": {
+          "reasoning": "The comment is short and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment states an obvious action that may not be very useful.",
+          "score": 2
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    "bca39a19:  ;\n ;Sets variables and arrays used for delay calculation.\n ;DGJTPAR captures key dates for the current status.\n ;DGJTNODT stores the last date/time event node.",
+    "3c833e84: ;Initialize variables with values based on the current status.",
+    "fef34871: ;Capture the last date/time event node if it exists.",
+    "caab9f97: ;Calculate the current date/time and initialize delay counter.",
+    "6c7ccfec: ;If the current status matches the entry, flag for processing and call PROC.",
+    "f4baee1d: ;Routine exit point.",
+    "368a604f:  ;Calculate delay days for 'Incomplete' status.\n ;If the delay exceeds the parameter, flag for totaling.\n ;Call DAYS to calculate the delay period and TOT1 to accumulate delays.",
+    "20b4aa95:  ;For 'Dictated' status, flag for totaling.\n ;Call DAYS to calculate the delay period and TOT1 to accumulate delays.",
+    "4d735e7f:  ;Calculate delay days for 'Transcribed' status.\n ;If the delay exceeds the parameter, flag for totaling.\n ;Call DAYS to calculate the delay period and TOT1 to accumulate delays.",
+    "052ce069:  ;Calculate delay days for 'Signed' status.\n ;If the delay exceeds the parameter, flag for totaling.\n ;Call DAYS to calculate the delay period and TOT1 to accumulate delays.",
+    "96626cb7: ;Exit point for PROC.",
+    "a53db662: ;Calculate the delay period in days based on the current date/time.",
+    "d1ecaa78:  ;Initialize variables for totaling delays.\n ;Set the start date to the later of the last event date or current date.\n ;Call FileMan %DTC to calculate the elapsed period.",
+    "93dfb691:  ;If no dictation date but a signature date exists:\n ;Set DGJT2PC to '-' to indicate no dictation delay.\n ;Call COD to get the procedure description.\n ;Set DGJT3PC to '-' to indicate no transcription delay.",
+    "71f6de36: ;Accumulate the dictation delay and set DGJT2PC with a '*' flag.",
+    "a694080a:  ;If a dictation date exists:\n ;Set the start date to the later of the dictation or current date.\n ;Set the end date to the dictation date.\n ;Calculate and accumulate the transcription delay in DGJTRNTO.\n ;Set DGJT3PC with the delay and a '*' flag.\n ;Remove the '*' flag from DGJT2PC.",
+    "f5f43f20: ;If a transcription date exists, call COD to get the procedure description.",
+    "ee1e7fd5:  ;If a transcription date exists:\n ;Set the start date to the later of the coding delay or current date.\n ;Set the end date to the transcription date.\n ;Calculate the coding delay and call SET to accumulate and format the delay.",
+    "fb4b18dc: ;Exit point for TOT1.",
+    "db7bbb90:  ;Attempt to retrieve the procedure description from the Patient file.\n ;Set DGJTFLLG if the description is not found.",
+    "90d2190a: ;Set DGJTFLLG if no procedure description was found.",
+    "5a8d5039: ;Exit point for COD.",
+    "294e4a1b:  ;Accumulate the coding delay in DGJCOTO.\n ;If DGJTFLLG is set, append a '*' flag to DGJT4PC.\n ;Otherwise, set DGJT4PC to the unflagged delay value.\n ;Remove any '*' flag from DGJT3PC."
+  ]
+}

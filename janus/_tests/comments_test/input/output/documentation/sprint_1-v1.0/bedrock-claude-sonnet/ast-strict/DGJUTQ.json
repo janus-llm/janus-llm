@@ -1,0 +1,27 @@
+{
+  "comments": [
+    "a35d6e9b: ;\n; Main entry point for the routine.\n;",
+    "09eabd43: ;Save the current date/time for use as the purge cut-off date.",
+    "26f0a94e: If ZTIO is undefined and ION is defined and null, set ZTIO to null.",
+    "7aa97e54: If ZTDESC is undefined, set it to DGPGM if defined, otherwise PGM if defined, otherwise 'IRT UNKNOWN OPTION'.",
+    "db18968e: If ZTRTN is undefined, set DGPGM to DGPGM if defined, otherwise PGM if defined, otherwise null. If DGPGM is null, go to CLOSE. Otherwise, set ZTRTN to 'DQ^DGJUTQ'.",
+    "5aebcd11: Set DGZTSAVE to DGVAR if defined, otherwise VAR if defined, otherwise '*'. Then call the SAVE routine.",
+    "f45716b1: If DGPGM is defined and ZTSAVE('DGPGM') is not defined, set ZTSAVE('DGPGM') to null.",
+    "90cd8c4c: If the task was queued, close the device and quit, otherwise quit.",
+    "bd268caf: Return control to the calling routine.",
+    "9bc2f92b: If the device selected is a queued device, queue the report and exit.",
+    "ac410a16: Use the selected device for subsequent input/output.",
+    "a0d3bc55: ;For the array DgztSave, break the string down into individual elements based on '^' delimiter. If that individual element is not defined already, then create an empty node for that element. Also, check if the element ends with '('. If so, then create another empty node with the '(' removed.",
+    "07e2a048: ;End of routine to save array elements from DgztSave into ZTSave array.",
+    "55f00dfb: ;Replace each '#' character in DGZTSAVE with '(' to allow the string to be evaluated as a MUMPS array.",
+    "85a7248c: ;Exit the routine.",
+    "3fa501a9: Close the current device and exit the routine if it is being run in a tasked job (i.e., queued). Otherwise, initialize the USER and DEVICE variables for the current process.",
+    "ea8a0bbc: ; Cleanup routine - kill off all variables and I/O devices used.",
+    "d72f5157: ; End routine execution.",
+    "3468ebe2: ;Execute utility entry point.",
+    "947574fb: ;Kill off any existing tasked process and close device.",
+    "261a0bd0: ;Exit routine.",
+    "587a47d3:  ;\n ;If the process was initiated by TaskMan, set DGX and Z to contain\n ;information about the date and time the task was queued for execution.\n ;DGX contains the time queued in FileMan internal format.\n ;Z contains the date and time queued in $H external format.\n ;%H is the current date in $H format.\n ;",
+    "3e99cf5c: ;Quit"
+  ]
+}

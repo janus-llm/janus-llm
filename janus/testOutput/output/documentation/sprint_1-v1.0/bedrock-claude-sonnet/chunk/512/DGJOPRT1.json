@@ -1,0 +1,705 @@
+{
+  "input": "{\n  \"comments\": [\n    \"7b74f4ed:  ;;\\n ;;DGJOPRT1 Entry Point\\n ;;Check for division, quit if error.\\n ;;Check domain and required variables.\\n ;;Perform required action.\\n ;;Process Follow-up action.\",\n    \"fca9eecb: ;Check for division and call division routine if required.\",\n    \"4c2dcdbf: ;If not division, set default division.\",\n    \"3f95f73a: ;Call routine based on parameter.\",\n    \"b2944d34: ;If parameter is not DAT, call DAT routine.\",\n    \"bd02e49f: ;Set screening logic for file selection.\",\n    \"0f553c13: Displays a 'Summary Type' prompt and calls the FIRST^VAUTOMA routine to allow the user to select a value from the file #393.3.\",\n    \"11a99ff3: Warns the user that the output requires 132 column output.\",\n    \"b2793314: Retrieves the current date and time, stores it in the VADAT('W') variable, and converts it to an external format using the FileMan ^VADATE routine, storing the result in DGJTDAT.\",\n    \"078953f3: Sets up variables required for the DGJOPRT1 routine, calls the ZIS^DGJUTQ routine to initialize the output device, and if no errors occur, branches to the START^DGJOPRT1 label.\",\n    \"1fa18311: ;Quit routine if no VAS data is present.\",\n    \"b33393a9: ;Initialize key variables and loop through VAS records, checking each one.\",\n    \"e2cbc0bd: ;If VAS data exists, initialize variables and branch to ^DGJOPRT2 routine.\",\n    \"19497dad: ;Tells the user that no records were found in ^UTILITY(\\\"VAS\\\",$J) and quits.\",\n    \"ecf9c37e: ;Kills all variables used in the routine.\",\n    \"4d34580a: Quit if unable to close the current host file.\",\n    \"e716f15c: If the log type is not 'SER', increment the total count for the division.\",\n    \"b1d7417d: If the log type is 'SER', increment the total count for the entry.\",\n    \"6b2a329e: If the log type is 'PHY', initialize the physician total for the division and physician if not already set, then increment it.\",\n    \"00b5b26f: If the log type is 'SER', initialize the service total for the division and service if not already set, then increment it.\",\n    \"3a7e6560: If the log type is 'SER', initialize the specialty total for the division, service, and specialty if not already set, then increment it.\",\n    \"e0e24d8f: Entry point of the routine.\",\n    \"490f9d9c: If the node has no sixth piece, set the sixth piece to the next sequential entry number in the 40.8 file.\",\n    \"1a3fd136: If VAUTD is defined and does not contain the sixth piece of the node, quit.\",\n    \"e92487bf: If DGJTDV is defined, and the sixth piece of the node does not match the value of DGJTDV, quit.\",\n    \"2bb78972: Exit routine if DGJTSR1 is 1 and the 13th piece of DGJTNODE is not 1.\",\n    \"c1eb5094: Exit routine if DGJTSR1 is 2 and the 13th piece of DGJTNODE is not blank.\",\n    \"7113c94b: If DGJTSR1 is not 2, and the 2nd piece of DGJTNODE equals the value of the zero-node of the 'DISCHARGE SUMMARY' cross-reference of the VISIT STATUS file (#393.3), and the 4th piece of DGJTNODE is non-blank and points to an entry in the PATIENT MOVEMENT file (#26.3), then set X to the 17th piece of that entry. If X is blank, quit.\",\n    \"3eb62be6: Set DGJTPC based on the value of DGJTL: 1 if 'PAT', 3 if 'DAT', 8 if 'SER', 14 if 'PHY', otherwise blank.\",\n    \"40313208: ;Quit if the document type is not an OP Report, Discharge Summary or Interim Summary.\",\n    \"6b4fd87a: ;Quit if the user is restricted by Terminal Type and the Terminal Type is not allowed for this document.\",\n    \"43e4dd7b: ;Quit if the user is restricted by Treatment Facility and the Treatment Facility is not allowed for this document.\",\n    \"6a238f15: ;Quit if the user is restricted by Document Type and the Document Type is not allowed.\",\n    \"51eaf861: ;Quit if the document date is outside the date range.\",\n    \"8d82e688: ;Get additional document information and quit if the document should not be displayed.\",\n    \"8e20955c: ;Initialize the total for the current division if it does not already exist.\",\n    \"23e5a495: Strip off DFN from node and get patient name from Patient file.\",\n    \"23d97a14: If level is PAT, store data in ^UTILITY with subscripts J, DVN, patient name, DFN, IFN. Call CNT subroutine.\",\n    \"3ee31eaf: If level is DAT, store data in ^UTILITY with subscripts J, DVN, date, patient name, DFN, IFN. Call CNT subroutine.\",\n    \"1a7c03b3: If level is PHY, get physician name from New Person file if available, else 'NOT SPECIFIED'. Store data in ^UTILITY with subscripts J, DVN, physician name, patient name, DFN, IFN. Call CNT subroutine.\",\n    \"7d9f50dc: Get the service and specialty names from the file entries if the data is present.\",\n    \"ca8c99d1: Store the data in a specific location and update the counter.\",\n    \"883dce76: Quit if called without an argument.\",\n    \"61823335: Get the patient and validate the input.\",\n    \"30ba208f: Quit if the patient lookup fails.\",\n    \"7e18c80e: Get the physician by entering a name and validate the input. Set a flag if no physician is selected and quit if the flag is set.\",\n    \"54f42c73: Quit if the physician lookup fails.\",\n    \"60fcf423:  ;\\n ;Prompts for start date\\n ;Converts input to FileMan format\\n ;Sets start date and start date range\\n ;Quits if no date entered\\n ;\",\n    \"225a8036: Prompt for the start date, convert input, set start date and date range, and quit if no date entered.\",\n    \"9d0f7d7e: ;If the user enters an invalid date or escapes, quit.\",\n    \"709a8d3f: ;Set the end date to the end of the day the user entered.\",\n    \"4f7dd7f0: Check if ending date is before beginning date and display an error message.\",\n    \"2b582138: Exit routine.\",\n    \"cdb9a356: Prompt for service and store it in VAUTN field of APPOINTMENT DIAG file #393.1. Exit if user cancels selection.\",\n    \"4fb9dc22: Prompt for specialty and store it in VAUTT field of SPECIALTY file #45.7.\",\n    \"230a56ac: ;Main entry point for the RECTYP function.\",\n    \"3c0a08a1:  ;\\n ;Determine the record type (primary or secondary) of a record.\\n ;Input: DGJTNODE - The record in the standard global node format.\\n ;Returns: 1 for primary record, 2 for secondary record.\\n ;\",\n    \"bad7c059: ;Initialize X to be used as a temporary variable.\",\n    \"d88060af: ;If the 6th piece of the input node is empty, return 1 (primary record).\",\n    \"dda8adc0: ;Extract the 6th piece of the input node, which contains the IEN of the record.\",\n    \"54ae8a69: ;Retrieve the 12th piece from the 0th node of the record, which indicates the record type.\",\n    \"1354a467: ;If the 12th piece is empty, set X to 1 (primary record).\",\n    \"667dbee7: ;Convert X to a number and return it as the record type.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 86.15299677848816
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "7b74f4ed:  ;;\n ;;DGJOPRT1 Entry Point\n ;;Check for division, quit if error.\n ;;Check domain and required variables.\n ;;Perform required action.\n ;;Process Follow-up action.",
+        "readability": {
+          "reasoning": "The comment is clear, concise, and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It gives a step-by-step explanation of the routine, which helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fca9eecb: ;Check for division and call division routine if required.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific functionality, which helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4c2dcdbf: ;If not division, set default division.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific functionality, which helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3f95f73a: ;Call routine based on parameter.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents only trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "b2944d34: ;If parameter is not DAT, call DAT routine.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific functionality, which helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bd02e49f: ;Set screening logic for file selection.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a high-level description of the function's purpose, which helps an average programmer understand the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0f553c13: Displays a 'Summary Type' prompt and calls the FIRST^VAUTOMA routine to allow the user to select a value from the file #393.3.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very specific, explaining the function's action and the file it interacts with, aiding both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "11a99ff3: Warns the user that the output requires 132 column output.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a necessary warning about output requirements, which is useful information for any programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b2793314: Retrieves the current date and time, stores it in the VADAT('W') variable, and converts it to an external format using the FileMan ^VADATE routine, storing the result in DGJTDAT.",
+        "readability": {
+          "reasoning": "The comment is clear and well-formed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific process in detail, which is particularly useful for understanding the function's operations.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "078953f3: Sets up variables required for the DGJOPRT1 routine, calls the ZIS^DGJUTQ routine to initialize the output device, and if no errors occur, branches to the START^DGJOPRT1 label.",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a comprehensive overview of the setup process and error handling, which helps in understanding the control flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1fa18311: ;Quit routine if no VAS data is present.",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the condition for quitting the routine.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b33393a9: ;Initialize key variables and loop through VAS records, checking each one.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information on the initialization and looping process which helps an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e2cbc0bd: ;If VAS data exists, initialize variables and branch to ^DGJOPRT2 routine.",
+        "readability": {
+          "reasoning": "The comment is clear and contains no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the conditions and the next step in the process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "19497dad: ;Tells the user that no records were found in ^UTILITY(\"VAS\",$J) and quits.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information to an average programmer about what happens when no records are found.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ecf9c37e: ;Kills all variables used in the routine.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the cleanup process at the end of the routine.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4d34580a: Quit if unable to close the current host file.",
+        "readability": {
+          "reasoning": "The comment is concise and clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides specific information about what happens under a particular condition, which can help both expert and average programmers understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e716f15c: If the log type is not 'SER', increment the total count for the division.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment explains a specific condition and action, which is helpful for understanding the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b1d7417d: If the log type is 'SER', increment the total count for the entry.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes a condition and an action, making it useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6b2a329e: If the log type is 'PHY', initialize the physician total for the division and physician if not already set, then increment it.",
+        "readability": {
+          "reasoning": "The comment is clear and detailed, making it easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a detailed explanation of a specific condition and a series of actions, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "00b5b26f: If the log type is 'SER', initialize the service total for the division and service if not already set, then increment it.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It gives a detailed description of a condition and the actions to take, aiding in understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3a7e6560: If the log type is 'SER', initialize the specialty total for the division, service, and specialty if not already set, then increment it.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action in a detailed manner, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e0e24d8f: Entry point of the routine.",
+        "readability": {
+          "reasoning": "The comment is very short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents the entry point, which is useful for understanding the structure of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "490f9d9c: If the node has no sixth piece, set the sixth piece to the next sequential entry number in the 40.8 file.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific and useful information about the node's data handling.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1a3fd136: If VAUTD is defined and does not contain the sixth piece of the node, quit.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional exit, which is useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e92487bf: If DGJTDV is defined, and the sixth piece of the node does not match the value of DGJTDV, quit.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains another conditional exit, which helps in understanding the code's logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2bb78972: Exit routine if DGJTSR1 is 1 and the 13th piece of DGJTNODE is not 1.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides a clear condition under which the routine exits, useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c1eb5094: Exit routine if DGJTSR1 is 2 and the 13th piece of DGJTNODE is not blank.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Clearly describes an important condition for exiting the routine.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7113c94b: If DGJTSR1 is not 2, and the 2nd piece of DGJTNODE equals the value of the zero-node of the 'DISCHARGE SUMMARY' cross-reference of the VISIT STATUS file (#393.3), and the 4th piece of DGJTNODE is non-blank and points to an entry in the PATIENT MOVEMENT file (#26.3), then set X to the 17th piece of that entry. If X is blank, quit.",
+        "readability": {
+          "reasoning": "The comment is detailed but remains clear and readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a deep understanding of a complex condition and its implications, which is very useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3eb62be6: Set DGJTPC based on the value of DGJTL: 1 if 'PAT', 3 if 'DAT', 8 if 'SER', 14 if 'PHY', otherwise blank.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Explains how a variable is set based on specific conditions, which is useful for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "40313208: ;Quit if the document type is not an OP Report, Discharge Summary or Interim Summary.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides a clear condition that dictates the flow of the program.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6b4fd87a: ;Quit if the user is restricted by Terminal Type and the Terminal Type is not allowed for this document.",
+        "readability": {
+          "reasoning": "The comment is well-written and clearly states the condition under which the process should quit.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the condition.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "43e4dd7b: ;Quit if the user is restricted by Treatment Facility and the Treatment Facility is not allowed for this document.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the restriction logic related to Treatment Facility.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6a238f15: ;Quit if the user is restricted by Document Type and the Document Type is not allowed.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the restriction logic based on Document Type.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "51eaf861: ;Quit if the document date is outside the date range.",
+        "readability": {
+          "reasoning": "The comment is very clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides essential information about the date range restriction, aiding average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8d82e688: ;Get additional document information and quit if the document should not be displayed.",
+        "readability": {
+          "reasoning": "The comment is easy to understand and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a more complex condition involving additional document information, which is useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8e20955c: ;Initialize the total for the current division if it does not already exist.",
+        "readability": {
+          "reasoning": "The comment is clearly written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear and useful information about the initialization process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "23e5a495: Strip off DFN from node and get patient name from Patient file.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific step in the process, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "23d97a14: If level is PAT, store data in ^UTILITY with subscripts J, DVN, patient name, DFN, IFN. Call CNT subroutine.",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific details about the data storage process, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3ee31eaf: If level is DAT, store data in ^UTILITY with subscripts J, DVN, date, patient name, DFN, IFN. Call CNT subroutine.",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific details about the data storage process, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1a7c03b3: If level is PHY, get physician name from New Person file if available, else 'NOT SPECIFIED'. Store data in ^UTILITY with subscripts J, DVN, physician name, patient name, DFN, IFN. Call CNT subroutine.",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific details about the data storage process, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7d9f50dc: Get the service and specialty names from the file entries if the data is present.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand what specific data is being retrieved.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ca8c99d1: Store the data in a specific location and update the counter.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand what actions are taken with the data.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "883dce76: Quit if called without an argument.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a basic functionality of the function quitting without an argument.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "61823335: Get the patient and validate the input.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand what operations are being performed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "30ba208f: Quit if the patient lookup fails.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a basic functionality of the function quitting if lookup fails.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7e18c80e: Get the physician by entering a name and validate the input. Set a flag if no physician is selected and quit if the flag is set.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information on the steps involved in the process.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "54f42c73: Quit if the physician lookup fails.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents an important conditional action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "60fcf423:  ;\n ;Prompts for start date\n ;Converts input to FileMan format\n ;Sets start date and start date range\n ;Quits if no date entered\n ;",
+        "readability": {
+          "reasoning": "The comment is clear but could be more concise and formatted better.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of several steps, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "225a8036: Prompt for the start date, convert input, set start date and date range, and quit if no date entered.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment succinctly describes the functionality, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9d0f7d7e: ;If the user enters an invalid date or escapes, quit.",
+        "readability": {
+          "reasoning": "The comment is clear, but the formatting is inconsistent.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about a specific conditional action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "709a8d3f: ;Set the end date to the end of the day the user entered.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the functionality of setting an end date, which could be useful for understanding date handling in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4f7dd7f0: Check if ending date is before beginning date and display an error message.",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about error checking for date validity, which is important for understanding program flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2b582138: Exit routine.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial action of exiting a routine, which may not provide significant insight.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "cdb9a356: Prompt for service and store it in VAUTN field of APPOINTMENT DIAG file #393.1. Exit if user cancels selection.",
+        "readability": {
+          "reasoning": "The comment is clear but slightly verbose.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides detailed information about user interaction and data storage, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4fb9dc22: Prompt for specialty and store it in VAUTT field of SPECIALTY file #45.7.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about user input and data storage in a specific field.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "230a56ac: ;Main entry point for the RECTYP function.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about the function's entry point.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3c0a08a1:  ;\n ;Determine the record type (primary or secondary) of a record.\n ;Input: DGJTNODE - The record in the standard global node format.\n ;Returns: 1 for primary record, 2 for secondary record.\n ;",
+        "readability": {
+          "reasoning": "The comment is detailed and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides comprehensive information that helps understand the function's purpose, input, and output.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bad7c059: ;Initialize X to be used as a temporary variable.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the purpose of a variable initialization, which is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d88060af: ;If the 6th piece of the input node is empty, return 1 (primary record).",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear condition and return value, aiding in understanding the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dda8adc0: ;Extract the 6th piece of the input node, which contains the IEN of the record.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific extraction operation, which is moderately useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "54ae8a69: ;Retrieve the 12th piece from the 0th node of the record, which indicates the record type.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides valuable information about the purpose of retrieving the 12th piece from the 0th node.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1354a467: ;If the 12th piece is empty, set X to 1 (primary record).",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific condition and its implication in a straightforward way.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "667dbee7: ;Convert X to a number and return it as the record type.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the final step of the process, which is helpful for understanding the code flow.",
+          "score": 4
+        }
+      }
+    ]
+  }
+}

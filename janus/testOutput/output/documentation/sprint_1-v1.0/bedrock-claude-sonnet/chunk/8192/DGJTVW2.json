@@ -1,0 +1,1551 @@
+{
+  "input": "{\n  \"comments\": [\n    \"9cf75097:  ;\\n ;PRINT REPORT FROM ARRAY DGJTNDT\\n ;\\n ;DIC(\\\"S\\\") - POINTER TO ^DGPT(\\\"AD\\\" CROSS REFERENCE ON ^DGPM\\n ;\\n ;DGJTNO1 - CONTAINS PARTIAL POINTERS IN ^DGPT(\\\"AD\\\"\\n ;\\n ;DGJTNO - DATA EXTRACTED FROM ^DGPT(\\\"AD\\\", NUMBER ^ DATE ^PATIENT LNK\\n ;         ^ LOCATION ^ REV-CODE ^ DIV ^ SERVCE ^ YN ^ CPRS ^RESP PHYS\\n ;\\n ;DGJTNDT - DETAILS FOR TRANS-PRINT HEADER, DATE/TIME, DICT/TRANS/\\n ;          SIGNS FOR, REV/SIG DATE/TIME\\n ;\",\n    \"e2216bda: ;Kill any leftover from previous run\",\n    \"c319a78f: ;Initialize variables\",\n    \"e2d72bfb: ;Get xreftitle text into tmpglobal, call tmp subrtn\",\n    \"db37c171: ;Reset x for the next line\",\n    \"389bc28e: ;Set 1)\",\n    \"fe200bb3: ;Set 3)\",\n    \"1d6f9a4a: ;Reset x for next line\",\n    \"c8fd4427: ;Check if report is a discharge summary\",\n    \"e1c08667: ;If dictated date <48 hrs before list date flag it\",\n    \"39b037c9: ;Add *Type of Report header\",\n    \"c4504116: ;Get and display report type\",\n    \"72d23d80: ;Display dictated date\",\n    \"e35e920b: ;Check if dictated date null get date from tran date\",\n    \"d5fb67e3: ;Add dictated by header\",\n    \"7f861b1b: ;Get and display name of dictator\",\n    \"b630b901: ;Reset x for next line\",\n    \"cdb88acf: ;add event date heading\",\n    \"24959775: ;add event date value\",\n    \"8fb7baa0: ;Get event date\",\n    \"6b73a17f: Extract and format the event date.\",\n    \"81b05ece: Extract and format the dictated by provider.\",\n    \"04c2a845: If the 'FROM SF' flag is present and the dictated by provider is not available, set the dictated by provider to 'NOT APPLICABLE'.\",\n    \"c50beedd: Prepare to set the 'Dictated By:' field.\",\n    \"f34b6fb6: Set the 'Dictated By:' field and store in the output array.\",\n    \"8d5d8baf: Prepare to set the admission/outpatient indicator.\",\n    \"fa9f49eb: Set the prefix for the admission/outpatient indicator field.\",\n    \"bb6f0ae3: If an admission is present, extract and format the admission date.\",\n    \"37bf7992: If no admission is present, set the admission indicator to 'OUTPATIENT'.\",\n    \"48108990: Set the admission/outpatient indicator field in the output array.\",\n    \"b9ddc4ea: Prepare to set the 'Date Transcribed:' field.\",\n    \"d504f8d7: Extract and format the date transcribed.\",\n    \"e82f3896: If the 'FROM SF' flag is present and the date transcribed and dictated by provider are not available, set the date transcribed to 'NOT APPLICABLE'.\",\n    \"235d457f: Set the 'Date Transcribed:' field in the output array.\",\n    \"77ddaeb3: Start a new line.\",\n    \"079a0d94: Prepare to set the division field.\",\n    \"8f643af7: Extract and format the division.\",\n    \"4e6927dc: Set the division field in the output array.\",\n    \"11177f78: Extract and format the transcribed by provider.\",\n    \"ddb38fb8: If the 'FROM SF' flag is present and the transcribed by provider, date transcribed, and dictated by provider are not available, set the transcribed by provider to 'NOT APPLICABLE'.\",\n    \"e8b5b959: ;Print the name of the transcriber.\",\n    \"f2f18038: ;Store the line of text in ^TMP.\",\n    \"55d61443: ;Get the name of the location.\",\n    \"4aea8a24: ;Build the string for the location line.\",\n    \"5081b1b4: ;Clear the line buffer.\",\n    \"d536527a: ;Insert the location line prompt.\",\n    \"e577ce97: ;Get the name of the location.\",\n    \"e008e842: ;Insert the location name.\",\n    \"1f206fec: ;Insert the date signed prompt.\",\n    \"366ba359: ;Get the date signed and format it.\",\n    \"d779887b: ;Insert the formatted date signed and store the line.\",\n    \"fccb0707: ;Get the service/section pointer.\",\n    \"ff40ba21: ;Get the name of the service/section.\",\n    \"0ad4779b: ;Clear the line buffer.\",\n    \"4d2d4d36: ;Insert the service/section prompt.\",\n    \"2c586535: ;Insert the service/section name.\",\n    \"22743952: ;Get the service/section pointer.\",\n    \"ba026761: ;Get the name of the service/section.\",\n    \"9028ce0a: ;Insert the service/section name.\",\n    \"7b2327cf: ;Get the name of the signer.\",\n    \"6536c0af: \",\n    \"ae5e7618: \",\n    \"2ac57f49: \",\n    \"6e55a053: \",\n    \"a0ad7098: \",\n    \"04d62f97: \",\n    \"f570f191: \",\n    \"a2231d53: \",\n    \"b4c49124: \",\n    \"cac10662: \",\n    \"15aa149e: \",\n    \"f48bd0e2: \",\n    \"7247825a: \",\n    \"e3e89d7e: \",\n    \"d75921b5: \",\n    \"3c9d8d73: \",\n    \"2fbef933: \",\n    \"10c1e89d: \",\n    \"7e773e89: \",\n    \"a3c5ebbb: \",\n    \"bf59fb85: ;Assign a default value when date/name fields are blank for a short-form report.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 161.9122371673584
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "9cf75097:  ;\n ;PRINT REPORT FROM ARRAY DGJTNDT\n ;\n ;DIC(\"S\") - POINTER TO ^DGPT(\"AD\" CROSS REFERENCE ON ^DGPM\n ;\n ;DGJTNO1 - CONTAINS PARTIAL POINTERS IN ^DGPT(\"AD\"\n ;\n ;DGJTNO - DATA EXTRACTED FROM ^DGPT(\"AD\", NUMBER ^ DATE ^PATIENT LNK\n ;         ^ LOCATION ^ REV-CODE ^ DIV ^ SERVCE ^ YN ^ CPRS ^RESP PHYS\n ;\n ;DGJTNDT - DETAILS FOR TRANS-PRINT HEADER, DATE/TIME, DICT/TRANS/\n ;          SIGNS FOR, REV/SIG DATE/TIME\n ;",
+        "completeness": {
+          "reasoning": "The comment addresses multiple elements of the code, covering different variables and their purposes.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "All the information provided appears accurate and relevant to the described functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to follow, despite the use of abbreviations which are standard in such contexts.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed explanations that would help both expert and average programmers understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e2216bda: ;Kill any leftover from previous run",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover all aspects of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but very limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific functionality it addresses but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c319a78f: ;Initialize variables",
+        "completeness": {
+          "reasoning": "The comment addresses the initialization of variables but does not go into detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate but very brief.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but provides only trivial information.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e2d72bfb: ;Get xreftitle text into tmpglobal, call tmp subrtn",
+        "completeness": {
+          "reasoning": "The comment captures a specific operation but does not cover other essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate but specific to one part of the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and provides specific details.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific operation but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "db37c171: ;Reset x for the next line",
+        "completeness": {
+          "reasoning": "The comment addresses a specific action but does not provide information on other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate but very limited.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific action but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "389bc28e: ;Set 1)",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is too vague to be understood.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "fe200bb3: ;Set 3)",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is too vague to be understood.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "1d6f9a4a: ;Reset x for next line",
+        "completeness": {
+          "reasoning": "Addresses a specific functionality of resetting 'x' for the next line.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c8fd4427: ;Check if report is a discharge summary",
+        "completeness": {
+          "reasoning": "Documents a specific functionality of checking if a report is a discharge summary.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e1c08667: ;If dictated date <48 hrs before list date flag it",
+        "completeness": {
+          "reasoning": "Documents a specific functionality of flagging a date.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "39b037c9: ;Add *Type of Report header",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality related to adding the Type of Report header.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and directly related to the code change.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the specific change but lacks depth.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c4504116: ;Get and display report type",
+        "completeness": {
+          "reasoning": "The comment addresses both getting and displaying the report type, covering more than one functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and relevant to the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is written clearly and concisely.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the code better by explaining two functionalities.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "72d23d80: ;Display dictated date",
+        "completeness": {
+          "reasoning": "The comment describes the functionality of displaying the dictated date.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e35e920b: ;Check if dictated date null get date from tran date",
+        "completeness": {
+          "reasoning": "The comment covers the functionality of checking for a null dictated date and an alternate action.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and aligned with the code functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could benefit from better punctuation.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand a conditional functionality better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d5fb67e3: ;Add dictated by header",
+        "completeness": {
+          "reasoning": "The comment covers the specific functionality of adding a header.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and directly relevant to the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the specific change but is somewhat trivial.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7f861b1b: ;Get and display name of dictator",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of getting and displaying the name.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "It is likely true as it specifies a specific functional action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b630b901: ;Reset x for next line",
+        "completeness": {
+          "reasoning": "The comment addresses a single aspect of the code.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is likely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cdb88acf: ;add event date heading",
+        "completeness": {
+          "reasoning": "The comment specifies a single functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is likely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand a specific aspect of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "24959775: ;add event date value",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is likely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand a specific aspect of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8fb7baa0: ;Get event date",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is likely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand a specific aspect of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6b73a17f: Extract and format the event date.",
+        "completeness": {
+          "reasoning": "The comment addresses the primary functionality of extracting and formatting the event date but does not go into detail about any specifics or edge cases.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and accurately describes the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the basic functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "81b05ece: Extract and format the dictated by provider.",
+        "completeness": {
+          "reasoning": "The comment addresses the main functionality but does not provide additional context or details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the function.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the basic purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "04c2a845: If the 'FROM SF' flag is present and the dictated by provider is not available, set the dictated by provider to 'NOT APPLICABLE'.",
+        "completeness": {
+          "reasoning": "The comment thoroughly explains the condition and the action taken.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding a specific condition and its handling.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c50beedd: Prepare to set the 'Dictated By:' field.",
+        "completeness": {
+          "reasoning": "The comment is vague and does not specify what preparation steps are taken.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but lacks detail.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read but could be more informative.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides only minimal context and is not very helpful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f34b6fb6: Set the 'Dictated By:' field and store in the output array.",
+        "completeness": {
+          "reasoning": "The comment describes the main action but does not provide any specifics about how it is done.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the basic functionality but lacks detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8d5d8baf: Prepare to set the admission/outpatient indicator.",
+        "completeness": {
+          "reasoning": "The comment is vague and does not detail what preparation entails.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide false information but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is too vague to be highly useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "fa9f49eb: Set the prefix for the admission/outpatient indicator field.",
+        "completeness": {
+          "reasoning": "The comment covers the specific action of setting the prefix but lacks additional context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific line of code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bb6f0ae3: If an admission is present, extract and format the admission date.",
+        "completeness": {
+          "reasoning": "The comment provides a clear explanation of its functionality.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding this part of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "37bf7992: If no admission is present, set the admission indicator to 'OUTPATIENT'.",
+        "completeness": {
+          "reasoning": "The comment fully explains the logic behind the condition.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the conditional logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "48108990: Set the admission/outpatient indicator field in the output array.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific action being taken but lacks broader context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b9ddc4ea: Prepare to set the 'Date Transcribed:' field.",
+        "completeness": {
+          "reasoning": "The comment mentions preparing to set a field but does not elaborate on any other steps or details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any false information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a basic idea but lacks depth to be significantly useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d504f8d7: Extract and format the date transcribed.",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality of extracting and formatting the date.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the code's functionality but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e82f3896: If the 'FROM SF' flag is present and the date transcribed and dictated by provider are not available, set the date transcribed to 'NOT APPLICABLE'.",
+        "completeness": {
+          "reasoning": "The comment thoroughly explains a specific condition and the action taken.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information based on the condition described.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is detailed but still clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding a specific logic condition.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "235d457f: Set the 'Date Transcribed:' field in the output array.",
+        "completeness": {
+          "reasoning": "The comment addresses the action of setting a field but lacks additional context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment gives correct information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but could provide more information.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "77ddaeb3: Start a new line.",
+        "completeness": {
+          "reasoning": "The comment is very brief and does not provide much context.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but overly simplistic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is readable but extremely brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is of limited usefulness due to its simplicity.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "079a0d94: Prepare to set the division field.",
+        "completeness": {
+          "reasoning": "The comment does not fully explain what 'preparing' entails or all capabilities related to the division field.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides a true but very limited scope of information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is minimally useful as it lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8f643af7: Extract and format the division.",
+        "completeness": {
+          "reasoning": "The comment outlines the primary action but does not describe the extraction and formatting process in detail.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is moderately useful, providing a clear but brief overview.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4e6927dc: Set the division field in the output array.",
+        "completeness": {
+          "reasoning": "The comment explains the action but does not cover all relevant details about setting the field.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more informative.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "11177f78: Extract and format the transcribed by provider.",
+        "completeness": {
+          "reasoning": "The comment outlines the main action but lacks detail on the process involved.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is moderately useful but could benefit from additional detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ddb38fb8: If the 'FROM SF' flag is present and the transcribed by provider, date transcribed, and dictated by provider are not available, set the transcribed by provider to 'NOT APPLICABLE'.",
+        "completeness": {
+          "reasoning": "The comment is comprehensive, covering all conditions and actions related to the 'FROM SF' flag.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true and detailed information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is detailed but remains clear and readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful, especially for understanding conditional logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e8b5b959: ;Print the name of the transcriber.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of printing the name of the transcriber.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the function of the code, especially for expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f2f18038: ;Store the line of text in ^TMP.",
+        "completeness": {
+          "reasoning": "The comment addresses the primary functionality of storing a line of text in a temporary storage.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the function of the code, especially for expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "55d61443: ;Get the name of the location.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of getting the name of the location.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the function of the code, especially for expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4aea8a24: ;Build the string for the location line.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of building a string for the location line.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the function of the code, especially for expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5081b1b4: ;Clear the line buffer.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of clearing the line buffer.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the function of the code, especially for expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d536527a: ;Insert the location line prompt.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of inserting the location line prompt but does not cover any other capabilities of the relevant code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about inserting the location line prompt.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand this specific line of code but does not provide broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e577ce97: ;Get the name of the location.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of getting the name of the location but does not elaborate further.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about getting the name of the location.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific functionality but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e008e842: ;Insert the location name.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of inserting the location name but does not cover any other capabilities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about inserting the location name.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand this specific line of code but does not provide broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1f206fec: ;Insert the date signed prompt.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of inserting the date signed prompt but does not elaborate further.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about inserting the date signed prompt.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific line of code but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "366ba359: ;Get the date signed and format it.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of getting and formatting the date signed, covering more ground than the other comments.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about getting and formatting the date signed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is quite useful as it covers both getting and formatting the date, providing better context.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d779887b: ;Insert the formatted date signed and store the line.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of inserting the date and storing the line.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific action being performed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fccb0707: ;Get the service/section pointer.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of getting the service/section pointer.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ff40ba21: ;Get the name of the service/section.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of getting the name of the service/section.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific action being performed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0ad4779b: ;Clear the line buffer.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of clearing the line buffer.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific action being performed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4d2d4d36: ;Insert the service/section prompt.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of inserting the service/section prompt.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2c586535: ;Insert the service/section name.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific action of inserting a name but doesn't cover associated functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but lacks context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful to understand the specific action but not the broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "22743952: ;Get the service/section pointer.",
+        "completeness": {
+          "reasoning": "The comment clearly identifies a single aspect of functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful to understand the specific action but not the surrounding context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ba026761: ;Get the name of the service/section.",
+        "completeness": {
+          "reasoning": "The comment documents one specific function but not additional capabilities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and succinct.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9028ce0a: ;Insert the service/section name.",
+        "completeness": {
+          "reasoning": "This is a duplicate of an earlier comment and thus shares the same level of completeness.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate but lacks additional context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding the specific action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7b2327cf: ;Get the name of the signer.",
+        "completeness": {
+          "reasoning": "The comment documents one specific action but no additional functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding the specific action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6536c0af: ",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided, so it is neither true nor false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus has no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at all.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "ae5e7618: ",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided, so it is neither true nor false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus has no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at all.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "2ac57f49: ",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided, so it is neither true nor false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus has no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at all.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "6e55a053: ",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided, so it is neither true nor false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus has no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at all.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "a0ad7098: ",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided, so it is neither true nor false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus has no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at all.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "04d62f97: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "No information is provided to verify its truthfulness.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is readable but lacks any meaningful content.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "f570f191: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "No information is provided to verify its truthfulness.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is readable but lacks any meaningful content.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "a2231d53: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "No information is provided to verify its truthfulness.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is readable but lacks any meaningful content.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "b4c49124: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "No information is provided to verify its truthfulness.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is readable but lacks any meaningful content.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "cac10662: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "No information is provided to verify its truthfulness.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is readable but lacks any meaningful content.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "15aa149e: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the relevant source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided to judge the truthfulness.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus unreadable.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "f48bd0e2: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the relevant source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided to judge the truthfulness.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus unreadable.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "7247825a: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the relevant source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided to judge the truthfulness.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus unreadable.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "e3e89d7e: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the relevant source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided to judge the truthfulness.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus unreadable.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "d75921b5: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the relevant source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided to judge the truthfulness.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus unreadable.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "3c9d8d73: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided to be true or false.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is just an identifier with no explanatory text.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level as it does not provide any information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "2fbef933: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided to be true or false.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is just an identifier with no explanatory text.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level as it does not provide any information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "10c1e89d: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided to be true or false.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is just an identifier with no explanatory text.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level as it does not provide any information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "7e773e89: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided to be true or false.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is just an identifier with no explanatory text.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level as it does not provide any information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "a3c5ebbb: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information provided to be true or false.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is just an identifier with no explanatory text.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level as it does not provide any information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "bf59fb85: ;Assign a default value when date/name fields are blank for a short-form report.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of assigning default values but does not cover any other aspects or details of the implementation.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately states the purpose of assigning default values when date/name fields are blank.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read, with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful in helping an average programmer understand the specific functionality of assigning default values for blank fields in a short-form report.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

@@ -17,6 +17,8 @@ from janus.converter.document import Documenter, MadLibsDocumenter, MultiDocumen
 from janus.converter.requirements import RequirementsDocumenter
 from janus.converter.translate import Translator
 from janus.converter.evaluate import Evaluator
+from janus.converter.evaluators.requirementEval import RequirementEvaluator
+from janus.converter.evaluators.inlineCommentEval import InlineCommentEvaluator
 from janus.embedding.collections import Collections
 from janus.embedding.database import ChromaEmbeddingDatabase
 from janus.embedding.embedding_models_info import (
@@ -601,7 +603,9 @@ def llm_self_eval(
     ] = None,
 ):
     model_arguments = dict(temperature=temperature)
-    self_evaluation_generator = Evaluator(
+    # Setting parser type here
+    if evaluation_type == "incose":
+        self_evaluation_generator = RequirementEvaluator(
         model=llm_name,
         model_arguments=model_arguments,
         source_language=language,
@@ -610,6 +614,18 @@ def llm_self_eval(
         evaluation_type=evaluation_type,
         eval_items_per_request=eval_items_per_request
     )
+    elif evaluation_type == "comments":
+        self_evaluation_generator = InlineCommentEvaluator(
+        model=llm_name,
+        model_arguments=model_arguments,
+        source_language=language,
+        max_prompts=max_prompts,
+        splitter_type=splitter_type,
+        evaluation_type=evaluation_type
+    )
+    else:
+        raise ValueError("Parser not found. Please make sure the evaluation type is correct and the parser and prompt exsists.")
+    
     self_evaluation_generator.translate(input_dir, output_dir, overwrite, collection)
 
 

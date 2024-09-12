@@ -1,0 +1,672 @@
+{
+  "input": "{\n  \"comments\": [\n    \"636c7922:  ;\\n ;Process the selected reports.\\n ;\",\n    \"c75583a6: ;Loop through each report and execute it.\",\n    \"37279c90: ;If reports were executed, call RET to cleanup and then call DGJOPRT3.\",\n    \"d369f82d: ;Exit point.\",\n    \"6df5e732: ;Set DGJTDV1 to the value of DGJTDV.\",\n    \"d371b161: ;Get the division name for the selected division.\",\n    \"0c4b0f31: ;Blank.\",\n    \"6dfbbb5f: ;Format the date for display.\",\n    \"e7f8cbc4: ;Loop through each patient and execute PAT1.\",\n    \"b5bc8a8d: ;Loop through all patient+treatment pointer pairs for the current division.\",\n    \"f875333d:  ;If the current pair has an entry in the Visit file, print a second copy of the report.\",\n    \"124d8136: ;Exit point for the PAT1 logic.\",\n    \"f1034ebb: ;If not the first facility, print the header.\",\n    \"3b5c42c9:  .;Loop through all physicians for the current division:\\n .;- If continuing a report, retrieve the next physician\\n .;- Print header and physician header line\\n .;- Loop through all patients for the current physician\\n .;-- Print patient-level details\",\n    \"c17d5ba7: ;Get next entry from ^UTILITY(\\\"VAS\\\",$J,DGJTDV,DGJTPHY,DGJTPT) for each DFN/IFN pair.\",\n    \"7f8b8cf8: ;If entry exists in ^VAS(393,IFN,0), print details and call PH routine.\",\n    \"b56b717c: ;Loop through ^UTILITY(\\\"VAS\\\",$J,DGJTDV,DGJTDT) for each date.\",\n    \"b8218210: ;For each date/patient pair, call DAT1.\",\n    \"b9c0e9fc: ;Get next entry from ^UTILITY(\\\"VAS\\\",$J,DGJTDV,DGJTDT,DGJTPT) for each DFN/IFN pair.\",\n    \"b98ff8be: ;If entry exists in ^VAS(393,IFN,0), print details.\",\n    \"ebfbd5ab: ;Quit if no data is to be processed.\",\n    \"3e1536fc: ;If not processing all HFs, display header with category name.\",\n    \"a7655fee: ;Processes each HF for the date and displays required data.\",\n    \"0ba2dcfb: ;End of routine.\",\n    \"d6617db5: Process each entry in the global array for the current patient, division, service, specialty, and provider team.\",\n    \"11a131f6: Exit the loop.\",\n    \"33a4e404: For each patient, division, service, specialty, provider team, and date/time, process each entry in the global array and print the results if the entry exists in the VAS(393 global array. Also, save any changes.\",\n    \"7a193eb9: Exit the loop.\",\n    \"713ebdf3: Get the node data from the VAS(393 global array for the current entry.\",\n    \"7f8b1ef5: If the entry is not a physician, get the physician name from the VA(200 global array using the pointer value in the current entry.\",\n    \"dae82564: If the entry is a date, print a newline and the date value.\",\n    \"51eb941d: ;If transfer is not for date movement, write blank line\",\n    \"bba8e23d: ;Write patient name\",\n    \"21784192: ;Write patient ID and if transfer is for date movement, write on column 30 else on column 18\",\n    \"b6ced931: ;If transfer is not for date movement, get transfer date and write it\",\n    \"49c3e337: ;If admission is to a specialty, get specialty name from file 405.1 and write it\",\n    \"9c12b016: ;If admission is to a clinic, get clinic name from file 44 and write it\",\n    \"7e9bee6f: Get the latest appointment date for the patient.\",\n    \"9fdea31a: Print the short appointment type.\",\n    \"19d96c17: If appointment type is PHY, print header and quit.\",\n    \"75ab1882: Print the provider name.\",\n    \"8ce9250a: Print the short specialty code for the principal treating specialty.\",\n    \"86a83609: If the appointment is canceled, print the cancellation reason.\",\n    \"dae8a684: ;Write the ASCII character and the Julian admission date.\",\n    \"60e3f8fe: ;Quit.\",\n    \"d6ea2b92: ;Call the header subroutine and quit.\",\n    \"8de076eb: ;If PAT or DAT mode and not displaying on a terminal, go to RET1.\",\n    \"a14f80e5: ;If not displaying on a terminal, quit.\",\n    \"00037f32: ;Clear screen lines for 'Enter <RET> to continue or ^ to QUIT' prompt.\",\n    \"c995fca9: ;Call the division subroutine and quit if not displaying on a terminal.\",\n    \"acc1a619: ;Prompt user for input. If user enters '^' or times out, set DGU=1. If DGU=1, quit. Otherwise, set DGFLAG=1.\",\n    \"69ee2bb5: ;If PAT or DAT mode and not enough lines left on screen, call RET and HEAD subroutines. Quit if DGU=1.\",\n    \"247bc31b: ;If not enough lines left on screen, call RET if displaying on a terminal. If not displaying on a terminal, call HEAD.\",\n    \"950b3234: ;Quit.\",\n    \"46d6f0f0: ;Write division name.\",\n    \"c3bd9377: ;Write physician name.\",\n    \"9b900e45: ;Write service name.\",\n    \"b5e1125d: ;Write specialty name.\",\n    \"4836a5ad: ;Call the physician subroutine and quit.\",\n    \"65513825: ;Call the service subroutine and quit.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 82.67216324806213
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "636c7922:  ;\n ;Process the selected reports.\n ;",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear description of the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c75583a6: ;Loop through each report and execute it.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the purpose of the loop.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "37279c90: ;If reports were executed, call RET to cleanup and then call DGJOPRT3.",
+        "readability": {
+          "reasoning": "The comment clearly explains the sequence of actions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the control flow and cleanup process.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d369f82d: ;Exit point.",
+        "readability": {
+          "reasoning": "The comment is very brief but still clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates an exit point, which is useful for understanding the code structure.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6df5e732: ;Set DGJTDV1 to the value of DGJTDV.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a simple assignment, which is somewhat trivial but still informative.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d371b161: ;Get the division name for the selected division.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the purpose of the code related to obtaining the division name.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0c4b0f31: ;Blank.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "6dfbbb5f: ;Format the date for display.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the code's functionality but is quite basic.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e7f8cbc4: ;Loop through each patient and execute PAT1.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the purpose of the loop and the action executed within it.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b5bc8a8d: ;Loop through all patient+treatment pointer pairs for the current division.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the scope and purpose of the loop in detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f875333d:  ;If the current pair has an entry in the Visit file, print a second copy of the report.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific functionality in the code, which is useful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "124d8136: ;Exit point for the PAT1 logic.",
+        "readability": {
+          "reasoning": "The comment is brief and comprehensible.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates an exit point in the code, which is useful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f1034ebb: ;If not the first facility, print the header.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a condition under which a specific action is taken, helpful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3b5c42c9:  .;Loop through all physicians for the current division:\n .;- If continuing a report, retrieve the next physician\n .;- Print header and physician header line\n .;- Loop through all patients for the current physician\n .;-- Print patient-level details",
+        "readability": {
+          "reasoning": "The comment is detailed but remains clear and organized.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a step-by-step explanation of a complex logic, useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c17d5ba7: ;Get next entry from ^UTILITY(\"VAS\",$J,DGJTDV,DGJTPHY,DGJTPT) for each DFN/IFN pair.",
+        "readability": {
+          "reasoning": "The comment is clear but includes specific code references that might be confusing to some.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a non-trivial action, but its utility might be limited due to the specific code references.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7f8b8cf8: ;If entry exists in ^VAS(393,IFN,0), print details and call PH routine.",
+        "readability": {
+          "reasoning": "The comment is well-structured and uses clear language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about the conditions and actions taken, useful for understanding code behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b56b717c: ;Loop through ^UTILITY(\"VAS\",$J,DGJTDV,DGJTDT) for each date.",
+        "readability": {
+          "reasoning": "The comment is clear but uses some jargon that might not be immediately understood by all.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a loop structure, which is moderately useful but not highly detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b8218210: ;For each date/patient pair, call DAT1.",
+        "readability": {
+          "reasoning": "The comment is brief and clear, but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a function call with limited context or explanation.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b9c0e9fc: ;Get next entry from ^UTILITY(\"VAS\",$J,DGJTDV,DGJTDT,DGJTPT) for each DFN/IFN pair.",
+        "readability": {
+          "reasoning": "The comment is clear but includes specific terms that may require additional knowledge.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a clear description of the action but lacks deeper context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b98ff8be: ;If entry exists in ^VAS(393,IFN,0), print details.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about a condition and an action, useful for understanding code behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ebfbd5ab: ;Quit if no data is to be processed.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the condition for quitting, which is useful for understanding the control flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3e1536fc: ;If not processing all HFs, display header with category name.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional display logic, which is helpful for understanding the display behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a7655fee: ;Processes each HF for the date and displays required data.",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a key part of the process, making it useful for understanding the functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0ba2dcfb: ;End of routine.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is trivial as it states the obvious end of a routine.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d6617db5: Process each entry in the global array for the current patient, division, service, specialty, and provider team.",
+        "readability": {
+          "reasoning": "The comment is comprehensive and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the processing logic, which is very useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "11a131f6: Exit the loop.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "33a4e404: For each patient, division, service, specialty, provider team, and date/time, process each entry in the global array and print the results if the entry exists in the VAS(393 global array. Also, save any changes.",
+        "readability": {
+          "reasoning": "The comment is well-written and comprehensive.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of the process, useful for understanding complex logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7a193eb9: Exit the loop.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "713ebdf3: Get the node data from the VAS(393 global array for the current entry.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the purpose of obtaining node data.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7f8b1ef5: If the entry is not a physician, get the physician name from the VA(200 global array using the pointer value in the current entry.",
+        "readability": {
+          "reasoning": "The comment is clear but a bit long.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an action that helps in understanding the specific condition and its handling.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dae82564: If the entry is a date, print a newline and the date value.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains specific functionality which helps in understanding the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "51eb941d: ;If transfer is not for date movement, write blank line",
+        "readability": {
+          "reasoning": "The comment is mostly clear but the semicolon at the beginning can be misleading.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding a specific condition in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bba8e23d: ;Write patient name",
+        "readability": {
+          "reasoning": "The comment is very brief but readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "21784192: ;Write patient ID and if transfer is for date movement, write on column 30 else on column 18",
+        "readability": {
+          "reasoning": "The comment is clear but the semicolon at the beginning can be misleading.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and its impact on the output, which is useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b6ced931: ;If transfer is not for date movement, get transfer date and write it",
+        "readability": {
+          "reasoning": "The comment is mostly clear but the semicolon at the beginning can be misleading.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding a specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "49c3e337: ;If admission is to a specialty, get specialty name from file 405.1 and write it",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the specific file being referenced for the functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9c12b016: ;If admission is to a clinic, get clinic name from file 44 and write it",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives clear information about the file and the action, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7e9bee6f: Get the latest appointment date for the patient.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a non-trivial functionality, aiding in code comprehension.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9fdea31a: Print the short appointment type.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the action being performed, though it could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "19d96c17: If appointment type is PHY, print header and quit.",
+        "readability": {
+          "reasoning": "The comment is clear and easily readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific conditions and actions, which helps in understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "75ab1882: Print the provider name.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains what the code is doing, which is helpful for understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8ce9250a: Print the short specialty code for the principal treating specialty.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding a specific functionality related to specialty codes.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "86a83609: If the appointment is canceled, print the cancellation reason.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context about handling appointment cancellations.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dae8a684: ;Write the ASCII character and the Julian admission date.",
+        "readability": {
+          "reasoning": "The comment is clear but the semicolon at the beginning is unnecessary.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding specific data handling but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "60e3f8fe: ;Quit.",
+        "readability": {
+          "reasoning": "The comment is clear but the semicolon is unnecessary.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d6ea2b92: ;Call the header subroutine and quit.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment directly explains what the code does, aiding understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8de076eb: ;If PAT or DAT mode and not displaying on a terminal, go to RET1.",
+        "readability": {
+          "reasoning": "The comment is clear but slightly complex due to technical terms.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific conditions that help in understanding the flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a14f80e5: ;If not displaying on a terminal, quit.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easily understood.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition, aiding in understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "00037f32: ;Clear screen lines for 'Enter <RET> to continue or ^ to QUIT' prompt.",
+        "readability": {
+          "reasoning": "The comment is clear and explains the functionality well.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand what the prompt is for, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c995fca9: ;Call the division subroutine and quit if not displaying on a terminal.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action, aiding understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "acc1a619: ;Prompt user for input. If user enters '^' or times out, set DGU=1. If DGU=1, quit. Otherwise, set DGFLAG=1.",
+        "readability": {
+          "reasoning": "The comment is clear and detailed, explaining the sequence of actions and conditions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a good understanding of the user input logic and the conditions for setting flags, helpful for any level of programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "69ee2bb5: ;If PAT or DAT mode and not enough lines left on screen, call RET and HEAD subroutines. Quit if DGU=1.",
+        "readability": {
+          "reasoning": "The comment is clear but has minor readability issues due to abbreviations.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains conditional logic and function calls, which is useful, but may require some understanding of the abbreviations.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "247bc31b: ;If not enough lines left on screen, call RET if displaying on a terminal. If not displaying on a terminal, call HEAD.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand, with no apparent issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the logic for calling different subroutines based on display conditions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "950b3234: ;Quit.",
+        "readability": {
+          "reasoning": "The comment is exceptionally brief and lacks detail, but is still readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is too trivial and does not provide much value.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "46d6f0f0: ;Write division name.",
+        "readability": {
+          "reasoning": "The comment is brief but clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it states the action, but it is still quite trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c3bd9377: ;Write physician name.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides information about the functionality related to writing a physician's name, which helps in understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9b900e45: ;Write service name.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides information about the functionality related to writing a service name, which helps in understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b5e1125d: ;Write specialty name.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides information about the functionality related to writing a specialty name, which helps in understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4836a5ad: ;Call the physician subroutine and quit.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific action and its outcome, which is useful for understanding the flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "65513825: ;Call the service subroutine and quit.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific action and its outcome, which is useful for understanding the flow of the code.",
+          "score": 4
+        }
+      }
+    ]
+  }
+}

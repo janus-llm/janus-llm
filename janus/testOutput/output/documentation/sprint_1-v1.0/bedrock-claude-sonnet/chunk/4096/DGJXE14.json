@@ -1,0 +1,628 @@
+{
+  "input": "{\n  \"comments\": [\n    \"dc58a515: ;\\n .;Process the STATUS/DATE/TIME fiels for each <QCODE>\\n .;transaction in the DENTAL QUALITY MONITOR file #393.\\n .;\\n .;This routine rearranges the output of the TRANSCRIBED or SIGNED\\n .;fields to produce data in the DATE/SIGNED BY format for\\n .;the DATE TRANSCRIBED and DATE SIGNED fields respectively.\\n .;\\n .;Variable DGJTDEL allows transcribers to update notes without\\n .;requiring co-signature for updates (first 2 pieces only)\\n .;\\n .;Variable DGJTST determines the STATUS value of the field\\n .;being processed, and allows routing to the appropriate part\\n .;of the routine for updates.\",\n    \"47769ba0: Save the entry number and go to label BEGIN\",\n    \"b02d333e: Identify fields, file and entry locations\",\n    \"3c3656ce: If DT field exists, extract the SIGNED BY value\",\n    \"b0c52680: Kill variables\",\n    \"6f6b056a: Ask the Updater question\",\n    \"92fc8e7b: Exit if no update required\",\n    \"73b5827f: Write out the update mode and field data\",\n    \"4d432f10: Check field attributes\",\n    \"d936bc94: Check LAYGO and DIC(0) values\",\n    \"66e3792a: Branch to documented label on U, timeout or <RET>\",\n    \"43c4b5b1: Exit if no change made\",\n    \"59241448: Store previous Dxn in DQ(Dxn)\",\n    \"11512f2e: Branch to the routine specified by Dxn\",\n    \"98232b97: If already edited branch, ask the leading question\",\n    \"5ad8277a: Check for null response\",\n    \"05646c02: Handle entry of question mark or up-arrow\",\n    \"4295cc14: Handle entry of @ and branch\",\n    \"2c2a2d49: Store executable help in X if edited last time\",\n    \"d5c1ebdc: Check validity of data by datatype, and if valid,\\nstore in X and format output as required\",\n    \"0cf4f950: ;If no match on this code value, try the next one\",\n    \"0d967a6c: ;Display the remainder of the code representation not including the matched value\",\n    \"2b3bbd73: ;If this is a Pointer and there is a value, re-display it\",\n    \"cdd90703: ;For numeric response, preserve 24 digits\",\n    \"264e499e: ;Strip leading zeros or decimal point from number\",\n    \"5034d273: ;Execute Computed-Field Code\",\n    \"040afe88: ;If a LAYGO word-processing document, save it\",\n    \"3a57a506: ;Kick out if was terminated prematurely\",\n    \"ee4e3bfb: ;Bad answer\",\n    \"7af28d2f: ;Save for Computed-field Code\",\n    \"427ed7e9: ;Build scratch global subscript node\",\n    \"854ec884: ;Get answer\",\n    \"bfe549a4: ;Re-display with final user-typed answer\",\n    \"54092b1b: ;Check for a modifying routine\",\n    \"3a17b1ef: ;See if linear-relational piece access piece\",\n    \"ed386f3d: ;If Set choice, do set logic\",\n    \"7b4d68b1: ;Restore if it was a Pointer\",\n    \"8554765f: ;Not a Simple, Wimpy, or X-type Reader\",\n    \"713dc25e: ;Simple Reader\",\n    \"ef20c35a: ;Done\",\n    \"d4463b78: ;UNSIGNED DIET TREATMENT\",\n    \"0723d976: ;FIELD 10.06 SIGNED BY, POINTS TO FILE 200 (PROVIDER FILE)\",\n    \"98d13581: ;USES PROVIDER FILE AS 'DIC' LOOKUP SOURCE\",\n    \"bcb94ea8: ;GO TO ^DIR READER/WRITER\",\n    \"4e31ebb6: ;NO ADDITIONAL CODE FOR X1\",\n    \"01b04115: ;IF NO SIGNATURE ENTERED, DELETE DATA FOR FIELD .05 AND SET STATUS TO 'TRANSCRIBED'\",\n    \"58dd01cb: ;DELETE SIGNATURE DATA AND SET STATUS\",\n    \"1bce63c6: ;NO ADDITIONAL CODE FOR X2\",\n    \"bdc91aab: ;SET STATUS TO 'SIGNED'\",\n    \"35f45f9f: ;SET STATUS\",\n    \"4b825f3b: ;NO ADDITIONAL CODE FOR X3\",\n    \"d464008b: ;IF DIET WAS DELETED (NO REVIEW), SET STATUS TO 'SIGNED NO REVIEW'\",\n    \"0f3a2879: ;SET STATUS FOR DELETED DIET\",\n    \"4fa7c5b7: ;NO ADDITIONAL CODE FOR X4\",\n    \"d1b43bd2: ;\\n;CONTROL BRANCHES TO ROUTINE ^DGJXE15\\n;\",\n    \"9d714527: ;BRANCH TO ROUTINE ^DGJXE15\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 72.7690680027008
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "dc58a515: ;\n .;Process the STATUS/DATE/TIME fiels for each <QCODE>\n .;transaction in the DENTAL QUALITY MONITOR file #393.\n .;\n .;This routine rearranges the output of the TRANSCRIBED or SIGNED\n .;fields to produce data in the DATE/SIGNED BY format for\n .;the DATE TRANSCRIBED and DATE SIGNED fields respectively.\n .;\n .;Variable DGJTDEL allows transcribers to update notes without\n .;requiring co-signature for updates (first 2 pieces only)\n .;\n .;Variable DGJTST determines the STATUS value of the field\n .;being processed, and allows routing to the appropriate part\n .;of the routine for updates.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear, but has minor typos like 'fiels' instead of 'fields'.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a comprehensive explanation of the function's purpose and variables, which is useful for an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "47769ba0: Save the entry number and go to label BEGIN",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code's flow better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b02d333e: Identify fields, file and entry locations",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a basic understanding, but it is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3c3656ce: If DT field exists, extract the SIGNED BY value",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific condition.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b0c52680: Kill variables",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial action without much context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6f6b056a: Ask the Updater question",
+        "readability": {
+          "reasoning": "The comment is clear and concise, though it could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat vague and doesn't provide much context for understanding the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "92fc8e7b: Exit if no update required",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the conditional logic of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "73b5827f: Write out the update mode and field data",
+        "readability": {
+          "reasoning": "The comment is clear and provides a good description.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding what data is being written, which is useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4d432f10: Check field attributes",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a general idea of what the code does but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d936bc94: Check LAYGO and DIC(0) values",
+        "readability": {
+          "reasoning": "The comment is clear and specific.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding specific values being checked in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "66e3792a: Branch to documented label on U, timeout or <RET>",
+        "readability": {
+          "reasoning": "The comment is clear and concise, though the use of '<RET>' may be unclear to some.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about when the branch occurs, which is useful for understanding the code's flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "43c4b5b1: Exit if no change made",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it succinctly explains an exit condition in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "59241448: Store previous Dxn in DQ(Dxn)",
+        "readability": {
+          "reasoning": "The comment is clear but contains abbreviated terms that may not be immediately understandable to all readers.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about a specific action within the code, but the abbreviations could be clarified.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "11512f2e: Branch to the routine specified by Dxn",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the purpose of a branch instruction.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "98232b97: If already edited branch, ask the leading question",
+        "readability": {
+          "reasoning": "The comment is clear but slightly ambiguous due to the phrasing 'ask the leading question'.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more specific about what the 'leading question' refers to.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5ad8277a: Check for null response",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand that the code checks for a null response, which is useful for both average and expert programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "05646c02: Handle entry of question mark or up-arrow",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates specific functionality related to user input, useful for understanding the code's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4295cc14: Handle entry of @ and branch",
+        "readability": {
+          "reasoning": "The comment is clear but slightly ambiguous due to the use of 'branch'.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful but could be more specific about what 'branch' means in this context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2c2a2d49: Store executable help in X if edited last time",
+        "readability": {
+          "reasoning": "The comment is clear but could be more specific.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is moderately useful, but more context on 'executable help' and 'X' would improve it.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d5c1ebdc: Check validity of data by datatype, and if valid,\nstore in X and format output as required",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, providing detailed information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it explains multiple steps of the process.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0cf4f950: ;If no match on this code value, try the next one",
+        "readability": {
+          "reasoning": "The comment is concise and clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition that would be useful for understanding code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0d967a6c: ;Display the remainder of the code representation not including the matched value",
+        "readability": {
+          "reasoning": "The comment is clear but slightly verbose.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about what is being displayed and what is excluded.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2b3bbd73: ;If this is a Pointer and there is a value, re-display it",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding what happens when certain conditions are met.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cdd90703: ;For numeric response, preserve 24 digits",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides important information about the precision of numeric responses.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "264e499e: ;Strip leading zeros or decimal point from number",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific operation on numbers, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5034d273: ;Execute Computed-Field Code",
+        "readability": {
+          "reasoning": "The comment is concise and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly states the purpose of the code, which is useful for understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "040afe88: ;If a LAYGO word-processing document, save it",
+        "readability": {
+          "reasoning": "The comment is clear but uses a specific term (LAYGO) that may not be universally understood.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the condition under which the document should be saved.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3a57a506: ;Kick out if was terminated prematurely",
+        "readability": {
+          "reasoning": "The comment is clear but could be slightly more specific.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an important conditional exit, aiding understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ee4e3bfb: ;Bad answer",
+        "readability": {
+          "reasoning": "The comment is very brief but still understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is too vague to be useful; it does not provide enough context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7af28d2f: ;Save for Computed-field Code",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment effectively explains the purpose of the code, helping to understand its functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "427ed7e9: ;Build scratch global subscript node",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information for understanding a specific part of the code related to building a scratch global subscript node.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "854ec884: ;Get answer",
+        "readability": {
+          "reasoning": "The comment is readable but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat vague and does not provide much context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "bfe549a4: ;Re-display with final user-typed answer",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action of re-displaying with the user's final answer, which can be useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "54092b1b: ;Check for a modifying routine",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about checking for a modifying routine, relevant for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3a17b1ef: ;See if linear-relational piece access piece",
+        "readability": {
+          "reasoning": "The comment is somewhat unclear due to the technical jargon.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment is difficult to understand and does not provide clear guidance.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ed386f3d: ;If Set choice, do set logic",
+        "readability": {
+          "reasoning": "The comment is clear and concise, with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the logic being implemented.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7b4d68b1: ;Restore if it was a Pointer",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a specific action to be taken, which is useful for understanding the code's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8554765f: ;Not a Simple, Wimpy, or X-type Reader",
+        "readability": {
+          "reasoning": "The comment is clear but slightly verbose.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the type of Reader being referred to.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "713dc25e: ;Simple Reader",
+        "readability": {
+          "reasoning": "The comment is very clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for identifying the type of Reader.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ef20c35a: ;Done",
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates the end of a process, which is trivial information.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d4463b78: ;UNSIGNED DIET TREATMENT",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about the diet treatment, which could be useful depending on the context of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0723d976: ;FIELD 10.06 SIGNED BY, POINTS TO FILE 200 (PROVIDER FILE)",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It specifies the field and its reference, which is useful for understanding the code's structure.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "98d13581: ;USES PROVIDER FILE AS 'DIC' LOOKUP SOURCE",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the role of the provider file, which helps in understanding the lookup mechanism.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bcb94ea8: ;GO TO ^DIR READER/WRITER",
+        "readability": {
+          "reasoning": "The comment is brief but understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides direction to another part of the code, which could be useful for navigation.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4e31ebb6: ;NO ADDITIONAL CODE FOR X1",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It specifies the absence of additional code, which helps in understanding the state of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "01b04115: ;IF NO SIGNATURE ENTERED, DELETE DATA FOR FIELD .05 AND SET STATUS TO 'TRANSCRIBED'",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a specific condition and the actions taken, aiding both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "58dd01cb: ;DELETE SIGNATURE DATA AND SET STATUS",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes the actions taken but lacks detail about conditions or context, making it moderately useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1bce63c6: ;NO ADDITIONAL CODE FOR X2",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment states the absence of code for a specific case, which is somewhat useful but not highly informative.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "bdc91aab: ;SET STATUS TO 'SIGNED'",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates an action but lacks context or conditions, making it only moderately useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "35f45f9f: ;SET STATUS",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is too vague to be useful as it does not specify what status is being set or under what conditions.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "4b825f3b: ;NO ADDITIONAL CODE FOR X3",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates there is no extra code for a specific section, which is useful for understanding code organization.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d464008b: ;IF DIET WAS DELETED (NO REVIEW), SET STATUS TO 'SIGNED NO REVIEW'",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear information about a specific conditional behavior in the code, which is useful for understanding logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0f3a2879: ;SET STATUS FOR DELETED DIET",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a specific action taken in the code, which is useful for understanding the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4fa7c5b7: ;NO ADDITIONAL CODE FOR X4",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates there is no extra code for a specific section, which is useful for understanding code organization.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d1b43bd2: ;\n;CONTROL BRANCHES TO ROUTINE ^DGJXE15\n;",
+        "readability": {
+          "reasoning": "The comment is clear but slightly redundant with extra semicolons.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains control flow, which is useful for understanding how code execution is managed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9d714527: ;BRANCH TO ROUTINE ^DGJXE15",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read, though it uses specialized terminology.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action in the code, which is helpful for understanding the program's flow.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

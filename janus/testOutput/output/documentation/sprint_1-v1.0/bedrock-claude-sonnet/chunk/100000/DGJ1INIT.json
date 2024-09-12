@@ -1,0 +1,791 @@
+{
+  "input": "{\n  \"comments\": [\n    \"ccaf896a: ;\\n .;DGJ1INIT - This routine does environment checks for the Registration\\n .;package and initializes the Incomplete Record Tracking module.\\n .;\",\n    \"bfa0d1ff: ;\\n .;The entry point that performs the environment checks and initialization.\\n .;\",\n    \"bf330cf1: Set the XPDABORT flag to blank (for now)\",\n    \"4f9702c8: Check that the user is a programmer (DUZ(0)=\\\"@\\\"), that the system date is defined (DT), and that the global node delimiter is set correctly (U=\\\"^\\\"). If any of these checks fail, branch to the ABRT label to abort the installation.\",\n    \"82eeb415: Print a separator banner\",\n    \"ad7eed95: Print a message indicating that the programming variables are not set up properly\",\n    \"48b02c72: Print a message indicating that the installation is being aborted\",\n    \"9be2c7e4: Check if the current version of the Registration package is 5.3. If not, branch to the ABRT label to abort the installation.\",\n    \"e9f1b929: Print a separator banner\",\n    \"a2e5a26a: Print a message indicating that Version 5.3 of the Registration package has not been loaded\",\n    \"d2c0c6f5: Print a message indicating that the installation is being aborted\",\n    \"d6d06ead: New a local variable DIC\",\n    \"41c652c2: Set up the DIC array to find the entry for 'REGISTRATION' in the PACKAGE file (#9.4)\",\n    \"e1d86238: If the REGISTRATION package is not found, branch to the ABRT label to abort the installation.\",\n    \"4f480c03: Print a separator banner\",\n    \"842477c1: REGISTRATION package IEN did not exist in the PACKAGE (#9.4) file.\",\n    \"06cba24a: Requests the site to contact PIMS National VISTA Support Team for assistance.\",\n    \"843d23f4: Indicates that the installation is being aborted.\",\n    \"1aa20bbf: Stores the PACKAGE (#9.4) IEN and sets up DIC to check for the 'Additional Prefix' sub-field (#14) of the PACKAGE (#9.4) file.\",\n    \"833eba27: Sets up DIC to check if the 'DGJ' prefix already exists in the 'Additional Prefix' sub-field (#14) of the REGISTRATION package.\",\n    \"66993c55: Checks if the 'DGJ' prefix was found in the 'Additional Prefix' sub-field.\",\n    \"e02fdec3: Displays a banner message.\",\n    \"d3819a62: Displays a message indicating that the 'DGJ' prefix must be removed from the 'Additional Prefix' sub-field before installation.\",\n    \"44bbe462: Instructs the user to follow the installation instructions in the Installation Guide.\",\n    \"454eb8a7: Indicates that the installation is being aborted.\",\n    \"159875fc: Kills the DA, DIC variables that were used for the file operations.\",\n    \"845213d0: Looks up the REGISTRATION package IEN in the PACKAGE (#9.4) file and stores the output in the DGJARRY array.\",\n    \"fc7eff86: Initializes the DGJI variable to 0, which will be used as a subscript in the loop.\",\n    \"9e725451: Loops through the DGJARRY array to process each entry.\",\n    \"4beb68a1: Stores the IEN and package name from the current DGJARRY entry.\",\n    \"08d6c52f: Find DGJ entries with incorrect name (not 'INCOMPLETE RECORDS TRACKING').\",\n    \"1dc4cccd: Set the name of the entry to 'INCOMPLETE RECORDS TRACKING'.\",\n    \"79bbd4ae: File the change to the DGJ entry.\",\n    \"aaff4082: Clean up variables used in the loop.\",\n    \"ecba330e: Clean up variables used in the environment check.\",\n    \"03b8667b: Print a success message for the environment check.\",\n    \"724ef420: Exit the environment check routine.\",\n    \"67f38141: ;\\n;Post-init routine to run after successful installation.\\n;\",\n    \"f4741b27: Run the DGJ1INIP routine for post-init actions.\",\n    \"24ba1fb8: Exit the post-init routine.\",\n    \"5f17ccb6: Set the XPDABORT flag to abort the installation.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 82.14199018478394
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "ccaf896a: ;\n .;DGJ1INIT - This routine does environment checks for the Registration\n .;package and initializes the Incomplete Record Tracking module.\n .;",
+        "completeness": {
+          "reasoning": "The comment addresses the main functionality of environment checks and initialization.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and relevant to the described functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but slightly fragmented.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the primary purpose of the routine.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bfa0d1ff: ;\n .;The entry point that performs the environment checks and initialization.\n .;",
+        "completeness": {
+          "reasoning": "The comment focuses on the entry point but lacks details on specific checks or initialization steps.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but very general.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides minimal useful information about the specific functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "bf330cf1: Set the XPDABORT flag to blank (for now)",
+        "completeness": {
+          "reasoning": "The comment addresses a specific action but not the reason behind it.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting a flag.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a specific action but lacks context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "4f9702c8: Check that the user is a programmer (DUZ(0)=\"@\"), that the system date is defined (DT), and that the global node delimiter is set correctly (U=\"^\"). If any of these checks fail, branch to the ABRT label to abort the installation.",
+        "completeness": {
+          "reasoning": "The comment thoroughly describes the environment checks and associated actions.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the checks and the conditions for aborting installation.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is detailed and clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding the specific checks performed before installation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "82eeb415: Print a separator banner",
+        "completeness": {
+          "reasoning": "The comment describes a trivial action without additional context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is truthful but very basic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial action of printing a banner.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ad7eed95: Print a message indicating that the programming variables are not set up properly",
+        "completeness": {
+          "reasoning": "The comment addresses the action of printing a message but does not cover all the functionality, such as which variables or why they need to be set up properly.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but not fully exhaustive.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment would be useful to understand a specific error message but lacks full context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "48b02c72: Print a message indicating that the installation is being aborted",
+        "completeness": {
+          "reasoning": "The comment explains the action of printing a message but does not provide specifics about why the installation is being aborted.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific action but does not give the full context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9be2c7e4: Check if the current version of the Registration package is 5.3. If not, branch to the ABRT label to abort the installation.",
+        "completeness": {
+          "reasoning": "The comment covers the main functionality, including the check and the conditional branching.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is entirely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding the version check and conditional logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e9f1b929: Print a separator banner",
+        "completeness": {
+          "reasoning": "The comment indicates the action but does not describe the purpose or significance of the separator banner.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information given is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a2e5a26a: Print a message indicating that Version 5.3 of the Registration package has not been loaded",
+        "completeness": {
+          "reasoning": "The comment explains the action of printing a message but does not address the implications or next steps.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific error message but could provide more context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d2c0c6f5: Print a message indicating that the installation is being aborted",
+        "completeness": {
+          "reasoning": "The comment fully addresses a specific functionality of the code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and directly related to the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Helps an expert programmer understand the specific action being performed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d6d06ead: New a local variable DIC",
+        "completeness": {
+          "reasoning": "The comment specifies the creation of a local variable but does not elaborate on its purpose or usage.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacking detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "Provides basic information but lacks context that would be useful to an expert programmer.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "41c652c2: Set up the DIC array to find the entry for 'REGISTRATION' in the PACKAGE file (#9.4)",
+        "completeness": {
+          "reasoning": "The comment adequately explains the purpose of setting up the DIC array.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and relevant.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and adequately detailed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Helps an expert understand the specific role of the DIC array.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e1d86238: If the REGISTRATION package is not found, branch to the ABRT label to abort the installation.",
+        "completeness": {
+          "reasoning": "The comment describes a specific control flow action but does not cover other potential branches or conditions.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides useful information about a specific control flow action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4f480c03: Print a separator banner",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of printing a separator banner but does not provide context or detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "Provides basic information but lacks context that would be useful to an expert programmer.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "842477c1: REGISTRATION package IEN did not exist in the PACKAGE (#9.4) file.",
+        "completeness": {
+          "reasoning": "The comment only mentions the non-existence of IEN but does not address other functionalities or actions taken.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate based on the context given.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful for understanding the state but lacks context on actions taken.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "06cba24a: Requests the site to contact PIMS National VISTA Support Team for assistance.",
+        "completeness": {
+          "reasoning": "The comment does not address any specific functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information is likely true but is not verifiable from the given context.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a useful action but lacks technical detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "843d23f4: Indicates that the installation is being aborted.",
+        "completeness": {
+          "reasoning": "The comment addresses the action taken but does not provide details on why or how.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate based on the context given.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail on the reason for the abort.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "1aa20bbf: Stores the PACKAGE (#9.4) IEN and sets up DIC to check for the 'Additional Prefix' sub-field (#14) of the PACKAGE (#9.4) file.",
+        "completeness": {
+          "reasoning": "The comment provides a good overview of the actions being taken.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information appears accurate and truthful.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is detailed and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the purpose and action of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "833eba27: Sets up DIC to check if the 'DGJ' prefix already exists in the 'Additional Prefix' sub-field (#14) of the REGISTRATION package.",
+        "completeness": {
+          "reasoning": "The comment explains the key action being performed but lacks context on what happens if the prefix exists or doesn't exist.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate based on the context given.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding what the code is checking for.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "66993c55: Checks if the 'DGJ' prefix was found in the 'Additional Prefix' sub-field.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of checking for the 'DGJ' prefix.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information regarding the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific check being performed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e02fdec3: Displays a banner message.",
+        "completeness": {
+          "reasoning": "The comment describes the action but lacks details about the context or content of the banner message.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate but very general.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is simple and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides only trivial information.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d3819a62: Displays a message indicating that the 'DGJ' prefix must be removed from the 'Additional Prefix' sub-field before installation.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality and context of the message displayed.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action and condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is detailed and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific requirement before installation.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "44bbe462: Instructs the user to follow the installation instructions in the Installation Guide.",
+        "completeness": {
+          "reasoning": "The comment provides general instruction but lacks specifics about the installation steps.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very general.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but not very detailed.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "454eb8a7: Indicates that the installation is being aborted.",
+        "completeness": {
+          "reasoning": "The comment describes the action but does not provide details on why the installation is aborted.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides essential information but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "159875fc: Kills the DA, DIC variables that were used for the file operations.",
+        "completeness": {
+          "reasoning": "The comment mentions the essential functionality but doesn't provide details on which file operations.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more descriptive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer by indicating which variables are being killed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "845213d0: Looks up the REGISTRATION package IEN in the PACKAGE (#9.4) file and stores the output in the DGJARRY array.",
+        "completeness": {
+          "reasoning": "The comment provides a comprehensive description of what the code does.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and correctly describes the operation.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific operation, aiding both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fc7eff86: Initializes the DGJI variable to 0, which will be used as a subscript in the loop.",
+        "completeness": {
+          "reasoning": "The comment covers the initialization but does not mention the loop's purpose.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more informative if it mentioned the loop's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9e725451: Loops through the DGJARRY array to process each entry.",
+        "completeness": {
+          "reasoning": "The comment mentions the loop and its target but not the processing details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is true but incomplete.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read but could be more descriptive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks details on how entries are processed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4beb68a1: Stores the IEN and package name from the current DGJARRY entry.",
+        "completeness": {
+          "reasoning": "The comment describes the storage operation but not why or how it's used.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could include more context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the storage operation but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "08d6c52f: Find DGJ entries with incorrect name (not 'INCOMPLETE RECORDS TRACKING').",
+        "completeness": {
+          "reasoning": "The comment partially addresses the functionality but does not provide complete details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information regarding the task.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1dc4cccd: Set the name of the entry to 'INCOMPLETE RECORDS TRACKING'.",
+        "completeness": {
+          "reasoning": "The comment is specific and addresses the functionality described.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful in understanding the specific action being taken.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "79bbd4ae: File the change to the DGJ entry.",
+        "completeness": {
+          "reasoning": "The comment is brief and does not fully explain the functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more descriptive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is moderately useful but could benefit from more detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "aaff4082: Clean up variables used in the loop.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific task but lacks details on the variables or the loop.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to understand but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could provide more context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ecba330e: Clean up variables used in the environment check.",
+        "completeness": {
+          "reasoning": "The comment is specific to the task but does not elaborate on the environment check.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more informative.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "03b8667b: Print a success message for the environment check.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of printing a success message but does not cover other potential aspects of the environment check.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the specific functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "724ef420: Exit the environment check routine.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of exiting but does not cover other potential aspects of the routine.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the specific functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "67f38141: ;\n;Post-init routine to run after successful installation.\n;",
+        "completeness": {
+          "reasoning": "The comment addresses the main purpose of the post-init routine but may omit some details of post-init actions.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the post-init routine.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f4741b27: Run the DGJ1INIP routine for post-init actions.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific action of running the DGJ1INIP routine but does not cover what the routine does.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail on what the routine accomplishes.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "24ba1fb8: Exit the post-init routine.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of exiting but does not cover other potential aspects of the routine.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the specific functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5f17ccb6: Set the XPDABORT flag to abort the installation.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of setting the XPDABORT flag but does not provide additional context or details about the process.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information regarding the purpose of the XPDABORT flag.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific functionality of the XPDABORT flag but may lack sufficient detail for an expert programmer seeking more context.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

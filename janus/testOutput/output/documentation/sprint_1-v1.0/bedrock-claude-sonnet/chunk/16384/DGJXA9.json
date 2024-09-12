@@ -1,0 +1,617 @@
+{
+  "input": "{\n  \"comments\": [\n    \"71c9f4fe: ;\\nThis routine is used to edit the DICTATED DATE field (field #10.01)\\nin the EXAMINATION file (#393). It sets up and controls the\\nsequence of execution of input templates and other logic.\\n;\",\n    \"f4ea2574: ;Call input transform for DICTATED DATE field\",\n    \"c0fb931a: ;Initialize variables and check if subfile data exists\",\n    \"30d9f9c1: ;If DICTATED DATE already exists, set DE(1) to existing value\",\n    \"e811c815: ;Clean up variables\",\n    \"287f833f: ;Write data label for field being edited\",\n    \"ca75a0a0: ;No additional logic\",\n    \"ab54cbda: ;Call directory utility to handle output formatting\",\n    \"ad4a2bc2: ;Check if word-wrapping is needed for long values\",\n    \"cf6a4b77: ;No editing allowed for COMPUTED fields\",\n    \"a7c0343c: ;Read user's response and handle timeout\",\n    \"90f1769b: ;No additional logic\",\n    \"78d64664: ;Increment input template sequence number\",\n    \"ac479649: ;Branch to the next input template\",\n    \"a5edde5c: ;If existing data, go to prompt. Otherwise read new entry.\",\n    \"071d0735: If X is blank, branch to the A label if DV does not contain an 'R', branch to X if DV is empty, or branch to A if D is less than or equal to 0.\",\n    \"6febe754: If X starts with '?', branch to the QS label (Query String).\",\n    \"ecc1bc63: If X is '@', execute the code at the Z^DIE2 label.\",\n    \"7e2f18b0: If X is a space and DV contains 'd' but not 'P', and there is a default value for the current field label in ^DISV(DUZ,'DIE',DLB), set X to that default value. If DV does not contain 'D' or 'S', write the default value preceded by two spaces.\",\n    \"dc574dfd: If DV is not empty, branch to M^DIE17. If DV contains 'V', branch to ^DIE3. If DV does not contain 'S', branch to P. If there is code in ^DD(DP,DIFLD,12.1), execute it. Set % to the second piece of the semicolon-delimited string DU, with X as the delimiter. Set Y to X. If % is not empty and there is code in DIC('S'), execute it. If DB(DQ) is not defined, write '  ' followed by %. Branch to V.\",\n    \"3bfc55d3: Loop through the semicolon-delimited pieces of DU. Set Y to the current piece, and DG to the position of the substring ':X' within Y. If Y is empty, branch to X. Set YS to Y, and Y to the piece before the colon. If DG is not zero and there is code in DIC('S'), execute it. If DG is zero, continue to the next iteration of the loop.\",\n    \"968d7f9f: If DB(DQ) is not defined, write the substring of YS starting from the position DG to the end. Set X to the piece of YS before the colon.\",\n    \"667996c0: If DV contains 'P', set DIC to the concatenation of U and DU, and set DIC(0) based on the value of DB(DQ) and whether DV contains the single quote character. If DIC(0) contains 'L', set DLAYGO to the second piece of DV delimited by 'P'. If DV does not contain '*', execute ^DIC. Set X to the value of Y, and set DIC to DIE. If X is less than 0, branch to X.\",\n    \"d5f5a2d3: If DV does not contain 'N', branch to V. Execute the code at the D label. If the length of the piece of X after the decimal point is greater than 24, kill X and branch to Z.\",\n    \"c34db6df: If the second piece of DV delimited by ',' is non-zero, X contains a decimal point, and the fifth piece of DQ(DQ) delimited by U does not start with '$', perform several transformations on X: If X starts with '00', set X to an empty string. If the first character of X is 0, set X to the substring starting from the second character. Otherwise, leave X as is. If the last character of the piece of X after the decimal point is 0, remove that character from X. If the piece of X after the decimal point is empty and X contains a decimal point, set X to its numeric value.\",\n    \"e17533cf: Execute the code at the label 'X' concatenated with DQ. Kill the variable YS.\",\n    \"7d63ff0c: Kill DIC('S') and DLAYGO. If X is defined and not equal to U, set DG(DW) to X. If DV contains 'd', set ^DISV(DUZ,'DIE',DLB) to X. Branch to A.\",\n    \"61792b34: Write a bell character and '??'. If DB(DQ) is defined, branch to Z^DIE17.\",\n    \"3509a93d: Set X to '?BAD'.\",\n    \"a78d66bc: Set DZ to X. Execute the code at the D and QQ\",\n    \"ea6bd9b2: ;Set up the input variables\",\n    \"d267fc1b: ;If no existing value, display it. If '^' entered, quit. If '@' entered and not a required field, go to next field.\",\n    \"78148c73: ;Get the existing value if there is one.\",\n    \"d0e71795: ;If a pointer value: get the pointer description\",\n    \"55e04229: ;If a pointer to a MUMPS array.\",\n    \"f7eddded: ;If this is a set of codes data attribute, get the external code value.\",\n    \"3c3b79a2: ;If no entry and either reader or '??' allowed, display '??'. If no reader and '??' required display '?BAD'\",\n    \"dc27b1aa: ;If no input transform (get internal value).\",\n    \"18a3cd49: ;do the input transform\",\n    \"56833d36: ;quit if the input transform was unsuccessful\",\n    \"16335eb9: ;Initialize looping control variables\",\n    \"7235a8d2: ;Set initial values of variables\",\n    \"f1dddace: ;Entry point for processing records\",\n    \"9b94ad4e: ;Date/Time Code Input Transform\",\n    \"01286541: ;Quit the Input Transform\",\n    \"96dd6085: \",\n    \"67e5a705: \",\n    \"3837e998: \",\n    \"8a298b09: \",\n    \"24c3ac31: \",\n    \"ee294c78: \",\n    \"7e79a05c: \",\n    \"51fc0bcf: \",\n    \"17834dd8: \",\n    \"991dd1bb: \"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 79.26660895347595
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "71c9f4fe: ;\nThis routine is used to edit the DICTATED DATE field (field #10.01)\nin the EXAMINATION file (#393). It sets up and controls the\nsequence of execution of input templates and other logic.\n;",
+        "readability": {
+          "reasoning": "The comment is well-organized, clear, and provides detailed information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Explains the purpose and functionality of the routine comprehensively, useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f4ea2574: ;Call input transform for DICTATED DATE field",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Indicates a specific action within the code, useful for understanding the code's flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c0fb931a: ;Initialize variables and check if subfile data exists",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides a clear explanation of a specific operation, useful for understanding initial setup.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "30d9f9c1: ;If DICTATED DATE already exists, set DE(1) to existing value",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Describes a conditional operation effectively, aiding in understanding the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e811c815: ;Clean up variables",
+        "readability": {
+          "reasoning": "The comment is very clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Indicates a cleanup operation, which is a common but necessary part of code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "287f833f: ;Write data label for field being edited",
+        "readability": {
+          "reasoning": "The comment is concise and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action in the code, which can help an expert understand the intent.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ca75a0a0: ;No additional logic",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates that no further logic is implemented, which is useful but not particularly informative.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ab54cbda: ;Call directory utility to handle output formatting",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific function call, aiding in understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ad4a2bc2: ;Check if word-wrapping is needed for long values",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the condition being checked.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cf6a4b77: ;No editing allowed for COMPUTED fields",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides important information about a restriction in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a7c0343c: ;Read user's response and handle timeout",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific functionality that is important for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "90f1769b: ;No additional logic",
+        "readability": {
+          "reasoning": "The comment is very clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide much useful information to understand the code better.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "78d64664: ;Increment input template sequence number",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific function which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ac479649: ;Branch to the next input template",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the control flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a5edde5c: ;If existing data, go to prompt. Otherwise read new entry.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides valuable information on how the code handles different scenarios, which helps in understanding its logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "071d0735: If X is blank, branch to the A label if DV does not contain an 'R', branch to X if DV is empty, or branch to A if D is less than or equal to 0.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific and useful information that helps understand the branching logic of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6febe754: If X starts with '?', branch to the QS label (Query String).",
+        "readability": {
+          "reasoning": "The comment is concise and clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains a specific condition and its effect, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ecc1bc63: If X is '@', execute the code at the Z^DIE2 label.",
+        "readability": {
+          "reasoning": "The comment is simple and straightforward, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear instructions on what happens when X is '@', which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7e2f18b0: If X is a space and DV contains 'd' but not 'P', and there is a default value for the current field label in ^DISV(DUZ,'DIE',DLB), set X to that default value. If DV does not contain 'D' or 'S', write the default value preceded by two spaces.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, although a bit complex due to its length.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about conditions and actions, which is very useful for understanding complex logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "dc574dfd: If DV is not empty, branch to M^DIE17. If DV contains 'V', branch to ^DIE3. If DV does not contain 'S', branch to P. If there is code in ^DD(DP,DIFLD,12.1), execute it. Set % to the second piece of the semicolon-delimited string DU, with X as the delimiter. Set Y to X. If % is not empty and there is code in DIC('S'), execute it. If DB(DQ) is not defined, write '  ' followed by %. Branch to V.",
+        "readability": {
+          "reasoning": "The comment is very detailed but somewhat difficult to read due to its length and complexity.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment provides extensive information about the branching logic and variable setting, which can be very useful for understanding complex code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3bfc55d3: Loop through the semicolon-delimited pieces of DU. Set Y to the current piece, and DG to the position of the substring ':X' within Y. If Y is empty, branch to X. Set YS to Y, and Y to the piece before the colon. If DG is not zero and there is code in DIC('S'), execute it. If DG is zero, continue to the next iteration of the loop.",
+        "readability": {
+          "reasoning": "The comment uses clear sentences and terms, making it easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed steps that help an expert or average programmer understand the loop logic and conditions within the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "968d7f9f: If DB(DQ) is not defined, write the substring of YS starting from the position DG to the end. Set X to the piece of YS before the colon.",
+        "readability": {
+          "reasoning": "The comment is concise and uses straightforward language, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear instructions that help programmers understand the specific conditions and actions taken.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "667996c0: If DV contains 'P', set DIC to the concatenation of U and DU, and set DIC(0) based on the value of DB(DQ) and whether DV contains the single quote character. If DIC(0) contains 'L', set DLAYGO to the second piece of DV delimited by 'P'. If DV does not contain '*', execute ^DIC. Set X to the value of Y, and set DIC to DIE. If X is less than 0, branch to X.",
+        "readability": {
+          "reasoning": "The comment is detailed but may be confusing due to the use of multiple variables and conditions.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains complex logic, which is helpful for understanding the code, but might be challenging for beginners.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d5f5a2d3: If DV does not contain 'N', branch to V. Execute the code at the D label. If the length of the piece of X after the decimal point is greater than 24, kill X and branch to Z.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and its associated actions, which aids in understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c34db6df: If the second piece of DV delimited by ',' is non-zero, X contains a decimal point, and the fifth piece of DQ(DQ) delimited by U does not start with '$', perform several transformations on X: If X starts with '00', set X to an empty string. If the first character of X is 0, set X to the substring starting from the second character. Otherwise, leave X as is. If the last character of the piece of X after the decimal point is 0, remove that character from X. If the piece of X after the decimal point is empty and X contains a decimal point, set X to its numeric value.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, but the complexity of the transformations might be overwhelming.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about transformations, but the complexity might make it difficult for novice programmers to follow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e17533cf: Execute the code at the label 'X' concatenated with DQ. Kill the variable YS.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains specific actions related to labels and variables, which is useful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7d63ff0c: Kill DIC('S') and DLAYGO. If X is defined and not equal to U, set DG(DW) to X. If DV contains 'd', set ^DISV(DUZ,'DIE',DLB) to X. Branch to A.",
+        "readability": {
+          "reasoning": "The comment is clear but a bit complex due to the conditional statements.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides detailed steps and conditions, aiding an average programmer's understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "61792b34: Write a bell character and '??'. If DB(DQ) is defined, branch to Z^DIE17.",
+        "readability": {
+          "reasoning": "The comment is clear but could be confusing with specific references.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It explains specific outputs and conditions, which are helpful but somewhat specialized.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3509a93d: Set X to '?BAD'.",
+        "readability": {
+          "reasoning": "The comment is very clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial assignment, which might not be very useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a78d66bc: Set DZ to X. Execute the code at the D and QQ",
+        "readability": {
+          "reasoning": "The comment is clear but has a small grammar issue.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It helps in understanding the assignments and execution but lacks detailed context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ea6bd9b2: ;Set up the input variables",
+        "readability": {
+          "reasoning": "The comment is concise and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of the code segment, useful for understanding initialization.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d267fc1b: ;If no existing value, display it. If '^' entered, quit. If '@' entered and not a required field, go to next field.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand multiple conditional behaviors, which is valuable for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "78148c73: ;Get the existing value if there is one.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a basic operation, but it is still useful for understanding code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d0e71795: ;If a pointer value: get the pointer description",
+        "readability": {
+          "reasoning": "The comment is clear but could be slightly more concise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies what to do with pointer values, which is useful for understanding specific operations.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "55e04229: ;If a pointer to a MUMPS array.",
+        "readability": {
+          "reasoning": "The comment is somewhat incomplete and could be clearer.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment is too vague to be highly useful and does not fully explain the related action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f7eddded: ;If this is a set of codes data attribute, get the external code value.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the purpose of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3c3b79a2: ;If no entry and either reader or '??' allowed, display '??'. If no reader and '??' required display '?BAD'",
+        "readability": {
+          "reasoning": "The comment is mostly clear but could be slightly confusing due to the use of '??' and '?BAD'.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about specific conditions and outputs.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dc27b1aa: ;If no input transform (get internal value).",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a useful explanation of the condition being checked.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "18a3cd49: ;do the input transform",
+        "readability": {
+          "reasoning": "The comment is clear but very short.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "56833d36: ;quit if the input transform was unsuccessful",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the result of a specific condition.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "16335eb9: ;Initialize looping control variables",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Helps an average programmer understand the purpose of the code snippet.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7235a8d2: ;Set initial values of variables",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Helps an average programmer understand the initialization process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f1dddace: ;Entry point for processing records",
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides important context for where the processing starts, useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9b94ad4e: ;Date/Time Code Input Transform",
+        "readability": {
+          "reasoning": "The comment is clear but somewhat vague.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides some context but lacks detail, making it only somewhat useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "01286541: ;Quit the Input Transform",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Documents a trivial action, which is not very useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "96dd6085: ",
+        "readability": {
+          "reasoning": "The comment consists of a hexadecimal string followed by a colon, which doesn't provide any clear information.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information to understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "67e5a705: ",
+        "readability": {
+          "reasoning": "The comment is just a hexadecimal string with a colon, offering no clear context or explanation.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "There is no useful information in this comment to aid understanding of the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "3837e998: ",
+        "readability": {
+          "reasoning": "The comment is a hexadecimal string followed by a colon, which does not convey any readable information.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "This comment provides no useful context or information for understanding the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "8a298b09: ",
+        "readability": {
+          "reasoning": "The comment includes only a hexadecimal string with a colon, making it unclear and not informative.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "There is no useful information in this comment to help understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "24c3ac31: ",
+        "readability": {
+          "reasoning": "The comment contains only a hexadecimal string followed by a colon, which is not informative or clear.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "This comment does not provide any useful information for understanding the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "ee294c78: ",
+        "readability": {
+          "reasoning": "The comment consists of a hexadecimal string followed by a colon and a space; it appears to be an identifier but does not provide any context.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it only contains an identifier without any explanation or context.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "7e79a05c: ",
+        "readability": {
+          "reasoning": "Similar to the previous comment, it is a hexadecimal string followed by a colon and a space with no additional information.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "It provides no context or explanation, thus offering no useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "51fc0bcf: ",
+        "readability": {
+          "reasoning": "This comment is another hexadecimal string with no context, making it unclear.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "Without context, the comment is not useful in understanding the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "17834dd8: ",
+        "readability": {
+          "reasoning": "It is a hexadecimal string followed by a colon and a space, lacking clarity and context.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "Does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "991dd1bb: ",
+        "readability": {
+          "reasoning": "The comment is another standalone hexadecimal string with no additional context or information.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment does not offer any useful information to understand the code.",
+          "score": 1
+        }
+      }
+    ]
+  }
+}

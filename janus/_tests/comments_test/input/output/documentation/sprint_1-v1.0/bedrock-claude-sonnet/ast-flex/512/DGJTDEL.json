@@ -1,0 +1,24 @@
+{
+  "comments": [
+    "cb555372: ;\n ;Delete an entry from the Incomplete Record Tracking file (#393).\n ;",
+    "819d8363: ; Entry point for the deletion option",
+    "53d4647a: ; If multi-divisional prompt user for division",
+    "feaf2e0e: ; If no division selected, use first entry in file #40.8",
+    "6efbb0b5: ; Quit if parameters not set up in Division file",
+    "b67bf5f2: ; Only allow selection of patients from the division",
+    "c6eb13dd: ; Call FileMan to select patient record to delete",
+    "0225caea: ; Call DGJTVW to actually delete the entry",
+    "2901b93c: Initialize some variables used for interaction with VA FileMan.",
+    "d6e048bd: Initialize VALMBCK variable which is used by VA FileMan functions to determine the action to be taken.",
+    "1476a057: Call the SEL^VALM2 routine to allow the user to select entries. If the user does not select any entries, go to the ENQ label. Otherwise, initialize DGJVALM to 0.",
+    "db654961: Call the FULL^VALM1 routine to refresh the screen display. Set the VALMBCK variable to 'R' to indicate that the user has made selections.",
+    "5191592e: Loop through the selected entries (VALMY array). For each selected entry, extract the internal entry number (DA), the field number (DGJIFNO) from the temporary global ^TMP(\"DGJIDX\",$J,DGJVALM). If DA is not empty, set DGJTEDT to '1^' concatenated with DA, set DGJDFNO to DA, set DIC to the global root ^VAS(393,, and set DGJTYP to the second piece of the 0 node of the entry in ^VAS(393,DA,0). Call the EDIT^DGJTEE2 routine to perform some action on the selected entry, and call the OKD1 routine.",
+    "8f2d8633: Exit routine",
+    "5fd4514d: Display confirmation prompt for deleting patient",
+    "5cf47e51: If confirmed, delete the record and display confirmation message",
+    "fe861dac: If not confirmed, do nothing",
+    "1aca1fcc: Set flag indicating user wants to exit routine",
+    "2fd1b1c9: Clean up and quit routine",
+    "6f4260ce: Display yes/no prompt"
+  ]
+}

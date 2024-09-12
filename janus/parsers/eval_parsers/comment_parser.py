@@ -13,7 +13,8 @@ log = create_logger(__name__)
 
 class Criteria(BaseModel):
     reasoning: str
-    score: conint(ge=1, le=4)  # type: ignore # Constrained to an integer between 1 and 4
+    # Constrained to an integer between 1 and 4
+    score: conint(ge=1, le=4)  # type: ignore 
 
 class Comment(BaseModel):
     comment: str
@@ -65,7 +66,7 @@ class CommentParser(PydanticOutputParser, JanusParser):
     #     return text
 
     def parse(self, text: str):
-        output_length: int = 0 
+
 
         log.info("Parsing text...")
         if isinstance(text, AIMessage):
@@ -100,9 +101,9 @@ class CommentParser(PydanticOutputParser, JanusParser):
     def get_format_instructions(self) -> str:
         """Get the format instructions for the parser."""
         return (
-            "Output must contain all original requirements specifications "
-            "in a JSON-formatted string. For each and every requirement there should be evaluated criteria C1-C9 each including: "
+            "Output must contain all original comments specifications "
+            "in a JSON-formatted string. For each and every comment there should be evaluated criteria  Completeness, Hallucination, Readability, and Usefulness each including: "
             "1) The LLM reasoning behind the score. "
-            "2) The 'Score' of either a 'pass' or 'fail'."
-            "Continue generating your response until all requirements have been returned. "
+            "2) The 'Score' of either a 1,2,3, or 4'."
+            "Continue generating your response until all comments have been returned. "
         )

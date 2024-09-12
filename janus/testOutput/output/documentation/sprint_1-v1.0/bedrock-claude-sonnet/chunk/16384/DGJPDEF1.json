@@ -1,0 +1,628 @@
+{
+  "input": "{\n  \"comments\": [\n    \"a0d7c4f5:  ;Entry point of program\\n ;Checks for multiple division input\\n ;Calls division selection if multiple\\n ;Calls processing loop by type\\n ;Calls date selection\\n ;Sets and calls DIC lookup of deficiencies\\n ;Asks user for type and other selectable options\\n ;Prompts user to set terminal to 132 columns\\n ;Calculates report date\\n ;Sets up environment\\n ;If queueing to device, queues job\",\n    \"e0e695b7: ;If multiple divisions selected call division select routine\",\n    \"6a569145: ;Set report division if only one\",\n    \"14dee6d6: ;For processing type PAT, PHY, or SER call appropriate routine\",\n    \"a2229520: ;Calls date selection routine\",\n    \"f491aeee: ;Looks up deficiencies file 393.3 to DIC\",\n    \"b482214a: ;Calls option selection\",\n    \"59185a38: ;Prompt to switch terminal to 132 columns\",\n    \"d75e20aa: ;Calculates report run date\",\n    \"a3367fcd: ;Sets up environment variables and queues report to device\",\n    \"b873b918: ;Exit point\",\n    \"b4043d24: ;Loops through all records and calls CK to filter records\\n ;If PAT report filters records and calls PAT^DGJPDEF2\\n ;If PHY report filters records and calls PHY^DGJPDEF2\\n ;If SER report filters records and calls SER^DGJPDEF2\\n ;If no records selected prints 'NO RECORDS'\",\n    \"290ba0f9: ;If PAT report calls report routine\",\n    \"5c72aca2: ;If PHY report calls report routine\",\n    \"cbc61bb6: ;No records selected message\",\n    \"43c20438: ;Quit and clean up variables.\",\n    \"31da0e83:  ;\\n .;Get Service/Specialty\\n .;Get division\\n .;Get Ward\\n .;Get Patient\\n .;Get Physician\",\n    \"58349935: ;Check if record is summary.\",\n    \"c7b3bedb: ;If DGJT node exists get last admission movement and extract ward/division.\",\n    \"1c1d35b4: ;Get ward/division information.\",\n    \"ea992790: ;If ward get division from DG PARAMETERS file.\",\n    \"b08e3e20: ;Get service/specialty for ward from DG PARAMETERS file.\",\n    \"db7b8c3d: ;If service not found use institution service/specialty.\",\n    \"8a9920f2: ;Get service/specialty from movement.\",\n    \"e870a2be: ;Build division, patient, physician stats.\",\n    \"7120bf4a: ;Quit if excluded.\",\n    \"ab1e46ba: ;If patient filter on, check if record is for that patient.\",\n    \"3b4276b3: ;If division is specified and record is not for that division, exclude.\",\n    \"6cbd2e5b: ;If unsigned discharge without review, exclude record.\",\n    \"c8af8d7c: ;If signed discharge with review, exclude record.\",\n    \"c3d11362: ;Skip record if status is COMPLETED\",\n    \"f103b66b: ;Kill variables holding status codes\",\n    \"4fa95cc0: ;If only printing signed entries, skip unsigned entries\",\n    \"c5945b5a: ;If only printing unsigned entries, skip signed entries\",\n    \"16eb8d53: ;If deficiency type is specified, skip records without that deficiency type\",\n    \"d1c90f6a: ;Skip records outside the date range\",\n    \"fe374bad: ;If physician is specified, skip records without that physician\",\n    \"71900f58: ;If patient is specified, skip records without that patient\",\n    \"5e27c8ac: ;If printing non-summary records, skip summary records\",\n    \"7925b223: ;Count records by division\",\n    \"445a7f97: ;Get patient name and record number\",\n    \"14e1f7d3: ;Store record by division, physician, patient, service number, and internal entry number\",\n    \"51f45ebc: ;Store record by division, patient, service number, physician, and internal entry number\",\n    \"37c41a38: ;Get service and specialty names\",\n    \"c6f684ec: ;Get service name and internal entry number\",\n    \"6a543a6e: ;Set DGJTSPY to the name and service pointer for the specialty.\",\n    \"6816afd1: ;If filter applied and entry does not meet criteria, quit.\",\n    \"76819843: ;Store the record for SER listings.\",\n    \"4d179b34: ;Nothing should be executed after this point.\",\n    \"55d85e0d: ;Get a physician to filter by.\",\n    \"7f679d24: ;Nothing should be executed after this point.\",\n    \"941c9c71: ;Get a patient to filter by.\",\n    \"67f1e7bc: ;Nothing should be executed after this point.\",\n    \"a28d0375: ;Get a service to filter by.\",\n    \"d5756d9a: ;Get a specialty to filter by.\",\n    \"4c17556f: ;Nothing should be executed after this point.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 75.03975081443787
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "a0d7c4f5:  ;Entry point of program\n ;Checks for multiple division input\n ;Calls division selection if multiple\n ;Calls processing loop by type\n ;Calls date selection\n ;Sets and calls DIC lookup of deficiencies\n ;Asks user for type and other selectable options\n ;Prompts user to set terminal to 132 columns\n ;Calculates report date\n ;Sets up environment\n ;If queueing to device, queues job",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to follow, with each line explaining a different aspect of the program.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a comprehensive overview of the program's entry point, which is useful for understanding the code structure.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e0e695b7: ;If multiple divisions selected call division select routine",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional operation that is useful for understanding the flow of the program.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6a569145: ;Set report division if only one",
+        "readability": {
+          "reasoning": "The comment is short and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific operation that helps in understanding the code, but it is relatively straightforward.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "14dee6d6: ;For processing type PAT, PHY, or SER call appropriate routine",
+        "readability": {
+          "reasoning": "The comment is clear and specifies different processing types.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding how different processing types are handled in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a2229520: ;Calls date selection routine",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a function call, which is useful but somewhat basic.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f491aeee: ;Looks up deficiencies file 393.3 to DIC",
+        "readability": {
+          "reasoning": "The comment is clear but slightly awkward with the phrasing.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It gives a general idea of what the code does but lacks details.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b482214a: ;Calls option selection",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps understand a specific action in the code but could provide more context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "59185a38: ;Prompt to switch terminal to 132 columns",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific functionality that might not be immediately obvious.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d75e20aa: ;Calculates report run date",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about code functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a3367fcd: ;Sets up environment variables and queues report to device",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It gives a good overview of important setup steps in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b873b918: ;Exit point",
+        "readability": {
+          "reasoning": "The comment is clear and concise, no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates an important part of the code, useful for understanding control flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b4043d24: ;Loops through all records and calls CK to filter records\n ;If PAT report filters records and calls PAT^DGJPDEF2\n ;If PHY report filters records and calls PHY^DGJPDEF2\n ;If SER report filters records and calls SER^DGJPDEF2\n ;If no records selected prints 'NO RECORDS'",
+        "readability": {
+          "reasoning": "The comment is well-written and detailed, but it is somewhat lengthy which might affect readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a thorough explanation of the different report types and their respective function calls, very useful for understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "290ba0f9: ;If PAT report calls report routine",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand, no issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about the PAT report, which is useful for understanding that part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5c72aca2: ;If PHY report calls report routine",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand, no issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about the PHY report, which is useful for understanding that part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cbc61bb6: ;No records selected message",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand, no issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of a specific message, which is helpful for understanding the code's output.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "43c20438: ;Quit and clean up variables.",
+        "readability": {
+          "reasoning": "The comment is short, clear, and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "31da0e83: ;\n .;Get Service/Specialty\n .;Get division\n .;Get Ward\n .;Get Patient\n .;Get Physician",
+        "readability": {
+          "reasoning": "The comment is generally clear but slightly cluttered with multiple lines.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment outlines multiple specific actions, which could be useful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "58349935: ;Check if record is summary.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand a specific check in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c7b3bedb: ;If DGJT node exists get last admission movement and extract ward/division.",
+        "readability": {
+          "reasoning": "The comment is clear but a bit long.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information which is useful for understanding complex logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1c1d35b4: ;Get ward/division information.",
+        "readability": {
+          "reasoning": "The comment is short and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a basic action, but the information is specific and useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ea992790: ;If ward get division from DG PARAMETERS file.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but has a minor grammatical issue which makes it slightly awkward to read.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps the programmer understand the purpose of the code related to wards and division, which might not be immediately obvious.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b08e3e20: ;Get service/specialty for ward from DG PARAMETERS file.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains a specific functionality, which is helpful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "db7b8c3d: ;If service not found use institution service/specialty.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment provides useful information about a fallback mechanism, which is important for understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8a9920f2: ;Get service/specialty from movement.",
+        "readability": {
+          "reasoning": "The comment is brief but clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action, which aids in understanding the corresponding code segment.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e870a2be: ;Build division, patient, physician stats.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment outlines the purpose of the code, which is useful for understanding its broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7120bf4a: ;Quit if excluded.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information on when to quit the operation.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ab1e46ba: ;If patient filter on, check if record is for that patient.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional operation regarding patient filtering, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3b4276b3: ;If division is specified and record is not for that division, exclude.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about excluding records based on division specification.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6cbd2e5b: ;If unsigned discharge without review, exclude record.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition for excluding a record, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c8af8d7c: ;If signed discharge with review, exclude record.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about excluding records based on discharge status.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c3d11362: ;Skip record if status is COMPLETED",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It informs about a conditional operation crucial to the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f103b66b: ;Kill variables holding status codes",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains an action that is important for resource management in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4fa95cc0: ;If only printing signed entries, skip unsigned entries",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It clarifies a conditional check related to a specific functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c5945b5a: ;If only printing unsigned entries, skip signed entries",
+        "readability": {
+          "reasoning": "The comment is clear and easily understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about a conditional check.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "16eb8d53: ;If deficiency type is specified, skip records without that deficiency type",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps understand the condition related to filtering records based on deficiency type.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d1c90f6a: ;Skip records outside the date range",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains the functionality related to filtering records by date range.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "fe374bad: ;If physician is specified, skip records without that physician",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the condition related to filtering records by physician.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "71900f58: ;If patient is specified, skip records without that patient",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the filtering condition for patient records well.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5e27c8ac: ;If printing non-summary records, skip summary records",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the condition for printing non-summary records.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7925b223: ;Count records by division",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful in understanding the functionality of counting records by division.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "445a7f97: ;Get patient name and record number",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the purpose of the code, which is to retrieve patient name and record number, helping both expert and average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "14e1f7d3: ;Store record by division, physician, patient, service number, and internal entry number",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear explanation of what data is being stored, which is useful for understanding the code's functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "51f45ebc: ;Store record by division, patient, service number, physician, and internal entry number",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the data storage priorities, which is helpful but somewhat repetitive given the previous comment.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "37c41a38: ;Get service and specialty names",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear indication of what the code does, which is useful for understanding the retrieval process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c6f684ec: ;Get service name and internal entry number",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains what is being retrieved, which is useful for understanding the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6a543a6e: ;Set DGJTSPY to the name and service pointer for the specialty.",
+        "readability": {
+          "reasoning": "The comment is concise and uses proper grammar.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is specific about what the variable represents, aiding in understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6816afd1: ;If filter applied and entry does not meet criteria, quit.",
+        "readability": {
+          "reasoning": "The comment is clear but could be slightly more descriptive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a condition and its consequence, which is helpful for understanding logic flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "76819843: ;Store the record for SER listings.",
+        "readability": {
+          "reasoning": "The comment is clear but abbreviated terms could be confusing.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a storage operation, which is useful but somewhat generic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4d179b34: ;Nothing should be executed after this point.",
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly indicates a critical point in the code, helping to prevent errors.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "55d85e0d: ;Get a physician to filter by.",
+        "readability": {
+          "reasoning": "The comment is concise and uses proper grammar.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of a filtering operation, aiding in understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7f679d24: ;Nothing should be executed after this point.",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand that the code should not execute beyond this point.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "941c9c71: ;Get a patient to filter by.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment clarifies the purpose of the code for an average programmer by explaining what is being filtered.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "67f1e7bc: ;Nothing should be executed after this point.",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand that the code should not execute beyond this point.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a28d0375: ;Get a service to filter by.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment clarifies the purpose of the code for an average programmer by explaining what is being filtered.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d5756d9a: ;Get a specialty to filter by.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment clarifies the purpose of the code for an average programmer by explaining what is being filtered.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4c17556f: ;Nothing should be executed after this point.",
+        "readability": {
+          "reasoning": "The comment is clear to read, with no grammatical or syntactical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a critical aspect of the code, helping an average programmer understand an important point.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

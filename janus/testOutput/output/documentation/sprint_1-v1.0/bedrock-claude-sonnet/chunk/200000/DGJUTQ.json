@@ -1,0 +1,449 @@
+{
+  "input": "{\n  \"comments\": [\n    \"a35d6e9b: .;\\n.;ENTRY POINT TO REQUEST TASK EXECUTION\\n.;IF PASSED PARAMETER OF FORM A^B QUEUES ROUTINE B AS TASK TO BE DONE AT TIME A\\n.;IF NO ARGUMENTS PASSED, DEVICE HANDLER TO SCHEDULE SAME SCRIPT TO RUN AT LATER TIME\",\n    \"09eabd43: ;Get current date/time into ZTDTH\",\n    \"26f0a94e: ;If ZTIO is undefined and ION is defined and null, set ZTIO to null\",\n    \"7aa97e54: ;If ZTDESC is undefined set it based on DGPGM, PGM or default to 'IRT UNKNOWN OPTION'\",\n    \"db18968e: ;If ZTRTN is undefined set DGPGM based on DGPGM, PGM or null. If DGPGM is null go to CLOSE. Set ZTRTN to entry point.\",\n    \"5aebcd11: ;Set DGZTSAVE based on DGVAR, VAR or default to '*'. Call SAVE\",\n    \"f45716b1: ;If DGPGM exists and ZTSAVE('DGPGM') doesn't exist, set it to null string\",\n    \"90cd8c4c: ;Call ZTLOAD to queue task. Write msg if DGUTQND is undefined. Set X based on if task was queued. Go to CLOSE if task queued else END.\",\n    \"bd268caf: ;Unconditional quit\",\n    \"9bc2f92b: ;Get device. If queued device, go to QUE and set POP=1, then go to CLOSE. Else use device.\",\n    \"ac410a16: ;Use principal device\",\n    \"a0d3bc55: .;\\n.;Save variables in ZTSAVE\\n.;If DGZTSAVE contains '#' call ARRAY subroutine\\n.;Loop through pieces of DGZTSAVE using '^' as piece separator\\n.;If ZTSAVE(piece) doesn't exist set it to null\\n.;If piece ends with '(' set ZTSAVE of piece sans last char to null\",\n    \"07e2a048: ;Unconditional quit\",\n    \"55f00dfb: .;\\n.;ARRAY subroutine\\n.;Loop through characters in DGZTSAVE\\n.;If char is '#' rebuild DGZTSAVE with that char replaced by '('\",\n    \"85a7248c: ;Unconditional quit\",\n    \"3fa501a9: ;Close device\",\n    \"ea8a0bbc: ;Kill variables\",\n    \"d72f5157: ;Quit\",\n    \"3468ebe2: ;Execute routine or option\",\n    \"947574fb: ;Clean up task\",\n    \"261a0bd0: ;Quit routine\",\n    \"587a47d3:  .;\\n .;Extract the task's scheduled execution date and time\\n .;from the ZTSK global node and format it\\n .;in FileMan's internal date/time format (X)\\n .;The date is stored in ZTSK(\\\"D\\\") as YYYMMDD,HHMM\\n .;The time is converted to a decimal value in the format HHMM.MM\",\n    \"3e99cf5c: ;Quit\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 48.26373815536499
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "a35d6e9b: .;\n.;ENTRY POINT TO REQUEST TASK EXECUTION\n.;IF PASSED PARAMETER OF FORM A^B QUEUES ROUTINE B AS TASK TO BE DONE AT TIME A\n.;IF NO ARGUMENTS PASSED, DEVICE HANDLER TO SCHEDULE SAME SCRIPT TO RUN AT LATER TIME",
+        "completeness": {
+          "reasoning": "This comment addresses all essential functionalities of the code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the function's behavior.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code's purpose and behavior better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "09eabd43: ;Get current date/time into ZTDTH",
+        "completeness": {
+          "reasoning": "The comment documents a single functionality but does not cover all aspects of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about this specific line of code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this single line but not the overall function.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "26f0a94e: ;If ZTIO is undefined and ION is defined and null, set ZTIO to null",
+        "completeness": {
+          "reasoning": "The comment documents a specific condition but does not cover all possible functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about this specific condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand this specific condition but not the overall function.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7aa97e54: ;If ZTDESC is undefined set it based on DGPGM, PGM or default to 'IRT UNKNOWN OPTION'",
+        "completeness": {
+          "reasoning": "The comment covers only one functionality and does not address other aspects of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information regarding this specific condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this particular functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "db18968e: ;If ZTRTN is undefined set DGPGM based on DGPGM, PGM or null. If DGPGM is null go to CLOSE. Set ZTRTN to entry point.",
+        "completeness": {
+          "reasoning": "The comment documents multiple steps but does not cover all functionalities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the specific conditions and steps.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the logic and flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5aebcd11: ;Set DGZTSAVE based on DGVAR, VAR or default to '*'. Call SAVE",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of setting DGZTSAVE and calling SAVE.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert or average programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f45716b1: ;If DGPGM exists and ZTSAVE('DGPGM') doesn't exist, set it to null string",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality related to DGPGM and ZTSAVE.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is true, assuming the variables and conditions exist.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a condition check and assignment.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "90cd8c4c: ;Call ZTLOAD to queue task. Write msg if DGUTQND is undefined. Set X based on if task was queued. Go to CLOSE if task queued else END.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple functionalities: calling ZTLOAD, writing a message, setting X, and branch logic.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The steps described are true given the context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is detailed but clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding a complex sequence of actions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bd268caf: ;Unconditional quit",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality of an unconditional quit.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true for an unconditional quit.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but documents only trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "9bc2f92b: ;Get device. If queued device, go to QUE and set POP=1, then go to CLOSE. Else use device.",
+        "completeness": {
+          "reasoning": "The comment addresses the main functionalities related to device handling.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is true given the described flow.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding device handling logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ac410a16: ;Use principal device",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality aspect.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful on its own.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "a0d3bc55: .;\n.;Save variables in ZTSAVE\n.;If DGZTSAVE contains '#' call ARRAY subroutine\n.;Loop through pieces of DGZTSAVE using '^' as piece separator\n.;If ZTSAVE(piece) doesn't exist set it to null\n.;If piece ends with '(' set ZTSAVE of piece sans last char to null",
+        "completeness": {
+          "reasoning": "The comment addresses most of the functionalities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides mostly true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured but a bit dense.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is quite useful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "07e2a048: ;Unconditional quit",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality aspect.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful on its own.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "55f00dfb: .;\n.;ARRAY subroutine\n.;Loop through characters in DGZTSAVE\n.;If char is '#' rebuild DGZTSAVE with that char replaced by '('",
+        "completeness": {
+          "reasoning": "The comment addresses some of the subroutine's functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is structured but somewhat dense.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is moderately useful for understanding the subroutine.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "85a7248c: ;Unconditional quit",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality aspect.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful on its own.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "3fa501a9: ;Close device",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of closing the device, but doesn't provide details on how it does so.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about closing the device.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail that could help an expert programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ea8a0bbc: ;Kill variables",
+        "completeness": {
+          "reasoning": "The comment mentions killing variables but lacks detail on which variables or under what conditions.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about killing variables.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks specificity.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d72f5157: ;Quit",
+        "completeness": {
+          "reasoning": "The comment indicates quitting but doesn't provide details on what is being quit.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about quitting.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is minimally useful due to lack of detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3468ebe2: ;Execute routine or option",
+        "completeness": {
+          "reasoning": "The comment mentions executing a routine or option but doesn't specify which or under what conditions.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about executing a routine or option.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks specificity.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "947574fb: ;Clean up task",
+        "completeness": {
+          "reasoning": "The comment mentions cleaning up a task but lacks detail on what task or how.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about cleaning up a task.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "261a0bd0: ;Quit routine",
+        "completeness": {
+          "reasoning": "The comment addresses only the quit functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but documents only a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "587a47d3:  .;\n .;Extract the task's scheduled execution date and time\n .;from the ZTSK global node and format it\n .;in FileMan's internal date/time format (X)\n .;The date is stored in ZTSK(\"D\") as YYYMMDD,HHMM\n .;The time is converted to a decimal value in the format HHMM.MM",
+        "completeness": {
+          "reasoning": "The comment addresses all essential functionality related to the task scheduling and formatting.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true and accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3e99cf5c: ;Quit",
+        "completeness": {
+          "reasoning": "The comment addresses only the quit functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but documents only a trivial functionality.",
+          "score": 2
+        }
+      }
+    ]
+  }
+}

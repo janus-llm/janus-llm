@@ -1,0 +1,683 @@
+{
+  "input": "{\n  \"comments\": [\n    \"34e0ba1f:  ;\\n ;Ask event date and validate\\n ;\",\n    \"0b763658: ;Get event date\",\n    \"fe03e338: ;If admission date exists and event date is before admission date, reset event date to admission date and display message\",\n    \"78b821e5: ;If discharge date exists and event date is after discharge date, reset event date to discharge date and display message\",\n    \"ead107c3: Set the Discharge Date to 'L' (for Lodger) if the Admission Type is 1 (Lodger).\",\n    \"85487272: If the Admission Type is not 1 (Lodger), set the Discharge Date to the Admission Date/Time if it has a decimal time component; otherwise, set it to the Admission Date with a default time of 2400 (midnight).\",\n    \"d6d39761: If Admission Source is 1 (Admission from Home), call the IN5^VADPT routine to update the patient's movement.\",\n    \"369012d1: If the 5th node of VAIP array (representing the Treating Specialty) has a value, set the DIR('B') prompt default to the second piece of that value (the Treating Specialty name).\",\n    \"124d1aae: Set DIR(0) to '393,.05' to prompt for the Ward Location, call the ^DIR routine to get user input, quit if the user entered '^' or timed out, otherwise set DGJTWD to the internal entry number of the selected Ward Location and DGJTWD1 to the value of the 42nd node (Ward Treating Specialty) of the Ward Location file entry (or 0 if none); then kill DIR('B').\",\n    \"1f8ed0bb: Set default value for DIR(\\\"B\\\") from VAIP(8) array if it exists\",\n    \"691d3c2c: Prompt for Treating Specialty code, quit if user enters up-arrow or times out, store selected value in DGJTSP and clear DIR(\\\"B\\\")\",\n    \"46af48b4: If Institution file (#4) entry for Hospital Location doesn't exist, get Service from Hospital Location file (#44)\",\n    \"c8a04fe1: If Institution file (#4) entry for Hospital Location exists, get Service from there\",\n    \"3decbf57: If Service is missing or 0, set to default of 12 (Medicine). If valid Service code in SPECIALTY CODE file (#393.1), set DGJTSV and DIR(\\\"B\\\") to corresponding Specialty Name\",\n    \"21963b56: ;Ask for start date of service\",\n    \"bf5fefe1: ;If editing existing entry, set default response to current start date\",\n    \"14d29e65: ;Ask for 1st phone co-pay source\",\n    \"6c106492: ;If no copay, set default response based on priority status for editing existing entry\",\n    \"23acfc79: ;If copay, set default response based on copay source for editing existing entry\",\n    \"cfbec43a: ;If copay source is copay required or copay exempt priority group, ask for 2nd phone co-pay source, setting default response if editing existing entry\",\n    \"3c46fcbb: Set the default value for the prompt to the last name of the provider if known, otherwise leave blank.\",\n    \"1d0bb145: Prompt the user to select a provider number; quit if the user enters an up-arrow or times out. Save the selected provider number in DGJTPR and remove the default value for the next prompt.\",\n    \"edeb1c53: Create a new Patient file entry (#393) for the current patient (DFN) using FileMan's DICN utility. Clear variables used by FileMan afterwards.\",\n    \"8577e6e9: Set the internal entry number (DA) of the VAS(393) global and initialize variables for editing the record.\",\n    \"29f8b887: If the document type is not an OP Report, Discharge Summary, or Interim Summary, then execute the DGJ ENTER IRT DEFICIENCY input template and quit.\",\n    \"713d597d: If the document type is an OP Report, Discharge Summary, or Interim Summary, then set up to execute the DGJ ENTER IRT RECORD input template.\",\n    \"f785271e: Call the DIE Entry code to update data in a file.\",\n    \"df2be85d: Initialize variables in INIT1^DGJTEE2 routine and quit.\",\n    \"816e5987: If the user enters '^' or times out, set the VALMBG and VALMBCK variables to indicate the exit action.\",\n    \"66add81f: Quit the current routine.\",\n    \"c3f10d43: Loop through the records in the ^VAS(393 global for the given patient DFN. If the record exists and the 4th piece of the 0th node is null, call the SCR1 routine.\",\n    \"8876ba2a: ; Quit if called without variables defined\",\n    \"9119c20c: ; Return if a delete error occurred or if status check failed\",\n    \"f093d4cf: Set up global variables for Means Test.\",\n    \"b605bc69: Exit the routine.\",\n    \"d6c0cc00: Check if the division from the record matches the current division. Set flag if they don't match.\",\n    \"a81d52e4: Get the Means Test effective date for the division associated with the record.\",\n    \"d8cc876f:  ;\\\\nGet the currently assigned treating specialty for the patient from the\\\\nPatient Movement file (#26.3). Then get the next active assignment context\\\\nwithin that treating specialty for the patient. Get the first record\\\\nnumber within that assignment context which contains information about\\\\nthe currently assigned treating specialty team.\",\n    \"2cf39d19: I pulled some strings and got you a discount on the tie you wanted.\",\n    \"725cda82: ;Get the provider's name if they have an active entry in the New Person file\",\n    \"10fdb7df:  ;\\n ;If the X parameter is 'A' return admission movement field #19,\\n ;if 'N' return null, else return field #8 that would be provider name\\n ;from the DGJT array that came from patient admission info call.\\n ;\",\n    \"1cf32ae5: ;Piece together name field.\",\n    \"8e732584: ;Quit\",\n    \"19a342c0: ;Get admission type name from Movement Type file based on DGJT admission mvt type pointer.\",\n    \"95ad7143: Quit if no action is needed\",\n    \"473ddab2: ;\\n;Building array of Deficiencies\\n;For use with text mode utilities\\n;\",\n    \"b13fdd39: Kill array for storing deficiency data\",\n    \"632d51ba: Initialize node reference and deficiency counter\",\n    \"91b9af7e: Initialize output array header for ListMan, set deficiency counter to 0, begin output section\",\n    \"b9aef9eb: Add line to output array indicating no deficiencies exist for patient\",\n    \"2425b06f: Call routine to build deficiency data array\",\n    \"0b1ee403: Quit after building deficiency data array\",\n    \"2205d350: ;If a new category was entered in the ORVL option jump to that category.\",\n    \"d45f2061: ;Allow the user to select a new category to jump to.\",\n    \"e41e40f4: If the user typed '^' to exit, set VALMBG and VALMBCK appropriately and quit.\",\n    \"3c42f4bb: If the user selected a negative option, jump to the JUMP label.\",\n    \"bab6efc9: Define a new variable DGJXCAT to store the category number.\",\n    \"cffd169e: Set DGJXCAT to the category number selected by the user.\",\n    \"f92e0d09: If the selected category does not contain any deficiencies, print a message and go to the JMP label.\",\n    \"0f98b718: Set VALMBG and VALMBCK based on the selected category and quit.\",\n    \"45ffd56e: Exit the routine.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 82.92934989929199
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "34e0ba1f:  ;\n ;Ask event date and validate\n ;",
+        "readability": {
+          "reasoning": "The comment is clear and succinct, but the formatting is a little awkward with the extra semicolons.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a brief explanation of the code's purpose, which is useful but not very detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0b763658: ;Get event date",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read despite being very short.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment only documents a trivial functionality of getting a date, which is somewhat useful but not very informative.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "fe03e338: ;If admission date exists and event date is before admission date, reset event date to admission date and display message",
+        "readability": {
+          "reasoning": "The comment is clear and explains the logic in a straightforward manner.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the code's conditional logic and its effect, which is very useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "78b821e5: ;If discharge date exists and event date is after discharge date, reset event date to discharge date and display message",
+        "readability": {
+          "reasoning": "The comment is clear and explains the logic in a straightforward manner.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the code's conditional logic and its effect, which is very useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ead107c3: Set the Discharge Date to 'L' (for Lodger) if the Admission Type is 1 (Lodger).",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a clear explanation of a specific conditional assignment, which is very useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "85487272: If the Admission Type is not 1 (Lodger), set the Discharge Date to the Admission Date/Time if it has a decimal time component; otherwise, set it to the Admission Date with a default time of 2400 (midnight).",
+        "readability": {
+          "reasoning": "The comment is well-structured and clearly explains the conditional logic and the actions to be taken.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Helps an expert programmer understand the specific logic related to setting the Discharge Date based on the Admission Type and time component.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d6d39761: If Admission Source is 1 (Admission from Home), call the IN5^VADPT routine to update the patient's movement.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides useful information about when to call a specific routine, aiding in understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "369012d1: If the 5th node of VAIP array (representing the Treating Specialty) has a value, set the DIR('B') prompt default to the second piece of that value (the Treating Specialty name).",
+        "readability": {
+          "reasoning": "The comment is clear and provides detailed information on the logic and the node structure.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Explains the specific logic for setting a prompt default based on array values, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "124d1aae: Set DIR(0) to '393,.05' to prompt for the Ward Location, call the ^DIR routine to get user input, quit if the user entered '^' or timed out, otherwise set DGJTWD to the internal entry number of the selected Ward Location and DGJTWD1 to the value of the 42nd node (Ward Treating Specialty) of the Ward Location file entry (or 0 if none); then kill DIR('B').",
+        "readability": {
+          "reasoning": "The comment is detailed and well-written but a bit lengthy, which could slightly affect readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "Provides comprehensive information about the steps involved in prompting for and handling Ward Location input, which is very useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1f8ed0bb: Set default value for DIR(\"B\") from VAIP(8) array if it exists",
+        "readability": {
+          "reasoning": "The comment is brief and straightforward, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Documents a simple but specific action, which is moderately useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "691d3c2c: Prompt for Treating Specialty code, quit if user enters up-arrow or times out, store selected value in DGJTSP and clear DIR(\"B\")",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear guidance on how the prompt for treating specialty code works and what actions are taken based on user input.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "46af48b4: If Institution file (#4) entry for Hospital Location doesn't exist, get Service from Hospital Location file (#44)",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies the logic for retrieving Service information when a certain condition is met, which helps in understanding the code's intent.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c8a04fe1: If Institution file (#4) entry for Hospital Location exists, get Service from there",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific conditional action regarding where to retrieve Service information, aiding in code comprehension.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3decbf57: If Service is missing or 0, set to default of 12 (Medicine). If valid Service code in SPECIALTY CODE file (#393.1), set DGJTSV and DIR(\"B\") to corresponding Specialty Name",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, though slightly long.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information on fallback logic and setting variables, which is highly useful for understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "21963b56: ;Ask for start date of service",
+        "readability": {
+          "reasoning": "The comment is very short but clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality, which is not highly useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "bf5fefe1: ;If editing existing entry, set default response to current start date",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about setting the default response when editing an existing entry.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "14d29e65: ;Ask for 1st phone co-pay source",
+        "readability": {
+          "reasoning": "The comment is brief and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It tells the programmer to ask for the first phone co-pay source, which is somewhat useful but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6c106492: ;If no copay, set default response based on priority status for editing existing entry",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about setting default responses based on priority status when there is no copay.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "23acfc79: ;If copay, set default response based on copay source for editing existing entry",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It gives important information about setting default responses based on the copay source.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cfbec43a: ;If copay source is copay required or copay exempt priority group, ask for 2nd phone co-pay source, setting default response if editing existing entry",
+        "readability": {
+          "reasoning": "The comment is a bit long but still clear and understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides important details on how to handle different copay sources and what to do when editing existing entries.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3c46fcbb: Set the default value for the prompt to the last name of the provider if known, otherwise leave blank.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides clear guidance on setting default values based on certain conditions, which is useful for understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1d0bb145: Prompt the user to select a provider number; quit if the user enters an up-arrow or times out. Save the selected provider number in DGJTPR and remove the default value for the next prompt.",
+        "readability": {
+          "reasoning": "The comment is detailed and clearly explains the process.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides step-by-step instructions on handling user input and storing values, which is very helpful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "edeb1c53: Create a new Patient file entry (#393) for the current patient (DFN) using FileMan's DICN utility. Clear variables used by FileMan afterwards.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the creation of a new patient file and the cleanup process, which is valuable for understanding the code's purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8577e6e9: Set the internal entry number (DA) of the VAS(393) global and initialize variables for editing the record.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides information on setting and initializing variables, which is crucial for understanding the data handling.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "29f8b887: If the document type is not an OP Report, Discharge Summary, or Interim Summary, then execute the DGJ ENTER IRT DEFICIENCY input template and quit.",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains conditional execution based on document type, which is useful for understanding the control flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "713d597d: If the document type is an OP Report, Discharge Summary, or Interim Summary, then set up to execute the DGJ ENTER IRT RECORD input template.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment provides specific information about the conditions under which a certain action is taken, which helps both expert and average programmers understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f785271e: Call the DIE Entry code to update data in a file.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific function call, which may be particularly useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "df2be85d: Initialize variables in INIT1^DGJTEE2 routine and quit.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the initialization process, which is helpful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "816e5987: If the user enters '^' or times out, set the VALMBG and VALMBCK variables to indicate the exit action.",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the user input handling and its effect on variables, which is useful for understanding user interactions within the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "66add81f: Quit the current routine.",
+        "readability": {
+          "reasoning": "The comment is simple and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial action that most programmers would understand without additional context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c3f10d43: Loop through the records in the ^VAS(393 global for the given patient DFN. If the record exists and the 4th piece of the 0th node is null, call the SCR1 routine.",
+        "readability": {
+          "reasoning": "The comment is well-structured and uses clear language to explain the process.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information that would help an expert programmer understand the specific conditions under which the code operates.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8876ba2a: ; Quit if called without variables defined",
+        "readability": {
+          "reasoning": "The comment is clear but lacks punctuation.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful for understanding a condition, but it does not provide deep insight into the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9119c20c: ; Return if a delete error occurred or if status check failed",
+        "readability": {
+          "reasoning": "The comment is clear but could benefit from better punctuation.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an important conditional return, making it moderately useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f093d4cf: Set up global variables for Means Test.",
+        "readability": {
+          "reasoning": "The comment is simple and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a setup process, which is useful but somewhat generic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b605bc69: Exit the routine.",
+        "readability": {
+          "reasoning": "The comment is very straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for indicating the end of a routine but is fairly trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d6c0cc00: Check if the division from the record matches the current division. Set flag if they don't match.",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific check within the code which can help an average programmer understand the logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a81d52e4: Get the Means Test effective date for the division associated with the record.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding what the code is fetching, specifically the Means Test effective date.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d8cc876f:  ;\\nGet the currently assigned treating specialty for the patient from the\\nPatient Movement file (#26.3). Then get the next active assignment context\\nwithin that treating specialty for the patient. Get the first record\\nnumber within that assignment context which contains information about\\nthe currently assigned treating specialty team.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, though it is somewhat lengthy.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "This comment is very detailed and helps an expert programmer understand the specific process being described.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2cf39d19: I pulled some strings and got you a discount on the tie you wanted.",
+        "readability": {
+          "reasoning": "The comment is easy to read but informal and irrelevant to coding.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "This comment is not useful as it provides no information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "725cda82: ;Get the provider's name if they have an active entry in the New Person file",
+        "readability": {
+          "reasoning": "The comment is clear but could be more structured.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action which can help an average programmer understand the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "10fdb7df:  ;\n ;If the X parameter is 'A' return admission movement field #19,\n ;if 'N' return null, else return field #8 that would be provider name\n ;from the DGJT array that came from patient admission info call.\n ;",
+        "readability": {
+          "reasoning": "The comment is well-written and each condition is clearly explained.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the logic behind parameter values, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1cf32ae5: ;Piece together name field.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a basic description of the functionality, but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8e732584: ;Quit",
+        "readability": {
+          "reasoning": "The comment is extremely brief but clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial action without additional context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "19a342c0: ;Get admission type name from Movement Type file based on DGJT admission mvt type pointer.",
+        "readability": {
+          "reasoning": "The comment is clear and detailed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the source and logic behind a specific data retrieval, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "95ad7143: Quit if no action is needed",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a brief explanation of a condition, but lacks detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "473ddab2: ;\n;Building array of Deficiencies\n;For use with text mode utilities\n;",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of the array and its usage, which is helpful for understanding the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b13fdd39: Kill array for storing deficiency data",
+        "readability": {
+          "reasoning": "The comment is concise and clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a crucial operation on the array, which is important for understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "632d51ba: Initialize node reference and deficiency counter",
+        "readability": {
+          "reasoning": "The comment is straightforward and well-written, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the initialization process, which is useful for understanding the setup of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "91b9af7e: Initialize output array header for ListMan, set deficiency counter to 0, begin output section",
+        "readability": {
+          "reasoning": "The comment is detailed and clearly written, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear explanation of multiple initialization steps, which is useful for understanding the code's purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b9aef9eb: Add line to output array indicating no deficiencies exist for patient",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action in the code, which helps in understanding the program's flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2425b06f: Call routine to build deficiency data array",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Helps understand the function of a specific routine in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0b1ee403: Quit after building deficiency data array",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides useful information about the control flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2205d350: ;If a new category was entered in the ORVL option jump to that category.",
+        "readability": {
+          "reasoning": "The comment is readable but starts with a semicolon which is unusual.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "Offers valuable information about the conditional behavior of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d45f2061: ;Allow the user to select a new category to jump to.",
+        "readability": {
+          "reasoning": "The comment is clear but the semicolon at the beginning is unconventional.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "Explains a user-interaction feature of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e41e40f4: If the user typed '^' to exit, set VALMBG and VALMBCK appropriately and quit.",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides specific and useful information about handling user input.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3c42f4bb: If the user selected a negative option, jump to the JUMP label.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional action that is not immediately obvious from the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bab6efc9: Define a new variable DGJXCAT to store the category number.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies the purpose of a new variable, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cffd169e: Set DGJXCAT to the category number selected by the user.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies an assignment operation which is useful for understanding user input handling.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f92e0d09: If the selected category does not contain any deficiencies, print a message and go to the JMP label.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional check and subsequent actions, which is important for understanding control flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0f98b718: Set VALMBG and VALMBCK based on the selected category and quit.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the setting of specific variables and the termination of the process, which is useful for understanding the code's logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "45ffd56e: Exit the routine.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, with no spelling or grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it indicates the purpose of a specific part of the code, but it could be more detailed to help an expert programmer understand why this routine is being exited.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

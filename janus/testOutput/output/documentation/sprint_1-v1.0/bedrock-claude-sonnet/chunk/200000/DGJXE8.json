@@ -1,0 +1,1038 @@
+{
+  "input": "{\n  \"comments\": [\n    \"781c3dec: ;\\n .;This routine is used to edit the ATTENDING PHYSICIAN field (Field #.1)\\n .;of the PATIENT MOVEMENT file (#393).\\n .;\",\n    \"159bedca: ;Initialize variables and branch to the entry point.\",\n    \"59434c43: ;Set up editing variables for this routine.\",\n    \"b7e2ab0a: ;Store existing value in DE(1) if present.\",\n    \"91919228: ;Clean up variables.\",\n    \"fbffe670: ;Write the field label at the appropriate column.\",\n    \"7c29fd1b: ;No further action required.\",\n    \"cbe7919a: ;Output the current value of the field.\",\n    \"7d6fbeb2: ;If the field value is longer than 19 characters and the field is word-processing, go to the text editor.\",\n    \"5bdaec7c: ;If the field is read-only, display the \\\"No Editing\\\" message.\",\n    \"1ca3b2f0: ;Read the user's input and handle timeouts.\",\n    \"35bf903a: ;No further action required.\",\n    \"08bd12a9: ;Increment the question number for the multiple field.\",\n    \"9946587b: ;Branch to the appropriate processing code for the current question.\",\n    \"0d01a48a: ;If there is an existing value, re-display it. Otherwise, get new input.\",\n    \"50895619: ;If no input, quit if field is not required, else set to null value.\",\n    \"daa3181c: ;If user enters '?', go to reader help.\",\n    \"51c48cc8: ;If user enters '@', go to dir utility.\",\n    \"e02abbba: ;If user enters space and there is a default value stored, retrieve it.\",\n    \"8cd49484: ;If valid data, write output code, else either ^DIC for a new entry, or field help.\",\n    \"cc920a0e: ;Look for an exact match from input value.\",\n    \"4a143940: ;Else, write output default.\",\n    \"2d1482a3: ;If P initializes this variable set by ^DIC call above.\",\n    \"b1cf57a0: ;If numeric, check for valid numeric data.\",\n    \"5f2a69d2: ;If numeric with decimal fraction, do fancy rounding.\",\n    \"970d3e41: ;Call computed expressions for executable code piece.\",\n    \"4f8eaffa: ;Save the value temporarily for LAYGO current value.\",\n    \"57425930: ;If unable to resolve variable value.\",\n    \"e207765c: ;Set 'X' to indicate a bad index.\",\n    \"09f073d4: ;Process qstatus and qbank services at field level.\",\n    \"8669272d: ;Set variables for the DIE input templates (DIFLD, DLB, DV, DU, DW)\",\n    \"07728907: ;If no data was edited, display the original answer (Y) and optionally return to reader\",\n    \"796f790f: ;If data was edited (DE(DQ) exists), retrieve it (Y=DE(DQ)), original answer (X=DU), and screen logic (DQ(DQ,2))\",\n    \"57bae196: ;If a pointer to a file entry, get the entry number\",\n    \"f4ea3da3: ;If a variable pointer, get the entry number from the global node pointed to\",\n    \"00148e4c: ;If set of codes, resolve any external value (;xxxx) for Y\",\n    \"1fff5af9: ;If X is null, set it to the edited data and re-display or quit if no edit was allowed\",\n    \"80424bae: ;If not a wordprocessing field, go to reader\",\n    \"a963509c: ;If a wordprocessing field, branch to the word-processing code\",\n    \"228c8d57: ;Return for wordprocessing fields\",\n    \"35e380ff: ;Initialize variables for MUMPS data entry routine\",\n    \"3df5161d: ;Field attributes for ATTENDING PHYSICIAN field\",\n    \"22ec9360: ;File global root for PROVIDER file\",\n    \"e97fd7a5: ;Re-entry point for editing\",\n    \"47a96b3e: ;No logic for re-displaying ATTENDING PHYSICIAN\",\n    \"e21ec4b8:  ;\\n ;This entry contains the Attending Provider for\\n ;the Admission. If this field is edited, field #5 is cleared.\\n ;The verson of this routine dated 1 DEC 1998 contains additional\\n ;checks and field crosslinks related to this field.\\n ;\",\n    \"d6d88d16: ;If not a Care Unit Transfer, clear field\",\n    \"46b277ca: ;Only an Attending Provider is allowed for a Care Unit Transfer.\",\n    \"d4ea7ffc: ;No further editing needed.\",\n    \"aec65f54:  ;\\n ;This entry contains the Provider responsible for\\n ;the Transfer. If this field is edited, field #3 is cleared.\\n ;The version of this routine dated 1 DEC 1998 contains additional\\n ;checks and field crosslinks related to this field.\\n ;\",\n    \"cda085e3: ;If not a Care Unit Transfer, clear field\",\n    \"8817505c: ;Only a Transfer Provider is allowed for a Care Unit Transfer.\",\n    \"ed5a399e: ;No further editing needed.\",\n    \"e928ae99: ;Exit to next routine\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 90.53913283348083
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "781c3dec: ;\n .;This routine is used to edit the ATTENDING PHYSICIAN field (Field #.1)\n .;of the PATIENT MOVEMENT file (#393).\n .;",
+        "completeness": {
+          "reasoning": "The comment specifies the routine's purpose and the specific field and file it modifies, covering essential functionality.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate regarding the purpose of the routine.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific purpose of the routine.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "159bedca: ;Initialize variables and branch to the entry point.",
+        "completeness": {
+          "reasoning": "The comment briefly mentions initializing variables and branching but doesn't detail the variables or the entry point.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about initializing variables and branching.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for an average programmer to understand the basic idea but lacks detailed information.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "59434c43: ;Set up editing variables for this routine.",
+        "completeness": {
+          "reasoning": "The comment mentions setting up editing variables but does not specify which variables or how they are being set up.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but only provides a general idea, lacking specific details.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b7e2ab0a: ;Store existing value in DE(1) if present.",
+        "completeness": {
+          "reasoning": "The comment specifies storing an existing value but doesn't explain the context or other operations involved.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate but incomplete.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but only documents a single aspect of the routine.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "91919228: ;Clean up variables.",
+        "completeness": {
+          "reasoning": "The comment mentions cleaning up variables but provides no detail on which variables or how they are cleaned up.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but is very vague.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but overly brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks specific details that would help understand the code better.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "fbffe670: ;Write the field label at the appropriate column.",
+        "completeness": {
+          "reasoning": "The comment specifies a single action but does not cover all potential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about writing the field label.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding that specific action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7c29fd1b: ;No further action required.",
+        "completeness": {
+          "reasoning": "The comment does not provide details on what was done previously or why no further action is required.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but lacks context.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful without further context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "cbe7919a: ;Output the current value of the field.",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality but does not mention other possible actions.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action of outputting the field value.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific action of outputting a value.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7d6fbeb2: ;If the field value is longer than 19 characters and the field is word-processing, go to the text editor.",
+        "completeness": {
+          "reasoning": "The comment provides detailed conditions and actions but may miss other functionalities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely true given its specificity.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and provides detailed information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding the specific conditions and actions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5bdaec7c: ;If the field is read-only, display the \"No Editing\" message.",
+        "completeness": {
+          "reasoning": "The comment covers a specific condition but does not mention other possible actions.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely true given its specific instruction.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and provides a straightforward condition and action.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this particular condition and action.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1ca3b2f0: ;Read the user's input and handle timeouts.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of reading user input and handling timeouts, but it might not cover all aspects of the code it refers to.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and accurately describes a plausible functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific aspect of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "35bf903a: ;No further action required.",
+        "completeness": {
+          "reasoning": "The comment is very brief and does not explain any functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The statement may be true, but it is too vague to determine its accuracy.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it does not provide any meaningful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "08bd12a9: ;Increment the question number for the multiple field.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover all aspects of the code.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely true as it describes a plausible action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific part of the functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9946587b: ;Branch to the appropriate processing code for the current question.",
+        "completeness": {
+          "reasoning": "The comment explains an important functionality of branching to processing code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and accurately describes the branching functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the control flow better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0d01a48a: ;If there is an existing value, re-display it. Otherwise, get new input.",
+        "completeness": {
+          "reasoning": "The comment provides a clear explanation of the conditional behavior.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about a common conditional operation.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific aspect of the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "50895619: ;If no input, quit if field is not required, else set to null value.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality regarding handling no input and setting to null value.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information based on typical behavior related to input handling.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "daa3181c: ;If user enters '?', go to reader help.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of handling the '?' input.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the behavior of the '?' input.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "51c48cc8: ;If user enters '@', go to dir utility.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of handling the '@' input.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the behavior of the '@' input.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e02abbba: ;If user enters space and there is a default value stored, retrieve it.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of handling the space input and default value retrieval.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the behavior of the space input.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8cd49484: ;If valid data, write output code, else either ^DIC for a new entry, or field help.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple functionalities related to valid data handling, output code, and invoking help or new entry.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the behavior regarding data handling and associated actions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear, although slightly more complex.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better due to its detailed nature.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cc920a0e: ;Look for an exact match from input value.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific function but doesn't cover all the code's capabilities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific part of the code but is not comprehensive.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4a143940: ;Else, write output default.",
+        "completeness": {
+          "reasoning": "The comment addresses an alternative action but lacks detail on other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but incomplete.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the default action but not comprehensive.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2d1482a3: ;If P initializes this variable set by ^DIC call above.",
+        "completeness": {
+          "reasoning": "The comment provides some context but doesn't cover all essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but somewhat vague.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is readable but could be clearer.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is partially useful but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "b1cf57a0: ;If numeric, check for valid numeric data.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific check but doesn't cover all functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but limited.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but only for a specific check.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5f2a69d2: ;If numeric with decimal fraction, do fancy rounding.",
+        "completeness": {
+          "reasoning": "The comment covers a specific function but not all essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true and specific.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific function.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "970d3e41: ;Call computed expressions for executable code piece.",
+        "completeness": {
+          "reasoning": "The comment is vague and does not address all capabilities of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true but very general information.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some context but is too vague to be highly useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "4f8eaffa: ;Save the value temporarily for LAYGO current value.",
+        "completeness": {
+          "reasoning": "The comment explains one aspect of the functionality but may miss other details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment appears accurate in the context provided.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the code regarding LAYGO current value.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "57425930: ;If unable to resolve variable value.",
+        "completeness": {
+          "reasoning": "The comment only addresses one specific scenario, not the full functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate but limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding error handling but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e207765c: ;Set 'X' to indicate a bad index.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific action but not the broader context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is truthful regarding setting 'X' for a bad index.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "09f073d4: ;Process qstatus and qbank services at field level.",
+        "completeness": {
+          "reasoning": "The comment describes a specific process but lacks detail on how it is achieved.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides correct information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a good overview but lacks detail for in-depth understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8669272d: ;Set variables for the DIE input templates (DIFLD, DLB, DV, DU, DW)",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of setting multiple variables for the DIE input templates.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting variables for input templates.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the purpose of these variables in the context of DIE input templates.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "07728907: ;If no data was edited, display the original answer (Y) and optionally return to reader",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality of displaying the original answer if no data is edited.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information regarding the display of the original answer if no data is edited.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is mostly clear but could be slightly more concise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the condition under which the original answer is displayed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "796f790f: ;If data was edited (DE(DQ) exists), retrieve it (Y=DE(DQ)), original answer (X=DU), and screen logic (DQ(DQ,2))",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of retrieving edited data, original answer, and screen logic.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the conditions and actions related to edited data.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-organized.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the retrieval process of edited data and associated logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "57bae196: ;If a pointer to a file entry, get the entry number",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of getting an entry number from a file pointer.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the process of getting an entry number from a file pointer.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the action of retrieving a file entry number.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f4ea3da3: ;If a variable pointer, get the entry number from the global node pointed to",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of retrieving an entry number from a variable pointer.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about getting an entry number from a variable pointer.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the action of retrieving an entry number from a variable pointer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "00148e4c: ;If set of codes, resolve any external value (;xxxx) for Y",
+        "completeness": {
+          "reasoning": "The comment partially explains what happens if a set of codes is present but doesn't cover all functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment seems to provide true information regarding resolving external values for Y.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is relatively clear, but the phrasing could be improved for better readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, but it doesn't provide a complete understanding of the code's functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1fff5af9: ;If X is null, set it to the edited data and re-display or quit if no edit was allowed",
+        "completeness": {
+          "reasoning": "The comment covers the behavior when X is null, including setting to edited data and the conditions for quitting.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the behavior of the code in specific conditions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "80424bae: ;If not a wordprocessing field, go to reader",
+        "completeness": {
+          "reasoning": "The comment addresses functionality related to non-wordprocessing fields but lacks details about what the 'reader' does.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is likely true, assuming the context is correct.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could benefit from a bit more detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but would be more so with additional context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a963509c: ;If a wordprocessing field, branch to the word-processing code",
+        "completeness": {
+          "reasoning": "The comment explains what happens for wordprocessing fields but could offer more specifics about the branching.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided seems to be true and relevant.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more detailed for expert understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "228c8d57: ;Return for wordprocessing fields",
+        "completeness": {
+          "reasoning": "The comment is very brief and doesn't explain the functionality in much detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but overly simplistic.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful due to its lack of detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "35e380ff: ;Initialize variables for MUMPS data entry routine",
+        "completeness": {
+          "reasoning": "The comment addresses the initialization of variables but does not detail which variables or their purposes.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about initialization.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks specifics.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail that would help an expert programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3df5161d: ;Field attributes for ATTENDING PHYSICIAN field",
+        "completeness": {
+          "reasoning": "The comment mentions field attributes but does not specify what they are.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but is incomplete.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides basic information but lacks specifics that would be more useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "22ec9360: ;File global root for PROVIDER file",
+        "completeness": {
+          "reasoning": "The comment identifies the file but does not give any further details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but very basic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is minimally useful, providing only basic information.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e97fd7a5: ;Re-entry point for editing",
+        "completeness": {
+          "reasoning": "The comment states a re-entry point but does not detail what is being edited.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but lacking in detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more detailed to help understand the context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "47a96b3e: ;No logic for re-displaying ATTENDING PHYSICIAN",
+        "completeness": {
+          "reasoning": "The comment provides a specific detail but does not explain why or the context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but lacks context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a limitation but does not provide enough detail to be fully useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e21ec4b8:  ;\n ;This entry contains the Attending Provider for\n ;the Admission. If this field is edited, field #5 is cleared.\n ;The verson of this routine dated 1 DEC 1998 contains additional\n ;checks and field crosslinks related to this field.\n ;",
+        "completeness": {
+          "reasoning": "The comment documents the Attending Provider for the Admission and mentions what happens when the field is edited, including a version reference with additional checks.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information about the Attending Provider and the behavior when the field is edited seems accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides essential details that help an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d6d88d16: ;If not a Care Unit Transfer, clear field",
+        "completeness": {
+          "reasoning": "The comment addresses a single conditional action but lacks details about related functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is likely true but very limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some useful information but is too limited to be highly useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "46b277ca: ;Only an Attending Provider is allowed for a Care Unit Transfer.",
+        "completeness": {
+          "reasoning": "The comment documents a specific rule but does not cover other aspects of the functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is likely true but very specific.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information but is too narrow in scope.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d4ea7ffc: ;No further editing needed.",
+        "completeness": {
+          "reasoning": "The comment is very brief and does not address any specific functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information is true but too vague to be useful.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is too vague to provide any real usefulness.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "aec65f54:  ;\n ;This entry contains the Provider responsible for\n ;the Transfer. If this field is edited, field #3 is cleared.\n ;The version of this routine dated 1 DEC 1998 contains additional\n ;checks and field crosslinks related to this field.\n ;",
+        "completeness": {
+          "reasoning": "The comment documents the Provider responsible for the Transfer, what happens when the field is edited, and includes a version reference.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears accurate and detailed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides essential details that help an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cda085e3: ;If not a Care Unit Transfer, clear field",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of clearing the field if it's not a Care Unit Transfer but doesn't address other capabilities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information based on the context given.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding this specific condition in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8817505c: ;Only a Transfer Provider is allowed for a Care Unit Transfer.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality related to transfer providers but doesn't cover other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information relevant to the context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the restriction on transfer providers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ed5a399e: ;No further editing needed.",
+        "completeness": {
+          "reasoning": "The comment is vague and doesn't provide specific details about the functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment seems true but is very generic.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is too generic to be very useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e928ae99: ;Exit to next routine",
+        "completeness": {
+          "reasoning": "The comment addresses the specific action of exiting to the next routine but doesn't cover other aspects.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information regarding the flow of the program.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding the program flow.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,1152 @@
+{
+  "input": "{\n  \"comments\": [\n    \"636c7922:  ;\\n ;This routine prints patient/division/date/physician and service\\n ;related data from the VAS data global ^UTILITY(\\\"VAS\\\",$J).\\n ;This data was compiled by other routines according to the\\n ;option selected.\",\n    \"c75583a6: ;This line handles printing based on the option selected.\",\n    \"37279c90: ;Go to ^DGJOPRT3 if there are more nodes to process.\",\n    \"d369f82d: ;Exit.\",\n    \"6df5e732: ;Set DGJTDV1 for use in DIV label.\",\n    \"d371b161: ;Print division data for the selected option.\",\n    \"0c4b0f31: ;Done.\",\n    \"6dfbbb5f: ;Format the date.\",\n    \"e7f8cbc4: ;Print data by date for the selected option.\",\n    \"b5bc8a8d: ;Done.\",\n    \"f875333d: ;Print patient data from ^VAS(393).\",\n    \"124d8136: ;Done.\",\n    \"f1034ebb: ;If not already printed, print the header.\",\n    \"3b5c42c9:  ;For the selected option, loop through services.\\n ;Print header data, reset flag, loop through specialties for each service.\\n ;Call SER1 to print patient data by specialty.\",\n    \"c17d5ba7: ;Done.\",\n    \"7f8b8cf8: ;Write additional patient details for physicians.\",\n    \"b56b717c: ;Exit patient loop.\",\n    \"b8218210: ;Loop through patients by admission date.\",\n    \"b9c0e9fc: ;Exit admission date loop.\",\n    \"b98ff8be: ;Print details for each admission date.\",\n    \"ebfbd5ab: ;Exit admission date details loop.\",\n    \"3e1536fc: ;Print header if not already printed.\",\n    \"a7655fee: ;Loop through services, specialties, and patients.\",\n    \"0ba2dcfb: ;Exit service loop.\",\n    \"d6617db5: ;Loop through patients for each service and specialty.\",\n    \"11a131f6: ;Exit patient loop for service and specialty.\",\n    \"33a4e404: ;Print details for each patient, service, and specialty.\",\n    \"7a193eb9: ;Exit patient detail loop for service and specialty.\",\n    \"713ebdf3: ;Get record data from VAS file.\",\n    \"7f8b1ef5: ;Get physician name if not printing by physician.\",\n    \"dae82564: ;Write date, padding to column 13\",\n    \"51eb941d: ;Start new line\",\n    \"bba8e23d: ;Write patient name\",\n    \"21784192: ;Write patient ID\",\n    \"b6ced931: ;Write date of visit\",\n    \"49c3e337: ;Write procedure type\",\n    \"9c12b016: ;Write service location\",\n    \"7e9bee6f: ;Get patient's means test information\",\n    \"9fdea31a: ;Write means test status\",\n    \"19d96c17: ;If physician output, print additional physician details\",\n    \"75ab1882: ;Write physician name\",\n    \"8ce9250a: ;Write disposition\",\n    \"86a83609: ;If outpatient, write clinic of visit\",\n    \"dae8a684: ;Write length of stay\",\n    \"60e3f8fe: ;Return\",\n    \"d6ea2b92: ;Sets some header variables.\",\n    \"8de076eb: ;If output is not coming to the terminal (IOST doesn't contain 'C-'), go to RET1.\",\n    \"a14f80e5: ;If output is not coming to the terminal, quit.\",\n    \"00037f32: ;Loop through the blank lines until 3 lines before the end of the page (IOSL).\",\n    \"c995fca9: ;Print the division.\",\n    \"acc1a619: ;Prompt user to continue or quit. Set DGU flag if user quits.\",\n    \"69ee2bb5: ;If output is for PAT or DAT and the current line is near the bottom of the page, get user input to continue and print a new header.\",\n    \"247bc31b: ;If the current line is near the bottom of the page and output is to the terminal, get user input to continue and print a new header.\",\n    \"950b3234: ;End of subroutine.\",\n    \"46d6f0f0: ;Print the division heading.\",\n    \"c3bd9377: ;Print the physician heading.\",\n    \"9b900e45: ;Print the service heading.\",\n    \"b5e1125d: ;Print the specialty heading.\",\n    \"4836a5ad: ;Call PH^DGJOPRT3 routine.\",\n    \"65513825: ;Call SV^DGJOPRT3 routine.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 103.81859683990479
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "636c7922:  ;\n ;This routine prints patient/division/date/physician and service\n ;related data from the VAS data global ^UTILITY(\"VAS\",$J).\n ;This data was compiled by other routines according to the\n ;option selected.",
+        "completeness": {
+          "reasoning": "The comment addresses the primary functionality of printing patient-related data but doesn't cover all details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about what the routine does.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the high-level purpose of the routine.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c75583a6: ;This line handles printing based on the option selected.",
+        "completeness": {
+          "reasoning": "The comment is very brief and only covers a single aspect of the functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but only covers a trivial aspect.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "37279c90: ;Go to ^DGJOPRT3 if there are more nodes to process.",
+        "completeness": {
+          "reasoning": "The comment provides a specific instruction but doesn't cover the full functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the code's behavior.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the control flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d369f82d: ;Exit.",
+        "completeness": {
+          "reasoning": "The comment is extremely brief and does not provide much information.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the code's function.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very clear but too brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful due to its brevity.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "6df5e732: ;Set DGJTDV1 for use in DIV label.",
+        "completeness": {
+          "reasoning": "The comment specifies a single action but does not cover the broader context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could provide more context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks comprehensive details.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d371b161: ;Print division data for the selected option.",
+        "completeness": {
+          "reasoning": "The comment explains what the code does but doesn't detail how it works.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment seems to accurately describe the code's function.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0c4b0f31: ;Done.",
+        "completeness": {
+          "reasoning": "The comment does not explain any functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides no useful information, so it cannot be judged on truthfulness.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks context.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful to understanding the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "6dfbbb5f: ;Format the date.",
+        "completeness": {
+          "reasoning": "The comment explains the function but not the method.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the function.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e7f8cbc4: ;Print data by date for the selected option.",
+        "completeness": {
+          "reasoning": "The comment explains what the code does but not how it does it.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment seems to accurately describe the code's function.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b5bc8a8d: ;Done.",
+        "completeness": {
+          "reasoning": "The comment does not explain any functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides no useful information, so it cannot be judged on truthfulness.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks context.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful to understanding the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "f875333d: ;Print patient data from ^VAS(393).",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of printing patient data from a specific source.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and specific to the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "124d8136: ;Done.",
+        "completeness": {
+          "reasoning": "The comment does not provide any functional details.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide false information, but it is very minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but too brief to be useful.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment does not help understand the code better.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "f1034ebb: ;If not already printed, print the header.",
+        "completeness": {
+          "reasoning": "The comment provides a specific functionality but does not cover all aspects.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is true related to printing headers.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the conditional printing of headers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3b5c42c9:  ;For the selected option, loop through services.\n ;Print header data, reset flag, loop through specialties for each service.\n ;Call SER1 to print patient data by specialty.",
+        "completeness": {
+          "reasoning": "The comment extensively covers the main functionalities of the code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be true and detailed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the flow and functions of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c17d5ba7: ;Done.",
+        "completeness": {
+          "reasoning": "The comment provides no functional details.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide false information, but it is very minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but too brief to be useful.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment does not help understand the code better.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "7f8b8cf8: ;Write additional patient details for physicians.",
+        "completeness": {
+          "reasoning": "The comment partially explains the functionality but lacks details on what specific patient details are written and how.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information given is accurate but incomplete.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand part of the functionality but lacks detail for full comprehension.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b56b717c: ;Exit patient loop.",
+        "completeness": {
+          "reasoning": "The comment fully describes the functionality of exiting the patient loop.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information given is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the control flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b8218210: ;Loop through patients by admission date.",
+        "completeness": {
+          "reasoning": "The comment explains the essential functionality of looping through patients by admission date.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is true and accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the purpose of the loop.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b9c0e9fc: ;Exit admission date loop.",
+        "completeness": {
+          "reasoning": "The comment fully describes the functionality of exiting the admission date loop.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information given is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the control flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b98ff8be: ;Print details for each admission date.",
+        "completeness": {
+          "reasoning": "The comment explains the core functionality but lacks specifics on what details are printed.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information given is accurate but somewhat vague.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be enhanced with more detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ebfbd5ab: ;Exit admission date details loop.",
+        "completeness": {
+          "reasoning": "The comment addresses the action of exiting a loop but does not give any context about the loop's functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about exiting the loop.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is only slightly useful as it does not provide context or details about the loop's purpose.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3e1536fc: ;Print header if not already printed.",
+        "completeness": {
+          "reasoning": "The comment addresses the condition and action of printing a header but does not specify what the header contains or its significance.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about printing a header.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the conditional printing of the header.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a7655fee: ;Loop through services, specialties, and patients.",
+        "completeness": {
+          "reasoning": "The comment provides a good overview of the loop's scope but lacks details on the loop's inner workings.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the entities being looped through.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful to an average programmer for understanding the entities involved in the loop.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0ba2dcfb: ;Exit service loop.",
+        "completeness": {
+          "reasoning": "The comment indicates exiting a loop but does not provide context or details on the loop's purpose.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is true in indicating the exit action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is minimally useful as it lacks context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d6617db5: ;Loop through patients for each service and specialty.",
+        "completeness": {
+          "reasoning": "The comment provides a clear understanding of the loop's purpose but does not elaborate on any additional functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the loop's purpose.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-constructed and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the context of the loop for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "11a131f6: ;Exit patient loop for service and specialty.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of exiting a loop but lacks details on the loop's purpose and context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about exiting the loop.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks context, making it harder for an expert to understand the broader functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "33a4e404: ;Print details for each patient, service, and specialty.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of printing details but does not specify what kind of details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about printing details.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding the code's purpose but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7a193eb9: ;Exit patient detail loop for service and specialty.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of exiting a loop but does not provide full context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about exiting the loop.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks context, making it harder for an expert to understand the broader functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "713ebdf3: ;Get record data from VAS file.",
+        "completeness": {
+          "reasoning": "The comment provides a clear indication of getting data but lacks details on what specific data or how it is processed.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about getting data.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful but could provide more context to be fully useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7f8b1ef5: ;Get physician name if not printing by physician.",
+        "completeness": {
+          "reasoning": "The comment describes a specific condition related to getting the physician's name but lacks additional context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the condition for getting the physician's name.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding the code's condition but lacks full context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dae82564: ;Write date, padding to column 13",
+        "completeness": {
+          "reasoning": "The comment describes the functionality of writing the date and padding it, but may not cover all aspects if the function does more.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about writing the date and padding.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific functionality of writing the date and padding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "51eb941d: ;Start new line",
+        "completeness": {
+          "reasoning": "The comment fully describes the essential functionality of starting a new line.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action of starting a new line.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the specific action of starting a new line.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bba8e23d: ;Write patient name",
+        "completeness": {
+          "reasoning": "The comment describes the essential functionality related to writing the patient name.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about writing the patient name.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and precise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific functionality of writing the patient name.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "21784192: ;Write patient ID",
+        "completeness": {
+          "reasoning": "The comment fully describes the essential functionality related to writing the patient ID.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about writing the patient ID.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is direct and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific action of writing the patient ID.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b6ced931: ;Write date of visit",
+        "completeness": {
+          "reasoning": "The comment describes the essential functionality related to writing the date of visit.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about writing the date of visit.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific action of writing the date of visit.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "49c3e337: ;Write procedure type",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of writing the procedure type.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9c12b016: ;Write service location",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of writing the service location.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7e9bee6f: ;Get patient's means test information",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of retrieving the patient's means test information.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9fdea31a: ;Write means test status",
+        "completeness": {
+          "reasoning": "The comment explains the essential functionality of writing the means test status.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "19d96c17: ;If physician output, print additional physician details",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of printing additional physician details if there is physician output.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "75ab1882: ;Write physician name",
+        "completeness": {
+          "reasoning": "This comment addresses a specific capability of the code, but not all essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and relevant to the specific line of code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents specific functionality but may not be useful for understanding the entire code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8ce9250a: ;Write disposition",
+        "completeness": {
+          "reasoning": "This comment addresses a specific capability of the code, but not all essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and relevant to the specific line of code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents specific functionality but may not be useful for understanding the entire code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "86a83609: ;If outpatient, write clinic of visit",
+        "completeness": {
+          "reasoning": "This comment addresses a specific condition and functionality, but not all essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and relevant to the specific condition mentioned.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents specific functionality but may not be useful for understanding the entire code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dae8a684: ;Write length of stay",
+        "completeness": {
+          "reasoning": "This comment addresses a specific capability of the code, but not all essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and relevant to the specific line of code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents specific functionality but may not be useful for understanding the entire code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "60e3f8fe: ;Return",
+        "completeness": {
+          "reasoning": "This comment addresses a basic capability of the code, but not all essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but very basic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial functionality and may not be very useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d6ea2b92: ;Sets some header variables.",
+        "completeness": {
+          "reasoning": "The comment is too vague and does not specify which header variables are being set.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely true given its simplicity.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but too generic to help an expert programmer.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8de076eb: ;If output is not coming to the terminal (IOST doesn't contain 'C-'), go to RET1.",
+        "completeness": {
+          "reasoning": "The comment explains a conditional statement and the resulting action.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be accurate and specific.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a14f80e5: ;If output is not coming to the terminal, quit.",
+        "completeness": {
+          "reasoning": "The comment explains a scenario but lacks detail compared to the previous one.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but is less specific.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could benefit from more detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks specificity.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "00037f32: ;Loop through the blank lines until 3 lines before the end of the page (IOSL).",
+        "completeness": {
+          "reasoning": "The comment fully explains the loop behavior and its stopping condition.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and provides sufficient detail.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the loop's purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c995fca9: ;Print the division.",
+        "completeness": {
+          "reasoning": "The comment is too brief and does not specify which division is being printed.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely true but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but too terse.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very helpful due to its brevity.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "acc1a619: ;Prompt user to continue or quit. Set DGU flag if user quits.",
+        "completeness": {
+          "reasoning": "The comment addresses the key functionality of prompting the user and setting a flag if they quit.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and matches typical functionality for user prompts and flags.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the user prompt and flag behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "69ee2bb5: ;If output is for PAT or DAT and the current line is near the bottom of the page, get user input to continue and print a new header.",
+        "completeness": {
+          "reasoning": "The comment covers both conditions and actions to be taken.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information seems reasonable and truthful based on typical conditions for output management.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear instructions on how the code handles specific output scenarios.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "247bc31b: ;If the current line is near the bottom of the page and output is to the terminal, get user input to continue and print a new header.",
+        "completeness": {
+          "reasoning": "The comment addresses both the condition and the action to be taken.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and logical given the context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the user input and header printing process.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "950b3234: ;End of subroutine.",
+        "completeness": {
+          "reasoning": "The comment addresses the end of the subroutine but lacks detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but very basic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is only slightly useful as it states the obvious.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "46d6f0f0: ;Print the division heading.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of printing a heading.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true based on the context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the specific action of printing a heading.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c3bd9377: ;Print the physician heading.",
+        "completeness": {
+          "reasoning": "The comment documents the specific functionality of printing the physician heading.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9b900e45: ;Print the service heading.",
+        "completeness": {
+          "reasoning": "The comment documents the specific functionality of printing the service heading.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b5e1125d: ;Print the specialty heading.",
+        "completeness": {
+          "reasoning": "The comment documents the specific functionality of printing the specialty heading.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4836a5ad: ;Call PH^DGJOPRT3 routine.",
+        "completeness": {
+          "reasoning": "The comment documents the specific functionality of calling the PH^DGJOPRT3 routine.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific call.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "65513825: ;Call SV^DGJOPRT3 routine.",
+        "completeness": {
+          "reasoning": "The comment documents the specific functionality of calling the SV^DGJOPRT3 routine.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific call.",
+          "score": 4
+        }
+      }
+    ]
+  }
+}

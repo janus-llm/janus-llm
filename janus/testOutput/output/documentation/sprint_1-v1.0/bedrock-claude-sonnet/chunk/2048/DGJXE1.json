@@ -1,0 +1,3128 @@
+{
+  "input": "{\n  \"comments\": [\n    \"8a378a95: ;\\n .;THIS ROUTINE CONTAINS AN ENTRY POINT FOR EACH FIELD OF THE SCREENING\\n .;PROFILE FILE. DATA IS PASSED TO THE ENTRY POINTS BY SETTING NODES IN\\n .;^UTILITY($J). FOR ADDS, THE FDA IS USED. FOR OTHER TRANSACTIONS, THE RECORD\\n .;IS TRANSFERRED TO ^UTILITY FROM DIC AND THEN UPDATED ACCORDING TO WORKING\\n .;STORAGE IN ^UTILITY($J)\\n .;\",\n    \"cb613dc1: ;Set up variables and call entry point.\",\n    \"ef726429: ;Set up variables for editing. Get Field values from Data Dictionary.\",\n    \"4747f44a: ;Get Field values from DD\",\n    \"04084897: ;Get Field values from DD\",\n    \"89309f83: ;Quit\",\n    \"f7eb2c62: ;Write data name\",\n    \"ff29a831: ;Quit\",\n    \"08475014: ;Call reader with parameters DV, DU, X, Y\",\n    \"593e0e61: ;If response longer than 19 characters, branch to word-wrapping routine.\",\n    \"34efcd3f: ;If field is inactive, display 'No Editing' and quit.\",\n    \"51529e4e: ;Read X and set time-out trap.\",\n    \"746f874e: ;Quit\",\n    \"a96817ba: ;Clean up and increment data sub-level counter.\",\n    \"a9a97465: ;Branch to appropriate IX^DIE17 entry point.\",\n    \"4045368a: ;Else re-display data and edit it.\",\n    \"0b947cfc: ;If null response and proper conditions, branch forNYA code.\",\n    \"c026921f: ;Handle VALUE POINTER questions.\",\n    \"7251f58b: ;Allow jump out to Line Editor.\",\n    \"c3c39ee0: ;If user enters an @, get default response from DISVS PROMPTS file.\",\n    \"2c4a0dbb: ;If data value validation fails, set X to null and branch to input transform.\",\n    \"f7420e22: Kill the DDER array and quit.\",\n    \"077ffdff: If DV contains a 'P' (pointer) set DIC and DIC(0) appropriately. If DV contains a '*' (wildcard), call the AST^DIED routine. Otherwise, call NOSCR^DIED. Set X to the value of Y (if positive) and set DIC to DIE.\",\n    \"56b463f0: If DV does not contain 'N' (numeric), go to V. Otherwise, call the D subroutine. If the length of the decimal part of X is greater than 24, kill X and go to Z.\",\n    \"b1328469: If the 5th piece of DQ(DQ) does not start with '$', and X is a valid numeric expression with a decimal point, and the 5th-99th pieces of DQ(DQ) contain '+X'=X', set X to its numeric value.\",\n    \"02e2be8f: Execute the code in the local variable X_DQ and kill YS.\",\n    \"50ddd8e7: Kill DIC('S') and DLAYGO. If X is defined and not equal to the at-sign (@), call SAVEVALS if DE(DW,'INDEX') is true. If KEYCHK returns false, call UNIQFERR^DIE17. Set DG(DW) to X. If DV contains 'd', set ^DISV(DUZ,'DIE',DLB) to X. Go to A.\",\n    \"cb720f22: If not in a TaskMan environment, write a beep and '??'. If DB(DQ) is defined, go to Z^DIE17.\",\n    \"e407d060: Set X to '?BAD'.\",\n    \"ad8f6cda: Set DZ to X, call the D and QQ^DIEQ subroutines, and go to B.\",\n    \"68c35227: Set D to DIFLD, set DQ(DQ) to DLB_U_DV_U_DU_U_DW_U_$P($T(@('X'_DQ)),' ',2,99).\",\n    \"cfec243b: If DE(DQ) is undefined, call the O subroutine. If X is not '@', go to RD. If DV does not contain 'R' and X is '@', go to A. If X is '@', set X to Y and go to N.\",\n    \"10ae794a: Set DG to DV, Y to DE(DQ), and X to DU. If DQ(DQ,2) is defined, execute it and go to RP.\",\n    \"bd3c2710: If DG contains 'P' and the global node ^(0) exists, set X to the 2nd piece of ^(0). If ^(Y,0) is undefined, go to RP. Otherwise, set Y to the 1st piece of ^(0), X to the 3rd piece of ^DD(X,.01,0), and DG to the 2nd piece of ^(0). Go to R.\",\n    \"9ea5b532: If DG contains 'V', Y is a number, the 2nd piece of Y contains '(', and the global node exists, set X to the 2nd piece of ^(0). If ^(+Y,0) is undefined, go to RP. Otherwise, set Y to the 1st piece of ^(0). If ^DD(+X,.01,0) exists, set DG to the 2nd piece of ^(0) and X to the 3rd piece of ^(0). Go to R.\",\n    \"2da25728: If the data global is defined ('D') or this is a sub-field ('S'), extract a portion of the Execute Code for the field.\",\n    \"fb14c68c: If the user response is empty, set it to the field's default value. If the Data Valid code is present and fails or if the Computed Multiple Field code fails (DC=2 or greater), skip to the Unedited Data Input transform.\",\n    \"69be31bc: If the input variable contains neither the 'I' nor the '#' code, jump to the Read input transform.\",\n    \"72b55137: Execute MUMPS code in the MUMPS Input transform, then jump to the Read input transform if the input variable is defined, otherwise go to the Print Processor code.\",\n    \"227184cc: Exit from the DIE Reader loop.\",\n    \"20abe8f1: Set up parameters for the DIR reader utility, optionally indicating that an existing value is present in the database (DB) for this field.\",\n    \"b7fe8478: If there is an existing value in the database for this field and the field is not flagged as quiet, create a DIQUIET node to indicate that the reader should display the existing value.\",\n    \"c6b0e0de: Call the DIR reader utility and store the results in the Despu\\u00e9s variable and the user's response in the input variable.\",\n    \"bf1a3d78: Exit from the SET Reader loop.\",\n    \"0a66c113: Store the original value of this field from the database in a temporary global node. If a MUMPS xecutable Help frame exists, store its value in case it needs to be restored later.\",\n    \"d2f8be06: If there are Word-processing attributes defined for this field, initialize the attribute storage global node.\",\n    \"60b5b949: Kill off temporary storage used for crosswalk logic.\",\n    \"62aa5ff3: Exit immediately.\",\n    \"567a0cdc: Display an error and set X to a bad value if a required key field is missing.\",\n    \"3f81322b: Check if the key integrity is violated for the current record being edited.\",\n    \"84691e46: Initialize variables for the INIT code.\",\n    \"563a61b0: Set up the field properties for SPECIALTY field.\",\n    \"77ed3a2d: Set the prefix for the SPECIALTY field's input transform.\",\n    \"fc92246a: Branch to the field's input transform logic.\",\n    \"581d1651: Exit the input transform logic.\",\n    \"e353a427: Set up the field properties for PRIMARY PHYSICIAN field.\",\n    \"4a0eb707: Set the PRIMARY PHYSICIAN field's cross-reference.\",\n    \"46cc468d: Set the prefix for the PRIMARY PHYSICIAN field's input transform.\",\n    \"5f22a39e: Branch to the field's input transform logic.\",\n    \"b868ef2d: Check if the PRIMARY PHYSICIAN field has a cross-reference and branch accordingly.\",\n    \"3d6c4d70: Initialize variables for the PRIMARY PHYSICIAN field's input transform.\",\n    \"a9466272: Handle a null or missing value for the PRIMARY PHYSICIAN field.\",\n    \"4d6e97f2: Set up variables for the PRIMARY PHYSICIAN field's input transform.\",\n    \"a6acea89: Execute the PRIMARY PHYSICIAN field's input transform logic.\",\n    \"3bddba7f: Exit from the PRIMARY PHYSICIAN field's input transform.\",\n    \"7cd1fd10: No operation.\",\n    \"2e891ec6: Execute the logic for the exit code when all fields have been processed.\",\n    \"22184ba5: Branch based on whether a lookup value is passed in.\",\n    \"212a2970: ;Indicates that a new application server session is needed.\",\n    \"919a85e9: ;Exits the routine.\",\n    \"e556ddfc: ;Sets up variables for the FileMan call to update/edit the ATTENDING PHYSICIAN field.\",\n    \"ce5be78d: ;Sets the DE(DW) array for the FileMan call.\",\n    \"85d8a585: ;Sets the DU array for the FileMan call.\",\n    \"8a0980c6: ;Goes to the FileMan entry point for the edit/update call.\",\n    \"c77b8c0f: ;Checks if the ATTENDING PHYSICIAN field is defined, goes to C4S if not.\",\n    \"b49f0216: ;Sets the X variable to the current value of the ATTENDING PHYSICIAN field and the DIC variable to the file number.\",\n    \"fb56dd78: ;Sets a flag indicating an attending physician was defined and calls a routine to perform additional processing.\",\n    \"2e6b987d: ;If the ATTENDING PHYSICIAN field is null, goes to C4F1. Otherwise, stores the current value in X and the file number in DIC.\",\n    \"bfc0c1b5: ;Sets the X variable to the current value of the ATTENDING PHYSICIAN field and the DIC variable to the file number.\",\n    \"627196f2: ;Sets a flag indicating an attending physician was defined and calls a routine to perform additional processing.\",\n    \"20fe454b: ;Exit point for the ATTENDING PHYSICIAN processing.\",\n    \"b62030d0: ;Exit point for the routine.\",\n    \"25131f7f: ;Sets up variables for the FileMan call to update/edit another field. Performs additional processing based on certain conditions.\",\n    \"00b1d2c4: Set DGJTUP=1, which indicates an update is in progress.\",\n    \"5181ab04: Exit the current code block.\",\n    \"a385ff66:  ;\\n ;Set DQ (data qualifier) to 7, which may be used to control code execution flow.\\n ;\",\n    \"8d7c0f08: ;Execute code block X7, then check for and handle any input transformations (FIREREC^DIE17), then handle any null or up-arrow responses (Y=U), and set DIC(0), DW, and go to OUT^DIE17.\",\n    \"73e45ac3: ;If DGJTNUM does not contain '3', set Y (output variable) to null.\",\n    \"3a82abfb: Exit the current code block.\",\n    \"9b29c7c0:  ;\\n ;Set DQ (data qualifier) to 9, which may be used to control code execution flow.\\n ;\",\n    \"d987329e: ;Execute code block X9, then check for and handle any input transformations (FIREREC^DIE17), then handle any null or up-arrow responses (Y=U), and set DIC(0), DW, and go to OUT^DIE17.\",\n    \"94d326dc: ;If DGJTDEF is defined and DGJTNUM contains '3', set Y to '@20'.\",\n    \"8c927f12: Exit the current code block.\",\n    \"89afe8c1: ;Execute code block X10, then check for and handle any input transformations (FIREREC^DIE17), then handle any null or up-arrow responses (Y=U), and set DIC(0), DW, and go to OUT^DIE17.\",\n    \"ca692951: ;If DGJTNUM does not contain '3', set Y to '@15'.\",\n    \"09dc02b3: Exit the current code block.\",\n    \"8d45afed: ;Execute code block X11, then check for and handle any input transformations (FIREREC^DIE17), then handle any null or up-arrow responses (Y=U), and set DIC(0), DW, and go to OUT^DIE17.\",\n    \"63402e14: ;Check if discharge summary and set Y to special characters based on result.\",\n    \"668fe163: ;Quit.\",\n    \"aad610e9: ;Set variables for DIE call to update DATE DICTATED field.\",\n    \"37d786ea: ;Set variable for input transform.\",\n    \"235bab07: ;Go to ReEnter Code.\",\n    \"2d9d0c85: ;If data exists, go to server code; otherwise, kill db.\",\n    \"099b55a8: ;Set X to existing data and DIC to file number.\",\n    \"5621dcb5: ;Check if physician defined, call utility to update.\",\n    \"4d7e6ef8: ;If no existing data, set X to null and go to field level.\",\n    \"e60ff455: ;Set X to existing data and DIC to file number.\",\n    \"3fef7fc1: ;Check if physician defined, call utility to update.\",\n    \"9d3acc89: ;Quit.\",\n    \"2a013d34: ;Set X to today's date in external format, kill X if date is invalid.\",\n    \"377c2748: ;Quit.\",\n    \"4981ba1b: ;Call DIE to update field, handle post-action, set X and DIC for re-enter.\",\n    \"b44bfa47: ;If no date, clear all date-related nodes.\",\n    \"e735af7e: \",\n    \"bd92d01f: \",\n    \"05c63450: \",\n    \"69edbce8: \",\n    \"534c0b79: \",\n    \"c6b2c9b1: \",\n    \"8124ac43: \",\n    \"11d42676: \",\n    \"7c0a2108: \",\n    \"5baf707c: \",\n    \"ead6ec0b: \",\n    \"aad898e4: \",\n    \"ae3bd4ca: \",\n    \"7feba445: \",\n    \"b1a445cf: \",\n    \"29615577: \",\n    \"743f406b: \",\n    \"2b9da1df: \",\n    \"a94c09c8: Set the X and DIC variables.\",\n    \"6d8da780: Set flag for DGJFDIC and call PHYDEF^DGJTUTL routine.\",\n    \"a1247467: Control Transfer - Quit.\",\n    \"733e9227: Control Transfer - Quit.\",\n    \"be6000f8: Call DIE17 routines, set DQ=18, execute X18^DGJXE1 and handle FIREREC^DIE17 call.\",\n    \"802859d8: If X is empty, clear DATE fields and set DGJTST and Y.\",\n    \"bf4d7f41: Control Transfer - Quit.\",\n    \"6caa60fa: Call DIE17 routines, set DQ=19, execute X19^DGJXE1 and handle FIREREC^DIE17 call.\",\n    \"f23e9af8: Set DGJTST to 'DICTATED'.\",\n    \"1f39fdcc: Control Transfer - Quit.\",\n    \"070659cf: ;\\nSet DQ=21;\\n\",\n    \"97e54c90: Call DIE17 routines, set DQ, DW, DV, DU, DLB and DIFLD variables.\",\n    \"831959e5: Set DE(DW) value with 'C21^DGJXE1'.\",\n    \"3e0a1f41: Control Transfer - Branch to label RE.\",\n    \"654653d6: Control Transfer - If DE(21) is undefined, go to C21S, else kill DB.\",\n    \"396e703b: Set X=DE(21) and DIC=DIE.\",\n    \"badc62a0: Set DGJFSIG=1 and call PHYDEF^DGJTUTL routine.\",\n    \"ac4ad309: If DG(DQ)=X, go to C21F1, else set X='', kill DB.\",\n    \"92a47f94: Set X=DG(DQ) and DIC=DIE.\",\n    \"ac684e30: Set DGJFSIG=1 and call PHYDEF^DGJTUTL routine.\",\n    \"f6554547: Control Transfer - Quit.\",\n    \"0cd13bec: Set %DT(0) and %DT, call ^%DT, kill %DT(0), set X=Y, if Y<1 kill X.\",\n    \"08d1f009: Control Transfer - Quit.\",\n    \"1b128eb4: Call DIE17 routines, set DQ=22, execute X22^DGJXE1 and handle FIREREC^DIE17 call.\",\n    \"31cadcb5: If X is empty, clear DATE TRANSCRIBED field.\",\n    \"c4258058: Control Transfer - Quit.\",\n    \"25dd3560: Call DIE17 routines, set DQ=23, execute X23^DGJXE1 and handle FIREREC^DIE17 call.\",\n    \"f374f830: If X is after DATE DICTATED, display error and clear DATE TRANSCRIBED. Set Y='@9'.\",\n    \"934cef16: Control Transfer - Quit.\",\n    \"c626334d: Call DIE17 routines, set DQ=24, execute X24^DGJXE1 and handle FIREREC^DIE17 call.\",\n    \"894cf907: If X is empty, set DGJTST='DICTATED' and Y='@2'.\",\n    \"8b4d385d: Control Transfer - Quit.\",\n    \"dbf7c721: Call F^DIE17 and branch to ^DGJXE2.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 346.53796887397766
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "8a378a95: ;\n .;THIS ROUTINE CONTAINS AN ENTRY POINT FOR EACH FIELD OF THE SCREENING\n .;PROFILE FILE. DATA IS PASSED TO THE ENTRY POINTS BY SETTING NODES IN\n .;^UTILITY($J). FOR ADDS, THE FDA IS USED. FOR OTHER TRANSACTIONS, THE RECORD\n .;IS TRANSFERRED TO ^UTILITY FROM DIC AND THEN UPDATED ACCORDING TO WORKING\n .;STORAGE IN ^UTILITY($J)\n .;",
+        "completeness": {
+          "reasoning": "The comment covers all essential functionality regarding how data is passed and processed.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is very useful for understanding how data is managed and processed in the routine.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cb613dc1: ;Set up variables and call entry point.",
+        "completeness": {
+          "reasoning": "The comment provides minimal information about the functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but very basic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents only trivial functionality and offers minimal understanding.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ef726429: ;Set up variables for editing. Get Field values from Data Dictionary.",
+        "completeness": {
+          "reasoning": "The comment covers the main functionalities but lacks detail.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the basic operations but lacks depth in explanation.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4747f44a: ;Get Field values from DD",
+        "completeness": {
+          "reasoning": "The comment mentions only one functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents only a single, trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "04084897: ;Get Field values from DD",
+        "completeness": {
+          "reasoning": "The comment mentions only one functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents only a single, trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "89309f83: ;Quit",
+        "completeness": {
+          "reasoning": "The comment is very brief and might only reflect a single function.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very short.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks depth.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f7eb2c62: ;Write data name",
+        "completeness": {
+          "reasoning": "The comment specifies a single action but lacks further detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely true but provides minimal context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is of limited use due to its brevity.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ff29a831: ;Quit",
+        "completeness": {
+          "reasoning": "The comment is very brief and might only reflect a single function.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very short.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks depth.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "08475014: ;Call reader with parameters DV, DU, X, Y",
+        "completeness": {
+          "reasoning": "The comment provides a list of parameters but lacks further context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to be accurate and makes sense.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "593e0e61: ;If response longer than 19 characters, branch to word-wrapping routine.",
+        "completeness": {
+          "reasoning": "The comment is quite detailed and covers a specific condition.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to be accurate and well-informed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful, particularly for understanding conditional logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "34efcd3f: ;If field is inactive, display 'No Editing' and quit.",
+        "completeness": {
+          "reasoning": "The comment explains the functionality completely.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "51529e4e: ;Read X and set time-out trap.",
+        "completeness": {
+          "reasoning": "The comment documents essential functionality but lacks detail.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "746f874e: ;Quit",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but too brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a96817ba: ;Clean up and increment data sub-level counter.",
+        "completeness": {
+          "reasoning": "The comment explains the functionality completely.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a9a97465: ;Branch to appropriate IX^DIE17 entry point.",
+        "completeness": {
+          "reasoning": "The comment explains the functionality but could be more detailed.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4045368a: ;Else re-display data and edit it.",
+        "completeness": {
+          "reasoning": "The comment is brief and does not fully explain the context or all the functionalities involved in the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes a possible action the code takes.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific action but lacks detailed context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0b947cfc: ;If null response and proper conditions, branch forNYA code.",
+        "completeness": {
+          "reasoning": "The comment addresses a conditional branching but does not elaborate on the conditions or the 'forNYA code'.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides mostly true information but lacks specifics.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is mostly clear but the term 'forNYA' may be confusing without context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a conditional branch but provides limited context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c026921f: ;Handle VALUE POINTER questions.",
+        "completeness": {
+          "reasoning": "The comment is very brief and does not explain how VALUE POINTER questions are handled.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate but minimal information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a general idea but is too vague to be highly useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7251f58b: ;Allow jump out to Line Editor.",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality but does not provide additional context or detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c3c39ee0: ;If user enters an @, get default response from DISVS PROMPTS file.",
+        "completeness": {
+          "reasoning": "The comment clearly explains the condition and the resulting action but does not provide full context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear and useful information for understanding the code behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2c4a0dbb: ;If data value validation fails, set X to null and branch to input transform.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of setting X to null and branching to input transform, but it does not cover all possible actions or conditions.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true based on the described condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific condition and action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f7420e22: Kill the DDER array and quit.",
+        "completeness": {
+          "reasoning": "The comment is very brief and may not cover all relevant functionality, such as the conditions under which this action is taken.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but overly brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents trivial functionality and lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "077ffdff: If DV contains a 'P' (pointer) set DIC and DIC(0) appropriately. If DV contains a '*' (wildcard), call the AST^DIED routine. Otherwise, call NOSCR^DIED. Set X to the value of Y (if positive) and set DIC to DIE.",
+        "completeness": {
+          "reasoning": "The comment is comprehensive and covers multiple conditions and their respective actions.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information that would help an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "56b463f0: If DV does not contain 'N' (numeric), go to V. Otherwise, call the D subroutine. If the length of the decimal part of X is greater than 24, kill X and go to Z.",
+        "completeness": {
+          "reasoning": "The comment covers multiple conditions and actions but may omit some less essential details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and accurately describes the conditions and actions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could benefit from additional structuring for better readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides valuable information that helps an average programmer understand the logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b1328469: If the 5th piece of DQ(DQ) does not start with '$', and X is a valid numeric expression with a decimal point, and the 5th-99th pieces of DQ(DQ) contain '+X'=X', set X to its numeric value.",
+        "completeness": {
+          "reasoning": "The comment covers the specific condition and action but may not provide complete context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but somewhat complex and could be simplified.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information that helps an average programmer understand the specific condition.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "02e2be8f: Execute the code in the local variable X_DQ and kill YS.",
+        "completeness": {
+          "reasoning": "The comment addresses the execution of code in a local variable and killing another variable but misses other essential details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment seems to provide true information but lacks context to fully verify its accuracy.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail and context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some useful information but lacks detail to be very helpful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "50ddd8e7: Kill DIC('S') and DLAYGO. If X is defined and not equal to the at-sign (@), call SAVEVALS if DE(DW,'INDEX') is true. If KEYCHK returns false, call UNIQFERR^DIE17. Set DG(DW) to X. If DV contains 'd', set ^DISV(DUZ,'DIE',DLB) to X. Go to A.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple functionalities and details of the code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to provide accurate and specific information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for an expert programmer to understand the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cb720f22: If not in a TaskMan environment, write a beep and '??'. If DB(DQ) is defined, go to Z^DIE17.",
+        "completeness": {
+          "reasoning": "The comment covers only a portion of the functionality related to TaskMan environment and DB(DQ).",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides mostly true information.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could use more context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful for understanding specific conditions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e407d060: Set X to '?BAD'.",
+        "completeness": {
+          "reasoning": "The comment addresses a very specific and small part of the functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information in the comment is likely true but lacks context.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is very brief and readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality and is therefore not very useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ad8f6cda: Set DZ to X, call the D and QQ^DIEQ subroutines, and go to B.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple functionalities but lacks some details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could provide more context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the sequence of operations.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "68c35227: Set D to DIFLD, set DQ(DQ) to DLB_U_DV_U_DU_U_DW_U_$P($T(@('X'_DQ)),' ',2,99).",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality but lacks detail.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is somewhat clear but uses abbreviations that could be confusing.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be clearer for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cfec243b: If DE(DQ) is undefined, call the O subroutine. If X is not '@', go to RD. If DV does not contain 'R' and X is '@', go to A. If X is '@', set X to Y and go to N.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple conditions and flows but could be more detailed.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but complex due to multiple conditions.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the logic flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "10ae794a: Set DG to DV, Y to DE(DQ), and X to DU. If DQ(DQ,2) is defined, execute it and go to RP.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality but lacks detail on what happens after RP.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but uses abbreviations that could be confusing.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be clearer for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bd3c2710: If DG contains 'P' and the global node ^(0) exists, set X to the 2nd piece of ^(0). If ^(Y,0) is undefined, go to RP. Otherwise, set Y to the 1st piece of ^(0), X to the 3rd piece of ^DD(X,.01,0), and DG to the 2nd piece of ^(0). Go to R.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple conditions and actions comprehensively.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but complex due to multiple actions and conditions.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding the logic flow and actions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9ea5b532: If DG contains 'V', Y is a number, the 2nd piece of Y contains '(', and the global node exists, set X to the 2nd piece of ^(0). If ^(+Y,0) is undefined, go to RP. Otherwise, set Y to the 1st piece of ^(0). If ^DD(+X,.01,0) exists, set DG to the 2nd piece of ^(0) and X to the 3rd piece of ^(0). Go to R.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple conditions and actions comprehensively.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but complex due to multiple actions and conditions.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding the logic flow and actions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2da25728: If the data global is defined ('D') or this is a sub-field ('S'), extract a portion of the Execute Code for the field.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but does not cover the full functionality of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific condition but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "fb14c68c: If the user response is empty, set it to the field's default value. If the Data Valid code is present and fails or if the Computed Multiple Field code fails (DC=2 or greater), skip to the Unedited Data Input transform.",
+        "completeness": {
+          "reasoning": "The comment covers multiple conditions and actions but may not address all possible scenarios.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is mostly true but might miss some edge cases.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but somewhat lengthy, making it harder to follow.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the handling of user responses and error conditions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "69be31bc: If the input variable contains neither the 'I' nor the '#' code, jump to the Read input transform.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but does not cover the full functionality of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific condition but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "72b55137: Execute MUMPS code in the MUMPS Input transform, then jump to the Read input transform if the input variable is defined, otherwise go to the Print Processor code.",
+        "completeness": {
+          "reasoning": "The comment covers multiple actions but may not address all possible scenarios.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is mostly true but might miss some edge cases.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but somewhat lengthy, making it harder to follow.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the sequence of actions in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "227184cc: Exit from the DIE Reader loop.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific action of exiting the loop but does not provide context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the loop exit action but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "20abe8f1: Set up parameters for the DIR reader utility, optionally indicating that an existing value is present in the database (DB) for this field.",
+        "completeness": {
+          "reasoning": "The comment addresses the setup of parameters and the optional indication of an existing value.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the setup process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b7fe8478: If there is an existing value in the database for this field and the field is not flagged as quiet, create a DIQUIET node to indicate that the reader should display the existing value.",
+        "completeness": {
+          "reasoning": "The comment explains the condition for creating a DIQUIET node and its purpose.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information in the comment is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information on conditional behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c6b0e0de: Call the DIR reader utility and store the results in the Despu\u00e9s variable and the user's response in the input variable.",
+        "completeness": {
+          "reasoning": "The comment describes the call to the utility and storage of results.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate, but the use of 'Despu\u00e9s' might be confusing.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is mostly clear, but the use of 'Despu\u00e9s' is unusual.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be clearer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bf1a3d78: Exit from the SET Reader loop.",
+        "completeness": {
+          "reasoning": "The comment is very brief and only mentions exiting the loop.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very short.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "0a66c113: Store the original value of this field from the database in a temporary global node. If a MUMPS executable Help frame exists, store its value in case it needs to be restored later.",
+        "completeness": {
+          "reasoning": "The comment explains the storage of the original value and the handling of the Help frame.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and detailed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the handling of values and Help frames.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d2f8be06: If there are Word-processing attributes defined for this field, initialize the attribute storage global node.",
+        "completeness": {
+          "reasoning": "The comment specifically addresses one aspect of the functionality but does not cover all possible cases and capabilities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but limited to one scenario.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-phrased.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific condition but does not provide a comprehensive overview.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "60b5b949: Kill off temporary storage used for crosswalk logic.",
+        "completeness": {
+          "reasoning": "The comment covers a specific action but does not detail why it is done or what the crosswalk logic entails.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate but limited.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but uses jargon that may not be understood by all programmers.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "Useful for understanding a specific action but lacks context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "62aa5ff3: Exit immediately.",
+        "completeness": {
+          "reasoning": "The comment is extremely brief and does not provide enough detail about the exit condition or context.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate but very limited.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but too brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful due to its lack of detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "567a0cdc: Display an error and set X to a bad value if a required key field is missing.",
+        "completeness": {
+          "reasoning": "The comment is specific and covers the essential functionality of handling a missing key field.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding error handling in this context.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3f81322b: Check if the key integrity is violated for the current record being edited.",
+        "completeness": {
+          "reasoning": "The comment describes a specific check but does not provide details on how the integrity check is performed.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific integrity check but could include more detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "84691e46: Initialize variables for the INIT code.",
+        "completeness": {
+          "reasoning": "The comment addresses the initialization of variables but does not specify which variables or their purpose.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the initialization process.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is moderately useful as it indicates initialization but lacks details.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "563a61b0: Set up the field properties for SPECIALTY field.",
+        "completeness": {
+          "reasoning": "The comment specifies setting up field properties but does not detail which properties.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting up field properties.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful but would be more so with additional details.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "77ed3a2d: Set the prefix for the SPECIALTY field's input transform.",
+        "completeness": {
+          "reasoning": "The comment describes setting a prefix but does not explain its significance or specifics.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action of setting a prefix.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail on the prefix's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "fc92246a: Branch to the field's input transform logic.",
+        "completeness": {
+          "reasoning": "The comment describes branching to logic but does not explain what the logic entails.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the branching action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but would benefit from more context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "581d1651: Exit the input transform logic.",
+        "completeness": {
+          "reasoning": "The comment accurately describes exiting the logic but does not detail the conditions or results of the exit.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about exiting the logic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks details on the logic's exit conditions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e353a427: Set up the field properties for PRIMARY PHYSICIAN field.",
+        "completeness": {
+          "reasoning": "The comment documents the essential functionality of setting up the field properties.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the setup of the PRIMARY PHYSICIAN field.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4a0eb707: Set the PRIMARY PHYSICIAN field's cross-reference.",
+        "completeness": {
+          "reasoning": "The comment documents the essential functionality of setting the cross-reference.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the cross-reference setup.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "46cc468d: Set the prefix for the PRIMARY PHYSICIAN field's input transform.",
+        "completeness": {
+          "reasoning": "The comment documents the specific task of setting the prefix for input transform.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the setup of the input transform prefix.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5f22a39e: Branch to the field's input transform logic.",
+        "completeness": {
+          "reasoning": "The comment documents a specific action related to the input transform logic.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the branching logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b868ef2d: Check if the PRIMARY PHYSICIAN field has a cross-reference and branch accordingly.",
+        "completeness": {
+          "reasoning": "The comment documents the check and conditional branching related to cross-reference.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the conditional logic based on cross-reference.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3d6c4d70: Initialize variables for the PRIMARY PHYSICIAN field's input transform.",
+        "completeness": {
+          "reasoning": "The comment addresses a single aspect of the input transform, not the entire process.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the initialization of variables.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but only covers a small part of the functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a9466272: Handle a null or missing value for the PRIMARY PHYSICIAN field.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of handling null or missing values.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes handling null or missing values.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific edge case in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4d6e97f2: Set up variables for the PRIMARY PHYSICIAN field's input transform.",
+        "completeness": {
+          "reasoning": "The comment addresses the setup of variables but not the entire input transform process.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about setting up variables.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but limited in scope.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a6acea89: Execute the PRIMARY PHYSICIAN field's input transform logic.",
+        "completeness": {
+          "reasoning": "The comment addresses the execution of the input transform logic but lacks specifics.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes executing the input transform logic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the main action taken by the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3bddba7f: Exit from the PRIMARY PHYSICIAN field's input transform.",
+        "completeness": {
+          "reasoning": "The comment addresses the exit process but not the entire input transform.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the exit process.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but covers a small part of the functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7cd1fd10: No operation.",
+        "completeness": {
+          "reasoning": "The comment fully addresses the functionality of the code, which is to perform no operation.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the code as performing no operation.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly indicates the code does nothing, which is useful for any programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2e891ec6: Execute the logic for the exit code when all fields have been processed.",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality related to the exit code logic.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the logic executed after processing all fields.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps any programmer understand the purpose of the exit code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "22184ba5: Branch based on whether a lookup value is passed in.",
+        "completeness": {
+          "reasoning": "The comment addresses the core functionality of the branching logic.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and relevant to the branching logic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is quite clear but could be slightly more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the conditions under which branching occurs.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "212a2970: ;Indicates that a new application server session is needed.",
+        "completeness": {
+          "reasoning": "The comment addresses the key functionality related to starting a new session.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly describes the requirement for a new session.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but the semicolon at the beginning is unnecessary.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding when a new session is needed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "919a85e9: ;Exits the routine.",
+        "completeness": {
+          "reasoning": "The comment fully addresses the functionality of the code exiting the routine.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the routine exit.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but the semicolon at the beginning is unnecessary.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding that the routine exits at this point.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e556ddfc: ;Sets up variables for the FileMan call to update/edit the ATTENDING PHYSICIAN field.",
+        "completeness": {
+          "reasoning": "The comment briefly mentions setting up variables but does not specify which variables or their purposes.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly states that variables are being set up for a FileMan call related to updating the ATTENDING PHYSICIAN field.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easily understood.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some context but lacks detail that would help an expert understand the specifics.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ce5be78d: ;Sets the DE(DW) array for the FileMan call.",
+        "completeness": {
+          "reasoning": "The comment mentions setting the DE(DW) array but does not explain its role or contents.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately states that the DE(DW) array is being set for a FileMan call.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks specific information that would benefit an expert programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "85d8a585: ;Sets the DU array for the FileMan call.",
+        "completeness": {
+          "reasoning": "The comment mentions setting the DU array but does not provide further details on its role or contents.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly states that the DU array is being set for a FileMan call.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some context but lacks detail that would help an expert understand the specifics.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8a0980c6: ;Goes to the FileMan entry point for the edit/update call.",
+        "completeness": {
+          "reasoning": "The comment indicates the action taken but does not provide the specific entry point or additional relevant information.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes that the code goes to the FileMan entry point for an edit/update call.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easily understood.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks specific information that would benefit an expert programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c77b8c0f: ;Checks if the ATTENDING PHYSICIAN field is defined, goes to C4S if not.",
+        "completeness": {
+          "reasoning": "The comment details a specific condition and action but does not explain the significance of C4S.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the checking of the ATTENDING PHYSICIAN field and the subsequent action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains a conditional action, though more detail on the significance of C4S would improve it.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b49f0216: ;Sets the X variable to the current value of the ATTENDING PHYSICIAN field and the DIC variable to the file number.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of setting the X and DIC variables but does not mention any other capabilities or side effects.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "fb56dd78: ;Sets a flag indicating an attending physician was defined and calls a routine to perform additional processing.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of setting a flag and calling a routine but does not provide details about the additional processing.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2e6b987d: ;If the ATTENDING PHYSICIAN field is null, goes to C4F1. Otherwise, stores the current value in X and the file number in DIC.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality, including conditional logic and variable assignments.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bfc0c1b5: ;Sets the X variable to the current value of the ATTENDING PHYSICIAN field and the DIC variable to the file number.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of setting the X and DIC variables but does not mention any other capabilities or side effects.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "627196f2: ;Sets a flag indicating an attending physician was defined and calls a routine to perform additional processing.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of setting a flag and calling a routine but does not provide details about the additional processing.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "20fe454b: ;Exit point for the ATTENDING PHYSICIAN processing.",
+        "completeness": {
+          "reasoning": "The comment addresses the exit point but does not mention other functionalities of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the exit point but lacks detail on other functionalities.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b62030d0: ;Exit point for the routine.",
+        "completeness": {
+          "reasoning": "The comment only addresses the exit point and not other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it helps identify the exit point.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "25131f7f: ;Sets up variables for the FileMan call to update/edit another field. Performs additional processing based on certain conditions.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple functionalities including variable setup and additional processing.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The provided information is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is very useful for understanding the complex functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "00b1d2c4: Set DGJTUP=1, which indicates an update is in progress.",
+        "completeness": {
+          "reasoning": "The comment focuses on a single functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5181ab04: Exit the current code block.",
+        "completeness": {
+          "reasoning": "The comment only addresses the exit point and does not cover other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is somewhat useful as it helps identify the exit point.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a385ff66:  ;\n ;Set DQ (data qualifier) to 7, which may be used to control code execution flow.\n ;",
+        "completeness": {
+          "reasoning": "The comment only mentions setting DQ to 7 and its possible use, lacking detail on overall functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but limited to one aspect.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps understand a specific action but lacks broader context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8d7c0f08: ;Execute code block X7, then check for and handle any input transformations (FIREREC^DIE17), then handle any null or up-arrow responses (Y=U), and set DIC(0), DW, and go to OUT^DIE17.",
+        "completeness": {
+          "reasoning": "The comment captures multiple actions and transitions in the code but may miss out on some finer details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information appears accurate and consistent with typical actions in such a code block.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is fairly clear but somewhat dense.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "Helps an average programmer understand the flow of the code block.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "73e45ac3: ;If DGJTNUM does not contain '3', set Y (output variable) to null.",
+        "completeness": {
+          "reasoning": "The comment provides a specific condition and action but does not cover broader code functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but specific to one condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Documents a specific logic but lacks context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3a82abfb: Exit the current code block.",
+        "completeness": {
+          "reasoning": "The comment is too brief and does not explain why or how the code block is exited.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The statement is true but extremely limited.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is not very useful as it does not provide sufficient context or details.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "9b29c7c0:  ;\n ;Set DQ (data qualifier) to 9, which may be used to control code execution flow.\n ;",
+        "completeness": {
+          "reasoning": "The comment only describes setting DQ to 9 and its possible use, lacking detail on other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps understand a specific action but lacks broader context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d987329e: ;Execute code block X9, then check for and handle any input transformations (FIREREC^DIE17), then handle any null or up-arrow responses (Y=U), and set DIC(0), DW, and go to OUT^DIE17.",
+        "completeness": {
+          "reasoning": "The comment addresses all essential functionalities of the source code block.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the code block.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for an expert programmer to understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "94d326dc: ;If DGJTDEF is defined and DGJTNUM contains '3', set Y to '@20'.",
+        "completeness": {
+          "reasoning": "The comment documents the essential functionality related to DGJTDEF and DGJTNUM.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the logic involving DGJTDEF and DGJTNUM.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8c927f12: Exit the current code block.",
+        "completeness": {
+          "reasoning": "The comment provides very little information about the code's functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but is very basic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but overly simplistic.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents trivial functionality and adds minimal value.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "89afe8c1: ;Execute code block X10, then check for and handle any input transformations (FIREREC^DIE17), then handle any null or up-arrow responses (Y=U), and set DIC(0), DW, and go to OUT^DIE17.",
+        "completeness": {
+          "reasoning": "The comment addresses all essential functionalities of the source code block.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the code block.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for an expert programmer to understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ca692951: ;If DGJTNUM does not contain '3', set Y to '@15'.",
+        "completeness": {
+          "reasoning": "The comment documents the essential functionality related to DGJTNUM.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the logic involving DGJTNUM.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "09dc02b3: Exit the current code block.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of exiting the current code block but does not provide details about the overall context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides basic information which may be useful but is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8d45afed: ;Execute code block X11, then check for and handle any input transformations (FIREREC^DIE17), then handle any null or up-arrow responses (Y=U), and set DIC(0), DW, and go to OUT^DIE17.",
+        "completeness": {
+          "reasoning": "The comment provides a detailed description of multiple steps in the code block.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment seems to be accurate and provides true information about what the code does.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is detailed and clear, although slightly dense.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the sequence of operations and the handling of specific cases.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "63402e14: ;Check if discharge summary and set Y to special characters based on result.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific check and the associated action but lacks context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to provide true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could benefit from more detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is moderately useful but could be improved with additional context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "668fe163: ;Quit.",
+        "completeness": {
+          "reasoning": "The comment is very minimal and does not provide much context.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but provides almost no information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is extremely clear but too brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful due to its brevity.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "aad610e9: ;Set variables for DIE call to update DATE DICTATED field.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of setting variables for a specific call but lacks details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more informative with additional context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "37d786ea: ;Set variable for input transform.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality but lacks detail on how the variable is set.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could provide more context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "235bab07: ;Go to ReEnter Code.",
+        "completeness": {
+          "reasoning": "The comment briefly addresses a functionality but lacks detail on the purpose of 'ReEnter Code'.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more descriptive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is minimally useful due to its brevity.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "2d9d0c85: ;If data exists, go to server code; otherwise, kill db.",
+        "completeness": {
+          "reasoning": "The comment provides a good overview of the functionality but lacks detail.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be better structured.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "099b55a8: ;Set X to existing data and DIC to file number.",
+        "completeness": {
+          "reasoning": "The comment clearly explains the essential functionality.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful and helps in understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5621dcb5: ;Check if physician defined, call utility to update.",
+        "completeness": {
+          "reasoning": "The comment provides essential functionality but lacks specific details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more descriptive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more informative.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4d7e6ef8: ;If no existing data, set X to null and go to field level.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of setting X to null and changing the field level.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific operation it describes.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e60ff455: ;Set X to existing data and DIC to file number.",
+        "completeness": {
+          "reasoning": "The comment addresses the main functionality but does not elaborate on what 'existing data' and 'file number' refer to.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate but somewhat vague.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could benefit from more detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3fef7fc1: ;Check if physician defined, call utility to update.",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality but does not specify which utility is being called.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is mostly true.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is readable but could be more precise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the code but lacks detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9d3acc89: ;Quit.",
+        "completeness": {
+          "reasoning": "The comment is too brief to cover any essential functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information is true but overly simplistic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but overly simplistic.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful due to its brevity.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "2a013d34: ;Set X to today's date in external format, kill X if date is invalid.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of setting and validating the date.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding date handling in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "377c2748: ;Quit.",
+        "completeness": {
+          "reasoning": "The comment is very brief and does not cover all essential functionalities.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but very minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but extremely limited.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful as it is too brief to provide meaningful context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "4981ba1b: ;Call DIE to update field, handle post-action, set X and DIC for re-enter.",
+        "completeness": {
+          "reasoning": "The comment covers multiple aspects of the code's functionality.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the sequence of actions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b44bfa47: ;If no date, clear all date-related nodes.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but not all aspects.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the conditional logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e735af7e: ",
+        "completeness": {
+          "reasoning": "The comment box is empty, thus it does not cover any functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information to evaluate.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "There is no text to read.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "An empty comment is not useful.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "bd92d01f: ",
+        "completeness": {
+          "reasoning": "The comment box is empty, thus it does not cover any functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "There is no information to evaluate.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "There is no text to read.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "An empty comment is not useful.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "05c63450: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, true or false.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is empty and does not contain any readable content.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level as it provides no information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "69edbce8: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, true or false.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is empty and does not contain any readable content.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level as it provides no information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "534c0b79: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, true or false.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is empty and does not contain any readable content.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level as it provides no information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "c6b2c9b1: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, true or false.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is empty and does not contain any readable content.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level as it provides no information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "8124ac43: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, true or false.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is empty and does not contain any readable content.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level as it provides no information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "11d42676: ",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the code's functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, so it cannot be true or false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty, making it neither readable nor unreadable.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information to understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "7c0a2108: ",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the code's functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, so it cannot be true or false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty, making it neither readable nor unreadable.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information to understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "5baf707c: ",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the code's functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, so it cannot be true or false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty, making it neither readable nor unreadable.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information to understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "ead6ec0b: ",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the code's functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, so it cannot be true or false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty, making it neither readable nor unreadable.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information to understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "aad898e4: ",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the code's functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, so it cannot be true or false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty, making it neither readable nor unreadable.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information to understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "ae3bd4ca: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, true or false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus cannot be assessed for readability.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "7feba445: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, true or false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus cannot be assessed for readability.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "b1a445cf: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, true or false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus cannot be assessed for readability.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "29615577: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, true or false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus cannot be assessed for readability.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "743f406b: ",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, true or false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is empty and thus cannot be assessed for readability.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "2b9da1df: ",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information, so it cannot be true or false.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "There is nothing to read in the comment.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "a94c09c8: Set the X and DIC variables.",
+        "completeness": {
+          "reasoning": "The comment partially addresses the functionality but may not cover all essential aspects.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting variables.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6d8da780: Set flag for DGJFDIC and call PHYDEF^DGJTUTL routine.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple functionalities, including setting a flag and calling a routine.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting the flag and calling the routine.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a1247467: Control Transfer - Quit.",
+        "completeness": {
+          "reasoning": "The comment addresses the control transfer but lacks detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about quitting the control transfer.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "733e9227: Control Transfer - Quit.",
+        "completeness": {
+          "reasoning": "The comment addresses the control transfer but lacks detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about quitting the control transfer.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "be6000f8: Call DIE17 routines, set DQ=18, execute X18^DGJXE1 and handle FIREREC^DIE17 call.",
+        "completeness": {
+          "reasoning": "The comment covers all essential functions of the code it describes.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and consistent with the code functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better by explaining all actions clearly.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "802859d8: If X is empty, clear DATE fields and set DGJTST and Y.",
+        "completeness": {
+          "reasoning": "Most essential functionalities are documented, but some details may be missing.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is mostly true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and has few problems.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better but may lack some details for experts.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bf4d7f41: Control Transfer - Quit.",
+        "completeness": {
+          "reasoning": "The comment provides little information about the essential functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but very brief.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6caa60fa: Call DIE17 routines, set DQ=19, execute X19^DGJXE1 and handle FIREREC^DIE17 call.",
+        "completeness": {
+          "reasoning": "The comment covers all essential functions of the code it describes.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and consistent with the code functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better by explaining all actions clearly.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f23e9af8: Set DGJTST to 'DICTATED'.",
+        "completeness": {
+          "reasoning": "The comment addresses the function it describes, but it is a single action.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but limited.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better, but it is basic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1f39fdcc: Control Transfer - Quit.",
+        "completeness": {
+          "reasoning": "The comment addresses the control transfer functionality but doesn't cover any other functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about a control transfer.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the control transfer but lacks detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "070659cf: ;\nSet DQ=21;\n",
+        "completeness": {
+          "reasoning": "The comment only documents the setting of DQ and nothing else.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately states the setting of DQ to 21.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read but includes an unnecessary semicolon.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific assignment but doesn't provide broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "97e54c90: Call DIE17 routines, set DQ, DW, DV, DU, DLB and DIFLD variables.",
+        "completeness": {
+          "reasoning": "The comment covers multiple functionalities related to calling routines and setting variables.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about calling routines and setting variables.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding multiple aspects of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "831959e5: Set DE(DW) value with 'C21^DGJXE1'.",
+        "completeness": {
+          "reasoning": "The comment documents the setting of a specific value but nothing else.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information on setting the DE(DW) value.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific assignment but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3e0a1f41: Control Transfer - Branch to label RE.",
+        "completeness": {
+          "reasoning": "The comment addresses the control transfer but not other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about branching to a label.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the control transfer but lacks additional detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "654653d6: Control Transfer - If DE(21) is undefined, go to C21S, else kill DB.",
+        "completeness": {
+          "reasoning": "The comment addresses the control flow logic but does not provide details on what C21S or DB refers to.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but lacks context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the control flow but lacks specific details that would help an expert.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "396e703b: Set X=DE(21) and DIC=DIE.",
+        "completeness": {
+          "reasoning": "The comment covers the functionality of setting variables but does not explain their significance.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise but could benefit from additional context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks depth for an expert understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "badc62a0: Set DGJFSIG=1 and call PHYDEF^DGJTUTL routine.",
+        "completeness": {
+          "reasoning": "The comment documents the setting of a variable and calling a routine but does not explain their purposes.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is correct.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could use more detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but does not fully explain the context or functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ac4ad309: If DG(DQ)=X, go to C21F1, else set X='', kill DB.",
+        "completeness": {
+          "reasoning": "The comment explains the conditional logic but lacks details on the variables and functions involved.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is readable but could be more descriptive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the control flow but lacks specific details for an expert.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "92a47f94: Set X=DG(DQ) and DIC=DIE.",
+        "completeness": {
+          "reasoning": "The comment covers the basic functionality but does not provide details on the significance of the variables.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides basic information but lacks depth for full understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ac684e30: Set DGJFSIG=1 and call PHYDEF^DGJTUTL routine.",
+        "completeness": {
+          "reasoning": "The comment addresses the primary actions performed by the code but might miss some less obvious functionalities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and accurately describes the actions performed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the key actions being performed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f6554547: Control Transfer - Quit.",
+        "completeness": {
+          "reasoning": "The comment addresses the primary action but lacks detail on specific conditions or context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but very minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides only basic information, likely only useful in trivial scenarios.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "0cd13bec: Set %DT(0) and %DT, call ^%DT, kill %DT(0), set X=Y, if Y<1 kill X.",
+        "completeness": {
+          "reasoning": "The comment covers all actions performed by the code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided accurately represents the sequence of actions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and provides a step-by-step description.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is detailed enough to help an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "08d1f009: Control Transfer - Quit.",
+        "completeness": {
+          "reasoning": "The comment addresses the primary action but lacks detail on specific conditions or context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but very minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides only basic information, likely only useful in trivial scenarios.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "1b128eb4: Call DIE17 routines, set DQ=22, execute X22^DGJXE1 and handle FIREREC^DIE17 call.",
+        "completeness": {
+          "reasoning": "The comment addresses the main actions but might miss some details or context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and provides a sequence of actions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the series of calls and actions taken.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "31cadcb5: If X is empty, clear DATE TRANSCRIBED field.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover all capabilities of the source code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c4258058: Control Transfer - Quit.",
+        "completeness": {
+          "reasoning": "The comment does not provide detailed information about the functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but very limited.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is too vague to be useful at a deeper level.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "25dd3560: Call DIE17 routines, set DQ=23, execute X23^DGJXE1 and handle FIREREC^DIE17 call.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple functionalities of the code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f374f830: If X is after DATE DICTATED, display error and clear DATE TRANSCRIBED. Set Y='@9'.",
+        "completeness": {
+          "reasoning": "The comment addresses specific functionality but not all capabilities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "934cef16: Control Transfer - Quit.",
+        "completeness": {
+          "reasoning": "The comment does not provide detailed information about the functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but very limited.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is too vague to be useful at a deeper level.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c626334d: Call DIE17 routines, set DQ=24, execute X24^DGJXE1 and handle FIREREC^DIE17 call.",
+        "completeness": {
+          "reasoning": "The comment addresses most of the essential functionality related to the specific routine calls and variables, but may miss some context or additional steps.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the function calls and variable settings.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the sequence of actions better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "894cf907: If X is empty, set DGJTST='DICTATED' and Y='@2'.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific condition and actions taken but does not provide context for why these actions are important.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the condition and resultant actions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8b4d385d: Control Transfer - Quit.",
+        "completeness": {
+          "reasoning": "The comment provides minimal information about the function's actions.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate but vague.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but too brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality and lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "dbf7c721: Call F^DIE17 and branch to ^DGJXE2.",
+        "completeness": {
+          "reasoning": "The comment covers the essential function calls but lacks additional context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the function calls.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the sequence of actions better.",
+          "score": 4
+        }
+      }
+    ]
+  }
+}

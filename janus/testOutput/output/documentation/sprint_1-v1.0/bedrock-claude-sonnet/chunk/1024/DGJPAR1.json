@@ -1,0 +1,771 @@
+{
+  "input": "{\n  \"comments\": [\n    \"0b9d1d24: ;\\n  ;Main entry point of the routine. Initializes variables and\\n  ;calls entry action for list manager.\\n  ;This routine manages the display and editing of\\n  ;standard parameter definitions.\\n  ;\",\n    \"0d807ba9: ;Quit if any errors occurred during initialization.\",\n    \"23042fb4: ;Quit if no parameters are defined.\",\n    \"d4103942: ;Initialize utility variables for building the display list.\",\n    \"20c6c1e2: ;Initialize loop variables for processing parameter definitions.\",\n    \"2cd65011: ;If the parameter has a display sequence #, include it.\",\n    \"429469e3: ;Display a 'null' entry if no parameters exist for the list.\",\n    \"0f58ce2e: ;Display a message indicating that highlighted lines are uneditable.\",\n    \"ba9a058b: ;Quit the routine.\",\n    \"22c587a2: ;\\n  ;Loop through each parameter definition and build the display list.\\n  ;Call the routine to format and add the definition to the list.\\n  ;\",\n    \"86bab388: ;Quit the loop routine.\",\n    \"d76b6e54: Kill (RESET) all variables.\",\n    \"25bdccf5: Kill temporary arrays.\",\n    \"5e3aff88: ;\\n;Main editing loop:\\n;\\n;1. If no health factors were selected, quit.\\n;2. Get selection from the VALM array.\\n;3. Initialize variables.\\n;4. Get new selection from the VALM array.\\n;5. Loop through each selected entry:\\n;  a. Parse the selection into DA (IEN of 393.3).\\n;  b. Set up variables for editing (DGJTEDT, DGJDFNO, IFN).\\n;  c. Call editing routines (EDIT1, ABB, RSET).\\n;  d. If entry was deleted, set DGJFLAG.\",\n    \"86376dfd: Initialize variables.\",\n    \"5f24cb3d: Clear display array.\",\n    \"69498caa: If no entries selected, exit editing.\",\n    \"5305cbbb: Rebuild display array after selections are made.\",\n    \"0a8b19b1: For each selected health factor:\\n1. Get internal entry number (DA) for health factor file (#393.3).\\n2. Set variables for editing routines.\\n3. Call editing routines.\\n4. If health factor was deleted, set flag.\",\n    \"bbfc10be: ;If facility selected then quit to return to Facility selection\",\n    \"b1784f67: ;Set 'VALMBCK' to 'R' to refresh list manager display upon return\",\n    \"f009e01c: ;Get the current default value for the parameter\",\n    \"a720c334: ;If active parameter, write parameter title and edit .07 and .08 fields\\n;Else use input template `DGJ DEF PARAMETER EDIT` to edit fields\\n;Quit if DGJTUP flag is not defined (user did not update any field)\",\n    \"975168e7: ;Set flag if the value from DA and DIENFILE (.03) differ.\",\n    \"9992cd29: ;Exit the routine/subroutine.\",\n    \"10abceaa: ;Reset VALM indexes, get DGJCNT from DGJVALM, get value from ^TMP, set X to null, call RESET^DGJCRSET, quit.\",\n    \"438967a6: Clean up variables and quit.\",\n    \"363e5f30: Initialize variables and setup display.\",\n    \"8d39cf76: Store record information in temporary global.\",\n    \"5d8c8cc1: Get category for current record.\",\n    \"9bd6bdbe: Increment counter for category.\",\n    \"76a70b12: If category not processed, set it up.\",\n    \"f49a84e0: Initialize string and counters for current record.\",\n    \"06e76df1: Build record number portion of output string.\",\n    \"57ffdda4: If record marked as deficiency, set attributes for display.\",\n    \"f99788ba: Build record name portion of output string.\",\n    \"1c63e292: Build record permanent portion of output string.\",\n    \"2793f27e: Build record scored portion of output string.\",\n    \"ed4740f5: Build record category portion of output string.\",\n    \"6df5d442: ;Store data in ^TMP global and cross-reference index.\",\n    \"ee5fd409: ;Store entry number and internal file number in index global.\",\n    \"493e263d: ;Exit routine.\",\n    \"6f567cef: ;\\n;Set counters for new category and entry.\\n;\",\n    \"01f43fa1: ;Increment category and entry counters.\",\n    \"70170ef8: Save the number of health factors in this category\",\n    \"1e2040f9: Initialize string X\",\n    \"1769dac7: Pad with 3 spaces and call subroutine TMP\",\n    \"f1ba6df9: Clear X, increment counters DGJCNT and VALMCNT\",\n    \"f911a908: Get the category name from file #393.41\",\n    \"26bcb2eb: Calculate padding for centering and build string\",\n    \"14f7d985: Center category name in X and call TMP\",\n    \"c7222543: Clear X, increment counters DGJCNT and VALMCNT\",\n    \"c72edc3c: Pad with 3 spaces and call subroutine TMP\",\n    \"6efc7439: Exit\",\n    \"7cf6c4a7: Save X in ^TMP, populate index\",\n    \"d5ee07f7: Save index info for health factor\",\n    \"5baab769: Exit\",\n    \"b0f22162: ;\\n  Returns string S centered in string V padded with spaces\\n  X is starting column (0 for left justify)\\n  L is length of output string\",\n    \"e2a98545: Return centered string\",\n    \"3487a5a4: ;\\n  Converts uppercase alphabetic characters in X to lowercase\\n \",\n    \"a8978519: Initialize variables\",\n    \"3e50b9f1: Convert to lowercase\",\n    \"f3cbdc08: Uppercase the first letter in each word separated by a space, comma, or forward slash\",\n    \"51d5012d: Return the modified string\",\n    \"e5e3f4f2: ;\\n;Increment/Decrement SP counters\\n;\\nIf DGJTREC array exists, it has already been counted. Otherwise, initialize variables:\\n;X=Deficiency Type^Type Code^Type Weight\\n;PC=TRACK. PROV. DEF.^Code^Weight\\n;SC=STANDARD DEF^Code^Weight\\n;CC=CATEGORY^Code^Weight\",\n    \"13cf0692: If DGJTREC array does not exist, set X to VALMDDF(\\\"DEFICIENCY\\\"), DC to 2nd piece (Code), DW to 3rd piece (Weight)\",\n    \"cf4321c0: Set X to VALMDDF(\\\"TRACK DEF\\\"), PC to 2nd piece (Code), PW to 3rd piece (Weight)\",\n    \"515a81e2: Set X to VALMDDF(\\\"STANDARD DEF\\\"), SC to 2nd piece (Code), SW to 3rd piece (Weight)\",\n    \"3a3fbdab: Set X to VALMDDF(\\\"CATEGORY\\\"), CC to 2nd piece (Code), CW to 3rd piece (Weight)\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 114.72778487205505
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "0b9d1d24: ;\n  ;Main entry point of the routine. Initializes variables and\n  ;calls entry action for list manager.\n  ;This routine manages the display and editing of\n  ;standard parameter definitions.\n  ;",
+        "readability": {
+          "reasoning": "The comment is well-written and clearly explains the purpose and actions of the routine.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the overall functionality and purpose of the routine.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0d807ba9: ;Quit if any errors occurred during initialization.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific condition in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "23042fb4: ;Quit if no parameters are defined.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific condition in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d4103942: ;Initialize utility variables for building the display list.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the initialization process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "20c6c1e2: ;Initialize loop variables for processing parameter definitions.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the initialization process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2cd65011: ;If the parameter has a display sequence #, include it.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides specific information about when to include the parameter, helpful for understanding code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "429469e3: ;Display a 'null' entry if no parameters exist for the list.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Explains the behavior of displaying a 'null' entry, useful for understanding the fallback logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0f58ce2e: ;Display a message indicating that highlighted lines are uneditable.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easily readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Clarifies what happens when lines are highlighted, useful for understanding user interface behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ba9a058b: ;Quit the routine.",
+        "readability": {
+          "reasoning": "The comment is very short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Indicates the end of a routine, but provides minimal additional context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "22c587a2: ;\n  ;Loop through each parameter definition and build the display list.\n  ;Call the routine to format and add the definition to the list.\n  ;",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides detailed steps on what the code is doing, useful for understanding the flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "86bab388: ;Quit the loop routine.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about the purpose of the code segment.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d76b6e54: Kill (RESET) all variables.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a crucial operation in the code, which is resetting all variables.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "25bdccf5: Kill temporary arrays.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes an operation that is important for memory management.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5e3aff88: ;\n;Main editing loop:\n;\n;1. If no health factors were selected, quit.\n;2. Get selection from the VALM array.\n;3. Initialize variables.\n;4. Get new selection from the VALM array.\n;5. Loop through each selected entry:\n;  a. Parse the selection into DA (IEN of 393.3).\n;  b. Set up variables for editing (DGJTEDT, DGJDFNO, IFN).\n;  c. Call editing routines (EDIT1, ABB, RSET).\n;  d. If entry was deleted, set DGJFLAG.",
+        "readability": {
+          "reasoning": "The comment is detailed and well-organized with clear steps.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a comprehensive guide to the main editing loop, which is highly valuable.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "86376dfd: Initialize variables.",
+        "readability": {
+          "reasoning": "The comment is simple and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a standard operation, which is initializing variables.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "5f24cb3d: Clear display array.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear understanding of the code's purpose for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "69498caa: If no entries selected, exit editing.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It conveys an important condition in the code, aiding both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5305cbbb: Rebuild display array after selections are made.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps to understand a key part of the functionality which is useful for all levels of programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0a8b19b1: For each selected health factor:\n1. Get internal entry number (DA) for health factor file (#393.3).\n2. Set variables for editing routines.\n3. Call editing routines.\n4. If health factor was deleted, set flag.",
+        "readability": {
+          "reasoning": "The comment is well-structured and detailed, making it easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a step-by-step explanation of a multi-step process, which is very useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bbfc10be: ;If facility selected then quit to return to Facility selection",
+        "readability": {
+          "reasoning": "The comment is somewhat clear but the use of a semicolon might be confusing.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It explains an important condition but could be written more clearly.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b1784f67: ;Set 'VALMBCK' to 'R' to refresh list manager display upon return",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it helps understand the purpose of setting 'VALMBCK' to 'R'.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f009e01c: ;Get the current default value for the parameter",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it provides information about the purpose of the code segment.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a720c334: ;If active parameter, write parameter title and edit .07 and .08 fields\n;Else use input template `DGJ DEF PARAMETER EDIT` to edit fields\n;Quit if DGJTUP flag is not defined (user did not update any field)",
+        "readability": {
+          "reasoning": "The comment is detailed and clearly explains the conditions and actions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful as it provides detailed logic and conditions for an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "975168e7: ;Set flag if the value from DA and DIENFILE (.03) differ.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the condition for setting a flag.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9992cd29: ;Exit the routine/subroutine.",
+        "readability": {
+          "reasoning": "The comment is very clear and simple.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but documents only a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "10abceaa: ;Reset VALM indexes, get DGJCNT from DGJVALM, get value from ^TMP, set X to null, call RESET^DGJCRSET, quit.",
+        "readability": {
+          "reasoning": "The comment is detailed and comprehensible, but it could be slightly more organized.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear explanation of multiple steps, which helps an expert understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "438967a6: Clean up variables and quit.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a basic functionality which is still useful in understanding the end of a process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "363e5f30: Initialize variables and setup display.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the initial setup of the code, which is useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8d39cf76: Store record information in temporary global.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action, which is useful for understanding the code's intent.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5d8c8cc1: Get category for current record.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific functionality, which is helpful for understanding a part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9bd6bdbe: Increment counter for category.",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand with no issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear indication of what the code does, which is useful for understanding the functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "76a70b12: If category not processed, set it up.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the condition and action taken in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f49a84e0: Initialize string and counters for current record.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful, explaining the initialization step clearly.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "06e76df1: Build record number portion of output string.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the specific part of the code dealing with output string construction.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "57ffdda4: If record marked as deficiency, set attributes for display.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful in explaining the condition and the action taken, aiding in understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f99788ba: Build record name portion of output string.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment clearly explains the functionality of the code for any level of programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1c63e292: Build record permanent portion of output string.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment clearly explains the functionality of the code for any level of programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2793f27e: Build record scored portion of output string.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment clearly explains the functionality of the code for any level of programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ed4740f5: Build record category portion of output string.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment clearly explains the functionality of the code for any level of programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6df5d442: ;Store data in ^TMP global and cross-reference index.",
+        "readability": {
+          "reasoning": "The comment is mostly clear, but the semicolon at the beginning is unnecessary and could be confusing.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "This comment is useful for understanding the storage and indexing of data, which is beneficial for any level of programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ee5fd409: ;Store entry number and internal file number in index global.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand what is being stored, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "493e263d: ;Exit routine.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates the purpose of the code section, which is useful for understanding the flow of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6f567cef: ;\n;Set counters for new category and entry.\n;",
+        "readability": {
+          "reasoning": "The comment is clear but contains unnecessary semicolons and empty lines.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment describes the functionality of setting counters, which is useful for understanding this part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "01f43fa1: ;Increment category and entry counters.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific action, which helps in understanding the code's functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "70170ef8: Save the number of health factors in this category",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding what is being saved, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1e2040f9: Initialize string X",
+        "readability": {
+          "reasoning": "The comment is concise and clearly written, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a specific and useful description of what the code is doing.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1769dac7: Pad with 3 spaces and call subroutine TMP",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful, providing a clear explanation of the code's functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f1ba6df9: Clear X, increment counters DGJCNT and VALMCNT",
+        "readability": {
+          "reasoning": "The comment is well-written with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful as it explains multiple actions performed by the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f911a908: Get the category name from file #393.41",
+        "readability": {
+          "reasoning": "The comment is clear and specific.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful, especially for understanding where data is being retrieved from.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "26bcb2eb: Calculate padding for centering and build string",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear understanding of what the code is doing, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "14f7d985: Center category name in X and call TMP",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear description of what the code is doing, useful for understanding the functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c7222543: Clear X, increment counters DGJCNT and VALMCNT",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes the operations being performed, helping an average programmer understand the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c72edc3c: Pad with 3 spaces and call subroutine TMP",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the padding operation and the subsequent subroutine call, useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6efc7439: Exit",
+        "readability": {
+          "reasoning": "The comment is clear but very short.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial operation which is usually self-explanatory.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7cf6c4a7: Save X in ^TMP, populate index",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes the saving operation and index population, useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d5ee07f7: Save index info for health factor",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the purpose of the code related to health factor index info.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5baab769: Exit",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates an exit but provides no additional context or details.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "b0f22162: ;\n  Returns string S centered in string V padded with spaces\n  X is starting column (0 for left justify)\n  L is length of output string",
+        "readability": {
+          "reasoning": "The comment is detailed and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information on the function's purpose and parameters.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e2a98545: Return centered string",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some context but lacks detail compared to the previous one.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3487a5a4: ;\n  Converts uppercase alphabetic characters in X to lowercase\n ",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear information on the functionality of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a8978519: Initialize variables",
+        "readability": {
+          "reasoning": "The comment is concise and clearly states its purpose.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand what the code is doing at this point.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3e50b9f1: Convert to lowercase",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial functionality that is generally self-explanatory.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f3cbdc08: Uppercase the first letter in each word separated by a space, comma, or forward slash",
+        "readability": {
+          "reasoning": "The comment is detailed and clearly explains what the code does.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a non-trivial functionality of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "51d5012d: Return the modified string",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial functionality that is easily inferred from the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e5e3f4f2: ;\n;Increment/Decrement SP counters\n;\nIf DGJTREC array exists, it has already been counted. Otherwise, initialize variables:\n;X=Deficiency Type^Type Code^Type Weight\n;PC=TRACK. PROV. DEF.^Code^Weight\n;SC=STANDARD DEF^Code^Weight\n;CC=CATEGORY^Code^Weight",
+        "readability": {
+          "reasoning": "The comment is detailed but somewhat cluttered, though still readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful in understanding the logic and initialization details of the code, especially for an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "13cf0692: If DGJTREC array does not exist, set X to VALMDDF(\"DEFICIENCY\"), DC to 2nd piece (Code), DW to 3rd piece (Weight)",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured with specific instructions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the logic behind setting variables, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cf4321c0: Set X to VALMDDF(\"TRACK DEF\"), PC to 2nd piece (Code), PW to 3rd piece (Weight)",
+        "readability": {
+          "reasoning": "The comment is clear but slightly less detailed than the first.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment gives useful information about variable assignments but lacks context on why these assignments are made.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "515a81e2: Set X to VALMDDF(\"STANDARD DEF\"), SC to 2nd piece (Code), SW to 3rd piece (Weight)",
+        "readability": {
+          "reasoning": "The comment is clear and follows a consistent format with other comments.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps in understanding the variable assignments but does not provide additional context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3a3fbdab: Set X to VALMDDF(\"CATEGORY\"), CC to 2nd piece (Code), CW to 3rd piece (Weight)",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains variable assignments well but lacks context on why these assignments are made.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

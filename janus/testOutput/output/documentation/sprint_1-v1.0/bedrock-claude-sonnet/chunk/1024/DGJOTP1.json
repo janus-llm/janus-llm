@@ -1,0 +1,595 @@
+{
+  "input": "{\n  \"comments\": [\n    \"c32a5e70:  ;\\n ;RPC entry point for JOINT OPERATIONS/THERAPIES PACKAGE\\n ;DGJTMUL=Multiple division option, passed to DC initiation\\n ;\",\n    \"4e918839: ;If multiple divisions, call DIVISION^VAUTOMA to get division\",\n    \"ba5b32bb: ;Otherwise set DGJTDV to IEN of default division\",\n    \"eb23d0bd: ;Call appropriate line tag based on DG JOINT L parameter\",\n    \"63631bf7: ;Call DAT^DGJOTP to get date/time parameters\",\n    \"6ab1d8e7: ;Set input transform for lookup to include only certain types of documents\",\n    \"e5c5ac91: Initiates the Date/Time selector and prompts the user for a Summary Type\",\n    \"fc928805: Warns the user that the output requires 132 column output\",\n    \"e191144e: Determines the current date and stores it in DGJTDAT and VADAT\",\n    \"d716fabb: Performs device selection and sends the user to START^DGJOTP1 if successful\",\n    \"e3024709: Exits the routine if device selection fails\",\n    \"4cb56e0b: Initializes variables and loops through the VAS(393) global, calling the CK subroutine for each entry\",\n    \"9d5145a1: If the user selected 'All Outpatient' or 'Outpatient Summary' report, initializes variables and goes to ^DGJOTP2\",\n    \"b703b32d: If the user selected 'Inpatient Summary' report, initializes variables and goes to ^DGJOTP3\",\n    \"961bb1f8: Exit with message if there are no records.\",\n    \"a66c7603: Exit the routine and quit.\",\n    \"9cb4e7c0: Calculate the sum of the percentages of the 3 sections.\",\n    \"5493fff8: Increment the divisional total patient count. If the total sum of percentages is greater than 30, increment the divisional high risk patient count.\",\n    \"adda6316: If the location is 'PHY', initialize the physician total count if not already done. Increment the physician total patient count and high risk patient count for the given division and physician if the total sum of percentages is greater than 30.\",\n    \"56bfadf4: ;Quit if this is a physician related procedure.\",\n    \"f5430412: ;Update service procedure totals and include percentage totals if percentage exceeds 30.\",\n    \"f0e38ddc: ;Update service provided procedure totals.\",\n    \"a030d84d: ;If no Variable Ptr Value is supplied, quit.\",\n    \"51213538: ;If Variable Ptr Value required but not defined, quit.\",\n    \"19f818e4: ;If Variable Ptr Value supplied but doesn't match requested value, quit.\",\n    \"d16bf1d0: ;If Select Screen 1 requests a procedure, quit if procedure doesn't match.\",\n    \"b5c89b56: ;If Select Screen 1 requests procedures, and a procedure was selected, quit.\",\n    \"4c9c9f30: ;If this is a discharge summary and Print From Date contains a record number, get the corresponding encounter date and quit if it's null.\",\n    \"167f0529: If the input parameter DGJTL is 'SER', set DGJTPC to 8. If DGJTL is 'PHY', set DGJTPC to 14. Otherwise, set DGJTPC to an empty string.\",\n    \"b35987f5: Quit if DGJTNODE does not have a second piece or if the second piece does not correspond to a valid entry in the VAS(393.3) file. Also quit if the record type in the VAS(393.3) file is not one of 'OP REPORT', 'DISCHARGE SUMMARY', or 'INTERIM SUMMARY'.\",\n    \"042d8adc: If the VAUTN array is defined and VAUTN is false, quit if the DGJTPC piece of DGJTNODE is not defined in the VAUTN array.\",\n    \"f9a8bf2b: If the VAUTT array is defined and VAUTT is false, quit if the 7th piece of DGJTNODE is not defined in the VAUTT array.\",\n    \"14b06133: If the VAUTY array is defined and VAUTY is false, quit if the 2nd piece of DGJTNODE is not defined in the VAUTY array.\",\n    \"c84af552: Quit if the 3rd piece of DGJTNODE is less than DGJTBG or greater than DGJTEND.\",\n    \"584b1336: Call the ^DGJOTPUL routine. If it returns a false value in DGJTREC, quit.\",\n    \"b67bc0eb: If DGJTL is not 'SER', set the element in DGJTOT array corresponding to the division name (6th piece of DGJTNODE) to 0 if it is not already defined.\",\n    \"0e4d80b9: Initialize counter for SERV/SPCL entry.\",\n    \"c193154f: Get patient name from PATIENT file.\",\n    \"8e7acced: If entry is for a physician, store physician name and patient information in UTILITY global. Increment counter for PHY entry.\",\n    \"750e71ee: ;Set the service and specialty for this node based on pointers in the entry.\",\n    \"62d51f96: ;Build and save the entry in UTILITY file.\",\n    \"0ba7fb44: ;Quit\",\n    \"da0a2ea6: ;Update the totals for the provider or service.\",\n    \"bda7c2ac: ;Store totals in DGJPHTOT\",\n    \"af28571e: ;Store totals in DGJSVTOT\",\n    \"4e9eefd7: ;Quit\",\n    \"102e4cea: ;Compute and store the total line, when over 30 days subtract 30.\",\n    \"477d1f58: ;Quit\",\n    \"2cbef471: ;Select Physician, if none selected set DGJFL flag.\",\n    \"bea1dd8d: ;Quit\",\n    \"61d9a2ca: ;Select Service, if none selected quit.\",\n    \"fb455f40: ;Select and add specialty.\",\n    \"55a3b839: ;Quit\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 80.62863516807556
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "c32a5e70:  ;\n ;RPC entry point for JOINT OPERATIONS/THERAPIES PACKAGE\n ;DGJTMUL=Multiple division option, passed to DC initiation\n ;",
+        "readability": {
+          "reasoning": "The comment is well-structured with clear explanations and proper line breaks.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the purpose and specific variables used in the code, aiding expert understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4e918839: ;If multiple divisions, call DIVISION^VAUTOMA to get division",
+        "readability": {
+          "reasoning": "The comment is concise and clear with no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional action in the code, making it useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ba5b32bb: ;Otherwise set DGJTDV to IEN of default division",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies the alternative action in a conditional statement, aiding average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "eb23d0bd: ;Call appropriate line tag based on DG JOINT L parameter",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific action in the code that depends on a parameter, which is useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "63631bf7: ;Call DAT^DGJOTP to get date/time parameters",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a function call to retrieve parameters, which is helpful for understanding the code's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6ab1d8e7: ;Set input transform for lookup to include only certain types of documents",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the filter criteria for the lookup function.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e5c5ac91: Initiates the Date/Time selector and prompts the user for a Summary Type",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the function's purpose, which is useful to both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fc928805: Warns the user that the output requires 132 column output",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides important information about output requirements, which is useful to any programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e191144e: Determines the current date and stores it in DGJTDAT and VADAT",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies the purpose of the code regarding date storage, useful for any programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d716fabb: Performs device selection and sends the user to START^DGJOTP1 if successful",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a critical step in the code, making it very useful for understanding the device selection process.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e3024709: Exits the routine if device selection fails",
+        "readability": {
+          "reasoning": "The comment is concise and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific failure condition.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4cb56e0b: Initializes variables and loops through the VAS(393) global, calling the CK subroutine for each entry",
+        "readability": {
+          "reasoning": "The comment is detailed and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed understanding of the code's functionality, beneficial for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9d5145a1: If the user selected 'All Outpatient' or 'Outpatient Summary' report, initializes variables and goes to ^DGJOTP2",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an important conditional flow related to the user's selection.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b703b32d: If the user selected 'Inpatient Summary' report, initializes variables and goes to ^DGJOTP3",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an important conditional flow related to the user's selection.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "961bb1f8: Exit with message if there are no records.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific exit condition which is helpful for understanding the code's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a66c7603: Exit the routine and quit.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the function of the code clearly.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9cb4e7c0: Calculate the sum of the percentages of the 3 sections.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about what the code does.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5493fff8: Increment the divisional total patient count. If the total sum of percentages is greater than 30, increment the divisional high risk patient count.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the functionality in a detailed but understandable manner.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "adda6316: If the location is 'PHY', initialize the physician total count if not already done. Increment the physician total patient count and high risk patient count for the given division and physician if the total sum of percentages is greater than 30.",
+        "readability": {
+          "reasoning": "The comment is long but clear and well-organized.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides comprehensive information that would be useful to any programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "56bfadf4: ;Quit if this is a physician related procedure.",
+        "readability": {
+          "reasoning": "The comment is generally clear but the semicolon at the beginning might be confusing.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful but does not provide much detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f5430412: ;Update service procedure totals and include percentage totals if percentage exceeds 30.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific conditions under which the code operates, which is helpful for understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f0e38ddc: ;Update service provided procedure totals.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents functionality but lacks details that could be helpful for deeper understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a030d84d: ;If no Variable Ptr Value is supplied, quit.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a basic conditional check which is somewhat useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "51213538: ;If Variable Ptr Value required but not defined, quit.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies a condition for quitting, which is useful for understanding flow control.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "19f818e4: ;If Variable Ptr Value supplied but doesn't match requested value, quit.",
+        "readability": {
+          "reasoning": "The comment is clear and detailed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information on a conditional check, which is helpful for understanding the code's requirements.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d16bf1d0: ;If Select Screen 1 requests a procedure, quit if procedure doesn't match.",
+        "readability": {
+          "reasoning": "The comment is well-written, concise, and clear in its intent.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific condition in the code, useful for both average and expert programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b5c89b56: ;If Select Screen 1 requests procedures, and a procedure was selected, quit.",
+        "readability": {
+          "reasoning": "The comment is clear but slightly less precise due to the wording.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful to understand a specific condition but could be clearer about the circumstances.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4c9c9f30: ;If this is a discharge summary and Print From Date contains a record number, get the corresponding encounter date and quit if it's null.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear in its explanation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a comprehensive explanation of a condition, useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "167f0529: If the input parameter DGJTL is 'SER', set DGJTPC to 8. If DGJTL is 'PHY', set DGJTPC to 14. Otherwise, set DGJTPC to an empty string.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, explaining the different conditions and corresponding actions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand specific logic based on input parameters, useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b35987f5: Quit if DGJTNODE does not have a second piece or if the second piece does not correspond to a valid entry in the VAS(393.3) file. Also quit if the record type in the VAS(393.3) file is not one of 'OP REPORT', 'DISCHARGE SUMMARY', or 'INTERIM SUMMARY'.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, explaining multiple conditions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a thorough explanation of multiple conditions, useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "042d8adc: If the VAUTN array is defined and VAUTN is false, quit if the DGJTPC piece of DGJTNODE is not defined in the VAUTN array.",
+        "readability": {
+          "reasoning": "The comment is clear and specifies the conditions and actions to be taken.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear understanding of the logic, useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f9a8bf2b: If the VAUTT array is defined and VAUTT is false, quit if the 7th piece of DGJTNODE is not defined in the VAUTT array.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific conditional check, beneficial for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "14b06133: If the VAUTY array is defined and VAUTY is false, quit if the 2nd piece of DGJTNODE is not defined in the VAUTY array.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a specific condition, making it helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c84af552: Quit if the 3rd piece of DGJTNODE is less than DGJTBG or greater than DGJTEND.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a boundary check, which is useful for understanding the logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "584b1336: Call the ^DGJOTPUL routine. If it returns a false value in DGJTREC, quit.",
+        "readability": {
+          "reasoning": "The comment is clear and specifies the action to be taken.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the function call and its condition.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b67bc0eb: If DGJTL is not 'SER', set the element in DGJTOT array corresponding to the division name (6th piece of DGJTNODE) to 0 if it is not already defined.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, explaining the condition and the action to be taken.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand a specific conditional operation in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0e4d80b9: Initialize counter for SERV/SPCL entry.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear, without any grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a basic initialization which is useful but not deeply informative.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c193154f: Get patient name from PATIENT file.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "While the comment describes a simple action, knowing where the patient name is sourced can be useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8e7acced: If entry is for a physician, store physician name and patient information in UTILITY global. Increment counter for PHY entry.",
+        "readability": {
+          "reasoning": "The comment is clear and provides a step-by-step explanation of the operations.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific operations performed for physician entries, aiding in comprehending the code's logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "750e71ee: ;Set the service and specialty for this node based on pointers in the entry.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read, though the semicolon at the beginning is somewhat unusual.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action taken to set service and specialty, which is useful for understanding the node's configuration.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "62d51f96: ;Build and save the entry in UTILITY file.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the action being taken in the code, which can help an expert programmer understand the purpose of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0ba7fb44: ;Quit",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality, indicating that the function quits.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "da0a2ea6: ;Update the totals for the provider or service.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides meaningful information about what the code is doing, which can help an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bda7c2ac: ;Store totals in DGJPHTOT",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about where the totals are being stored, which can help an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "af28571e: ;Store totals in DGJSVTOT",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about where the totals are being stored, which can help an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4e9eefd7: ;Quit",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a 'Quit' action which is useful but not complex.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "102e4cea: ;Compute and store the total line, when over 30 days subtract 30.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the logic related to day calculation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "477d1f58: ;Quit",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a 'Quit' action which is useful but not complex.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "2cbef471: ;Select Physician, if none selected set DGJFL flag.",
+        "readability": {
+          "reasoning": "The comment is clear and informative.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional logic related to physician selection, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bea1dd8d: ;Quit",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a 'Quit' action which is useful but not complex.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "61d9a2ca: ;Select Service, if none selected quit.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with proper punctuation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the functionality of selecting a service and the consequence if none is selected, which is beneficial for understanding the control flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "fb455f40: ;Select and add specialty.",
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it describes an action, but it lacks context for deeper understanding.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "55a3b839: ;Quit",
+        "readability": {
+          "reasoning": "The comment is clear but extremely brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial action without additional context.",
+          "score": 2
+        }
+      }
+    ]
+  }
+}

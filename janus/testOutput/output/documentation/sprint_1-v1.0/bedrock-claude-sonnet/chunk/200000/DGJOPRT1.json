@@ -1,0 +1,1209 @@
+{
+  "input": "{\n  \"comments\": [\n    \"7b74f4ed: ;\\n .;This routine outputs selected data from the VASCULAR ASSESSMENT\\n .;file (#393) and a subtotal by Division and creates a ^UTILITY($J)\\n .;global.\\n .;\",\n    \"fca9eecb: ;if division selected, determine if it is a 'mult' division\",\n    \"4c2dcdbf: ;if no division selected get default division\",\n    \"3f95f73a: ;branch to selected report type\",\n    \"b2944d34: ;if not DATE then do DATE report\",\n    \"bd02e49f: ;build screen to select summary types\",\n    \"0f553c13: ;select summary type\",\n    \"11a99ff3: ;requires 132 column output\",\n    \"b2793314: ;convert print date to VA FileMan external format\",\n    \"078953f3: ;set variables needed by TSK routine, call TASKMAN\",\n    \"1fa18311: ;no need to continue\",\n    \"b33393a9: ;initialize variables, get each entry in file #393\",\n    \"e2cbc0bd: ;continue processing in DGJOPRT2 if records exist\",\n    \"19497dad: ;output message if no records found\",\n    \"ecf9c37e: ;kill variables used in routine\",\n    \"4d34580a: Close the device and quit.\",\n    \"e716f15c: If the listing is by division, increment the division total.\",\n    \"b1d7417d: If the listing is by service, increment the service total.\",\n    \"6b2a329e: If the listing is by physician, increment the physician total for the division.\",\n    \"00b5b26f: If the listing is by service, increment the service total for the division.\",\n    \"3a7e6560: If the listing is by service, increment the service-specialty total for the division.\",\n    \"e0e24d8f: Return.\",\n    \"490f9d9c: If division not specified, set to default division.\",\n    \"1a3fd136: If division specified, skip record if division not selected.\",\n    \"e92487bf: If division specified, skip record if it does not match selected division.\",\n    \"2bb78972: If only summarizing records checked out, skip record not checked out.\",\n    \"c1eb5094: If only summarizing records not checked out, skip record checked out.\",\n    \"7113c94b: If summarizing discharge summaries, skip records without a discharge date.\",\n    \"3eb62be6: Set column number to print patient, date, service, or physician.\",\n    \"40313208: Skip record if not an OP Report, Discharge Summary, or Interim Summary.\",\n    \"6b4fd87a: Quit if the patient name is specified but doesn't match the patient pointer in the record.\",\n    \"43e4dd7b: Quit if the specialty is specified but doesn't match the specialty pointer in the record.\",\n    \"6a238f15: Quit if the report type is specified but doesn't match the report type pointer in the record.\",\n    \"51eaf861: Quit if the event date is outside the specified date range.\",\n    \"8d82e688: Quit if the record fails the division check.\",\n    \"8e20955c: Set the division name and initialize the record count for the division.\",\n    \"23e5a495: Get the patient name from the Patient file.\",\n    \"23d97a14: Store the record data in ^UTILITY and increment the patient count.\",\n    \"3ee31eaf: Store the record data in ^UTILITY and increment the date count.\",\n    \"1a7c03b3: Store the record data in ^UTILITY and increment the physician count.\",\n    \"7d9f50dc: Get the service and specialty names from their respective files.\",\n    \"ca8c99d1: Store the record data in ^UTILITY and increment the service/specialty counts.\",\n    \"883dce76: Exit the CK routine.\",\n    \"61823335: Call FileMan to get a patient.\",\n    \"30ba208f: Exit the PAT routine.\",\n    \"7e18c80e: ;If user exits, set flag to quit routine\",\n    \"54f42c73: ;If user did not exit, continue\",\n    \"60fcf423:  .;\\n .;Obtain date range for report\\n .;\",\n    \"225a8036: ;Prompts for start date and sets start date value\",\n    \"9d0f7d7e: ;Prompts for end date and checks if valid date entered\",\n    \"709a8d3f: ;Sets end date value\",\n    \"4f7dd7f0: ;Checks if end date is before start date and re-prompts if so\",\n    \"2b582138: ;Exits date range prompts\",\n    \"cdb9a356: ;Prompts to select a service and gets user input\",\n    \"4fb9dc22: ;Prompts to select a specialty and gets user input\",\n    \"230a56ac: ;Exits service/specialty prompts\",\n    \"3c0a08a1:  .;\\n .;Determines record type based on division\\n .;\",\n    \"bad7c059: ;Initializes variable\",\n    \"d88060af: ;If no division, returns record type 1\",\n    \"dda8adc0: ;Gets division from input node\",\n    \"54ae8a69: Check if the RECORD TYP field for this division exists\",\n    \"1354a467: If it doesn't exist, set it to 1 (outpatient)\",\n    \"667dbee7: Return the numeric value of the RECORD TYP field\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 108.95777297019958
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "7b74f4ed: ;\n .;This routine outputs selected data from the VASCULAR ASSESSMENT\n .;file (#393) and a subtotal by Division and creates a ^UTILITY($J)\n .;global.\n .;",
+        "completeness": {
+          "reasoning": "The comment sufficiently describes the primary capabilities of the routine.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and pertains to the functionality described.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written, despite a slightly unusual format.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding the primary purpose of the routine, especially for an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fca9eecb: ;if division selected, determine if it is a 'mult' division",
+        "completeness": {
+          "reasoning": "The comment only describes a single conditional check and does not cover the entire functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but limited to a specific condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but only provides trivial information.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "4c2dcdbf: ;if no division selected get default division",
+        "completeness": {
+          "reasoning": "The comment only addresses a single condition and does not cover the entire code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate but limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific condition but lacks broader context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3f95f73a: ;branch to selected report type",
+        "completeness": {
+          "reasoning": "The comment adequately describes a specific functionality but lacks broader detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but very limited.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but only provides trivial information.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "b2944d34: ;if not DATE then do DATE report",
+        "completeness": {
+          "reasoning": "The comment addresses a specific conditional check but not the overall functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate but very specific.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but a bit repetitive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but only provides trivial information.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "bd02e49f: ;build screen to select summary types",
+        "completeness": {
+          "reasoning": "The comment provides a general idea but lacks detail on all functionalities related to building the screen.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly describes the function of building a screen to select summary types.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the code but lacks depth for expert understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0f553c13: ;select summary type",
+        "completeness": {
+          "reasoning": "The comment addresses a basic aspect of the code but does not provide comprehensive detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about selecting a summary type.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is brief and easy to read, though a bit vague.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides basic information that is somewhat useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "11a99ff3: ;requires 132 column output",
+        "completeness": {
+          "reasoning": "The comment addresses a specific requirement but does not cover other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely accurate, specifying an output requirement.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding output requirements but does not provide broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b2793314: ;convert print date to VA FileMan external format",
+        "completeness": {
+          "reasoning": "The comment clearly describes the function of converting a date format but lacks additional details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the conversion process.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding date conversion in the context of VA FileMan.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "078953f3: ;set variables needed by TSK routine, call TASKMAN",
+        "completeness": {
+          "reasoning": "The comment covers essential tasks of setting variables and calling a routine but omits specifics.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment truthfully describes setting variables and calling TASKMAN.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the key tasks but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1fa18311: ;no need to continue",
+        "completeness": {
+          "reasoning": "The comment does not address any essential functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any false information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it provides no meaningful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "b33393a9: ;initialize variables, get each entry in file #393",
+        "completeness": {
+          "reasoning": "The comment mentions initializing variables and getting entries, which covers some essential functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is likely true based on typical programming tasks.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information for understanding the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e2cbc0bd: ;continue processing in DGJOPRT2 if records exist",
+        "completeness": {
+          "reasoning": "The comment addresses an essential functionality of continuing processing based on a condition.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided seems accurate and logical.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "19497dad: ;output message if no records found",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality regarding output behavior.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is clear and likely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding what happens when no records are found.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ecf9c37e: ;kill variables used in routine",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality of cleaning up variables.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is straightforward and likely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding variable management in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4d34580a: Close the device and quit.",
+        "completeness": {
+          "reasoning": "The comment briefly explains the essential functionality but lacks detail on how the device is closed and the quitting process.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the basic functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e716f15c: If the listing is by division, increment the division total.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality but does not explain the context or the method used for incrementing.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the basic functionality but lacks depth for an expert.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b1d7417d: If the listing is by service, increment the service total.",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality but lacks details on how the increment is performed.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for an average programmer but lacks specifics that would help an expert.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6b2a329e: If the listing is by physician, increment the physician total for the division.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality but does not explain the context or the method used for incrementing.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the basic functionality but lacks depth for an expert.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "00b5b26f: If the listing is by service, increment the service total for the division.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality but does not provide details on how the increment is performed.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for an average programmer but lacks specifics that would help an expert.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3a7e6560: If the listing is by service, increment the service-specialty total for the division.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover all aspects of the relevant source code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e0e24d8f: Return.",
+        "completeness": {
+          "reasoning": "The comment is too brief and does not address any functionality in detail.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but is too vague.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but overly simplistic.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide useful information beyond the obvious.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "490f9d9c: If division not specified, set to default division.",
+        "completeness": {
+          "reasoning": "The comment covers a specific functionality but does not provide a complete picture.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific conditional logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1a3fd136: If division specified, skip record if division not selected.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover all aspects of the relevant source code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific conditional logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e92487bf: If division specified, skip record if it does not match selected division.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover all aspects of the relevant source code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific conditional logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2bb78972: If only summarizing records checked out, skip record not checked out.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but does not cover all functionalities of the relevant code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the condition it describes.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific conditional check but is not extremely useful for understanding the entire code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c1eb5094: If only summarizing records not checked out, skip record checked out.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but does not cover all functionalities of the relevant code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the condition it describes.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific conditional check but is not extremely useful for understanding the entire code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7113c94b: If summarizing discharge summaries, skip records without a discharge date.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but does not cover all functionalities of the relevant code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the condition it describes.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific conditional check but is not extremely useful for understanding the entire code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3eb62be6: Set column number to print patient, date, service, or physician.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality related to setting a column number but does not cover all functionalities of the relevant code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the function it describes.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific functionality but is not extremely useful for understanding the entire code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "40313208: Skip record if not an OP Report, Discharge Summary, or Interim Summary.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but does not cover all functionalities of the relevant code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the condition it describes.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific conditional check but is not extremely useful for understanding the entire code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6b4fd87a: Quit if the patient name is specified but doesn't match the patient pointer in the record.",
+        "completeness": {
+          "reasoning": "The comment addresses the key functionality related to the patient name check.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific conditional check.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "43e4dd7b: Quit if the specialty is specified but doesn't match the specialty pointer in the record.",
+        "completeness": {
+          "reasoning": "The comment fully explains the functionality related to the specialty check.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is correct.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the specialty-related conditional check.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6a238f15: Quit if the report type is specified but doesn't match the report type pointer in the record.",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality related to the report type check.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the report type condition.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "51eaf861: Quit if the event date is outside the specified date range.",
+        "completeness": {
+          "reasoning": "The comment addresses the key functionality about the event date check.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the date range condition.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8d82e688: Quit if the record fails the division check.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality related to the division check.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the division check condition.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8e20955c: Set the division name and initialize the record count for the division.",
+        "completeness": {
+          "reasoning": "The comment mentions setting the division name and initializing the record count, which seem like the essential functionalities of the relevant code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The provided information seems accurate and plausible.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand key actions in the code, which is useful for both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "23e5a495: Get the patient name from the Patient file.",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality but does not provide additional context or details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment seems accurate with no misleading information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific action but lacks broader context, potentially limiting its usefulness.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "23d97a14: Store the record data in ^UTILITY and increment the patient count.",
+        "completeness": {
+          "reasoning": "The comment explains two key functionalities: storing data and incrementing the patient count.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears accurate and relevant.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is informative and useful for understanding the code's actions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3ee31eaf: Store the record data in ^UTILITY and increment the date count.",
+        "completeness": {
+          "reasoning": "The comment explains two functionalities: storing data and incrementing the date count.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and does not contain any false details.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the code's operations.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1a7c03b3: Store the record data in ^UTILITY and increment the physician count.",
+        "completeness": {
+          "reasoning": "The comment details two functionalities: storing data and incrementing the physician count.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is true and relevant to the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-phrased and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the specific functionalities related to the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7d9f50dc: Get the service and specialty names from their respective files.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of retrieving service and specialty names, which seems to be the main purpose of the code section.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true as it accurately describes the code's functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps both average and expert programmers understand what the code is doing.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ca8c99d1: Store the record data in ^UTILITY and increment the service/specialty counts.",
+        "completeness": {
+          "reasoning": "The comment addresses the main functionality of storing data and incrementing counts.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true based on the described functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding key parts of the code, especially for tracking data storage and counting.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "883dce76: Exit the CK routine.",
+        "completeness": {
+          "reasoning": "The comment addresses the exit functionality but lacks details on what the CK routine does.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is only slightly useful as it does not provide context about the CK routine.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "61823335: Call FileMan to get a patient.",
+        "completeness": {
+          "reasoning": "The comment addresses the main functionality of calling FileMan to retrieve a patient.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the code section.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "30ba208f: Exit the PAT routine.",
+        "completeness": {
+          "reasoning": "The comment addresses the exit functionality but lacks details on what the PAT routine does.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is only slightly useful as it does not provide context about the PAT routine.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7e18c80e: ;If user exits, set flag to quit routine",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of setting a flag if the user exits, but it doesn't cover other parts of the routine.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting a flag when the user exits.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding what happens when the user exits.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "54f42c73: ;If user did not exit, continue",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of continuing if the user did not exit, but it doesn't cover other parts of the routine.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about continuing if the user did not exit.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the flow of the program if the user does not exit.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "60fcf423:  .;\n .;Obtain date range for report\n .;",
+        "completeness": {
+          "reasoning": "The comment describes obtaining the date range for the report but does not mention how it is done.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment truthfully states that a date range is obtained.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The formatting is a bit awkward but still understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail on how the date range is obtained.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "225a8036: ;Prompts for start date and sets start date value",
+        "completeness": {
+          "reasoning": "The comment fully describes the functionality of prompting for and setting the start date.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about prompting for and setting the start date.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding this part of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9d0f7d7e: ;Prompts for end date and checks if valid date entered",
+        "completeness": {
+          "reasoning": "The comment fully describes the functionality of prompting for and validating the end date.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about prompting for and validating the end date.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding this part of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "709a8d3f: ;Sets end date value",
+        "completeness": {
+          "reasoning": "The comment addresses the basic functionality of setting an end date value but lacks any additional details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly describes the functionality without any false information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides basic information that is somewhat useful but lacks depth.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "4f7dd7f0: ;Checks if end date is before start date and re-prompts if so",
+        "completeness": {
+          "reasoning": "The comment describes the key functionality of checking date order and re-prompting.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the functionality without misinformation.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps users understand the logic behind date validation, making it useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2b582138: ;Exits date range prompts",
+        "completeness": {
+          "reasoning": "The comment briefly describes the functionality but lacks detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately states the function of exiting date range prompts.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is simple and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides basic information, which is useful but lacks depth.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "cdb9a356: ;Prompts to select a service and gets user input",
+        "completeness": {
+          "reasoning": "The comment describes the main functionality but doesn't cover any edge cases or additional details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the user input process for selecting a service.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4fb9dc22: ;Prompts to select a specialty and gets user input",
+        "completeness": {
+          "reasoning": "The comment covers the core functionality but lacks details on possible options or error handling.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the user input process for selecting a specialty.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "230a56ac: ;Exits service/specialty prompts",
+        "completeness": {
+          "reasoning": "The comment accurately describes the function but lacks detail on how it interacts with the rest of the system.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information as it describes the exit functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail for a deeper understanding.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3c0a08a1:  .;\n .;Determines record type based on division\n .;",
+        "completeness": {
+          "reasoning": "The comment provides a good summary of the functionality but could include more specifics.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about determining record type based on division.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is mostly clear but formatting could be improved.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bad7c059: ;Initializes variable",
+        "completeness": {
+          "reasoning": "The comment is too vague and doesn't specify which variable or its purpose.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but overly generic.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d88060af: ;If no division, returns record type 1",
+        "completeness": {
+          "reasoning": "The comment provides essential functionality but lacks context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the return value.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful to understand the condition and return value.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dda8adc0: ;Gets division from input node",
+        "completeness": {
+          "reasoning": "The comment accurately describes the functionality but lacks detail on the input node structure.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about getting the division.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more detailed for expert understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "54ae8a69: Check if the RECORD TYP field for this division exists",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of checking the existence of the RECORD TYP field.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action to check for the existence of a field.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of this code line.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1354a467: If it doesn't exist, set it to 1 (outpatient)",
+        "completeness": {
+          "reasoning": "The comment mentions setting a value if the field doesn't exist, but it doesn't cover everything about the field.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting the value to 1 if the field doesn't exist.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific conditional action in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "667dbee7: Return the numeric value of the RECORD TYP field",
+        "completeness": {
+          "reasoning": "The comment fully addresses the action of returning the numeric value.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information regarding the return action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the return value of the function.",
+          "score": 4
+        }
+      }
+    ]
+  }
+}

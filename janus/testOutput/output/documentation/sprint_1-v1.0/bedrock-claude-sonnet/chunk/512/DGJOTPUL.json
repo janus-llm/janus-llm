@@ -1,0 +1,265 @@
+{
+  "input": "{\n  \"comments\": [\n    \"bca39a19:  ;\\n ;This routine initializes variables for the Patient Record Entry/Display\\n ;application (ADGOTPUL).\\n ;\",\n    \"3c833e84: ;This sets the DGJTPAR variable to contain the principal cause of admission, admitting diagnosis, and service connected condition for the current patient.\",\n    \"fef34871: Save the original 'DT' node value if it exists.\",\n    \"caab9f97: Get the current date and time as a FileMan date value and the number of days since January 1, 1700 (DGJTNOW). Initialize DGJTDL to zero.\",\n    \"6c7ccfec: If the record status matches the status in the 11th piece of DGJTNODE, set DGJTREC=1 and call the PROC routine.\",\n    \"f4baee1d: Quit the routine.\",\n    \"368a604f: If the 11th piece of DGJTNODE is 'INCOMPLETE', calculate the number of days since the admission date (X1) and admission movement (X2). Set DGJTFLAG to 1 if the current date is in the same month as the admission date or if the current date is after the admission date. If DGJTFLAG is 1, calculate the number of days late (DGJTDL) and call the DAYS and TOT1 routines.\",\n    \"20b4aa95: If the 11th piece of DGJTNODE is 'DICTATED', set DGJTFLAG to 1, set X to the 3rd piece of DGJTNODE, and call DAYS and TOT1 subroutines.\",\n    \"4d735e7f: If the 11th piece of DGJTNODE is 'TRANSCRIBED', set X1 to the 3rd piece of DGJTNODT, set X2 to the 2nd piece of DGJTPAR, calculate the difference between DGJTNOW and X2 using C^%DTC, set DGJTFLAG to 1 if the difference is not negative, call DAYS if DGJTFLAG is set, and call TOT1.\",\n    \"052ce069: If the 3rd piece of DGJTDEL is non-zero and the 11th piece of DGJTNODE is 'SIGNED', set X1 to the 5th piece of DGJTNODT, set X2 to the 3rd piece of DGJTPAR, calculate the difference between DGJTNOW and X2 using C^%DTC, set DGJTFLAG to 1 if the difference is not negative, call DAYS if DGJTFLAG is set, and call TOT1.\",\n    \"96626cb7: ;Exit if called from an invalid entry point\",\n    \"a53db662: ;Get the number of days since 01/01/1700\",\n    \"d1ecaa78: ;Calculate the number of days (in units of flths/wholes) that have elapsed since the last inspection and update the DGJTFLLG flag for use in TOT2\",\n    \"93dfb691: ;If no DX terminal digit code is present but there is a valid node status, set the 2nd and 3rd decimal position digits, then quit.\",\n    \"71f6de36: ;Otherwise, append the terminal digit code to the diagnosis ICD code being built and save it in DGJDICTO, also setting the 2nd decimal position digit.\",\n    \"a694080a: ;If there is a non-admission movement update the total range, set DGJT3PC and increment DGJT2PC.\",\n    \"f5f43f20: ;If there is a non-admission movement call the COD subroutine.\",\n    \"ee1e7fd5: ;If there is a non-admission movement reset the start date and time and call the SET subroutine.\",\n    \"fb4b18dc: ;Exit the routine.\",\n    \"db7bbb90: ;Get the code associated with the movement from the DGPM, DGPT and DGP files.\",\n    \"90d2190a: Set a flag indicating that X contains double quotes\",\n    \"5a8d5039: Exit the routine\",\n    \"294e4a1b: Concatenate X to DGJCOTO. If the double quote flag is set, append an asterisk to DGJT4PC after concatenating X. If the double quote flag is not set, just concatenate X to DGJT4PC. Increment DGJT3PC by 1\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 36.20037817955017
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "bca39a19:  ;\n ;This routine initializes variables for the Patient Record Entry/Display\n ;application (ADGOTPUL).\n ;",
+        "readability": {
+          "reasoning": "The comment is clear to read and well-organized with appropriate line breaks.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the routine but lacks specific details that would be useful to an expert.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3c833e84: ;This sets the DGJTPAR variable to contain the principal cause of admission, admitting diagnosis, and service connected condition for the current patient.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains what the variable will contain, which is useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fef34871: Save the original 'DT' node value if it exists.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a simple, yet significant action which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "caab9f97: Get the current date and time as a FileMan date value and the number of days since January 1, 1700 (DGJTNOW). Initialize DGJTDL to zero.",
+        "readability": {
+          "reasoning": "The comment is clear and detailed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it explains multiple actions and variables, helping both average and expert programmers understand the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6c7ccfec: If the record status matches the status in the 11th piece of DGJTNODE, set DGJTREC=1 and call the PROC routine.",
+        "readability": {
+          "reasoning": "The comment is clear and specific.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear condition and action, which helps both average and expert programmers understand the flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f4baee1d: Quit the routine.",
+        "readability": {
+          "reasoning": "The comment is short and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a trivial action that is clear from the code itself.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "368a604f: If the 11th piece of DGJTNODE is 'INCOMPLETE', calculate the number of days since the admission date (X1) and admission movement (X2). Set DGJTFLAG to 1 if the current date is in the same month as the admission date or if the current date is after the admission date. If DGJTFLAG is 1, calculate the number of days late (DGJTDL) and call the DAYS and TOT1 routines.",
+        "readability": {
+          "reasoning": "The comment is detailed and uses clear language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a complex condition and subsequent actions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "20b4aa95: If the 11th piece of DGJTNODE is 'DICTATED', set DGJTFLAG to 1, set X to the 3rd piece of DGJTNODE, and call DAYS and TOT1 subroutines.",
+        "readability": {
+          "reasoning": "The comment is clear and provides enough detail to understand the logic.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific condition and subsequent actions, useful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4d735e7f: If the 11th piece of DGJTNODE is 'TRANSCRIBED', set X1 to the 3rd piece of DGJTNODT, set X2 to the 2nd piece of DGJTPAR, calculate the difference between DGJTNOW and X2 using C^%DTC, set DGJTFLAG to 1 if the difference is not negative, call DAYS if DGJTFLAG is set, and call TOT1.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear but a bit lengthy.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and subsequent actions, beneficial for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "052ce069: If the 3rd piece of DGJTDEL is non-zero and the 11th piece of DGJTNODE is 'SIGNED', set X1 to the 5th piece of DGJTNODT, set X2 to the 3rd piece of DGJTPAR, calculate the difference between DGJTNOW and X2 using C^%DTC, set DGJTFLAG to 1 if the difference is not negative, call DAYS if DGJTFLAG is set, and call TOT1.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear but slightly long.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific condition and subsequent actions, useful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "96626cb7: ;Exit if called from an invalid entry point",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides essential information about when the exit condition is triggered.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a53db662: ;Get the number of days since 01/01/1700",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates the specific functionality related to date calculation, which is useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d1ecaa78: ;Calculate the number of days (in units of flths/wholes) that have elapsed since the last inspection and update the DGJTFLLG flag for use in TOT2",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, although it is somewhat lengthy.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific details about the calculations and flag updates, which is useful for understanding the code's purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "93dfb691: ;If no DX terminal digit code is present but there is a valid node status, set the 2nd and 3rd decimal position digits, then quit.",
+        "readability": {
+          "reasoning": "The comment is clear and detailed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional operation and its specifics, which is useful for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "71f6de36: ;Otherwise, append the terminal digit code to the diagnosis ICD code being built and save it in DGJDICTO, also setting the 2nd decimal position digit.",
+        "readability": {
+          "reasoning": "The comment is clear but somewhat lengthy.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about appending and saving codes, which helps understand the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a694080a: ;If there is a non-admission movement update the total range, set DGJT3PC and increment DGJT2PC.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains multiple actions taken in the code, which would be useful to an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f5f43f20: ;If there is a non-admission movement call the COD subroutine.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides information on what the code does, which is helpful to an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ee1e7fd5: ;If there is a non-admission movement reset the start date and time and call the SET subroutine.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains multiple actions taken in the code, which would be useful to an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fb4b18dc: ;Exit the routine.",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality that is usually self-explanatory.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "db7bbb90: ;Get the code associated with the movement from the DGPM, DGPT and DGP files.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information for understanding code interaction with multiple files, which is helpful to an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "90d2190a: Set a flag indicating that X contains double quotes",
+        "readability": {
+          "reasoning": "The comment is well-written with clear and concise language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a non-trivial functionality that helps understand a specific part of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5a8d5039: Exit the routine",
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality that is often self-explanatory.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "294e4a1b: Concatenate X to DGJCOTO. If the double quote flag is set, append an asterisk to DGJT4PC after concatenating X. If the double quote flag is not set, just concatenate X to DGJT4PC. Increment DGJT3PC by 1",
+        "readability": {
+          "reasoning": "The comment is clear, but it's quite lengthy and could be broken down for better readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of the code's functionality, which is useful for understanding complex logic.",
+          "score": 4
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    "bca39a19:  ;\n ;Build WINDOW data\n ;",
+    "3c833e84: ;From VAS(393 get par node and parameters",
+    "fef34871: ;If node exists, save DT node of report",
+    "caab9f97: ;Calculate current date and initialize DGJTDL",
+    "6c7ccfec: ;If report status matches current status, process report",
+    "f4baee1d: ;Exit",
+    "368a604f: ;Process incomplete reports:\n;  Check if overdue\n;  If overdue, calculate delay and call TOT1",
+    "20b4aa95: ;Process dictated reports:\n;  Set flag, get date, calculate delay and call TOT1",
+    "4d735e7f: ;Process transcribed reports:\n;  Check if transcription is overdue\n;  If overdue, calculate delay and call TOT1",
+    "052ce069: ;Process signed reports:\n;  Check if signing is overdue\n;  If overdue, calculate delay and call TOT1",
+    "96626cb7: ;Exit if no delay target",
+    "a53db662: ;Calculate delay in days",
+    "d1ecaa78: Calculate the latest possible transmission date from the transmission date on the package and the transmission date from the receiving site.",
+    "93dfb691: If there is no package transmission date, but there is a receiving site transmission date, calculate a default initial transmission date and a default retransmission date.",
+    "71f6de36: Add the time difference between the receiving site transmission date and the package transmission date to a counter for outbound time and display this initial transmission time.",
+    "a694080a: If there is a package transmission date, calculate the retransmission date using the package transmission date or current date if the package retransmission date is empty. Add the retransmission time difference to a counter for inbound time and display the retransmission time.",
+    "f5f43f20: If there is a package retransmission date, calculate and display a transmission code.",
+    "ee1e7fd5: If there is a package retransmission date, calculate the retransmission time and display the retransmission time.",
+    "fb4b18dc: Exit the routine.",
+    "db7bbb90: If the code in the Integrated Billing DGJTNODE exists, retrieve the insurer pointer. If the insurer pointer exists, retrieve the name of the insurer. If the insurer name exists, retrieve the short name of the insurer from file 45.84 (Insurer Name Entry).",
+    "90d2190a: If there is no insurer short name, set the flag DGJTFLLG to 1.",
+    "5a8d5039: Quit the COD subroutine.",
+    "294e4a1b: Add the insurer short name to DGJCOTO. If DGJTFLLG is set, append an asterisk to the short name in DGJT4PC. If not, set DGJT4PC to the short name. Set DGJT3PC to the incremented value."
+  ]
+}

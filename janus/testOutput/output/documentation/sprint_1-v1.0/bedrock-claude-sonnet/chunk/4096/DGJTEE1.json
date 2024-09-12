@@ -1,0 +1,1167 @@
+{
+  "input": "{\n  \"comments\": [\n    \"6c6df4de: \",\n    \"fcd8fbce: \",\n    \"504f6aad: \",\n    \"de0621b7: \",\n    \"4318f48e: \",\n    \"c53207fd: \",\n    \"0437d629: \",\n    \"0fd87f41: \",\n    \"6ff60fa4: \",\n    \"b8d0f5b1: \",\n    \"3d569356: \",\n    \"7c5bdd82: \",\n    \"732425c2: \",\n    \"6ba29ea3: \",\n    \"3c6d6ac8: \",\n    \"7f73c7d3: \",\n    \"368c8a31: \",\n    \"303d006b: \",\n    \"95ae85a6: \",\n    \"3a2ffc34: \",\n    \"ee5a7c04: ;If it's a comment record and it doesn't match the current status, set flag.\",\n    \"1a4b289c: ;Quit\",\n    \"8f2b434a: ;If it's not a comment record\",\n    \"29242722: ;If it's a comment record and is CM, set flag\",\n    \"2db5cb52: ;If it's a RV in a 1st apr record, set flag\",\n    \"bfd75c65: ;If it's a SN in a 0-day record, set flag\",\n    \"11ee2c52: ;Quit\",\n    \"1bd1402e: ;Initialize header line\",\n    \"98273beb: ;Set patient name\",\n    \"6e070ec4: ;Set patient name from file\",\n    \"aa5c25c7: ;Set PT ID label\",\n    \"3b54ce4a: ;Set PT ID value\",\n    \"15b38b41: ;Save first header line\",\n    \"c4e4333a: ;Initialize second header line\",\n    \"0bbc2057: ;Set ADMISSION label\",\n    \"8515dcd1: ;Set admission date/time if inpatient\",\n    \"eeda2c50: ;Set OUTPATIENT if outpatient\",\n    \"7773b54d: ;Save second header line\",\n    \"3c776f7a: ;Quit\",\n    \"6e3a2ca7: ;\\n;Display the detailed record for the selected items.\\n;Handle exiting, navigating, editing records, etc.\\n;\",\n    \"0dac9a6d: ;Initialize variables for ExposeD display\",\n    \"c7219baa: ;Reset background color\",\n    \"cb0b4862: ;Exit if no selection made, otherwise set DGJVALM=0\",\n    \"cdb0b036: ;Full expose mode, reset background\",\n    \"00238f9c: ;Loop through selected entries\",\n    \"c1df0a39: ;Expose entry in full\",\n    \"c6312911: ;Get document IFN and node from ^TMP\",\n    \"74e1c14f: ;Write document definition line\",\n    \"3fffc123: ;If document exists, display document text\",\n    \"7d03e7fc: ;If document is an entry in the TRANSCRIPT STATUS file, branch to handle that\",\n    \"bfc727c6: ;If document is a recognized document type, branch to display the document\",\n    \"658ec53b: ;Reset background color\",\n    \"7266290f: ;Quit\",\n    \"fffc8bc4: ;Initialize variables for ExposeD display and reset background\",\n    \"ea49ddd7: ;Quit\",\n    \"0e126dbf: ;\\n;Handle display of a TRANSCRIPT STATUS document\\n;\",\n    \"b51a1192: ;If document is a Discharge Summary, branch to edit the TRANSCRIPT STATUS entry and display the document\",\n    \"ba41b113: ;If document is not a Discharge Summary, display the document using the TRANSCRIPT STATUS entry\",\n    \"10274a1f: ;Quit\",\n    \"caedb5a6: ;Edit the TRANSCRIPT STATUS entry for the document\",\n    \"59c2f3c6: ;No replacement comment provided for this placeholder.\",\n    \"ff8ab527:  ;\\n ;If the user selects the 'Re-display Patient' menu option, then\\n ;reinitialize the main display with the current patient.\\n ;\",\n    \"f478eac0: ;Load patient ID if context changed while this option was suspended.\",\n    \"9e0d85dc: ;Save current context before calling ^DGJTEE.\",\n    \"37c4f110: ;Pass current treatment episode to ^DGJTEE if DGJTSR1=1.\",\n    \"3a021431: ;Restore saved variables if ^DGJTEE returns without changing patient.\",\n    \"39478b0c: ;Call patient selection routine.\",\n    \"cdf4523a: ;If patient not changed, restore context and redisplay current patient.\",\n    \"045a5d5b: ;Restore saved variables if patient not changed.\",\n    \"eb2cd719: ;Inform user that patient was not changed.\",\n    \"7802508c: ;Wait for user to acknowledge the 'no change' message.\",\n    \"cafdcfe1: ;Reset flag and re-display main screen.\",\n    \"3a8f131c: ;Redisplay main header for current patient.\",\n    \"33486bb1: ;Exit point.\",\n    \"33e7b8e8: ;If the document type is not OP REPORT, DISCHARGE SUMMARY, or INTERIM SUMMARY, then skip.\",\n    \"afceded1: ;Get the category code for the current document type.\",\n    \"1144e702: ;Increment the category counter.\",\n    \"5d1665b0: ;If this is the first document for this category, then set up category header.\",\n    \"c5eecdcf: ;Increment line counter and screen counter.\",\n    \"79055980: ;Format the line for the current document.\",\n    \"24c2ca75: ;Set the counter for the current category.\",\n    \"209af035: ;Get the file number for the record type.\",\n    \"1fcf6873: ;Insert the record type name into the display line.\",\n    \"136dbe0b: ;Insert the user who entered the record into the display line.\",\n    \"07cb94a3: ;Insert the status of the record into the display line.\",\n    \"4071055a: ;Insert the category name into the display line.\",\n    \"f1fe13d4: ;Insert the entry date of the record into the display line.\",\n    \"281aca94: ;Save the display line in the ^TMP global for later display.\",\n    \"88cb12b3: ;Save the line number and internal record number in the index ^TMP global.\",\n    \"b064185b: ;Done processing this record.\",\n    \"74ba05da:  .;\\n .;Initialize a new category for display.\\n .;Count the number of lines for this category.\\n .;Save the line number where the category name will be displayed.\\n .;Generate a blank line before the category name.\\n .;Generate the category name line.\\n .;Generate a blank line after the category name.\",\n    \"59c70d23: ;Increment the line counter.\",\n    \"7f4c4063: ;Save the line number where this category name is displayed.\",\n    \"135f9891: ;Initialize a variable to build the display line.\",\n    \"3459f6eb: ;Build a blank line and save it in the ^TMP global.\",\n    \"e01d61c6: ;Increment the line counters for a new display line.\",\n    \"d99dd8e2: ;Get the category name for display.\",\n    \"b115b4da: ;Calculate the number of spaces to center the category name.\",\n    \"ebff3a7d: ;Build the centered category name line and save it.\",\n    \"d44db8ca: ;Increment the line counters for a new blank display line.\",\n    \"768a1219: This line creates a blank separator line after the category label.\",\n    \"6d253f31: This line exits the CATSET subroutine after creating the category heading and separator lines.\",\n    \"70a6d74f: This line stores the category label, separator lines, and data lines in the ^TMP global for display in the list.\",\n    \"b4e4cb24: This line stores the index of the current data line in the ^TMP global for later reference.\",\n    \"273a7922: This line exits the TMP subroutine.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 141.944167137146
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "6c6df4de: ",
+        "readability": {
+          "reasoning": "The comment is a hexadecimal string with no additional context or explanation.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information to understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "fcd8fbce: ",
+        "readability": {
+          "reasoning": "The comment is a hexadecimal string with no additional context or explanation.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information to understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "504f6aad: ",
+        "readability": {
+          "reasoning": "The comment is a hexadecimal string with no additional context or explanation.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information to understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "de0621b7: ",
+        "readability": {
+          "reasoning": "The comment is a hexadecimal string with no additional context or explanation.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information to understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "4318f48e: ",
+        "readability": {
+          "reasoning": "The comment is a hexadecimal string with no additional context or explanation.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information to understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "c53207fd: ",
+        "readability": {
+          "reasoning": "The comment is just a string of characters with a colon, making it unclear and not well-written.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "0437d629: ",
+        "readability": {
+          "reasoning": "Similar to the previous comment, it is a string of characters with a colon, making it unclear and not well-written.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "0fd87f41: ",
+        "readability": {
+          "reasoning": "This is also just a string of characters with a colon, making it unclear and not well-written.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "6ff60fa4: ",
+        "readability": {
+          "reasoning": "Again, this is a string of characters with a colon, making it unclear and not well-written.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "b8d0f5b1: ",
+        "readability": {
+          "reasoning": "This is just a string of characters with a colon, making it unclear and not well-written.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "3d569356: ",
+        "readability": {
+          "reasoning": "The comment contains only what appears to be a hexadecimal identifier with no context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any meaningful information or context about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "7c5bdd82: ",
+        "readability": {
+          "reasoning": "The comment contains only what appears to be a hexadecimal identifier with no context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any meaningful information or context about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "732425c2: ",
+        "readability": {
+          "reasoning": "The comment contains only what appears to be a hexadecimal identifier with no context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any meaningful information or context about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "6ba29ea3: ",
+        "readability": {
+          "reasoning": "The comment contains only what appears to be a hexadecimal identifier with no context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any meaningful information or context about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "3c6d6ac8: ",
+        "readability": {
+          "reasoning": "The comment contains only what appears to be a hexadecimal identifier with no context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any meaningful information or context about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "7f73c7d3: ",
+        "readability": {
+          "reasoning": "The comment is just a series of characters and does not form understandable words or sentences.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any information that would help understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "368c8a31: ",
+        "readability": {
+          "reasoning": "The comment is just a series of characters and does not form understandable words or sentences.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any information that would help understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "303d006b: ",
+        "readability": {
+          "reasoning": "The comment is just a series of characters and does not form understandable words or sentences.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any information that would help understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "95ae85a6: ",
+        "readability": {
+          "reasoning": "The comment is just a series of characters and does not form understandable words or sentences.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any information that would help understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "3a2ffc34: ",
+        "readability": {
+          "reasoning": "The comment is just a series of characters and does not form understandable words or sentences.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any information that would help understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "ee5a7c04: ;If it's a comment record and it doesn't match the current status, set flag.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific condition and action taken.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1a4b289c: ;Quit",
+        "readability": {
+          "reasoning": "The comment is clear but very short.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality that is likely self-explanatory.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8f2b434a: ;If it's not a comment record",
+        "readability": {
+          "reasoning": "The comment is clear but incomplete.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some context but doesn't explain the action taken.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "29242722: ;If it's a comment record and is CM, set flag",
+        "readability": {
+          "reasoning": "The comment is well-written and specific.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific condition and action taken.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2db5cb52: ;If it's a RV in a 1st apr record, set flag",
+        "readability": {
+          "reasoning": "The comment is clear but uses some abbreviations that might not be immediately understood.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific condition and action taken, though the abbreviations reduce clarity.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bfd75c65: ;If it's a SN in a 0-day record, set flag",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about a specific condition and action.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "11ee2c52: ;Quit",
+        "readability": {
+          "reasoning": "The comment is very clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "1bd1402e: ;Initialize header line",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear information about initializing a header line.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "98273beb: ;Set patient name",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents setting a patient name, which is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6e070ec4: ;Set patient name from file",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides more context by specifying the source of the patient name.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "aa5c25c7: ;Set PT ID label",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action related to setting a label, which is useful for understanding the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3b54ce4a: ;Set PT ID value",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides information about setting a specific value, which helps in understanding the code's functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "15b38b41: ;Save first header line",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific action related to saving a header line, which aids in understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c4e4333a: ;Initialize second header line",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the initialization of a second header line, which is useful for understanding the code's steps.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0bbc2057: ;Set ADMISSION label",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clarity on setting a specific label, which is helpful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8515dcd1: ;Set admission date/time if inpatient",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a specific detail about setting admission date/time for inpatients.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "eeda2c50: ;Set OUTPATIENT if outpatient",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial functionality of setting an outpatient status.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7773b54d: ;Save second header line",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific action of saving the second header line.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3c776f7a: ;Quit",
+        "readability": {
+          "reasoning": "The comment is very short, but clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial functionality of quitting.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6e3a2ca7: ;\n;Display the detailed record for the selected items.\n;Handle exiting, navigating, editing records, etc.\n;",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the various functionalities involved in displaying detailed records.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0dac9a6d: ;Initialize variables for ExposeD display",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the purpose of variable initialization specific to ExposeD display.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c7219baa: ;Reset background color",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a single but useful action of resetting the background color.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cb0b4862: ;Exit if no selection made, otherwise set DGJVALM=0",
+        "readability": {
+          "reasoning": "The comment is clear, but the variable name could be confusing without context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional action, which is useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cdb0b036: ;Full expose mode, reset background",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the mode and background reset.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "00238f9c: ;Loop through selected entries",
+        "readability": {
+          "reasoning": "The comment is simple and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a basic looping action, which is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c1df0a39: ;Expose entry in full",
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It gives a clear indication of what the code is doing, which is useful for understanding the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c6312911: ;Get document IFN and node from ^TMP",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides specific information about what is being retrieved, which is useful for understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "74e1c14f: ;Write document definition line",
+        "readability": {
+          "reasoning": "The comment is straightforward and readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is helpful in understanding the specific action being taken in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3fffc123: ;If document exists, display document text",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a conditional action which is useful for understanding the code's logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7d03e7fc: ;If document is an entry in the TRANSCRIPT STATUS file, branch to handle that",
+        "readability": {
+          "reasoning": "The comment is clear with a good level of detail.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides specific information about a conditional branch, which is useful for understanding the code's flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bfc727c6: ;If document is a recognized document type, branch to display the document",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the conditional logic in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "658ec53b: ;Reset background color",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7266290f: ;Quit",
+        "readability": {
+          "reasoning": "The comment is well-written but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "fffc8bc4: ;Initialize variables for ExposeD display and reset background",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand multiple initializations in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ea49ddd7: ;Quit",
+        "readability": {
+          "reasoning": "The comment is well-written but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "0e126dbf: ;\n;Handle display of a TRANSCRIPT STATUS document\n;",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear to read with appropriate punctuation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the code related to displaying a TRANSCRIPT STATUS document.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b51a1192: ;If document is a Discharge Summary, branch to edit the TRANSCRIPT STATUS entry and display the document",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains specific branching logic for Discharge Summary documents, which is useful for understanding the code's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ba41b113: ;If document is not a Discharge Summary, display the document using the TRANSCRIPT STATUS entry",
+        "readability": {
+          "reasoning": "The comment is clear, concise, and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the handling of non-Discharge Summary documents, providing useful context for understanding the code's functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "10274a1f: ;Quit",
+        "readability": {
+          "reasoning": "The comment is extremely short but clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment only documents a trivial functionality of quitting, which is self-explanatory.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "caedb5a6: ;Edit the TRANSCRIPT STATUS entry for the document",
+        "readability": {
+          "reasoning": "The comment is concise and well-written, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the specific action of editing the TRANSCRIPT STATUS entry, which is useful for understanding the code's operation.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "59c2f3c6: ;No replacement comment provided for this placeholder.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains that the placeholder has not been replaced, which is somewhat useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ff8ab527:  ;\n ;If the user selects the 'Re-display Patient' menu option, then\n ;reinitialize the main display with the current patient.\n ;",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, though the extra semicolons could be cleaned up.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific user action and its consequence, which is useful for understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f478eac0: ;Load patient ID if context changed while this option was suspended.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about context handling that helps understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9e0d85dc: ;Save current context before calling ^DGJTEE.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about saving context which is important for understanding the function call.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "37c4f110: ;Pass current treatment episode to ^DGJTEE if DGJTSR1=1.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides valuable information about a condition and the function call, aiding in understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3a021431: ;Restore saved variables if ^DGJTEE returns without changing patient.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a condition that helps an expert understand the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "39478b0c: ;Call patient selection routine.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the purpose of the code section.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cdf4523a: ;If patient not changed, restore context and redisplay current patient.",
+        "readability": {
+          "reasoning": "The comment is clear and describes the function well.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the behavior of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "045a5d5b: ;Restore saved variables if patient not changed.",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a specific condition which is useful for understanding the code's logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "eb2cd719: ;Inform user that patient was not changed.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a user-facing action, which is helpful for understanding the code's output.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7802508c: ;Wait for user to acknowledge the 'no change' message.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific user interaction.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cafdcfe1: ;Reset flag and re-display main screen.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the code segment.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3a8f131c: ;Redisplay main header for current patient.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality related to the current patient.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "33486bb1: ;Exit point.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality of marking an exit point.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "33e7b8e8: ;If the document type is not OP REPORT, DISCHARGE SUMMARY, or INTERIM SUMMARY, then skip.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the conditional logic related to document types.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "afceded1: ;Get the category code for the current document type.",
+        "readability": {
+          "reasoning": "The comment is well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1144e702: ;Increment the category counter.",
+        "readability": {
+          "reasoning": "The comment is well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents only trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "5d1665b0: ;If this is the first document for this category, then set up category header.",
+        "readability": {
+          "reasoning": "The comment is well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c5eecdcf: ;Increment line counter and screen counter.",
+        "readability": {
+          "reasoning": "The comment is well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents only trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "79055980: ;Format the line for the current document.",
+        "readability": {
+          "reasoning": "The comment is well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "24c2ca75: ;Set the counter for the current category.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of setting the counter, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "209af035: ;Get the file number for the record type.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a non-trivial action that helps in understanding the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1fcf6873: ;Insert the record type name into the display line.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action that is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "136dbe0b: ;Insert the user who entered the record into the display line.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the functionality of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "07cb94a3: ;Insert the status of the record into the display line.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific action that helps in understanding the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4071055a: ;Insert the category name into the display line.",
+        "readability": {
+          "reasoning": "The comment is concise and easily understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It clarifies a specific action being performed in the code, which is helpful for understanding its purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f1fe13d4: ;Insert the entry date of the record into the display line.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific function of the code, making it easier to comprehend.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "281aca94: ;Save the display line in the ^TMP global for later display.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides valuable context about the storage of data for later use.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "88cb12b3: ;Save the line number and internal record number in the index ^TMP global.",
+        "readability": {
+          "reasoning": "The comment is well-written and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It offers important details about the indexing process, aiding comprehension.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b064185b: ;Done processing this record.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It indicates the completion of an operation, which is useful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "74ba05da:  .;\n .;Initialize a new category for display.\n .;Count the number of lines for this category.\n .;Save the line number where the category name will be displayed.\n .;Generate a blank line before the category name.\n .;Generate the category name line.\n .;Generate a blank line after the category name.",
+        "readability": {
+          "reasoning": "The comment is well-structured and each step is clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the sequence of operations for initializing and displaying a new category.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "59c70d23: ;Increment the line counter.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a simple operation that even an average programmer can understand easily.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7f4c4063: ;Save the line number where this category name is displayed.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about saving the line number for category display, aiding an average programmer's understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "135f9891: ;Initialize a variable to build the display line.",
+        "readability": {
+          "reasoning": "The comment is simple and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an initialization step that is useful for understanding variable setup.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3459f6eb: ;Build a blank line and save it in the ^TMP global.",
+        "readability": {
+          "reasoning": "The comment is clear and provides specific information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand where the blank line is saved, contributing to understanding the data structure used.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e01d61c6: ;Increment the line counters for a new display line.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d99dd8e2: ;Get the category name for display.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b115b4da: ;Calculate the number of spaces to center the category name.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ebff3a7d: ;Build the centered category name line and save it.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d44db8ca: ;Increment the line counters for a new blank display line.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "768a1219: This line creates a blank separator line after the category label.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific functionality which is useful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6d253f31: This line exits the CATSET subroutine after creating the category heading and separator lines.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides context about the subroutine's exit which is useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "70a6d74f: This line stores the category label, separator lines, and data lines in the ^TMP global for display in the list.",
+        "readability": {
+          "reasoning": "The comment is clear and adequately detailed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives useful information about data storage which is beneficial for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b4e4cb24: This line stores the index of the current data line in the ^TMP global for later reference.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is quite useful as it explains the storing of an index for later use.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "273a7922: This line exits the TMP subroutine.",
+        "readability": {
+          "reasoning": "The comment is readable but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment only documents a trivial functionality of exiting a subroutine.",
+          "score": 2
+        }
+      }
+    ]
+  }
+}

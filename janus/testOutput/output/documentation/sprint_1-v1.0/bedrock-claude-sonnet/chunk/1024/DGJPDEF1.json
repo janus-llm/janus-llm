@@ -1,0 +1,628 @@
+{
+  "input": "{\n  \"comments\": [\n    \"a0d7c4f5:  ;\\n ;Deficiency Rating program main routine.\\n ;\",\n    \"e0e695b7: ;Allow user to divide report into multiple devices\",\n    \"6a569145: ;If not divided retrieve next division code\",\n    \"14dee6d6: ;Call approp. routine/code via DGJTL variable\",\n    \"a2229520: ;Set up date variables\",\n    \"f491aeee: ;Initiate variable VAUTVB=VAUTY,DIC=file#393.3,Search string VAUTSTR,VAUTNI=2\",\n    \"b482214a: ;Ask user if they want more than summary statistics\",\n    \"59185a38: ;Warn user that 132 column output is required\",\n    \"d75e20aa: ;Get current date/time and format for printing\",\n    \"a3367fcd: ;Set variables for ^DGJUTQ call to get printer type. Call entry point START if successful\",\n    \"b873b918: ;Exit point if unsuccessful ^DGJUTQ call\",\n    \"b4043d24: ;\\n ;Loop through file 393 to get data for printout\\n ;Set page ctr, div ctr=0\\n ;DGJTNODE=0 node of file 393\\n ;Call routine CK to check data\\n ;\",\n    \"290ba0f9: ;\\n ;If printing summary or division and ^TMP(\\\"VAS\\\",\\\"$J\\\"\\n ;zeroise variables, pad print line, goto ^DGJPDEF2\\n ;\",\n    \"5c72aca2: If the second parameter passed to the tag^routine is 2 and the VAS scratch global exists, zero out (initialize) several variables, nullify part of DGJTLN, and go to DGJPDEF3.\",\n    \"cbc61bb6: If the VAS scratch global does not exist, write 'NO RECORDS' to the screen.\",\n    \"43c20438: Quit the current execution and go to the QUIT^DGJPDEF label.\",\n    \"31da0e83: ;\\n;Subroutine SSP\\n;\",\n    \"58349935: Initialize DGJT to the second piece of DGJTNODE if it exists, otherwise set it to null. Quit if DGJT is null or 0.\",\n    \"c7b3bedb: If the global node for the DGJT value doesn't exist, set DGJTQF=1 and quit. Otherwise, traverse the DGPM global to resolve the proper DGJT value from the cross-references, and set DGJT to the associated 0 node data.\",\n    \"1c1d35b4: ;Get ward from Ward Utilities routine.\",\n    \"ea992790: ;If X contains ward number, set DGJTWARD and get division pointer and name.\",\n    \"b08e3e20: ;Get division transfer date.\",\n    \"db7b8c3d: ;Get service from ward and check if service is defined. If not defined set to 'NONE'. If service is not in file 393.1 get first entry.\",\n    \"8a9920f2: ;If no service is found get first entry in file 393.1.\",\n    \"e870a2be: ;Get specialty from treating specialty field and check if specialty is defined. If not defined set to 'NOT SPECIFIED'.\",\n    \"7120bf4a: This mumps routine QUITs if called from the top level.\",\n    \"ab1e46ba: Checks if the current node has a pointer to a file (#40.8) entry and QUITs if the entry doesn't exist.\",\n    \"3b4276b3: If DGJTDV is defined and the current node has a pointer to file #40.8, QUITs if the pointer doesn't match DGJTDV.\",\n    \"6cbd2e5b: If the status of the pointed entry is 'SIGNED NO REVIEW' (393.2 file entry), it kills X1, X2 and X3 and QUITs.\",\n    \"c8af8d7c: If the status of the pointed entry is 'REVIEWED' (393.2 file entry), it kills X1, X2 and X3 and QUITs.\",\n    \"c3d11362: If the status of the pointed entry is 'COMPLETED' (393.2 file entry), it kills X1, X2 and X3 and QUITs.\",\n    \"f103b66b: Kills X1, X2 and X3 variables.\",\n    \"4fa95cc0: If DGJTSR1=1 and the 4th piece of DGJTNODE is null, it QUITs.\",\n    \"c5945b5a: If DGJTSR1=2 and the 4th piece of DGJTNODE is non-null, it QUITs.\",\n    \"16eb8d53: If VAUTY is defined and false, and the 2nd piece of DGJTNODE doesn't point to an existing VAUTY entry, it QUITs.\",\n    \"d1c90f6a: ;Quit if the admission/discharge date is outside the date range being processed.\",\n    \"fe374bad: ;If processing providers and the provider is not part of the area undergoing transmission, quit.\",\n    \"71900f58: ;If processing patients and the patient is not part of the area undergoing transmission, quit.\",\n    \"5e27c8ac: ;If there is an encounter associated with the node, check if it is a 'SUMMARY' encounter type, and quit if so.\",\n    \"7925b223: Initialize division totals to 0 if division is not already in DGJTOT array\",\n    \"445a7f97: Get full patient name and patient ID for current patient node\",\n    \"14e1f7d3: If sorting by physician, store patient ID in ^TMP(\\\"VAS\\\",$J,division,physician,patient,IFN sort date,record number)\",\n    \"51f45ebc: If sorting by patient, store patient ID in ^TMP(\\\"VAS\\\",$J,division,patient,IFN sort date,physician,record number)\",\n    \"37c41a38: ;Return service and specialty of service pair.\",\n    \"c6f684ec: ;Retrieve service information.\",\n    \"6a543a6e: ;Retrieve specialty of service information.\",\n    \"6816afd1: ;Don't proceed further if QUIT flag is set.\",\n    \"76819843: ;Store encounter data in temp global for later use.\",\n    \"4d179b34: ;Quit if no encounter data found.\",\n    \"55d85e0d: ;Prompt for physician using VA FileMan lookup.\",\n    \"7f679d24: ;Quit if no physician selected.\",\n    \"941c9c71: ;Prompt for patient using VA FileMan lookup.\",\n    \"67f1e7bc: ;Quit if no patient selected.\",\n    \"a28d0375: ;Prompt for service using VA FileMan lookup. Quit if no service selected.\",\n    \"d5756d9a: ;Prompt for specialty using VA FileMan lookup.\",\n    \"4c17556f: ;Quit after prompting for specialty.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 81.83157992362976
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "a0d7c4f5:  ;\n ;Deficiency Rating program main routine.\n ;",
+        "readability": {
+          "reasoning": "The comment is structured well and clearly states its purpose.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes the main routine of the program, which is crucial for understanding the overall functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e0e695b7: ;Allow user to divide report into multiple devices",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific feature of the program, which is helpful for understanding its functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6a569145: ;If not divided retrieve next division code",
+        "readability": {
+          "reasoning": "The comment is clear but slightly less concise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It helps understand a specific conditional logic within the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "14dee6d6: ;Call approp. routine/code via DGJTL variable",
+        "readability": {
+          "reasoning": "The abbreviation 'approp.' might be confusing for some readers, but overall it is understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It explains a mechanism for calling a routine, which is useful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a2229520: ;Set up date variables",
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f491aeee: ;Initiate variable VAUTVB=VAUTY,DIC=file#393.3,Search string VAUTSTR,VAUTNI=2",
+        "readability": {
+          "reasoning": "The comment is clear but slightly dense due to the compressed format and multiple elements.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about variable initialization and file references, helpful for understanding the code setup.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b482214a: ;Ask user if they want more than summary statistics",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a user prompt, which is useful for understanding user interaction.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "59185a38: ;Warn user that 132 column output is required",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment informs about an important requirement, which is useful for avoiding issues.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d75e20aa: ;Get current date/time and format for printing",
+        "readability": {
+          "reasoning": "The comment is simple and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a common functionality which might be somewhat trivial but still useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a3367fcd: ;Set variables for ^DGJUTQ call to get printer type. Call entry point START if successful",
+        "readability": {
+          "reasoning": "The comment is clear and provides adequate detail.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the function call and the conditional flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b873b918: ;Exit point if unsuccessful ^DGJUTQ call",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It informs the reader about the exit point condition.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b4043d24: ;\n ;Loop through file 393 to get data for printout\n ;Set page ctr, div ctr=0\n ;DGJTNODE=0 node of file 393\n ;Call routine CK to check data\n ;",
+        "readability": {
+          "reasoning": "The comment is detailed but a bit disjointed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about the process and variables involved.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "290ba0f9: ;\n ;If printing summary or division and ^TMP(\"VAS\",\"$J\"\n ;zeroise variables, pad print line, goto ^DGJPDEF2\n ;",
+        "readability": {
+          "reasoning": "The comment is fragmented and somewhat unclear due to incomplete sentences.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "It attempts to explain conditional logic but is difficult to follow.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "5c72aca2: If the second parameter passed to the tag^routine is 2 and the VAS scratch global exists, zero out (initialize) several variables, nullify part of DGJTLN, and go to DGJPDEF3.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a detailed explanation of the conditional logic and actions taken.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cbc61bb6: If the VAS scratch global does not exist, write 'NO RECORDS' to the screen.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It clearly explains an action based on a condition, which is helpful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "43c20438: Quit the current execution and go to the QUIT^DGJPDEF label.",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides clear information about the flow control, which is valuable for understanding the program logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "31da0e83: ;\n;Subroutine SSP\n;",
+        "readability": {
+          "reasoning": "The comment is readable but lacks detailed information.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It only indicates the name of the subroutine, which is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "58349935: Initialize DGJT to the second piece of DGJTNODE if it exists, otherwise set it to null. Quit if DGJT is null or 0.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a detailed explanation of initialization logic, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c7b3bedb: If the global node for the DGJT value doesn't exist, set DGJTQF=1 and quit. Otherwise, traverse the DGPM global to resolve the proper DGJT value from the cross-references, and set DGJT to the associated 0 node data.",
+        "readability": {
+          "reasoning": "The comment is comprehensive and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides valuable insights into the logic for handling the DGJT value, which is helpful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1c1d35b4: ;Get ward from Ward Utilities routine.",
+        "readability": {
+          "reasoning": "The comment is short but understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides only a basic description of the functionality, making it somewhat useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ea992790: ;If X contains ward number, set DGJTWARD and get division pointer and name.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the variable and the actions performed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b08e3e20: ;Get division transfer date.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality, which is not very helpful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "db7b8c3d: ;Get service from ward and check if service is defined. If not defined set to 'NONE'. If service is not in file 393.1 get first entry.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the conditional logic and fallback mechanism.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8a9920f2: ;If no service is found get first entry in file 393.1.",
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a fallback mechanism but is not very detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e870a2be: ;Get specialty from treating specialty field and check if specialty is defined. If not defined set to 'NOT SPECIFIED'.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the logic and the fallback mechanism.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7120bf4a: This mumps routine QUITs if called from the top level.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the behavior of the routine when called from the top level.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ab1e46ba: Checks if the current node has a pointer to a file (#40.8) entry and QUITs if the entry doesn't exist.",
+        "readability": {
+          "reasoning": "The comment is well-written with no noticeable issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific check and its condition, which helps in understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3b4276b3: If DGJTDV is defined and the current node has a pointer to file #40.8, QUITs if the pointer doesn't match DGJTDV.",
+        "readability": {
+          "reasoning": "The comment is clear and provides detailed information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a conditional behavior that is crucial for understanding code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6cbd2e5b: If the status of the pointed entry is 'SIGNED NO REVIEW' (393.2 file entry), it kills X1, X2 and X3 and QUITs.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment details specific actions taken based on a condition, which is important for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c8af8d7c: If the status of the pointed entry is 'REVIEWED' (393.2 file entry), it kills X1, X2 and X3 and QUITs.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about specific actions taken under a certain condition.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c3d11362: If the status of the pointed entry is 'COMPLETED' (393.2 file entry), it kills X1, X2 and X3 and QUITs.",
+        "readability": {
+          "reasoning": "The comment is clear and provides specific conditions and actions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains specific conditions and consequences, helping an expert understand the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f103b66b: Kills X1, X2 and X3 variables.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial functionality without context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "4fa95cc0: If DGJTSR1=1 and the 4th piece of DGJTNODE is null, it QUITs.",
+        "readability": {
+          "reasoning": "The comment is clear and specifies the conditions and actions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains specific conditions and consequences, helping to understand the code logic better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c5945b5a: If DGJTSR1=2 and the 4th piece of DGJTNODE is non-null, it QUITs.",
+        "readability": {
+          "reasoning": "The comment is clear and specifies the conditions and actions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains specific conditions and consequences, aiding in understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "16eb8d53: If VAUTY is defined and false, and the 2nd piece of DGJTNODE doesn't point to an existing VAUTY entry, it QUITs.",
+        "readability": {
+          "reasoning": "The comment is clear and provides detailed conditions and actions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains specific conditions and consequences, aiding in understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d1c90f6a: ;Quit if the admission/discharge date is outside the date range being processed.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context about a condition that an expert or average programmer needs to be aware of.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fe374bad: ;If processing providers and the provider is not part of the area undergoing transmission, quit.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a condition relevant to the program\u2019s logic, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "71900f58: ;If processing patients and the patient is not part of the area undergoing transmission, quit.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides important information about a specific condition in the code, useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5e27c8ac: ;If there is an encounter associated with the node, check if it is a 'SUMMARY' encounter type, and quit if so.",
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition related to 'SUMMARY' encounter types, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7925b223: Initialize division totals to 0 if division is not already in DGJTOT array",
+        "readability": {
+          "reasoning": "The comment is clear but lacks punctuation, making it slightly less readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a routine initialization, which is useful but somewhat trivial.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "445a7f97: Get full patient name and patient ID for current patient node",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with no noticeable issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information for understanding which data is being retrieved, which is helpful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "14e1f7d3: If sorting by physician, store patient ID in ^TMP(\"VAS\",$J,division,physician,patient,IFN sort date,record number)",
+        "readability": {
+          "reasoning": "The comment is mostly clear but has a slight complexity due to the inclusion of a data structure.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific sorting and storage mechanism, which is useful for understanding the code flow and data organization.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "51f45ebc: If sorting by patient, store patient ID in ^TMP(\"VAS\",$J,division,patient,IFN sort date,physician,record number)",
+        "readability": {
+          "reasoning": "The comment is clear but slightly complex due to the inclusion of a data structure.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides important information about the sorting mechanism and data storage, useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "37c41a38: ;Return service and specialty of service pair.",
+        "readability": {
+          "reasoning": "The comment is brief and clear without any issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it specifies what the function returns, aiding in understanding the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c6f684ec: ;Retrieve service information.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, but it documents a trivial functionality without much detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6a543a6e: ;Retrieve specialty of service information.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly states its purpose.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand what the code is doing.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6816afd1: ;Don't proceed further if QUIT flag is set.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides essential logic information that helps in understanding the flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "76819843: ;Store encounter data in temp global for later use.",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a key operation, which is helpful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4d179b34: ;Quit if no encounter data found.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides important control flow information, aiding understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "55d85e0d: ;Prompt for physician using VA FileMan lookup.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes a specific function call, useful for understanding code behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7f679d24: ;Quit if no physician selected.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies a conditional quit operation which is useful for understanding the flow of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "941c9c71: ;Prompt for patient using VA FileMan lookup.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes an operation which is useful for understanding the functionality of the code to an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "67f1e7bc: ;Quit if no patient selected.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies a conditional quit operation which is useful for understanding the flow of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a28d0375: ;Prompt for service using VA FileMan lookup. Quit if no service selected.",
+        "readability": {
+          "reasoning": "The comment is clear and provides sufficient detail.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains multiple operations which is useful for understanding the code's functionality and flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d5756d9a: ;Prompt for specialty using VA FileMan lookup.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes an operation which is useful for understanding the functionality of the code to an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4c17556f: ;Quit after prompting for specialty.",
+        "readability": {
+          "reasoning": "The comment is clear but the inclusion of a commit hash or identifier may confuse readers.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment succinctly describes the action taken by the code, but it may be considered somewhat trivial.",
+          "score": 2
+        }
+      }
+    ]
+  }
+}

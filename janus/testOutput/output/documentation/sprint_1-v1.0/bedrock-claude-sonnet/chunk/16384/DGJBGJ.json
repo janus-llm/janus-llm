@@ -1,0 +1,892 @@
+{
+  "input": "{\n  \"comments\": [\n    \"8aeb0048: ;\\n .;Initiate Standard Admission Deficiencies\\n .;for all new admissions.\\n .\",\n    \"b916cdc2: ;Define variables\",\n    \"fe2a2da0: ;Get date range\",\n    \"1caac3f9: ;Quit if no date range entered\",\n    \"c2f40502: ;Set job to run in background, initialize ZTSAVE\",\n    \"293c827b: ;Save all variables required for job\",\n    \"4aced4c7: ;Queue job and display task number\",\n    \"edd3d9f7: ;Exit routine\",\n    \"acff3282: ;\\n .;Initialize admissions for two date ranges:\\n .;1. Today minus 2 days\\n .;2. Today minus 1 day\\n .\",\n    \"748595b7: ;Set start date for today minus 2 days\",\n    \"4e7be9df: ;Initialize flags\",\n    \"308007f8: ;Process short stay admissions\",\n    \"6a421bec: ;Set start date for today minus 1 day\",\n    \"ea92706a: ;Process other admissions\",\n    \"4eb18476: ;Exit subroutine\",\n    \"47029c72: ;Set admission information into ^TMP global for short stay admissions\",\n    \"208340f9: ;Cycle through admissions in date range and process new admissions\",\n    \"6ca2b90f: ;Exit subroutine\",\n    \"fa2cf4bd: ;Check if admission and discharge dates are different, set flag if different\",\n    \"49e40399: ;Exit subroutine\",\n    \"e167db59: .;\\n .;Set the string to the first part of V concatenated with the required\\n .;number of spaces at the beginning, concatenated with the substring\\n .;of S that starts at position X and is L characters long,\\n .;concatenated with the substring of V starting at position X+L\",\n    \"057cb60f: ;This function returns a modified string\",\n    \"d001bcf6: ;Set the date/time of discharge one millisecond before the actual discharge time. Retrieve the ward information. Store the name of the division.\",\n    \"0fb1f797: ;If discharge type is known store the type in DGJTTYP\",\n    \"e462a3f6: ;Initialize X which will hold the formatted string\",\n    \"a897a95c: ;Insert patient name into X\",\n    \"6ef17802: ;Insert patient ID into X\",\n    \"271ce8d0: ;Insert admission date/time into X\",\n    \"d55f47c0: ;Insert transfer type into X\",\n    \"d439c363: ;Insert division name into X\",\n    \"eaa2543c: ;Store formatted string in ^TMP(\\\"VAS\\\",$J,division,admission date/time,ien of admission in ^DGPM,0)=$J\",\n    \"edc285c9: ;End of SETUP\",\n    \"c27a90cb: ;Extract transfer data node and discharge data node from ^DGPM.  If no discharge data node is present set flag.\",\n    \"f050276a: ;Initialize flags and date/time variables\",\n    \"ccd9c41a: ;Initialize loop control variables\",\n    \"613eef64: ;Build an array of defiencies to process excluding DISCHARGE SUMMARY\",\n    \"4e89892b: ;Build flag array if node in ^DGPM has no discharge data; call subroutines SETUP and DIV if admission has no discharge data; call UP and FL to build deficiencies if not current ones on admission\",\n    \"7e769687: ;Store date/time run started in file ^DG(43,1,401)\",\n    \"235a86ff: ;Output any messages that were collected during processing\",\n    \"cb55ee92: ;Output any error messages that were collected during processing\",\n    \"ca22b02d: ;Kill all variables.\",\n    \"6616ef2d: ;Kill all variables and nodes used.\",\n    \"58482463: ;Get the admitted date for the patient.\",\n    \"7dcefe72: ;Retrieve patient information from MAS.\",\n    \"1478817b: ;Check if patient is admitted to a valid ward. If not, log error.\",\n    \"f1a9fd47: ;Store the ward the patient is admitted to.\",\n    \"21e5960b: ;Get the ward name for the admitted ward.\",\n    \"ac1fd5da: ;Get the treating specialty for the admitted ward.\",\n    \"542d78aa: ;Get the treating specialty pointer for the admitted ward.\",\n    \"ee881213: ;If no treating specialty found, set to default of Medicine service.\",\n    \"da2f12dd: ;Set the event pointer to the current admission.\",\n    \"bb9f2311: ;Get the division pointer for the admitted ward.\",\n    \"8adea3da: ;Get the deficiency tracking parameters for the division.\",\n    \"81951009: ;Get the attending physician and co-signers for the admission.\",\n    \"487f57c0: ;Get the attending physician for display.\",\n    \"b42d57b2: ;Get the co-signer for display if deficiency tracking is turned on.\",\n    \"811d8a8d: ;Store the attending physician for later use.\",\n    \"40928b19: ;Exit if no errors found.\",\n    \"c9bf5a7b: ;Exit if errors were logged earlier.\",\n    \"8afcae01: ;Initialize loop for each deficiency code to be added.\",\n    \"9486879b: Save standard deficiencies in temporary global.\",\n    \"4bb00945: Build standard deficiency records for patients.\",\n    \"bbb3bc7f: Set up variable for adding new record.\",\n    \"ebe88820: Default status of 'Incomplete'.\",\n    \"8f82aa95: Set up variables for editing new record.\",\n    \"52187d77: Set field values for new standard deficiency record.\",\n    \"92848b0b: Update last review date for admission.\",\n    \"5e9d86fb: Quit subroutine.\",\n    \"5e8b62c5: Check if division requires standard deficiencies.\",\n    \"b5d1e7d4: Quit subroutine.\",\n    \"3795c45a: ; .\\n ;Get document data from DISCHARGE DEFICIENCIES file (#43.3).\\n ;If document type is 'A'ttending, get primary doc value.\\n ;If type is 'N'ursing, get null value.\\n ;Else get resident doc value.\",\n    \"7c485cd1: Get document type code value.\",\n    \"e775cbcb: Based on doc type, get corresponding doc value.\",\n    \"8e1b492f: Quit subroutine.\",\n    \"ecfe2231: ;\\n ;Prompt user to enter beginning and ending dates.\\n ;Validate date range and set DGJBG and DGJED variables.\\n ;\",\n    \"9b2fba93: Ensure begin date is not in the future.\",\n    \"8480a646: Ensure end date is a valid FileMan date.\",\n    \"cd9fc672: Set end date/time to 23:59 on end date.\",\n    \"20f06ed6: Ensure end date is not before begin date.\",\n    \"aae3a321: Quit subroutine.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 108.0313150882721
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "8aeb0048: ;\n .;Initiate Standard Admission Deficiencies\n .;for all new admissions.\n .",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, though the extra dots might be slightly distracting.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear description of the purpose of the code, which is useful to understand the functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b916cdc2: ;Define variables",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is quite general and only documents a trivial aspect of the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "fe2a2da0: ;Get date range",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly states what the code does, which is useful for understanding specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1caac3f9: ;Quit if no date range entered",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it describes the condition under which the code will terminate, which helps in understanding the control flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c2f40502: ;Set job to run in background, initialize ZTSAVE",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes two actions that are crucial for understanding the execution context, making it very useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "293c827b: ;Save all variables required for job",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the purpose of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4aced4c7: ;Queue job and display task number",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action and output of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "edd3d9f7: ;Exit routine",
+        "readability": {
+          "reasoning": "The comment is very brief but clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides minimal but necessary information.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "acff3282: ;\n .;Initialize admissions for two date ranges:\n .;1. Today minus 2 days\n .;2. Today minus 1 day\n .",
+        "readability": {
+          "reasoning": "The comment is detailed and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides extensive details about the initialization process.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "748595b7: ;Set start date for today minus 2 days",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains the purpose of the code segment.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4e7be9df: ;Initialize flags",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a useful description of initializing flags, which is helpful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "308007f8: ;Process short stay admissions",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It clearly explains a specific operation in the code, which is useful for understanding the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6a421bec: ;Set start date for today minus 1 day",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a clear explanation of setting a start date, which helps in understanding the code's functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ea92706a: ;Process other admissions",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear explanation of processing other admissions, helping to understand the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4eb18476: ;Exit subroutine",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the exit of a subroutine, which is a basic but useful piece of information.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "47029c72: ;Set admission information into ^TMP global for short stay admissions",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about what is being set, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "208340f9: ;Cycle through admissions in date range and process new admissions",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of a loop which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6ca2b90f: ;Exit subroutine",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial action that is usually self-explanatory.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "fa2cf4bd: ;Check if admission and discharge dates are different, set flag if different",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about a specific condition being checked.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "49e40399: ;Exit subroutine",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial action that is usually self-explanatory.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e167db59: .;\n .;Set the string to the first part of V concatenated with the required\n .;number of spaces at the beginning, concatenated with the substring\n .;of S that starts at position X and is L characters long,\n .;concatenated with the substring of V starting at position X+L",
+        "readability": {
+          "reasoning": "The comment is well-written with clear and complete sentences.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a complex string manipulation in a detailed manner which is helpful for understanding the functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "057cb60f: ;This function returns a modified string",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, but it only provides a high-level overview without much detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d001bcf6: ;Set the date/time of discharge one millisecond before the actual discharge time. Retrieve the ward information. Store the name of the division.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed steps of what the code is doing, which is useful for understanding the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0fb1f797: ;If discharge type is known store the type in DGJTTYP",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a specific condition and action, which is helpful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e462a3f6: ;Initialize X which will hold the formatted string",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial initialization, which is not very useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a897a95c: ;Insert patient name into X",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear information about the action being performed, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6ef17802: ;Insert patient ID into X",
+        "readability": {
+          "reasoning": "The comment is concise and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly indicates the functionality of inserting the patient ID, aiding code comprehension.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "271ce8d0: ;Insert admission date/time into X",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps in understanding the specific action of inserting admission date/time.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d55f47c0: ;Insert transfer type into X",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides clear information about the insertion of the transfer type, aiding understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d439c363: ;Insert division name into X",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps clarify the action of inserting the division name.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "eaa2543c: ;Store formatted string in ^TMP(\"VAS\",$J,division,admission date/time,ien of admission in ^DGPM,0)=$J",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, though the use of technical jargon might be difficult for beginners.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains where a formatted string is stored, which is useful for understanding the code's data handling for experienced programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "edc285c9: ;End of SETUP",
+        "readability": {
+          "reasoning": "The comment is brief and clear, though it could be more descriptive.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates the end of a setup section but lacks detail, making it less useful for understanding the code's functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c27a90cb: ;Extract transfer data node and discharge data node from ^DGPM.  If no discharge data node is present set flag.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, explaining multiple actions in a straightforward manner.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about extracting data nodes and setting a flag, which aids in understanding the code's logic and flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f050276a: ;Initialize flags and date/time variables",
+        "readability": {
+          "reasoning": "The comment is clear and concise, describing the initialization process effectively.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the initialization of important variables, aiding in understanding the setup phase of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ccd9c41a: ;Initialize loop control variables",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, providing a clear description of the action.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the initialization of loop control variables, which is important for understanding the loop logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "613eef64: ;Build an array of defiencies to process excluding DISCHARGE SUMMARY",
+        "readability": {
+          "reasoning": "The comment is clear but contains a spelling error ('defiencies' instead of 'deficiencies').",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the array being built.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4e89892b: ;Build flag array if node in ^DGPM has no discharge data; call subroutines SETUP and DIV if admission has no discharge data; call UP and FL to build deficiencies if not current ones on admission",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, but it is quite long and could be broken into shorter sentences.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a step-by-step explanation of the process, which is very useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7e769687: ;Store date/time run started in file ^DG(43,1,401)",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies the action and the exact location, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "235a86ff: ;Output any messages that were collected during processing",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a straightforward action, which is useful but somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "cb55ee92: ;Output any error messages that were collected during processing",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a straightforward action, which is useful but somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ca22b02d: ;Kill all variables.",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes an action that is clear but may be somewhat trivial for an experienced programmer.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6616ef2d: ;Kill all variables and nodes used.",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about both variables and nodes, helping an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "58482463: ;Get the admitted date for the patient.",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific functionality, which could be useful for understanding the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7dcefe72: ;Retrieve patient information from MAS.",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the source of patient data, aiding both average and expert programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1478817b: ;Check if patient is admitted to a valid ward. If not, log error.",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment outlines a specific validation and error logging process, which is useful for understanding the code's logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f1a9fd47: ;Store the ward the patient is admitted to.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a specific functionality that helps understand the code context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "21e5960b: ;Get the ward name for the admitted ward.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about obtaining the ward name, which helps in understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ac1fd5da: ;Get the treating specialty for the admitted ward.",
+        "readability": {
+          "reasoning": "The comment is clear and uses correct grammar.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a non-trivial functionality that is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "542d78aa: ;Get the treating specialty pointer for the admitted ward.",
+        "readability": {
+          "reasoning": "The comment is well-written and comprehensible.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides specific information that aids in understanding the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ee881213: ;If no treating specialty found, set to default of Medicine service.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents an important conditional functionality, which is useful for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "da2f12dd: ;Set the event pointer to the current admission.",
+        "readability": {
+          "reasoning": "The comment is well-written with proper grammar and punctuation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand what the code is doing.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bb9f2311: ;Get the division pointer for the admitted ward.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the code related to the division pointer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8adea3da: ;Get the deficiency tracking parameters for the division.",
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding what parameters are being fetched.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "81951009: ;Get the attending physician and co-signers for the admission.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the purpose of fetching specific data related to the admission.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "487f57c0: ;Get the attending physician for display.",
+        "readability": {
+          "reasoning": "The comment is easy to read and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the fetched data.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b42d57b2: ;Get the co-signer for display if deficiency tracking is turned on.",
+        "readability": {
+          "reasoning": "The comment is clear, concise, and free of any grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains the condition under which the co-signer is displayed, which is useful for understanding the logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "811d8a8d: ;Store the attending physician for later use.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates what the code is doing, but does not provide deeper insight into why this is important.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "40928b19: ;Exit if no errors found.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a basic condition but does not add much context beyond what the code likely already makes clear.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c9bf5a7b: ;Exit if errors were logged earlier.",
+        "readability": {
+          "reasoning": "The comment is clear and free of any grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a condition that is useful to understand the code's control flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8afcae01: ;Initialize loop for each deficiency code to be added.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to comprehend.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context for understanding the purpose of the loop.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9486879b: Save standard deficiencies in temporary global.",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information that helps understand the purpose of saving standard deficiencies.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4bb00945: Build standard deficiency records for patients.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the specific action of building deficiency records for patients, which is valuable.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bbb3bc7f: Set up variable for adding new record.",
+        "readability": {
+          "reasoning": "The comment is clear and has no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the variable setup, though it is somewhat trivial.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ebe88820: Default status of 'Incomplete'.",
+        "readability": {
+          "reasoning": "The comment is straightforward and free of errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the default status setting clearly, which is useful but somewhat basic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8f82aa95: Set up variables for editing new record.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the variable setup in the editing context, though it is fairly basic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "52187d77: Set field values for new standard deficiency record.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful and helps understand the purpose of the code segment.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "92848b0b: Update last review date for admission.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is functional and explains the purpose of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5e9d86fb: Quit subroutine.",
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "5e8b62c5: Check if division requires standard deficiencies.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the conditional check.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b5d1e7d4: Quit subroutine.",
+        "readability": {
+          "reasoning": "The comment is brief and readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3795c45a: ; .\n ;Get document data from DISCHARGE DEFICIENCIES file (#43.3).\n ;If document type is 'A'ttending, get primary doc value.\n ;If type is 'N'ursing, get null value.\n ;Else get resident doc value.",
+        "readability": {
+          "reasoning": "The comment is mostly clear, but it could be formatted better for readability and the first line seems unnecessary.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information on how to handle different document types, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7c485cd1: Get document type code value.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific step in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e775cbcb: Based on doc type, get corresponding doc value.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a crucial step, making it useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8e1b492f: Quit subroutine.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the exit point of the subroutine.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ecfe2231: ;\n ;Prompt user to enter beginning and ending dates.\n ;Validate date range and set DGJBG and DGJED variables.\n ;",
+        "readability": {
+          "reasoning": "The comment is mostly clear but could be formatted better for readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about user input validation and variable setting.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9b2fba93: Ensure begin date is not in the future.",
+        "readability": {
+          "reasoning": "The comment is concise and uses clear language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear and important validation check that would be useful to any programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8480a646: Ensure end date is a valid FileMan date.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific validation check which is useful for understanding the code's purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cd9fc672: Set end date/time to 23:59 on end date.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action taken by the code, which is useful for understanding its functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "20f06ed6: Ensure end date is not before begin date.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides an essential validation check that helps understand the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "aae3a321: Quit subroutine.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment informs about the termination of a subroutine, which is useful but somewhat trivial.",
+          "score": 2
+        }
+      }
+    ]
+  }
+}

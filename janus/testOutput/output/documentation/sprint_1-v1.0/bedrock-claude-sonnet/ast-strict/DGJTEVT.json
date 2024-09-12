@@ -1,0 +1,727 @@
+{
+  "input": "{\n  \"comments\": [\n    \"41132e2c:  ;\\n ;$$$ROUTINE: Builds the ^ACRO global for building and displaying a large list of\\n ;events to key health care providers at a facility.\\n ;\\n ;Functional Description:\\n ;1. Input the location and date range for events.\\n ;2. Processes all providers with scheduled events within that date range.\\n ;3. Populates the ^ACRO global with event details.\\n ;4. Then an option file prints or displays the list from ^ACRO.\\n ;See also: DGPSOP2\",\n    \"e2bb87c1: Set up necessary variables for processing.\",\n    \"bd8b71d8: Flag to indicate that processing is occurring.\",\n    \"1caca2f8: Loop through all tasks for the current process, retrieving task details and calling the START routine for each.\",\n    \"71dc9c6a: Clean up variables and quit.\",\n    \"94ad8e9f: Exit point.\",\n    \"10c7ae46: ;\\n ;Main entry point of routine\\n ;NOTE: This code has hardcoded references to other routines,\\n ;files, and variables that are not defined here.\",\n    \"664b8d5a: ;Determine treating specialty code for patient\",\n    \"b505d0a5: ;Determine patient movement type\",\n    \"4a1527f9: ;If PT movement type is admission and no admission data exists\",\n    \"e0e163ae: ;Display message if not in quiet mode\",\n    \"4b1dc4d2: ;Reset flag to indicate record has been updated\",\n    \"37371ed1: ;Call routine to update/initialize file entry\",\n    \"3f772026: ;Call routine to get ward data\",\n    \"5803c285: ;If ward data retrieved, get ward IEN and associated division\",\n    \"7f38ea2e: ;If ward has no treating specialty defined, quit\",\n    \"c7987c58: Display a message indicating that incomplete records are being updated, and set DGONE to 0 (false) unless running quietly (DGQUIET is true).\",\n    \"a3ee0e7c: If the temporary global ^UTILITY(\\\"DGPM\\\",$J,6) exists, get the first subscript value from its 0 node and store it in DGJTSIFN.\",\n    \"1f018286: Call the DIS routine and quit.\",\n    \"64d9cce9: ;Delete all entries under 'ADM' node for the specified Patient Movement record.\",\n    \"d547cc0e: ;Kill variables used in the deletion process.\",\n    \"5437dc15:  ;Routine to determine processing of transfer admission;\\n ;update, new, delete or edit admission data.\",\n    \"6f3fd896: ;Initialize variable DR\",\n    \"abe5ac3b: ;If no admission movement data, quit\",\n    \"11ba6567: ;Find admission movement ifn\",\n    \"d199a159: ;Set admission movement ifn if found\",\n    \"a56de695: ;If transfer movement and current admission doesn't match previous admission, edit admission data\",\n    \"d34d01a5: ;If new admission or admission edit, create new admission or edit existing admission\",\n    \"06b57fda: ;If new admission and previous admission exists, delete previous admission\",\n    \"28e7c93d: ;If new admission and current admission doesn't match previous admission, edit admission data\",\n    \"d89d9fec: ;If admission edit and current admission doesn't match previous admission, edit admission data using previous admission's patient ifn\",\n    \"6ff41b08: ;If admission edit and no current admission but previous admission exists, create new admission using previous admission data\",\n    \"dc0b68d2: ;If admission edit, quit\",\n    \"3950b482: ;If new admission and admission movement ifn found, set current admission ifn\",\n    \"3bf5d4da: ;If admission movement ifn found and current admission doesn't match previous admission, edit admission data\",\n    \"72ee6368: ;If admission movement ifn found and current admission matches previous admission but patient ifn doesn't match, edit admission data\",\n    \"7c9454be: ;Perform a NEW operation to initialize variables.\",\n    \"b96e53ef: ;\\n ;Initialize variables needed to store appointment data.\\n ;\",\n    \"bbcaa8b5: ;Get the appointment data for this appointment.\",\n    \"003936cf: ;Get the institution's division transfer disposition setting.\",\n    \"c8b796f1: ;Get the ward's disposition setting.\",\n    \"80a6c453: ;Get the service to which this ward belongs.\",\n    \"4b7c0a70: ;If the service is not valid get the default service.\",\n    \"8c84f29b: ;Get the documentation prompt text.\",\n    \"062e8940: ;Get the institution's documentation prompt setting.\",\n    \"d372d185: ;Quit if this is a transfer disposition.\",\n    \"8823ff76: ;Quit if an admission/discharge update is happening concurrently.\",\n    \"793f8fdb: ;Create/open a record in the PATIENT MOVEMENT file.\",\n    \"64db8615: ;Get the internal entry number for the 'INCOMPLETE' status.\",\n    \"e02fe899: ;If a new record was created, get the internal entry number.\",\n    \"c3b947cc: ;Update the new/existing record with appointment data.\",\n    \"0def0681: ;File the updated record.\",\n    \"73934e3f: ;Perform additional processing for discharge.\",\n    \"c1d07288: Set the VARIABLE multiple .05 field to the Job Tracking Work Days, .06 to the Division, and for the other fields, keep the existing values or force blanks for the record being filed or reedited.\",\n    \"b340475c: Set the remaining VARIABLE multiple fields: .07 to the Amount, .08 to the Service Connected field, .09 to the 9th piece of the DGJT array, and .1 to the 10th piece of the DGJT array or '@' if it's null. Invoke FileMan's UPDATE^DIE to complete the filing or reediting of the record.\",\n    \"a1061950: Execute the DISQ routine, which may contain additional processing related to the filing or reediting of the record.\",\n    \"b54f525f: Exit from the current execution context or routine.\",\n    \"84f43d29:  ;\\n ;Extract a piece of data based on the value of DGJY.\\n ;\",\n    \"a02f53ea: ;Extract the DGJY'th piece from DGJTP.\",\n    \"f839ffb4: ;If X is 'A', extract the 19th piece from DGJT. If 'N', set X to null. Otherwise, extract the 8th piece.\",\n    \"ff45c4fd: ;Return the value of X.\",\n    \"c9455d00: ;Update an existing entry in the PATIENT EVENTS file (#393) with DGJI from the input variable I.\",\n    \"c11b0ecf: If the parent entry is blank, use the current time as the transmission time.\",\n    \"add86427: If the parent entry is populated, use the transmission time of the referenced entry.\",\n    \"a89280cb: Update the transmission time field of the current entry with the determined transmission time.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 77.34823989868164
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "41132e2c:  ;\n ;$$$ROUTINE: Builds the ^ACRO global for building and displaying a large list of\n ;events to key health care providers at a facility.\n ;\n ;Functional Description:\n ;1. Input the location and date range for events.\n ;2. Processes all providers with scheduled events within that date range.\n ;3. Populates the ^ACRO global with event details.\n ;4. Then an option file prints or displays the list from ^ACRO.\n ;See also: DGPSOP2",
+        "readability": {
+          "reasoning": "The comment is well-structured, with clear formatting and bullet points.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a comprehensive overview of the routine, useful for both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e2bb87c1: Set up necessary variables for processing.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains what the code does at a high level, but it might be considered trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "bd8b71d8: Flag to indicate that processing is occurring.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a specific variable's purpose, which is more useful than trivial comments.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1caca2f8: Loop through all tasks for the current process, retrieving task details and calling the START routine for each.",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear explanation of a loop's function, useful for understanding the code's logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "71dc9c6a: Clean up variables and quit.",
+        "readability": {
+          "reasoning": "The comment is simple and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes the final step of the routine, which is useful but somewhat basic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "94ad8e9f: Exit point.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It indicates an exit point, which is useful but not highly informative.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "10c7ae46: ;\n ;Main entry point of routine\n ;NOTE: This code has hardcoded references to other routines,\n ;files, and variables that are not defined here.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read, but the formatting could be slightly better.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides critical context about the main entry point and dependencies, which is very useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "664b8d5a: ;Determine treating specialty code for patient",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the purpose of the code in a useful way but does not provide much detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b505d0a5: ;Determine patient movement type",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear indication of what the code is doing, which is useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4a1527f9: ;If PT movement type is admission and no admission data exists",
+        "readability": {
+          "reasoning": "The comment is clear but could be more concise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It describes a conditional scenario, which is useful but not highly detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e0e163ae: ;Display message if not in quiet mode",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand when a message is displayed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4b1dc4d2: ;Reset flag to indicate record has been updated",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the purpose of the flag reset.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "37371ed1: ;Call routine to update/initialize file entry",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the purpose of the routine call.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3f772026: ;Call routine to get ward data",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the purpose of the routine call.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5803c285: ;If ward data retrieved, get ward IEN and associated division",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides specific details that help an average programmer understand the logic flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7f38ea2e: ;If ward has no treating specialty defined, quit",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment succinctly explains a conditional check, which is helpful to understand the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c7987c58: Display a message indicating that incomplete records are being updated, and set DGONE to 0 (false) unless running quietly (DGQUIET is true).",
+        "readability": {
+          "reasoning": "The comment is well-written, with clear instructions and explanations.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific conditions and actions taken within the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a3ee0e7c: If the temporary global ^UTILITY(\"DGPM\",$J,6) exists, get the first subscript value from its 0 node and store it in DGJTSIFN.",
+        "readability": {
+          "reasoning": "The comment is clear and detailed, explaining the condition and subsequent action.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding the purpose of a non-trivial operation in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1f018286: Call the DIS routine and quit.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment states what the code does, but does not provide additional context or rationale.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "64d9cce9: ;Delete all entries under 'ADM' node for the specified Patient Movement record.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the action being taken, making it easier to understand the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d547cc0e: ;Kill variables used in the deletion process.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains why variables are being deleted, which helps in understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5437dc15:  ;Routine to determine processing of transfer admission;\n ;update, new, delete or edit admission data.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but slightly verbose.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides a comprehensive overview of what the routine handles, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6f3fd896: ;Initialize variable DR",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial action without much context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "abe5ac3b: ;If no admission movement data, quit",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It clearly states a condition for quitting, which is useful for understanding the control flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "11ba6567: ;Find admission movement ifn",
+        "readability": {
+          "reasoning": "The comment is clear but uses an abbreviation ('ifn') that may not be immediately clear.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It explains the purpose of the code but could be more detailed for better understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d199a159: ;Set admission movement ifn if found",
+        "readability": {
+          "reasoning": "The comment is mostly clear but contains a typo 'ifn' which should probably be 'if'.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides useful context regarding the function's purpose but lacks detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a56de695: ;If transfer movement and current admission doesn't match previous admission, edit admission data",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear condition and action, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d34d01a5: ;If new admission or admission edit, create new admission or edit existing admission",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explicitly states the conditions and actions, aiding in comprehending the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "06b57fda: ;If new admission and previous admission exists, delete previous admission",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear condition and action, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "28e7c93d: ;If new admission and current admission doesn't match previous admission, edit admission data",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear condition and action, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d89d9fec: ;If admission edit and current admission doesn't match previous admission, edit admission data using previous admission's patient ifn",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read, though slightly longer than necessary.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a specific condition and action, useful for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6ff41b08: ;If admission edit and no current admission but previous admission exists, create new admission using previous admission data",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific scenario in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "dc0b68d2: ;If admission edit, quit",
+        "readability": {
+          "reasoning": "The comment is very short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but a bit too brief to provide full context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3950b482: ;If new admission and admission movement ifn found, set current admission ifn",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information on the specific condition and action taken.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3bf5d4da: ;If admission movement ifn found and current admission doesn't match previous admission, edit admission data",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the logic dealing with admission movements.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "72ee6368: ;If admission movement ifn found and current admission matches previous admission but patient ifn doesn't match, edit admission data",
+        "readability": {
+          "reasoning": "The comment is mostly clear but has a few minor issues in phrasing.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action, which could help an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7c9454be: ;Perform a NEW operation to initialize variables.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the operation.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b96e53ef: ;\n ;Initialize variables needed to store appointment data.\n ;",
+        "readability": {
+          "reasoning": "The comment is clear and well-formatted, though slightly redundant with the extra semicolons.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the initialization.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bbcaa8b5: ;Get the appointment data for this appointment.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality but is still somewhat useful for understanding the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "003936cf: ;Get the institution's division transfer disposition setting.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the specific setting being retrieved, which could help both average and expert programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c8b796f1: ;Get the ward's disposition setting.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains what the code is doing, which helps an average programmer understand it better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "80a6c453: ;Get the service to which this ward belongs.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful context about the code's functionality for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4b7c0a70: ;If the service is not valid get the default service.",
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional operation, which is useful for understanding the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8c84f29b: ;Get the documentation prompt text.",
+        "readability": {
+          "reasoning": "The comment is short and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes a straightforward functionality, which is somewhat useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "062e8940: ;Get the institution's documentation prompt setting.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about the code's purpose, helping an average programmer understand it better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d372d185: ;Quit if this is a transfer disposition.",
+        "readability": {
+          "reasoning": "The comment is concise and uses clear language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides context that helps both expert and average programmers understand the condition.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8823ff76: ;Quit if an admission/discharge update is happening concurrently.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the specific condition under which the quit operation should occur.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "793f8fdb: ;Create/open a record in the PATIENT MOVEMENT file.",
+        "readability": {
+          "reasoning": "The comment is straightforward and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an important action in the code, which is useful for understanding the operation.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "64db8615: ;Get the internal entry number for the 'INCOMPLETE' status.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about a specific operation, helpful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e02fe899: ;If a new record was created, get the internal entry number.",
+        "readability": {
+          "reasoning": "The comment is easy to read and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives useful context for a specific operation, aiding comprehension.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c3b947cc: ;Update the new/existing record with appointment data.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains what the code does, which is useful for understanding the function at a glance.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0def0681: ;File the updated record.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment states a basic action that is somewhat obvious, providing limited additional insight.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "73934e3f: ;Perform additional processing for discharge.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to comprehend.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides helpful context about the purpose of the code, which could be useful to an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c1d07288: Set the VARIABLE multiple .05 field to the Job Tracking Work Days, .06 to the Division, and for the other fields, keep the existing values or force blanks for the record being filed or reedited.",
+        "readability": {
+          "reasoning": "The comment is detailed but might be a bit dense for quick reading.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding specific field assignments, especially for someone familiar with the code or database schema.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b340475c: Set the remaining VARIABLE multiple fields: .07 to the Amount, .08 to the Service Connected field, .09 to the 9th piece of the DGJT array, and .1 to the 10th piece of the DGJT array or '@' if it's null. Invoke FileMan's UPDATE^DIE to complete the filing or reediting of the record.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, though somewhat long.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a lot of useful information about how specific fields are set and what function is invoked, which is valuable for an expert.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a1061950: Execute the DISQ routine, which may contain additional processing related to the filing or reediting of the record.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides insight into the purpose of the DISQ routine, which is valuable for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b54f525f: Exit from the current execution context or routine.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a fundamental operation, which is useful for understanding the control flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "84f43d29:  ;\n ;Extract a piece of data based on the value of DGJY.\n ;",
+        "readability": {
+          "reasoning": "The use of semicolons is somewhat distracting, but the comment is still readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a basic explanation, but it doesn't offer in-depth information about the data extraction.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a02f53ea: ;Extract the DGJY'th piece from DGJTP.",
+        "readability": {
+          "reasoning": "The comment is clear but uses an unusual notation with the semicolon.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific operation, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f839ffb4: ;If X is 'A', extract the 19th piece from DGJT. If 'N', set X to null. Otherwise, extract the 8th piece.",
+        "readability": {
+          "reasoning": "The comment is clear and provides detailed conditions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it explains conditional logic in detail.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ff45c4fd: ;Return the value of X.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c9455d00: ;Update an existing entry in the PATIENT EVENTS file (#393) with DGJI from the input variable I.",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand a specific operation on a file.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c11b0ecf: If the parent entry is blank, use the current time as the transmission time.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the logic of handling a specific case, useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "add86427: If the parent entry is populated, use the transmission time of the referenced entry.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the logic of handling a specific case, useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a89280cb: Update the transmission time field of the current entry with the determined transmission time.",
+        "readability": {
+          "reasoning": "The comment is clear and precise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a specific action clearly, useful for average programmers.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

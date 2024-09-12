@@ -1,0 +1,606 @@
+{
+  "input": "{\n  \"comments\": [\n    \"781c3dec: ;\\n .;This is the driver for editing a subfield.\\n .;It calls other entry points such as DE and BEGIN.\\n .;\",\n    \"159bedca: ;Call DE to initialize variables and BEGIN to start editing\",\n    \"59434c43: ;Initialize variables for editing a subfield\",\n    \"b7e2ab0a: ;If node 0 exists, get default value from 10th piece\",\n    \"91919228: ;Clean up variables\",\n    \"fbffe670: ;Write data label\",\n    \"7c29fd1b: ;Terminate writing data label\",\n    \"cbe7919a: ;Write data value and word-wrap if necessary\",\n    \"7d6fbeb2: ;If data value is longer than 19 characters and not a word-processing field, call word-wrapping routine\",\n    \"5bdaec7c: ;If no editor and field is inactive identifiable, display '(No Editing)' message\",\n    \"1ca3b2f0: ;Read user input, set timeout\",\n    \"35bf903a: ;Terminate after reading input\",\n    \"08bd12a9: ;Increment data qualifier and remove previous response\",\n    \"9946587b: ;Branch to data qualifier code\",\n    \"0d01a48a: ;If data qualifier has an entry point, go to PR, otherwise get user input\",\n    \"50895619: ;If null response and reader doesn't allow nulls, loop or quit\",\n    \"daa3181c: ;If user enters '?', go to QS for help, if '^' go to DIE17 for exit or abort\",\n    \"51c48cc8: ;If user enters '@', call Fileman's data transcription routine\",\n    \"e02abbba: ;If user enters space and field has DISV node, populate with stored data value\",\n    \"8cd49484: ;\\n .;Route branching based on data validation:\\n .;  - If DV is true, go to M^DIE17 for validity checking\\n .;  - If DV contains 'V', go to ^DIE3 for MUMPS code validation\\n .;  - If DV doesn't contain 'S', go to P for post-initializaiton\\n .;If a computed expression exists at ^DD(DP,DIFLD,12.1), execute it\\n .;Attempt to resolve any 'U' codrestens in DIC(\\\"S\\\") by executing DIC(\\\"S\\\")\\n .;If no 'U's remain, display \\\" '_value and go to V\",\n    \"cc920a0e: ;If DIC(\\\"S\\\") is defined, execute it. If DG is true, quit.\",\n    \"4a143940: ;If DB(DQ) is undefined, write the portion of YS starting from DG. Set X to the part of YS before the colon.\",\n    \"2d1482a3: ;If DV contains \\\"P\\\", set DIC to U_DU, set DIC(0) based on DB(DQ) and DV containing \\\"'\\\", and if DV contains \\\"P\\\" with a number, set DLAYGO to that number. If DV does not contain \\\"*\\\", execute ^DIC, set X to Y, and set DIC to DIE. If X is less than 0, go to X.\",\n    \"b1cf57a0: ;If DV does not contain \\\"N\\\", go to V. Otherwise, execute D. If the length of the decimal portion of X is greater than 24, kill X and go to Z.\",\n    \"5f2a69d2: ;If the second comma-piece of DV is non-zero, X contains a decimal point, and the fifth comma-piece of DQ(DQ) does not start with \\\"$\\\", then strip leading zeroes from X, remove trailing zeroes after decimal point if present, and if X has no decimal portion, convert it to a number.\",\n    \"970d3e41: Set and export variable for screen value.\",\n    \"4f8eaffa: Save edited value and audit trail. Quit if up-arrow.\",\n    \"57425930: Re-display field attributes if data is in error.\",\n    \"e207765c: Set 'Bad' error code.\",\n    \"09f073d4: Branch to input transform and quit.\",\n    \"8669272d: Build execution vector and piece definition.\",\n    \"07728907: If not a word-processing field, branch to computed field logic. If user enters null and field is required ask again, else quit.\",\n    \"796f790f: Set variables for word-processing fields.\",\n    \"57bae196: If pointer to file with .01 field, get .01 from pointed-to file. If successful, re-display field attributes.\",\n    \"f4ea3da3: For variable pointers, retrieve .01 from pointed-to file. If successful, re-display field attributes.\",\n    \"00148e4c: Execute cross-referencing logic for set of codes and mnemonic values.\",\n    \"1fff5af9: Validate data and quit if invalid or operating in one of the two special cases.\",\n    \"80424bae: If the input value is not a pointer or IEN, go to RD (Read).\",\n    \"a963509c: Call helper code, then if X is defined go to RD, else go to PR (Prompt).\",\n    \"228c8d57: Quit.\",\n    \"35e380ff: Set initial values for the MUMPS variables used in data entry.\",\n    \"3df5161d: Set field properties for the first field.\",\n    \"22ec9360: Set the prefix for the pointer value lookup.\",\n    \"e97fd7a5: Go to RE (Read/Edit).\",\n    \"47a96b3e: No code for this label.\",\n    \"e21ec4b8:  ;\\n ;Code executed after the user enters data for the second field.\\n ;DQ is set to 3 to indicate this is the third field.\",\n    \"d6d88d16: If DG array is populated, call a FileMan utility, store user input in Y, set DQ to 3 to indicate this is the third field, call a routine to process the input, quit if Y is null or equal to Up-arrow, otherwise store Y in X, set DIC(0) to indicate a lookup is needed, set DW to the third field number, and go to a FileMan utility routine.\",\n    \"46b277ca: If the movement number does not contain a '3', then set Y to null.\",\n    \"d4ea7ffc: Quit the current execution.\",\n    \"aec65f54:  ;\\n ;Set the value of DQ to 5.\\n ;\",\n    \"cda085e3: If the data global variable DG exists and is greater than 9, then execute the F^DIE17 routine, set the value of Y to the 'undefined' character, set the value of DQ to 5, execute the X5 routine, go to label A if Y is undefined or if Y is equal to the 'undefined' character, set the value of X to Y, set the DIC(0) variable to 'F', set the value of DW to DQ, and then execute the OUT^DIE17 routine.\",\n    \"8817505c: If the movement number does not contain a '3', then set Y to null.\",\n    \"ed5a399e: Quit the current execution.\",\n    \"e928ae99: If the data global variable DG exists and is greater than 9, then execute the F^DIE17 routine, and then go to the ^DGJXE9 label.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 75.54947018623352
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "781c3dec: ;\n .;This is the driver for editing a subfield.\n .;It calls other entry points such as DE and BEGIN.\n .;",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, despite the unusual line breaks.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a general overview of the function, which is useful but not highly detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "159bedca: ;Call DE to initialize variables and BEGIN to start editing",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of calling DE and BEGIN, which is helpful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "59434c43: ;Initialize variables for editing a subfield",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a basic action that is somewhat useful but not very detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b7e2ab0a: ;If node 0 exists, get default value from 10th piece",
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed about what 'node 0' and '10th piece' refer to.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional operation, which is useful for understanding the logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "91919228: ;Clean up variables",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial but necessary action, which is somewhat useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "fbffe670: ;Write data label",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7c29fd1b: ;Terminate writing data label",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cbe7919a: ;Write data value and word-wrap if necessary",
+        "readability": {
+          "reasoning": "The comment is clear and provides a good explanation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7d6fbeb2: ;If data value is longer than 19 characters and not a word-processing field, call word-wrapping routine",
+        "readability": {
+          "reasoning": "The comment is clear but a bit lengthy which might make it slightly harder to read.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific conditions for calling the word-wrapping routine.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5bdaec7c: ;If no editor and field is inactive identifiable, display '(No Editing)' message",
+        "readability": {
+          "reasoning": "The comment is clear but has minor grammatical issues.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1ca3b2f0: ;Read user input, set timeout",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps both average and expert programmers understand the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "35bf903a: ;Terminate after reading input",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the termination condition, which is useful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "08bd12a9: ;Increment data qualifier and remove previous response",
+        "readability": {
+          "reasoning": "The comment is clear and informative.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes specific actions, useful for understanding code changes.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9946587b: ;Branch to data qualifier code",
+        "readability": {
+          "reasoning": "The comment is clear and simple.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment informs about a branch operation, helpful for understanding code structure.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0d01a48a: ;If data qualifier has an entry point, go to PR, otherwise get user input",
+        "readability": {
+          "reasoning": "The comment is clear but slightly complex.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional operation, which is important for understanding code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "50895619: ;If null response and reader doesn't allow nulls, loop or quit",
+        "readability": {
+          "reasoning": "The comment is concise and easily readable, with proper punctuation and clear language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear guidance on handling null responses, which is valuable for understanding the code's control flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "daa3181c: ;If user enters '?', go to QS for help, if '^' go to DIE17 for exit or abort",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read, with straightforward language and punctuation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains specific user input handling, which is useful for understanding the program's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "51c48cc8: ;If user enters '@', call Fileman's data transcription routine",
+        "readability": {
+          "reasoning": "The comment is concise and easily readable with clear language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about user input handling, which is useful for understanding the associated functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e02abbba: ;If user enters space and field has DISV node, populate with stored data value",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific behavior related to user input and data population, which is useful for understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8cd49484: ;\n .;Route branching based on data validation:\n .;  - If DV is true, go to M^DIE17 for validity checking\n .;  - If DV contains 'V', go to ^DIE3 for MUMPS code validation\n .;  - If DV doesn't contain 'S', go to P for post-initializaiton\n .;If a computed expression exists at ^DD(DP,DIFLD,12.1), execute it\n .;Attempt to resolve any 'U' codrestens in DIC(\"S\") by executing DIC(\"S\")\n .;If no 'U's remain, display \" '_value and go to V",
+        "readability": {
+          "reasoning": "The comment is somewhat fragmented and has a typo ('codrestens' instead of 'conditions'), but it is generally readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly detailed, providing valuable information about the various branches and conditions, which helps in understanding complex logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cc920a0e: ;If DIC(\"S\") is defined, execute it. If DG is true, quit.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the condition and the action taken.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4a143940: ;If DB(DQ) is undefined, write the portion of YS starting from DG. Set X to the part of YS before the colon.",
+        "readability": {
+          "reasoning": "The comment is clear and follows a logical flow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information for an average programmer to understand the operations.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2d1482a3: ;If DV contains \"P\", set DIC to U_DU, set DIC(0) based on DB(DQ) and DV containing \"'\", and if DV contains \"P\" with a number, set DLAYGO to that number. If DV does not contain \"*\", execute ^DIC, set X to Y, and set DIC to DIE. If X is less than 0, go to X.",
+        "readability": {
+          "reasoning": "The comment is verbose and somewhat complex, but still understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for an average programmer as it explains a series of operations clearly.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b1cf57a0: ;If DV does not contain \"N\", go to V. Otherwise, execute D. If the length of the decimal portion of X is greater than 24, kill X and go to Z.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding specific conditions and actions, helpful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5f2a69d2: ;If the second comma-piece of DV is non-zero, X contains a decimal point, and the fifth comma-piece of DQ(DQ) does not start with \"$\", then strip leading zeroes from X, remove trailing zeroes after decimal point if present, and if X has no decimal portion, convert it to a number.",
+        "readability": {
+          "reasoning": "The comment is detailed but clear despite its length.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the specific conditions and operations, helpful for an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "970d3e41: Set and export variable for screen value.",
+        "readability": {
+          "reasoning": "The comment is concise and uses simple language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the action performed, which is helpful to understand the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4f8eaffa: Save edited value and audit trail. Quit if up-arrow.",
+        "readability": {
+          "reasoning": "The comment is clear but slightly fragmented, making it slightly less fluid.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It describes multiple actions, which are useful for understanding the code's purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "57425930: Re-display field attributes if data is in error.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific condition and action, which helps in understanding error handling.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e207765c: Set 'Bad' error code.",
+        "readability": {
+          "reasoning": "The comment is short and easily understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides information on error handling, which is useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "09f073d4: Branch to input transform and quit.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the flow control, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8669272d: Build execution vector and piece definition.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat vague and does not provide much detail, but it indicates a general purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "07728907: If not a word-processing field, branch to computed field logic. If user enters null and field is required ask again, else quit.",
+        "readability": {
+          "reasoning": "The comment is clear, though it is a bit long.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific logic steps that would help an average programmer understand the flow of the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "796f790f: Set variables for word-processing fields.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is straightforward but only documents trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "57bae196: If pointer to file with .01 field, get .01 from pointed-to file. If successful, re-display field attributes.",
+        "readability": {
+          "reasoning": "The comment is clear and provides step-by-step logic.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment offers detailed information about the logic, which is helpful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f4ea3da3: For variable pointers, retrieve .01 from pointed-to file. If successful, re-display field attributes.",
+        "readability": {
+          "reasoning": "The comment is clear and provides step-by-step logic.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment offers detailed information about the logic, which is helpful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "00148e4c: Execute cross-referencing logic for set of codes and mnemonic values.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an expert programmer understand the specific operation being performed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1fff5af9: Validate data and quit if invalid or operating in one of the two special cases.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an expert programmer understand the specific validation and exit conditions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "80424bae: If the input value is not a pointer or IEN, go to RD (Read).",
+        "readability": {
+          "reasoning": "The comment is clear and well-written except for the abbreviation 'IEN', which might not be known to all.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the specific conditional logic, though the abbreviation could be confusing.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a963509c: Call helper code, then if X is defined go to RD, else go to PR (Prompt).",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an expert programmer understand the flow control based on the condition.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "228c8d57: Quit.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial functionality, providing minimal insight.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "35e380ff: Set initial values for the MUMPS variables used in data entry.",
+        "readability": {
+          "reasoning": "The comment is clear, concise, and well-written.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the purpose of the code segment.",
+          "score": "3"
+        }
+      },
+      {
+        "comment": "3df5161d: Set field properties for the first field.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "It documents a basic functionality but provides useful context to an average programmer.",
+          "score": "3"
+        }
+      },
+      {
+        "comment": "22ec9360: Set the prefix for the pointer value lookup.",
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about the purpose of the code action.",
+          "score": "3"
+        }
+      },
+      {
+        "comment": "e97fd7a5: Go to RE (Read/Edit).",
+        "readability": {
+          "reasoning": "The comment is clear but the abbreviation might be unclear to some.",
+          "score": "3"
+        },
+        "usefulness": {
+          "reasoning": "It is somewhat useful but the abbreviation might need further clarification.",
+          "score": "2"
+        }
+      },
+      {
+        "comment": "47a96b3e: No code for this label.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "It is useful in indicating the absence of code which is helpful for understanding the structure.",
+          "score": "3"
+        }
+      },
+      {
+        "comment": "e21ec4b8:  ;\n ;Code executed after the user enters data for the second field.\n ;DQ is set to 3 to indicate this is the third field.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, with each statement on a new line.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear information about the code's functionality and logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d6d88d16: If DG array is populated, call a FileMan utility, store user input in Y, set DQ to 3 to indicate this is the third field, call a routine to process the input, quit if Y is null or equal to Up-arrow, otherwise store Y in X, set DIC(0) to indicate a lookup is needed, set DW to the third field number, and go to a FileMan utility routine.",
+        "readability": {
+          "reasoning": "The comment is long and complex, making it slightly difficult to read.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is detailed and helps an average programmer understand the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "46b277ca: If the movement number does not contain a '3', then set Y to null.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides straightforward information about the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d4ea7ffc: Quit the current execution.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a very basic functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "aec65f54:  ;\n ;Set the value of DQ to 5.\n ;",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read, with each statement on a new line.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear but basic information about setting a value.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "cda085e3: If the data global variable DG exists and is greater than 9, then execute the F^DIE17 routine, set the value of Y to the 'undefined' character, set the value of DQ to 5, execute the X5 routine, go to label A if Y is undefined or if Y is equal to the 'undefined' character, set the value of X to Y, set the DIC(0) variable to 'F', set the value of DW to DQ, and then execute the OUT^DIE17 routine.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, though it is a bit long.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a complex series of operations, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8817505c: If the movement number does not contain a '3', then set Y to null.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ed5a399e: Quit the current execution.",
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it explains the exit from execution, though it may be considered trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e928ae99: If the data global variable DG exists and is greater than 9, then execute the F^DIE17 routine, and then go to the ^DGJXE9 label.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional operation and a subsequent action, helping to understand the code flow.",
+          "score": 4
+        }
+      }
+    ]
+  }
+}

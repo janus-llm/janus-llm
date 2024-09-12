@@ -1,0 +1,727 @@
+{
+  "input": "{\n  \"comments\": [\n    \"41132e2c: ;\\n ;Event Driver Entry Point.\\n ;Call EVENT^SDAPM to update PT Movement Status.\\n ;\",\n    \"e2bb87c1: ; Set facility array references.\",\n    \"bd8b71d8: ; Flag to control exit processing.\",\n    \"1caca2f8: ; For each event - Movement, Appt, Dispositon and Admit; Initialize SDAPM API and call SDStart to process event.\",\n    \"71dc9c6a: ; Exit and kill variables.\",\n    \"94ad8e9f: ;Do not overwrite the current QA period if it exists and return.\",\n    \"10c7ae46: ;\\n ;Entry point to determine and set the current QA period.\\n ;If an active QA period exists then set CA and DGPMT to this period.\\n ;If no active period exists then set CA and DGPMT to the default period.\",\n    \"664b8d5a: ;Set the current quarter/annual period to the active QA period if it exists, otherwise use the default.\",\n    \"b505d0a5: ;Set the period type (quarterly or annual) to the active QA period if it exists, otherwise use the default.\",\n    \"4a1527f9: ;If the default period is annual and there is no active period then quit.\",\n    \"e0e163ae: Inform the user that incomplete records are being updated if DGQUIET is not defined or has a false value.\",\n    \"4b1dc4d2: Reset DGONE to 0 after the message has been displayed.\",\n    \"37371ed1: Execute the DIK utility, which is used for data manipulation and record deletion.\",\n    \"3f772026: Call the WARD^DGJTUTL routine, which likely retrieves or processes ward-related information.\",\n    \"5803c285: If X contains a value, store the value in DGJTWARD and retrieve the division name from the INSTITUTION file (^DIC(42)) using the ward code, and store it in DGJTDIV. If the ward code is not found in the file, DGJTDIV is set to an empty string.\",\n    \"7f38ea2e: If the 'DT' node does not exist, or if it is 0, then quit out of the code.\",\n    \"c7987c58: If DGONE is true and DGQUIET is not defined or false, write a message to the screen that says 'Updating incomplete records...' and set DGONE to 0.\",\n    \"a3ee0e7c: If the ^UTILITY global node exists at the current job's 6th subscript, set DGJTSIFN to the next available subscript after 6.\",\n    \"1f018286: Call the DIS routine and then quit.\",\n    \"64d9cce9: Delete all entries in the ^VAS(393 global where the 'ADM' cross-reference matches DGPMDA. This is done using the ^DIK utility.\",\n    \"d547cc0e: Clear the variables DIK, DA, and DGJDIK before quitting.\",\n    \"5437dc15: ;\\nBegin routine to determine DIS (Disability) data.\\nRoutine uses variables DGPMP, DGPMA, DGJTADM and I.\",\n    \"6f3fd896: Initialize variable DR for later use.\",\n    \"abe5ac3b: Set DGJTADM to the admission date from either DGPMP or DGPMA if available, otherwise set it to null. If DGJTADM is null, quit to DISQ label.\",\n    \"11ba6567: Loop through the VAS(393) file, finding entries with an admission date matching DGJTADM and a status of '1' (active). Quit the loop when such an entry is found.\",\n    \"d199a159: ;If input parameter I is defined and not null, set DGJTDA to I.\",\n    \"a56de695: ;If DGPMT=2 (edit mode), input parameter I is defined, DGPMA does not equal DGPMP, and ^UTILITY(\\\"DGPM\\\",$J,6) does not exist, call the CHNG routine and quit.\",\n    \"d34d01a5: ;If DGPMT=1 (add mode) or DGPMT=3 (delete mode), and DGPMA is defined but input parameter I is not defined, call the NEW routine. If DGPMT=3 (delete mode), quit after calling NEW. Otherwise, if DGPMT=1 (add mode), call the CK routine, set DIE to ^VAS(393,, set DA to DGJTDA, call ^DIE, and quit.\",\n    \"06b57fda: Delete the movement's entry in the MOVEMENT COMMENTS file if it is a delete transaction, the delete transaction is allowed, and the movement does not have an admission associated with it.\",\n    \"28e7c93d: If it is an add transaction and the admission and movement are different, call the CK and CHNG routines to perform checks and update the movement.\",\n    \"d89d9fec: If it is an edit transaction and the admission and movement are different, update the admission associated with the movement, set the DGJTCA flag to indicate a change, and call the CHNG routine to update the movement.\",\n    \"6ff41b08: If it is an edit transaction, the movement does not have an admission, and the movement has a pointer to an admission, set the DGPMA variable to the admission pointed to by the movement and call the NEW routine.\",\n    \"dc0b68d2: If it is an edit transaction, exit.\",\n    \"3950b482: If it is an add transaction, set the DGJTCA flag to the movement's internal entry number.\",\n    \"3bf5d4da: If the movement's admission and movement comments in the utility global are different, call the CHNG routine to update the movement.\",\n    \"72ee6368: If the movement's admission and movement comments in the utility global are the same, but the admission associated with the movement is different from the movement's admission, call the CHNG routine to update the movement.\",\n    \"7c9454be: ;Kill all variables used in this routine.\",\n    \"b96e53ef: ;\\n ;Based on information from the DGPM array initialize the variable DGJT\\n ;with the appropriate values for processing related to patient's appointment data.\\n ;\",\n    \"bbcaa8b5: ;Store the appointment multiple entry data node in DGJT\",\n    \"003936cf: Assign the value stored in ^DG(40.8,+DGJTDIV,\\\"DT\\\") to DGJTP if it exists, otherwise assign an empty string.\",\n    \"c8b796f1: Assign the value stored in ^DIC(42,DGJTWARD,44) to DGJTWD if the node ^DIC(42,DGJTWARD,0) exists, otherwise assign an empty string.\",\n    \"80a6c453: If DGJTWARD is not empty, assign the 3rd piece of ^DIC(42,+DGJTWARD,0) to DGJTSV, otherwise assign an empty string.\",\n    \"4b7c0a70: If DGJTSV is not an empty string, check if a cross-reference entry exists in ^DG(393.1,\\\"AC\\\",DGJTSV). If it exists, assign the first entry to DGJTSV, otherwise, assign the first entry in ^DG(393.1,\\\"AC\\\",0,0) to DGJTSV. If DGJTSV is still an empty string after this, assign 0 to it.\",\n    \"8c84f29b: Write the document name and service date to the array.\",\n    \"062e8940: Set the position and alignment if the processing type is message or registration and document is an appointment.\",\n    \"d372d185: Quit if the patient movement type is either intra-facility transfer or AA patient movement.\",\n    \"8823ff76: Quit if the transfer/admission has already been processed.\",\n    \"793f8fdb: Create a new entry in the PATIENT MOVEMENT file (#393) for the patient.\",\n    \"64db8615: Get the IEN of the 'INCOMPLETE' status in the PATIENT STATUS file (#393.2).\",\n    \"e02fe899: If a new entry was created, set up variables to update the entry.\",\n    \"c3b947cc: ;Set the field values for the new entry.\",\n    \"0def0681: Update the entry that was selected in the list.\",\n    \"73934e3f: Perform cleanup and quit the routine.\",\n    \"c1d07288: If the payment is a type 1, 2, or 3, set the fields .05 to the transfer date, .06 to the transfer division.\",\n    \"b340475c: Set fields .07 to the legacy DFN, .08 to the payment source, .09 to the legacy payment type, and .1 to the legacy payment type name or '@' if blank.\",\n    \"a1061950: Perform cleanup.\",\n    \"b54f525f: Quit the routine.\",\n    \"84f43d29: ;\\n;Extract document information from the DGJTP and DGJT arrays.\\n;\",\n    \"a02f53ea: Get the document type from DGJTP.\",\n    \"f839ffb4: Set X to the document pointer if type A, empty for type N, or the legacy document pointer otherwise.\",\n    \"ff45c4fd: Exit if unable to get information from ^DGPM.\",\n    \"c9455d00: If the application is succesful, set the patient's primary physician and file the changes.\",\n    \"c11b0ecf: Check if the patient has a primary physician defined. If not, use the system date/time.\",\n    \"add86427: If the patient has a primary physician defined, use the primary physician's file entry date.\",\n    \"a89280cb: Update the primary physician assignment date field with the date found above.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 114.70326399803162
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "41132e2c: ;\n ;Event Driver Entry Point.\n ;Call EVENT^SDAPM to update PT Movement Status.\n ;",
+        "readability": {
+          "reasoning": "The comment is well-structured and uses proper punctuation, making it clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the entry point and functionality, which helps programmers understand the purpose of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e2bb87c1: ; Set facility array references.",
+        "readability": {
+          "reasoning": "The comment is short and clear, with no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it indicates the action being performed, but it lacks detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bd8b71d8: ; Flag to control exit processing.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, with no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the purpose of a flag, providing context for the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1caca2f8: ; For each event - Movement, Appt, Dispositon and Admit; Initialize SDAPM API and call SDStart to process event.",
+        "readability": {
+          "reasoning": "The comment is clear and detailed, but it contains a typo ('Dispositon' instead of 'Disposition').",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it explains the sequence of actions and functions called for different events.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "71dc9c6a: ; Exit and kill variables.",
+        "readability": {
+          "reasoning": "The comment is short and clear, with no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it indicates the final actions in the code, but it could be more descriptive.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "94ad8e9f: ;Do not overwrite the current QA period if it exists and return.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about preserving an existing state, which is helpful to understand the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "10c7ae46: ;\n ;Entry point to determine and set the current QA period.\n ;If an active QA period exists then set CA and DGPMT to this period.\n ;If no active period exists then set CA and DGPMT to the default period.",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear with good separation of details.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it provides a detailed explanation of the function's purpose and behavior, aiding in understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "664b8d5a: ;Set the current quarter/annual period to the active QA period if it exists, otherwise use the default.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it describes the logic for setting the period, which is crucial for understanding the code's operation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b505d0a5: ;Set the period type (quarterly or annual) to the active QA period if it exists, otherwise use the default.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful as it explains the decision-making process for setting the period type.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4a1527f9: ;If the default period is annual and there is no active period then quit.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains a specific condition for exiting a process, aiding in understanding the flow control.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e0e163ae: Inform the user that incomplete records are being updated if DGQUIET is not defined or has a false value.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, explaining the condition and the action taken.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific condition and its effect.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4b1dc4d2: Reset DGONE to 0 after the message has been displayed.",
+        "readability": {
+          "reasoning": "The comment is concise and straightforward, with no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains a specific action taken in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "37371ed1: Execute the DIK utility, which is used for data manipulation and record deletion.",
+        "readability": {
+          "reasoning": "The comment is clear and well-explained, providing details about the utility.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding the purpose of the DIK utility.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3f772026: Call the WARD^DGJTUTL routine, which likely retrieves or processes ward-related information.",
+        "readability": {
+          "reasoning": "The comment is clear, but the word 'likely' introduces some uncertainty.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more precise about the routine's function.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5803c285: If X contains a value, store the value in DGJTWARD and retrieve the division name from the INSTITUTION file (^DIC(42)) using the ward code, and store it in DGJTDIV. If the ward code is not found in the file, DGJTDIV is set to an empty string.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, though it is somewhat lengthy.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful as it explains a complex process step-by-step.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7f38ea2e: If the 'DT' node does not exist, or if it is 0, then quit out of the code.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, with no grammatical errors or ambiguities.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a condition that may not be immediately obvious to an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c7987c58: If DGONE is true and DGQUIET is not defined or false, write a message to the screen that says 'Updating incomplete records...' and set DGONE to 0.",
+        "readability": {
+          "reasoning": "The comment is clear and well-constructed, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action that provides context for understanding the code's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a3ee0e7c: If the ^UTILITY global node exists at the current job's 6th subscript, set DGJTSIFN to the next available subscript after 6.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but contains technical jargon that might be confusing to some.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about specific functionality related to global nodes and subscripts.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1f018286: Call the DIS routine and then quit.",
+        "readability": {
+          "reasoning": "The comment is short and clear, but might be too terse.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment only documents a trivial functionality, providing minimal additional context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "64d9cce9: Delete all entries in the ^VAS(393 global where the 'ADM' cross-reference matches DGPMDA. This is done using the ^DIK utility.",
+        "readability": {
+          "reasoning": "The comment is clear and detailed, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information on a specific and potentially complex operation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d547cc0e: Clear the variables DIK, DA, and DGJDIK before quitting.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the code segment, especially for ensuring proper cleanup.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5437dc15: ;\nBegin routine to determine DIS (Disability) data.\nRoutine uses variables DGPMP, DGPMA, DGJTADM and I.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but the use of a semicolon at the beginning is confusing.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains what the routine does and lists the variables involved, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6f3fd896: Initialize variable DR for later use.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment states a trivial action without additional context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "abe5ac3b: Set DGJTADM to the admission date from either DGPMP or DGPMA if available, otherwise set it to null. If DGJTADM is null, quit to DISQ label.",
+        "readability": {
+          "reasoning": "The comment is clear and provides a detailed explanation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies a non-trivial logic that would be useful for any programmer trying to understand the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "11ba6567: Loop through the VAS(393) file, finding entries with an admission date matching DGJTADM and a status of '1' (active). Quit the loop when such an entry is found.",
+        "readability": {
+          "reasoning": "The comment is well-written and provides clear instructions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific and important part of the logic, making it very useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d199a159: ;If input parameter I is defined and not null, set DGJTDA to I.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly states the condition and the action taken.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains a conditional check and action that would help any programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a56de695: ;If DGPMT=2 (edit mode), input parameter I is defined, DGPMA does not equal DGPMP, and ^UTILITY(\"DGPM\",$J,6) does not exist, call the CHNG routine and quit.",
+        "readability": {
+          "reasoning": "The comment is long but clear, with specific conditions and actions well-explained.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps to understand a complex conditional operation, which is very useful for any programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d34d01a5: ;If DGPMT=1 (add mode) or DGPMT=3 (delete mode), and DGPMA is defined but input parameter I is not defined, call the NEW routine. If DGPMT=3 (delete mode), quit after calling NEW. Otherwise, if DGPMT=1 (add mode), call the CK routine, set DIE to ^VAS(393,, set DA to DGJTDA, call ^DIE, and quit.",
+        "readability": {
+          "reasoning": "The comment is very detailed and clear but a bit long, requiring careful reading.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed steps for various conditions which is highly useful for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "06b57fda: Delete the movement's entry in the MOVEMENT COMMENTS file if it is a delete transaction, the delete transaction is allowed, and the movement does not have an admission associated with it.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read, with conditions and actions well-defined.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action, which is quite useful for understanding this part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "28e7c93d: If it is an add transaction and the admission and movement are different, call the CK and CHNG routines to perform checks and update the movement.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, with a straightforward explanation of conditions and actions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps to understand a specific condition and the resulting actions, which is useful for any programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d89d9fec: If it is an edit transaction and the admission and movement are different, update the admission associated with the movement, set the DGJTCA flag to indicate a change, and call the CHNG routine to update the movement.",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and the steps that follow, which would help an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6ff41b08: If it is an edit transaction, the movement does not have an admission, and the movement has a pointer to an admission, set the DGPMA variable to the admission pointed to by the movement and call the NEW routine.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, with no apparent issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information on handling specific conditions, aiding an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "dc0b68d2: If it is an edit transaction, exit.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a basic condition but lacks detailed context, making it less useful for understanding complex code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3950b482: If it is an add transaction, set the DGJTCA flag to the movement's internal entry number.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the setting of a specific flag during an add transaction.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3bf5d4da: If the movement's admission and movement comments in the utility global are different, call the CHNG routine to update the movement.",
+        "readability": {
+          "reasoning": "The comment is clearly written and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a useful condition and subsequent action, which helps in understanding the code behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "72ee6368: If the movement's admission and movement comments in the utility global are the same, but the admission associated with the movement is different from the movement's admission, call the CHNG routine to update the movement.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment provides detailed information on a specific condition and its corresponding action, which is highly useful for an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7c9454be: ;Kill all variables used in this routine.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Although the comment is clear, it documents a trivial action that most programmers would understand without additional explanation.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "b96e53ef: ;\n ;Based on information from the DGPM array initialize the variable DGJT\n ;with the appropriate values for processing related to patient's appointment data.\n ;",
+        "readability": {
+          "reasoning": "The comment is clear, but the use of semicolons and line breaks could be streamlined for better readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context for initializing a variable, which is helpful for understanding the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bbcaa8b5: ;Store the appointment multiple entry data node in DGJT",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action, which is useful for understanding the code's functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "003936cf: Assign the value stored in ^DG(40.8,+DGJTDIV,\"DT\") to DGJTP if it exists, otherwise assign an empty string.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information on a specific assignment operation, which is useful for understanding the code's logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c8b796f1: Assign the value stored in ^DIC(42,DGJTWARD,44) to DGJTWD if the node ^DIC(42,DGJTWARD,0) exists, otherwise assign an empty string.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear explanation of a conditional assignment that may not be immediately obvious.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "80a6c453: If DGJTWARD is not empty, assign the 3rd piece of ^DIC(42,+DGJTWARD,0) to DGJTSV, otherwise assign an empty string.",
+        "readability": {
+          "reasoning": "The comment is concise and clear, with no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific conditional assignment, which is useful for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4b7c0a70: If DGJTSV is not an empty string, check if a cross-reference entry exists in ^DG(393.1,\"AC\",DGJTSV). If it exists, assign the first entry to DGJTSV, otherwise, assign the first entry in ^DG(393.1,\"AC\",0,0) to DGJTSV. If DGJTSV is still an empty string after this, assign 0 to it.",
+        "readability": {
+          "reasoning": "The comment is detailed and clearly explains a complex conditional logic.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it provides a detailed explanation of a multi-step conditional logic, helping to understand the code's flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8c84f29b: Write the document name and service date to the array.",
+        "readability": {
+          "reasoning": "The comment is concise and clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a straightforward operation, which is useful but fairly trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "062e8940: Set the position and alignment if the processing type is message or registration and document is an appointment.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional setting of properties, which is helpful for understanding the code's intent.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d372d185: Quit if the patient movement type is either intra-facility transfer or AA patient movement.",
+        "readability": {
+          "reasoning": "The comment is comprehensive and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains the condition for quitting, which is useful for understanding the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8823ff76: Quit if the transfer/admission has already been processed.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific condition in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "793f8fdb: Create a new entry in the PATIENT MOVEMENT file (#393) for the patient.",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the creation of a new entry in the specific file.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "64db8615: Get the IEN of the 'INCOMPLETE' status in the PATIENT STATUS file (#393.2).",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding the retrieval of a specific status.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e02fe899: If a new entry was created, set up variables to update the entry.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information on what happens if a new entry is created.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c3b947cc: ;Set the field values for the new entry.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides context for setting field values, which is useful for understanding what the code does.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0def0681: Update the entry that was selected in the list.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It clarifies the action being performed, which is useful for understanding the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "73934e3f: Perform cleanup and quit the routine.",
+        "readability": {
+          "reasoning": "The comment is clear and simple to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes the final steps in the routine, which is useful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c1d07288: If the payment is a type 1, 2, or 3, set the fields .05 to the transfer date, .06 to the transfer division.",
+        "readability": {
+          "reasoning": "The comment is detailed but still clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides specific instructions for setting fields based on payment type, which is useful for understanding conditional logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b340475c: Set fields .07 to the legacy DFN, .08 to the payment source, .09 to the legacy payment type, and .1 to the legacy payment type name or '@' if blank.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides specific instructions for setting multiple fields, which is very useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a1061950: Perform cleanup.",
+        "readability": {
+          "reasoning": "The comment is concise and uses simple language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is a bit vague and doesn't specify what 'cleanup' entails.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "b54f525f: Quit the routine.",
+        "readability": {
+          "reasoning": "The comment is clear and direct.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a basic understanding but lacks detail on the implications of quitting the routine.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "84f43d29: ;\n;Extract document information from the DGJTP and DGJT arrays.\n;",
+        "readability": {
+          "reasoning": "The comment is clear and structured in an understandable way.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the code block, specifying the arrays involved.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a02f53ea: Get the document type from DGJTP.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is specific about which array to extract the document type from, aiding understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f839ffb4: Set X to the document pointer if type A, empty for type N, or the legacy document pointer otherwise.",
+        "readability": {
+          "reasoning": "The comment is detailed but uses clear language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed logic about setting X based on document type, aiding expert understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ff45c4fd: Exit if unable to get information from ^DGPM.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a non-trivial exit condition, helpful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c9455d00: If the application is succesful, set the patient's primary physician and file the changes.",
+        "readability": {
+          "reasoning": "The comment has a minor spelling error but is otherwise clear.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an important conditional action, helpful for understanding code behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c11b0ecf: Check if the patient has a primary physician defined. If not, use the system date/time.",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional logic that is important for understanding the program's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "add86427: If the patient has a primary physician defined, use the primary physician's file entry date.",
+        "readability": {
+          "reasoning": "The comment is clear and well-phrased.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the logic for setting a date.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a89280cb: Update the primary physician assignment date field with the date found above.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a simple yet essential operation, useful for understanding the flow.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

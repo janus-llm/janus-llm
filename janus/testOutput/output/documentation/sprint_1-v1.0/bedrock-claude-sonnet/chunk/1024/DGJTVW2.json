@@ -1,0 +1,903 @@
+{
+  "input": "{\n  \"comments\": [\n    \"9cf75097: ;\\n .;This procedure populates the ^TMP array with user-selected\\n .;data and displays it in a list format.\\n .;\",\n    \"e2216bda: ;Kill the temporary array for this job.\",\n    \"c319a78f: ;Initialize variables used for displaying the list: X is the line being built, VALMCNT tracks the number of lines in the list, DGJCNT is another line counter, and VALMBG is the beginning line number.\",\n    \"e2d72bfb: ;Set X to a line containing the header string DGJTHDR padded with spaces out to column 25. Call TMP, likely to populate the temporary array with the list data.\",\n    \"db37c171: ;Initialize X variable to an empty string.\",\n    \"389bc28e: ;Set the value of X to the string '1)' concatenated to the current value of X, starting at position 1, with a length of 2 characters.\",\n    \"fe200bb3: ;Set the value of X to the string '3)' concatenated to the current value of X, starting at position 42, with a length of 2 characters. Then execute the TMP routine.\",\n    \"1d6f9a4a: ;Reset X variable to an empty string.\",\n    \"c8fd4427: ;Get the value of DGJVAL from the 0th node of the entry in file 393.3 corresponding to the 2nd piece of DGJTNO. If the entry doesn't exist, set DGJVAL to an empty string.\",\n    \"e1c08667: ;If DGJVAL is 'DISCHARGE SUMMARY', calculate the number of days between the event date (3rd piece of DGJTNO) and the discharge date (1st piece of the 0th node of the entry in file 42 corresponding to the 4th piece of DGJTNO). If the event date is less than the discharge date and the event date is more than 48 hours after the discharge date, set DGJVAL to 'DISCHARGE SUM <48' and set DGJTSF to 1. Kill DGJTX3 and DGJTX4.\",\n    \"39b037c9: ;Set the value of X to the string '     *Type of Report: ' concatenated to the current value of X, starting at position 1, with a length of 22 characters.\",\n    \"c4504116: ;Set the value of X to the value of DGJVAL concatenated to the current value of X, starting at position 23, with a length of 18 characters.\",\n    \"72d23d80: ;Set DGJVAL to the 1st piece of DGJTNDT. If DGJVAL is not empty, convert it to an external date format using the FileMan 'DD' utility and store the result back in DGJVAL.\",\n    \"e35e920b: ;If DGJTSF is defined and DGJVAL is empty but the 5th piece of DGJTNDT is not empty, execute the SFRM routine.\",\n    \"d5fb67e3: ;Set the value of X to the string '      Date Dictated: ' concatenated to the current value of X, starting at position 42, with a length of 21 characters.\",\n    \"7f861b1b: ;Set the value of X to the value of DGJVAL concatenated to the current value of X, starting at position 63, with a length of 18 characters. Then execute the TMP routine.\",\n    \"b630b901: ;Reset X variable to an empty string.\",\n    \"cdb88acf: ;Initialize DGJVAL to a string with a leading space and an asterisk if the 2nd piece of DGJTNO is 1 and DGJTVIEW is not defined, or just a leading space otherwise, followed by 'Event Date: '.\",\n    \"24959775: ;Set the value of X to the value of DGJVAL concatenated to the current value of X, starting at position 1, with a length of 22 characters.\",\n    \"8fb7baa0: Extract internal value; run INPUT transform; store transformed value\",\n    \"6b73a17f: Set array piece by calling SET^VALM1\",\n    \"81b05ece: Get entry value and name for new person pointer; if person not found, set to null\",\n    \"04c2a845: If SF007 flag set and new person null but pointer value exists, call SFRM\",\n    \"c50beedd: Sets the 'Dictated By:' text in the output string X.\",\n    \"f34b6fb6: Appends the dictated by name (DGJVAL) to the output string X and calls the TMP routine.\",\n    \"8d5d8baf: Sets the prefix text 'Admission:' for the admission type with a leading asterisk if the note is not a view.\",\n    \"fa9f49eb: Appends the prefix string to the output string X.\",\n    \"bb6f0ae3: If the DGJTNO variable has a fourth piece, it gets the name of the associated admission movement and formats it using DGPM.\",\n    \"37bf7992: If the DGJTNO variable does not have a fourth piece, it sets the admission type to 'OUTPATIENT'.\",\n    \"48108990: Appends the admission type (DGJVAL) to the output string X.\",\n    \"b9ddc4ea: Sets the 'Date Transcribed:' text in the output string X.\",\n    \"d504f8d7: Gets the transcribed date from DGJTNDT, formats it using FileMan code, and stores it in DGJVAL.\",\n    \"e82f3896: ;If division and date are valid and treatment specifier is present, call SFRM routine.\",\n    \"235d457f: ;Set the value field into the display string X using the SETSTR^VALM1 utility.\",\n    \"77ddaeb3: ;Clear the display string X.\",\n    \"079a0d94: ;Set the 'Division: ' label into the display string X.\",\n    \"8f643af7: ;Get the division name from the division file and set it into the display string X.\",\n    \"4e6927dc: ;Set the division name into the display string X using the SETSTR^VALM1 utility.\",\n    \"11177f78: ;Get the date from the input variable and format it using the date input variable Y^DIQ call, set the formatted date into DGJVAL.\",\n    \"ddb38fb8: ;If division and date are valid and treatment specifier is present, call SFRM routine.\",\n    \"e8b5b959: ;Add 'Transcribed By:' and a string value at column 42 with length 21\",\n    \"f2f18038: ;Add DGJVAL variable value at column 63 with length 18, then execute subroutine TMP\",\n    \"55d61443: ;Set DGJVAL to 5th piece of DGJTNO, which is entry number for location in HOSPITAL LOCATION file. If entry exists, set DGJVAL to value from that file entry, otherwise leave blank\",\n    \"4aea8a24: ;Set DGJVAL to 'Location: ', prefixed by '*' if 2nd piece of DGJTNO=1 and DGJTVIEW is undefined, otherwise prefixed by space\",\n    \"5081b1b4: Initialize X to empty string.\",\n    \"d536527a: Set X with the value from DGJVAL at position 1 to 22 using $$SETSTR^VALM1.\",\n    \"e577ce97: Get the translated value of DGJVAL from the 0 node of the corresponding 'SC' file entry and store it in DGJVAL. If the entry is not found, set DGJVAL to an empty string.\",\n    \"e008e842: Set X with the value from DGJVAL at position 23 to 40 using $$SETSTR^VALM1.\",\n    \"1f206fec: Set X with the literal string '        Date Signed: ' at position 42 to 62 using $$SETSTR^VALM1.\",\n    \"366ba359: Get the external date format of DGJVAL from the FileMan internal date format stored in DGJTNDT^5 and store it in DGJVAL. The original internal date format is preserved in Y.\",\n    \"d779887b: Set X with the value from DGJVAL at position 63 to 80 using $$SETSTR^VALM1. Call the TMP subroutine.\",\n    \"fccb0707: Get the value of the 8th piece of DGJTNO and store it in DGJVAL.\",\n    \"ff40ba21: Get the value of the .01 field from the 'DG(393.1' file entry corresponding to DGJVAL and store it in DGJVAL. If the entry is not found, set DGJVAL to an empty string.\",\n    \"0ad4779b: Initialize X to empty string.\",\n    \"4d2d4d36: Set X with the literal string '            *Service: ' at position 1 to 22 using $$SETSTR^VALM1.\",\n    \"2c586535: Set X with the value from DGJVAL at position 23 to 40 using $$SETSTR^VALM1.\",\n    \"22743952: Get the value of the 8th piece of DGJTNO and store it in DGJVAL.\",\n    \"ba026761: Get the value for the reason for tracking.\",\n    \"9028ce0a: Set the reason for tracking value in the display string.\",\n    \"7b2327cf: Get the value for the signed by user.\",\n    \"6536c0af: Set the 'Signed By: ' heading in the display string.\",\n    \"ae5e7618: Set the signed by user value in the display string and call TMP subroutine.\",\n    \"2ac57f49: Clear the display string.\",\n    \"6e55a053: Set the 'Phys. Responsible: ' heading in the display string.\",\n    \"a0ad7098: Get the value for the responsible physician.\",\n    \"04d62f97: Insert a clinical indicator string into the text line buffer.\",\n    \"f570f191: If display date reviewed flag is set, insert 'Date Reviewed:' into the text line buffer.\",\n    \"a2231d53: If display date reviewed flag is set, convert clinical review date to external format and insert into the text line buffer.\",\n    \"b4c49124: Execute routine TMP.\",\n    \"cac10662: If user's pointer to 200 file is defined, get provider's name, else blank.\",\n    \"15aa149e: Initialize X (the output string) to blank.\",\n    \"f48bd0e2: If review is required, format reviewed by line.\",\n    \"7247825a: Clear X again.\",\n    \"e3e89d7e: Output line 2.\",\n    \"d75921b5: Quit.\",\n    \"3c9d8d73: Increment counters.\",\n    \"2fbef933: Store output line in temporary global.\",\n    \"10c1e89d: Store index in temporary global.\",\n    \"7e773e89: Quit.\",\n    \"a3c5ebbb: Set DGJVAL to 'NOT APPLICABLE'.\",\n    \"bf59fb85: Quit.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 127.66157913208008
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "9cf75097: ;\n .;This procedure populates the ^TMP array with user-selected\n .;data and displays it in a list format.\n .;",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear, although the formatting is somewhat unconventional.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment adequately describes the functionality of the procedure for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e2216bda: ;Kill the temporary array for this job.",
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a necessary action but is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c319a78f: ;Initialize variables used for displaying the list: X is the line being built, VALMCNT tracks the number of lines in the list, DGJCNT is another line counter, and VALMBG is the beginning line number.",
+        "readability": {
+          "reasoning": "The comment is clear and provides detailed information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the initialization of variables.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e2d72bfb: ;Set X to a line containing the header string DGJTHDR padded with spaces out to column 25. Call TMP, likely to populate the temporary array with the list data.",
+        "readability": {
+          "reasoning": "The comment is clear but slightly verbose.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific function of setting variables and calling another function.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "db37c171: ;Initialize X variable to an empty string.",
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "389bc28e: ;Set the value of X to the string '1)' concatenated to the current value of X, starting at position 1, with a length of 2 characters.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific string manipulation in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fe200bb3: ;Set the value of X to the string '3)' concatenated to the current value of X, starting at position 42, with a length of 2 characters. Then execute the TMP routine.",
+        "readability": {
+          "reasoning": "The comment is clear, but slightly longer than necessary.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding both the string manipulation and the subsequent routine execution.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1d6f9a4a: ;Reset X variable to an empty string.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial operation, resetting a variable.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c8fd4427: ;Get the value of DGJVAL from the 0th node of the entry in file 393.3 corresponding to the 2nd piece of DGJTNO. If the entry doesn't exist, set DGJVAL to an empty string.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding data retrieval and conditional logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e1c08667: ;If DGJVAL is 'DISCHARGE SUMMARY', calculate the number of days between the event date (3rd piece of DGJTNO) and the discharge date (1st piece of the 0th node of the entry in file 42 corresponding to the 4th piece of DGJTNO). If the event date is less than the discharge date and the event date is more than 48 hours after the discharge date, set DGJVAL to 'DISCHARGE SUM <48' and set DGJTSF to 1. Kill DGJTX3 and DGJTX4.",
+        "readability": {
+          "reasoning": "The comment is lengthy but clear and well-structured.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of a complex conditional operation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "39b037c9: ;Set the value of X to the string '     *Type of Report: ' concatenated to the current value of X, starting at position 1, with a length of 22 characters.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains the concatenation operation and is useful for understanding this specific line of code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c4504116: ;Set the value of X to the value of DGJVAL concatenated to the current value of X, starting at position 23, with a length of 18 characters.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear explanation of the concatenation operation, helping to understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "72d23d80: ;Set DGJVAL to the 1st piece of DGJTNDT. If DGJVAL is not empty, convert it to an external date format using the FileMan 'DD' utility and store the result back in DGJVAL.",
+        "readability": {
+          "reasoning": "The comment is well-written and clearly explains the process.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information on the process, including the use of the 'DD' utility, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e35e920b: ;If DGJTSF is defined and DGJVAL is empty but the 5th piece of DGJTNDT is not empty, execute the SFRM routine.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the conditions under which a routine is executed, providing useful context for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d5fb67e3: ;Set the value of X to the string '      Date Dictated: ' concatenated to the current value of X, starting at position 42, with a length of 21 characters.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific string concatenation operation, aiding in understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7f861b1b: ;Set the value of X to the value of DGJVAL concatenated to the current value of X, starting at position 63, with a length of 18 characters. Then execute the TMP routine.",
+        "readability": {
+          "reasoning": "The comment is clear, well-written, and grammatically correct.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation that would help an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b630b901: ;Reset X variable to an empty string.",
+        "readability": {
+          "reasoning": "The comment is concise and easily understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a simple operation but is still useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cdb88acf: ;Initialize DGJVAL to a string with a leading space and an asterisk if the 2nd piece of DGJTNO is 1 and DGJTVIEW is not defined, or just a leading space otherwise, followed by 'Event Date: '.",
+        "readability": {
+          "reasoning": "The comment is detailed and well-written, making it clear to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional initialization which is useful for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "24959775: ;Set the value of X to the value of DGJVAL concatenated to the current value of X, starting at position 1, with a length of 22 characters.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific details that help understand a non-trivial operation in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8fb7baa0: Extract internal value; run INPUT transform; store transformed value",
+        "readability": {
+          "reasoning": "The comment is clear but lacks some punctuation which makes it slightly less readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a high-level overview but lacks details, making it moderately useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6b73a17f: Set array piece by calling SET^VALM1",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the purpose of a specific function call, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "81b05ece: Get entry value and name for new person pointer; if person not found, set to null",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about the code's handling of a new person pointer, which is valuable for understanding the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "04c2a845: If SF007 flag set and new person null but pointer value exists, call SFRM",
+        "readability": {
+          "reasoning": "The comment is clear and provides specific conditions for calling a function.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides important details about conditional logic, helping to understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c50beedd: Sets the 'Dictated By:' text in the output string X.",
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific action in the code, which helps in understanding the output.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f34b6fb6: Appends the dictated by name (DGJVAL) to the output string X and calls the TMP routine.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides details on two specific actions, which is helpful for understanding the flow of operations.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8d5d8baf: Sets the prefix text 'Admission:' for the admission type with a leading asterisk if the note is not a view.",
+        "readability": {
+          "reasoning": "The comment is well-structured and clearly explains the functionality.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a detailed explanation that helps an expert understand the specific condition and action.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fa9f49eb: Appends the prefix string to the output string X.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a basic functionality but doesn't provide extensive insight into the context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bb6f0ae3: If the DGJTNO variable has a fourth piece, it gets the name of the associated admission movement and formats it using DGPM.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a detailed explanation of the logic, useful for understanding specific conditions and actions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "37bf7992: If the DGJTNO variable does not have a fourth piece, it sets the admission type to 'OUTPATIENT'.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It clarifies the logic for setting a specific value based on a condition, aiding understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "48108990: Appends the admission type (DGJVAL) to the output string X.",
+        "readability": {
+          "reasoning": "The comment is clear but quite brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a basic operation without much context, useful but not highly informative.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b9ddc4ea: Sets the 'Date Transcribed:' text in the output string X.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides specific and clear information about what the code does, useful for understanding the functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d504f8d7: Gets the transcribed date from DGJTNDT, formats it using FileMan code, and stores it in DGJVAL.",
+        "readability": {
+          "reasoning": "The comment is well-written, with clear instructions and terminology.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Details the process of getting, formatting, and storing the date, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e82f3896: ;If division and date are valid and treatment specifier is present, call SFRM routine.",
+        "readability": {
+          "reasoning": "The comment is clear but the semicolon is unnecessary and disruptive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "Provides useful conditional information about when to call the SFRM routine.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "235d457f: ;Set the value field into the display string X using the SETSTR^VALM1 utility.",
+        "readability": {
+          "reasoning": "The comment is clear but the semicolon is unnecessary and disruptive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "Explains how to set the value in the display string, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "77ddaeb3: ;Clear the display string X.",
+        "readability": {
+          "reasoning": "The comment is clear but the semicolon is unnecessary and disruptive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "This comment only documents a trivial action of clearing a string.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "079a0d94: ;Set the 'Division: ' label into the display string X.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a specific functionality but is relatively trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8f643af7: ;Get the division name from the division file and set it into the display string X.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the retrieval and setting of the division name.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4e6927dc: ;Set the division name into the display string X using the SETSTR^VALM1 utility.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies the use of a specific utility, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "11177f78: ;Get the date from the input variable and format it using the date input variable Y^DIQ call, set the formatted date into DGJVAL.",
+        "readability": {
+          "reasoning": "The comment is a bit lengthy but clear and well-written.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the date formatting process, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ddb38fb8: ;If division and date are valid and treatment specifier is present, call SFRM routine.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the conditions under which a routine is called, which is helpful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e8b5b959: ;Add 'Transcribed By:' and a string value at column 42 with length 21",
+        "readability": {
+          "reasoning": "The comment is clear and specifies the action and details precisely.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand what specific action is being taken in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f2f18038: ;Add DGJVAL variable value at column 63 with length 18, then execute subroutine TMP",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read, explaining both parts of the action.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information to an average programmer about specific actions being taken and the subroutine being executed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "55d61443: ;Set DGJVAL to 5th piece of DGJTNO, which is entry number for location in HOSPITAL LOCATION file. If entry exists, set DGJVAL to value from that file entry, otherwise leave blank",
+        "readability": {
+          "reasoning": "The comment is clear and provides a detailed explanation of the logic being applied.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This detailed explanation is highly useful for understanding the logic, especially for complex file interactions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4aea8a24: ;Set DGJVAL to 'Location: ', prefixed by '*' if 2nd piece of DGJTNO=1 and DGJTVIEW is undefined, otherwise prefixed by space",
+        "readability": {
+          "reasoning": "The comment is clear and delineates the conditions and outcomes well.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is useful for understanding conditional logic, especially for someone looking into how DGJVAL is set.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5081b1b4: Initialize X to empty string.",
+        "readability": {
+          "reasoning": "The comment is very clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "While it documents a trivial action, it is still useful for clarity in code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d536527a: Set X with the value from DGJVAL at position 1 to 22 using $$SETSTR^VALM1.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific details about the code's functionality, which is helpful to both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e577ce97: Get the translated value of DGJVAL from the 0 node of the corresponding 'SC' file entry and store it in DGJVAL. If the entry is not found, set DGJVAL to an empty string.",
+        "readability": {
+          "reasoning": "The comment is well-written and provides a clear explanation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific functionality that adds context, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e008e842: Set X with the value from DGJVAL at position 23 to 40 using $$SETSTR^VALM1.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a specific detail about the code's operation, which aids understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1f206fec: Set X with the literal string '        Date Signed: ' at position 42 to 62 using $$SETSTR^VALM1.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action within the code, which is useful for understanding its behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "366ba359: Get the external date format of DGJVAL from the FileMan internal date format stored in DGJTNDT^5 and store it in DGJVAL. The original internal date format is preserved in Y.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the code's functionality, which is useful for understanding its operation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d779887b: Set X with the value from DGJVAL at position 63 to 80 using $$SETSTR^VALM1. Call the TMP subroutine.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, explaining the operation and the function used.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps both expert and average programmers understand a specific operation and function call.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fccb0707: Get the value of the 8th piece of DGJTNO and store it in DGJVAL.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It clearly explains a specific data extraction operation, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ff40ba21: Get the value of the .01 field from the 'DG(393.1' file entry corresponding to DGJVAL and store it in DGJVAL. If the entry is not found, set DGJVAL to an empty string.",
+        "readability": {
+          "reasoning": "The comment is detailed and well-structured, making it easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear explanation of a database operation, including a fallback condition, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0ad4779b: Initialize X to empty string.",
+        "readability": {
+          "reasoning": "The comment is simple and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial initialization, which is not very useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "4d2d4d36: Set X with the literal string '            *Service: ' at position 1 to 22 using $$SETSTR^VALM1.",
+        "readability": {
+          "reasoning": "The comment is well-written and clearly explains the operation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps in understanding the exact operation and function used, which is beneficial for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2c586535: Set X with the value from DGJVAL at position 23 to 40 using $$SETSTR^VALM1.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, providing specific details about the operation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert understand the code better by specifying the exact positions and function used.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "22743952: Get the value of the 8th piece of DGJTNO and store it in DGJVAL.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps both average and expert programmers understand a specific operation in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ba026761: Get the value for the reason for tracking.",
+        "readability": {
+          "reasoning": "The comment is clear, but it could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality and lacks specific details.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "9028ce0a: Set the reason for tracking value in the display string.",
+        "readability": {
+          "reasoning": "The comment is clear, but could be more precise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some useful information but lacks detailed context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7b2327cf: Get the value for the signed by user.",
+        "readability": {
+          "reasoning": "The comment is clear, but it lacks specificity.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality and lacks specific details.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6536c0af: Set the 'Signed By: ' heading in the display string.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment provides a clear understanding of what the code is doing by setting a specific heading which is useful for all levels of programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ae5e7618: Set the signed by user value in the display string and call TMP subroutine.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is useful as it explains both setting a value and calling a subroutine, which helps in understanding the flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2ac57f49: Clear the display string.",
+        "readability": {
+          "reasoning": "The comment is straightforward and readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is useful but documents a trivial functionality, which may be obvious from the code itself.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6e55a053: Set the 'Phys. Responsible: ' heading in the display string.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is useful as it explains the setting of a specific heading, which is beneficial for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a0ad7098: Get the value for the responsible physician.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is useful as it explains the purpose of the code to get a specific value, aiding in understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "04d62f97: Insert a clinical indicator string into the text line buffer.",
+        "readability": {
+          "reasoning": "The comment is concise and uses clear language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly states the purpose of the code, which would help both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f570f191: If display date reviewed flag is set, insert 'Date Reviewed:' into the text line buffer.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional action that is useful information for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a2231d53: If display date reviewed flag is set, convert clinical review date to external format and insert into the text line buffer.",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a multi-step process, adding significant value to understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b4c49124: Execute routine TMP.",
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates the execution of a routine but lacks detail about the routine's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cac10662: If user's pointer to 200 file is defined, get provider's name, else blank.",
+        "readability": {
+          "reasoning": "The comment is clear and effectively communicates its intent.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains a conditional check and the resulting actions, which aids in code understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "15aa149e: Initialize X (the output string) to blank.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an important initialization step that is not trivial.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f48bd0e2: If review is required, format reviewed by line.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but could be slightly improved for readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides conditional logic that helps understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7247825a: Clear X again.",
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a simple but necessary step in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e3e89d7e: Output line 2.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an output action, which is straightforward but useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d75921b5: Quit.",
+        "readability": {
+          "reasoning": "The comment is very clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a termination step, which is simple but important.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3c9d8d73: Increment counters.",
+        "readability": {
+          "reasoning": "The comment is concise and uses simple language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Knowing that counters are being incremented is useful for understanding the flow of logic, even for experienced developers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2fbef933: Store output line in temporary global.",
+        "readability": {
+          "reasoning": "The comment is concise and uses clear language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Storing an output line in a temporary global variable is a specific action that clarifies the code's intent.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "10c1e89d: Store index in temporary global.",
+        "readability": {
+          "reasoning": "The comment is concise and uses clear language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Storing an index in a temporary global variable is a specific action that clarifies the code's intent.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7e773e89: Quit.",
+        "readability": {
+          "reasoning": "The comment is very short but still understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "Simply stating 'Quit' provides minimal additional context, as the action is likely self-explanatory.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a3c5ebbb: Set DGJVAL to 'NOT APPLICABLE'.",
+        "readability": {
+          "reasoning": "The comment is concise and uses clear language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Knowing that a variable is being set to a specific value provides useful context for understanding the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bf59fb85: Quit.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a specific action, but it lacks context to help understand the code better.",
+          "score": 2
+        }
+      }
+    ]
+  }
+}

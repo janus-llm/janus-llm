@@ -1,0 +1,826 @@
+{
+  "input": "{\n  \"comments\": [\n    \"07d093d0:  ;;\\n ;;EDIT multiple fields in the input template file\\n ;;setting IENS,VARIABLES, MESSAGE CODE LOOKUP,\\n ;;and ELIFEOR CLEANING CODE.\",\n    \"a758c1fe: Determine variable pointers of entry being edited\",\n    \"f6a58f3f: Initialize variables for FileManager\",\n    \"f626e98d: If a STATUS value exists, store it for later use\",\n    \"a958bee6: If a MESSAGE CODE value exists, store it for later use\",\n    \"8ea2d8fa: Housekeeping for variables\",\n    \"ea8b319b: Write label for field being edited\",\n    \"f58299fc: Exit point\",\n    \"62db112a: Write data for field, handle word-wrapping\",\n    \"4d4e9b47: If field is word-wrapped, go to word-wrapping routine\",\n    \"a55d479c: If field is inactive, write no editing message and exit\",\n    \"0998a466: Read user response, allow timeout\",\n    \"6355cd43: Exit point\",\n    \"d9dcc5d8: Increment sequence number\",\n    \"25b9a249: Branch to sequence logic\",\n    \"c9598ac2: If the field is required or has responding help, read the entry and branch to the appropriate routine.\",\n    \"cb83e0a3: If the value entered is null, branch based on certain conditions.\",\n    \"06011494: If the user enters a question mark, branch to the question/help routine.\",\n    \"560eb2a5: If the user enters an '@', branch to the FileMan output routine.\",\n    \"ff453040: If the user enters a space and there is a default value defined for this field, display the default value.\",\n    \"48a034c7: If there are multiple choice values, search for a match and branch based on conditions.\",\n    \"6965e2c6: If no match is found in the multiple choice list, display the available choices.\",\n    \"320cb39b: Display the remaining portion of the last multiple choice value.\",\n    \"626f6256: If this is a pointer field, perform a lookup and retrieve the internal value.\",\n    \"49c262bf: If this is a numeric field, validate the input format and length.\",\n    \"3178dc4e: If this is a numeric field with decimal places, validate and format the input.\",\n    \"5c67b577: Execute any additional input transform logic.\",\n    \"10c68d8f: Store the final input value, and if it's a DISPLAY-only field, update the user's last reference.\",\n    \"dce06fbf: If the input is invalid, display an error message and branch to the input error routine.\",\n    \"2a7f0d94: Set the default error message.\",\n    \"482945f3: ;Branch to QQ^DIEQ to handle user entering '?'\",\n    \"0d41a5e0: ;Build the DQ array for the current field\",\n    \"7b93e087: ;If previous value not defined, perform outputting and branching\",\n    \"6e48ba2d: ;If value is predefined, use it\",\n    \"c8b3c118: ;Resolve pointer values in POINTER MASS DIAGONAL format\",\n    \"6bc1cdef: ;Resolve pointer values in POINTER MASS VERTICAL format\",\n    \"9a777ce8: ;Resolve SET OF CODES values\",\n    \"fc276f87: ;Validate and re-display the data value\",\n    \"095aae44: ;If INPUT transform is not allowed for this type of field, branch to normal read\",\n    \"1dc18527: ;Call the INPUT transform\",\n    \"61d4cfec: ;INPUT transform exits here\",\n    \"21b87e85: ;Entry point and initialization\",\n    \"6210d3b7: ;Form initial values for field STATUS: required, pointer to file #393.2\",\n    \"b1524167: ;Prefix for pointer to STATUS values\",\n    \"33b071c7: ;Get the current value to prime the multiple\",\n    \"09cea5d9: ;Set Y to the test status value passed from the calling routine.\",\n    \"3bc7f399: ;If status value is defined, store it in X and set DB(DQ)=1 for editing. If status is undefined or invalid, go to the 'N' or 'A' labels based on DV value.\",\n    \"b7873942: ;If a valid status value is in X, go to the 'Z' label to store it. Otherwise, go to the 'RD' label to read a new value.\",\n    \"3d25025f: ;No code for this label.\",\n    \"f3472c91: ;Set up to display the help text for status codes.\",\n    \"e80d3aea: ;The help text is stored in ^DIC(9.4,\\\"ACODE\\\",15).\",\n    \"8f081103: ;Exit the X2 label.\",\n    \"6233f9e9: ;\\n;\\n;Section to edit the status field again, in case previous edits were undone.\\n;\",\n    \"63db89fb: ;Redefine DW, DV, DU, DLB, and DIFLD for the status field.\",\n    \"ac7ed369: ;Redefine DU to reference the DG(393.2 file.\",\n    \"e82c3698: ;Go to the 'RE' label to begin editing.\",\n    \"d5b29385: ;Call DGJTHLP to display allowable status codes, call ^DIC to edit, store result in Y, reset DIC to current file, store value in X if valid.\",\n    \"eb0189c7: ;Exit the X4 label.\",\n    \"9be46072: ;Set flag to update the record on exit.\",\n    \"1b42f63d: ;Set DGJTUP=1 to indicate the record should be updated.\",\n    \"67c21b9f: ;Call UPDATE^DIE, but see which fields were changed first.\",\n    \"5db695ad:  .;\\n .;MSG is required for DECEASED & INACTIVE status.\\n .;Added this field if MSG was missing.\",\n    \"249ca0e2: ;Process MSG field.\",\n    \"a595593f: ;Populate MSG for Inactive/Deceased Patients.\",\n    \"8c60d8d9: ;Quit.\",\n    \"06a6abf5: ;MSG field, comments.\",\n    \"3540db5e: ;Re-entry point from .01.\",\n    \"f5318ad8: ;Delete MSG if too long or too short.\",\n    \"2f6ea09e: ;Delete invalid MSG.\",\n    \"2dfc18ee: ;Quit MSG editing.\",\n    \"c98b69b0: ;See if MSG updated, and if so re-do .01.\",\n    \"256364b1: ;MSG field edited.\",\n    \"153c02e6: ;Quit MSG editing.\",\n    \"612f9883: ;Fall-through quit.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 98.4911789894104
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "07d093d0:  ;;\n ;;EDIT multiple fields in the input template file\n ;;setting IENS,VARIABLES, MESSAGE CODE LOOKUP,\n ;;and ELIFEOR CLEANING CODE.",
+        "readability": {
+          "reasoning": "The comment is clear but has some formatting issues with unnecessary semicolons and inconsistent line breaks.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a high-level overview of what the code is doing, which can help an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a758c1fe: Determine variable pointers of entry being edited",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the code, but it does not go into much detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f6a58f3f: Initialize variables for FileManager",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a straightforward action, which might be considered trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f626e98d: If a STATUS value exists, store it for later use",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action, helping an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a958bee6: If a MESSAGE CODE value exists, store it for later use",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action, helping an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8ea2d8fa: Housekeeping for variables",
+        "readability": {
+          "reasoning": "The comment is clear and concise, but the term 'Housekeeping' could be more specific.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat vague and does not provide detailed information about the variables.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ea8b319b: Write label for field being edited",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f58299fc: Exit point",
+        "readability": {
+          "reasoning": "The comment is very brief but understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail on the context of the exit point.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "62db112a: Write data for field, handle word-wrapping",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the code's functionality in handling word-wrapping.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4d4e9b47: If field is word-wrapped, go to word-wrapping routine",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it explains the condition and the subsequent action in detail.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a55d479c: If field is inactive, write no editing message and exit",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the behavior of the code under a specific condition, which is useful for understanding logic flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0998a466: Read user response, allow timeout",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes an important functional aspect of the code, which is helpful for understanding user interaction handling.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6355cd43: Exit point",
+        "readability": {
+          "reasoning": "The comment is very brief but still readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a termination point, which is useful in understanding the flow of the program.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d9dcc5d8: Increment sequence number",
+        "readability": {
+          "reasoning": "The comment is clear and easily understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a basic operation, which is useful but not very informative beyond the obvious.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "25b9a249: Branch to sequence logic",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information regarding control flow, which helps in understanding the code's branching logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c9598ac2: If the field is required or has responding help, read the entry and branch to the appropriate routine.",
+        "readability": {
+          "reasoning": "The comment is well-written and easily understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the logic for handling required fields and help routines, which is useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cb83e0a3: If the value entered is null, branch based on certain conditions.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action taken for null values, which is useful for understanding conditional branching.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "06011494: If the user enters a question mark, branch to the question/help routine.",
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the handling of a specific user input, which is helpful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "560eb2a5: If the user enters an '@', branch to the FileMan output routine.",
+        "readability": {
+          "reasoning": "The comment is clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the handling of a specific input, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ff453040: If the user enters a space and there is a default value defined for this field, display the default value.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action taken for a specific input when a default value is defined, which is useful for understanding the code's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "48a034c7: If there are multiple choice values, search for a match and branch based on conditions.",
+        "readability": {
+          "reasoning": "The comment is clearly written with proper grammar.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the branching logic based on multiple choice values, which is useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6965e2c6: If no match is found in the multiple choice list, display the available choices.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies what happens when there is no match in the list, which aids in understanding the error handling.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "320cb39b: Display the remaining portion of the last multiple choice value.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action related to the last multiple choice value, which is helpful for understanding the code behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "626f6256: If this is a pointer field, perform a lookup and retrieve the internal value.",
+        "readability": {
+          "reasoning": "The comment is well-written with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the special handling required for pointer fields, which is valuable for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "49c262bf: If this is a numeric field, validate the input format and length.",
+        "readability": {
+          "reasoning": "The comment is clear and uses proper grammar.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the validation requirements for numeric fields, aiding in code comprehension.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3178dc4e: If this is a numeric field with decimal places, validate and format the input.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific and useful information about validating and formatting numeric input.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5c67b577: Execute any additional input transform logic.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat vague but indicates a necessary step in the process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "10c68d8f: Store the final input value, and if it's a DISPLAY-only field, update the user's last reference.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment offers detailed and useful information about storing and updating the input value.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "dce06fbf: If the input is invalid, display an error message and branch to the input error routine.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides essential information about error handling.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2a7f0d94: Set the default error message.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a basic but necessary functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "482945f3: ;Branch to QQ^DIEQ to handle user entering '?'",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about error handling, useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0d41a5e0: ;Build the DQ array for the current field",
+        "readability": {
+          "reasoning": "The comment is concise and clear, with no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action taken in the code, which is helpful for understanding its purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7b93e087: ;If previous value not defined, perform outputting and branching",
+        "readability": {
+          "reasoning": "The comment is clear but could be slightly more concise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional operation, aiding in understanding the code's logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6e48ba2d: ;If value is predefined, use it",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a basic conditional check, which is somewhat useful but not highly detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c8b3c118: ;Resolve pointer values in POINTER MASS DIAGONAL format",
+        "readability": {
+          "reasoning": "The comment is clear but uses jargon that might not be universally understood.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about a complex operation, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6bc1cdef: ;Resolve pointer values in POINTER MASS VERTICAL format",
+        "readability": {
+          "reasoning": "The comment is clear and concise, well-written without any grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about resolving pointer values in a specific format, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9a777ce8: ;Resolve SET OF CODES values",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of resolving a set of codes, which helps understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fc276f87: ;Validate and re-display the data value",
+        "readability": {
+          "reasoning": "The comment is straightforward and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a useful operation of validating and re-displaying a data value.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "095aae44: ;If INPUT transform is not allowed for this type of field, branch to normal read",
+        "readability": {
+          "reasoning": "The comment is clear with a detailed description.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful conditional logic that helps in understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1dc18527: ;Call the INPUT transform",
+        "readability": {
+          "reasoning": "The comment is simple and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a function call, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "61d4cfec: ;INPUT transform exits here",
+        "readability": {
+          "reasoning": "The comment is clear to read but includes an identifier that doesn't add to its clarity.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, as it indicates the exit point of an input transformation.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "21b87e85: ;Entry point and initialization",
+        "readability": {
+          "reasoning": "The comment is clear and well-written despite the identifier.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding that this is the entry point and where initialization happens.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6210d3b7: ;Form initial values for field STATUS: required, pointer to file #393.2",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, accurately describing its purpose.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful, providing detailed information about the initial values for a specific field.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b1524167: ;Prefix for pointer to STATUS values",
+        "readability": {
+          "reasoning": "The comment is clear to read but the identifier slightly detracts from readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, explaining the purpose of a prefix.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "33b071c7: ;Get the current value to prime the multiple",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful, explaining a specific action to be taken.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "09cea5d9: ;Set Y to the test status value passed from the calling routine.",
+        "readability": {
+          "reasoning": "The comment is concise and free of grammatical errors, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context about what the code is doing, helping both average and expert programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3bc7f399: ;If status value is defined, store it in X and set DB(DQ)=1 for editing. If status is undefined or invalid, go to the 'N' or 'A' labels based on DV value.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, with no significant readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a comprehensive description of the code's logic, which is very useful for understanding the flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b7873942: ;If a valid status value is in X, go to the 'Z' label to store it. Otherwise, go to the 'RD' label to read a new value.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, making it easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it outlines the decision-making process based on the status value, providing valuable context.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3d25025f: ;No code for this label.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment states a trivial fact that is easily discernible from the code itself.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f3472c91: ;Set up to display the help text for status codes.",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it explains the purpose of the upcoming code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e80d3aea: ;The help text is stored in ^DIC(9.4,\"ACODE\",15).",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about where the help text is stored, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8f081103: ;Exit the X2 label.",
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the purpose of a specific label in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6233f9e9: ;\n;\n;Section to edit the status field again, in case previous edits were undone.\n;",
+        "readability": {
+          "reasoning": "The comment is clear but includes unnecessary newlines.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific section of the code and its purpose, which is helpful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "63db89fb: ;Redefine DW, DV, DU, DLB, and DIFLD for the status field.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the redefinition of multiple variables related to the status field.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ac7ed369: ;Redefine DU to reference the DG(393.2 file.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific redefinition in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e82c3698: ;Go to the 'RE' label to begin editing.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is helpful for an average programmer to understand the instruction.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d5b29385: ;Call DGJTHLP to display allowable status codes, call ^DIC to edit, store result in Y, reset DIC to current file, store value in X if valid.",
+        "readability": {
+          "reasoning": "The comment is detailed and mostly clear but slightly verbose.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "Provides a step-by-step breakdown of the function, aiding understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "eb0189c7: ;Exit the X4 label.",
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a basic but clear instruction, which is useful for navigation.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9be46072: ;Set flag to update the record on exit.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides clear information about functionality related to record updating.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1b42f63d: ;Set DGJTUP=1 to indicate the record should be updated.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is useful for understanding a specific condition related to the record update.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "67c21b9f: ;Call UPDATE^DIE, but see which fields were changed first.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the specific action being taken and a condition to check before proceeding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5db695ad:  .;\n .;MSG is required for DECEASED & INACTIVE status.\n .;Added this field if MSG was missing.",
+        "readability": {
+          "reasoning": "The comment is clear but slightly disjointed due to line breaks.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides important information about a requirement and an action taken if a condition is met, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "249ca0e2: ;Process MSG field.",
+        "readability": {
+          "reasoning": "The comment is very clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but very general, indicating only that the MSG field is being processed without additional detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a595593f: ;Populate MSG for Inactive/Deceased Patients.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it specifies the purpose of the code clearly.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8c60d8d9: ;Quit.",
+        "readability": {
+          "reasoning": "The comment is very clear but extremely brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is trivial and does not provide much additional information.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "06a6abf5: ;MSG field, comments.",
+        "readability": {
+          "reasoning": "The comment is concise, but it could be clearer about what the 'MSG field' refers to.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail to be exceptionally helpful for understanding the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3540db5e: ;Re-entry point from .01.",
+        "readability": {
+          "reasoning": "The comment is succinct and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific function of the code segment.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f5318ad8: ;Delete MSG if too long or too short.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about a specific condition for MSG deletion.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2f6ea09e: ;Delete invalid MSG.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but could be more specific about what makes an MSG invalid.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "2dfc18ee: ;Quit MSG editing.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the termination of MSG editing.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c98b69b0: ;See if MSG updated, and if so re-do .01.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a specific condition and action, which is useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "256364b1: ;MSG field edited.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment states a simple fact about the MSG field being edited, which is somewhat useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "153c02e6: ;Quit MSG editing.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment simply states that MSG editing is being quit, which is somewhat useful but not detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "612f9883: ;Fall-through quit.",
+        "readability": {
+          "reasoning": "The comment is clear but uses jargon ('fall-through'), which might not be immediately understandable to everyone.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a specific type of quit operation, which is useful for understanding the control flow.",
+          "score": 4
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,1418 @@
+{
+  "input": "{\n  \"comments\": [\n    \"07d093d0: ;\\n .;\\nUpdate an existing entry. Set DE nodes to contain coded edit values.\\n .;If there are no locked multiple fields, exit with descendent naked.\\n .;\",\n    \"a758c1fe: ;Returns old values to DE nodes.\",\n    \"f6a58f3f: ;Set location and external form of file, check validity and absence of data.\",\n    \"f626e98d: ;Get coded data - VALUE(1) (e.g. IEN) and VALUE(4) from ^DD global node.\",\n    \"a958bee6: ;Get written MSG node value.\",\n    \"8ea2d8fa: ;Kill variables.\",\n    \"ea8b319b: ;Write indentation and label.\",\n    \"f58299fc: ;Return.\",\n    \"62db112a: ;Output value.\",\n    \"4d4e9b47: ;Read WORD-PROCESSING fields, and other SO-PIECES.\",\n    \"a55d479c: ;If no editing value defined, and RO or DIST LOGIC in DIEDIT, disable editing.\",\n    \"0998a466: ;Read input, execute DIR TIMEOUT code and buzz if timed out.\",\n    \"6355cd43: ;Return.\",\n    \"d9dcc5d8: ;Lock denied.\",\n    \"25b9a249: ;Branch to routine DE(DQ).\",\n    \"c9598ac2: ;Re-entry point for embedded DEs.\",\n    \"cb83e0a3: ;If null, and not required, exit; otherwise branch out.\",\n    \"06011494: ;Help requested, or BRANCH TO FILE entry point.\",\n    \"560eb2a5: ;Entry of `@` to spawn ZOOM to another file.\",\n    \"ff453040: ;If VALUE POINTER, MULTIPLE VALUED and defined WORD PROCESSING MULTIPLE, stuff VALUE with WORD PROCESSING MULTIPLE.\",\n    \"48a034c7: ;Set Y from VALUE JPI0 node. If it says ScreenMan code follows, execute it.\",\n    \"6965e2c6: ;Find Y at the end of an `abc:...' VALUE JPI0 node.\",\n    \"320cb39b: ;Output unchanged remaining piece of VALUE JPI0 node, and un-`abc:...'ed X piece.\",\n    \"626f6256: ;POINTER or VARIABLE POINTER Value.  Call ScreenMan POINTER code.\",\n    \"49c262bf: ;NUMBER and NUMERIC Value , screening and storage conversion needed.\",\n    \"3178dc4e: ;If free text numeric only, remove leading zeros and continue.\",\n    \"5c67b577: ;Check if X is already defined. If it exists, kill YS.\",\n    \"10c68d8f: ;If X is defined and not the up-arrow character, store X in DG(DW). If DV contains 'd', store X in ^DISV(DUZ,\\\"DIE\\\",DLB). Go to label A.\",\n    \"dce06fbf: ;If X is undefined, write a beep and go to Z^DIE17 if DB(DQ) is defined.\",\n    \"2a7f0d94: ;If X is still undefined, set it to \\\"?BAD\\\".\",\n    \"482945f3: ;Set DZ to X, call D subroutine, call QQ^DIEQ, go to label B.\",\n    \"0d41a5e0: ;Set D to DIFLD, and store field definition in DQ(DQ). The definition includes the file number (DLB), field number (DV), up-arrow code (DU), word-processing flag (DW), and executable code from the DD global.\",\n    \"7b93e087: ;If DE(DQ) is undefined, call O subroutine. If X is not \\\"@\\\", go to RD. If DV does not contain \\\"R\\\" and X is \\\"@\\\", go to A. If X is \\\"@\\\", set X to Y and go to N.\",\n    \"6e48ba2d: ;Set DG to DV, Y to DE(DQ), and X to DU. If DQ(DQ,2) is defined, execute it. Go to RP.\",\n    \"c8b3c118: ;If DG contains \\\"P\\\" and the 0 node of the pointed-to global exists, set X to the second piece of that node. If Y is undefined at the pointed-to location, go to RP. Otherwise, set Y and X from the 0 node, and set DG from the DD global. Go to R.\",\n    \"6bc1cdef: ;If DG contains \\\"V\\\", Y is non-zero, the second piece of Y contains \\\"(\\\", and the global node referenced exists, set X to the second piece of that node. If Y is undefined at the pointed-to location, go to RP. Otherwise, set Y. If the .01 field of the pointed-to file exists in DD, set DG and X from there. Go to R.\",\n    \"9a777ce8: ;If DG contains \\\"D\\\", execute ^DD(\\\"DD\\\"). If DG contains \\\"S\\\", parse out a value from X based on Y and set Y to that value.\",\n    \"fc276f87: ;Call O subroutine. If X is null, set X to DE(DQ). If DV is null, go to A. If DC is less than 2, go to A. Otherwise go to N^DIE17.\",\n    \"095aae44: ;If DV does not contain \\\"I\\\" or \\\"#\\\", go to RD.\",\n    \"1dc18527: ;Call E^DIE0. If X is defined, go to RD, else go to PR.\",\n    \"61d4cfec: ;End of routine.\",\n    \"21b87e85: ;Set DNM to \\\"DGJXE7\\\", DQ to 1.\",\n    \"6210d3b7: ;If DG is defined, call F^DIE17 and DE. Set DQ to 1, DW to \\\"0;11\\\", DV to \\\"R*P393.2'\\\", DU to null, DLB to \\\"STATUS\\\", and DIFLD to .11.\",\n    \"b1524167: ;Set DU to \\\"DG(393.2,\\\".\",\n    \"33b071c7: ;Set X to DGJTST.\",\n    \"09cea5d9: ;Set Y to X.\",\n    \"3bc7f399: ;Set X to Y, DB(DQ) to 1. If X is null, go to N^DIE17 if DV is null, or go to A if not. If DE(DQ) is defined and DV contains \\\"I\\\" or \\\"#\\\", call E^DIE0. Go to A if X is undefined.\",\n    \"b7873942: ;If X is true or the reader input is true, go to label Z.\",\n    \"3d25025f: ;Quit\",\n    \"f3472c91: ;If DG is defined and has more than 9 nodes, call F^DIE17 and DE, set Y to $CHAR(3) and DQ to 2, call X2, if Y is undefined or $CHAR(3) then go to A, else set X to Y, set DIC(0) to 'F', set DW to DQ, and go to OUT^DIE17.\",\n    \"e80d3aea: ;Set Y to '@15'\",\n    \"8f081103: ;Quit\",\n    \"6233f9e9: ;\\n;Set DQ to 4\\n\",\n    \"63db89fb: ;Set DW to '0;11', DV to 'R*P393.2', DU to null, DLB to 'STATUS', and DIFLD to .11\",\n    \"ac7ed369: ;Set DU to 'DG(393.2,'\",\n    \"e82c3698: ;Go to label RE\",\n    \"d5b29385: ;Call STATUS^DGJTHLP and ^DIC, kill DIC, set DIC to DIE, set X to +Y, kill X if Y is negative\",\n    \"eb0189c7: ;Quit\",\n    \"9be46072: ;If DG is defined and has more than 9 nodes, call F^DIE17 and DE, set Y to $CHAR(3), set DQ to 5, call X5, if Y is undefined or $CHAR(3) then go to A, else set X to Y, set DIC(0) to 'F', set DW to DQ, and go to OUT^DIE17.\",\n    \"1b42f63d: ;Set DGJTUP to 1\",\n    \"67c21b9f: ;Quit\",\n    \"5db695ad: ;\\n;Set DQ to 7\\n\",\n    \"249ca0e2: ;If DG is defined and has more than 9 nodes, call F^DIE17 and DE, set Y to $CHAR(3), set DQ to 7, call X7, if Y is undefined or $CHAR(3) then go to A, else set X to Y, set DIC(0) to 'F', set DW to DQ, and go to OUT^DIE17.\",\n    \"a595593f: ;If DGJTNUM does not contain '4', set Y to null\",\n    \"8c60d8d9: ;Quit\",\n    \"06a6abf5: ;Set DW to 'MSG;1', DV to 'F', DU to null, DLB to 'COMMENTS', and DIFLD to 20.01\",\n    \"3540db5e: ;Go to label RE\",\n    \"f5318ad8: ;Kill X if $LENGTH(X) is greater than 200 or less than 3\",\n    \"2f6ea09e: ;If X is defined and does not contain only alphanumerics and punctuation, kill X\",\n    \"2dfc18ee: ;Quit\",\n    \"c98b69b0: ;If DG is defined and has more than 9 nodes, call F^DIE17 and DE, set Y to $CHAR(3), set DQ to 9, call X9, if Y is undefined or $CHAR(3) then go to A, else set X to Y, set DIC(0) to 'F', set DW to DQ, and go to OUT^DIE17.\",\n    \"256364b1: ;Set DGJTUP to 1\",\n    \"153c02e6: ;Quit\",\n    \"612f9883: ;Go to 0^DIE17\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 181.23518776893616
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "07d093d0: ;\n .;\nUpdate an existing entry. Set DE nodes to contain coded edit values.\n .;If there are no locked multiple fields, exit with descendent naked.\n .;",
+        "completeness": {
+          "reasoning": "The comment addresses multiple aspects of the code, such as updating entries and handling locked fields.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is plausible and aligns with typical operations in such contexts.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, though the semicolons might be slightly distracting.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides helpful insight for understanding the functionality of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a758c1fe: ;Returns old values to DE nodes.",
+        "completeness": {
+          "reasoning": "The comment addresses a single aspect of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The statement is likely accurate based on typical functionality described.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "While it is clear, it provides limited information on the overall functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f6a58f3f: ;Set location and external form of file, check validity and absence of data.",
+        "completeness": {
+          "reasoning": "The comment covers multiple essential functions of the code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides plausible and true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the key operations performed by the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f626e98d: ;Get coded data - VALUE(1) (e.g. IEN) and VALUE(4) from ^DD global node.",
+        "completeness": {
+          "reasoning": "The comment addresses specific functionality related to retrieving coded data.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is likely accurate based on the context provided.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but might benefit from additional context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful but might not provide enough context for complete understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a958bee6: ;Get written MSG node value.",
+        "completeness": {
+          "reasoning": "The comment is very specific and does not cover multiple aspects of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is likely accurate but limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks depth.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8ea2d8fa: ;Kill variables.",
+        "completeness": {
+          "reasoning": "The comment addresses the action of killing variables but doesn't specify which variables or why.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true; it states that variables are being killed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some insight but lacks detail to be fully useful to an expert programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ea8b319b: ;Write indentation and label.",
+        "completeness": {
+          "reasoning": "The comment mentions writing indentation and a label but does not specify which indentation or label.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate in terms of what the code does.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but could be more specific.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f58299fc: ;Return.",
+        "completeness": {
+          "reasoning": "The comment only states 'Return' without any additional context.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information is true but very minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very clear but lacks detail.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful due to its lack of detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "62db112a: ;Output value.",
+        "completeness": {
+          "reasoning": "The comment states that a value is output but doesn't specify which value or why.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but lacks context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but could be more specific.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4d4e9b47: ;Read WORD-PROCESSING fields, and other SO-PIECES.",
+        "completeness": {
+          "reasoning": "The comment provides more detail about reading specific fields but could still include more information.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and provides specific details.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding what specific fields are being read.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a55d479c: ;If no editing value defined, and RO or DIST LOGIC in DIEDIT, disable editing.",
+        "completeness": {
+          "reasoning": "The comment addresses essential functionality related to the editing value and its conditions.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true based on the context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand condition-based editing.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0998a466: ;Read input, execute DIR TIMEOUT code and buzz if timed out.",
+        "completeness": {
+          "reasoning": "The comment covers essential actions like reading input and handling timeout.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to provide true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the timeout mechanism.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6355cd43: ;Return.",
+        "completeness": {
+          "reasoning": "The comment only indicates a return statement without further details.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but too simplistic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but extremely brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents only trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d9dcc5d8: ;Lock denied.",
+        "completeness": {
+          "reasoning": "The comment only states a single outcome without context.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information is true but lacks depth.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents only trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "25b9a249: ;Branch to routine DE(DQ).",
+        "completeness": {
+          "reasoning": "The comment specifies a single action but doesn't explain the context of the routine.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but not comprehensive.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the control flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c9598ac2: ;Re-entry point for embedded DEs.",
+        "completeness": {
+          "reasoning": "The comment addresses the re-entry point for embedded DEs but lacks specific details about functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but is vague.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail for a full understanding.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "cb83e0a3: ;If null, and not required, exit; otherwise branch out.",
+        "completeness": {
+          "reasoning": "The comment addresses conditional behavior but does not cover all capabilities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about conditional logic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding conditional logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "06011494: ;Help requested, or BRANCH TO FILE entry point.",
+        "completeness": {
+          "reasoning": "The comment mentions two functionalities but lacks detail on how they are implemented.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but is vague.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "560eb2a5: ;Entry of `@` to spawn ZOOM to another file.",
+        "completeness": {
+          "reasoning": "The comment specifies the action triggered by the entry of `@` but lacks broader context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the action triggered.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful to understand the specific action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ff453040: ;If VALUE POINTER, MULTIPLE VALUED and defined WORD PROCESSING MULTIPLE, stuff VALUE with WORD PROCESSING MULTIPLE.",
+        "completeness": {
+          "reasoning": "The comment explains a specific conditional operation but lacks broader context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but technical.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific conditional operation.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "48a034c7: ;Set Y from VALUE JPI0 node. If it says ScreenMan code follows, execute it.",
+        "completeness": {
+          "reasoning": "The comment partially addresses the functionality, mentioning setting Y and executing ScreenMan code, but lacks full context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but incomplete, leading to potential misinterpretation.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but slightly terse, making it slightly harder to understand.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better, especially regarding the conditional execution.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6965e2c6: ;Find Y at the end of an `abc:...' VALUE JPI0 node.",
+        "completeness": {
+          "reasoning": "The comment provides a specific functionality but does not cover all the code's capabilities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate but limited in scope.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but uses shorthand (`abc:...') that might confuse some readers.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific part of the code but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "320cb39b: ;Output unchanged remaining piece of VALUE JPI0 node, and un-`abc:...'ed X piece.",
+        "completeness": {
+          "reasoning": "The comment describes the functionality well but is somewhat vague about the 'un-abc:...' part.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is mostly true but could be clearer in its explanation.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is somewhat clear but could be more specific to enhance understanding.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the code, especially for handling specific pieces.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "626f6256: ;POINTER or VARIABLE POINTER Value.  Call ScreenMan POINTER code.",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality regarding POINTER values but lacks detail on how ScreenMan POINTER code is called.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The provided information is accurate and specific.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful, particularly for understanding POINTER handling in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "49c262bf: ;NUMBER and NUMERIC Value , screening and storage conversion needed.",
+        "completeness": {
+          "reasoning": "The comment covers the basic functionality but lacks detail on what the screening and storage conversion entails.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate but not comprehensive.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could include more details to improve understanding.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the need for screening and conversion but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3178dc4e: ;If free text numeric only, remove leading zeros and continue.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover all capabilities of the relevant source code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about removing leading zeros for numeric-free text.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5c67b577: ;Check if X is already defined. If it exists, kill YS.",
+        "completeness": {
+          "reasoning": "The comment explains a crucial functionality but does not cover all the code's capabilities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the check for X and the action taken if it exists.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific condition and action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "10c68d8f: ;If X is defined and not the up-arrow character, store X in DG(DW). If DV contains 'd', store X in ^DISV(DUZ,\"DIE\",DLB). Go to label A.",
+        "completeness": {
+          "reasoning": "The comment documents multiple functionalities, covering most essential aspects.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true and detailed information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and detailed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is quite useful for an average to expert programmer to understand the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "dce06fbf: ;If X is undefined, write a beep and go to Z^DIE17 if DB(DQ) is defined.",
+        "completeness": {
+          "reasoning": "The comment describes a specific scenario but does not cover all functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the condition and subsequent actions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a particular condition and action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2a7f0d94: ;If X is still undefined, set it to \"?BAD\".",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but lacks overall coverage.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting X to \"?BAD\".",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific condition and action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "482945f3: ;Set DZ to X, call D subroutine, call QQ^DIEQ, go to label B.",
+        "completeness": {
+          "reasoning": "The comment addresses all the steps performed by the code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided matches the likely operations of the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a sequence of operations.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0d41a5e0: ;Set D to DIFLD, and store field definition in DQ(DQ). The definition includes the file number (DLB), field number (DV), up-arrow code (DU), word-processing flag (DW), and executable code from the DD global.",
+        "completeness": {
+          "reasoning": "The comment thoroughly explains the functionality.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information appears to be accurate and detailed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is detailed yet easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding the metadata being set.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7b93e087: ;If DE(DQ) is undefined, call O subroutine. If X is not '@', go to RD. If DV does not contain 'R' and X is '@', go to A. If X is '@', set X to Y and go to N.",
+        "completeness": {
+          "reasoning": "The comment covers the conditional logic comprehensively.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the conditional logic.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but slightly complex due to multiple conditions.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the flow of control.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6e48ba2d: ;Set DG to DV, Y to DE(DQ), and X to DU. If DQ(DQ,2) is defined, execute it. Go to RP.",
+        "completeness": {
+          "reasoning": "The comment explains all actions performed by the code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information appears to be correct and relevant.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding variable assignments and conditional execution.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c8b3c118: ;If DG contains 'P' and the 0 node of the pointed-to global exists, set X to the second piece of that node. If Y is undefined at the pointed-to location, go to RP. Otherwise, set Y and X from the 0 node, and set DG from the DD global. Go to R.",
+        "completeness": {
+          "reasoning": "The comment fully explains the conditions and actions taken.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The detailed information appears to be accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but involves complex logic.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding complex conditional logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6bc1cdef: ;If DG contains \"V\", Y is non-zero, the second piece of Y contains \"(\", and the global node referenced exists, set X to the second piece of that node. If Y is undefined at the pointed-to location, go to RP. Otherwise, set Y. If the .01 field of the pointed-to file exists in DD, set DG and X from there. Go to R.",
+        "completeness": {
+          "reasoning": "The comment covers multiple conditions and actions, capturing most of the functionality but not necessarily all edge cases or details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided matches common programming logic and does not seem to include false details.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is long and somewhat complex but remains clear and understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better by detailing multiple conditions and actions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9a777ce8: ;If DG contains \"D\", execute ^DD(\"DD\"). If DG contains \"S\", parse out a value from X based on Y and set Y to that value.",
+        "completeness": {
+          "reasoning": "The comment documents key functionalities regarding DG containing 'D' and 'S', but may miss other possible conditions.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "There is no indication that the information provided is false; it aligns with common programming tasks.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for an average programmer, explaining specific conditions and actions without trivial details.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "fc276f87: ;Call O subroutine. If X is null, set X to DE(DQ). If DV is null, go to A. If DC is less than 2, go to A. Otherwise go to N^DIE17.",
+        "completeness": {
+          "reasoning": "The comment addresses several conditions and actions but may not cover all aspects of the subroutine.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information appears accurate and is consistent with common programming patterns.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to follow despite its length.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding multiple conditions and their outcomes, helping an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "095aae44: ;If DV does not contain \"I\" or \"#\", go to RD.",
+        "completeness": {
+          "reasoning": "The comment only documents a single condition and action.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is straightforward and likely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and very clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but only covers a trivial condition.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "1dc18527: ;Call E^DIE0. If X is defined, go to RD, else go to PR.",
+        "completeness": {
+          "reasoning": "The comment documents a function call and two conditions, but likely misses other relevant details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is simple and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but does not provide comprehensive insight.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "61d4cfec: ;End of routine.",
+        "completeness": {
+          "reasoning": "The comment is very brief and does not provide much information about the routine.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but very minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but too short to be very informative.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very helpful for understanding the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "21b87e85: ;Set DNM to \"DGJXE7\", DQ to 1.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific action but lacks context and detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to be true based on its content.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some useful information but is limited in scope.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6210d3b7: ;If DG is defined, call F^DIE17 and DE. Set DQ to 1, DW to \"0;11\", DV to \"R*P393.2'\", DU to null, DLB to \"STATUS\", and DIFLD to .11.",
+        "completeness": {
+          "reasoning": "The comment provides detailed information about multiple actions.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides specific and likely accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-organized, though a bit complex.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very helpful for understanding the various actions in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b1524167: ;Set DU to \"DG(393.2,\".",
+        "completeness": {
+          "reasoning": "The comment addresses a specific action but lacks context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some useful information but is limited in scope.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "33b071c7: ;Set X to DGJTST.",
+        "completeness": {
+          "reasoning": "The comment addresses a single action and lacks context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to be true based on its content.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some useful information but is limited in scope.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "09cea5d9: ;Set Y to X.",
+        "completeness": {
+          "reasoning": "The comment only describes a single operation.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is trivial and does not provide much context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3bc7f399: ;Set X to Y, DB(DQ) to 1. If X is null, go to N^DIE17 if DV is null, or go to A if not. If DE(DQ) is defined and DV contains \"I\" or \"#\", call E^DIE0. Go to A if X is undefined.",
+        "completeness": {
+          "reasoning": "The comment covers multiple operations and conditions.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information seems accurate and detailed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear, though slightly complex.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand complex logic and conditions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b7873942: ;If X is true or the reader input is true, go to label Z.",
+        "completeness": {
+          "reasoning": "The comment covers a conditional operation but lacks detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides basic conditional information which is somewhat useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3d25025f: ;Quit",
+        "completeness": {
+          "reasoning": "The comment only describes a single, simple operation.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is trivial and does not add much context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f3472c91: ;If DG is defined and has more than 9 nodes, call F^DIE17 and DE, set Y to $CHAR(3) and DQ to 2, call X2, if Y is undefined or $CHAR(3) then go to A, else set X to Y, set DIC(0) to 'F', set DW to DQ, and go to OUT^DIE17.",
+        "completeness": {
+          "reasoning": "The comment covers multiple operations and conditions in detail.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information seems accurate and thorough.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but complex, requiring careful reading.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information useful for understanding complex logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e80d3aea: ;Set Y to '@15'",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of setting Y to '@15', but it does not provide context or mention other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the specific action being taken.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific action, but lacks context for a broader understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8f081103: ;Quit",
+        "completeness": {
+          "reasoning": "The comment only describes a single action, which is to quit, without detailing any additional functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very clear and unambiguous.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is straightforward and useful for understanding that this action will result in quitting.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6233f9e9: ;\n;Set DQ to 4\n",
+        "completeness": {
+          "reasoning": "The comment mentions setting DQ to 4 but does not provide any additional context or cover further functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting DQ to 4.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific action but does not offer broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "63db89fb: ;Set DW to '0;11', DV to 'R*P393.2', DU to null, DLB to 'STATUS', and DIFLD to .11",
+        "completeness": {
+          "reasoning": "The comment covers multiple settings in detail, providing a comprehensive overview of the actions taken.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes each setting without any false information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding multiple settings in one place, benefiting expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ac7ed369: ;Set DU to 'DG(393.2,'",
+        "completeness": {
+          "reasoning": "The comment only mentions setting DU to a specific value and does not address any other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes setting DU to a specific value.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific action but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e82c3698: ;Go to label RE",
+        "completeness": {
+          "reasoning": "The comment addresses only one specific action and does not document any other functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the code's action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is only marginally useful as it explains a very simple operation that is likely evident from the code itself.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d5b29385: ;Call STATUS^DGJTHLP and ^DIC, kill DIC, set DIC to DIE, set X to +Y, kill X if Y is negative",
+        "completeness": {
+          "reasoning": "The comment covers several actions but may not encompass all essential functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided seems accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is mostly clear but could be broken down for better readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a series of actions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "eb0189c7: ;Quit",
+        "completeness": {
+          "reasoning": "The comment addresses only one action and does not document any other functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the code's action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is only marginally useful as it explains a very simple operation that is likely evident from the code itself.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "9be46072: ;If DG is defined and has more than 9 nodes, call F^DIE17 and DE, set Y to $CHAR(3), set DQ to 5, call X5, if Y is undefined or $CHAR(3) then go to A, else set X to Y, set DIC(0) to 'F', set DW to DQ, and go to OUT^DIE17.",
+        "completeness": {
+          "reasoning": "The comment covers multiple actions and conditions, addressing most essential functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information appears accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is detailed but somewhat complex, making it harder to read.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a complex series of actions and conditions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1b42f63d: ;Set DGJTUP to 1",
+        "completeness": {
+          "reasoning": "The comment addresses only one specific action and does not document any other functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the code's action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is only marginally useful as it explains a very simple operation that is likely evident from the code itself.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "67c21b9f: ;Quit",
+        "completeness": {
+          "reasoning": "The comment does not provide any details about the functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but lacks any detailed information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful for understanding the broader functionality of the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "5db695ad: ;\n;Set DQ to 7\n",
+        "completeness": {
+          "reasoning": "The comment only addresses a single line of functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action taken by the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but only documents a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "249ca0e2: ;If DG is defined and has more than 9 nodes, call F^DIE17 and DE, set Y to $CHAR(3), set DQ to 7, call X7, if Y is undefined or $CHAR(3) then go to A, else set X to Y, set DIC(0) to 'F', set DW to DQ, and go to OUT^DIE17.",
+        "completeness": {
+          "reasoning": "The comment provides a comprehensive explanation of the functionality.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to provide accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is detailed but might be overwhelming due to its length.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the code's logic and flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a595593f: ;If DGJTNUM does not contain '4', set Y to null",
+        "completeness": {
+          "reasoning": "The comment provides a specific condition and action but does not cover all functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information based on the condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8c60d8d9: ;Quit",
+        "completeness": {
+          "reasoning": "The comment does not provide any details about the functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but lacks any detailed information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful for understanding the broader functionality of the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "06a6abf5: ;Set DW to 'MSG;1', DV to 'F', DU to null, DLB to 'COMMENTS', and DIFLD to 20.01",
+        "completeness": {
+          "reasoning": "The comment seems to address all variables being set, but without knowing the full context of the code, it's hard to determine if other functionalities are involved.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be accurate based on the variables and values mentioned.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is mostly clear, although the use of abbreviations could be confusing to some.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the initialization of several variables, which could be useful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3540db5e: ;Go to label RE",
+        "completeness": {
+          "reasoning": "The comment only describes a single action, and does not provide comprehensive details about the code's functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be true, but it lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but very limited in scope.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f5318ad8: ;Kill X if $LENGTH(X) is greater than 200 or less than 3",
+        "completeness": {
+          "reasoning": "The comment fully describes the conditional action being taken.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be true and matches the described action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the conditions under which the variable X is killed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2f6ea09e: ;If X is defined and does not contain only alphanumerics and punctuation, kill X",
+        "completeness": {
+          "reasoning": "The comment fully describes the conditional action being taken.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be true and matches the described action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the conditions under which the variable X is killed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2dfc18ee: ;Quit",
+        "completeness": {
+          "reasoning": "The comment describes only a single action and does not provide comprehensive details about the code's functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be true, but it lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but very limited in scope.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c98b69b0: ;If DG is defined and has more than 9 nodes, call F^DIE17 and DE, set Y to $CHAR(3), set DQ to 9, call X9, if Y is undefined or $CHAR(3) then go to A, else set X to Y, set DIC(0) to 'F', set DW to DQ, and go to OUT^DIE17.",
+        "completeness": {
+          "reasoning": "The comment addresses the entire sequence of operations and conditions involved.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the operations and conditions without any false information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is detailed and well-structured, despite the complexity of the operations described.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a thorough explanation that would be useful to an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "256364b1: ;Set DGJTUP to 1",
+        "completeness": {
+          "reasoning": "The comment only documents a single, straightforward assignment.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting a single variable.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial action that most programmers would easily understand.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "153c02e6: ;Quit",
+        "completeness": {
+          "reasoning": "The comment addresses a single action but lacks context or additional details.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but is too brief.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but extremely brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful due to its brevity and lack of context.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "612f9883: ;Go to 0^DIE17",
+        "completeness": {
+          "reasoning": "The comment describes a single jump action without additional context.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but is minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful due to its lack of detail and context.",
+          "score": 1
+        }
+      }
+    ]
+  }
+}

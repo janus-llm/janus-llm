@@ -1,0 +1,1076 @@
+{
+  "input": "{\n  \"comments\": [\n    \"03bbc313:  ;\\n ;Select the output sort order by Patient, Service/Specialty, or Provider\\n ;Set flags for file print parameters\\n ;If multiple entries (Multidivision) then get Mult Div pointer\\n ;Set logic for header line print and branching to output routine\\n ;Get date range for report\",\n    \"6d8fce1b: ;Default to sort by patient if no sort choice entered\",\n    \"d9e0e62e: ;Convert chosen sort option to numeric value\",\n    \"f6d70133: ;If user requests help display available options\",\n    \"56efb261: ;If unknown response re-display sort choices\",\n    \"7fa0374b: ;Default to Both inpatients and outpatients if no choice made\",\n    \"2b342d9e: ;Convert chosen choice to numeric value\",\n    \"84d1fcf8: ;If user requests help display available options\",\n    \"9f6ce142: ;If unknown response re-display choices\",\n    \"c831a608: ;If multidivision entry exists get pointer value\",\n    \"ad4aecc0: ;Initialize page counter\",\n    \"aae4a9bd: ;If multidivision entry exists get pointer value\",\n    \"3e0faafc: ;Set up branching based on sort choice\",\n    \"bc95ab7b: ;Branch to output routine\",\n    \"2f8c4e0c:  ;\\n ;Get beginning and ending dates for report\\n ;\\n ;Prompt user for Summary deficiency print choice if not discharged\\n ;\\n ;Clean up variables used\\n ;\\n ;Display sort choice help text\\n ;Display patient type choice help text\\n ;Display status choice help text\\n ;\\n ;Set up available sort choices\\n ;Set up available patient type choices\\n ;\\n ;Get Incomplete Record Status choice(s)\",\n    \"5dbcf51d: ;Exit if user enters up-arrow or times out.\",\n    \"64cc93e6: ;Exit if user enters up-arrow or times out. Display help screen if entered date is invalid.\",\n    \"1544425a: ;Set DGJTEND to end date plus .9999 days (just before midnight on the end date).\",\n    \"b054b970: ;Check if ending date is before beginning date and display error message if so.\",\n    \"697588f2: ;Exit date range selection.\",\n    \"6a5d3d95: ;Ask if summary deficiencies should be displayed for patients not yet discharged.\",\n    \"14bffa0c: ;Exit if user entered up-arrow.\",\n    \"2bc4de71: ;Set DGJDSC=1 if summary deficiencies should be displayed for patients not discharged.\",\n    \"db48cde1: ;Exit selection of whether to display summary deficiencies.\",\n    \"83fcacbb: ;Kill (undefine) variables used in this routine.\",\n    \"30fc6417: ;Kill additional variables used in this routine.\",\n    \"8015589a: ;Close device for printing and quit.\",\n    \"c0aca632: ;Display help text for sort output options.\",\n    \"0183a778: ;Exit help for sort output options.\",\n    \"d05736fc: ;Display help text for print report options.\",\n    \"fe873d9e: ; Display prompt for accepting/rejecting display of Deficiencies for not discharged patients\",\n    \"aceab04d: ; Instructions for including Deficiencies under SUMMARY for not discharged patients\",\n    \"824ccbb3: ; Instructions for excluding Deficiencies under SUMMARY for not discharged patients\",\n    \"089822da: ; End of help text for DGJDSC option\",\n    \"5797509d: ; Set up sort order options\",\n    \"f63bc470: ; Set up patient type options\",\n    \"3eb4b6e8: ; Prompt for Incomplete Record Status selection\",\n    \"81b8caf8: ; Display help text for Incomplete Record Status selection\",\n    \"45a9e271: ; Start of help text for Incomplete Record Status selection\",\n    \"5c2fc5bd: ; List of options for Incomplete Record Status selection\",\n    \"e2c0f757: ; Check if user opted out of selection\",\n    \"630fea34: ; Set DGJTSTAT for 'ALL' selection\",\n    \"23afe4fb: ; Initialize DGJTSTAT for selective status\",\n    \"e77c902b: ; Call subroutine to set DGJTSTAT\",\n    \"bcce6fbb: ; Modify prompt to allow selection of additional statuses\",\n    \"46a3ef99: ;Prepare for selection of additional status options.\",\n    \"f3c8f273: ;Remove previous lines from the help array after selecting an option.\",\n    \"1c062ffe: ;Prompt user for additional status option selection.\",\n    \"7ee57ee7: ;Check if the user requested to exit option selection.\",\n    \"5b266a9f: ;If an option was selected, process it and ask again.\",\n    \"4631b1b9: ;Exit option selection loop.\",\n    \"36eb8761: ;Translate option code to internal status representation.\",\n    \"e2915568: ;Retrieve internal code for selected status.\",\n    \"57c4f978: ;Add selected status code to list.\",\n    \"c399389d: ;Exit status code lookup.\",\n    \"4c163d61: ;Return the selected value.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 105.51621294021606
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "03bbc313:  ;\n ;Select the output sort order by Patient, Service/Specialty, or Provider\n ;Set flags for file print parameters\n ;If multiple entries (Multidivision) then get Mult Div pointer\n ;Set logic for header line print and branching to output routine\n ;Get date range for report",
+        "completeness": {
+          "reasoning": "The comment addresses several important functionalities related to sorting, setting flags, handling multiple entries, printing header logic, and date range.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true and relevant information about the code functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding key aspects of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6d8fce1b: ;Default to sort by patient if no sort choice entered",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover other aspects.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the default sort behavior.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful, but only for understanding a specific default behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d9e0e62e: ;Convert chosen sort option to numeric value",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality related to converting sort options.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the sorting option conversion.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f6d70133: ;If user requests help display available options",
+        "completeness": {
+          "reasoning": "The comment addresses only the help display functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the help functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the help feature but does not provide broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "56efb261: ;If unknown response re-display sort choices",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of handling unknown responses but nothing else.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about re-displaying sort choices.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding response handling but is limited in scope.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7fa0374b: ;Default to Both inpatients and outpatients if no choice made",
+        "completeness": {
+          "reasoning": "The comment addresses a specific default behavior but does not cover all aspects of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the default behavior.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific part of the code but not the entire functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2b342d9e: ;Convert chosen choice to numeric value",
+        "completeness": {
+          "reasoning": "The comment addresses a specific action but does not explain any additional functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about converting a choice to a numeric value.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the conversion process but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "84d1fcf8: ;If user requests help display available options",
+        "completeness": {
+          "reasoning": "The comment addresses a specific user action but does not cover the entire code's capabilities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the help display functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the help functionality but not the entire context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9f6ce142: ;If unknown response re-display choices",
+        "completeness": {
+          "reasoning": "The comment addresses a specific error-handling scenario but not the full functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes re-displaying choices on unknown responses.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding error handling but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c831a608: ;If multidivision entry exists get pointer value",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but not the overall functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes what happens if a multidivision entry exists.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific condition but lacks full context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ad4aecc0: ;Initialize page counter",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but doesn't cover much else.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly states the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but only for a very specific part of the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "aae4a9bd: ;If multidivision entry exists get pointer value",
+        "completeness": {
+          "reasoning": "The comment addresses a conditional functionality but does not cover all aspects.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear, although a bit technical.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a conditional operation in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3e0faafc: ;Set up branching based on sort choice",
+        "completeness": {
+          "reasoning": "The comment describes a specific functionality but lacks detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks depth.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "bc95ab7b: ;Branch to output routine",
+        "completeness": {
+          "reasoning": "The comment addresses a specific action but is very limited in scope.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly describes the action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is simple and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is only useful for understanding a specific branch in the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "2f8c4e0c:  ;\n ;Get beginning and ending dates for report\n ;\n ;Prompt user for Summary deficiency print choice if not discharged\n ;\n ;Clean up variables used\n ;\n ;Display sort choice help text\n ;Display patient type choice help text\n ;Display status choice help text\n ;\n ;Set up available sort choices\n ;Set up available patient type choices\n ;\n ;Get Incomplete Record Status choice(s)",
+        "completeness": {
+          "reasoning": "The comment thoroughly documents multiple functionalities and steps.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate descriptions of multiple steps.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-organized and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the overall process and multiple functionalities.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5dbcf51d: ;Exit if user enters up-arrow or times out.",
+        "completeness": {
+          "reasoning": "The comment covers the exit condition for up-arrow and timeout but doesn't cover other potential behaviors.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the exit conditions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "64cc93e6: ;Exit if user enters up-arrow or times out. Display help screen if entered date is invalid.",
+        "completeness": {
+          "reasoning": "The comment covers multiple functionalities: exit conditions and invalid date handling.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding multiple behaviors in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1544425a: ;Set DGJTEND to end date plus .9999 days (just before midnight on the end date).",
+        "completeness": {
+          "reasoning": "The comment fully explains the functionality of setting the end date.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific timing adjustment.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b054b970: ;Check if ending date is before beginning date and display error message if so.",
+        "completeness": {
+          "reasoning": "The comment fully explains the validation check and error handling.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the date validation logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "697588f2: ;Exit date range selection.",
+        "completeness": {
+          "reasoning": "The comment briefly explains the exit condition but lacks detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate but lacks detail.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the exit condition but does not provide in-depth information.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6a5d3d95: ;Ask if summary deficiencies should be displayed for patients not yet discharged.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of asking if summary deficiencies should be displayed for patients not yet discharged, but does not mention other capabilities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate and provides true information about the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful, but only documents a specific functionality and may not be helpful for understanding the entire code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "14bffa0c: ;Exit if user entered up-arrow.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of exiting if the user entered an up-arrow, but does not mention other capabilities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate and true about the code's behavior.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific condition but does not provide broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2bc4de71: ;Set DGJDSC=1 if summary deficiencies should be displayed for patients not discharged.",
+        "completeness": {
+          "reasoning": "The comment focuses on setting a specific variable but does not cover other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information in the comment is true and accurately describes the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific variable setting but not the entire code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "db48cde1: ;Exit selection of whether to display summary deficiencies.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of exiting the selection process but does not mention other capabilities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate and provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific exit condition but not the entire code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "83fcacbb: ;Kill (undefine) variables used in this routine.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of cleaning up variables but does not cover other aspects of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate and provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the cleanup process but does not provide broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "30fc6417: ;Kill additional variables used in this routine.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific action within the code but does not cover all functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true as it describes a real action in the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, as it documents a specific task, but it may not help an expert understand the overall functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8015589a: ;Close device for printing and quit.",
+        "completeness": {
+          "reasoning": "The comment covers the main actions of closing the device and quitting but lacks detailed description.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and correctly describes the actions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is useful for understanding specific actions but lacks depth for a full understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c0aca632: ;Display help text for sort output options.",
+        "completeness": {
+          "reasoning": "The comment addresses the key functionality related to displaying help text for sort options but doesn't go into detail.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the code block.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0183a778: ;Exit help for sort output options.",
+        "completeness": {
+          "reasoning": "The comment describes the functionality of exiting help but lacks additional details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the exit functionality but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d05736fc: ;Display help text for print report options.",
+        "completeness": {
+          "reasoning": "The comment addresses the main function of displaying help text, but does not cover all aspects of the code.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the code block but could include more details.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "fe873d9e: ; Display prompt for accepting/rejecting display of Deficiencies for not discharged patients",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover all aspects of the related source code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information seems true as it describes a specific action related to the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "aceab04d: ; Instructions for including Deficiencies under SUMMARY for not discharged patients",
+        "completeness": {
+          "reasoning": "The comment mentions a single functionality but does not detail all essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to provide true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "824ccbb3: ; Instructions for excluding Deficiencies under SUMMARY for not discharged patients",
+        "completeness": {
+          "reasoning": "It mentions one functionality but lacks details on other essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is likely true based on the context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for an average programmer to understand the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "089822da: ; End of help text for DGJDSC option",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover all aspects of the related source code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "5797509d: ; Set up sort order options",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but lacks details on how it is set up.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more detailed to help an expert programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f63bc470: ; Set up patient type options",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of setting up patient type options but does not provide any detail.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate and does not provide any false information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better but lacks detail for expert-level understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3eb4b6e8: ; Prompt for Incomplete Record Status selection",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of prompting for Incomplete Record Status selection but lacks detail on how the prompt is implemented.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better but could benefit from more detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "81b8caf8: ; Display help text for Incomplete Record Status selection",
+        "completeness": {
+          "reasoning": "The comment specifies that help text is displayed but doesn't detail what the help text contains.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding that help text is displayed but lacks specifics.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "45a9e271: ; Start of help text for Incomplete Record Status selection",
+        "completeness": {
+          "reasoning": "The comment indicates the start of help text but does not detail the content or purpose of the help text.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate but vague.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks important details.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "5c2fc5bd: ; List of options for Incomplete Record Status selection",
+        "completeness": {
+          "reasoning": "The comment indicates a list of options but does not specify what those options are.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks important details.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e2c0f757: ; Check if user opted out of selection",
+        "completeness": {
+          "reasoning": "The comment addresses only a specific functionality related to user selection opt-out.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is factual about its specific functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful to understand a specific part of the code but does not provide broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "630fea34: ; Set DGJTSTAT for 'ALL' selection",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of setting DGJTSTAT for 'ALL' selection but lacks broader context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action being performed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful in understanding a specific action in the code but does not provide complete context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "23afe4fb: ; Initialize DGJTSTAT for selective status",
+        "completeness": {
+          "reasoning": "The comment addresses the initialization of DGJTSTAT for selective status but lacks details on what selective status entails.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate in describing the initialization process.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but could be more informative about the selective status.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e77c902b: ; Call subroutine to set DGJTSTAT",
+        "completeness": {
+          "reasoning": "The comment mentions calling a subroutine but does not provide details on what the subroutine does.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly describes the action of calling a subroutine.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful to know a subroutine is being called but lacks details on its purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bcce6fbb: ; Modify prompt to allow selection of additional statuses",
+        "completeness": {
+          "reasoning": "The comment explains modifying a prompt but does not specify which prompt or additional statuses.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the modification purpose.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more specific about the prompt and statuses being modified.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "46a3ef99: ;Prepare for selection of additional status options.",
+        "completeness": {
+          "reasoning": "The comment briefly addresses the functionality but lacks detail on how it's achieved.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the code's functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a basic functionality but lacks depth for expert understanding.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f3c8f273: ;Remove previous lines from the help array after selecting an option.",
+        "completeness": {
+          "reasoning": "The comment fully explains the specific action taken by the code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the code's operation.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information for understanding the code's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1c062ffe: ;Prompt user for additional status option selection.",
+        "completeness": {
+          "reasoning": "The comment mentions the action but lacks detail on how the prompt is presented.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment describes the code's function accurately.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is generally useful but could provide more detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7ee57ee7: ;Check if the user requested to exit option selection.",
+        "completeness": {
+          "reasoning": "The comment describes the condition being checked but doesn't elaborate on what happens if the condition is true.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately reflects what the code does.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding the specific check being performed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5b266a9f: ;If an option was selected, process it and ask again.",
+        "completeness": {
+          "reasoning": "The comment describes the loop behavior but lacks detail on how the processing is done.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the loop's function.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4631b1b9: ;Exit option selection loop.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of exiting the option selection loop, which is likely a key part of the code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is likely true as it directly states the action being performed by the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an expert programmer understand the end of the loop, which is crucial.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "36eb8761: ;Translate option code to internal status representation.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of translating an option code, which is likely a core part of the code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment is specific and likely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is useful for understanding the transformation of data, which is important for both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e2915568: ;Retrieve internal code for selected status.",
+        "completeness": {
+          "reasoning": "The comment describes the action of retrieving an internal code, which is likely essential.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The action described is likely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps to understand an essential step in the process, useful for all levels of programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "57c4f978: ;Add selected status code to list.",
+        "completeness": {
+          "reasoning": "The comment addresses the action of adding a status code to a list, which is likely a key functionality.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The action described is likely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment makes the code easier to understand for all levels of programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c399389d: ;Exit status code lookup.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of exiting the status code lookup, an essential part of the process.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment is very likely to be true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is useful for understanding the termination of an important operation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4c163d61: ;Return the selected value.",
+        "completeness": {
+          "reasoning": "The comment addresses only a single functionality of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate but extremely minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail.",
+          "score": 2
+        }
+      }
+    ]
+  }
+}

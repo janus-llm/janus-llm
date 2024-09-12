@@ -1,0 +1,265 @@
+{
+  "input": "{\n  \"comments\": [\n    \"a35d6e9b: ; Routine to queue an entry in TaskMan to run a process at a later time.\\n .;\\n .;This routine sets up the variables needed to queue a task and calls\\n .;%ZTLOAD to actually queue the task in the TaskMan.\\n .;\\n .;If the task is successfully queued the routine will write a success\\n .;message, otherwise it will write a cancel message.\",\n    \"09eabd43: ; Store the time the task was queued.\",\n    \"26f0a94e: ; If $IO is not defined and ION is null, initialize ZTIO to null.\\n .;ZTIO is used by %ZTLOAD to pass information for device handling.\",\n    \"7aa97e54: ; If ZTDESC (TaskMan description) is not defined, set it to the value\\n .;of DGPGM (if defined), PGM (if defined), or 'IRT UNKNOWN OPTION'.\",\n    \"db18968e: ; If ZTRTN (TaskMan routine) is not defined, set it to the entry\\n .;point 'DQ^DGJUTQ'. This is the routine and label that will be\\n .;executed when the task runs.\",\n    \"5aebcd11: ; Save any variables that need to be restored when the task runs.\\n .;DGZTSAVE is set to DGVAR (if defined) or VAR (if defined) or '*'.\",\n    \"f45716b1: ; If DGPGM is defined but not included in ZTSAVE, add it to\\n .;ZTSAVE so it will be restored when the task runs.\",\n    \"90cd8c4c: ; Call %ZTLOAD to actually queue the task. Write a success or\\n .;cancel message based on whether ZTSK (TaskMan task number) is\\n .;defined. Set X='^' if task was cancelled, otherwise set X=''.\\n .;If task was queued, go to CLOSE label, else go to END label.\",\n    \"bd268caf: If the user quits the routine, do not execute any other code.\",\n    \"9bc2f92b: If the output is being queued, go to the QUE label to queue the report, otherwise close the device.\",\n    \"ac410a16: Use the selected device.\",\n    \"a0d3bc55: Save specified variables in the ZTSAVE array for tasked jobs. Handle global references in variable names.\",\n    \"07e2a048: ;Process DgzTSave, if # found in string, replace with ()\",\n    \"55f00dfb: ;Loop through the string and replace all # with ()\",\n    \"85a7248c: ;Quit if task is closed\",\n    \"3fa501a9: ;If the task is not queued, clear device\",\n    \"ea8a0bbc: ;Kill all task related variables\",\n    \"d72f5157: Quit if called from top level.\",\n    \"3468ebe2: Execute entry point task code, either DGPGM, PGM, or CLOSE.\",\n    \"947574fb: Clean up task variables and close device.\",\n    \"261a0bd0: Exit the routine.\",\n    \"587a47d3:  ;\\n ;If running as a task, set variables with task information:\\n ;DGX = task number, %H = date task started, DGX = time task started,\\n ;Z = date and time in external format.\\n ;\",\n    \"3e99cf5c: Exit the routine.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 33.85032296180725
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "a35d6e9b: ; Routine to queue an entry in TaskMan to run a process at a later time.\n .;\n .;This routine sets up the variables needed to queue a task and calls\n .;%ZTLOAD to actually queue the task in the TaskMan.\n .;\n .;If the task is successfully queued the routine will write a success\n .;message, otherwise it will write a cancel message.",
+        "readability": {
+          "reasoning": "The comment is well-structured and clearly explains the purpose and behavior of the routine.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information that helps an expert programmer understand the process of queuing a task in TaskMan.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "09eabd43: ; Store the time the task was queued.",
+        "readability": {
+          "reasoning": "The comment is short and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial functionality of storing the time a task was queued.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "26f0a94e: ; If $IO is not defined and ION is null, initialize ZTIO to null.\n .;ZTIO is used by %ZTLOAD to pass information for device handling.",
+        "readability": {
+          "reasoning": "The comment is clear and provides sufficient context.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains specific conditional logic and its impact on ZTIO, which is useful for understanding device handling.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7aa97e54: ; If ZTDESC (TaskMan description) is not defined, set it to the value\n .;of DGPGM (if defined), PGM (if defined), or 'IRT UNKNOWN OPTION'.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the fallback logic for setting TaskMan description, which is helpful for understanding default settings.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "db18968e: ; If ZTRTN (TaskMan routine) is not defined, set it to the entry\n .;point 'DQ^DGJUTQ'. This is the routine and label that will be\n .;executed when the task runs.",
+        "readability": {
+          "reasoning": "The comment is clear and provides detailed information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the significance of ZTRTN and what routine will be executed, which is important for understanding the task execution.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5aebcd11: ; Save any variables that need to be restored when the task runs.\n .;DGZTSAVE is set to DGVAR (if defined) or VAR (if defined) or '*'.",
+        "readability": {
+          "reasoning": "The comment is clear, well-written, and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides valuable information about variable restoration which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f45716b1: ; If DGPGM is defined but not included in ZTSAVE, add it to\n .;ZTSAVE so it will be restored when the task runs.",
+        "readability": {
+          "reasoning": "The comment is clear, well-written, and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a useful explanation of a condition and its effect on ZTSAVE, aiding in understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "90cd8c4c: ; Call %ZTLOAD to actually queue the task. Write a success or\n .;cancel message based on whether ZTSK (TaskMan task number) is\n .;defined. Set X='^' if task was cancelled, otherwise set X=''.\n .;If task was queued, go to CLOSE label, else go to END label.",
+        "readability": {
+          "reasoning": "The comment is well-written but a little lengthy, making it slightly harder to read.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information on task queuing and related conditions, which is highly useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bd268caf: If the user quits the routine, do not execute any other code.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides important information about the program's flow control, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9bc2f92b: If the output is being queued, go to the QUE label to queue the report, otherwise close the device.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about output handling and flow control, aiding in understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ac410a16: Use the selected device.",
+        "readability": {
+          "reasoning": "The comment is short and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a straightforward explanation of the code's action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a0d3bc55: Save specified variables in the ZTSAVE array for tasked jobs. Handle global references in variable names.",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information that can help both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "07e2a048: ;Process DgzTSave, if # found in string, replace with ()",
+        "readability": {
+          "reasoning": "The comment is mostly clear but has slight readability issues with the structure.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific functionality which is somewhat useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "55f00dfb: ;Loop through the string and replace all # with ()",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a loop's functionality which is useful to understand the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "85a7248c: ;Quit if task is closed",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a conditional action which is somewhat useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3fa501a9: ;If the task is not queued, clear device",
+        "readability": {
+          "reasoning": "The comment is well-written and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action which is useful for understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ea8a0bbc: ;Kill all task related variables",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a clean-up action that is crucial for managing the task state.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d72f5157: Quit if called from top level.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an exit condition which is important for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3468ebe2: Execute entry point task code, either DGPGM, PGM, or CLOSE.",
+        "readability": {
+          "reasoning": "The comment is clear and specifies different task codes.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding what kinds of entry points the code handles.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "947574fb: Clean up task variables and close device.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it describes clean-up and close actions which are crucial for resource management.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "261a0bd0: Exit the routine.",
+        "readability": {
+          "reasoning": "The comment is clear, concise, and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear explanation of what the code does, which is useful for understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "587a47d3:  ;\n ;If running as a task, set variables with task information:\n ;DGX = task number, %H = date task started, DGX = time task started,\n ;Z = date and time in external format.\n ;",
+        "readability": {
+          "reasoning": "The comment is detailed and well-structured, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides detailed information about the variables and conditions, which helps an average programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3e99cf5c: Exit the routine.",
+        "readability": {
+          "reasoning": "The comment is clear, concise, and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear explanation of what the code does, which is useful for understanding.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

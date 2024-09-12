@@ -1,0 +1,16 @@
+{
+  "comments": [
+    "9287f7ca: ;\n .;Transcript Display\n .;\n .;The following lines are to check the status of a transcript\n .;and determine if the transcript should be flagged\n .;\n .;Get pertinent transcript variable values and set status flag(DGJTFLAG)\n .;to determine if the transcript should be flagged for display.\n .;\n .;Node 0:  IFN=Internal entry reference in file 393\n .;         DGJTNODE=zero node of transcript entry\n .;         DGJTDEL=associated 40.8 entry from word-processing package\n .;         DGJTPAR=pieces 6-8 of 40.8 entry",
+    "3971cbba: ;Parse pieces 6-8 of 40.8 entry",
+    "75b6f265: ;Get .01 field of transcript entry if defined",
+    "c1dfe959: ;Get today's date converted to FileMan internal format",
+    "514bf937: ;Check if transcript is within status passed in DGJTSTAT",
+    "a150f60a: ;Quit",
+    "830eb231:  .;\n .;Check if transcript status = INCOMPLETE\n .;\n .;Get timestamp of sent to transcription and parse timelimit\n .;  parameter of dictated -> transcribed\n .;Set status flag if timestamp is:\n .;  1) prior to but in same month as today; or\n .;  2) earlier than X month(s) ago as defined by timelimit parameter\n .;\n .;Calculate days late if flagged\n .;\n .;Exit if not flagged",
+    "7fd11e82: ;\n .;Check if transcript status = DICTATED\n .;Set status flag\n .;Calculate days late\n .;Exit",
+    "34ccf893:  .;\n .;Check if transcript status = TRANSCRIBED\n .;\n .;Get timestamp of transcription complete and parse timelimit\n .;  parameter of transcribed -> signed\n .;Set status flag if timestamp is NOT less than timelimit\n .;\n .;Calculate days late if flagged\n .;Exit",
+    "f7bc5aff: ;\n .;If transcript status = SIGNED and timelimit parameter is defined\n .;\n .;Get timestamp of transcript signature and parse timelimit parameter\n .;Set status flag if timestamp is NOT less than timelimit\n .;\n .;Calculate days late if flagged\n .;Exit",
+    "86a1b6cf: ;No further action required",
+    "7729c9c8: ;\n .;Calculate days late in format Xd\n .;X1=today's date in FileMan internal format\n .;X2=timestamp of incident/status in FileMan internal format"
+  ]
+}

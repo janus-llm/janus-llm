@@ -1,0 +1,595 @@
+{
+  "input": "{\n  \"comments\": [\n    \"cbba2453: \\n ;\\n ;Dictated dialysis event edit - VA Dialysis Data\\n ;\\n ;  joined by DANJXI,\\n ;  Modify Field 10.02,10.03 if no values exist\\n ;\",\n    \"3d6617b2: ;Perform post-reader logic on the user's response.\",\n    \"08026bf9: ;Setup variables and quit if no data node exists.\",\n    \"3a1bc830: ;If Field 10.02 data exists, set DE(1) equal to the existing value.\",\n    \"8fd1c225: ;Kill %Z and quit.\",\n    \"63076744: ;Write the field label at the specified column location.\",\n    \"b35bd3ad: ;Quit the current sub-routine.\",\n    \"b8a9836d: ;Write out the field data value, wrap around to column 9 if longer than 45 characters.\",\n    \"84452af6: ;If data value is longer than 19 characters, the field is not word-processing (DV does not contain 'I'), and the field expects either a free-text response (DV contains 'F') or akeys-only response (DV contains 'K'), then branch to the word-wrapping logic at RW^DIR2.\",\n    \"99a5b375: ;If the data value exists, write out the '// ' prompt. If the field is not word-processing (DV does not contain 'I'), the field expects a keys-only response (DV contains 'I'), and the DD global definition contains executable M code (DE(DQ) is defined), then display the 'No Editing' prompt and quit.\",\n    \"b12fc567: ;Read the user's response into X. If time runs out, set DTOUT=U and X=U. Write a bell character.\",\n    \"ca25d69b: ;Quit the current sub-routine.\",\n    \"0f0ba092: ;Kill the previous response in DQ(DQ) and increment DQ.\",\n    \"c66a4333: ;Branch to the label corresponding to the current value of DQ.\",\n    \"fc219b8a: ;If the DD global definition contains executable M code (DE(DQ) is defined), branch to the post-reader logic at PR. Otherwise, write out the field label and read the user's response.\",\n    \"ba2b8d3f: ;If nothing is entered and required field, go to next field.\",\n    \"e31398bf: ;If user enters '?', go to reader help.\",\n    \"9e22718d: ;If user enters '@', go to input transform.\",\n    \"123c5c3c: ;If user enters ' ' and field is date type and a default value exists, display default value.\",\n    \"ba7a2548: ;Follow associated variable pointers and execute input transform. If matched entry found, display.\",\n    \"bd22341e: ;If matched entry found and not a word-processing field, go to next match for that identifier.\",\n    \"205eab82: ;If matched entry found and a word-processing field, display the match.\",\n    \"5457aa73: ;If field is pointer to New Person file, call fileman LAYGO then viewer (unless field is multiple) and get matched entry or user's entry.\",\n    \"1a03536b: ;If numeric and more than 24 digits, truncate and display error message.\",\n    \"4be839e4: ;Validate numeric data and strip leading zeros.\",\n    \"2cd78eb9: ;Execute computed-field expression.\",\n    \"8c202b77: ;Store data in local array and display default if field is date type.\",\n    \"9d650903: ;If unable to resolve the entry, display msg.\",\n    \"24e6e2ad: ;Set X='BAD' for bad data resolving.\",\n    \"19dccfa4: ;Store the external value in DZ, call entry code generator, and go to RE.\",\n    \"891fd10d: ;Set the DD array values for this field.\",\n    \"98653814: ;If editing a field, get the current value; else get user input.\",\n    \"d2418d68: ;If the current value is from an \\\"OTHER\\\" multiple, get the set and value codes.\",\n    \"f751cd17: ;If the current value is a pointer to another file, resolve the pointer and get the .01 field of the entry pointed to.\",\n    \"521be16a: ;If the current value is a VARIABLE POINTER, get the resolved .01 field of the entry pointed to.\",\n    \"1fa566c3: ;If set of codes, get the external value for the code selected.\",\n    \"204ad58e: ;If the current value is Ok, quit INPUT TRANSFORM.\",\n    \"37c29685: ;If INPUT TRANSFORM required, branch to INFIELD code.\",\n    \"514444dc: ;If INPUT TRANSFORM runs code (INFIELD or UNEDITABLE), quit here.\",\n    \"c516cff8: ;Else, quit from INPUT TEMPLATE.\",\n    \"34c7223c: ;Start a new INPUT TEMPLATE.\",\n    \"75898049: ;Field and variable definitions for DICTATED BY field.\",\n    \"044a4dd2: ;DICTATED BY is pointer to NEW PERSON file.\",\n    \"399e7e10: ;Branch to RE to allow user to edit DICTATED BY.\",\n    \"5b882d2c: ;No additional XECUTABLE code.\",\n    \"5686783f: ;If data missing, allow FileMan to call transform for fields 2-4\",\n    \"83b83a70: ;If no data, set incomplete status and prevent further edits on page\",\n    \"f5a505c7: ;End of input transform logic\",\n    \"26b42410: ;If data present, allow FileMan to call transform for fields 5-7\",\n    \"a63cb288: ;Set status to 'DICTATED' if field 3 has data\",\n    \"3541c2f2: ;End of input transform logic\",\n    \"e8ce5e81:  .;\\n .;Branch to next page in the FORM\\n .;Fields on next page: ADDENDUM?,ADDENDUM BY,VERIFY DICTATION\\n .;\",\n    \"389323f7: ;Branch to next page in the form\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 70.64295101165771
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "cbba2453: \n ;\n ;Dictated dialysis event edit - VA Dialysis Data\n ;\n ;  joined by DANJXI,\n ;  Modify Field 10.02,10.03 if no values exist\n ;",
+        "readability": {
+          "reasoning": "The comment is clear and well-formatted, but the extraneous formatting may slightly detract from readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context about the specific modification being made and the conditions under which it applies.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3d6617b2: ;Perform post-reader logic on the user's response.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a good high-level description of what the code does, which is useful for understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "08026bf9: ;Setup variables and quit if no data node exists.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a basic but necessary operation, making it useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3a1bc830: ;If Field 10.02 data exists, set DE(1) equal to the existing value.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific operation, which can be very useful for understanding the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8fd1c225: ;Kill %Z and quit.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about an operation that is not trivial.",
+          "score": 4
+        }
+      },
+      {
+        "comment": ";Write the field label at the specified column location.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly states the purpose.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the action being taken, which would help both average and expert programmers understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": ";Quit the current sub-routine.",
+        "readability": {
+          "reasoning": "The comment is short and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It indicates an important exit point in the code, which is useful for understanding the flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": ";Write out the field data value, wrap around to column 9 if longer than 45 characters.",
+        "readability": {
+          "reasoning": "The comment is clear and describes the action with a condition.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific behavior of the code, which is useful for understanding how the data is handled.",
+          "score": 4
+        }
+      },
+      {
+        "comment": ";If data value is longer than 19 characters, the field is not word-processing (DV does not contain 'I'), and the field expects either a free-text response (DV contains 'F') or a keys-only response (DV contains 'K'), then branch to the word-wrapping logic at RW^DIR2.",
+        "readability": {
+          "reasoning": "The comment is long but well-structured, making it clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a detailed explanation of a complex condition, which is very useful for understanding the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": ";If the data value exists, write out the '// ' prompt. If the field is not word-processing (DV does not contain 'I'), the field expects a keys-only response (DV contains 'I'), and the DD global definition contains executable M code (DE(DQ) is defined), then display the 'No Editing' prompt and quit.",
+        "readability": {
+          "reasoning": "The comment is long and somewhat complex, but it is written clearly.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific scenario in detail, which is useful but may be slightly overwhelming for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b12fc567: ;Read the user's response into X. If time runs out, set DTOUT=U and X=U. Write a bell character.",
+        "readability": {
+          "reasoning": "The comment is well-written with clear and concise language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about what the code does, helping both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ca25d69b: ;Quit the current sub-routine.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents trivial functionality, which is generally obvious from the code itself.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "0f0ba092: ;Kill the previous response in DQ(DQ) and increment DQ.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context about the code's function, helpful to an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c66a4333: ;Branch to the label corresponding to the current value of DQ.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides helpful information about the code's branching logic, useful to an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "fc219b8a: ;If the DD global definition contains executable M code (DE(DQ) is defined), branch to the post-reader logic at PR. Otherwise, write out the field label and read the user's response.",
+        "readability": {
+          "reasoning": "The comment is detailed and well-written, though slightly complex.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides thorough information about the code's logic, highly useful to an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ba2b8d3f: ;If nothing is entered and required field, go to next field.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains behavior that might not be immediately obvious.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e31398bf: ;If user enters '?', go to reader help.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific user input behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9e22718d: ;If user enters '@', go to input transform.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand how a specific input is handled.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "123c5c3c: ;If user enters ' ' and field is date type and a default value exists, display default value.",
+        "readability": {
+          "reasoning": "The comment is a bit long but still understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific behavior for date type fields with default values.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ba7a2548: ;Follow associated variable pointers and execute input transform. If matched entry found, display.",
+        "readability": {
+          "reasoning": "The comment is clear but slightly complex.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment describes the process of handling variable pointers and displaying matched entries.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bd22341e: ;If matched entry found and not a word-processing field, go to next match for that identifier.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific condition and what the code will do next.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "205eab82: ;If matched entry found and a word-processing field, display the match.",
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies a specific condition and the resulting action, aiding an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5457aa73: ;If field is pointer to New Person file, call fileman LAYGO then viewer (unless field is multiple) and get matched entry or user's entry.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but contains some jargon that might be confusing for beginners.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a complex operation that could benefit both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1a03536b: ;If numeric and more than 24 digits, truncate and display error message.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific validation step which is useful to understand the functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4be839e4: ;Validate numeric data and strip leading zeros.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a basic validation step, which is somewhat trivial but still useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "2cd78eb9: ;Execute computed-field expression.",
+        "readability": {
+          "reasoning": "The comment is concise and clear with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a specific explanation of what the code does, which is helpful for understanding the purpose of the field expression.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8c202b77: ;Store data in local array and display default if field is date type.",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains two actions clearly: storing data and displaying a default value, which helps in understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9d650903: ;If unable to resolve the entry, display msg.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It gives a basic understanding of the code's error-handling mechanism but lacks specifics on what kind of message is displayed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "24e6e2ad: ;Set X='BAD' for bad data resolving.",
+        "readability": {
+          "reasoning": "The comment is clear but uses a colloquial term ('bad data') that could be more specific.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides a straightforward explanation but lacks context on what 'bad data' entails.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "19dccfa4: ;Store the external value in DZ, call entry code generator, and go to RE.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, explaining multiple actions in a single statement.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is very informative, detailing the operations step by step, which is valuable for understanding the sequence of actions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "891fd10d: ;Set the DD array values for this field.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about what the code is doing, specifically setting array values.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "98653814: ;If editing a field, get the current value; else get user input.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a clear conditional action which helps understand the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d2418d68: ;If the current value is from an \"OTHER\" multiple, get the set and value codes.",
+        "readability": {
+          "reasoning": "The comment is straightforward and well-phrased.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific scenario which is useful for understanding the code's behavior in that situation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f751cd17: ;If the current value is a pointer to another file, resolve the pointer and get the .01 field of the entry pointed to.",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear explanation of what to do in a specific case, which is very useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "521be16a: ;If the current value is a VARIABLE POINTER, get the resolved .01 field of the entry pointed to.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding what to do when encountering a variable pointer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1fa566c3: ;If set of codes, get the external value for the code selected.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific operation related to code selection.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "204ad58e: ;If the current value is Ok, quit INPUT TRANSFORM.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information on the condition to exit a process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "37c29685: ;If INPUT TRANSFORM required, branch to INFIELD code.",
+        "readability": {
+          "reasoning": "The comment is clear but could be slightly more descriptive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information on branching logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "514444dc: ;If INPUT TRANSFORM runs code (INFIELD or UNEDITABLE), quit here.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information on when to exit, which is helpful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c516cff8: ;Else, quit from INPUT TEMPLATE.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could benefit from more context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "34c7223c: ;Start a new INPUT TEMPLATE.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly indicates the start of a new input template.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Helps any programmer understand the initiation of a new input template.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "75898049: ;Field and variable definitions for DICTATED BY field.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read, specifying its purpose directly.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Clarifies what the subsequent code pertains to, aiding in code comprehension.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "044a4dd2: ;DICTATED BY is pointer to NEW PERSON file.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides specific information about the 'DICTATED BY' field, useful for understanding data relationships.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "399e7e10: ;Branch to RE to allow user to edit DICTATED BY.",
+        "readability": {
+          "reasoning": "The comment is clear but uses an abbreviation ('RE') that may not be immediately obvious to all readers.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "Explains the purpose of a branch in the code, which is useful, but the abbreviation 'RE' could be confusing.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5b882d2c: ;No additional XECUTABLE code.",
+        "readability": {
+          "reasoning": "The comment is readable but contains a typo ('XECUTABLE' instead of 'EXECUTABLE').",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "Informs that there is no additional executable code, which might be useful in certain contexts but is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "5686783f: ;If data missing, allow FileMan to call transform for fields 2-4",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains specific behavior relevant to handling missing data, which can help understand the code's logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "83b83a70: ;If no data, set incomplete status and prevent further edits on page",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear guidance on what happens when data is missing, aiding in understanding the code's flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f5a505c7: ;End of input transform logic",
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear indication of the end of a logical section, helpful for code organization.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "26b42410: ;If data present, allow FileMan to call transform for fields 5-7",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains specific behavior when data is present, which aids in understanding the code's logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a63cb288: ;Set status to 'DICTATED' if field 3 has data",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear explanation of a specific action based on a condition, aiding comprehension of the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3541c2f2: ;End of input transform logic",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment succinctly describes the function of the code block, aiding understanding.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e8ce5e81:  .;\n .;Branch to next page in the FORM\n .;Fields on next page: ADDENDUM?,ADDENDUM BY,VERIFY DICTATION\n .;",
+        "readability": {
+          "reasoning": "The comment is mostly clear but has unnecessary formatting which slightly reduces readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the next page and the fields it contains, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "389323f7: ;Branch to next page in the form",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a basic description of a branch operation, which is helpful but not as detailed.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

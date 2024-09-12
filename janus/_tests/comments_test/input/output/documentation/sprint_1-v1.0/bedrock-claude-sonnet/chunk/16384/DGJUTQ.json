@@ -1,0 +1,27 @@
+{
+  "comments": [
+    "a35d6e9b:  ;\n ;DGJUTQ - Queues a routine to run at a specified time.\n ;\n ;Supports options:\n ; PGM/DGPGM = the name of the routine to queue up\n ; VAR/DGVAR = variables to be NEWed by %ZTLOAD\n ; ZTDESC = optional description for display in ZTMQ listing\n ; ZTIO = target device for output to go to\n ;",
+    "09eabd43: ;Store the current time in ZTDTH for later reference.",
+    "26f0a94e: ;Kill any pre-existing IO settings. If the device has not been set, set ZTIO to null.",
+    "7aa97e54: ;If ZTDESC has not been set, set it to the current routine name or a default based on available values.",
+    "db18968e: ;If ZTRTN has not been set, set it to the entry point of DGJUTQ, and if PGM/DGPGM also hasn't been set, go to CLOSE (exit). Otherwise, set ZTRTN to call DQ^DGJUTQ.",
+    "5aebcd11: ;Save variables specified in DGVAR/VAR array into ZTSAVE.",
+    "f45716b1: ;If PGM/DGPGM exists but is not already in ZTSAVE, add it.",
+    "90cd8c4c: ;Queue the request by running %ZTLOAD, display a message, handle exit codes.",
+    "bd268caf: ;Blank line.",
+    "9bc2f92b: ;If the device has not been set, prompt user to select one. If a queued device is selected, go to QUE. If user exits, go to CLOSE.",
+    "ac410a16: ;Use the selected device.",
+    "a0d3bc55: ;;For each variable in DGZTSAVE,\n   if it does not already exist in ZTSAVE, add it.\n   If the variable is an array (ends with '('), save just the root node.",
+    "07e2a048: ;Blank line.",
+    "55f00dfb: ;;Handle any array references in DGZTSAVE by replacing '#' with '('.\n ;Example: 'TEST#(' becomes 'TEST('.",
+    "85a7248c: ;Blank line.",
+    "3fa501a9: ;Close device if not queued.",
+    "ea8a0bbc: ;Kill all variables used.",
+    "d72f5157: ;Exit routine.",
+    "3468ebe2: ;Execute option logic.",
+    "947574fb: ;Unload task and close.",
+    "261a0bd0: ;Return from option logic.",
+    "587a47d3:  .;If task has a date/time scheduled, calculate it from the\n .;internal ZTSK(\"D\") format of #Days,Time (in seconds)\n .;and put in ZTIME format into Z.",
+    "3e99cf5c: ;Exit date/time calculation."
+  ]
+}

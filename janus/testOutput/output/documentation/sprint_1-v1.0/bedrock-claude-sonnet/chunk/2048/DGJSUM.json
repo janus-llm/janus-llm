@@ -1,0 +1,1152 @@
+{
+  "input": "{\n  \"comments\": [\n    \"70f4c8d9:  ;;\\n ;Creates or edits a Discharge Summary entry in file 393.\\n ;\",\n    \"d9a54d1b:  ;;\\n ;DFN = Patient Internal Entry Number\\n ;DGJTDT = Discharge Summary Date [optional]\\n ;DGJPARM = Division ADT Commitment Parameter Values\\n ;DGJIRTDA = Internal Entry Number of Previous Discharge Summary\\n ;DGJT = Array containing movements nodes\\n ;DGJFLG = Flag indicating if ^VAS(393,\\\"DT\\\") should be created\\n ;DGJTYP = Discharge Summary Type\\n ;\",\n    \"e80b5266: ;Flag variable to check if 393 record should be added\",\n    \"aee77029: ;Get division ADT commitment parameters\",\n    \"7d4752d2: ;If no parameters, quit\",\n    \"e0cd6ac8: ;Set default discharge summary type if not defined\",\n    \"33897e25: ;If DGJIRTDA passed, check if discharge summary date field exists, if not, set DGJFLG to indicate creation of date field\",\n    \"5446a70f: ;If DGJIRTDA passed, and discharge summary record exists, quit\",\n    \"7b552386: ;Loop through existing discharge summaries to find one matching patient, type, and admission\",\n    \"993c1182: ;If matching discharge summary found, set DGJOUT flag\",\n    \"79eea9f6: ;If no matching discharge summary found, call ADD to create new one\",\n    \"4fd1a771: ;Exit point\",\n    \"f53d4995:  ;;\\n ;Subroutine to add a new Discharge Summary record\\n ;\",\n    \"9d79c912: ;Variable initialization\",\n    \"cb8b184a: ;Get service to use from movement data\",\n    \"48147690: ;If no service, try to get one from file 393.1\",\n    \"cd564392: ;Get treating specialty from patient movement\",\n    \"93254169: ;Get current user and date/time\",\n    \"dd8aac1d: ;If division parameter requires approval, get approving official info\",\n    \"35b53276: ;Set discharge summary date and ward location\",\n    \"56cb13c3: ;Create new Discharge Summary record in file 393\",\n    \"87a7e99c: ; Quit if the input date/time is missing or invalid.\",\n    \"f941e208: ; Lock the record and quit if unable to lock.\",\n    \"561b49a0: ; Build the field update string with the provided values.\",\n    \"872c1bc2: ; Update the record using the ^DIE utility.\",\n    \"2dcf4627: ; Unlock the record.\",\n    \"ea0f9b67: ; Set the flag indicating successful update and quit.\",\n    \"471fca2e:  ;\\n ;Edit fields 10.01 to 10.08 in the INCONSULT/EXAM record.\\n ;Input:\\n ; DGJIRTDA = Internal entry number\\n ; DGJVDD = Value for field 10.01\\n ; DGJVDB = Value for field 10.02\\n ; DGJVDT = Value for field 10.03\\n ; DGJVTB = Value for field 10.04\\n ; DGJPARM = Parameter passed for DIC call (not used)\",\n    \"8f6c290b: ; Lock the record and quit if unable to lock.\",\n    \"4509d56f: ; Build the field update string with the provided values.\",\n    \"98e6fbb5: ; Update the record using the ^DIE utility and call STAT1 tag.\",\n    \"f6de194c: ; Unlock the record.\",\n    \"665ab386: ; Quit.\",\n    \"36aaa27d:  ;\\n ;Delete fields 10.01 to 10.08 in the INCONSULT/EXAM record.\\n ;Input:\\n ; DGJIRTDA = Internal entry number\\n ; DGJPARM = Parameter passed for DIC call (not used)\",\n    \"a75cd078: ; Lock the record and quit if unable to lock.\",\n    \"ebc89854: ; Build the field update string to delete the fields.\",\n    \"0f8d0bb3: ; Update the record using the ^DIE utility and call STAT1 tag.\",\n    \"947cf24a: ; Unlock the record.\",\n    \"5b79313f: ; Quit.\",\n    \"d226777b:  ;\\n ;Update fields 10.05 to 10.08 in the INCONSULT/EXAM record.\\n ;Input:\\n ; DGJIRTDA = Internal entry number\\n ; DGJDS = Value for field 10.05\\n ; DGJSB = Value for field 10.06\\n ; DGJDR = Value for field 10.07\\n ; DGJRB = Value for field 10.08\\n ; DGJPARM = Parameter passed for DIC call (not used)\",\n    \"d5e9397a: ; Lock the record and quit if unable to lock.\",\n    \"e214345a: ; Build the field update string with the provided values.\",\n    \"b69017fc: ; Update the record using the ^DIE utility and call STAT1 tag.\",\n    \"334566d6: ; Unlock the record.\",\n    \"3733bbe6: ; Quit.\",\n    \"3f8e1d4f:  ;\\n ;Update the INCONSULT/EXAM status based on field values.\\n ;Called by EDIT, DCSDEL, and SIGUP tags.\",\n    \"2f3784a3: ; Initialize variables.\",\n    \"7450ebc8: ; Get the value of the .01 field (DT multiple).\",\n    \"1d2a3221: ; If .01 field is empty, set status to 'INCOMPLETE' and branch.\",\n    \"d443207a: ;If no doc time/date, set status to 'DICTATED'.\",\n    \"75942ac9: ;If no transcribed time/date, set status to 'TRANSCRIBED'.\",\n    \"dac04369: ;If not reviewed, set status to 'SIGNED NO REVIEW'.\",\n    \"ff7f009a: ;If no signed time/date, set status to 'SIGNED'.\",\n    \"08ce7333: ;If reviewed, set status to 'REVIEWED'.\",\n    \"8d04382e: ;Set status in VAS(393 file and clean up variables.\",\n    \"59b8510d: ;End of main code section.\",\n    \"a23c4e9a: ;\\n;Subroutine to set X based on parameter\\n;and TSP values.\\n;\",\n    \"78260e0d: ;Get parameter piece from DGJPARM.\",\n    \"cf98c30b: ;Set X based on parameter: A=attending, N=null, else resident.\",\n    \"f38c122e: ;End of DOC subroutine.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 120.10361289978027
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "70f4c8d9:  ;;\n ;Creates or edits a Discharge Summary entry in file 393.\n ;",
+        "completeness": {
+          "reasoning": "The comment briefly mentions the creation or editing of a Discharge Summary entry but lacks details on the essential functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate as far as it goes.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful for understanding the main purpose but lacks detail for an expert understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d9a54d1b:  ;;\n ;DFN = Patient Internal Entry Number\n ;DGJTDT = Discharge Summary Date [optional]\n ;DGJPARM = Division ADT Commitment Parameter Values\n ;DGJIRTDA = Internal Entry Number of Previous Discharge Summary\n ;DGJT = Array containing movements nodes\n ;DGJFLG = Flag indicating if ^VAS(393,\"DT\") should be created\n ;DGJTYP = Discharge Summary Type\n ;",
+        "completeness": {
+          "reasoning": "The comment documents essential parameters used in the code, covering most essential functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "All the information provided is accurate and corresponds to typical parameter definitions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-organized and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is highly useful for both expert and average programmers to understand the parameters involved.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e80b5266: ;Flag variable to check if 393 record should be added",
+        "completeness": {
+          "reasoning": "The comment addresses a single variable but lacks broader context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but limited to documenting a single variable.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "aee77029: ;Get division ADT commitment parameters",
+        "completeness": {
+          "reasoning": "The comment is too brief and lacks details about the functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but too brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7d4752d2: ;If no parameters, quit",
+        "completeness": {
+          "reasoning": "The comment addresses a specific, essential condition but lacks broader context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific condition in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e0cd6ac8: ;Set default discharge summary type if not defined",
+        "completeness": {
+          "reasoning": "The comment addresses only the setting of a default type but does not detail other capabilities.",
+          "score": "2"
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting the default type.",
+          "score": "4"
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "This comment is somewhat useful but only documents a trivial functionality.",
+          "score": "2"
+        }
+      },
+      {
+        "comment": "33897e25: ;If DGJIRTDA passed, check if discharge summary date field exists, if not, set DGJFLG to indicate creation of date field",
+        "completeness": {
+          "reasoning": "The comment covers the functionality of checking and setting the date field but not all related capabilities.",
+          "score": "3"
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information based on the condition provided.",
+          "score": "4"
+        },
+        "readability": {
+          "reasoning": "The comment is clear but somewhat long.",
+          "score": "3"
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand the code better.",
+          "score": "3"
+        }
+      },
+      {
+        "comment": "5446a70f: ;If DGJIRTDA passed, and discharge summary record exists, quit",
+        "completeness": {
+          "reasoning": "The comment addresses the condition for quitting but does not detail other capabilities.",
+          "score": "2"
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the quit condition.",
+          "score": "4"
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "This comment is somewhat useful but documents a simple condition.",
+          "score": "2"
+        }
+      },
+      {
+        "comment": "7b552386: ;Loop through existing discharge summaries to find one matching patient, type, and admission",
+        "completeness": {
+          "reasoning": "The comment describes the loop and criteria but does not cover all related details.",
+          "score": "3"
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the looping criteria.",
+          "score": "4"
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand the code better.",
+          "score": "3"
+        }
+      },
+      {
+        "comment": "993c1182: ;If matching discharge summary found, set DGJOUT flag",
+        "completeness": {
+          "reasoning": "The comment only covers the setting of the flag but not other functionalities.",
+          "score": "2"
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting the flag.",
+          "score": "4"
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to understand.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "This comment is somewhat useful but documents a simple condition.",
+          "score": "2"
+        }
+      },
+      {
+        "comment": "79eea9f6: ;If no matching discharge summary found, call ADD to create new one",
+        "completeness": {
+          "reasoning": "The comment addresses a specific capability of the code but not all essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the specific functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific part of the code but does not provide a comprehensive overview.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4fd1a771: ;Exit point",
+        "completeness": {
+          "reasoning": "The comment is very brief and does not cover any functionality in detail.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but extremely limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful on its own as it lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f53d4995:  ;; Subroutine to add a new Discharge Summary record",
+        "completeness": {
+          "reasoning": "The comment provides an overview of a specific functionality but lacks detail.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the subroutine.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9d79c912: ;Variable initialization",
+        "completeness": {
+          "reasoning": "The comment is very brief and does not cover any functionality in detail.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but extremely limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful on its own as it lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "cb8b184a: ;Get service to use from movement data",
+        "completeness": {
+          "reasoning": "The comment provides a specific piece of functionality but lacks comprehensive details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the specific functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific part of the code but does not provide a comprehensive overview.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "48147690: ;If no service, try to get one from file 393.1",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but may not cover all essential aspects of the related code.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The statement is clear and true based on the given information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful to understand the fallback mechanism related to the service.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cd564392: ;Get treating specialty from patient movement",
+        "completeness": {
+          "reasoning": "The comment clearly explains the specific functionality it addresses but may not cover all related aspects.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is simple and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the code segment.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "93254169: ;Get current user and date/time",
+        "completeness": {
+          "reasoning": "The comment addresses key functionality but does not elaborate on how or why.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate and true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the retrieval of user and timestamp information.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dd8aac1d: ;If division parameter requires approval, get approving official info",
+        "completeness": {
+          "reasoning": "The comment addresses a specific conditional functionality which is essential but may not cover all nuances.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a conditional logic path.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "35b53276: ;Set discharge summary date and ward location",
+        "completeness": {
+          "reasoning": "The comment provides essential information but lacks detail on how it is achieved.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information given is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific action of setting discharge details.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "56cb13c3: ;Create new Discharge Summary record in file 393",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of creating a new Discharge Summary record.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about creating a new Discharge Summary record in file 393.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it helps an expert programmer understand the specific action being performed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "87a7e99c: ; Quit if the input date/time is missing or invalid.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of quitting if the input date/time is missing or invalid.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the condition to quit.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand an important conditional check in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f941e208: ; Lock the record and quit if unable to lock.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of locking the record and quitting if unable to lock.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the locking mechanism.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is useful for understanding the locking mechanism and handling failures.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "561b49a0: ; Build the field update string with the provided values.",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality of building the field update string.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly describes the action of building the field update string.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding how the field update string is constructed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "872c1bc2: ; Update the record using the ^DIE utility.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of updating the record using the ^DIE utility.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides correct information about the ^DIE utility.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an expert programmer by specifying the utility used for updating the record.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2dcf4627: ; Unlock the record.",
+        "completeness": {
+          "reasoning": "The comment addresses only one specific functionality, unlocking the record.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information about unlocking the record is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a specific, non-trivial action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ea0f9b67: ; Set the flag indicating successful update and quit.",
+        "completeness": {
+          "reasoning": "The comment addresses two actions: setting the flag and quitting.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a logical sequence of actions, which is useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "471fca2e:  ;\n ;Edit fields 10.01 to 10.08 in the INCONSULT/EXAM record.\n ;Input:\n ; DGJIRTDA = Internal entry number\n ; DGJVDD = Value for field 10.01\n ; DGJVDB = Value for field 10.02\n ; DGJVDT = Value for field 10.03\n ; DGJVTB = Value for field 10.04\n ; DGJPARM = Parameter passed for DIC call (not used)",
+        "completeness": {
+          "reasoning": "The comment thoroughly documents the functionality and input parameters.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information appears accurate and matches typical documentation.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8f6c290b: ; Lock the record and quit if unable to lock.",
+        "completeness": {
+          "reasoning": "The comment addresses two actions but does not detail what happens after quitting.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action sequence, which is useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4509d56f: ; Build the field update string with the provided values.",
+        "completeness": {
+          "reasoning": "The comment only covers the action of building the update string, not what happens with it.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information seems accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a specific action but lacks details on further steps.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "98e6fbb5: ; Update the record using the ^DIE utility and call STAT1 tag.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of updating the record and calling the STAT1 tag.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and describes the functions being performed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific actions in the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f6de194c: ; Unlock the record.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of unlocking the record.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is true and directly related to the code functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "665ab386: ; Quit.",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality of quitting.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the action being performed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality, which is often self-explanatory.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "36aaa27d:  ;\n ;Delete fields 10.01 to 10.08 in the INCONSULT/EXAM record.\n ;Input:\n ; DGJIRTDA = Internal entry number\n ; DGJPARM = Parameter passed for DIC call (not used)",
+        "completeness": {
+          "reasoning": "The comment provides detailed information on what fields are being deleted and the input parameters.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and detailed.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding the specific details and parameters involved.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a75cd078: ; Lock the record and quit if unable to lock.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of locking the record and conditionally quitting.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the conditional action better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ebc89854: ; Build the field update string to delete the fields.",
+        "completeness": {
+          "reasoning": "The comment explains the purpose of the line of code but doesn't provide details on how the string is built or its components.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the purpose of the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail that could help an expert or average programmer understand better.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "0f8d0bb3: ; Update the record using the ^DIE utility and call STAT1 tag.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of updating the record and calling the STAT1 tag.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the update process and the utility being used.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the use of the ^DIE utility and the subsequent call.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "947cf24a: ; Unlock the record.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of unlocking the record, but no details are provided.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about unlocking the record.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is simple and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks additional context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "5b79313f: ; Quit.",
+        "completeness": {
+          "reasoning": "The comment explains the functionality of quitting but lacks further details.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the quit operation.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is minimally useful because it states the obvious.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "d226777b:  ;\n ;Update fields 10.05 to 10.08 in the INCONSULT/EXAM record.\n ;Input:\n ; DGJIRTDA = Internal entry number\n ; DGJDS = Value for field 10.05\n ; DGJSB = Value for field 10.06\n ; DGJDR = Value for field 10.07\n ; DGJRB = Value for field 10.08\n ; DGJPARM = Parameter passed for DIC call (not used)",
+        "completeness": {
+          "reasoning": "The comment thoroughly documents all relevant fields and inputs.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the fields and inputs.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful as it provides detailed information about the fields and inputs.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d5e9397a: ; Lock the record and quit if unable to lock.",
+        "completeness": {
+          "reasoning": "The comment addresses the locking mechanism but does not specify what happens next.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the lock but lacks detail on subsequent actions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e214345a: ; Build the field update string with the provided values.",
+        "completeness": {
+          "reasoning": "The comment adequately describes the purpose of the code.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b69017fc: ; Update the record using the ^DIE utility and call STAT1 tag.",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality of updating the record and calling a specific tag.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the specific actions taken.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "334566d6: ; Unlock the record.",
+        "completeness": {
+          "reasoning": "The comment addresses the action of unlocking but does not specify the context or subsequent actions.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but lacks context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3733bbe6: ; Quit.",
+        "completeness": {
+          "reasoning": "The comment only addresses the action of quitting, without any context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is trivial and provides little additional understanding.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3f8e1d4f:  ;\n ;Update the INCONSULT/EXAM status based on field values.\n ;Called by EDIT, DCSDEL, and SIGUP tags.",
+        "completeness": {
+          "reasoning": "The comment covers the purpose and the tags that call the function but does not detail all essential functionalities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2f3784a3: ; Initialize variables.",
+        "completeness": {
+          "reasoning": "The comment only covers the initialization of variables, which is a small part of the functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7450ebc8: ; Get the value of the .01 field (DT multiple).",
+        "completeness": {
+          "reasoning": "The comment documents a single action, not the full functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true and accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents only a specific and small part of the functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "1d2a3221: ; If .01 field is empty, set status to 'INCOMPLETE' and branch.",
+        "completeness": {
+          "reasoning": "The comment describes a specific condition and action but not the entire functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information given is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific condition.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d443207a: ;If no doc time/date, set status to 'DICTATED'.",
+        "completeness": {
+          "reasoning": "The comment documents a specific condition but not the overall functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding a specific condition.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "75942ac9: ;If no transcribed time/date, set status to 'TRANSCRIBED'.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but does not cover all essential functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the condition it describes.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific condition but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dac04369: ;If not reviewed, set status to 'SIGNED NO REVIEW'.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but does not cover all essential functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the condition it describes.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific condition but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ff7f009a: ;If no signed time/date, set status to 'SIGNED'.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but does not cover all essential functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the condition it describes.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific condition but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "08ce7333: ;If reviewed, set status to 'REVIEWED'.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but does not cover all essential functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the condition it describes.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific condition but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8d04382e: ;Set status in VAS(393 file and clean up variables.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of setting status and cleaning up variables but lacks specific details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functions it describes.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is mostly clear but could be slightly more specific.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is fairly useful but could benefit from more detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "59b8510d: ;End of main code section.",
+        "completeness": {
+          "reasoning": "The comment addresses the end of the main code section but doesn't provide details on the functionality within the section.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly states the end of the main code section.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for identifying the end of the main code section but does not help in understanding the code itself.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a23c4e9a: ;\n;Subroutine to set X based on parameter\n;and TSP values.\n;",
+        "completeness": {
+          "reasoning": "The comment partially explains the subroutine but doesn't provide full details on how parameters and TSP values are used.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly describes the purpose of the subroutine.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more concise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the general purpose of the subroutine but lacks specific details.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "78260e0d: ;Get parameter piece from DGJPARM.",
+        "completeness": {
+          "reasoning": "The comment briefly describes the action but does not elaborate on how it works.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about getting a parameter piece.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a basic understanding but lacks depth.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "cf98c30b: ;Set X based on parameter: A=attending, N=null, else resident.",
+        "completeness": {
+          "reasoning": "The comment provides a clear and detailed explanation of setting X based on parameter values.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the logic for setting X.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the logic behind setting X.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f38c122e: ;End of DOC subroutine.",
+        "completeness": {
+          "reasoning": "The comment indicates the end of a subroutine but does not provide details on what the subroutine does.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly identifies the end of the DOC subroutine.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is only moderately useful as it does not help in understanding the subroutine's functionality.",
+          "score": 2
+        }
+      }
+    ]
+  }
+}

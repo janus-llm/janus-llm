@@ -1,0 +1,815 @@
+{
+  "input": "{\n  \"comments\": [\n    \"72295d78:  ;\\n ;Entry point to edit or create a new corrective action record.\\n ;\",\n    \"3d7bec21: ;If editing an existing record, go to edit routine\",\n    \"dce4d0d0: ;If creating new record, go to data entry routine\",\n    \"68381e3e: ;Exit routine\",\n    \"95cca886: ;Save VALMBCK before initializing edit\",\n    \"26fb322b: ;If the record being edited is an OP REPORT, DISCHARGE SUMMARY or INTERIM SUMMARY, initialize edit of that type of record\",\n    \"0498b248: ;Otherwise, initialize edit of a deficiency record\",\n    \"2e375577: ;Set VALMBCK to restart VALM-EDIT\",\n    \"5b37e129:  ;\\n ;Set up pointers and column widths for VALM display.\\n ;\",\n    \"a2afab75: ;If editing record, get record type column pointers/widths\",\n    \"06b0d768: ;If editing deficiency, get deficiency column pointers/widths\",\n    \"fb19d3ea: ;Get physician column pointers/widths\",\n    \"ca5b1103: ;Get status column pointers/widths\",\n    \"80ee7b1b: ;Get category column pointers/widths\",\n    \"ee232200: ;Get event date column pointers/widths\",\n    \"725e2f04: ;Get internal entry number for COMPLETED status\",\n    \"3efba034: ;Get internal entry number for REVIEWED status\",\n    \"428cf702: ;Get internal entry number for SIGNED NO REVIEW status\",\n    \"dbd2f5c3: ;Exit routine\",\n    \"52324956: ;Initialize counters for listing admissions\",\n    \"ab4246bc: ;If user chooses a different admission from the one displayed, or an admission to quit, then quit.\",\n    \"994ab18c: ;If user quit, set flag to quit.\",\n    \"8484cb1c: ;Clear flags used for user choices.\",\n    \"81e6c031: ;If not a multiple of 5, prompt user to choose an admission or quit.\",\n    \"6269de82: ;Prompt user to choose an admission.\",\n    \"0b19fb9f: ;Indicate range of valid admissions to choose from.\",\n    \"c88a1373: ;Read user's response.\",\n    \"e1a1b0b1: ;If user's response is not a valid admission, go back to list.\",\n    \"e4cd72fa: ;Store user's response in DGJTX.\",\n    \"ac1b1972: ;Get internal entry number of admission chosen by user.\",\n    \"d149e346: ;End of LIST routine.\",\n    \"5df38a88: ;Call routine to get admission type and date.\",\n    \"6effd6d4: ;Display admission number, admit date, and admit type.\",\n    \"e4fd8a2c: ;Display discharge date if applicable.\",\n    \"2f1b289b: ;If a multiple of 5 admissions listed, prompt for next action.\",\n    \"af3ef394: ;End of DT1 routine.\",\n    \"0e7af32a: ;Display admission number and date.\",\n    \"d4a3be29: ;End of DT routine.\",\n    \"ded71df7: ;Prompt to quit or continue listing.\",\n    \"c2c72b1e: ;Read user's response. If valid admission or record chosen, set flags and quit listing.\",\n    \"15822278: Check for user selection to quit or select an admission.\",\n    \"3db51bba: \\n .;Build display array for DGJTRT.\\n .\",\n    \"add2e39d: Initialize counters.\",\n    \"1f80c0c4: Set counters to 0.\",\n    \"e019fa79: Increment counters and set array element.\",\n    \"5c4be24c: Set array element and cross reference.\",\n    \"c170e957: Set cross reference array.\",\n    \"062c1052: Quit.\",\n    \"c4cdc1b7: If deleting a record, call delete option.\",\n    \"0fb46d28: Call edit option.\",\n    \"a2471d33: Quit.\",\n    \"a33e7782: Call enter option.\",\n    \"4ef30e7d: Call expiration entry option.\",\n    \"782b2929: Quit.\",\n    \"ad280bc8: Entry point.\",\n    \"8e37142f: \\n .;If deleting a deficiency call delete option,\\n .;else call deficiency edit option.\\n .\",\n    \"735956e7: If deleting a deficiency, call delete option.\",\n    \"5c991ddf: Call deficiency edit option.\",\n    \"8d63c8e6: Quit.\",\n    \"073bbd49: \\n .;Quick completion logic.\\n .;Get user selected items.\\n .;For each selected item, set status to COMPLETED.\\n .\",\n    \"62fe1047: Initialize variables\",\n    \"9f0d664d: Clear VALMBCK\",\n    \"b413e263: If no selections, go to REP^DGJTEE\",\n    \"767e6b83: Display full screen\",\n    \"d1a3f604: Process each selection\",\n    \"7d03c160: Go to ENQ\",\n    \"5a9d4bae: If not a valid record type, quit\",\n    \"025e5fd7: Set status to COMPLETED\",\n    \"13182665: Quit\",\n    \"3287a59d: Go to REP^DGJTEE and quit\",\n    \"9eeeab1e: Kill variables related to admissions and records\",\n    \"9731dfa4: Kill additional variables\",\n    \"55fd2077: Kill DIC(\\\"S\\\") and DIC(\\\"A\\\")\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 86.41254806518555
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "72295d78:  ;\n ;Entry point to edit or create a new corrective action record.\n ;",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to read with clear punctuation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains the purpose of the entry point, which is valuable for understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3d7bec21: ;If editing an existing record, go to edit routine",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the flow of the code when editing an existing record.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dce4d0d0: ;If creating new record, go to data entry routine",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the flow of the code when creating a new record.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "68381e3e: ;Exit routine",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates the purpose of the code section but is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "95cca886: ;Save VALMBCK before initializing edit",
+        "readability": {
+          "reasoning": "The comment is clear and describes the action concisely.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information that helps understand a critical step in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "26fb322b: ;If the record being edited is an OP REPORT, DISCHARGE SUMMARY or INTERIM SUMMARY, initialize edit of that type of record",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about the initialization process for different types of records, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0498b248: ;Otherwise, initialize edit of a deficiency record",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an alternative initialization process, which helps in understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2e375577: ;Set VALMBCK to restart VALM-EDIT",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides valuable information about the function of VALMBCK, aiding in comprehension of the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5b37e129:  ;\n ;Set up pointers and column widths for VALM display.\n ;",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear, though it includes unnecessary blank lines.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the setup process for display parameters, which is useful but somewhat basic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a2afab75: ;If editing record, get record type column pointers/widths",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies a conditional operation, providing useful context for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "06b0d768: ;If editing deficiency, get deficiency column pointers/widths",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides context about the functionality, which is helpful for understanding the purpose of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fb19d3ea: ;Get physician column pointers/widths",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment informs about retrieving the physician column's pointers and widths, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ca5b1103: ;Get status column pointers/widths",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it documents the purpose of the code related to status column pointers and widths.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "80ee7b1b: ;Get category column pointers/widths",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps to understand that the code deals with category column pointers and widths, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ee232200: ;Get event date column pointers/widths",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the code's purpose related to event date column pointers and widths.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "725e2f04: ;Get internal entry number for COMPLETED status",
+        "readability": {
+          "reasoning": "The comment is concise and clearly describes the purpose.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand what the code is doing.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3efba034: ;Get internal entry number for REVIEWED status",
+        "readability": {
+          "reasoning": "The comment is concise and clearly describes the purpose.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand what the code is doing.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "428cf702: ;Get internal entry number for SIGNED NO REVIEW status",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, although a bit long.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand what the code is doing.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dbd2f5c3: ;Exit routine",
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "52324956: ;Initialize counters for listing admissions",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand what the code is doing.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ab4246bc: ;If user chooses a different admission from the one displayed, or an admission to quit, then quit.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, although slightly wordy.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional decision that might not be obvious at first glance.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "994ab18c: ;If user quit, set flag to quit.",
+        "readability": {
+          "reasoning": "The comment is clear but has minor grammatical issues.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful in understanding the purpose of a specific flag.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8484cb1c: ;Clear flags used for user choices.",
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the resetting of flags, which is an important part of the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "81e6c031: ;If not a multiple of 5, prompt user to choose an admission or quit.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition that may not be immediately obvious.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6269de82: ;Prompt user to choose an admission.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a basic function, but it is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "0b19fb9f: ;Indicate range of valid admissions to choose from.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the specific functionality of indicating a range of valid admissions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c88a1373: ;Read user's response.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial functionality of reading a user's response.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e1a1b0b1: ;If user's response is not a valid admission, go back to list.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the error-checking logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e4cd72fa: ;Store user's response in DGJTX.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a straightforward functionality of storing a response.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ac1b1972: ;Get internal entry number of admission chosen by user.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the purpose of retrieving an internal entry number.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d149e346: ;End of LIST routine.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It indicates the end of a routine which could help in understanding code structure for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5df38a88: ;Call routine to get admission type and date.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the purpose of the routine call.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6effd6d4: ;Display admission number, admit date, and admit type.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about what is being displayed, useful to an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e4fd8a2c: ;Display discharge date if applicable.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a conditional display, which is useful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2f1b289b: ;If a multiple of 5 admissions listed, prompt for next action.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific conditional action, which is useful for understanding the logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "af3ef394: ;End of DT1 routine.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides an informative marker indicating the end of a specific routine, which helps understand the code structure.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0e7af32a: ;Display admission number and date.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes the functionality of displaying specific data, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d4a3be29: ;End of DT routine.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a helpful indication of the end of a routine, aiding in code navigation.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ded71df7: ;Prompt to quit or continue listing.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes a user interaction point, which is useful for understanding the program flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c2c72b1e: ;Read user's response. If valid admission or record chosen, set flags and quit listing.",
+        "readability": {
+          "reasoning": "The comment is clear and provides details on the functionality.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a conditional process and its impact on program flow, which is very useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "15822278: Check for user selection to quit or select an admission.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the user selection process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3db51bba: \n .;Build display array for DGJTRT.\n .",
+        "readability": {
+          "reasoning": "The comment is somewhat fragmented and has unnecessary punctuation.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a basic idea but lacks detail about the display array.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "add2e39d: Initialize counters.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality of initializing counters.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "1f80c0c4: Set counters to 0.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a simple operation of setting counters to zero.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e019fa79: Increment counters and set array element.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about incrementing counters and setting an array element.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5c4be24c: Set array element and cross reference.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear understanding of the action performed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c170e957: Set cross reference array.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of the code effectively.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "062c1052: Quit.",
+        "readability": {
+          "reasoning": "The comment is very brief but readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is too succinct to provide much context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c4cdc1b7: If deleting a record, call delete option.",
+        "readability": {
+          "reasoning": "The comment is clear and provides context.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the condition and action taken.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0fb46d28: Call edit option.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action performed by the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a2471d33: Quit.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a quit action, which is useful but somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a33e7782: Call enter option.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates calling an enter option, which provides useful information about the function's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4ef30e7d: Call expiration entry option.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the specific function of calling an expiration entry option, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "782b2929: Quit.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a quit action, which is useful but somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ad280bc8: Entry point.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates the entry point of the code, which is very useful for understanding the structure.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8e37142f: \n .;If deleting a deficiency call delete option,\n .;else call deficiency edit option.\n .",
+        "readability": {
+          "reasoning": "The comment is somewhat fragmented and contains unnecessary punctuation, but it is still understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a conditional logic in the code which is useful for understanding the flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "735956e7: If deleting a deficiency, call delete option.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific action in the code, which is useful for any programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5c991ddf: Call deficiency edit option.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific function call, which can be considered trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8d63c8e6: Quit.",
+        "readability": {
+          "reasoning": "The comment is too brief but still readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a very basic action, providing very little additional insight.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "073bbd49: \n .;Quick completion logic.\n .;Get user selected items.\n .;For each selected item, set status to COMPLETED.\n .",
+        "readability": {
+          "reasoning": "The comment is somewhat fragmented and contains unnecessary punctuation, but it is still clear.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment outlines a multi-step process, which is useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "62fe1047: Initialize variables",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the initialization step.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9f0d664d: Clear VALMBCK",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the specific action being taken.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b413e263: If no selections, go to REP^DGJTEE",
+        "readability": {
+          "reasoning": "The comment is well-written but could be slightly clearer with more context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the control flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "767e6b83: Display full screen",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the action being taken.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d1a3f604: Process each selection",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the iteration over selections.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7d03c160: Go to ENQ",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear direction of the next action in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5a9d4bae: If not a valid record type, quit",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains an important condition in the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "025e5fd7: Set status to COMPLETED",
+        "readability": {
+          "reasoning": "The comment is straightforward and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes a specific action being performed, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "13182665: Quit",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It does indicate a point of exit but lacks context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3287a59d: Go to REP^DGJTEE and quit",
+        "readability": {
+          "reasoning": "The comment is clear and provides specific instructions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It specifies a procedural step and the next action, which is helpful for understanding code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9eeeab1e: Kill variables related to admissions and records",
+        "readability": {
+          "reasoning": "The comment is clearly written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies which variables are being affected, which can help an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9731dfa4: Kill additional variables",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat vague as it does not specify which additional variables are being referred to, which limits its usefulness.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "55fd2077: Kill DIC(\"S\") and DIC(\"A\")",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies exactly which variables are being affected, which is useful for understanding the code.",
+          "score": 4
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,672 @@
+{
+  "input": "{\n  \"comments\": [\n    \"70f4c8d9:  ;\\n ;This routine checks for and calculates the total of all DG charges that have\\n ;occurred during the current admission for a given patient.\\n ;\",\n    \"d9a54d1b:  ;\\n ;Input Parameters:\\n ;\\n ;  DFN      = Patient Internal Entry Number\\n ;  DGJTDT   = Transaction Date\\n ;  DGJPARM  = Parameter Array\\n ;  DGJIRTDA = IRT Internal Entry Number Array\\n ;  DGJT     = Total Charges Array\\n ;  DGJFLG   = Flag to Determine if Separate Bills per Occurrence\\n ;  DGJTYP   = Type of Charge (i.e. OPT, SC, etc)\\n ;\",\n    \"e80b5266: Initialize the variable DGJOUT which will be used to store the output.\",\n    \"aee77029: Get the value of the parameter node for the current division from the DG PARAMETER file (#40.8). This value is stored in the variable DGJPARM.\",\n    \"7d4752d2: If the parameter node value is 0 (false), quit the routine.\",\n    \"e0cd6ac8: Set the DGJTYP variable to the internal entry number of the 'DISCHARGE SUMMARY' entry in the VAS SERVICE/SECTION file (#393.3). If DGJTYP is already defined, use that value instead.\",\n    \"33897e25: If DGJIRTDA (IRT Data Array) is defined and an entry exists in the VAS SERVICE/SECTION file (#393) for that IRT, and either there is no 'DT' node for that entry or the 'DT' node exists but has a null value, set the DGJFLG flag to 1 and quit the routine.\",\n    \"5446a70f: Quit if no data or invalid entry reference number.\",\n    \"7b552386: Loop through all 'B' cross-reference entries for the patient, and quit if the user has indicated a desire to exit (DGJOUT is true).\",\n    \"993c1182: If the entry matches the type and admission number, set the DGJOUT flag to quit the loop and return the entry reference number.\",\n    \"79eea9f6: If the required variables are not set, add them and quit.\",\n    \"4fd1a771: Quit the routine.\",\n    \"f53d4995: \\n ;Set up variables for adding a new entry\\n ;DIC = file number\\n ;DLAYGO = file number for laygo\\n ;DR = input template\\n ;DIE = file number for die call\\n ;DGJT9, DGJT10, DGJTSP, DGJTSV, DGJX, DGJY, DGJTEV, DGJTWARD are work variables\",\n    \"9d79c912: Set DGJTSV to ward's service if a ward was passed in, otherwise null.\",\n    \"cb8b184a: If DGJT(\\\"WARD\\\") is defined, set DGJTSV to the service for that ward lookup value, otherwise set DGJTSV to 1.\",\n    \"48147690: If DGJTSV is null or empty string, set it to 0. Then set DGJTSV to the next entry in ^DG(393.1,\\\"AC\\\") for the current DGJTSV value. If no such entry exists, set DGJTSV to the first entry in ^DG(393.1,\\\"AC\\\",0).\",\n    \"cd564392: Set DGJTSP to the 0th node of the latest Transfer in Date/Time multiple entry for the current admission and patient.\",\n    \"93254169: Set DGJX and DGJY to 8 and 2 respectively. Call the DOC tag to set X. Set DGJT9 to X and reset X to null string.\",\n    \"dd8aac1d: If parameter #3 in DGJPARM is true, set DGJX to 19 and DGJY to 4. Call the DOC tag to set X and store the value in DGJT10.\",\n    \"35b53276: Set DGJTEV to DGJTDT if it is not null, otherwise set it to the admission date/time from DGJT(\\\"ADDT\\\"). Set DGJTWARD to the ward location from file 42 for the current ward in DGJT(\\\"WARD\\\").\",\n    \"56cb13c3: Look up the entry for the current patient in the HEALTH FACTORS file (#393) and create a new entry if one does not exist.\",\n    \"87a7e99c: Check if the visit date is valid and quit if not.\",\n    \"f941e208: Acquire a lock on the entry being updated. Quit if unable to obtain the lock.\",\n    \"561b49a0: Set the fields to be edited with new values for type, event, admission number, ward, division, time stamp, treating specialty, time/procedure code 9, time/procedure code 10, time/procedure code 9 again, and 'was admission determined'.\",\n    \"872c1bc2: Call the FileMan ^DIE routine to edit the entry.\",\n    \"2dcf4627: Release the lock on the entry.\",\n    \"ea0f9b67: Set a flag indicating the update was successful and quit.\",\n    \"471fca2e: Block comment describing the EDIT subroutine.\\n\\nThe subroutine edits an existing entry in the VAS(393 global. It takes several input parameters: DGJIRTDA (the internal entry number), DGJVDD (unknown), DGJVDB (unknown), DGJVDT (unknown), DGJVTB (unknown), and DGJPARM (unknown). The routine acquires a lock on the entry to prevent simultaneous updates.\",\n    \"8f6c290b: Acquire a lock on the entry being updated. Quit if unable to obtain the lock.\",\n    \"4509d56f: Build DR string\",\n    \"98e6fbb5: Call FILE^DIE to update record with new values\",\n    \"f6de194c: Lock the record globally.\",\n    \"665ab386: Exit if no record is found.\",\n    \"36aaa27d: ;\\nLock the record locally.\\n;\\nUnable to lock? Quit.\\n;\\nDelete all data fields for the record.\",\n    \"a75cd078: Lock the record locally and quit if unable to obtain lock.\",\n    \"ebc89854: Generate FileMan data deletion syntax.\",\n    \"0f8d0bb3: Call FileMan to update the record and store result in STAT1.\",\n    \"947cf24a: Release the global lock on the record.\",\n    \"5b79313f: Exit routine.\",\n    \"d226777b: ;\\nLock the record locally.\\n;\\nUnable to lock? Quit.\\n;\\nUpdate data fields with passed values.\",\n    \"d5e9397a: Lock the record locally and quit if unable to obtain lock.\",\n    \"e214345a: Generate FileMan data update syntax from passed values.\",\n    \"b69017fc: Store IRT entry number in DA, set to file 393 DIC, and run FileMan DIE update.\",\n    \"334566d6: Release lock on IRT entry after editing.\",\n    \"3733bbe6: Exit routine.\",\n    \"3f8e1d4f:  ;\\nCheck status of IRT\\n ; \",\n    \"2f3784a3: Initialize local variables.\",\n    \"7450ebc8: Get 'DT' node for IRT entry - contains status information.\",\n    \"1d2a3221: If DT node is empty, set INCOMPLETE status and branch to STAT label.\",\n    \"d443207a: ;If document has no dictation date set status to DICTATED\",\n    \"75942ac9: ;If document has no transcription date set status to TRANSCRIBED\",\n    \"dac04369: ;If document has not been reviewed set status to SIGNED NO REVIEW\",\n    \"ff7f009a: ;If document has no signature date set status to SIGNED\",\n    \"08ce7333: ;If document has been reviewed set status to REVIEWED\",\n    \"8d04382e: ;Store the status code in the ^VAS(393 global and kill off variables\",\n    \"59b8510d: ;Exit if nothing else to do\",\n    \"a23c4e9a:  ;\\n ;This unit holds the routine that updates and stores certain data fields\\n ;related to documents in the temporary storage global ^DGJTSP.\",\n    \"78260e0d: ;Extract the parameter in question\",\n    \"cf98c30b: ;Set X to the appropriate value based on the parameter\",\n    \"f38c122e: ;Exit and return\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 79.35923600196838
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "70f4c8d9:  ;\n ;This routine checks for and calculates the total of all DG charges that have\n ;occurred during the current admission for a given patient.\n ;",
+        "readability": {
+          "reasoning": "The comment is well-structured and clearly explains the purpose of the routine.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a comprehensive overview, which helps understand the purpose of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d9a54d1b:  ;\n ;Input Parameters:\n ;\n ;  DFN      = Patient Internal Entry Number\n ;  DGJTDT   = Transaction Date\n ;  DGJPARM  = Parameter Array\n ;  DGJIRTDA = IRT Internal Entry Number Array\n ;  DGJT     = Total Charges Array\n ;  DGJFLG   = Flag to Determine if Separate Bills per Occurrence\n ;  DGJTYP   = Type of Charge (i.e. OPT, SC, etc)\n ;",
+        "readability": {
+          "reasoning": "The comment is well-organized with clear formatting.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It thoroughly documents input parameters, aiding understanding for any programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e80b5266: Initialize the variable DGJOUT which will be used to store the output.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the purpose of a variable, which is helpful but somewhat basic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "aee77029: Get the value of the parameter node for the current division from the DG PARAMETER file (#40.8). This value is stored in the variable DGJPARM.",
+        "readability": {
+          "reasoning": "The comment is clear and informative.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It thoroughly explains a specific action, helping to understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7d4752d2: If the parameter node value is 0 (false), quit the routine.",
+        "readability": {
+          "reasoning": "The comment is simple and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear condition for terminating the routine, aiding code comprehension.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e0cd6ac8: Set the DGJTYP variable to the internal entry number of the 'DISCHARGE SUMMARY' entry in the VAS SERVICE/SECTION file (#393.3). If DGJTYP is already defined, use that value instead.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read, with no grammar or punctuation issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of setting the variable and the conditions for using its value, which helps both expert and average programmers understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "33897e25: If DGJIRTDA (IRT Data Array) is defined and an entry exists in the VAS SERVICE/SECTION file (#393) for that IRT, and either there is no 'DT' node for that entry or the 'DT' node exists but has a null value, set the DGJFLG flag to 1 and quit the routine.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, with proper grammar and punctuation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific and potentially complex condition and action, which is very useful for understanding the logic of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5446a70f: Quit if no data or invalid entry reference number.",
+        "readability": {
+          "reasoning": "The comment is concise and clear, with no issues in grammar or punctuation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a simple, yet important condition for quitting the routine, which is useful for understanding the flow of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7b552386: Loop through all 'B' cross-reference entries for the patient, and quit if the user has indicated a desire to exit (DGJOUT is true).",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, with no grammar or punctuation issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the loop condition and the exit condition, which is useful for understanding the control flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "993c1182: If the entry matches the type and admission number, set the DGJOUT flag to quit the loop and return the entry reference number.",
+        "readability": {
+          "reasoning": "The comment is clear and well-constructed, with no issues in grammar or punctuation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action, which helps in understanding the logic and flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "79eea9f6: If the required variables are not set, add them and quit.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional action within the code, which is useful for understanding its logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4fd1a771: Quit the routine.",
+        "readability": {
+          "reasoning": "The comment is short and straightforward, making it very readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes an action taken by the code but lacks detail to fully understand the context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f53d4995: \n ;Set up variables for adding a new entry\n ;DIC = file number\n ;DLAYGO = file number for laygo\n ;DR = input template\n ;DIE = file number for die call\n ;DGJT9, DGJT10, DGJTSP, DGJTSV, DGJX, DGJY, DGJTEV, DGJTWARD are work variables",
+        "readability": {
+          "reasoning": "The formatting and list structure make it easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about variable setup, which is very useful for understanding the initialization process.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9d79c912: Set DGJTSV to ward's service if a ward was passed in, otherwise null.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional assignment, which helps in understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cb8b184a: If DGJT(\"WARD\") is defined, set DGJTSV to the service for that ward lookup value, otherwise set DGJTSV to 1.",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear explanation of a conditional logic, which is useful for understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "48147690: If DGJTSV is null or empty string, set it to 0. Then set DGJTSV to the next entry in ^DG(393.1,\"AC\") for the current DGJTSV value. If no such entry exists, set DGJTSV to the first entry in ^DG(393.1,\"AC\",0).",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear explanation of the logic for setting DGJTSV, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cd564392: Set DGJTSP to the 0th node of the latest Transfer in Date/Time multiple entry for the current admission and patient.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies a non-trivial action related to setting DGJTSP, aiding in code comprehension.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "93254169: Set DGJX and DGJY to 8 and 2 respectively. Call the DOC tag to set X. Set DGJT9 to X and reset X to null string.",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains multiple steps and their significance, which aids in understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "dd8aac1d: If parameter #3 in DGJPARM is true, set DGJX to 19 and DGJY to 4. Call the DOC tag to set X and store the value in DGJT10.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional action and its subsequent steps, which is useful for understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "35b53276: Set DGJTEV to DGJTDT if it is not null, otherwise set it to the admission date/time from DGJT(\"ADDT\"). Set DGJTWARD to the ward location from file 42 for the current ward in DGJT(\"WARD\").",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information on setting DGJTEV and DGJTWARD, which is crucial for understanding this part of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "56cb13c3: Look up the entry for the current patient in the HEALTH FACTORS file (#393) and create a new entry if one does not exist.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information that helps an expert understand the functionality of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "87a7e99c: Check if the visit date is valid and quit if not.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a validation check that is useful for understanding the code's logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f941e208: Acquire a lock on the entry being updated. Quit if unable to obtain the lock.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an important part of the code related to concurrency, which is useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "561b49a0: Set the fields to be edited with new values for type, event, admission number, ward, division, time stamp, treating specialty, time/procedure code 9, time/procedure code 10, time/procedure code 9 again, and 'was admission determined'.",
+        "readability": {
+          "reasoning": "The comment is long but clearly lists each field being set, making it understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment details the fields being edited, which is useful for understanding the specific updates being made.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "872c1bc2: Call the FileMan ^DIE routine to edit the entry.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the function being called, which helps in understanding the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2dcf4627: Release the lock on the entry.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains a critical operation of releasing a lock.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ea0f9b67: Set a flag indicating the update was successful and quit.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it describes an important part of the control flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "471fca2e: Block comment describing the EDIT subroutine.\n\nThe subroutine edits an existing entry in the VAS(393 global. It takes several input parameters: DGJIRTDA (the internal entry number), DGJVDD (unknown), DGJVDB (unknown), DGJVDT (unknown), DGJVTB (unknown), and DGJPARM (unknown). The routine acquires a lock on the entry to prevent simultaneous updates.",
+        "readability": {
+          "reasoning": "The comment is detailed and well-structured, making it easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides comprehensive information about the subroutine and its parameters, which is highly useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8f6c290b: Acquire a lock on the entry being updated. Quit if unable to obtain the lock.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an essential operation related to concurrency control, which is very useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4509d56f: Build DR string",
+        "readability": {
+          "reasoning": "The comment is brief and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it describes the creation of a string but lacks detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "98e6fbb5: Call FILE^DIE to update record with new values",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific action being taken in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f6de194c: Lock the record globally.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the scope of the lock.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "665ab386: Exit if no record is found.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a conditional action, which is helpful for understanding the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "36aaa27d: ;\nLock the record locally.\n;\nUnable to lock? Quit.\n;\nDelete all data fields for the record.",
+        "readability": {
+          "reasoning": "The comment is formatted in a way that breaks up the information clearly.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment describes multiple actions and conditions, which is useful for understanding the flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a75cd078: Lock the record locally and quit if unable to obtain lock.",
+        "readability": {
+          "reasoning": "The comment is well-written and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action and condition, aiding understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ebc89854: Generate FileMan data deletion syntax.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear understanding of the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0f8d0bb3: Call FileMan to update the record and store result in STAT1.",
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It specifies the function and the variable where the result is stored, aiding comprehension.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "947cf24a: Release the global lock on the record.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains an important action taken by the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5b79313f: Exit routine.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d226777b: ;\nLock the record locally.\n;\nUnable to lock? Quit.\n;\nUpdate data fields with passed values.",
+        "readability": {
+          "reasoning": "The comment is somewhat fragmented but overall understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It describes multiple steps taken in the code, but could be clearer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d5e9397a: Lock the record locally and quit if unable to obtain lock.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly describes the action being taken.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a non-trivial functionality that is important for understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e214345a: Generate FileMan data update syntax from passed values.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful in understanding the purpose of the code, especially for those familiar with FileMan.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b69017fc: Store IRT entry number in DA, set to file 393 DIC, and run FileMan DIE update.",
+        "readability": {
+          "reasoning": "The comment is detailed and explains multiple steps clearly.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it outlines specific actions and their sequence, which can aid in understanding complex code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "334566d6: Release lock on IRT entry after editing.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it denotes an important operation related to resource management.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3733bbe6: Exit routine.",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is only somewhat useful as it documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3f8e1d4f:  ;\nCheck status of IRT\n ; ",
+        "readability": {
+          "reasoning": "The comment is clear but has unnecessary characters and formatting issues.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about checking the status of IRT but is somewhat vague.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2f3784a3: Initialize local variables.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the initialization process but is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7450ebc8: Get 'DT' node for IRT entry - contains status information.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the purpose of the 'DT' node.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1d2a3221: If DT node is empty, set INCOMPLETE status and branch to STAT label.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains a specific condition and action, aiding comprehension.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d443207a: ;If document has no dictation date set status to DICTATED",
+        "readability": {
+          "reasoning": "The comment is mostly clear but lacks punctuation and has a minor formatting issue.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action, which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "75942ac9: ;If document has no transcription date set status to TRANSCRIBED",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the code's functionality, particularly for understanding status changes.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dac04369: ;If document has not been reviewed set status to SIGNED NO REVIEW",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding when a specific status is set, which is useful for both average and expert programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ff7f009a: ;If document has no signature date set status to SIGNED",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides valuable information about the condition under which a status is set, aiding in code comprehension.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "08ce7333: ;If document has been reviewed set status to REVIEWED",
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the condition for setting a status, which is helpful to understand the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8d04382e: ;Store the status code in the ^VAS(393 global and kill off variables",
+        "readability": {
+          "reasoning": "The comment is clear but uses some jargon that may not be immediately understood by everyone.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides specific and useful information about where data is stored and the cleanup process, which is valuable for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "59b8510d: ;Exit if nothing else to do",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the point at which the code exits.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a23c4e9a: ;\n ;This unit holds the routine that updates and stores certain data fields\n ;related to documents in the temporary storage global ^DGJTSP.",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of the unit, which is useful for understanding its overall functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "78260e0d: ;Extract the parameter in question",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific action performed by the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cf98c30b: ;Set X to the appropriate value based on the parameter",
+        "readability": {
+          "reasoning": "The comment is clear and precise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies how a variable is being set, which is useful for understanding the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f38c122e: ;Exit and return",
+        "readability": {
+          "reasoning": "The comment is succinct and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the flow of the code at the exit point.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

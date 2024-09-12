@@ -1,0 +1,27 @@
+{
+  "comments": [
+    "bca39a19: ;\n .;Sets initial variables for the DGJOTPUL routine.\n .;DGJTNODE is set to the 0 node of the VAS(393) record\n .;DGJTPAR is set to the '6^7^8' nodes of the DG(40.8) record\n .;DGJTNODT is set to the 'DT' node of the VAS(393) record\n .;DGJTNOW is set to the current date/time\n .;DGJTDL is used to store the number of days late",
+    "3c833e84: ;Set DGJTPAR to the 6^7^8 piece of the DG(40.8) record",
+    "fef34871: ;Set DGJTNODT to the 'DT' node of the VAS(393) record",
+    "caab9f97: ;Set DGJTNOW to the current date/time\n;Set DGJTDL to 0",
+    "6c7ccfec: ;Check if the status is in DGJTSTAT\n;If so, set DGJTREC to 1 and call the PROC routine",
+    "f4baee1d: ;Quit the routine",
+    "368a604f: ;\n .;If the status is INCOMPLETE:\n .;Set DGJTFLAG based on the due date (in DGJTPAR)\n .;If late, set DGJTDL to the number of days late\n .;Call DAYS and TOT1 routines",
+    "20b4aa95: ;\n .;If the status is DICTATED:\n .;Set DGJTFLAG to 1\n .;Call DAYS and TOT1 routines",
+    "4d735e7f: ;\n .;If the status is TRANSCRIBED:\n .;Set DGJTFLAG based on the due date (in DGJTPAR)\n .;If late, call DAYS and TOT1 routines",
+    "052ce069: ;\n .;If the DG(40.8) record has a non-zero piece 3:\n .;If the status is SIGNED:\n .;Set DGJTFLAG based on the due date (in DGJTPAR)\n .;If late, call DAYS and TOT1 routines",
+    "96626cb7: Quit if there are no patient visits to process.",
+    "a53db662: Set DGJTDL to the day portion of DGJTNOW (current date/time).",
+    "d1ecaa78: Set DGJTFLLG=0 to indicate that no patient visits have been processed yet. Set X1 to the latest of: DGJTNODT (date/time of last patient visit processed), DGJTNOW (current date/time), or the discharge date/time from DGJTNODE (patient info node). Convert X1 to FileMan date/time format.",
+    "93dfb691: If DGJTNODT is defined but has no date/time component (first piece), and a patient movement indicator is present (5th piece), then set DGJT2PC and DGJT3PC to '-' (indicating no patient visit data for that day), call COD (unknown routine), set X1 to DGJTNOW or discharge date/time if available, convert to FileMan format, call SET (unknown routine), and quit.",
+    "71f6de36: Increment DGJDICTO by the numeric value in X (presumably the length of the patient visit in days). Set DGJT2PC to the value in X followed by '*' (to indicate a patient visit was processed).",
+    "a694080a: ;Calculate remaining tour time and format time strings",
+    "f5f43f20: ;Call COD subroutine if end date/time is set",
+    "ee1e7fd5: ;Calculate actual remaining tour time if end date/time is set",
+    "fb4b18dc: ;Exit routine",
+    "db7bbb90: ;Get provider name from file entries based on code in DGJTNODE",
+    "90d2190a: ;Set flag if no provider name found",
+    "5a8d5039: ;Exit COD subroutine",
+    "294e4a1b: ;Update provider name and remaining tour time output variables"
+  ]
+}

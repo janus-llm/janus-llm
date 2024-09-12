@@ -1,0 +1,562 @@
+{
+  "input": "{\n  \"comments\": [\n    \"35b32a0f:  .;\\n .;This routine edits the PHYSICIAN RESPONSIBLE field (0;12) of the\\n .;PATIENT MOVEMENT file (#393).\\n .;\",\n    \"5c5f9ba6: ;Call EN^DIE.\",\n    \"8e12971b: ;Check for existing data to edit and set up variables.\",\n    \"725fe4d6: ;If field PHYSICIAN RESPONSIBLE is already set, save it in DE(1).\",\n    \"9f9e712d: ;Clean up and quit.\",\n    \"40fb19e5: ;Write the label for the field being edited.\",\n    \"58f17d22: ;Quit.\",\n    \"e0de8658: ;Write the data for the field being edited.\",\n    \"de0078c2: ;If the data is too long, branch to word-wrapping routine.\",\n    \"a4bf4137: ;If field is read-only and has data, display 'No Editing'.\",\n    \"0f5f8aee: ;Read user input and handle timeout.\",\n    \"db9f16e7: ;Quit.\",\n    \"7108661d: ;Increment the DQ counter and reset DQ(DQ).\",\n    \"193472a9: ;Branch to the appropriate input transform based on DQ.\",\n    \"fb414af3: ;If data already exists for this field, go to PR (previous). Otherwise, get new input.\",\n    \"1d21d204: If no input is given and field does not require an answer, quit.\",\n    \"28a96123: If input is a question mark, branch to help instructions.\",\n    \"c9eb915c: If input is an @ sign, branch to FileMan options.\",\n    \"8ce984bf: If input is a space and default response is defined, use that response.\",\n    \"46999570: Validate input and write any transform code defined.\",\n    \"ca22d708: If multi-valued field, check additional values in set of codes.\",\n    \"7f248875: If multi-valued field, write any remaining values from set of codes.\",\n    \"60d4ab4b: If field is a pointer, resolve pointer value and validate.\",\n    \"4878a4c1: If numeric field, ensure value is within maximum length.\",\n    \"a4434f8e: If decimal numbers allowed, strip any leading/trailing 0s.\",\n    \"4dea839e: Execute any executable help code defined.\",\n    \"4acfc600: Save the new responded value and any default value defined.\",\n    \"048de7b6: If input is bad and help is available, go to help instructions.\",\n    \"f7e86443: Set bad input response code.\",\n    \"7873edea: If input is a question mark, go to reader help.\",\n    \"84a9baf1: ;Build the array entry for the input template.\",\n    \"8435ae72: ;If input variable array does not exist, write data and read input.;If input variable is undefined or does not allow REPLACE go to input transform.;If input was @ go to Recursion mode.\",\n    \"89137e83: ;Retrieve the stored variable value and process QUIT logic.\",\n    \"0667e266: ;If DG is a pointer and the pointed-to file has data at the 'NO' node, move data to X and if the pointer has a DIEZ node get the description and move data to X.\",\n    \"740fb1fd: ;If DG is a VA FileMan code get the external value into X.;If DG is a MUMPS XECUTABLE code get the external value from the X-REF and move the code description into X.\",\n    \"404c142e: ;If DG is a Set of Codes replace pointer with the code value.\",\n    \"5fca4bd6: ;Do output transform and if X is null revert to the stored value unless VALUES are not allowed for this field.\",\n    \"e0629976: ;If DG is not an INPUT TRANSFORM go to the READ command.\",\n    \"8f577a23: ;Bypass the standard input transform supplied with INPUT TEMPLATES.\",\n    \"acf21e42: ;Reached the end of the reader loop.\",\n    \"5a8aeed2: ;Initialize variables for this record being edited.\",\n    \"e0ba1dcc: ;Set reader variables for Field 12 PHYSICIAN RESPONSIBLE.\",\n    \"59d4efb0: ;Build the input transform variables.\",\n    \"a9aaf287: ;Initialize the input variable X with the current field value.\",\n    \"af57999e: ;Initialize the internal output variable.\",\n    \"40bc9873: ;If valid data already exists set X to that data value\",\n    \"852bf452: ;If data value is null go to reader to input new value\",\n    \"ad2562af: ;Nothing to execute for setting X when input data is valid\",\n    \"07e7da1d: ;\\n;Store data into field\\n;Then re-index cross-references for future lookups\",\n    \"f2c6f812: ;Jump to next block of code for this input\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 88.57425308227539
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "35b32a0f:  .;\n .;This routine edits the PHYSICIAN RESPONSIBLE field (0;12) of the\n .;PATIENT MOVEMENT file (#393).\n .;",
+        "readability": {
+          "reasoning": "The comment is well-structured and clearly describes what the routine does.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides valuable context about the function and the specific field it modifies, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5c5f9ba6: ;Call EN^DIE.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a specific function call, which is useful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8e12971b: ;Check for existing data to edit and set up variables.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of the code block, which helps in understanding what the code is supposed to do.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "725fe4d6: ;If field PHYSICIAN RESPONSIBLE is already set, save it in DE(1).",
+        "readability": {
+          "reasoning": "The comment is clear and provides specific information about the field and variable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an important condition and action, which helps in understanding the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9f9e712d: ;Clean up and quit.",
+        "readability": {
+          "reasoning": "The comment is short and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a basic explanation of the code's final action, which is somewhat useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "40fb19e5: ;Write the label for the field being edited.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "58f17d22: ;Quit.",
+        "readability": {
+          "reasoning": "The comment is very brief but clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment documents trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e0de8658: ;Write the data for the field being edited.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "de0078c2: ;If the data is too long, branch to word-wrapping routine.",
+        "readability": {
+          "reasoning": "The comment is clear and descriptive.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment provides useful information about the logic flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a4bf4137: ;If field is read-only and has data, display 'No Editing'.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps understand a specific condition in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0f5f8aee: ;Read user input and handle timeout.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific functionality in the code that might not be immediately obvious.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "db9f16e7: ;Quit.",
+        "readability": {
+          "reasoning": "The comment is very clear but extremely brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a very trivial functionality which is self-explanatory.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7108661d: ;Increment the DQ counter and reset DQ(DQ).",
+        "readability": {
+          "reasoning": "The comment is mostly clear but the use of 'DQ(DQ)' is a bit confusing.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an action that may not be immediately obvious but could be clearer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "193472a9: ;Branch to the appropriate input transform based on DQ.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a branching decision in the code which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fb414af3: ;If data already exists for this field, go to PR (previous). Otherwise, get new input.",
+        "readability": {
+          "reasoning": "The comment is clear and explains the logic well.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional decision that is useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1d21d204: If no input is given and field does not require an answer, quit.",
+        "readability": {
+          "reasoning": "The comment is clear, concise, and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a non-trivial functionality related to input handling.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "28a96123: If input is a question mark, branch to help instructions.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about a specific input behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c9eb915c: If input is an @ sign, branch to FileMan options.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to comprehend.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific input scenario and its handling.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8ce984bf: If input is a space and default response is defined, use that response.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a useful condition related to input handling and default responses.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "46999570: Validate input and write any transform code defined.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a key functionality about input validation and transformation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ca22d708: If multi-valued field, check additional values in set of codes.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific functionality that could be important for understanding the code's logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7f248875: If multi-valued field, write any remaining values from set of codes.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an action that needs to be taken, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "60d4ab4b: If field is a pointer, resolve pointer value and validate.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful because it explains an important step in handling pointer values.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4878a4c1: If numeric field, ensure value is within maximum length.",
+        "readability": {
+          "reasoning": "This comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it specifies a validation step for numeric fields.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a4434f8e: If decimal numbers allowed, strip any leading/trailing 0s.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it provides a specific action to handle decimal numbers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4dea839e: Execute any executable help code defined.",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand what the code is supposed to do.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4acfc600: Save the new responded value and any default value defined.",
+        "readability": {
+          "reasoning": "The comment is clear but slightly verbose.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "048de7b6: If input is bad and help is available, go to help instructions.",
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the logic behind the input validation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f7e86443: Set bad input response code.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7873edea: If input is a question mark, go to reader help.",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific input condition handling.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "84a9baf1: ;Build the array entry for the input template.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It gives a clear indication of the function's purpose, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8435ae72: ;If input variable array does not exist, write data and read input.;If input variable is undefined or does not allow REPLACE go to input transform.;If input was @ go to Recursion mode.",
+        "readability": {
+          "reasoning": "The comment is fairly clear but a bit lengthy and dense.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It covers multiple conditions and actions, which is useful for understanding the logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "89137e83: ;Retrieve the stored variable value and process QUIT logic.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes a specific action, which helps in understanding the code's function.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0667e266: ;If DG is a pointer and the pointed-to file has data at the 'NO' node, move data to X and if the pointer has a DIEZ node get the description and move data to X.",
+        "readability": {
+          "reasoning": "The comment is quite complex and somewhat difficult to follow.",
+          "score": 2
+        },
+        "usefulness": {
+          "reasoning": "It provides detailed information but could be more straightforward.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "740fb1fd: ;If DG is a VA FileMan code get the external value into X.;If DG is a MUMPS XECUTABLE code get the external value from the X-REF and move the code description into X.",
+        "readability": {
+          "reasoning": "The comment is relatively clear but contains a lot of information.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It is useful in understanding different scenarios but is somewhat dense.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "404c142e: ;If DG is a Set of Codes replace pointer with the code value.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a clear explanation of what happens when DG is a set of codes, aiding understanding for an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5fca4bd6: ;Do output transform and if X is null revert to the stored value unless VALUES are not allowed for this field.",
+        "readability": {
+          "reasoning": "The comment is generally clear but could be slightly confusing due to its length and structure.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about handling null values and output transforms, helpful to an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e0629976: ;If DG is not an INPUT TRANSFORM go to the READ command.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the condition and subsequent action, aiding understanding for an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8f577a23: ;Bypass the standard input transform supplied with INPUT TEMPLATES.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains a non-standard operation, helpful for an expert programmer.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "acf21e42: ;Reached the end of the reader loop.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality, providing minimal additional understanding.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "5a8aeed2: ;Initialize variables for this record being edited.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand that variables are being initialized for a specific record.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e0ba1dcc: ;Set reader variables for Field 12 PHYSICIAN RESPONSIBLE.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is specific and helps an average programmer understand the purpose of the reader variables.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "59d4efb0: ;Build the input transform variables.",
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail on what 'building the input transform variables' entails.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a9aaf287: ;Initialize the input variable X with the current field value.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the initialization process of the input variable X.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "af57999e: ;Initialize the internal output variable.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more specific about which internal output variable is being initialized.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "40bc9873: ;If valid data already exists set X to that data value",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the condition and action taken, which helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "852bf452: ;If data value is null go to reader to input new value",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action taken if the data value is null, which helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ad2562af: ;Nothing to execute for setting X when input data is valid",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains that no action is taken when the input data is valid, which helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "07e7da1d: ;\n;Store data into field\n;Then re-index cross-references for future lookups",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, though it is slightly verbose.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment details two actions, storing data and re-indexing, which helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f2c6f812: ;Jump to next block of code for this input",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the flow of the code, which helps an average programmer understand the code better.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

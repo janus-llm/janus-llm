@@ -1,0 +1,27 @@
+{
+  "comments": [
+    "bca39a19:  ;\n ;This code is used to process a patient admission record.\n ;It initializes variables, retrieves patient data from the VAS(393 file,\n ;and determines if the admission should be processed based on the\n ;patient's admission status.",
+    "3c833e84: ;Retrieve the parent pointer for the patient admission record (from DG(40.8 file).",
+    "fef34871: ;Retrieve the admission date for the patient record (from VAS(393 file).",
+    "caab9f97: ;Get the current date/time and initialize the discharge date variable.",
+    "6c7ccfec: ;If the admission status is in the list of processable statuses, set the record flag and call the PROC routine to process the admission.",
+    "f4baee1d: ;Quit the routine.",
+    "368a604f: If the note status is 'Incomplete' then calculate the number of days since date and time of note. Set DGJTFLAG based on calculated time difference and set DGJTDL if note is out of compliance. Call DAYS and TOT1 routines to update the total counts.",
+    "20b4aa95: If the note status is 'Dictated' then set DGJTFLAG to 1, indicating the note is out of compliance. Retrieve the note date and call DAYS and TOT1 routines to update the total counts.",
+    "4d735e7f: If the note status is 'Transcribed' then calculate the number of days since the note was transcribed against the allowed time for transcription. If the note is out of compliance, set DGJTFLAG to 1. Call DAYS and TOT1 routines to update the total counts.",
+    "052ce069: If the note has been signed and the number of days since signing date exceeds the allowed time for signing, set DGJTFLAG to 1 indicating the note is out of compliance. Call DAYS and TOT1 routines to update the total counts.",
+    "96626cb7: Exit the routine.",
+    "a53db662: ;Calculates the number of days since the Unix epoch date (January 1, 1970) for the current date and time.",
+    "d1ecaa78: Finds the later of the not admitted date and the node effective date.",
+    "93dfb691: If not admitted date has no admission date and a disallowed episode indicator, set the release and transfer percentage dates to a dash and quit.",
+    "71f6de36: Add the number of continuous inpatient days to the total inpatient days. Set discharge percentage to number with an asterisk.",
+    "a694080a: If the not admitted date has an admission date, find the number of days from the admission date to today or the node effective date, whichever is later. Add these days to the total, set the release date percentage to the number with an asterisk, and set the discharge percentage to the numeric value.",
+    "f5f43f20: If the not admitted date has a transfer date, perform some coding activity.",
+    "ee1e7fd5: If the not admitted date has a transfer date, find the number of days from the transfer date to today or the node effective date, whichever is later, and perform some setting activity.",
+    "fb4b18dc: Quit the routine.",
+    "db7bbb90: ;Set the variable X to the clinical occupation description if it exists in the NEW PERSON (#200) file.",
+    "90d2190a: ;If no matching description, set DGJTFLLG flag to indicate failure.",
+    "5a8d5039: ;Exit the COD subroutine.",
+    "294e4a1b: ;Concatenate the occupation description to DGJCOTO, flag with '*' if failed, store in DGJT4PC, increment DGJT3PC counter."
+  ]
+}

@@ -1,0 +1,430 @@
+{
+  "input": "{\n  \"comments\": [\n    \"a0c81b31: \\n ;Obtain sort and patient type filters for outpatient team position assignment listing\\n ;Output and quit variables initialized\",\n    \"6abfb045: ;Default sort is by Physician Name\",\n    \"87e3a53e: ;Allow alternate sort by Service\",\n    \"4d0f870f: ;Display help text for sort options if needed\",\n    \"e3d4c481: ;Validate sort selection\",\n    \"6a5ea50c: ;Default to Both inpatients and outpatients\",\n    \"e01e3160: Convert case of input character to corresponding numeric value.\",\n    \"84012688: If input is '?' then execute ZSET2 and HELP2 routines and go to label OUT1.\",\n    \"5e139787: Extract first character of input, execute IN^DGJHELP routine, print newline. If return value is -1, execute ZSET2 and HELP2 routines and go to label OUT1.\",\n    \"db861a50: Determine report type for printing: 1 for Patient Lists, 2 for Totals Page, 3 for Both. Set DGJFL to 0, prompt user for input with timeout, exit if user enters '^' or times out. If no input or 'B' or 'b' is entered, set report type to 3 (Both).\",\n    \"df1f05e1: ;Check if user entered 'P', 'p', 'T', or 't'. If so, assign 1 or 2, otherwise assign the entered value to X.\",\n    \"5eba706a: ;If the user entered '?', execute ZSET3 and HELP3, then go to label TOT1.\",\n    \"0ca9ea59: ;Get the first character of the user input and store it in DGJTLPG. Call IN^DGJHELP and print a newline. If the returned value is -1, execute ZSET3 and HELP3, then go to label TOT1.\",\n    \"05a03bed: ;If the global node ^DG(43,1,\\\"GL\\\") exists, set DGJTMUL to the second piece of its value.\",\n    \"ed72bd9c: ;Determine the value of DGJTL based on DGJTSR. If DGJTSR is 1, set DGJTL to \\\"PHY\\\". If DGJTSR is 2, set DGJTL to \\\"SER\\\". Otherwise, set DGJTL to \\\"QUIT\\\".\",\n    \"751eeb25: ;DGJTSTAT contains subscripts to ^DG(393.2,'B') nodes for INCOMPLETE, DICTATED, TRANSCRIBED & SIGNED.\",\n    \"0bf64d26: ;Branch to tag DGJOTP1 to continue.\",\n    \"c6821aae: ;Kill all variables used in this routine.\",\n    \"bedd6edf: ;Kill variables used in the routine.\",\n    \"a4af4432: Clear variables used for the report\",\n    \"06ba01b7: Clear additional variables used for the report\",\n    \"37969961: Clear out variables and the $J node in ^UTILITY\",\n    \"6af36576: Close any open files and quit\",\n    \"47f33b8e: ;\\nEntry point to ask user for date range to report on\\n;\",\n    \"337bb432: ; Ask user for starting date and set date range for report to begin at 0.0001 prior to input\",\n    \"90f020ac: ; Ask user for ending date, validate it is after the start date, loop back if invalid\",\n    \"c051315f: ; Set the ending date to be 0.9999 after the input date to catch events on that date\",\n    \"bd586688: Display error message if ending date is before beginning date and go to the 'END' label\",\n    \"7ec9cfd8: Exit the current execution context\",\n    \"aac81051: Display a prompt to choose a number or first initial, and list the options from the 2nd, 3rd, and 4th piece of the 'Z' variable\",\n    \"8e70e896: ;Exit routine.\",\n    \"27f8780b: ;Display help menu options.\",\n    \"c6da2695: ;To exit routine - quit.\",\n    \"81ccbc52: ;Prompt user to select an option and display menu options.\",\n    \"f141bd5b: ;Exit after displaying menu options.\",\n    \"cbc4961b: ;Menu options for physician or service/specialty selection.\",\n    \"3e7ad969: ;Menu options for inpatient/outpatient selection.\",\n    \"6e70280e: ;Menu options for report format selection.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 55.34774684906006
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "a0c81b31: \n ;Obtain sort and patient type filters for outpatient team position assignment listing\n ;Output and quit variables initialized",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear, though it contains some technical jargon.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the initialization process and the context of the filters.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6abfb045: ;Default sort is by Physician Name",
+        "readability": {
+          "reasoning": "The comment is concise and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies the default sorting behavior, which is useful for understanding the logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "87e3a53e: ;Allow alternate sort by Service",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an alternative sorting option, useful for understanding code functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4d0f870f: ;Display help text for sort options if needed",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional display of help text, which is helpful for understanding user assistance features.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e3d4c481: ;Validate sort selection",
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates a validation process, which is beneficial for understanding code checks.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6a5ea50c: ;Default to Both inpatients and outpatients",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the default behavior, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e01e3160: Convert case of input character to corresponding numeric value.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific functionality that might not be immediately obvious.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "84012688: If input is '?' then execute ZSET2 and HELP2 routines and go to label OUT1.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of a specific condition and related actions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5e139787: Extract first character of input, execute IN^DGJHELP routine, print newline. If return value is -1, execute ZSET2 and HELP2 routines and go to label OUT1.",
+        "readability": {
+          "reasoning": "The comment is a bit lengthy but clear and detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a comprehensive explanation of a sequence of actions, which is very useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "db861a50: Determine report type for printing: 1 for Patient Lists, 2 for Totals Page, 3 for Both. Set DGJFL to 0, prompt user for input with timeout, exit if user enters '^' or times out. If no input or 'B' or 'b' is entered, set report type to 3 (Both).",
+        "readability": {
+          "reasoning": "The comment is detailed but might be too long for quick reading.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a complex behavior in detail, which is very useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "df1f05e1: ;Check if user entered 'P', 'p', 'T', or 't'. If so, assign 1 or 2, otherwise assign the entered value to X.",
+        "readability": {
+          "reasoning": "The comment is clear, concise, and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the specific conditions and actions very well, which helps in understanding the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5eba706a: ;If the user entered '?', execute ZSET3 and HELP3, then go to label TOT1.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and the subsequent actions, aiding in understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0ca9ea59: ;Get the first character of the user input and store it in DGJTLPG. Call IN^DGJHELP and print a newline. If the returned value is -1, execute ZSET3 and HELP3, then go to label TOT1.",
+        "readability": {
+          "reasoning": "The comment is detailed and clearly written, although quite long.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a comprehensive explanation of multiple steps, which is very useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "05a03bed: ;If the global node ^DG(43,1,\"GL\") exists, set DGJTMUL to the second piece of its value.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition and action, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ed72bd9c: ;Determine the value of DGJTL based on DGJTSR. If DGJTSR is 1, set DGJTL to \"PHY\". If DGJTSR is 2, set DGJTL to \"SER\". Otherwise, set DGJTL to \"QUIT\".",
+        "readability": {
+          "reasoning": "The comment is clear and provides a detailed explanation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the logic for setting values based on conditions, which helps in understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "751eeb25: ;DGJTSTAT contains subscripts to ^DG(393.2,'B') nodes for INCOMPLETE, DICTATED, TRANSCRIBED & SIGNED.",
+        "readability": {
+          "reasoning": "The comment is clear and provides specific information about what DGJTSTAT contains.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for both average and expert programmers as it explains the contents and purpose of DGJTSTAT.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0bf64d26: ;Branch to tag DGJOTP1 to continue.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the flow of the code, helpful for understanding the code structure.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c6821aae: ;Kill all variables used in this routine.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful as it gives information about variable management, though it is slightly general.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bedd6edf: ;Kill variables used in the routine.",
+        "readability": {
+          "reasoning": "The comment is clear but almost identical to the previous one.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks specificity, making it less helpful than the previous similar comment.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "a4af4432: Clear variables used for the report",
+        "readability": {
+          "reasoning": "The comment is clear but lacks punctuation.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful but basic information about variable management specific to the report.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "06ba01b7: Clear additional variables used for the report",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of clearing variables related to the report.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "37969961: Clear out variables and the $J node in ^UTILITY",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific task of clearing variables and a node.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6af36576: Close any open files and quit",
+        "readability": {
+          "reasoning": "The comment is simple and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a common task but is useful for understanding the flow of the program.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "47f33b8e: ;\nEntry point to ask user for date range to report on\n;",
+        "readability": {
+          "reasoning": "The comment is mostly clear but the semicolons might be slightly distracting.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding where the date range prompt is initiated.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "337bb432: ; Ask user for starting date and set date range for report to begin at 0.0001 prior to input",
+        "readability": {
+          "reasoning": "The comment is clear and provides specific details.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific logic for setting the date range.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "90f020ac: ; Ask user for ending date, validate it is after the start date, loop back if invalid",
+        "readability": {
+          "reasoning": "The comment is well-organized and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the logic and flow of a process involving user interaction and validation.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c051315f: ; Set the ending date to be 0.9999 after the input date to catch events on that date",
+        "readability": {
+          "reasoning": "The comment is clear, but the phrasing '0.9999 after the input date' could be more precise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It clarifies a specific and potentially non-obvious implementation detail.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bd586688: Display error message if ending date is before beginning date and go to the 'END' label",
+        "readability": {
+          "reasoning": "The comment is mostly clear but slightly wordy and could be more concise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It explains the error handling logic, which is useful for understanding the control flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7ec9cfd8: Exit the current execution context",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes a fundamental aspect of program control, but it's somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "aac81051: Display a prompt to choose a number or first initial, and list the options from the 2nd, 3rd, and 4th piece of the 'Z' variable",
+        "readability": {
+          "reasoning": "The comment is clear but slightly complex due to the detailed description.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides detailed information about user interaction and the structure of data.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8e70e896: ;Exit routine.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment adequately describes the code's purpose for exiting.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "27f8780b: ;Display help menu options.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It clearly describes the action of displaying help menu options.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c6da2695: ;To exit routine - quit.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but has some redundancy.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It describes a simple exit function which is rather trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "81ccbc52: ;Prompt user to select an option and display menu options.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It thoroughly describes the process of prompting the user and displaying menu options.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f141bd5b: ;Exit after displaying menu options.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a good understanding of the order of operations in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cbc4961b: ;Menu options for physician or service/specialty selection.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear information about the purpose of the menu options, useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3e7ad969: ;Menu options for inpatient/outpatient selection.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear information about the purpose of the menu options, useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6e70280e: ;Menu options for report format selection.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides clear information about the purpose of the menu options, useful for understanding the code.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,1076 @@
+{
+  "input": "{\n  \"comments\": [\n    \"a0d7c4f5: ;\\n .;This routine controls the printing of Patient Treatment Files.\\n .;It is called by options \\\"Patient Treatment Files by Physician,\\n .;Patient Treatment Files by Patient\\\" and \\\"Patient Treatment\\n .;Files by Service/Specialty\\\".\\n .;\",\n    \"e0e695b7: ;If division-level printing and a division was selected, call DIVISION^VAUTOMA.\",\n    \"6a569145: ;If no division was selected, set DGJTDV to the division number.\",\n    \"14dee6d6: ;Do logic controlling selection of report type (PHY,PAT,SER).\",\n    \"a2229520: ;Setup required variables for printing data.\",\n    \"f491aeee: ;Setup variables for selection of deficiency types.\",\n    \"b482214a: ;Prompt user for any desired selections.\",\n    \"59185a38: ;Advise user that the output requires 132 column output.\",\n    \"d75e20aa: ;Get current date and format for printing.\",\n    \"a3367fcd: ;Setup variables for call to EN1^DGUTQ which controls device selection and header printing.\",\n    \"b873b918: ;Exit point for errors.\",\n    \"b4043d24: ;\\n .;Loop through ^VAS(393) global (Patient Treatment File) and call CK\\n .;to check if each entry matches the selection criteria.\\n .;\",\n    \"290ba0f9: ;If listing by physician, branch to DGJPDEF2 for printing.\",\n    \"5c72aca2: ;If listing by patient, branch to DGJPDEF3 for printing.\",\n    \"cbc61bb6: ;If no records match selection criteria, print \\\"NO RECORDS\\\".\",\n    \"43c20438: ;Quit to cleanup routine\",\n    \"31da0e83:  ;\\n ;Retrieve service, specialty and treating specialty information\\n ;associated with patient admission\\n ;\",\n    \"58349935: ;If no movement data, quit.\",\n    \"c7b3bedb: ;Retrieve admission movement data.\",\n    \"1c1d35b4: ;Retrieve ward and division data.\",\n    \"ea992790: ;If ward is valid, retrieve division.\",\n    \"b08e3e20: ;Retrieve division print name.\",\n    \"db7b8c3d: ;Retrieve service print name.\",\n    \"8a9920f2: ;If no service, set to highest service code.\",\n    \"e870a2be: ;Retrieve specialty print name.\",\n    \"7120bf4a: ;Exit point.\",\n    \"ab1e46ba: ;Validate division criteria.\",\n    \"3b4276b3: ;Validate division.\",\n    \"6cbd2e5b: ;Ignore unsigned reviews.\",\n    \"c8af8d7c: ;Ignore signed reviews and completed evals.\",\n    \"c3d11362: ;Exclude completed deficiencies.\",\n    \"f103b66b: ;Clean up variables.\",\n    \"4fa95cc0: ;If only signed deficiencies are to be included, exclude unsigned deficiencies.\",\n    \"c5945b5a: ;If only unsigned deficiencies are to be included, exclude signed deficiencies.\",\n    \"16eb8d53: ;If a deficiency type was specified, exclude deficiencies of other types.\",\n    \"d1c90f6a: ;Exclude deficiencies outside the date range.\",\n    \"fe374bad: ;If providers were specified, exclude deficiencies by other providers.\",\n    \"71900f58: ;If patients were specified, exclude deficiencies for other patients.\",\n    \"5e27c8ac: ;If descriptions were specified, exclude summary deficiencies.\",\n    \"7925b223: ;Count deficiencies by division.\",\n    \"445a7f97: ;Identify patient.\",\n    \"14e1f7d3: ;If output is by provider, store deficiencies in ^TMP.\",\n    \"51f45ebc: ;If output is by patient, store deficiencies in ^TMP.\",\n    \"37c41a38: ;Identify service and specialty.\",\n    \"c6f684ec: ;If services were specified, exclude deficiencies for other services.\",\n    \"6a543a6e: If running for service selection and the user doesn't have access to the service or specialty, skip this record.\",\n    \"6816afd1: If this record has already been filtered out, skip it.\",\n    \"76819843: Store the record in the ^TMP global for service selection output.\",\n    \"4d179b34: Exit point after processing this record.\",\n    \"55d85e0d: Allow the user to select a physician. If cancelled, set the flag to quit.\",\n    \"7f679d24: Exit point for physician selection.\",\n    \"941c9c71: Allow the user to select a patient.\",\n    \"67f1e7bc: Exit point for patient selection.\",\n    \"a28d0375: Allow the user to select a service. If cancelled, quit.\",\n    \"d5756d9a: Allow the user to select a specialty.\",\n    \"4c17556f: Exit point for service and specialty selection.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 100.15567421913147
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "a0d7c4f5: ;\n .;This routine controls the printing of Patient Treatment Files.\n .;It is called by options \"Patient Treatment Files by Physician,\n .;Patient Treatment Files by Patient\" and \"Patient Treatment\n .;Files by Service/Specialty\".\n .;",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality of the routine and mentions the options that call it.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is factual and accurately describes the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the context and functionality of the routine.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e0e695b7: ;If division-level printing and a division was selected, call DIVISION^VAUTOMA.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition and action but does not cover other aspects of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true and accurately describes the condition and action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific part of the code but not the overall functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6a569145: ;If no division was selected, set DGJTDV to the division number.",
+        "completeness": {
+          "reasoning": "The comment describes a specific action but does not provide context or other details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is factual and accurately describes the condition and action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific part of the code but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "14dee6d6: ;Do logic controlling selection of report type (PHY,PAT,SER).",
+        "completeness": {
+          "reasoning": "The comment briefly mentions the logic but lacks detail on how the selection is controlled.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but very brief.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks essential details for a full understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a2229520: ;Setup required variables for printing data.",
+        "completeness": {
+          "reasoning": "The comment is very brief and lacks detail on the variables being set up.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but very minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides minimal information, making it less useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f491aeee: ;Setup variables for selection of deficiency types.",
+        "completeness": {
+          "reasoning": "The comment addresses the setup of variables but does not explain what those variables are or how they are used.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting up variables.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the purpose of the variables but lacks detail on their usage.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b482214a: ;Prompt user for any desired selections.",
+        "completeness": {
+          "reasoning": "The comment describes prompting the user but lacks specifics on the selections or the context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about prompting the user.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "While it provides some context, it is too vague to be highly useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "59185a38: ;Advise user that the output requires 132 column output.",
+        "completeness": {
+          "reasoning": "The comment specifies the output format requirement but does not explain why or how it is enforced.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information about the column requirement is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides important information about the output format which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d75e20aa: ;Get current date and format for printing.",
+        "completeness": {
+          "reasoning": "The comment mentions getting and formatting the date but lacks detail on the format used.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the functionality of getting and formatting the date.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is useful for understanding the purpose of the code but could benefit from more detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a3367fcd: ;Setup variables for call to EN1^DGUTQ which controls device selection and header printing.",
+        "completeness": {
+          "reasoning": "The comment explains the setup of variables and their purpose in calling EN1^DGUTQ.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the function and its purpose.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and specific.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is highly useful for understanding the setup and purpose of the variables in the context of the function call.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b873b918: ;Exit point for errors.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality, but not all essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps understand the specific part of the code where errors are handled.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b4043d24: ;\n .;Loop through ^VAS(393) global (Patient Treatment File) and call CK\n .;to check if each entry matches the selection criteria.\n .;",
+        "completeness": {
+          "reasoning": "The comment provides a detailed explanation of the loop's purpose.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is very helpful for understanding the logic of the loop and its purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "290ba0f9: ;If listing by physician, branch to DGJPDEF2 for printing.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but not all essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps understand a specific conditional branch in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5c72aca2: ;If listing by patient, branch to DGJPDEF3 for printing.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but not all essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps understand a specific conditional branch in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cbc61bb6: ;If no records match selection criteria, print \"NO RECORDS\".",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but not all essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps understand the behavior when no records match the criteria.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "43c20438: ;Quit to cleanup routine",
+        "completeness": {
+          "reasoning": "The comment covers a specific functionality but does not provide details on what the cleanup routine entails.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely true but lacks details, making it difficult to fully verify.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks depth.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "31da0e83:  ;\n ;Retrieve service, specialty and treating specialty information\n ;associated with patient admission\n ;",
+        "completeness": {
+          "reasoning": "The comment provides a good overview of the functionality.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to be accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the code's purpose effectively.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "58349935: ;If no movement data, quit.",
+        "completeness": {
+          "reasoning": "The comment covers a specific condition but lacks details on the context or consequences.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely true but limited in scope.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks depth.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c7b3bedb: ;Retrieve admission movement data.",
+        "completeness": {
+          "reasoning": "The comment documents the functionality but lacks detail.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to be accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could provide more context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1c1d35b4: ;Retrieve ward and division data.",
+        "completeness": {
+          "reasoning": "The comment documents the functionality but lacks detail.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to be accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could provide more context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ea992790: ;If ward is valid, retrieve division.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover all capabilities of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the specific condition and action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful for understanding the specific condition and action but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b08e3e20: ;Retrieve division print name.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover all capabilities of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the specific action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful for understanding the specific action but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "db7b8c3d: ;Retrieve service print name.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover all capabilities of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the specific action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful for understanding the specific action but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8a9920f2: ;If no service, set to highest service code.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition and action but does not cover all capabilities of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the specific condition and action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful for understanding the specific condition and action but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e870a2be: ;Retrieve specialty print name.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not cover all capabilities of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the specific action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful for understanding the specific action but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7120bf4a: ;Exit point.",
+        "completeness": {
+          "reasoning": "The comment addresses a single function, but does not provide further details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any incorrect information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very minimal.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful for understanding the purpose of the code at that point.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ab1e46ba: ;Validate division criteria.",
+        "completeness": {
+          "reasoning": "The comment gives a general idea of the code's function but lacks specifics.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment does not contain any false information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is moderately useful but could benefit from more detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3b4276b3: ;Validate division.",
+        "completeness": {
+          "reasoning": "The comment gives a vague idea of the code's purpose but is not detailed.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate in describing the code's purpose.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is simple and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6cbd2e5b: ;Ignore unsigned reviews.",
+        "completeness": {
+          "reasoning": "The comment specifies a single action but does not provide additional information.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is truthful about the code's action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is partially useful but could be more detailed.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c8af8d7c: ;Ignore signed reviews and completed evals.",
+        "completeness": {
+          "reasoning": "The comment specifies multiple actions but lacks further detail.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes what the code does.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but not comprehensive.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c3d11362: ;Exclude completed deficiencies.",
+        "completeness": {
+          "reasoning": "The comment addresses only one specific functionality of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about excluding completed deficiencies.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f103b66b: ;Clean up variables.",
+        "completeness": {
+          "reasoning": "The comment is vague and does not document specific functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment likely provides true information but is too general.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful due to its generality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "4fa95cc0: ;If only signed deficiencies are to be included, exclude unsigned deficiencies.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality related to signed deficiencies.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about excluding unsigned deficiencies.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific condition in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c5945b5a: ;If only unsigned deficiencies are to be included, exclude signed deficiencies.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality related to unsigned deficiencies.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about excluding signed deficiencies.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific condition in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "16eb8d53: ;If a deficiency type was specified, exclude deficiencies of other types.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality related to deficiency types.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about excluding other types of deficiencies.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific condition in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d1c90f6a: ;Exclude deficiencies outside the date range.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality regarding date range exclusion.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific condition being handled.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fe374bad: ;If providers were specified, exclude deficiencies by other providers.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality regarding provider-specific exclusion.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the provider-specific exclusion.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific condition being handled.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "71900f58: ;If patients were specified, exclude deficiencies for other patients.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality regarding patient-specific exclusion.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the patient-specific exclusion.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific condition being handled.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5e27c8ac: ;If descriptions were specified, exclude summary deficiencies.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality regarding description-specific exclusion.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the description-specific exclusion.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific condition being handled.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7925b223: ;Count deficiencies by division.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality regarding counting deficiencies by division.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about counting deficiencies by division.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific condition being handled.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "445a7f97: ;Identify patient.",
+        "completeness": {
+          "reasoning": "The comment is very brief and only addresses the identification of the patient.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate but very limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but only for understanding a small part of the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "14e1f7d3: ;If output is by provider, store deficiencies in ^TMP.",
+        "completeness": {
+          "reasoning": "The comment covers the action that occurs if output is by provider but does not provide further context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand conditional logic related to providers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "51f45ebc: ;If output is by patient, store deficiencies in ^TMP.",
+        "completeness": {
+          "reasoning": "The comment addresses the action for patient-based output but lacks additional context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding conditional logic related to patients.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "37c41a38: ;Identify service and specialty.",
+        "completeness": {
+          "reasoning": "The comment briefly mentions identifying service and specialty but lacks detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides minimal useful information about the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c6f684ec: ;If services were specified, exclude deficiencies for other services.",
+        "completeness": {
+          "reasoning": "The comment covers the exclusion of deficiencies for non-specified services but lacks further detail.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the conditional logic for service exclusion.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6a543a6e: If running for service selection and the user doesn't have access to the service or specialty, skip this record.",
+        "completeness": {
+          "reasoning": "The comment explains the condition under which the record is skipped, but does not detail any other actions or functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information about skipping the record based on user access is likely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the condition under which records are skipped.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6816afd1: If this record has already been filtered out, skip it.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition for skipping a record but does not cover other functionalities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The statement about skipping already filtered records is likely accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific condition for skipping records.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "76819843: Store the record in the ^TMP global for service selection output.",
+        "completeness": {
+          "reasoning": "The comment explains what is done with the record but does not detail any other actions or functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information about storing the record in the ^TMP global for service selection output is likely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand where the record is stored for output.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4d179b34: Exit point after processing this record.",
+        "completeness": {
+          "reasoning": "The comment addresses the exit point but does not detail what processing has been done or other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The statement about the exit point after processing the record is likely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand where the exit point is.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "55d85e0d: Allow the user to select a physician. If cancelled, set the flag to quit.",
+        "completeness": {
+          "reasoning": "The comment explains both the selection of a physician and the condition if the action is canceled.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information about selecting a physician and setting a flag to quit if canceled is likely true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the user selection process and the handling of cancellations.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7f679d24: Exit point for physician selection.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality but doesn't provide details on how it achieves this.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment seems to provide true information based on the description.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the exit point but lacks detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "941c9c71: Allow the user to select a patient.",
+        "completeness": {
+          "reasoning": "The comment addresses the main functionality but not any additional details or conditions.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to provide accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the user selection process but lacks depth.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "67f1e7bc: Exit point for patient selection.",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality but doesn't elaborate on the process.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment seems to provide true information about the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps with understanding the exit point but lacks detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a28d0375: Allow the user to select a service. If cancelled, quit.",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality and includes a conditional action.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate and true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful as it includes both the main action and a condition.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d5756d9a: Allow the user to select a specialty.",
+        "completeness": {
+          "reasoning": "The comment addresses the primary functionality but lacks additional context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4c17556f: Exit point for service and specialty selection.",
+        "completeness": {
+          "reasoning": "The comment only briefly describes the function as an exit point without detailing how it handles service and specialty selection.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but does not provide in-depth understanding for an expert programmer.",
+          "score": 2
+        }
+      }
+    ]
+  }
+}

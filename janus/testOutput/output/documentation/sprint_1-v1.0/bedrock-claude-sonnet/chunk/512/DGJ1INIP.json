@@ -1,0 +1,661 @@
+{
+  "input": "{\n  \"comments\": [\n    \"4fe7aadc: ;\\nThis routine updates the PACKAGE File (#9.4) entry for the IRT package.\",\n    \"0453b589: ;Blank line to separate sections.\",\n    \"cb2c2625: ;Message to indicate that the PACKAGE File is being updated.\",\n    \"a68e5e94: ;\\nThis section finds the IRT package entry in the PACKAGE File (#9.4)\\nand stores the internal entry number in DGJIEN.\",\n    \"c447bbea: ;Find the entry in the PACKAGE File for the 'DGJ' namespace.\",\n    \"85ca6c64: ;Initialize loop counters.\",\n    \"8b4f663f: ;Loop through entries found by FIND^DIC.\",\n    \"c0121240: ;Skip entries that are not for the 'DGJ' namespace.\",\n    \"5c4038da: ;Store the internal entry number of the 'DGJ' package.\",\n    \"b75abf74: ;If no 'DGJ' package entry was found, exit with an error message.\",\n    \"32573c13: ;Blank line before displaying error message.\",\n    \"89eeea23: ;Error message if no 'DGJ' package entry was found.\",\n    \"2bd339bb: ;\\nThis section updates the 'DGJ' package entry to indicate that it is\\npart of the Integrated Billing (IB) package namespace.\",\n    \"93327bf5: ;Set the IB MASTER SUBSTR field (#2) to 'IRT' for the 'DGJ' package entry.\",\n    \"61c0b9ae: ;Call FileMan to update the 'DGJ' package entry.\",\n    \"e5f1e796: ;Blank line after updating the PACKAGE File entry.\",\n    \"bef38c6f: ;Report short description field population complete\",\n    \"2308c39b: ;Clear data and error arrays before proceeding\",\n    \"85463f31: ;Invoke FileMan API to save description to file 9.4, entry DGJIEN\",\n    \"e9c12581: ;Print blank line for readability\",\n    \"88843148: ;Report description field population complete\",\n    \"b47067fd:  ;\\n ;Populate local array DGJARRY with entries from file 9.44\\n ;related to the current entry DGJIEN\\n ;\",\n    \"c7273822: ;Clear local array and variable before proceeding\",\n    \"ba09a69d: ;Invoke FileMan DIC call to retrieve entries for DGJIEN from file 9.44\",\n    \"9f5d57c5: Initialize a loop counter for the DGJARRY array.\",\n    \"defcc4df: Loop through the 'DILIST' subscript of the DGJARRY array, quit if no more entries.\",\n    \"71f78dc5: Extract the first piece from the current node, which is the file entry number (IEN) of the File #9.4 entry.\",\n    \"3c9b4e14: Set the global reference for the subfile in File #9.4 using the IEN value.\",\n    \"36d78a9b: Update the header node of the file entry to the current date/time.\",\n    \"219571a8: Loop through various subfiles to update their data.\",\n    \"799505f5: Set up the parent file and entry number for the subfile update.\",\n    \"556630f3: Set up the subfile number, lookup mode, and prefix for the subfile global based on the data dictionary.\",\n    \"979314bc: ;Call the DIC^DIC routine to update the data dictionary and cross-references for the file.\",\n    \"b03a0254: ;Display a blank line.\",\n    \"05748e1a: ;Display a message indicating that the file field update is complete.\",\n    \"c7e09535: ;\\n;This block of code sets up the variables needed to update the fields\\n;for the package file.\",\n    \"005b14b2: ;Set DIC to the global root for the Package File (#9.4), set DA(1) to the IEN of the package being updated, and set DIC(0) to 'X' to allow editing of fields.\",\n    \"5d18d62a: Set the file and prefix for new entries\",\n    \"e727eebe: Loop through various files and create new entries\",\n    \"768fef05: Call FileMan to create a new entry in the current file\",\n    \"eb8eac85: Set variables for editing the new entry\",\n    \"ed4a34c7: If creating an entry in the IMMUNIZATION VISIT file, set various fields\",\n    \"8cc1ef4f: Update fields 401 and 513 for this record\",\n    \"437320ac: Update field 60.01 for this record if the value of X is 405\",\n    \"f59b38be: Update field 222.2 with the value 'Y' if X contains 393\",\n    \"76b155c5: Print a blank line\",\n    \"e210efa9: Print a message indicating that the field update is complete\",\n    \"9a3eb9a1: ;\\nSet up DIC array to access the 'EX' cross-reference of the file #9.4\\nwith DA(1) set to the value of DGJIEN.\\n;\",\n    \"d4e39f3e: Set DIC to the global root of file #9.4\",\n    \"e1bee5d5: Set additional DIC parameters for the lookup, including setting DIC(0) to 'L' for a lookup and DIC('P') to the prompt text for field #919\",\n    \"3906df22: Setup for finding the file number for DIC(9.4) which holds the PACKAGE file.\",\n    \"e90d8439: Setup for finding the entry in the PACKAGE file for the REGISTRATION package.\",\n    \"aee5e5a4: If the REGISTRATION package entry is not found, branch to ABRT^DGJ1INIT.\",\n    \"ba5f37c5: Display an error message about the REGISTRATION package not being found.\",\n    \"61b8a5dd: Display a message to contact the PIMS National VISTA Support Team for assistance.\",\n    \"3f62f898: ;Set the DIC array elements to enable selection of the 'DGJ' subfile under the current 'G.CLINICAL MOVEMENT' file entry.\",\n    \"67be18f3: ;Execute the standard FileMan input routine to select/add a new 'DGJ' entry in the subfile.\",\n    \"013a224f: ;Clean up and kill off all temporary variables used in the previous steps.\",\n    \"f71552bd: ;Exit the current procedure.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 93.98419690132141
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "4fe7aadc: ;\nThis routine updates the PACKAGE File (#9.4) entry for the IRT package.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written, with no grammatical errors or ambiguities.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the functionality of the routine, which is valuable to both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0453b589: ;Blank line to separate sections.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality, which may not be very useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "cb2c2625: ;Message to indicate that the PACKAGE File is being updated.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides contextual information that is helpful for understanding the code's functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a68e5e94: ;\nThis section finds the IRT package entry in the PACKAGE File (#9.4)\nand stores the internal entry number in DGJIEN.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the functionality of the section, which is helpful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c447bbea: ;Find the entry in the PACKAGE File for the 'DGJ' namespace.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about what the code is doing, which is useful to understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "85ca6c64: ;Initialize loop counters.",
+        "readability": {
+          "reasoning": "The comment is concise and uses simple language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps both average and expert programmers understand the initialization process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8b4f663f: ;Loop through entries found by FIND^DIC.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful context about the loop's purpose, valuable for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c0121240: ;Skip entries that are not for the 'DGJ' namespace.",
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a conditional check, which is moderately useful for both average and expert programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5c4038da: ;Store the internal entry number of the 'DGJ' package.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains an important step in data handling, useful for understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b75abf74: ;If no 'DGJ' package entry was found, exit with an error message.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides crucial information about error handling, highly useful for understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "32573c13: ;Blank line before displaying error message.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "89eeea23: ;Error message if no 'DGJ' package entry was found.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the condition under which an error message is displayed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2bd339bb: ;\nThis section updates the 'DGJ' package entry to indicate that it is\npart of the Integrated Billing (IB) package namespace.",
+        "readability": {
+          "reasoning": "The comment is clear and provides detailed information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific and non-trivial functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "93327bf5: ;Set the IB MASTER SUBSTR field (#2) to 'IRT' for the 'DGJ' package entry.",
+        "readability": {
+          "reasoning": "The comment is clear and precise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment details a specific action, aiding understanding of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "61c0b9ae: ;Call FileMan to update the 'DGJ' package entry.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a function call, which is useful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e5f1e796: ;Blank line after updating the PACKAGE File entry.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a non-trivial action, which can help both average and expert programmers understand the purpose of the blank line.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bef38c6f: ;Report short description field population complete",
+        "readability": {
+          "reasoning": "The comment is clear with no grammatical issues, and it's easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It indicates the completion of a task which is useful for understanding the flow of operations.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2308c39b: ;Clear data and error arrays before proceeding",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This is important information as it clarifies a pre-condition before proceeding with further operations, useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "85463f31: ;Invoke FileMan API to save description to file 9.4, entry DGJIEN",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It specifies an action involving an API and a particular file and entry, which is very useful for understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e9c12581: ;Print blank line for readability",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial action, but it helps in understanding the code's formatting choices.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "88843148: ;Report description field population complete",
+        "readability": {
+          "reasoning": "The comment is concise and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates the completion of an action which is useful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b47067fd: ;\n ;Populate local array DGJARRY with entries from file 9.44\n ;related to the current entry DGJIEN\n ;",
+        "readability": {
+          "reasoning": "The comment is clear, well-formatted, and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific action and provides context which helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c7273822: ;Clear local array and variable before proceeding",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a necessary step that is useful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ba09a69d: ;Invoke FileMan DIC call to retrieve entries for DGJIEN from file 9.44",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific function of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9f5d57c5: Initialize a loop counter for the DGJARRY array.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality but still explains what the code does.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "defcc4df: Loop through the 'DILIST' subscript of the DGJARRY array, quit if no more entries.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand what the loop's purpose is.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "71f78dc5: Extract the first piece from the current node, which is the file entry number (IEN) of the File #9.4 entry.",
+        "readability": {
+          "reasoning": "The comment is clear and specific.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the extraction process, useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3c9b4e14: Set the global reference for the subfile in File #9.4 using the IEN value.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action being taken with the IEN value, useful for understanding the code's purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "36d78a9b: Update the header node of the file entry to the current date/time.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific update action, useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "219571a8: Loop through various subfiles to update their data.",
+        "readability": {
+          "reasoning": "The comment is clear but a bit general.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful at a high level but lacks specific details.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "799505f5: Set up the parent file and entry number for the subfile update.",
+        "readability": {
+          "reasoning": "The comment is concise and clear, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of the code, which is useful for both expert and average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "556630f3: Set up the subfile number, lookup mode, and prefix for the subfile global based on the data dictionary.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, making it easy to understand the setup process.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a useful explanation of the setup process, helpful for both expert and average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "979314bc: ;Call the DIC^DIC routine to update the data dictionary and cross-references for the file.",
+        "readability": {
+          "reasoning": "The comment is clear but includes a semicolon that may be unnecessary.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of a specific routine call, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b03a0254: ;Display a blank line.",
+        "readability": {
+          "reasoning": "The comment is clear but includes a semicolon that may be unnecessary.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents trivial functionality, which may not be very useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "05748e1a: ;Display a message indicating that the file field update is complete.",
+        "readability": {
+          "reasoning": "The comment is clear but includes a semicolon that may be unnecessary.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of a user notification, which is somewhat useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c7e09535: ;\n;This block of code sets up the variables needed to update the fields\n;for the package file.",
+        "readability": {
+          "reasoning": "The comment is well-written with clear sentence structure and punctuation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a high-level overview of the code's purpose, which helps an expert programmer understand the context.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "005b14b2: ;Set DIC to the global root for the Package File (#9.4), set DA(1) to the IEN of the package being updated, and set DIC(0) to 'X' to allow editing of fields.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific and detailed information about the variables, aiding an expert programmer in understanding the code's operations.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5d18d62a: Set the file and prefix for new entries",
+        "readability": {
+          "reasoning": "The comment is clear but somewhat brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a general overview of what the code does, which is useful but not highly detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e727eebe: Loop through various files and create new entries",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a general overview but lacks specific details, making it moderately useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "768fef05: Call FileMan to create a new entry in the current file",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific function call, aiding average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "eb8eac85: Set variables for editing the new entry",
+        "readability": {
+          "reasoning": "The comment is concise and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear description of what the code does, which is helpful for understanding the purpose of the variables.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ed4a34c7: If creating an entry in the IMMUNIZATION VISIT file, set various fields",
+        "readability": {
+          "reasoning": "The comment is clear and well-constructed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It specifies the context in which the code operates, which is useful for understanding the purpose of the fields being set.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8cc1ef4f: Update fields 401 and 513 for this record",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is somewhat useful as it mentions which fields are being updated, but it lacks detail on why these fields are being updated or their significance.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "437320ac: Update field 60.01 for this record if the value of X is 405",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful conditional information about the update, which helps in understanding the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f59b38be: Update field 222.2 with the value 'Y' if X contains 393",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It gives useful conditional information, which is helpful for understanding the specific update.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "76b155c5: Print a blank line",
+        "readability": {
+          "reasoning": "The comment is short, clear, and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e210efa9: Print a message indicating that the field update is complete",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of a message print statement.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9a3eb9a1: ;\nSet up DIC array to access the 'EX' cross-reference of the file #9.4\nwith DA(1) set to the value of DGJIEN.\n;",
+        "readability": {
+          "reasoning": "The comment is mostly clear but has some minor formatting issues.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context for setting up the DIC array with relevant details.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d4e39f3e: Set DIC to the global root of file #9.4",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about setting DIC to the global root.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e1bee5d5: Set additional DIC parameters for the lookup, including setting DIC(0) to 'L' for a lookup and DIC('P') to the prompt text for field #919",
+        "readability": {
+          "reasoning": "The comment is clear and provides detailed information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment offers valuable details about setting additional DIC parameters, which aids in understanding the lookup process.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3906df22: Setup for finding the file number for DIC(9.4) which holds the PACKAGE file.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of the code, which is useful for both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e90d8439: Setup for finding the entry in the PACKAGE file for the REGISTRATION package.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of the code, which is useful for both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "aee5e5a4: If the REGISTRATION package entry is not found, branch to ABRT^DGJ1INIT.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action taken when a condition is met, which is useful for both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ba5f37c5: Display an error message about the REGISTRATION package not being found.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains what happens when an error condition is met, which is useful for both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "61b8a5dd: Display a message to contact the PIMS National VISTA Support Team for assistance.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action taken during an error state, which is useful for both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3f62f898: ;Set the DIC array elements to enable selection of the 'DGJ' subfile under the current 'G.CLINICAL MOVEMENT' file entry.",
+        "readability": {
+          "reasoning": "The comment is clear and does not contain any grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear explanation of what the code is doing, which would help an expert programmer understand the purpose of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "67be18f3: ;Execute the standard FileMan input routine to select/add a new 'DGJ' entry in the subfile.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific function of the code, adding valuable context for understanding the operation being performed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "013a224f: ;Clean up and kill off all temporary variables used in the previous steps.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes an important step in the code, making it useful for understanding resource management and code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f71552bd: ;Exit the current procedure.",
+        "readability": {
+          "reasoning": "The comment is simple and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial function that is generally self-explanatory.",
+          "score": 2
+        }
+      }
+    ]
+  }
+}

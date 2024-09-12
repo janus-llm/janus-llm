@@ -1,0 +1,1171 @@
+{
+  "input": "{\n  \"comments\": [\n    \"34e0ba1f: ;\\n .;Store event date and ask for event date if necessary.\\n .;Check for valid date ranges. Set up variables for\\n .;other prompts based on event type.\\n .;Get other data from user for new PASS record.\",\n    \"0b763658: ;Build DIR array and ask for Event Date if needed.\",\n    \"fe03e338: ;Event Date must be after admit date.\",\n    \"78b821e5: ;Event Date must be before discharge date.\",\n    \"ead107c3: ;If Inpatient event, set date to last transfer date.\",\n    \"85487272: ;If Outpatient event, set date to beginning of day.\",\n    \"d6d39761: ;Get inpatient data if necessary.\",\n    \"369012d1: ;Ask for Ward if patient location is available.\",\n    \"124d1aae: ;Get Ward and corresponding service/specialty.\",\n    \"1f8ed0bb: ;Ask for specialty if previous variable is available.\",\n    \"691d3c2c: ;Get specialty if not already determined.\",\n    \"46af48b4: ;If no specialty code, use service from ward file.\",\n    \"c8a04fe1: ;If specialty code exists, get name from file.\",\n    \"3decbf57: ;Set specialty description for DIR call.\",\n    \"21963b56: ;Get Service using DIR call.\",\n    \"bf5fefe1: ;If this is a review, set the default physician.\",\n    \"14d29e65: ;Get the primary physician.\",\n    \"6c106492: ;If this is a new entry and the type is an addendum, set the default attending.\",\n    \"23acfc79: ;If this is a review, set the default attending.\",\n    \"cfbec43a: ;If the entry type allows for a second physician, get it.\",\n    \"3c46fcbb: ;Set the default primary physician.\",\n    \"1d0bb145: ;Get the procedure.\",\n    \"edeb1c53: ;Create a new entry in the VAS DEFICIENCY file.\",\n    \"8577e6e9: ;Set the entry number and file variables.\",\n    \"29f8b887: ;If the entry type is not an op report, discharge summary, or interim summary, use the IRT deficiency form.\",\n    \"713d597d: ;If the entry type is an op report, discharge summary, or interim summary, use the IRT record form.\",\n    \"f785271e: ;Update the entry with the new data.\",\n    \"df2be85d: ;Initialize variables for the next entry.\",\n    \"816e5987: ;If the user exited or timed out, set the exit action.\",\n    \"66add81f: ;Exit the routine.\",\n    \"c3f10d43: ;Screens the VAS(393) file for records with no division id.\",\n    \"8876ba2a: ;Exits the subroutine SCR.\",\n    \"9119c20c: ;Checks if the current record is for the same division as DGJTDV and if the type of record is valid. If so, calls other subroutines to process the record.\",\n    \"f093d4cf: ;Sets flags indicating if the record should be included in the deficiency report.\",\n    \"b605bc69: ;Exits the subroutine SCR1.\",\n    \"d6c0cc00: ;Checks if the division id for the current record is different from DGJTDV and sets DGJTF if so.\",\n    \"a81d52e4: ;Sets DGJTDEL to the array node containing record status.\",\n    \"2cf39d19: ;Sets X to the internal entry number of the appropriate record status.\",\n    \"d8cc876f:  .;Gets the attending physician from the DGPM file.\\n .;DGJT contains the DGPM array node for the attending physician.\",\n    \"725cda82: ;Gets the name of the attending physician if found.\",\n    \"10fdb7df:  .;If the record status indicates 'Signed', gets the cosigner name.\\n .;If the record status indicates 'Reviewed', gets the reviewer name.\\n .;Otherwise, gets the attending physician name.\",\n    \"1cf32ae5: ;Sets X to the appropriate name from the DGJT array.\",\n    \"8e732584: ;Exits the subroutine DOC1.\",\n    \"19a342c0: ;Gets the admission type name from the DGPM file if available.\",\n    \"95ad7143: ;Exits the subroutine DT1.\",\n    \"473ddab2:  .;\\n .;This block of code is used to initialize and populate the temporary global\\n .;array ^TMP(\\\"DGJRPT\\\",$J) with a message indicating that no deficiencies\\n .;were created for the patient.\\n .;\",\n    \"b13fdd39: ;Kill the temporary global array\",\n    \"632d51ba: ;Initialize variables for the temporary global array\",\n    \"91b9af7e: ;Set the initial value of the array to an empty string, initialize the\\n ;VALMCNT and DGJCNT counters to 0, and set VALMBG to 1\",\n    \"b9aef9eb: ;Set the string 'No Deficiency was created for this Patient' in the\\n ;temporary global array using the SETSTR^VALM1 utility function\",\n    \"2425b06f: ;Call the TMP^DGJTVW2 routine to populate the temporary global array\",\n    \"0b1ee403: ;Quit the routine\",\n    \"2205d350: ;If the XQORNOD(0) array is defined and the 4th piece is not empty, it\\n ;attempts to retrieve the value of the deficiency category from the 4th\\n ;piece and calls the JUMP1 routine with the category IEN\",\n    \"d45f2061: ;Prompts the user to select a deficiency category using the ^DIC lookup\\n ;utility\",\n    \"e41e40f4: ;If the user enters '^' to exit, reset VALMBG and VALMBCK and quit\",\n    \"3c42f4bb: ;If the selected category IEN is negative, go back to the JUMP label\",\n    \"bab6efc9: ;Initialize a new variable DGJXCAT to hold the selected category IEN\",\n    \"cffd169e: ;Store the selected category IEN in the DGJXCAT variable\",\n    \"f92e0d09: ;If the selected category does not contain any deficiencies, display a\\n ;message and go back to the JMP label\",\n    \"0f98b718: ;Set VALMBG to the value of DGJCAT(DGJXCAT) and VALMBCK to 'R'\",\n    \"45ffd56e: ;Move to a different deficiency category and load its list.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 128.41524195671082
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "34e0ba1f: ;\n .;Store event date and ask for event date if necessary.\n .;Check for valid date ranges. Set up variables for\n .;other prompts based on event type.\n .;Get other data from user for new PASS record.",
+        "completeness": {
+          "reasoning": "The comment covers essential functionality including storing the event date, checking date ranges, setting up variables, and getting additional data.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and aligns with typical functions related to event date processing.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-organized but could be slightly more concise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the different steps involved in processing the event date.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0b763658: ;Build DIR array and ask for Event Date if needed.",
+        "completeness": {
+          "reasoning": "The comment mentions building a DIR array and asking for the event date but lacks details on other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but incomplete.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents only trivial functionality, providing minimal help to an average programmer.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "fe03e338: ;Event Date must be after admit date.",
+        "completeness": {
+          "reasoning": "The comment is specific to one aspect of the functionality: the relationship between event date and admit date.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate regarding the event date needing to be after the admit date.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but only for understanding this specific rule.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "78b821e5: ;Event Date must be before discharge date.",
+        "completeness": {
+          "reasoning": "The comment addresses one specific rule regarding the event date and discharge date.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and aligns with common rules for event dates.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but only for understanding this specific rule.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ead107c3: ;If Inpatient event, set date to last transfer date.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition for setting the event date.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and reasonable.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but only for understanding this specific condition.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "85487272: ;If Outpatient event, set date to beginning of day.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality related to Outpatient events.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and directly related to the code's functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific aspect of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d6d39761: ;Get inpatient data if necessary.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but does not provide details on what constitutes 'necessary'.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is short and clear but could benefit from additional context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but lacks specifics.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "369012d1: ;Ask for Ward if patient location is available.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality related to patient location.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a conditional action in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "124d1aae: ;Get Ward and corresponding service/specialty.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but is vague about how it is done.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true but incomplete information.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but lacks details to be fully informative.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1f8ed0bb: ;Ask for specialty if previous variable is available.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific conditional action in the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific condition in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "691d3c2c: ;Get specialty if not already determined.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but not all essential capabilities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate in describing the action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "46af48b4: ;If no specialty code, use service from ward file.",
+        "completeness": {
+          "reasoning": "The comment addresses a significant condition but not all essential functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific condition in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c8a04fe1: ;If specialty code exists, get name from file.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but not all essential capabilities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate in describing its condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific condition in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3decbf57: ;Set specialty description for DIR call.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific part of the functionality but not all essential capabilities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific step in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "21963b56: ;Get Service using DIR call.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific action but not all essential capabilities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific step in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bf5fefe1: ;If this is a review, set the default physician.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific function of setting the default physician during a review, but it does not cover any other potential functionalities of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about setting the default physician during a review.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful to an average programmer by clearly stating the specific condition under which the default physician is set.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "14d29e65: ;Get the primary physician.",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality of getting the primary physician but does not provide context or additional details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action of getting the primary physician.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, but it lacks context which could help an expert programmer understand more deeply.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6c106492: ;If this is a new entry and the type is an addendum, set the default attending.",
+        "completeness": {
+          "reasoning": "The comment fully explains the condition and action for new entries of type addendum.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting the default attending for new addendum entries.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for both average and expert programmers by providing detailed conditions and actions.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "23acfc79: ;If this is a review, set the default attending.",
+        "completeness": {
+          "reasoning": "The comment explains a specific functionality related to reviews but does not cover other potential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about setting the default attending during a review.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful to an average programmer by specifying the condition under which the default attending is set.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cfbec43a: ;If the entry type allows for a second physician, get it.",
+        "completeness": {
+          "reasoning": "The comment explains the functionality of getting a second physician if allowed by the entry type but lacks additional context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the action of getting a second physician.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful to an average programmer by explaining the condition and action succinctly.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3c46fcbb: ;Set the default primary physician.",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality but does not cover any additional context or related aspects.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information based on its content.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a simple explanation that may be useful to an average programmer but lacks depth for an expert.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1d0bb145: ;Get the procedure.",
+        "completeness": {
+          "reasoning": "The comment is very vague and does not provide sufficient information about the functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide false information but is too brief to be very useful.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is too generic to be very useful for understanding the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "edeb1c53: ;Create a new entry in the VAS DEFICIENCY file.",
+        "completeness": {
+          "reasoning": "The comment covers one specific functionality but does not provide additional context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the code's functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful, though it could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8577e6e9: ;Set the entry number and file variables.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality mentioned but does not cover any related aspects.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could benefit from more context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "29f8b887: ;If the entry type is not an op report, discharge summary, or interim summary, use the IRT deficiency form.",
+        "completeness": {
+          "reasoning": "The comment is fairly specific and addresses multiple conditions, providing more context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is quite useful for understanding the conditional logic in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "713d597d: ;If the entry type is an op report, discharge summary, or interim summary, use the IRT record form.",
+        "completeness": {
+          "reasoning": "The comment specifies a condition and the action to be taken, but it does not cover any other capabilities or details of the context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information based on the condition described.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific condition and action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f785271e: ;Update the entry with the new data.",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality, without covering other potential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps understand a specific action but lacks depth for more comprehensive understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "df2be85d: ;Initialize variables for the next entry.",
+        "completeness": {
+          "reasoning": "The comment mentions the initialization of variables but does not specify which variables or their purpose.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about initializing variables.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a basic action but lacks details that might be important for deeper understanding.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "816e5987: ;If the user exited or timed out, set the exit action.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition and action but does not include any other relevant details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information regarding the condition and action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and written in plain language.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps understand a specific scenario, which is useful for average programmers.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "66add81f: ;Exit the routine.",
+        "completeness": {
+          "reasoning": "The comment is very brief and only describes a single action without any context.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear due to its brevity.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "While it documents a basic action, the lack of context and details makes it less useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c3f10d43: ;Screens the VAS(393) file for records with no division id.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of screening records with no division ID, but does not mention any other functionalities or details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information regarding the screening of records.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the purpose of the code at a high level.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8876ba2a: ;Exits the subroutine SCR.",
+        "completeness": {
+          "reasoning": "The comment only states the exit of a subroutine without detailing any other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but very minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful to an average extent as it indicates the exit point of a subroutine.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "9119c20c: ;Checks if the current record is for the same division as DGJTDV and if the type of record is valid. If so, calls other subroutines to process the record.",
+        "completeness": {
+          "reasoning": "The comment covers multiple functionalities including record validation and subroutine calls.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate and detailed information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful, providing a clear understanding of multiple actions performed by the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f093d4cf: ;Sets flags indicating if the record should be included in the deficiency report.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of setting flags but does not mention other potential functionalities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting flags for deficiency reports.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific function of setting flags.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b605bc69: ;Exits the subroutine SCR1.",
+        "completeness": {
+          "reasoning": "The comment only states the exit of a subroutine without detailing any other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true but minimal information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful to an average extent as it indicates the exit point of a subroutine.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d6c0cc00: ;Checks if the division id for the current record is different from DGJTDV and sets DGJTF if so.",
+        "completeness": {
+          "reasoning": "The comment addresses the key functionality but doesn't provide details on what DGJTDV or DGJTF represent.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more descriptive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the conditional check.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a81d52e4: ;Sets DGJTDEL to the array node containing record status.",
+        "completeness": {
+          "reasoning": "The comment explains the assignment but lacks context about what DGJTDEL and the array node are.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the assignment operation but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2cf39d19: ;Sets X to the internal entry number of the appropriate record status.",
+        "completeness": {
+          "reasoning": "The comment provides sufficient information about the assignment but lacks context for what 'X' and 'internal entry number' mean.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the operation.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clean and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding what 'X' is being assigned to but could be more informative.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d8cc876f:  .;Gets the attending physician from the DGPM file.\n .;DGJT contains the DGPM array node for the attending physician.",
+        "completeness": {
+          "reasoning": "The comment gives a clear description of what is being retrieved but lacks some detail about DGJT and DGPM.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but the structure could be improved.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding what the function retrieves.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "725cda82: ;Gets the name of the attending physician if found.",
+        "completeness": {
+          "reasoning": "The comment is specific but doesn't explain the context or variables involved.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is brief and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but lacks context for a deeper understanding.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "10fdb7df:  .;If the record status indicates 'Signed', gets the cosigner name.\n .;If the record status indicates 'Reviewed', gets the reviewer name.\n .;Otherwise, gets the attending physician name.",
+        "completeness": {
+          "reasoning": "The comment addresses all possible statuses and the corresponding names it retrieves.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate with respect to the statuses and names.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code\u2019s logic for retrieving names based on status.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1cf32ae5: ;Sets X to the appropriate name from the DGJT array.",
+        "completeness": {
+          "reasoning": "The comment explains the essential functionality but lacks details on what 'appropriate' means.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate but incomplete.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the assignment operation but lacks detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8e732584: ;Exits the subroutine DOC1.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality but is very basic.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents only trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "19a342c0: ;Gets the admission type name from the DGPM file if available.",
+        "completeness": {
+          "reasoning": "The comment explains the essential functionality but lacks details on what happens if not available.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate but could be more comprehensive.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "95ad7143: ;Exits the subroutine DT1.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality but is very basic.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment documents only trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "473ddab2:  .;\n .;This block of code is used to initialize and populate the temporary global\n .;array ^TMP(\"DGJRPT\",$J) with a message indicating that no deficiencies\n .;were created for the patient.\n .;",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of initializing and populating the global array.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and relevant to the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the purpose of the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b13fdd39: ;Kill the temporary global array",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of killing the temporary global array.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is true and directly related to the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "632d51ba: ;Initialize variables for the temporary global array",
+        "completeness": {
+          "reasoning": "The comment mentions initializing variables but lacks details on which variables.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer but could be more specific.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "91b9af7e: ;Set the initial value of the array to an empty string, initialize the\n ;VALMCNT and DGJCNT counters to 0, and set VALMBG to 1",
+        "completeness": {
+          "reasoning": "The comment covers multiple essential functionalities in detail.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding the initial setup steps.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b9aef9eb: ;Set the string 'No Deficiency was created for this Patient' in the\n ;temporary global array using the SETSTR^VALM1 utility function",
+        "completeness": {
+          "reasoning": "The comment fully explains the action and utility function used.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding how the message is set.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2425b06f: ;Call the TMP^DGJTVW2 routine to populate the temporary global array",
+        "completeness": {
+          "reasoning": "The comment explains the functionality of a specific routine call but does not elaborate on what the routine does or why it's necessary.",
+          "score": "2"
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and accurately describes the routine call.",
+          "score": "4"
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "Helps understand a specific line of code but lacks broader context.",
+          "score": "3"
+        }
+      },
+      {
+        "comment": "0b1ee403: ;Quit the routine",
+        "completeness": {
+          "reasoning": "The comment is very brief and does not explain the conditions or context for quitting the routine.",
+          "score": "1"
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate but minimal.",
+          "score": "4"
+        },
+        "readability": {
+          "reasoning": "The comment is extremely brief but understandable.",
+          "score": "3"
+        },
+        "usefulness": {
+          "reasoning": "Provides very limited information, helping only at a superficial level.",
+          "score": "2"
+        }
+      },
+      {
+        "comment": "2205d350: ;If the XQORNOD(0) array is defined and the 4th piece is not empty, it\n ;attempts to retrieve the value of the deficiency category from the 4th\n ;piece and calls the JUMP1 routine with the category IEN",
+        "completeness": {
+          "reasoning": "The comment explains the conditions and actions taken in the code quite thoroughly.",
+          "score": "3"
+        },
+        "hallucination": {
+          "reasoning": "The information provided is detailed and accurate.",
+          "score": "4"
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-formatted, although a bit complex.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the specific condition and action, making it valuable for debugging and comprehension.",
+          "score": "4"
+        }
+      },
+      {
+        "comment": "d45f2061: ;Prompts the user to select a deficiency category using the ^DIC lookup\n ;utility",
+        "completeness": {
+          "reasoning": "The comment explains the purpose of the prompt but does not detail the process or implications.",
+          "score": "3"
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and factual.",
+          "score": "4"
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "Provides useful information about the user prompt and the utility involved.",
+          "score": "4"
+        }
+      },
+      {
+        "comment": "e41e40f4: ;If the user enters '^' to exit, reset VALMBG and VALMBCK and quit",
+        "completeness": {
+          "reasoning": "The comment explains the condition and actions thoroughly.",
+          "score": "4"
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and precise.",
+          "score": "4"
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding the exit condition and associated actions.",
+          "score": "4"
+        }
+      },
+      {
+        "comment": "3c42f4bb: ;If the selected category IEN is negative, go back to the JUMP label",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality related to handling a negative IEN but does not cover other aspects of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true, as it correctly describes the behavior when the IEN is negative.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific condition but does not provide broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bab6efc9: ;Initialize a new variable DGJXCAT to hold the selected category IEN",
+        "completeness": {
+          "reasoning": "The comment addresses the initialization of a specific variable but does not cover other essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate regarding the initialization of the variable.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the variable initialization but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cffd169e: ;Store the selected category IEN in the DGJXCAT variable",
+        "completeness": {
+          "reasoning": "The comment discusses the storage of the category IEN but does not mention other aspects of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and accurately describes the storage action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific action but does not provide a complete picture.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f92e0d09: ;If the selected category does not contain any deficiencies, display a\n ;message and go back to the JMP label",
+        "completeness": {
+          "reasoning": "The comment covers the specific condition and action taken but does not address other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and correctly describes the behavior under this condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear, but the line break could affect readability slightly.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific condition but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0f98b718: ;Set VALMBG to the value of DGJCAT(DGJXCAT) and VALMBCK to 'R'",
+        "completeness": {
+          "reasoning": "The comment addresses setting specific variables but does not cover other essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and accurately describes the setting of the variables.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the setting of these variables but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "45ffd56e: ;Move to a different deficiency category and load its list.",
+        "completeness": {
+          "reasoning": "The comment briefly mentions the action but does not cover all essential functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information given is accurate but very minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail and context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides a basic understanding for an average programmer but is not very detailed.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

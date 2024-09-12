@@ -1,0 +1,24 @@
+{
+  "comments": [
+    "cb555372: ;\n;This routine deletes patient incomplete records from the Patient Incomplete Record file (#393).\n;",
+    "819d8363: ;Entry point of the routine",
+    "53d4647a: ;If the division defined in global ^DG(43,1,\"GL\") is set to 1, prompt user to select a division from 393.06",
+    "feaf2e0e: ;If no division is selected, set DGJTDV to the first entry in the MEDICAL CENTER DIVISION file (#40.8)",
+    "6efbb0b5: ;If the MEDICAL CENTER DIVISION file (#40.8) does not have delinquency tracking parameters set up, exit the routine",
+    "b67bf5f2: ;Set the screen for selecting a patient incomplete record to only show entries that match the selected division",
+    "c6eb13dd: ;Prompt user to select a patient incomplete record to delete from file #393, set DGJTIFN to the IEN of the selected entry",
+    "0225caea: ;Call EN2^DGJTVW routine to display the selected patient incomplete record for review",
+    "2901b93c: ;Initialize variables for Valuables",
+    "d6e048bd: ;Clear the Valuables array",
+    "1476a057: ;If no entries are selected from the Valuables list, exit the routine",
+    "db654961: ;Set Valuables to read-only mode",
+    "5191592e: ;Loop through the selected entries from the Valuables list, set variables for editing the patient incomplete record, call EDIT^DGJTEE2 to edit the record, call OKD1 to confirm deletion",
+    "8f2d8633: ;Call REP^DGJTEE routine to generate a report",
+    "5fd4514d: ;Prompt user to confirm deletion of the patient incomplete record, call YN^DICN to get user's response",
+    "5cf47e51: ;If the user confirms the deletion, delete the record and display a confirmation message.",
+    "fe861dac: ;If the user chooses not to delete the record, exit without making any changes.",
+    "1aca1fcc: ;If there is an unexpected response, set DGJOUT flag and exit.",
+    "2fd1b1c9: ;Clean up variables at the end.",
+    "6f4260ce: ;Display a prompt for the user to choose Y (Yes) or N (No)."
+  ]
+}

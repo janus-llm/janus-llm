@@ -1,0 +1,27 @@
+{
+  "comments": [
+    "a35d6e9b: ;\n .;Task scheduling routine for options queued to run in the background.\n .;Handles setting up environment for scheduled task.",
+    "09eabd43: ;Save current date/time value from $HOROLOG.",
+    "26f0a94e: ;Set device if IO does not exist and ION does exist as a null value.",
+    "7aa97e54: ;Attempt to set a default value for ZTDESC based on existing program variables.",
+    "db18968e: ;If ZTRTN not defined, set it to entry point DQ^DGJUTQ and set DGPGM based on any existing program variables.",
+    "5aebcd11: ;Save variables from DGVAR / VAR into ZTSAVE, using DGZTSAVE if defined.",
+    "f45716b1: ;If DGPGM exists and not yet saved into ZTSAVE, save it as an empty string.",
+    "90cd8c4c: ;Run %ZTLOAD to queue the task, display appropriate message and handle exiting.",
+    "bd268caf: ;End of QUE tag.",
+    "9bc2f92b: ;Prompt for device and handle queuing request if needed.",
+    "ac410a16: ;Use selected device after prompting.",
+    "a0d3bc55: ;\n .;Parse DGZTSAVE into individual variables and save each into ZTSAVE array.\n .;For any variable ending with '(' save also with trailing '(' removed.",
+    "07e2a048: ;End of SAVE tag.",
+    "55f00dfb: ;\n .;Replace any occurrences of '#' in DGZTSAVE with '(' to handle passing\n .;subscripted arrays to ZTSAVE.",
+    "85a7248c: ;End of ARRAY tag.",
+    "3fa501a9: ;If task not already queued, close current device.",
+    "ea8a0bbc: ;\n .;Kill all variables used by this routine, apart from those that may have\n .;been saved by the SAVE logic.",
+    "d72f5157: ;End of END tag.",
+    "3468ebe2: ;Execute the specified program (DGPGM/PGM), or CLOSE if neither defined.",
+    "947574fb: ;\n .;Unwind scheduled task by deleting temp globals created by %ZTLOAD\n .;and close any device assignment.",
+    "261a0bd0: ;End of DQ tag.",
+    "587a47d3:  .;\n .;If ZTSK(\"D\") exists, convert the queued date/time value into\n .;internal FileMan formats %H (date) and Z (time).\n .;Uses %DTC utility to convert external date value.",
+    "3e99cf5c: ;End of DTQ tag."
+  ]
+}

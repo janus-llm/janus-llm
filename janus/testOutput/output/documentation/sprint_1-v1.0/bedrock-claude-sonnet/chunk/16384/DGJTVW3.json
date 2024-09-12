@@ -1,0 +1,914 @@
+{
+  "input": "{\n  \"comments\": [\n    \"413ba0cb:  ;\\\\n ;Get event data from VAS(393\\\\n ;If the DA from the ticket file can't be found in\\\\n ;the case level file this routine will not run.\\\\n ;Get the DFN, date travelled and patient name.\",\n    \"8bc72f61: ;Ensure the DA from the ticket file exists in the case level file.\",\n    \"bc6b2a3a: ;Get the date from the DT field which holds the reference date.\",\n    \"1b3d3f49: ;If no value in DT field set date to null value.\",\n    \"a72198c6: ;Get the division from the ticket file and get the division name from the deficiency tracking parameter file.\",\n    \"5af61af7: ;Set flag to 0, set header, clear variables, get patient name and id.\",\n    \"9778e5a2: ;Get Provider ID and last charged data for widget TMP ACC RMB.\",\n    \"84197603: ;Kill the ^TMP array to remove previous data values.\",\n    \"9d2ac668: ;Initialize counters and boolean values.\",\n    \"38aa38c3: ;Put header into ^TMP array.\",\n    \"58f3eb05: ;Clear existing value of X variable.\",\n    \"b3c4a1a6: ;Put list number into ^TMP array.\",\n    \"d39046b0: ;Add next list number to ^TMP array.\",\n    \"f069a233: ;Clear value of X variable.\",\n    \"91a68279: ;Get the type of deficiency from the deficiency type file.\",\n    \"916fffe3: Print the type of deficiency for the current record.\",\n    \"9c6fbea4: Get and print the type of deficiency value from the VAS(393.3 file.\",\n    \"4b058a4d: Check if the user has the DGJ TS UPDATE key and if the deficiency type is 'DISCHARGE SUMMARY'. If so, prefix the specialty with '*' to indicate it can't be edited.\",\n    \"0104bc6d: Print the specialty value.\",\n    \"81389d02: Get the specialty value from the DIC(45.7 file.\",\n    \"644ed307: Print the specialty value.\",\n    \"1ed1f9ff: Clear the X variable for the next line.\",\n    \"cd061b2d: Check if the deficiency type is 1 (admission) and if the user is in edit mode. If so, prefix the event date with '*' to indicate it can't be edited.\",\n    \"8d06067e: Print the prefix for the event date.\",\n    \"f921848a: Get the event date from the record, convert it to external format, and store it in DGJVAL.\",\n    \"e1816ea0: Print the event date value.\",\n    \"022ea6db: Check if the user has the DGJ TS UPDATE key and if the deficiency type is 'DISCHARGE SUMMARY'. If so, prefix the primary physician with '*' to indicate it can't be edited.\",\n    \"ae203c06: Print the prefix for the primary physician.\",\n    \"ab8c76c9: Get the primary physician value from the VA(200 file.\",\n    \"7ad1488c: Print the primary physician value.\",\n    \"d43265dd: ;Indicates if the patient was an inpatient or outpatient.\",\n    \"1dc69a35: ;Prints 'Admission:' as a label.\",\n    \"f96ffaee: ;If an admission movement number exists, gets the admission date.\",\n    \"113d0074: ;If no admission movement number exists, sets admission to 'OUTPATIENT'.\",\n    \"b096989a: ;Prints the admission date or 'OUTPATIENT'.\",\n    \"d43322fe: ;If the provider type is Attending Physician, prints 'Attending Physician:' as a label.\",\n    \"fb785c14: ;If the provider type is Attending Physician, sets the column position for the provider's name.\",\n    \"45ca6e5b: ;If the provider type is Attending Physician, gets the provider's name.\",\n    \"78bae031: ;If the provider type is Attending Physician, prints the provider's name.\",\n    \"3704a040: ;Resets the line buffer.\",\n    \"25ee2c77: ;Prints 'Division:' as a label.\",\n    \"7268ed69: ;Gets the division name.\",\n    \"f298dc9f: ;Prints the division name.\",\n    \"161d90df: ;Gets the location name.\",\n    \"7ba6f1d3: ;Prints 'Location:' as a label.\",\n    \"9fa35738: ;Location description.\",\n    \"8e555a1e: ;Set the text to display the location description.\",\n    \"31f7a3e2: ;Retrieve the location description.\",\n    \"61597f33: ;Display the location description.\",\n    \"4fe980ef: ;Retrieve the borrower name.\",\n    \"e86445f1: ;Set the text to display the borrower name.\",\n    \"dbb67513: ;Display the borrower name.\",\n    \"dfb19909: ;Retrieve the service code.\",\n    \"458459f3: ;Retrieve the service description.\",\n    \"9592191a: ;Set a new line.\",\n    \"b9faa85a: ;Set the text to display the service description.\",\n    \"c022b9c7: ;Display the service description.\",\n    \"3e969413: ;Retrieve the phone/room number.\",\n    \"cc2421c3: ;Set the text to display the phone/room number.\",\n    \"608cd6de: ;Display the phone/room number.\",\n    \"3a56e0fd: ;Continuation of header information\",\n    \"2ff4b651: ;Physician responsible for patient and their record\",\n    \"75fb7c81: ;Get physician responsible from record\",\n    \"461a1e7d: ;Store physician responsible name in output line\",\n    \"e7a43645: ;Get date record was charged out from data\",\n    \"752568b8: ;Add date charged to output line\",\n    \"a875d323: ;Add date charged to output line\",\n    \"2014c837: ;Finished with patient movement data, clean up variables\",\n    \"86d9e6ee: ;Process coding date and coder information for output\",\n    \"90a736fe: ;Reset output line\",\n    \"90adbc4a: ;Add header for status section\",\n    \"4ab949da: ;Reset output line\",\n    \"857313c5: ;Add prompt for status\",\n    \"a64cad54: ;Get status description from record\",\n    \"f07fb8ce: ;Add status to output line\",\n    \"f4b43b2b: If there is no comment stored, display the header for the comments section.\",\n    \"286af400: Display the stored comments.\",\n    \"7d56c1ba: If in edit mode, display a warning message that some fields are readonly.\",\n    \"94f8d8be: Increment the line counters for the temporary report array.\",\n    \"2ddd1d1b: Store the current line of the report in the temporary array, and create a cross-reference from the array index to the line number.\",\n    \"a84ad932: Store a cross-reference from the line number to the array index.\",\n    \"cafe7d42: Exit the subroutine.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 141.786306142807
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "413ba0cb:  ;\\n ;Get event data from VAS(393\\n ;If the DA from the ticket file can't be found in\\n ;the case level file this routine will not run.\\n ;Get the DFN, date travelled and patient name.",
+        "readability": {
+          "reasoning": "The comment is generally clear but has some formatting issues that could be improved.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding specific actions and conditions, which can aid both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8bc72f61: ;Ensure the DA from the ticket file exists in the case level file.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides crucial validation information, which is useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bc6b2a3a: ;Get the date from the DT field which holds the reference date.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a specific piece of functionality, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1b3d3f49: ;If no value in DT field set date to null value.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a condition and corresponding action, which is useful for understanding the code's behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a72198c6: ;Get the division from the ticket file and get the division name from the deficiency tracking parameter file.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific retrieval operation, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5af61af7: ;Set flag to 0, set header, clear variables, get patient name and id.",
+        "readability": {
+          "reasoning": "The comment is concise and uses proper English, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful because it explains multiple steps that are taken in the code, helping understand the initialization process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9778e5a2: ;Get Provider ID and last charged data for widget TMP ACC RMB.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read, with no grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains a specific function of the code, which is helpful for understanding data retrieval.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "84197603: ;Kill the ^TMP array to remove previous data values.",
+        "readability": {
+          "reasoning": "The comment is straightforward and uses simple language, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful because it explains a cleanup operation, which can be important for memory management.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9d2ac668: ;Initialize counters and boolean values.",
+        "readability": {
+          "reasoning": "The comment is clear and uses standard terminology, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is moderately useful as it explains an initialization step, but lacks detail on what specific counters and boolean values are being initialized.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "38aa38c3: ;Put header into ^TMP array.",
+        "readability": {
+          "reasoning": "The comment is clear, concise, and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is moderately useful as it explains an action on a data structure but does not provide much detail on the header's significance.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "58f3eb05: ;Clear existing value of X variable.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies the action of the code which helps in understanding its purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b3c4a1a6: ;Put list number into ^TMP array.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the action of the code, giving useful context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d39046b0: ;Add next list number to ^TMP array.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about the code's functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f069a233: ;Clear value of X variable.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a basic action, which is generally useful but not for complex understanding.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "91a68279: ;Get the type of deficiency from the deficiency type file.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the purpose of the code which helps in understanding its context.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "916fffe3: Print the type of deficiency for the current record.",
+        "readability": {
+          "reasoning": "The comment is well-written and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9c6fbea4: Get and print the type of deficiency value from the VAS(393.3 file.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but has a slight formatting issue.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information for understanding the code's functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4b058a4d: Check if the user has the DGJ TS UPDATE key and if the deficiency type is 'DISCHARGE SUMMARY'. If so, prefix the specialty with '*' to indicate it can't be edited.",
+        "readability": {
+          "reasoning": "The comment is well-written and explains a complex condition clearly.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides detailed information useful for understanding how the code works.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0104bc6d: Print the specialty value.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "81389d02: Get the specialty value from the DIC(45.7 file.",
+        "readability": {
+          "reasoning": "The comment is mostly clear but has a slight formatting issue.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the source of the value.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "644ed307: Print the specialty value.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly states the action being performed, which helps in understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1ed1f9ff: Clear the X variable for the next line.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains why the variable is being cleared, which is helpful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cd061b2d: Check if the deficiency type is 1 (admission) and if the user is in edit mode. If so, prefix the event date with '*' to indicate it can't be edited.",
+        "readability": {
+          "reasoning": "The comment is detailed and easily understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of the condition and its purpose, which is very useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "8d06067e: Print the prefix for the event date.",
+        "readability": {
+          "reasoning": "The comment is short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a basic action, which is somewhat helpful but not very detailed.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f921848a: Get the event date from the record, convert it to external format, and store it in DGJVAL.",
+        "readability": {
+          "reasoning": "The comment provides a clear and detailed explanation.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it explains multiple steps in the process clearly.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e1816ea0: Print the event date value.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand what the code is doing, but it is a basic operation.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "022ea6db: Check if the user has the DGJ TS UPDATE key and if the deficiency type is 'DISCHARGE SUMMARY'. If so, prefix the primary physician with '*' to indicate it can't be edited.",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear explanation of a conditional operation and its implications.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ae203c06: Print the prefix for the primary physician.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a basic print operation.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ab8c76c9: Get the primary physician value from the VA(200 file.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the data source, which is useful for context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7ad1488c: Print the primary physician value.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a basic print operation.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d43265dd: ;Indicates if the patient was an inpatient or outpatient.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains the functionality of the code snippet it is associated with.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1dc69a35: ;Prints 'Admission:' as a label.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains what the code does, but the functionality is relatively trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "f96ffaee: ;If an admission movement number exists, gets the admission date.",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no grammatical errors.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the logic behind the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "113d0074: ;If no admission movement number exists, sets admission to 'OUTPATIENT'.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific conditional logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b096989a: ;Prints the admission date or 'OUTPATIENT'.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the code's functionality, but it's relatively straightforward.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d43322fe: ;If the provider type is Attending Physician, prints 'Attending Physician:' as a label.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific function of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "fb785c14: ;If the provider type is Attending Physician, sets the column position for the provider's name.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information for understanding code layout.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "45ca6e5b: ;If the provider type is Attending Physician, gets the provider's name.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the function of retrieving the provider's name.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "78bae031: ;If the provider type is Attending Physician, prints the provider's name.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies the function of the code for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3704a040: ;Resets the line buffer.",
+        "readability": {
+          "reasoning": "The comment is simple and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a basic functionality but is still useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "25ee2c77: ;Prints 'Division:' as a label.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial functionality of printing a label.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7268ed69: ;Gets the division name.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a useful description of the code's function.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f298dc9f: ;Prints the division name.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the code's function, though it is fairly simple.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "161d90df: ;Gets the location name.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a useful description of the code's function.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7ba6f1d3: ;Prints 'Location:' as a label.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a trivial functionality of printing a label.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "9fa35738: ;Location description.",
+        "readability": {
+          "reasoning": "The comment is brief and clear, but it lacks sufficient context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It only provides a trivial description without any added value.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8e555a1e: ;Set the text to display the location description.",
+        "readability": {
+          "reasoning": "The comment is clear and specifies the action being taken.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a straightforward action, which could be inferred from the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "31f7a3e2: ;Retrieve the location description.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a straightforward operation that may be obvious from the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "61597f33: ;Display the location description.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes a simple display action, which is likely apparent from the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4fe980ef: ;Retrieve the borrower name.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a straightforward operation that may be apparent from the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e86445f1: ;Set the text to display the borrower name.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dbb67513: ;Display the borrower name.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat redundant and less informative compared to the previous comment.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "dfb19909: ;Retrieve the service code.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful in understanding the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "458459f3: ;Retrieve the service description.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful in understanding the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9592191a: ;Set a new line.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "b9faa85a: ;Set the text to display the service description.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand that the code sets the text to display the service description.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c022b9c7: ;Display the service description.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a fairly obvious functionality but is still informative.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3e969413: ;Retrieve the phone/room number.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand that the code retrieves the phone or room number.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cc2421c3: ;Set the text to display the phone/room number.",
+        "readability": {
+          "reasoning": "The comment is well-written and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand that the code sets the text to display the phone or room number.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "608cd6de: ;Display the phone/room number.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a fairly trivial functionality but is still clear.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3a56e0fd: ;Continuation of header information",
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of the section, which is useful for understanding the structure of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2ff4b651: ;Physician responsible for patient and their record",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies which physician is being referred to, which is helpful for understanding the context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "75fb7c81: ;Get physician responsible from record",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action being taken, which aids in understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "461a1e7d: ;Store physician responsible name in output line",
+        "readability": {
+          "reasoning": "The comment is clear and descriptive.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action that is crucial for output generation, making it very useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e7a43645: ;Get date record was charged out from data",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the retrieval of a specific piece of data, which is useful for understanding the code's purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "752568b8: ;Add date charged to output line",
+        "readability": {
+          "reasoning": "The comment is concise and clear with no evident grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action, which helps understand the associated code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a875d323: ;Add date charged to output line",
+        "readability": {
+          "reasoning": "The comment is concise and clear with no evident grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action, which helps understand the associated code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2014c837: ;Finished with patient movement data, clean up variables",
+        "readability": {
+          "reasoning": "The comment is clear and concise, explaining the context well.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding the cleanup process after handling patient movement data.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "86d9e6ee: ;Process coding date and coder information for output",
+        "readability": {
+          "reasoning": "The comment is clear and concise with no evident grammatical issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clarifies what specific data is being processed, which is useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "90a736fe: ;Reset output line",
+        "readability": {
+          "reasoning": "The comment is brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful as it explains a specific action in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "90adbc4a: ;Add header for status section",
+        "readability": {
+          "reasoning": "The comment is succinct and clear, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand what the code is doing at a higher level.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4ab949da: ;Reset output line",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand the specific functionality of resetting the output line.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "857313c5: ;Add prompt for status",
+        "readability": {
+          "reasoning": "The comment is concise and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand that a prompt for status is being added.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a64cad54: ;Get status description from record",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand that the status description is being fetched from a record.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f07fb8ce: ;Add status to output line",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand that the status is being added to the output line.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f4b43b2b: If there is no comment stored, display the header for the comments section.",
+        "readability": {
+          "reasoning": "The comment is concise and the intent is clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides context for a conditional display action, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "286af400: Display the stored comments.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes a basic action without much detail, which is somewhat useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7d56c1ba: If in edit mode, display a warning message that some fields are readonly.",
+        "readability": {
+          "reasoning": "The comment is clear and specifies the condition and action well.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about the behavior of the edit mode, aiding understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "94f8d8be: Increment the line counters for the temporary report array.",
+        "readability": {
+          "reasoning": "The comment is clear but could be more descriptive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It documents a specific operation, which is helpful but not deeply informative.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "2ddd1d1b: Store the current line of the report in the temporary array, and create a cross-reference from the array index to the line number.",
+        "readability": {
+          "reasoning": "The comment is detailed and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a clear explanation of a multi-step process, which is very useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a84ad932: Store a cross-reference from the line number to the array index.",
+        "readability": {
+          "reasoning": "The comment is well-written and clearly explains the purpose.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is very useful as it helps understand a specific and non-trivial aspect of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "cafe7d42: Exit the subroutine.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is not very useful as it describes a very basic operation that is usually self-evident.",
+          "score": 2
+        }
+      }
+    ]
+  }
+}

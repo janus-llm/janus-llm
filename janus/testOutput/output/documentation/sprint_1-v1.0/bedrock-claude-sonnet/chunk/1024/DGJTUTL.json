@@ -1,0 +1,672 @@
+{
+  "input": "{\n  \"comments\": [\n    \"f3f1e2e9:  ;;\\n ;Utility to let provider enter either\\n ;- patient movement (admission/transfer/specialty transfer/disposition)\\n ;- check patient file status\\n ;or Unsigned Notes Report task for the chart;\\n ;;\",\n    \"b51c3200: ;Get DFN\",\n    \"edc0223a: ;Call WARNING procedure\",\n    \"dfca1962: ;Display header\",\n    \"43d1c954: ;Display menu options\",\n    \"8f6b7127:  ;;\\n ;Check patient file status\\n ;Returns:\\n ; 0 if patient file status is invalid or patient file is incomplete\\n ; 1 if patient file status is valid\\n ;;\",\n    \"92da11f7: ;Check if patient file is valid\",\n    \"ce3b6c0d: ;Exit point\",\n    \"7a51839d: ;Determine if provider needs to sign/transcribe/review note\",\n    \"7bea38f1:  ;;\\n ;Check if discharge date is less than 48 hours from current date\\n ;and if there was a transfer within facility during the admission\\n ;Ask if discharge summary less than 48 hours needs to be dictated\\n ;;\",\n    \"bfd3f553: ;If discharge date exists and is in the future, exit\",\n    \"0d688365: ;Calculate if discharge date is less than 48 hours from admission date; if so, and there was a transfer, call ASK procedure\",\n    \"e3959143: ;Exit point\",\n    \"d7c310b2: ;Ask if discharge summary less than 48 hours needs to be dictated\",\n    \"f34d8446: ;Get user response, re-prompt if invalid\",\n    \"7e6d96df: ;Set X based on user response\",\n    \"6282743c: Quit if called without parameters\",\n    \"22e3e026: Go to option to select an admission and display full screen\",\n    \"856716ef: Set the list manager environment for the admission selection\",\n    \"f4cebe0a: Clean up the temporary global for the current job\",\n    \"5f26a267: Load the patient's admissions into the temporary global for processing\",\n    \"69d8bd3d: If there are no admissions, display a message and quit\",\n    \"bc216961: Clean up miscellaneous variables\",\n    \"62741279: Quit the routine\",\n    \"6b1702a6: \\n.;This tag is used to write out the deficiency description\\n.;associated with a given code\\n.\",\n    \"6ddaac47: Initialize local variables\",\n    \"6cf7ad62: Get the deficiency code from the DGJT array\",\n    \"95db11c8: Write out the deficiency description from the VAS(393.3 file, or 'UNKNOWN DEFICIENCY' if not found\",\n    \"ec0ae972: Write the description from the WARD LOCATION file.\",\n    \"cae318f4: Quit if no description.\",\n    \"645a9719: ;\\n;Get ward location for patient's movements.\\n;\\nSee description for field #18 in the MOVEMENT file (#405.3).\\n;If movement type is not 13, 43, 44, or 45,\\n;And the WARD LOCATION file (#42) has an entry for the\\n;WARD LOCATION field (#6) in the MOVEMENT file,\\n;Then use the WARD LOCATION field value as the ward location.\",\n    \"4c079c1a: Initialize variables.\",\n    \"eeaffaec: Initialize ward location variable.\",\n    \"5bcaed9d: Scan PATIENT MOVEMENTS multiple.\",\n    \"7987d749: ;Quit if no input parameters\",\n    \"71d79644:  ;\\n ;Define Physician Default Viewer\\n ;\",\n    \"f8981e07: ;Initialize nodes and variables\",\n    \"1c19dce1: ;Get file 393 entry for patient and pointer to file 40.8 entry for assigning provider\",\n    \"08089577: ;Get file 40.8 entry for assigning provider\",\n    \"b1a3855d: ;If entry is transcribed or signed and provider is active, set default viewer to attending physician and quit\",\n    \"071f8fdc: Extract the pharmacy data reference from the node.\",\n    \"cdb3d624: Retrieve the date information for the prescription.\",\n    \"ce063c8f: If drug interaction checking is needed, perform additional processing and quit.\",\n    \"e303df58: Determine the appropriate date for drug interaction checking based on various conditions, and initiate the drug interaction checking process.\",\n    \"05008876: If significant drug interaction checking is needed, perform additional processing and quit.\",\n    \"4ce558a6: If significant drug interaction checking is required due to missing data, determine the appropriate date for checking based on various conditions, and initiate the significant drug interaction checking process.\",\n    \"bbb31800: If the computed value is different from the previous value, set it and quit.\",\n    \"6c137962: If there are future insurance review dates, process them and then quit.\",\n    \"47a29155: If the next review date is missing but the last review date is present, set the computed value based on the patient or admission status and call the SET routine.\",\n    \"f454346d: If both review dates are missing and the last review date is also missing, set the computed value based on the patient or admission status, or a default value, and call the SET routine.\",\n    \"c69079ac: ;Set DGJX based on values from DGJTDV, DGJNDT and DGJTNOD, then call SET\",\n    \"2f7738e9: ;If DGJREVD exists, check certain fields from DGJNDT and set DGJX accordingly, call SET, then kill DGJREVD\",\n    \"3fc25145: ;If DGJREVD exists and certain fields in DGJNDT are blank, set DGJX from DGJTNOD based on DGJTDV value\",\n    \"5916272f: ;If DGJREVD exists and certain fields in DGJNDT have values, set DGJX from DGJNDT if both fields have values, or from DGJTNOD if not\",\n    \"c701b807: ;Quit\",\n    \"6246d620: ;Update DELETED field (14th piece) of PATIENT file (#393) with DELETED FLAG set by procedure.\",\n    \"5b187a1c: ;Kill off all local variables used by procedure.\",\n    \"4b978a4b: ;Kill off all local variables used by procedure.\",\n    \"9d567e58: ;Kill off all local variables used by procedure.\",\n    \"63fb6605: ;Kill off screening variables and prompts used by ^DIC.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 80.01682710647583
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "f3f1e2e9:  ;;\n ;Utility to let provider enter either\n ;- patient movement (admission/transfer/specialty transfer/disposition)\n ;- check patient file status\n ;or Unsigned Notes Report task for the chart;\n ;;",
+        "readability": {
+          "reasoning": "The comment is well-structured and clearly lists the functionalities.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment is very useful as it provides a comprehensive overview of the utility's purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b51c3200: ;Get DFN",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It documents a specific functionality but doesn't provide much context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "edc0223a: ;Call WARNING procedure",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains the action taken in the code but lacks detailed context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "dfca1962: ;Display header",
+        "readability": {
+          "reasoning": "The comment is simple and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes a basic function but does not add much detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "43d1c954: ;Display menu options",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes a specific action but lacks additional context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8f6b7127:  ;;\n ;Check patient file status\n ;Returns:\n ; 0 if patient file status is invalid or patient file is incomplete\n ; 1 if patient file status is valid\n ;;",
+        "readability": {
+          "reasoning": "The comment is well-structured with clear sections and detailed information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information that helps an expert programmer understand the return values and the context.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "92da11f7: ;Check if patient file is valid",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detailed information beyond the basic functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ce3b6c0d: ;Exit point",
+        "readability": {
+          "reasoning": "The comment is very short and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7a51839d: ;Determine if provider needs to sign/transcribe/review note",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7bea38f1:  ;;\n ;Check if discharge date is less than 48 hours from current date\n ;and if there was a transfer within facility during the admission\n ;Ask if discharge summary less than 48 hours needs to be dictated\n ;;",
+        "readability": {
+          "reasoning": "The comment is well-structured with detailed information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful and detailed context that helps an expert programmer understand the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bfd3f553: ;If discharge date exists and is in the future, exit",
+        "readability": {
+          "reasoning": "The comment is clear, concise, and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a condition for exiting, which helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0d688365: ;Calculate if discharge date is less than 48 hours from admission date; if so, and there was a transfer, call ASK procedure",
+        "readability": {
+          "reasoning": "The comment is detailed and well-structured, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information that explains complex conditions, aiding an expert programmer in understanding the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e3959143: ;Exit point",
+        "readability": {
+          "reasoning": "The comment is very short but clear and readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is too brief and only documents a trivial point, such as an exit point.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d7c310b2: ;Ask if discharge summary less than 48 hours needs to be dictated",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition to be checked, which helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f34d8446: ;Get user response, re-prompt if invalid",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains user interaction logic, which is useful for an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7e6d96df: ;Set X based on user response",
+        "readability": {
+          "reasoning": "The comment is concise but clear, explaining what is being set.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand what the variable X is being set to.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6282743c: Quit if called without parameters",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains an important control flow in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "22e3e026: Go to option to select an admission and display full screen",
+        "readability": {
+          "reasoning": "The comment is clear but slightly lengthy.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It provides useful information about the functionality and user interaction.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "856716ef: Set the list manager environment for the admission selection",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is useful for understanding the setup of the environment context.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f4cebe0a: Clean up the temporary global for the current job",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides critical information about resource management.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5f26a267: Load the patient's admissions into the temporary global for processing",
+        "readability": {
+          "reasoning": "The comment is well-structured and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear explanation of the code's functionality, aiding both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "69d8bd3d: If there are no admissions, display a message and quit",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the behavior of the code under a specific condition, which is useful for understanding the program flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bc216961: Clean up miscellaneous variables",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a general overview of the code's function, which is somewhat useful but not very detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "62741279: Quit the routine",
+        "readability": {
+          "reasoning": "The comment is simple and clear to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality, which is not very useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6b1702a6: \n.;This tag is used to write out the deficiency description\n.;associated with a given code\n.",
+        "readability": {
+          "reasoning": "The comment has formatting issues but is still readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the tag's purpose, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6ddaac47: Initialize local variables",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides useful context about initializing local variables.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6cf7ad62: Get the deficiency code from the DGJT array",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific action being performed, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "95db11c8: Write out the deficiency description from the VAS(393.3 file, or 'UNKNOWN DEFICIENCY' if not found",
+        "readability": {
+          "reasoning": "The comment is detailed and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a thorough explanation of the action and the fallback condition.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ec0ae972: Write the description from the WARD LOCATION file.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It describes the action being taken but lacks additional context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cae318f4: Quit if no description.",
+        "readability": {
+          "reasoning": "The comment is clear and direct.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a condition for quitting, which is important for understanding the control flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "645a9719: ;\n;Get ward location for patient's movements.\n;\nSee description for field #18 in the MOVEMENT file (#405.3).\n;If movement type is not 13, 43, 44, or 45,\n;And the WARD LOCATION file (#42) has an entry for the\n;WARD LOCATION field (#6) in the MOVEMENT file,\n;Then use the WARD LOCATION field value as the ward location.",
+        "readability": {
+          "reasoning": "The comment is well-structured and clearly explains the steps and conditions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation that helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4c079c1a: Initialize variables.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial action that most programmers would understand without additional explanation.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "eeaffaec: Initialize ward location variable.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is slightly more specific but still documents a trivial action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "5bcaed9d: Scan PATIENT MOVEMENTS multiple.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment describes a specific action which is useful for understanding the code's purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7987d749: ;Quit if no input parameters",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional action that adds clarity to the code's flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "71d79644:  ;\n ;Define Physician Default Viewer\n ;",
+        "readability": {
+          "reasoning": "The comment is clear but contains unnecessary semicolons and line breaks.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail on how the default viewer is defined.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f8981e07: ;Initialize nodes and variables",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it specifies the initialization purpose.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1c19dce1: ;Get file 393 entry for patient and pointer to file 40.8 entry for assigning provider",
+        "readability": {
+          "reasoning": "The comment is clear and detailed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it explains the specific entries being retrieved and their purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "08089577: ;Get file 40.8 entry for assigning provider",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but could provide more context on why the entry is needed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b1a3855d: ;If entry is transcribed or signed and provider is active, set default viewer to attending physician and quit",
+        "readability": {
+          "reasoning": "The comment is clear and detailed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it explains the conditions and actions taken.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "071f8fdc: Extract the pharmacy data reference from the node.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand what specific data is being extracted.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cdb3d624: Retrieve the date information for the prescription.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates what type of information is being retrieved.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ce063c8f: If drug interaction checking is needed, perform additional processing and quit.",
+        "readability": {
+          "reasoning": "The comment is clear but a bit verbose.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional operation, which is moderately useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e303df58: Determine the appropriate date for drug interaction checking based on various conditions, and initiate the drug interaction checking process.",
+        "readability": {
+          "reasoning": "The comment is detailed but may be slightly overwhelming due to its length.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides comprehensive information about the operation, which is very useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "05008876: If significant drug interaction checking is needed, perform additional processing and quit.",
+        "readability": {
+          "reasoning": "The comment is clear but contains some redundancy.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional operation, which is moderately useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4ce558a6: If significant drug interaction checking is required due to missing data, determine the appropriate date for checking based on various conditions, and initiate the significant drug interaction checking process.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific conditions under which a significant drug interaction check is initiated.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bbb31800: If the computed value is different from the previous value, set it and quit.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the logic of value comparison and setting.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6c137962: If there are future insurance review dates, process them and then quit.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents the functionality clearly, though it is somewhat trivial.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "47a29155: If the next review date is missing but the last review date is present, set the computed value based on the patient or admission status and call the SET routine.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the conditions for setting a computed value and invoking a routine.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f454346d: If both review dates are missing and the last review date is also missing, set the computed value based on the patient or admission status, or a default value, and call the SET routine.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand complex conditions for setting a computed value and invoking a routine.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c69079ac: ;Set DGJX based on values from DGJTDV, DGJNDT and DGJTNOD, then call SET",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a useful explanation of what the code is doing, which helps both expert and average programmers understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "2f7738e9: ;If DGJREVD exists, check certain fields from DGJNDT and set DGJX accordingly, call SET, then kill DGJREVD",
+        "readability": {
+          "reasoning": "The comment is generally clear but could benefit from better punctuation for readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the conditional logic and subsequent actions in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3fc25145: ;If DGJREVD exists and certain fields in DGJNDT are blank, set DGJX from DGJTNOD based on DGJTDV value",
+        "readability": {
+          "reasoning": "The comment is clear but slightly long-winded, which could be improved for better readability.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific conditions under which DGJX is set.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5916272f: ;If DGJREVD exists and certain fields in DGJNDT have values, set DGJX from DGJNDT if both fields have values, or from DGJTNOD if not",
+        "readability": {
+          "reasoning": "The comment is a bit verbose, which affects its readability, but it is generally clear.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for explaining the logic behind setting DGJX based on multiple fields.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c701b807: ;Quit",
+        "readability": {
+          "reasoning": "The comment is very brief and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6246d620: ;Update DELETED field (14th piece) of PATIENT file (#393) with DELETED FLAG set by procedure.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment precisely explains what the procedure does, which is useful for understanding the specific field being updated.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5b187a1c: ;Kill off all local variables used by procedure.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains that all local variables are being cleared, which is useful for understanding the scope of variable cleanup.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4b978a4b: ;Kill off all local variables used by procedure.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains that all local variables are being cleared, which is useful for understanding the scope of variable cleanup.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9d567e58: ;Kill off all local variables used by procedure.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains that all local variables are being cleared, which is useful for understanding the scope of variable cleanup.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "63fb6605: ;Kill off screening variables and prompts used by ^DIC.",
+        "readability": {
+          "reasoning": "The comment is clear but may be slightly technical for some readers.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains that screening variables and prompts used by a specific utility are being cleared, which is useful for understanding the cleanup process.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

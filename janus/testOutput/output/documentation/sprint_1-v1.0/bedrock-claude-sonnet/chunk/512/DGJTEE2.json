@@ -1,0 +1,815 @@
+{
+  "input": "{\n  \"comments\": [\n    \"72295d78:  ;\\n ;This routine edits VistA/CPRS Text Integration utilities data.\\n ;\\n ;Entry point for the edit option.\\n ;\",\n    \"3d7bec21: If editing an existing doc, call the EDIT code and quit\",\n    \"dce4d0d0: Otherwise, call the NEW doc code in DGJTEE3\",\n    \"68381e3e: Quit the routine\",\n    \"95cca886: Initialize VALMBCK for list manager\",\n    \"26fb322b: If doc type allows editing, initialize the editing environment and set VALMBCK to refresh the display\",\n    \"0498b248: Otherwise, initialize the new doc editing environment\",\n    \"2e375577: ;Return if the reason for quitting is resume (R).\",\n    \"5b37e129: ;\\n;Initialize variables for Record Type, Deficiency, and Physician columns.\\n;TC, DC, PC are caption codes for the columns.\\n;TW, DW, PW are window numbers for the columns.\",\n    \"a2afab75: ;Set the Record Type caption and window if DGJTREC is defined.\",\n    \"06b0d768: ;Set the Deficiency caption and window if DGJTREC is not defined.\",\n    \"fb19d3ea: ;Set the Physician caption and window.\",\n    \"ca5b1103: Extract the MUMPS code, subscript, and boolean value from the 'STATUS' component of VALMDDF\",\n    \"80ee7b1b: Extract the MUMPS code, subscript, and boolean value from the 'CATEGORY' component of VALMDDF\",\n    \"ee232200: Extract the MUMPS code, subscript, and boolean value from the 'EVENT DATE' component of VALMDDF\",\n    \"725e2f04: 1\",\n    \"3efba034: 1\",\n    \"428cf702: 1\",\n    \"dbd2f5c3: 1\",\n    \"52324956: 1\",\n    \"ab4246bc: 1\",\n    \"994ab18c: Clear flag and quit if DGJTCH1 (indicator of complete history) is defined.\",\n    \"8484cb1c: Kill DGJTCH (output array) and DGJTCH1.\",\n    \"81e6c031: If the admission count is not divisible by 5, display a prompt to choose an admission number or '^' to quit. If user input is '?', '^^', or contains non-numeric characters, go to LIST label. If user input is '^' or an error occurs, set DGJTFG (flag) to 1 and quit if it is set.\",\n    \"6269de82: Display 'Choose admission 1'.\",\n    \"0b19fb9f: Display number of admissions and prompt for input.\",\n    \"c88a1373: Read user input into X with timeout DTIME.\",\n    \"e1a1b0b1: If the user input is not found in DGJTOA array, go to LIST label.\",\n    \"e4cd72fa: Save the admission number (X) in DGJTX for later use.\",\n    \"ac1b1972: Get the patient name from the DGJTOA DBIA and save it in DGJTAIFN.\",\n    \"d149e346: Exit the routine if no further action is required.\",\n    \"5df38a88: Call the DT1^DGJTEE3 routine to retrieve the admission date and transfer data.\",\n    \"6effd6d4: Print the admission count, admission date, and admission type. The admission date is formatted using FMTE^XLFDT and the admission type is truncated to 20 characters if longer.\",\n    \"e4fd8a2c: Get the discharge date from the DGPM file for the admission and print it. If no discharge date, print 'N/A'. The discharge date is also formatted using FMTE^XLFDT.\",\n    \"2f1b289b: If the counter is a multiple of 5, call the CHOZ subroutine.\",\n    \"af3ef394: Exit the routine.\",\n    \"0e7af32a: Display the current entry number, and if it's a multiple of 5, call the CHOZ subroutine.\",\n    \"d4a3be29: Exit the DT subroutine.\",\n    \"ded71df7: Prompt the user to either quit or continue displaying entries.\",\n    \"c2c72b1e: Prompt the user to select a record or admission. If the input is valid (matches a key in DGJTOA or DGJTRC), set flags to indicate a valid selection, and store the user's input in DGJTX. Otherwise, if the user enters '^' or times out, set flags to indicate the user wants to quit.\",\n    \"15822278: ;Quit the current context and return to the calling environment.\",\n    \"3db51bba:  ;\\n ;This tag is used to set up global arrays for storing report data.\\n ;It initializes counters for the report data and index arrays.\",\n    \"add2e39d: ;Initialize counters for data and index arrays.\",\n    \"1f80c0c4: ;Set both counters to 0.\",\n    \"e019fa79: ;Increment both counters and store an empty string as the first line of the report data.\",\n    \"5c4be24c: ;Store the empty string in the report data array using the data counter, and set up a cross-reference in the index array linking the data counter to the index counter.\",\n    \"c170e957: ;Store the index of the selected item in the ^TMP global.\",\n    \"062c1052: ;Exit the option.\",\n    \"c4cdc1b7: ;If the DGJTDLT variable is defined, call the DGJ DELETE RECORD option and exit.\",\n    \"0fb46d28: ;Call the DGJ IRT REC EDIT option to edit an existing record.\",\n    \"a2471d33: ;Exit the option.\",\n    \"a33e7782: ;Call the DGJ IRT REC ENTER option to enter a new record.\",\n    \"4ef30e7d: Quit if called without any action.\",\n    \"782b2929: Initialize for entering new exposure.\",\n    \"ad280bc8: Quit after initializing for entry.\",\n    \"8e37142f: ;\\n;Initialize for editing/deleting deficiencies.\\n;\",\n    \"735956e7: If deleting deficiency, initialize and quit.\",\n    \"5c991ddf: If editing deficiency, initialize.\",\n    \"8d63c8e6: Quit after initializing for edit/delete.\",\n    \"073bbd49: ;\\n;Quick comparison of data.\\n;\",\n    \"62fe1047: Initialize variables for comparison.\",\n    \"9f0d664d: Initialize VALMBCK to null.\",\n    \"b413e263: If the user chooses to quit by selecting an exit option, return to the main routine.\",\n    \"767e6b83: Reset the selection to allow for new entries, and set the VALMBCK variable to indicate a return to the calling routine.\",\n    \"d1a3f604: Loop through each selected entry. Extract the record number from the selected entry, and set up variables for updating the record. Call the SET tag to update the record.\",\n    \"7d03c160: Quit if the navigation's to a different option.\",\n    \"5a9d4bae: Check if the encounter is an outpatient appointment, discharge summary, or interim summary.\",\n    \"025e5fd7: Set the status of the intake process to 'COMPLETED'.\",\n    \"13182665: End of line.\",\n    \"3287a59d: Branch to REP^DGJTEE if the navigation is to this option.\",\n    \"9eeeab1e: Kill all variables used in this routine/option.\",\n    \"9731dfa4: ;Kill all variables\",\n    \"55fd2077: ;Kill the DIC input parameters and quit\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 91.75269484519958
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "72295d78:  ;\n ;This routine edits VistA/CPRS Text Integration utilities data.\n ;\n ;Entry point for the edit option.\n ;",
+        "readability": {
+          "reasoning": "The comment is well-written, clear, and properly formatted.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a clear description of the purpose of the routine and the entry point, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3d7bec21: If editing an existing doc, call the EDIT code and quit",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the condition and the subsequent action, which helps in understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "dce4d0d0: Otherwise, call the NEW doc code in DGJTEE3",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the alternative action, which helps in understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "68381e3e: Quit the routine",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the termination of the routine, which is helpful but somewhat trivial.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "95cca886: Initialize VALMBCK for list manager",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an initialization step, which is helpful but somewhat trivial.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "26fb322b: If doc type allows editing, initialize the editing environment and set VALMBCK to refresh the display",
+        "readability": {
+          "reasoning": "The comment is well-structured and clearly explains the conditions and actions.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an expert programmer understand the specific behavior of the code based on the document type.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0498b248: Otherwise, initialize the new doc editing environment",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It explains a specific condition and action, helping an average programmer understand the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2e375577: ;Return if the reason for quitting is resume (R).",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It documents a specific return condition which is useful for understanding the flow of the program.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5b37e129: ;\n;Initialize variables for Record Type, Deficiency, and Physician columns.\n;TC, DC, PC are caption codes for the columns.\n;TW, DW, PW are window numbers for the columns.",
+        "readability": {
+          "reasoning": "The comment is detailed and clearly formatted, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It thoroughly explains the initialization of variables and their corresponding codes and window numbers, which is valuable for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a2afab75: ;Set the Record Type caption and window if DGJTREC is defined.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a specific condition and action, aiding in understanding the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "06b0d768: ;Set the Deficiency caption and window if DGJTREC is not defined.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context about the condition being checked and the action taken, which helps understand the code logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fb19d3ea: ;Set the Physician caption and window.",
+        "readability": {
+          "reasoning": "The comment is brief and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful, but it lacks detail about conditions or specific logic, providing only a general action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ca5b1103: Extract the MUMPS code, subscript, and boolean value from the 'STATUS' component of VALMDDF",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the specific component being extracted, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "80ee7b1b: Extract the MUMPS code, subscript, and boolean value from the 'CATEGORY' component of VALMDDF",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the specific component being extracted, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ee232200: Extract the MUMPS code, subscript, and boolean value from the 'EVENT DATE' component of VALMDDF",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about the specific component being extracted, which is helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "725e2f04: 1",
+        "readability": {
+          "reasoning": "The comment consists of a hexadecimal string followed by a number, which is not typically readable without context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code's functionality or purpose.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "3efba034: 1",
+        "readability": {
+          "reasoning": "The comment consists of a hexadecimal string followed by a number, which is not typically readable without context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code's functionality or purpose.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "428cf702: 1",
+        "readability": {
+          "reasoning": "The comment consists of a hexadecimal string followed by a number, which is not typically readable without context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code's functionality or purpose.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "dbd2f5c3: 1",
+        "readability": {
+          "reasoning": "The comment consists of a hexadecimal string followed by a number, which is not typically readable without context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code's functionality or purpose.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "52324956: 1",
+        "readability": {
+          "reasoning": "The comment consists of a hexadecimal string followed by a number, which is not typically readable without context.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment does not provide any useful information about the code's functionality or purpose.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "ab4246bc: 1",
+        "readability": {
+          "reasoning": "The comment is extremely brief and lacks clarity.",
+          "score": 1
+        },
+        "usefulness": {
+          "reasoning": "The comment is too vague to be useful.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "994ab18c: Clear flag and quit if DGJTCH1 (indicator of complete history) is defined.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the condition and action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8484cb1c: Kill DGJTCH (output array) and DGJTCH1.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the actions on specific variables.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "81e6c031: If the admission count is not divisible by 5, display a prompt to choose an admission number or '^' to quit. If user input is '?', '^^', or contains non-numeric characters, go to LIST label. If user input is '^' or an error occurs, set DGJTFG (flag) to 1 and quit if it is set.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear but somewhat lengthy.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed and useful information about the logic and error handling.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6269de82: Display 'Choose admission 1'.",
+        "readability": {
+          "reasoning": "The comment is clear and simple.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "0b19fb9f: Display number of admissions and prompt for input.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly conveys the purpose of the code.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear explanation of the code's functionality, which is helpful for understanding.",
+          "score": "3"
+        }
+      },
+      {
+        "comment": "c88a1373: Read user input into X with timeout DTIME.",
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to understand.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific and potentially non-trivial functionality, aiding comprehension.",
+          "score": "3"
+        }
+      },
+      {
+        "comment": "e1a1b0b1: If the user input is not found in DGJTOA array, go to LIST label.",
+        "readability": {
+          "reasoning": "The comment is clear and specifies the conditions and actions taken.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional check and a subsequent action, which is useful for understanding the control flow.",
+          "score": "4"
+        }
+      },
+      {
+        "comment": "e4cd72fa: Save the admission number (X) in DGJTX for later use.",
+        "readability": {
+          "reasoning": "The comment is clear and indicates what the code does.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of saving a value, which aids in understanding its later use.",
+          "score": "3"
+        }
+      },
+      {
+        "comment": "ac1b1972: Get the patient name from the DGJTOA DBIA and save it in DGJTAIFN.",
+        "readability": {
+          "reasoning": "The comment is clear and indicates the data retrieval and storage process.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment explains an important step in the data handling process, which is useful for understanding the code.",
+          "score": "4"
+        }
+      },
+      {
+        "comment": "d149e346: Exit the routine if no further action is required.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly states the condition under which the routine will exit.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a conditional exit, which is useful but somewhat trivial.",
+          "score": "2"
+        }
+      },
+      {
+        "comment": "5df38a88: Call the DT1^DGJTEE3 routine to retrieve the admission date and transfer data.",
+        "readability": {
+          "reasoning": "The comment is well-written and clearly describes what the routine does.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment provides specific information about the function being called and its purpose, which is helpful for understanding the code.",
+          "score": "3"
+        }
+      },
+      {
+        "comment": "6effd6d4: Print the admission count, admission date, and admission type. The admission date is formatted using FMTE^XLFDT and the admission type is truncated to 20 characters if longer.",
+        "readability": {
+          "reasoning": "The comment is detailed and clearly explains what data is being printed and how it is formatted.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it provides detailed information about the data formatting and processing.",
+          "score": "4"
+        }
+      },
+      {
+        "comment": "e4fd8a2c: Get the discharge date from the DGPM file for the admission and print it. If no discharge date, print 'N/A'. The discharge date is also formatted using FMTE^XLFDT.",
+        "readability": {
+          "reasoning": "The comment is clear and detailed, explaining both the retrieval and formatting of the discharge date.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment provides comprehensive information on fetching and formatting the discharge date, which is highly useful.",
+          "score": "4"
+        }
+      },
+      {
+        "comment": "2f1b289b: If the counter is a multiple of 5, call the CHOZ subroutine.",
+        "readability": {
+          "reasoning": "The comment is clear and succinctly describes the condition and action taken.",
+          "score": "4"
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific condition under which a subroutine is called, which is useful for understanding control flow.",
+          "score": "3"
+        }
+      },
+      {
+        "comment": "af3ef394: Exit the routine.",
+        "readability": {
+          "reasoning": "The comment is concise and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment clearly explains what the code does at this point, which is exiting the routine.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0e7af32a: Display the current entry number, and if it's a multiple of 5, call the CHOZ subroutine.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides valuable information about the functionality, including a specific condition and subroutine call.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d4a3be29: Exit the DT subroutine.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment specifies exactly where the exit is happening, which is useful for understanding the flow of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ded71df7: Prompt the user to either quit or continue displaying entries.",
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the user interaction at this point in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c2c72b1e: Prompt the user to select a record or admission. If the input is valid (matches a key in DGJTOA or DGJTRC), set flags to indicate a valid selection, and store the user's input in DGJTX. Otherwise, if the user enters '^' or times out, set flags to indicate the user wants to quit.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, although it is somewhat lengthy.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information about user input validation and the consequences of different inputs, which is very helpful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "15822278: ;Quit the current context and return to the calling environment.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better by explaining what happens when the function is called.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3db51bba: ;\n ;This tag is used to set up global arrays for storing report data.\n ;It initializes counters for the report data and index arrays.",
+        "readability": {
+          "reasoning": "The comment is well-written and structured clearly, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the purpose and initialization process of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "add2e39d: ;Initialize counters for data and index arrays.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a trivial functionality related to initialization, which is generally straightforward.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "1f80c0c4: ;Set both counters to 0.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality of setting counters to zero.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e019fa79: ;Increment both counters and store an empty string as the first line of the report data.",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the function of incrementing counters and initializing the first line of data.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5c4be24c: ;Store the empty string in the report data array using the data counter, and set up a cross-reference in the index array linking the data counter to the index counter.",
+        "readability": {
+          "reasoning": "The comment is well-written and clearly describes the actions taken.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific data manipulation and cross-referencing being performed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c170e957: ;Store the index of the selected item in the ^TMP global.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, with no readability issues.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it specifies where the index is stored, which is important for understanding the code's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "062c1052: ;Exit the option.",
+        "readability": {
+          "reasoning": "The comment is very brief but still clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality, providing minimal additional context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c4cdc1b7: ;If the DGJTDLT variable is defined, call the DGJ DELETE RECORD option and exit.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the conditional operation and subsequent action, aiding in understanding the code's flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0fb46d28: ;Call the DGJ IRT REC EDIT option to edit an existing record.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the purpose of the function being called.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "a2471d33: ;Exit the option.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides a specific action that is easy to understand.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a33e7782: ;Call the DGJ IRT REC ENTER option to enter a new record.",
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Explains a specific function call, aiding in code comprehension.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "4ef30e7d: Quit if called without any action.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Describes a conditional behavior of the function.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "782b2929: Initialize for entering new exposure.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Provides a clear description of the initialization process.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ad280bc8: Quit after initializing for entry.",
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "Explains the sequence of actions, enhancing comprehension.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8e37142f: ;\n;Initialize for editing/deleting deficiencies.\n;",
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a clear indication of the purpose of the code, which is useful for understanding the initialization process for editing or deleting deficiencies.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "735956e7: If deleting deficiency, initialize and quit.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific condition for deletion and subsequent actions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5c991ddf: If editing deficiency, initialize.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific condition for editing.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8d63c8e6: Quit after initializing for edit/delete.",
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful as it explains the sequence of actions clearly.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "073bbd49: ;\n;Quick comparison of data.\n;",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a trivial functionality of comparing data without providing much detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "62fe1047: Initialize variables for comparison.",
+        "readability": {
+          "reasoning": "The comment is concise and clearly written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment helps an average programmer understand the purpose of the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9f0d664d: Initialize VALMBCK to null.",
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment documents a specific initialization, which is useful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b413e263: If the user chooses to quit by selecting an exit option, return to the main routine.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment clearly explains a user interaction scenario, aiding both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "767e6b83: Reset the selection to allow for new entries, and set the VALMBCK variable to indicate a return to the calling routine.",
+        "readability": {
+          "reasoning": "The comment is detailed and comprehensible.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment provides valuable context about resetting selections and returning to the calling routine, helpful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d1a3f604: Loop through each selected entry. Extract the record number from the selected entry, and set up variables for updating the record. Call the SET tag to update the record.",
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "This comment offers a detailed step-by-step explanation, making it very useful for understanding the code's functionality.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7d03c160: Quit if the navigation's to a different option.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the specific condition for quitting.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5a9d4bae: Check if the encounter is an outpatient appointment, discharge summary, or interim summary.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the conditions under which a check is made, useful for understanding the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "025e5fd7: Set the status of the intake process to 'COMPLETED'.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific action taken in the code, useful for understanding the code flow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "13182665: End of line.",
+        "readability": {
+          "reasoning": "The comment is very short but readable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is too vague and provides little information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "3287a59d: Branch to REP^DGJTEE if the navigation is to this option.",
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a specific branching condition, useful for understanding code paths.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "9eeeab1e: Kill all variables used in this routine/option.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the purpose of the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9731dfa4: ;Kill all variables",
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "55fd2077: ;Kill the DIC input parameters and quit",
+        "readability": {
+          "reasoning": "The comment is clear and specific.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer understand the purpose of the code better.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}

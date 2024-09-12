@@ -1,0 +1,2007 @@
+{
+  "input": "{\n  \"comments\": [\n    \"6c6df4de:  ;\\n ;At the top of DGJTEE1, this group of comments describes the\\n ;purpose and logic flow of the routine.\",\n    \"fcd8fbce: ;If there are entries in ^TMP for this continuation, process them.\",\n    \"504f6aad: ;Exit point for DGJTEE1.\",\n    \"de0621b7: ;If this is a discharge summary or op report type, see if it is\\n;a related or unrelated entry. If unrelated, quit and return\\n;to list manager.\",\n    \"4318f48e: ;If this entry has been deleted from FS, and we are not in View mode,\\n;and this is a discharge summary (TYPE 14), quit and return\\n;to list manager.\",\n    \"c53207fd: ;If the entry is to be processed, branch to process it.\",\n    \"0437d629: ;Return to Fileman list manager.\",\n    \"0fd87f41:  ;\\n ;LOWER converts the passed string to lower case.\\n ;Periods, commas and slashes remain upper case.\",\n    \"6ff60fa4: ;Define working variable space.\",\n    \"b8d0f5b1: ;Convert the first character to lower case. Convert the remaining\\n;characters to lower case except for blanks and special chars.\",\n    \"3d569356: ;Convert special chars back to upper case.\",\n    \"7c5bdd82: ;Return the converted string.\",\n    \"732425c2:  ;\\n ;SETSTR replaces a substring in string S with substring V.\\n ;X is the start position of substring replacement.\\n ;L is the length of substring replacement.\",\n    \"6ba29ea3: ;Replace substring in S with substring from V.\",\n    \"3c6d6ac8:  ;\\n ;STATCK determines medical record status of patient.\\n ;Entry status must match patient type or flag (DGJFL1) is set.\\n ;First do checks for ambulatory (OUTPATIENT) status.\\n ;Then do checks for inpatient status.\",\n    \"7f73c7d3: ;Get status and admission type.\",\n    \"368c8a31: ;If 'DGJTCOM' is set check if status and admission type match.\",\n    \"303d006b: ;If status is 'CM' then quit.\",\n    \"95ae85a6: ;If admitted as inpatient and status is 'RV' then quit.\",\n    \"3a2ffc34: ;If admitted as outpatient and status is 'SN' then quit.\",\n    \"ee5a7c04: ;Set 'DGJFL1' flag to indicate status and admission type do not match.\",\n    \"1a4b289c: ;Quit from the 'DGJTCOM' check.\",\n    \"8f2b434a: ;If 'DGJTCOM' is not set then check status and admission type.\",\n    \"29242722: ;If status is 'CM' then set 'DGJFL1' flag and quit.\",\n    \"2db5cb52: ;If admitted as inpatient and status is 'RV' then set 'DGJFL1' flag and quit.\",\n    \"bfd75c65: ;If admitted as outpatient and status is 'SN' then set 'DGJFL1' flag and quit.\",\n    \"11ee2c52: ;Quit from 'STATCK' routine.\",\n    \"1bd1402e: ;Initialize 'X' variable for header.\",\n    \"98273beb: ;Set patient name in header.\",\n    \"6e070ec4: ;Set patient ID in header.\",\n    \"aa5c25c7: ;Print patient ID\",\n    \"3b54ce4a: ;Print patient ID value\",\n    \"15b38b41: ;Store first line of header\",\n    \"c4e4333a: ;Reset X variable for second line of header\",\n    \"0bbc2057: ;Print 'ADMISSION: '\",\n    \"8515dcd1: ;If admission info exists, print formatted admission time\",\n    \"eeda2c50: ;If no admission info, print 'OUTPATIENT'\",\n    \"7773b54d: ;Store second line of header\",\n    \"3c776f7a: ;Return from HDR routine\",\n    \"6e3a2ca7: ;\\nEnter EXP routine.\\n;Set up variables for displaying detailed information.\",\n    \"0dac9a6d: ;Initialize variables\",\n    \"c7219baa: ;Set VALMBCK to null string\",\n    \"cb0b4862: ;If no items selected, go to ENQ\",\n    \"cdb0b036: ;Display full detail, set VALMBCK to allow return\",\n    \"00238f9c: ;Loop through selected items\",\n    \"c1df0a39: ;Write out the entire health factor definition\",\n    \"c6312911: ;Get the index for retrieving the health factor data\",\n    \"74e1c14f: ;Write out the health factor type\",\n    \"3fffc123: ;Retrieve and display data for the selected health factor\",\n    \"7d03e7fc: ;If this is a TIU document, process it separately\",\n    \"bfc727c6: ;If this is a standard document type, process it using the standard routine\",\n    \"658ec53b: ;Return to reader mode\",\n    \"7266290f: ;Quit the EXP routine\",\n    \"fffc8bc4: ;Initialize the TIU document display\",\n    \"ea49ddd7: ;Quit the EXP1 routine\",\n    \"0e126dbf: ;\\n;If the selected document is a TIU discharge summary, process it\\n;for display. Otherwise, allow the user to edit the TIU event date\\n;and then quit.\",\n    \"b51a1192: ;Check if the document is a TIU discharge summary\",\n    \"ba41b113: ;Set up parameters for displaying the TIU document\",\n    \"10274a1f: ;Quit the EXP2 routine\",\n    \"caedb5a6: ;Allow the user to edit the TIU event date and related fields\",\n    \"59c2f3c6: 59c2f3c6\",\n    \"37c4f110: 37c4f110\",\n    \"eb2cd719: eb2cd719\",\n    \"3a021431: 3a021431\",\n    \"045a5d5b: 045a5d5b\",\n    \"f478eac0: f478eac0\",\n    \"33e7b8e8: 33e7b8e8\",\n    \"cdf4523a: cdf4523a\",\n    \"39478b0c: 39478b0c\",\n    \"cafdcfe1: cafdcfe1\",\n    \"9e0d85dc: 9e0d85dc\",\n    \"7802508c: 7802508c\",\n    \"ff8ab527: ff8ab527\",\n    \"33486bb1: 33486bb1\",\n    \"3a8f131c: 3a8f131c\",\n    \"afceded1: ; If this is a type of report, proceed.\",\n    \"1144e702: ; Get the category from the report type.\",\n    \"5d1665b0: ; Increment the category count.\",\n    \"c5eecdcf: ; If this is a new category, set it up.\",\n    \"79055980: ; Increment counters for line item, total items.\",\n    \"24c2ca75: ; Set the line item number.\",\n    \"209af035: ; Get the report type IEN.\",\n    \"1fcf6873: ; Format the report type and width.\",\n    \"136dbe0b: ; Format the person who last edited and width.\",\n    \"07cb94a3: ; Format the status and width.\",\n    \"4071055a: ; Format the category and width.\",\n    \"f1fe13d4: ; Format the date/time and width.\",\n    \"281aca94: ; Store the formatted line in a temporary global.\",\n    \"88cb12b3: ; Store the index pointing to the formatted line.\",\n    \"b064185b: ; Done.\",\n    \"74ba05da: ;\\n;Set up a new category.\\n;\\n;Categories are determined based on the CLASS file entry (#393.41).\\n;Each unique class gets an entry at the top of the display.\\n;\",\n    \"59c70d23: ;Increment counters for new line.\",\n    \"7f4c4063: ;Store line number for this category.\",\n    \"135f9891: ;Initialize new line.\",\n    \"3459f6eb: ;Add a blank line for spacing.\",\n    \"e01d61c6: ;Increment counters for new line.\",\n    \"d99dd8e2: ;Get the category name from file #393.41.\",\n    \"b115b4da: ;Center the category name on the line.\",\n    \"ebff3a7d: ;Add the category name to the line.\",\n    \"d44db8ca: ;Increment counters for new line.\",\n    \"768a1219: ;Add another blank line for spacing.\",\n    \"6d253f31: ;End of category setup.\",\n    \"70a6d74f: ;Store the line in ^TMP.\",\n    \"b4e4cb24: ;Store index information for the line.\",\n    \"273a7922: ;End of TMP subroutine.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 188.17563819885254
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "6c6df4de:  ;\n ;At the top of DGJTEE1, this group of comments describes the\n ;purpose and logic flow of the routine.",
+        "completeness": {
+          "reasoning": "The comment provides an overview but does not document specific functionalities of the routine.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate in describing that it provides an overview of the routine.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the high-level purpose of the routine.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "fcd8fbce: ;If there are entries in ^TMP for this continuation, process them.",
+        "completeness": {
+          "reasoning": "It documents the specific functionality related to handling entries in ^TMP.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the processing of ^TMP entries.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "504f6aad: ;Exit point for DGJTEE1.",
+        "completeness": {
+          "reasoning": "The comment specifies the exit point but does not elaborate on any other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate regarding the exit point.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but very specific and limited in scope.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "de0621b7: ;If this is a discharge summary or op report type, see if it is\n;a related or unrelated entry. If unrelated, quit and return\n;to list manager.",
+        "completeness": {
+          "reasoning": "It covers the specific functionality for handling discharge summaries or op report types.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the conditions and actions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be slightly more concise.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific conditional workflow.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4318f48e: ;If this entry has been deleted from FS, and we are not in View mode,\n;and this is a discharge summary (TYPE 14), quit and return\n;to list manager.",
+        "completeness": {
+          "reasoning": "It documents the specific conditions and actions for handling deleted entries.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific conditional workflow for deleted entries.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c53207fd: ;If the entry is to be processed, branch to process it.",
+        "completeness": {
+          "reasoning": "The comment briefly explains a single functionality aspect.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0437d629: ;Return to Fileman list manager.",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality but not in detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true but minimal information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific return operation.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0fd87f41:  ;\n ;LOWER converts the passed string to lower case.\n ;Periods, commas and slashes remain upper case.",
+        "completeness": {
+          "reasoning": "The comment explains the function and exceptions in detail.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment thoroughly explains the function's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6ff60fa4: ;Define working variable space.",
+        "completeness": {
+          "reasoning": "The comment is very brief and lacks details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read but too brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides basic information but lacks depth.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "b8d0f5b1: ;Convert the first character to lower case. Convert the remaining\n;characters to lower case except for blanks and special chars.",
+        "completeness": {
+          "reasoning": "The comment explains the entire functionality in detail.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very helpful in understanding the function's behavior.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3d569356: ;Convert special chars back to upper case.",
+        "completeness": {
+          "reasoning": "The comment only mentions converting special characters to upper case, without addressing any other functionality that might be present.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is likely true but very limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific part of the code but lacks broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7c5bdd82: ;Return the converted string.",
+        "completeness": {
+          "reasoning": "The comment only mentions returning a converted string and does not cover other aspects of the function.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but very limited.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "732425c2:  ;\n ;SETSTR replaces a substring in string S with substring V.\n ;X is the start position of substring replacement.\n ;L is the length of substring replacement.",
+        "completeness": {
+          "reasoning": "The comment covers most essential functionality of the SETSTR function.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and relevant to the function's operation.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written with clear explanations.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding how the function operates.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6ba29ea3: ;Replace substring in S with substring from V.",
+        "completeness": {
+          "reasoning": "The comment covers the basic functionality but lacks detail on other aspects.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but terse.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some understanding but is not very detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3c6d6ac8:  ;\n ;STATCK determines medical record status of patient.\n ;Entry status must match patient type or flag (DGJFL1) is set.\n ;First do checks for ambulatory (OUTPATIENT) status.\n ;Then do checks for inpatient status.",
+        "completeness": {
+          "reasoning": "The comment covers all essential functionality of the STATCK function.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is detailed and accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding the full operation of the function.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7f73c7d3: ;Get status and admission type.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality but does not provide details on how status and admission type are retrieved.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about retrieving status and admission type.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the purpose of the code line.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "368c8a31: ;If 'DGJTCOM' is set check if status and admission type match.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality conditionally based on 'DGJTCOM' but does not elaborate on what constitutes a match.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides mostly true information but lacks some detail.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could benefit from more detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer but leaves some ambiguity.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "303d006b: ;If status is 'CM' then quit.",
+        "completeness": {
+          "reasoning": "The comment fully documents the condition and action associated with it.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific conditional action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "95ae85a6: ;If admitted as inpatient and status is 'RV' then quit.",
+        "completeness": {
+          "reasoning": "The comment covers all aspects of the condition and action.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific conditional action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3a2ffc34: ;If admitted as outpatient and status is 'SN' then quit.",
+        "completeness": {
+          "reasoning": "The comment fully documents the condition and action associated with it.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific conditional action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ee5a7c04: ;Set 'DGJFL1' flag to indicate status and admission type do not match.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of setting the 'DGJFL1' flag.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information given is true and accurately describes what the code is doing.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the specific purpose of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1a4b289c: ;Quit from the 'DGJTCOM' check.",
+        "completeness": {
+          "reasoning": "The comment indicates the action taken but does not provide details on why or under what conditions.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but lacks context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could benefit from additional context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail to be fully helpful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8f2b434a: ;If 'DGJTCOM' is not set then check status and admission type.",
+        "completeness": {
+          "reasoning": "The comment explains the condition and subsequent action but does not elaborate on what happens next.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and describes the condition accurately.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps to understand the condition but could offer more detail on the next steps.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "29242722: ;If status is 'CM' then set 'DGJFL1' flag and quit.",
+        "completeness": {
+          "reasoning": "The comment provides a clear condition and action but does not explain the significance of 'CM'.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is true and accurately describes the action taken.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could use additional context for 'CM'.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the specific condition and action but lacks full context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2db5cb52: ;If admitted as inpatient and status is 'RV' then set 'DGJFL1' flag and quit.",
+        "completeness": {
+          "reasoning": "The comment is complete in explaining both the condition and the subsequent action.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is true and accurately describes the condition and action.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful, providing clear information on the condition and action.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bfd75c65: ;If admitted as outpatient and status is 'SN' then set 'DGJFL1' flag and quit.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition and action but may not cover all relevant conditions or actions.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears accurate and true based on the described condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific condition and action.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "11ee2c52: ;Quit from 'STATCK' routine.",
+        "completeness": {
+          "reasoning": "The comment addresses the action of quitting but does not provide any context about the routine or conditions.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but provides minimal information for understanding the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "1bd1402e: ;Initialize 'X' variable for header.",
+        "completeness": {
+          "reasoning": "The comment specifies the initialization of a variable but does not provide context or further details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents trivial functionality but can be useful for understanding initialization.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "98273beb: ;Set patient name in header.",
+        "completeness": {
+          "reasoning": "The comment addresses setting the patient name but does not provide details on how or why.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a basic understanding but lacks depth.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6e070ec4: ;Set patient ID in header.",
+        "completeness": {
+          "reasoning": "The comment specifies setting the patient ID but lacks context or additional details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides minimal information but is somewhat useful for understanding the action.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "aa5c25c7: ;Print patient ID",
+        "completeness": {
+          "reasoning": "The comment addresses a single capability of the code - printing the patient ID.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate and reflects what the code does.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific function of the code, but it is a simple and obvious task.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3b54ce4a: ;Print patient ID value",
+        "completeness": {
+          "reasoning": "The comment addresses a single capability of the code - printing the patient ID value.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately reflects the action of the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific function of the code but describes an obvious task.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "15b38b41: ;Store first line of header",
+        "completeness": {
+          "reasoning": "The comment is focused on one specific action - storing the first line of the header.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly describes what the code does.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful in understanding this part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c4e4333a: ;Reset X variable for second line of header",
+        "completeness": {
+          "reasoning": "The comment addresses a specific action - resetting a variable for the second line of the header.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the purpose of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0bbc2057: ;Print 'ADMISSION: '",
+        "completeness": {
+          "reasoning": "The comment describes a single action - printing a specific string.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the function of the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding this part of the code, though the action it describes is straightforward.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8515dcd1: ;If admission info exists, print formatted admission time",
+        "completeness": {
+          "reasoning": "The comment explains the functionality of the code segment but does not cover all aspects.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "eeda2c50: ;If no admission info, print 'OUTPATIENT'",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality but not all capabilities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7773b54d: ;Store second line of header",
+        "completeness": {
+          "reasoning": "The comment addresses the specific action being taken but lacks detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read but minimalistic.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3c776f7a: ;Return from HDR routine",
+        "completeness": {
+          "reasoning": "The comment addresses a very specific part of the code without additional context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but too brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is only marginally useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6e3a2ca7: ;\nEnter EXP routine.\n;Set up variables for displaying detailed information.",
+        "completeness": {
+          "reasoning": "The comment provides a good overview but might miss some details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "0dac9a6d: ;Initialize variables",
+        "completeness": {
+          "reasoning": "The comment addresses a single aspect of the code, initializing variables, but does not provide details on what variables are initialized or how.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately states that variables are initialized.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but only in a very limited scope.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c7219baa: ;Set VALMBCK to null string",
+        "completeness": {
+          "reasoning": "The comment documents the action of setting VALMBCK to a null string but does not provide context or reasons.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action taken.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding a specific action but lacks context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cb0b4862: ;If no items selected, go to ENQ",
+        "completeness": {
+          "reasoning": "The comment addresses a specific condition but does not explain what happens at ENQ or why.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the condition and the action taken.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the flow of the code but could be more comprehensive.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "cdb0b036: ;Display full detail, set VALMBCK to allow return",
+        "completeness": {
+          "reasoning": "The comment addresses two actions but doesn't explain the context or reasons for these actions.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the actions taken.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could provide more context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "00238f9c: ;Loop through selected items",
+        "completeness": {
+          "reasoning": "The comment addresses the action of looping but does not specify what is being done within the loop or why.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action taken.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but lacks detail.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c1df0a39: ;Write out the entire health factor definition",
+        "completeness": {
+          "reasoning": "The comment indicates that the code writes out the entire health factor definition but does not elaborate on any specific functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment seems to accurately describe the code's purpose with no apparent false information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the main purpose of the code, but lacks details.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c6312911: ;Get the index for retrieving the health factor data",
+        "completeness": {
+          "reasoning": "The comment describes a specific action of getting an index but does not provide details on how it is used.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information in the comment is likely true regarding its function.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but only provides basic information.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "74e1c14f: ;Write out the health factor type",
+        "completeness": {
+          "reasoning": "The comment states the code writes out the health factor type but does not detail any other functionality.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely accurate and does not contain false information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides a basic understanding of the code's purpose but lacks detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3fffc123: ;Retrieve and display data for the selected health factor",
+        "completeness": {
+          "reasoning": "The comment addresses the two main actions of the code: retrieving and displaying data.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment appears to accurately describe the two main functions of the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the dual actions performed by the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "7d03e7fc: ;If this is a TIU document, process it separately",
+        "completeness": {
+          "reasoning": "The comment describes a conditional action but does not provide details on the processing.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment likely provides true information about the conditional processing.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be slightly more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the conditional action but lacks detail on the separate processing.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "bfc727c6: ;If this is a standard document type, process it using the standard routine",
+        "completeness": {
+          "reasoning": "The comment addresses the main functionality but does not provide details on what constitutes a 'standard document type' or what the 'standard routine' entails.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is likely true but lacks detail.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the intention but lacks specifics that could help an expert programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "658ec53b: ;Return to reader mode",
+        "completeness": {
+          "reasoning": "The comment addresses a single action but does not provide context or detail about 'reader mode'.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is likely true but is too vague to be fully verified.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could use more detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7266290f: ;Quit the EXP routine",
+        "completeness": {
+          "reasoning": "The comment addresses the main action but does not provide detail about the 'EXP routine'.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is likely true but lacks detail for full verification.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could use more detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "fffc8bc4: ;Initialize the TIU document display",
+        "completeness": {
+          "reasoning": "The comment addresses the main action but does not provide detail about what 'TIU document display' entails or any initialization specifics.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is likely true but lacks detail for full verification.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could use more detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ea49ddd7: ;Quit the EXP1 routine",
+        "completeness": {
+          "reasoning": "The comment addresses the main action but does not provide detail about the 'EXP1 routine'.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is likely true but lacks detail for full verification.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could use more detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "0e126dbf: ;\n;If the selected document is a TIU discharge summary, process it\n;for display. Otherwise, allow the user to edit the TIU event date\n;and then quit.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple capabilities of the code, including processing and editing.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment appears to be accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b51a1192: ;Check if the document is a TIU discharge summary",
+        "completeness": {
+          "reasoning": "The comment addresses only one specific functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but limited.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ba41b113: ;Set up parameters for displaying the TIU document",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality related to setting up parameters.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "10274a1f: ;Quit the EXP2 routine",
+        "completeness": {
+          "reasoning": "The comment addresses only the quitting functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "caedb5a6: ;Allow the user to edit the TIU event date and related fields",
+        "completeness": {
+          "reasoning": "The comment addresses an important functionality but does not cover all aspects.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "59c2f3c6: 59c2f3c6",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is just a repetition of a code segment and does not provide any factual information.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is clear but does not provide any meaningful information.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment does not help understand the code at all.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "37c4f110: 37c4f110",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is just a repetition of a code segment and does not provide any factual information.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is clear but does not provide any meaningful information.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment does not help understand the code at all.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "eb2cd719: eb2cd719",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is just a repetition of a code segment and does not provide any factual information.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is clear but does not provide any meaningful information.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment does not help understand the code at all.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "3a021431: 3a021431",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is just a repetition of a code segment and does not provide any factual information.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is clear but does not provide any meaningful information.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment does not help understand the code at all.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "045a5d5b: 045a5d5b",
+        "completeness": {
+          "reasoning": "The comment does not address any functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is just a repetition of a code segment and does not provide any factual information.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is clear but does not provide any meaningful information.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment does not help understand the code at all.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "f478eac0: f478eac0",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is correct as it matches the code, but it does not provide any useful information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is readable but lacks context and detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment does not help understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "33e7b8e8: 33e7b8e8",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is correct as it matches the code, but it does not provide any useful information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is readable but lacks context and detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment does not help understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "cdf4523a: cdf4523a",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is correct as it matches the code, but it does not provide any useful information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is readable but lacks context and detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment does not help understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "39478b0c: 39478b0c",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is correct as it matches the code, but it does not provide any useful information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is readable but lacks context and detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment does not help understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "cafdcfe1: cafdcfe1",
+        "completeness": {
+          "reasoning": "The comment does not provide any information about the functionality of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is correct as it matches the code, but it does not provide any useful information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is readable but lacks context and detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment does not help understand the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "9e0d85dc: 9e0d85dc",
+        "completeness": {
+          "reasoning": "The comment does not describe any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any factual information relevant to the source code.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is readable but does not convey any meaningful information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it does not help understand the source code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "7802508c: 7802508c",
+        "completeness": {
+          "reasoning": "The comment does not describe any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any factual information relevant to the source code.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is readable but does not convey any meaningful information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it does not help understand the source code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "ff8ab527: ff8ab527",
+        "completeness": {
+          "reasoning": "The comment does not describe any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any factual information relevant to the source code.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is readable but does not convey any meaningful information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it does not help understand the source code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "33486bb1: 33486bb1",
+        "completeness": {
+          "reasoning": "The comment does not describe any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any factual information relevant to the source code.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is readable but does not convey any meaningful information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it does not help understand the source code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "3a8f131c: 3a8f131c",
+        "completeness": {
+          "reasoning": "The comment does not describe any functionality of the source code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any factual information relevant to the source code.",
+          "score": 1
+        },
+        "readability": {
+          "reasoning": "The comment is readable but does not convey any meaningful information.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it does not help understand the source code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "afceded1: ; If this is a type of report, proceed.",
+        "completeness": {
+          "reasoning": "The comment partially describes the condition but lacks details about what 'proceed' entails.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate but incomplete.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks depth for an expert understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1144e702: ; Get the category from the report type.",
+        "completeness": {
+          "reasoning": "This comment covers the essential functionality being performed.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action being taken.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It provides clear information that would assist an average programmer.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5d1665b0: ; Increment the category count.",
+        "completeness": {
+          "reasoning": "The comment fully describes the functionality related to incrementing the category count.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information is true and straightforward.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is useful for understanding the specific action being taken.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c5eecdcf: ; If this is a new category, set it up.",
+        "completeness": {
+          "reasoning": "The comment provides an adequate explanation of the condition and action.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment is accurate but somewhat vague.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is helpful but could be more detailed for expert comprehension.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "79055980: ; Increment counters for line item, total items.",
+        "completeness": {
+          "reasoning": "The comment describes the functionality but could include more detail.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is useful in understanding the action but lacks depth.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "24c2ca75: ; Set the line item number.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of setting the line item number but does not provide details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting the line item number.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "209af035: ; Get the report type IEN.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of getting the report type IEN but lacks additional context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about getting the report type IEN.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easily understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1fcf6873: ; Format the report type and width.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of formatting the report type and width but is not detailed.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about formatting the report type and width.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "136dbe0b: ; Format the person who last edited and width.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of formatting the person who last edited and width but lacks details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about formatting the person who last edited and width.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easily understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "07cb94a3: ; Format the status and width.",
+        "completeness": {
+          "reasoning": "The comment addresses the specific functionality of formatting the status and width but is brief.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about formatting the status and width.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4071055a: ; Format the category and width.",
+        "completeness": {
+          "reasoning": "The comment describes the purpose of the code but does not provide detailed information on how the formatting is done.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail that could help understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f1fe13d4: ; Format the date/time and width.",
+        "completeness": {
+          "reasoning": "The comment describes the purpose of the code but does not provide detailed information on how the formatting is done.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail that could help understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "281aca94: ; Store the formatted line in a temporary global.",
+        "completeness": {
+          "reasoning": "The comment describes the purpose of the code but does not explain how or why it is stored in a temporary global.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail that could help understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "88cb12b3: ; Store the index pointing to the formatted line.",
+        "completeness": {
+          "reasoning": "The comment describes the purpose of the code but does not explain why storing the index is necessary.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail that could help understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b064185b: ; Done.",
+        "completeness": {
+          "reasoning": "The comment is too vague and does not describe any functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is true but not informative.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but too concise to be meaningful.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it does not provide any meaningful information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "74ba05da: ;\n;Set up a new category.\n;\n;Categories are determined based on the CLASS file entry (#393.41).\n;Each unique class gets an entry at the top of the display.\n;",
+        "completeness": {
+          "reasoning": "The comment addresses the setup of a new category and mentions the CLASS file entry but doesn't explain the entire process or all functions involved.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and accurate based on the context given.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding how categories are determined and displayed.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "59c70d23: ;Increment counters for new line.",
+        "completeness": {
+          "reasoning": "The comment explains the function it is documenting but does not provide further details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true but very minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks depth.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7f4c4063: ;Store line number for this category.",
+        "completeness": {
+          "reasoning": "The comment is very brief and only documents a single functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "135f9891: ;Initialize new line.",
+        "completeness": {
+          "reasoning": "The comment explains what the code does but lacks additional context or details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a specific functionality but is too brief for deeper understanding.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3459f6eb: ;Add a blank line for spacing.",
+        "completeness": {
+          "reasoning": "The comment addresses a single, simple functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the code's layout but is very basic.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "e01d61c6: ;Increment counters for new line.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of incrementing counters but does not specify which counters or provide any further detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about incrementing counters.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides basic information but lacks detail that would help in-depth understanding.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d99dd8e2: ;Get the category name from file #393.41.",
+        "completeness": {
+          "reasoning": "The comment specifies the file from which the category name is retrieved, but does not mention the method or context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "Assuming the file number is correct, the comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about the source of the data but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b115b4da: ;Center the category name on the line.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of centering the category name but omits how this is done.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action of centering the category name.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides essential information but lacks depth.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "ebff3a7d: ;Add the category name to the line.",
+        "completeness": {
+          "reasoning": "The comment explains the action of adding a category name but does not provide further context.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about adding the category name.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives basic information but does not enhance understanding significantly.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d44db8ca: ;Increment counters for new line.",
+        "completeness": {
+          "reasoning": "Similar to the first comment, it addresses the action of incrementing counters but lacks specifics.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes incrementing counters.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "While the comment provides basic information, it is not very detailed.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "768a1219: ;Add another blank line for spacing.",
+        "completeness": {
+          "reasoning": "The comment addresses a minor part of the code related to formatting, not its functionality.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about adding a blank line.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the formatting intention but not for understanding the core functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6d253f31: ;End of category setup.",
+        "completeness": {
+          "reasoning": "The comment addresses the end of a specific section but does not provide details on what the category setup entails.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely true given its context.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful in delineating sections but lacks depth.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "70a6d74f: ;Store the line in ^TMP.",
+        "completeness": {
+          "reasoning": "The comment documents a specific action but does not explain the broader context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely true as it describes storing a line in a temporary location.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific action within the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b4e4cb24: ;Store index information for the line.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality related to indexing.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the code's function.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the indexing action in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "273a7922: ;End of TMP subroutine.",
+        "completeness": {
+          "reasoning": "The comment indicates the end of a subroutine but doesn't detail what the subroutine does.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely true as it specifies the end of a subroutine.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful for understanding the structure but lacks detail.",
+          "score": 2
+        }
+      }
+    ]
+  }
+}

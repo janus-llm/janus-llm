@@ -1,0 +1,27 @@
+{
+  "comments": [
+    "bca39a19: ;\nInitialize variables and set required values from VAS(393) and DG(40.8) files.\nSet DGJTPAR to contain the parameters for dictated, transcribed, and signed timeframes.",
+    "3c833e84: Set DGJTPAR to concatenation of parameters from DG(40.8) for dictation, transcription, and signature timeframes.",
+    "fef34871: Retrieve date/time data from VAS(393) entry if it exists.",
+    "caab9f97: Get current date/time and initialize delay counter.",
+    "6c7ccfec: If status matches current status, set flag and call PROC.",
+    "f4baee1d: Exit point.",
+    "368a604f: Process 'INCOMPLETE' status:\nCalculate delay based on dictation date vs. current date.\nSet flag if delay exceeds parameter.\nCall DAYS and TOT1 to update counters if flag set.",
+    "20b4aa95: Process 'DICTATED' status:\nSet flag.\nCall DAYS and TOT1 to update counters.",
+    "4d735e7f: Process 'TRANSCRIBED' status:\nCalculate delay based on transcription date vs. transcription parameter.\nSet flag if delay exceeds parameter.\nCall DAYS and TOT1 to update counters if flag set.",
+    "052ce069: Process 'SIGNED' status:\nCalculate delay based on signature date vs. signature parameter.\nSet flag if delay exceeds parameter.\nCall DAYS and TOT1 to update counters if flag set.",
+    "96626cb7: Exit point for PROC.",
+    "a53db662: Calculate delay in days between two dates and store in DGJTDL.",
+    "d1ecaa78: Set start date for counting total time:\nUse earliest of 'not available', 'DICTATED DATE', or current date.\nCall FileMan %DTC to calculate elapsed time.",
+    "93dfb691: If no dictation date but signature date exists:\nSet DGJT2PC and DGJT3PC to '-' (dashes).\nCall COD to get procedure code.\nCalculate elapsed time from start date to dictation date or current date.\nCall SET to update DGJCOTO, DGJT4PC.",
+    "71f6de36: Add elapsed time to DGJDICTO counter.\nSet DGJT2PC to elapsed time with '*'.",
+    "a694080a: ;Add the number of days to the report line",
+    "f5f43f20: ;Determine the code for the health factor",
+    "ee1e7fd5: ;Calculate the number of days from transcribe date to now",
+    "fb4b18dc: ;Exit",
+    "db7bbb90: ;Retrieve the code for the health factor",
+    "90d2190a: ;Set flag if code not found",
+    "5a8d5039: ;Exit from COD subroutine",
+    "294e4a1b: ;Add days to report line and set flag if code not found"
+  ]
+}

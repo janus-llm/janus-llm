@@ -1,0 +1,1513 @@
+{
+  "input": "{\n  \"comments\": [\n    \"18e84516: ;\\n .;Entry point for List Manager options.\\n .;Displays the Deficiency Tracking List Manager menu.\",\n    \"5337b990: ;Initialize variables and display the 'Deficiency List' list manager option.\",\n    \"e5f1261d: ;Exit point.\",\n    \"d6c9f62e: ;Initialize variables and display the 'IRT Record List' list manager option.\",\n    \"d2f9ef98: ;Exit point.\",\n    \"c0d57354: ;Initialize variables and display the 'Delete Single' list manager option.\",\n    \"6e9e5452: ;Exit point.\",\n    \"97213555: ;Initialize variables, set option flag and display the 'Edit Single' list manager option.\",\n    \"828938dc: ;Exit point.\",\n    \"705f4922: ;Display the 'Edit Super' list manager option.\",\n    \"a32feb34: ;Exit point.\",\n    \"aa2878c6: ;Display the 'Delete Super' list manager option.\",\n    \"15f48e9b: ;Exit point.\",\n    \"6e79d5dc: ;Initialize variables, set view flag and display the 'IRT View' list manager option.\",\n    \"101519f1: ;Kill view flag and exit.\",\n    \"aeff0286: ;Initialize variables used in the option.\",\n    \"fb29a3ac: ;If division global exists, prompt user to select division and set division variable.\",\n    \"0c6c6774: ;Get pointer to PATIENT MOVEMENT site parameters file and store name.\",\n    \"845a6bc4: ;Check if outpatient OP Reporting is turned off for this facility and set flag if so.\",\n    \"42305b6e: ;Initialize variables for storing report counts and building array.\",\n    \"08cc2650: ;Get patient from user input.\",\n    \"d40d642a: ;Exit if user enters up-arrow or times out.\",\n    \"24497090: ;If invalid patient entry, re-prompt.\",\n    \"2877b963: ;Store DFN and set DGJTPT to DFN for later use.\",\n    \"c025e22b: ;Get patient ID and name from Patient file.\",\n    \"737946db: ;If outpatient reporting is turned off, skip to inpatient selection.\",\n    \"95b1e37d: ;Prompt for Inpatient/Outpatient report selection. Set default to Inpatient if no input.\",\n    \"13fbca18: ;Set report selection code based on user input.\",\n    \"67c3df3d: ;If user enters '?', display help and re-prompt.\",\n    \"e5473db1: ;Set report selection code, display additional help if needed, and re-prompt if invalid.\",\n    \"b665b592: ;If Outpatient report selected, branch to EVDT label.\",\n    \"00ba70b6: ;Check for existing admission data. Exit if no data and outpatient reporting is off or inpatient report selected.\",\n    \"aed4ce79: ;If no admission data and outpatient reporting is on, call NUL routine and quit.\",\n    \"de7fa2c2: ;Call LIST^DGJTEE2 to build inpatient report array. Exit if error flag is set.\",\n    \"74614b3b: ;Wait for device, clear temporary global arrays, initialize counters and flags. For outpatient reports, call SCR^DGJTEE3. Display 'No Data' message if no data found.\",\n    \"deb0740e: ;Get division pointer and division name from the DGPM ADMISSION file.\",\n    \"78559519: ;Loop through entries in VISN ADMISSION PATIENT file, setting DGJTCDIS to the service type description. Call UTIL to add entry to ^TMP global and indicate if the entry is a discharge summary.\",\n    \"57a9d6f6: ;If no entries were added to ^TMP(\\\"DGJDEF\\\",$J,0), call NUL routine.\",\n    \"1559ff1a: ;Quit the routine.\",\n    \"660c3131: ;Add entry to ^TMP(\\\"DGJ\\\",$J global, storing discharge summary indicator in DGJDISD if the entry is a discharge summary.\",\n    \"2601c591: ;Unspecified comment.\",\n    \"eeda903d: ;Clear variables and set VALMBCK to 'R' (refresh?)\",\n    \"ac01ed5f: ;Set Z to a string with list of options.\",\n    \"fb9b6636: ;Display options from Z.\",\n    \"002c676d: ;Unspecified comment.\",\n    \"2bccae19: ;If DGJTEDT is not set, call NEW1 routine with DGJTAIFN as input.\",\n    \"8bdc4379: ;Unspecified comment.\",\n    \"8d269108: ;\\n;Routine for adding/editing entries\\n;\",\n    \"76a20f61: ;Initialize variables.\",\n    \"7be75f9f: ;Clear VALMBCK.\",\n    \"cde1468e: ;Call SEL^VALM2 routine to get user selection, quit if none. Set DGJVALM to 0.\",\n    \"20698156: ;Call FULL^VALM1 routine to rebuild display, set VALMBCK to 'R'.\",\n    \"ae6436df: ;Loop through selected entries. Set DGJTEDT and DGJDFNO based on selected entry DA. Call EN^DGJTEE2 routine.\",\n    \"82c69cd9: ;Entry point for routine.\",\n    \"339bccfb: ;Initialize/kill variables related to processing list template parameters.\",\n    \"1cef84ef: ;Initialize/kill variables used for processing list template parameters.\",\n    \"fd46d57e: ;Initialize/kill variables related to processing list templates.\",\n    \"de96043e: ;Cleanup and terminate routine execution.\",\n    \"f7c563f9: ;\\n .;Initiate a new Deficiency Management order\\n .;Kill the local array DGJTEDT used to store edits\\n .;Form primary display\\n .;Set variables relevant to Category and Type selections from user\",\n    \"c0403c5a: Kill the local array DGJTEDT\",\n    \"9ee5d112: Initiate main form display\",\n    \"d065f99a: ;If user selects a category and has edit/create access do category selection;\\nIf category selection is aborted go to REP to redisplay main form;\\nIf category selected store its IEN in local variable DGJY\",\n    \"45d785af: ;If no record selected set selection criteria to match category\\n;and status = incomplete. Call CAT1 to further limit selection criteria\\n;based on Discharge Summary restriction\",\n    \"1ff5a4ea: ;If new OP REPORT order, limit type selection to OP REPORT types\",\n    \"a2a4b02a: ;If new order for category of existing record, limit type selection\\n;to OP REPORT, INTERIM SUMMARY, and DISCHARGE SUMMARY types\",\n    \"1bb54c83: ;Select type of deficiency; if selection aborted or timed out quit;\\nIf selection made store type IEN in DGJTYP; go to EDIT to create record\",\n    \"dbb80e42: Kill DGJY used to store selected category, do editing, redisplay form\",\n    \"664c1e7a: ;If restricted to Discharge Summary categories exclude DISCHARGE SUMMARY type\",\n    \"e1782f5c: Exit point\",\n    \"8db83076: Initiate main form display\",\n    \"4a085a1a: Strip FileMan version code from DGJTDV if present\",\n    \"9c20d2c9: Call routine DGJTEE2 to perform edits\",\n    \"b7bfa572: Exit point\",\n    \"4ed76f6a: Kill input variables, set form characteristics for display, redisplay\",\n    \"183e8c0f: Call routine DGJTEE1 to build header\",\n    \"90b77386: Exit point\",\n    \"c27a997b: ;\\n .;Set up NO DATA message display\\n .;Kill any previous deficiency data\\n .;Set NO DATA message text based on DGJTCOM\\n .;Set indices of message text lines\",\n    \"6e5c31af: Kill previous deficiency data, set NO DATA message lines\",\n    \"b768cafa: Exit point\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 161.4241681098938
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "18e84516: ;\n .;Entry point for List Manager options.\n .;Displays the Deficiency Tracking List Manager menu.",
+        "completeness": {
+          "reasoning": "The comment describes the entry point and what menu it displays but does not cover all functionalities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true and aligns with typical comments for entry points.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the function of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "5337b990: ;Initialize variables and display the 'Deficiency List' list manager option.",
+        "completeness": {
+          "reasoning": "It covers the initialization of variables and the display of the list manager option but lacks other details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information seems plausible and relevant to the task described.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed for better understanding.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer but is somewhat limited in scope.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e5f1261d: ;Exit point.",
+        "completeness": {
+          "reasoning": "The comment indicates an exit point but provides no additional context.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information is likely true but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is extremely brief but clear.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment offers minimal information that only slightly helps understand the code.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d6c9f62e: ;Initialize variables and display the 'IRT Record List' list manager option.",
+        "completeness": {
+          "reasoning": "It describes initializing variables and displaying a menu option but misses other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate based on the task described.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more comprehensive.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "It helps an average programmer but is not very detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d2f9ef98: ;Exit point.",
+        "completeness": {
+          "reasoning": "The comment only indicates an exit point without any further details.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment offers very minimal insight, making it only somewhat useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "c0d57354: ;Initialize variables and display the 'Delete Single' list manager option.",
+        "completeness": {
+          "reasoning": "The comment addresses initializing variables and displaying the 'Delete Single' list manager option but does not mention if there are any other functionalities involved.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides information that is likely true and related to the code segment.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better by explaining the main actions taken.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "6e9e5452: ;Exit point.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of the code segment, which is to serve as an exit point.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information by describing the exit point.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "While the comment is short, it clearly identifies the exit point which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "97213555: ;Initialize variables, set option flag and display the 'Edit Single' list manager option.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple functionalities including initializing variables, setting an option flag, and displaying the 'Edit Single' list manager option.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the code segment.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better by explaining multiple actions taken in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "828938dc: ;Exit point.",
+        "completeness": {
+          "reasoning": "The comment addresses the essential functionality of the code segment, which is to serve as an exit point.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information by describing the exit point.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "While the comment is short, it clearly identifies the exit point which is useful.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "705f4922: ;Display the 'Edit Super' list manager option.",
+        "completeness": {
+          "reasoning": "The comment addresses the functionality of displaying the 'Edit Super' list manager option but does not mention if there are any other functionalities involved.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides information that is likely true and related to the code segment.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better by explaining the main action taken.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a32feb34: ;Exit point.",
+        "completeness": {
+          "reasoning": "The comment addresses the exit point but does not cover other functionalities.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the exit point but lacks broader context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "aa2878c6: ;Display the 'Delete Super' list manager option.",
+        "completeness": {
+          "reasoning": "The comment documents the specific functionality of displaying an option.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "15f48e9b: ;Exit point.",
+        "completeness": {
+          "reasoning": "The comment addresses the exit point but does not cover other functionalities.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the exit point but lacks broader context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "6e79d5dc: ;Initialize variables, set view flag and display the 'IRT View' list manager option.",
+        "completeness": {
+          "reasoning": "The comment covers multiple functionalities including initialization, setting a flag, and displaying an option.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the described functionalities.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the multiple steps involved.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "101519f1: ;Kill view flag and exit.",
+        "completeness": {
+          "reasoning": "The comment covers the functionalities of killing a flag and exiting.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific functionalities mentioned.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "aeff0286: ;Initialize variables used in the option.",
+        "completeness": {
+          "reasoning": "The comment mentions initializing variables but does not specify which variables or their purpose.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about initializing variables.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but lacks detail on which variables are initialized.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "fb29a3ac: ;If division global exists, prompt user to select division and set division variable.",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality related to prompting the user and setting a variable.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and describes the actual functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the user prompt and variable setting process.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "0c6c6774: ;Get pointer to PATIENT MOVEMENT site parameters file and store name.",
+        "completeness": {
+          "reasoning": "The comment clearly describes the functionality of getting a pointer and storing a name.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the code's functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the specific action of getting a pointer and storing a name.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "845a6bc4: ;Check if outpatient OP Reporting is turned off for this facility and set flag if so.",
+        "completeness": {
+          "reasoning": "The comment addresses the key functionality of checking a setting and setting a flag.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate and reflects the code's purpose.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the conditional check and flag setting.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "42305b6e: ;Initialize variables for storing report counts and building array.",
+        "completeness": {
+          "reasoning": "The comment mentions initializing variables but does not specify which ones.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate but lacks detail.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could use more specifics.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "While it is useful, additional details would make it more helpful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "08cc2650: ;Get patient from user input.",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality related to user input.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the functionality of getting patient input.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific functionality.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "d40d642a: ;Exit if user enters up-arrow or times out.",
+        "completeness": {
+          "reasoning": "The comment addresses specific user input conditions.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the conditions for exit.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand exit conditions based on user input.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "24497090: ;If invalid patient entry, re-prompt.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific functionality related to invalid entries.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about re-prompting.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read and understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the behavior on invalid input.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2877b963: ;Store DFN and set DGJTPT to DFN for later use.",
+        "completeness": {
+          "reasoning": "The comment describes storing and setting variables but lacks additional context.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information about storing DFN and setting DGJTPT is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of DFN and DGJTPT.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "c025e22b: ;Get patient ID and name from Patient file.",
+        "completeness": {
+          "reasoning": "The comment addresses a specific function of retrieving patient information.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the retrieval of patient ID and name.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and comprehensible.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the retrieval of patient data.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "737946db: ;If outpatient reporting is turned off, skip to inpatient selection.",
+        "completeness": {
+          "reasoning": "The comment only addresses the functionality related to skipping to inpatient selection if outpatient reporting is turned off.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information regarding the conditional behavior.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding this specific condition but does not provide a comprehensive view.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "95b1e37d: ;Prompt for Inpatient/Outpatient report selection. Set default to Inpatient if no input.",
+        "completeness": {
+          "reasoning": "The comment covers the prompting and default setting for report selection.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the report selection and default behavior.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the selection prompt and default behavior.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "13fbca18: ;Set report selection code based on user input.",
+        "completeness": {
+          "reasoning": "The comment briefly mentions setting the report selection code based on user input but lacks detail.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about setting the report selection code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is only somewhat useful due to its brevity.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "67c3df3d: ;If user enters '?', display help and re-prompt.",
+        "completeness": {
+          "reasoning": "The comment covers the functionality for displaying help and re-prompting when a '?' is entered.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the help and re-prompt functionality.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding how help is displayed and when re-prompting occurs.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "e5473db1: ;Set report selection code, display additional help if needed, and re-prompt if invalid.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple functionalities: setting the selection code, displaying help, and re-prompting.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the functionalities described.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the sequence of operations and error handling.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "b665b592: ;If Outpatient report selected, branch to EVDT label.",
+        "completeness": {
+          "reasoning": "The comment addresses one specific capability of the code but does not cover any other details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the branching condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the specific branching condition related to outpatient reports.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "00ba70b6: ;Check for existing admission data. Exit if no data and outpatient reporting is off or inpatient report selected.",
+        "completeness": {
+          "reasoning": "The comment addresses two conditions regarding existing admission data and reporting types.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the conditions being checked.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear with minor complexity.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the conditions under which the code exits.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "aed4ce79: ;If no admission data and outpatient reporting is on, call NUL routine and quit.",
+        "completeness": {
+          "reasoning": "The comment covers the conditions and actions taken if no admission data is found.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the conditions and actions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the conditional call to the NUL routine.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "de7fa2c2: ;Call LIST^DGJTEE2 to build inpatient report array. Exit if error flag is set.",
+        "completeness": {
+          "reasoning": "The comment documents the call to a specific routine and the exit condition.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the routine call and exit condition.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "74614b3b: ;Wait for device, clear temporary global arrays, initialize counters and flags. For outpatient reports, call SCR^DGJTEE3. Display 'No Data' message if no data found.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple steps in the process, including waiting for a device, clearing arrays, initializing counters and flags, and handling outpatient reports.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment provides accurate information about the multiple steps documented.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and covers several actions clearly.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding the sequence of actions taken.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "deb0740e: ;Get division pointer and division name from the DGPM ADMISSION file.",
+        "completeness": {
+          "reasoning": "The comment addresses only one specific action without covering all functionalities of the relevant code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes what the code does.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but only for understanding a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "78559519: ;Loop through entries in VISN ADMISSION PATIENT file, setting DGJTCDIS to the service type description. Call UTIL to add entry to ^TMP global and indicate if the entry is a discharge summary.",
+        "completeness": {
+          "reasoning": "The comment addresses multiple essential functionalities, though it may not cover all possible actions.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides mostly true information relevant to the described actions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better by providing context about multiple actions.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "57a9d6f6: ;If no entries were added to ^TMP(\"DGJDEF\",$J,0), call NUL routine.",
+        "completeness": {
+          "reasoning": "The comment explains a specific conditional action but does not cover all functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides correct information about calling the NUL routine under a specific condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific conditional action in the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1559ff1a: ;Quit the routine.",
+        "completeness": {
+          "reasoning": "The comment addresses a single, simple action without covering other functionalities.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes what the code does.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful as quitting a routine is generally understood by default.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "660c3131: ;Add entry to ^TMP(\"DGJ\",$J global, storing discharge summary indicator in DGJDISD if the entry is a discharge summary.",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality related to adding an entry to the global and storing the discharge summary indicator.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the actions described.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific part of the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "2601c591: ;Unspecified comment.",
+        "completeness": {
+          "reasoning": "The comment does not address any functionalities of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks content.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "eeda903d: ;Clear variables and set VALMBCK to 'R' (refresh?)",
+        "completeness": {
+          "reasoning": "The comment partially documents the functionality but is not exhaustive.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is likely true, but the question mark indicates uncertainty.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is mostly clear but includes an uncertain element.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the code better.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "ac01ed5f: ;Set Z to a string with list of options.",
+        "completeness": {
+          "reasoning": "The comment documents essential functionality concisely.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "fb9b6636: ;Display options from Z.",
+        "completeness": {
+          "reasoning": "The comment documents essential functionality concisely.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "002c676d: ;Unspecified comment.",
+        "completeness": {
+          "reasoning": "The comment does not address any functionalities of the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment does not provide any information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks content.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful at any level.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "2bccae19: ;If DGJTEDT is not set, call NEW1 routine with DGJTAIFN as input.",
+        "completeness": {
+          "reasoning": "This comment addresses a specific conditional call but does not cover all capabilities of the relevant source code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment is specific and provides true information about the conditional call.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is useful for understanding this specific part of the code but does not provide a broader context.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "8bdc4379: ;Unspecified comment.",
+        "completeness": {
+          "reasoning": "The comment does not document any functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment truthfully states it is unspecified.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and readable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not useful as it does not provide any information about the code.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "8d269108: ;\n;Routine for adding/editing entries\n;",
+        "completeness": {
+          "reasoning": "The comment gives a general idea but lacks details on how entries are added or edited.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true but very general information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It gives a general idea but lacks specific details that would be more useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "76a20f61: ;Initialize variables.",
+        "completeness": {
+          "reasoning": "The comment provides a brief description but does not specify which variables are being initialized.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true but very general information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It gives a general idea but lacks specific details that would be more useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "7be75f9f: ;Clear VALMBCK.",
+        "completeness": {
+          "reasoning": "The comment specifically documents the action of clearing VALMBCK but does not provide context or additional details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "It is useful for understanding this specific action but does not offer broader context.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "cde1468e: ;Call SEL^VALM2 routine to get user selection, quit if none. Set DGJVALM to 0.",
+        "completeness": {
+          "reasoning": "The comment addresses the primary functionality of calling a routine and setting a variable.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is accurate based on the described actions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the purpose of the code segment.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "20698156: ;Call FULL^VALM1 routine to rebuild display, set VALMBCK to 'R'.",
+        "completeness": {
+          "reasoning": "The comment documents the essential functionality of calling a routine and setting a variable.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and reflects the described actions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is concise and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps in understanding the purpose of the code segment.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ae6436df: ;Loop through selected entries. Set DGJTEDT and DGJDFNO based on selected entry DA. Call EN^DGJTEE2 routine.",
+        "completeness": {
+          "reasoning": "The comment covers the looping mechanism, variable setting, and routine calling.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided matches the described actions.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-written and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the flow and purpose of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "82c69cd9: ;Entry point for routine.",
+        "completeness": {
+          "reasoning": "The comment provides minimal information about the entry point.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information is true but very brief.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful due to its brevity.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "339bccfb: ;Initialize/kill variables related to processing list template parameters.",
+        "completeness": {
+          "reasoning": "The comment addresses the initialization and cleanup of variables but lacks specifics.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is generally true but lacks detail.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could be more detailed.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides some context but is too vague to be highly useful.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "1cef84ef: ;Initialize/kill variables used for processing list template parameters.",
+        "completeness": {
+          "reasoning": "The comment addresses initializing and killing variables but does not provide details on all the specific functionalities of the code.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided in the comment is true but lacks depth.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is somewhat useful but does not provide a comprehensive understanding of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "fd46d57e: ;Initialize/kill variables related to processing list templates.",
+        "completeness": {
+          "reasoning": "The comment is similar to the first one and addresses initializing and killing variables but lacks detail on other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate and true.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is easy to read and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand the basic function but is not comprehensive.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "de96043e: ;Cleanup and terminate routine execution.",
+        "completeness": {
+          "reasoning": "The comment briefly explains the functionality but does not cover all aspects.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but very brief.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but lacks detail.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but not very detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "f7c563f9: ;\n .;Initiate a new Deficiency Management order\n .;Kill the local array DGJTEDT used to store edits\n .;Form primary display\n .;Set variables relevant to Category and Type selections from user",
+        "completeness": {
+          "reasoning": "The comment covers multiple aspects of the code, thus providing a comprehensive overview.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "All the information provided in the comment is accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is well-structured and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed description that helps understand the code better.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "c0403c5a: Kill the local array DGJTEDT",
+        "completeness": {
+          "reasoning": "The comment addresses a single functionality but lacks detail on other functionalities.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The information is accurate but very limited.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but too brief.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is not very useful due to its brevity.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "9ee5d112: Initiate main form display",
+        "completeness": {
+          "reasoning": "The comment is very brief and does not address all the capabilities or steps involved in the code.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear to read but lacks detail.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is too brief to be highly useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "d065f99a: ;If user selects a category and has edit/create access do category selection;\nIf category selection is aborted go to REP to redisplay main form;\nIf category selected store its IEN in local variable DGJY",
+        "completeness": {
+          "reasoning": "The comment addresses various conditions and actions but may not cover all possible scenarios.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be true and logical.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but a bit verbose.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information for understanding the code logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "45d785af: ;If no record selected set selection criteria to match category\n;and status = incomplete. Call CAT1 to further limit selection criteria\n;based on Discharge Summary restriction",
+        "completeness": {
+          "reasoning": "The comment covers the essential functionality related to the selection criteria.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is highly useful for understanding the logic and flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1ff5a4ea: ;If new OP REPORT order, limit type selection to OP REPORT types",
+        "completeness": {
+          "reasoning": "The comment is specific but does not cover all possible conditions or actions.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided is true but limited in scope.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but could be more detailed.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a2a4b02a: ;If new order for category of existing record, limit type selection\n;to OP REPORT, INTERIM SUMMARY, and DISCHARGE SUMMARY types",
+        "completeness": {
+          "reasoning": "The comment covers multiple conditions and actions, providing a good overview.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The information provided appears to be accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-structured.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful for understanding the selection logic in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "1bb54c83: ;Select type of deficiency; if selection aborted or timed out quit;\nIf selection made store type IEN in DGJTYP; go to EDIT to create record",
+        "completeness": {
+          "reasoning": "The comment addresses the selection process, storing the type, and the next step.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the functionality of the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an expert programmer understand the flow of the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "dbb80e42: Kill DGJY used to store selected category, do editing, redisplay form",
+        "completeness": {
+          "reasoning": "The comment mentions killing a variable, editing, and redisplaying the form, but lacks specifics about the editing process.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information about the variable and form redisplay.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is mostly clear but could benefit from more detail.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand key actions but lacks details.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "664c1e7a: ;If restricted to Discharge Summary categories exclude DISCHARGE SUMMARY type",
+        "completeness": {
+          "reasoning": "The comment provides specific information about exclusion criteria.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the exclusion condition.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding specific conditions in the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "e1782f5c: Exit point",
+        "completeness": {
+          "reasoning": "The comment only indicates an exit point without further details.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information but is extremely minimal.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but too brief.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment offers minimal information, useful only at a very basic level.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "8db83076: Initiate main form display",
+        "completeness": {
+          "reasoning": "The comment mentions the initiation of the form display but lacks additional details.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the initiation process.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear but could provide more context.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand the initiation but is somewhat basic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "4a085a1a: Strip FileMan version code from DGJTDV if present",
+        "completeness": {
+          "reasoning": "The comment addresses an essential functionality of the code but does not provide details on any other capabilities.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment provides true information regarding the functionality described.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps an average programmer understand a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "9c20d2c9: Call routine DGJTEE2 to perform edits",
+        "completeness": {
+          "reasoning": "The comment covers the key functionality of calling a routine but does not delve into what edits are performed.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the action taken by the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is straightforward and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding the code's function at a high level.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b7bfa572: Exit point",
+        "completeness": {
+          "reasoning": "The comment identifies an exit point but lacks detail on what conditions lead to this exit.",
+          "score": 2
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly identifies the exit point.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is very brief but understandable.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides minimal information of use to an expert programmer.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "4ed76f6a: Kill input variables, set form characteristics for display, redisplay",
+        "completeness": {
+          "reasoning": "The comment covers multiple actions (killing variables, setting form characteristics, redisplaying) making it quite comprehensive.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The comment accurately describes the actions performed by the code.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and detailed.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is helpful for understanding the various actions taken by the code, useful for both average and expert programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "183e8c0f: Call routine DGJTEE1 to build header",
+        "completeness": {
+          "reasoning": "The comment specifies the action but does not provide details on what the header contains or its purpose.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The comment correctly describes the action of calling a routine to build a header.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and to the point.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific part of the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "90b77386: Exit point",
+        "completeness": {
+          "reasoning": "The comment mentions 'Exit point' but does not provide further context or details about the functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely true but is too vague to verify.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very short.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is minimally useful as it provides very little information.",
+          "score": 1
+        }
+      },
+      {
+        "comment": "c27a997b: ;\n .;Set up NO DATA message display\n .;Kill any previous deficiency data\n .;Set NO DATA message text based on DGJTCOM\n .;Set indices of message text lines",
+        "completeness": {
+          "reasoning": "The comment covers various steps, such as setting up a message display and handling previous data.",
+          "score": 4
+        },
+        "hallucination": {
+          "reasoning": "The steps mentioned are likely true and logical.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is structured in a clear and readable manner.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed steps that help understand the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "6e5c31af: Kill previous deficiency data, set NO DATA message lines",
+        "completeness": {
+          "reasoning": "The comment addresses two main actions but does not cover all possible aspects.",
+          "score": 3
+        },
+        "hallucination": {
+          "reasoning": "The information provided seems accurate.",
+          "score": 4
+        },
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful but lacks complete detail.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "b768cafa: Exit point",
+        "completeness": {
+          "reasoning": "The comment mentions 'Exit point' but does not provide further context or details about the functionality.",
+          "score": 1
+        },
+        "hallucination": {
+          "reasoning": "The comment is likely true but is too vague to verify.",
+          "score": 3
+        },
+        "readability": {
+          "reasoning": "The comment is clear but very short.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is minimally useful as it provides very little information.",
+          "score": 1
+        }
+      }
+    ]
+  }
+}

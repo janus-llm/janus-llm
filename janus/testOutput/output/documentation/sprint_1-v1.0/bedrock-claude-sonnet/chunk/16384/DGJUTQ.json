@@ -1,0 +1,265 @@
+{
+  "input": "{\n  \"comments\": [\n    \"a35d6e9b:  ;\\n ;DGJUTQ - Queues a routine to run at a specified time.\\n ;\\n ;Supports options:\\n ; PGM/DGPGM = the name of the routine to queue up\\n ; VAR/DGVAR = variables to be NEWed by %ZTLOAD\\n ; ZTDESC = optional description for display in ZTMQ listing\\n ; ZTIO = target device for output to go to\\n ;\",\n    \"09eabd43: ;Store the current time in ZTDTH for later reference.\",\n    \"26f0a94e: ;Kill any pre-existing IO settings. If the device has not been set, set ZTIO to null.\",\n    \"7aa97e54: ;If ZTDESC has not been set, set it to the current routine name or a default based on available values.\",\n    \"db18968e: ;If ZTRTN has not been set, set it to the entry point of DGJUTQ, and if PGM/DGPGM also hasn't been set, go to CLOSE (exit). Otherwise, set ZTRTN to call DQ^DGJUTQ.\",\n    \"5aebcd11: ;Save variables specified in DGVAR/VAR array into ZTSAVE.\",\n    \"f45716b1: ;If PGM/DGPGM exists but is not already in ZTSAVE, add it.\",\n    \"90cd8c4c: ;Queue the request by running %ZTLOAD, display a message, handle exit codes.\",\n    \"bd268caf: ;Blank line.\",\n    \"9bc2f92b: ;If the device has not been set, prompt user to select one. If a queued device is selected, go to QUE. If user exits, go to CLOSE.\",\n    \"ac410a16: ;Use the selected device.\",\n    \"a0d3bc55: ;;For each variable in DGZTSAVE,\\n   if it does not already exist in ZTSAVE, add it.\\n   If the variable is an array (ends with '('), save just the root node.\",\n    \"07e2a048: ;Blank line.\",\n    \"55f00dfb: ;;Handle any array references in DGZTSAVE by replacing '#' with '('.\\n ;Example: 'TEST#(' becomes 'TEST('.\",\n    \"85a7248c: ;Blank line.\",\n    \"3fa501a9: ;Close device if not queued.\",\n    \"ea8a0bbc: ;Kill all variables used.\",\n    \"d72f5157: ;Exit routine.\",\n    \"3468ebe2: ;Execute option logic.\",\n    \"947574fb: ;Unload task and close.\",\n    \"261a0bd0: ;Return from option logic.\",\n    \"587a47d3:  .;If task has a date/time scheduled, calculate it from the\\n .;internal ZTSK(\\\"D\\\") format of #Days,Time (in seconds)\\n .;and put in ZTIME format into Z.\",\n    \"3e99cf5c: ;Exit date/time calculation.\"\n  ]\n}",
+  "metadata": {
+    "retries": 0,
+    "cost": 0.0,
+    "processing_time": 34.0420777797699
+  },
+  "output": {
+    "comments": [
+      {
+        "comment": "a35d6e9b:  ;\n ;DGJUTQ - Queues a routine to run at a specified time.\n ;\n ;Supports options:\n ; PGM/DGPGM = the name of the routine to queue up\n ; VAR/DGVAR = variables to be NEWed by %ZTLOAD\n ; ZTDESC = optional description for display in ZTMQ listing\n ; ZTIO = target device for output to go to\n ;",
+        "readability": {
+          "reasoning": "The comment is structured and lists the supported options clearly.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed information on the functionality and options supported, which is useful for understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "09eabd43: ;Store the current time in ZTDTH for later reference.",
+        "readability": {
+          "reasoning": "The comment is concise and easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful context by explaining the purpose of storing the current time.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "26f0a94e: ;Kill any pre-existing IO settings. If the device has not been set, set ZTIO to null.",
+        "readability": {
+          "reasoning": "The comment is clear and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the purpose of the code, which is useful for understanding why certain actions are taken.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "7aa97e54: ;If ZTDESC has not been set, set it to the current routine name or a default based on available values.",
+        "readability": {
+          "reasoning": "The comment is clear and understandable.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains the conditional logic, which helps in understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "db18968e: ;If ZTRTN has not been set, set it to the entry point of DGJUTQ, and if PGM/DGPGM also hasn't been set, go to CLOSE (exit). Otherwise, set ZTRTN to call DQ^DGJUTQ.",
+        "readability": {
+          "reasoning": "The comment is clear and concise, but slightly complex.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment explains complex conditional logic, which is useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "5aebcd11: ;Save variables specified in DGVAR/VAR array into ZTSAVE.",
+        "readability": {
+          "reasoning": "The comment is concise and uses clear language, making it well-written.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful information about saving variables, aiding both expert and average programmers.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "f45716b1: ;If PGM/DGPGM exists but is not already in ZTSAVE, add it.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward, making it easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment helps understand a conditional check and subsequent action, aiding programmers in understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "90cd8c4c: ;Queue the request by running %ZTLOAD, display a message, handle exit codes.",
+        "readability": {
+          "reasoning": "The comment is clear and succinct, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a sequence of actions, which is useful for understanding the code flow.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "bd268caf: ;Blank line.",
+        "readability": {
+          "reasoning": "The comment is clear and simple, making it easy to read.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial aspect (a blank line), which is not particularly useful.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "9bc2f92b: ;If the device has not been set, prompt user to select one. If a queued device is selected, go to QUE. If user exits, go to CLOSE.",
+        "readability": {
+          "reasoning": "The comment is detailed yet clear, making it easy to follow.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment provides detailed control flow information, aiding programmers in understanding the logic.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ac410a16: ;Use the selected device.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment explains a non-trivial functionality that could be helpful for understanding the code.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "a0d3bc55: ;;For each variable in DGZTSAVE,\n   if it does not already exist in ZTSAVE, add it.\n   If the variable is an array (ends with '('), save just the root node.",
+        "readability": {
+          "reasoning": "The comment is detailed and clear, although some formatting could be improved.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides useful and detailed information that aids in understanding the code.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "07e2a048: ;Blank line.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "55f00dfb: ;;Handle any array references in DGZTSAVE by replacing '#' with '('.\n ;Example: 'TEST#(' becomes 'TEST('.",
+        "readability": {
+          "reasoning": "The comment is clear and includes an example for better understanding.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is very useful as it explains a specific and non-trivial operation with an example.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "85a7248c: ;Blank line.",
+        "readability": {
+          "reasoning": "The comment is clear and straightforward.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment documents a trivial functionality.",
+          "score": 2
+        }
+      },
+      {
+        "comment": "3fa501a9: ;Close device if not queued.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding a specific condition.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "ea8a0bbc: ;Kill all variables used.",
+        "readability": {
+          "reasoning": "The comment is well-written and easy to understand.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for cleanup or memory management.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "d72f5157: ;Exit routine.",
+        "readability": {
+          "reasoning": "The comment is straightforward and clear.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for indicating the end of a routine.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "3468ebe2: ;Execute option logic.",
+        "readability": {
+          "reasoning": "The comment is easy to read but a bit vague.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment lacks detail about the option logic.",
+          "score": 3
+        }
+      },
+      {
+        "comment": "947574fb: ;Unload task and close.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment is useful for understanding task management.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "261a0bd0: ;Return from option logic.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment gives a clear indication of what the following code does.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "587a47d3:  .;If task has a date/time scheduled, calculate it from the\n .;internal ZTSK(\"D\") format of #Days,Time (in seconds)\n .;and put in ZTIME format into Z.",
+        "readability": {
+          "reasoning": "The comment is detailed and well-structured but could be slightly clearer with less technical jargon.",
+          "score": 3
+        },
+        "usefulness": {
+          "reasoning": "The comment provides a detailed explanation of a non-trivial functionality, which helps understand the code's purpose.",
+          "score": 4
+        }
+      },
+      {
+        "comment": "3e99cf5c: ;Exit date/time calculation.",
+        "readability": {
+          "reasoning": "The comment is clear and concise.",
+          "score": 4
+        },
+        "usefulness": {
+          "reasoning": "The comment indicates the end of a specific logic block, which is useful for readability.",
+          "score": 3
+        }
+      }
+    ]
+  }
+}
