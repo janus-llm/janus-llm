@@ -93,7 +93,7 @@ class PartitionParser(JanusParser, PydanticOutputParser):
             raise OutputParserException(err_msg)
 
         # Map line IDs to indices (so they can be sorted and lines indexed)
-        index_to_line_id = {0: "START", -1: "END"}
+        index_to_line_id = {0: "START", None: "END"}
         split_points = {0}
         for partition in out.__root__:
             index = self.line_id_to_index[partition.location]
@@ -101,7 +101,7 @@ class PartitionParser(JanusParser, PydanticOutputParser):
             split_points.add(index)
 
         # Get partition start/ends, chunks, chunk lengths
-        split_points = sorted(split_points) + [-1]
+        split_points = sorted(split_points) + [None]
         partition_indices = list(zip(split_points, split_points[1:]))
         partition_points = [
             (index_to_line_id[i0], index_to_line_id[i1]) for i0, i1 in partition_indices
