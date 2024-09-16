@@ -130,7 +130,7 @@ class DiagramGenerator(Documenter):
         If the relevant fields have not been changed since the last time this method was
         called, nothing happens.
         """
-        self._diagram_prompt_engine = MODEL_PROMPT_ENGINES[self._model_name](
+        self._diagram_prompt_engine = MODEL_PROMPT_ENGINES[self._model_id](
             source_language=self._source_language,
             target_language="text",
             target_version=None,
