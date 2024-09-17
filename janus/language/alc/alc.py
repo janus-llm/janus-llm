@@ -129,12 +129,18 @@ class AlcListingSplitter(AlcSplitter):
             prune_unprotected=prune_unprotected,
         )
 
-    def _get_ast(self, code: str) -> CodeBlock:
+    def split_string(self, code: str, name: str) -> CodeBlock:
+        # Override split_string to use processed code and track active usings
         active_usings = self.get_active_usings(code)
-        code = self.preproccess_assembly(code)
-        ast: CodeBlock = super()._get_ast(code)
-        ast.context_tags["active_usings"] = active_usings
-        return ast
+        processed_code = self.preproccess_assembly(code)
+        root = super().split_string(processed_code, name)
+        if active_usings is not None:
+            stack = [root]
+            while stack:
+                block = stack.pop()
+                block.context_tags["active_usings"] = active_usings
+                stack.extend(block.children)
+        return root
 
     def preproccess_assembly(self, code: str) -> str:
         """Remove non-essential lines from an assembly snippet"""
