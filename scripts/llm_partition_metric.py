@@ -54,14 +54,22 @@ def dynamic_time_warp(a: np.ndarray, b: np.ndarray) -> float:
     return dtw(a, b).normalizedDistance
 
 
-def f1(a: np.ndarray, b: np.ndarray) -> float:
+def precision(a: np.ndarray, b: np.ndarray) -> float:
     tp = np.bitwise_and(a, b).sum(axis=-1)
     fp = np.bitwise_and(np.bitwise_not(a), b).sum(axis=-1)
-    fn = np.bitwise_and(a, np.bitwise_not(b)).sum(axis=-1)
+    return tp / (tp + fp)
 
-    precision = tp / (tp + fp)
-    recall = tp / (tp + fn)
-    return 2 * (precision * recall) / (precision + recall)
+
+def recall(a: np.ndarray, b: np.ndarray) -> float:
+    tp = np.bitwise_and(a, b).sum(axis=-1)
+    fn = np.bitwise_and(a, np.bitwise_not(b)).sum(axis=-1)
+    return tp / (tp + fn)
+
+
+def f1(a: np.ndarray, b: np.ndarray) -> float:
+    p = precision(a, b)
+    r = recall(a, b)
+    return 2 * (p * r) / (p + r)
 
 
 def check_files(a: str, b: str) -> None:
@@ -127,15 +135,15 @@ def get_bitstring(bitvec: np.ndarray, chars=(" ", "|")) -> str:
 
 
 if __name__ == "__main__":
-    # path = Path("~/llm-data/vista_irt-mumps/00-inputs/processed_inputs").expanduser()
-    # file_glob = "**/*.m"
-    path = Path("~/llm-data/walmart-alc/00-inputs/processed_inputs").expanduser()
-    file_glob = "**/*.asm"
+    path = Path("~/llm-data/vista_irt-mumps/00-inputs/processed_inputs").expanduser()
+    file_glob = "**/*.m"
+    # path = Path("~/llm-data/walmart-alc/00-inputs/processed_inputs").expanduser()
+    # file_glob = "**/*.asm"
     outpath = Path("~/janus/scripts/plots").expanduser()
     outpath.mkdir(parents=True, exist_ok=True)
 
     human_paths = get_paths(path / "human-partitioned", file_glob)
-    gen_paths = get_paths(path / "llm-partitioned", file_glob)
+    gen_paths = get_paths(path / "llm-partitioned-2", file_glob)
     gen_paths.update(get_paths(path / "alg-partitioned", file_glob))
 
     # Check Files
@@ -176,6 +184,8 @@ if __name__ == "__main__":
         DTW=dynamic_time_warp,
         EMD=emd,
         L2=euclidean,
+        Precision=precision,
+        Recall=recall,
         # norm_dtw=density_normalized_metric(
         #   dynamic_time_warp,
         #   density=mean_human_partition_density),
@@ -219,6 +229,8 @@ if __name__ == "__main__":
             "DTW",
             "EMD",
             "L2",
+            "Precision",
+            "Recall",
             "partition_string",
         ],
     )
