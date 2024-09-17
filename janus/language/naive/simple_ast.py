@@ -19,6 +19,7 @@ def get_flexible_ast(language: str, **kwargs) -> Splitter:
     Returns:
         A flexible AST splitter for the given language.
     """
+    kwargs.update(protected_node_types=())
     if language == "ibmhlasm":
         return AlcSplitter(**kwargs)
     elif language == "mumps":
@@ -28,7 +29,7 @@ def get_flexible_ast(language: str, **kwargs) -> Splitter:
 
 
 @register_splitter("ast-strict")
-def get_strict_ast(language: str, **kwargs) -> Splitter:
+def get_strict_ast(language: str, prune_unprotected=True, **kwargs) -> Splitter:
     """Get a strict AST splitter for the given language.
 
     The strict splitter will only return nodes that are of a functional type.
@@ -41,7 +42,7 @@ def get_strict_ast(language: str, **kwargs) -> Splitter:
     """
     kwargs.update(
         protected_node_types=LANGUAGES[language]["functional_node_types"],
-        prune_unprotected=True,
+        prune_unprotected=prune_unprotected,
     )
     if language == "ibmhlasm":
         return AlcSplitter(**kwargs)

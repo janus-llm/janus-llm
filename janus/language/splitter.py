@@ -387,7 +387,10 @@ class Splitter(FileManager):
             return
 
         if self._is_protected(node):
-            raise TokenLimitError(r"Irreducible node too large for context!")
+            log.error(
+                "Protected node too large for context!"
+                f" ({node.tokens} > {self.max_tokens})"
+            )
 
         if node.children:
             for child in node.children:
@@ -423,7 +426,7 @@ class Splitter(FileManager):
             name = f"{node.name}-L#{node_line}"
             tokens = self._count_tokens(line)
             if tokens > self.max_tokens:
-                raise TokenLimitError(
+                log.error(
                     "Irreducible node too large for context!"
                     f" ({tokens} > {self.max_tokens})"
                 )

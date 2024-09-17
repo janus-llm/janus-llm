@@ -63,7 +63,7 @@ class AlcSplitter(TreeSitterSplitter):
             #  instruction and containing all the subsequent nodes up until the
             #  next csect or dsect instruction
             sects: list[list[CodeBlock]] = [[]]
-            for c in block.children:
+            for c in sorted(block.children):
                 if c.node_type == "csect_instruction":
                     c.context_tags["alc_section"] = "CSECT"
                     sects.append([c])
