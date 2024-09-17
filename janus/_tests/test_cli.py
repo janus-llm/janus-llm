@@ -120,6 +120,7 @@ class TestCli(unittest.TestCase):
             temp=0.7,
             prompt_template="simple",
             collection=None,
+            llm_name="gpt-4o",
         )
 
         # Assert
