@@ -2,17 +2,12 @@ import functools
 import json
 import time
 from pathlib import Path
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
-from langchain.output_parsers import RetryWithErrorOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate
-from langchain_core.runnables import (
-    RunnableLambda,
-    RunnableParallel,
-    RunnablePassthrough,
-)
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
 
@@ -30,8 +25,13 @@ from janus.llm import load_model
 from janus.llm.model_callbacks import get_model_callback
 from janus.llm.models_info import MODEL_PROMPT_ENGINES
 from janus.parsers.parser import GenericParser, JanusParser
-from janus.parsers.refiner_parser import RefinerParser
-from janus.refiners.refiner import BasicRefiner, Refiner
+from janus.parsers.refiner_parser import (
+    FixParserExceptions,
+    JanusRefiner,
+    ReflectionRefiner,
+)
+
+# from janus.refiners.refiner import BasicRefiner, Refiner
 from janus.retrievers.retriever import ActiveUsingsRetriever, JanusRetriever
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
@@ -79,10 +79,8 @@ class Converter:
         protected_node_types: tuple[str, ...] = (),
         prune_node_types: tuple[str, ...] = (),
         splitter_type: str = "file",
-        refiner_type: str = "basic",
-        retriever_type: str = "basic",
-        skip_refiner: bool = True,
-        skip_context: bool = False,
+        refiner_type: str | None = None,
+        retriever_type: str | None = None,
     ) -> None:
         """Initialize a Converter instance.
 
@@ -102,9 +100,13 @@ class Converter:
             prune_node_types: A set of node types which should be pruned.
             splitter_type: The type of splitter to use. Valid values are `"file"`,
                 `"tag"`, `"chunk"`, `"ast-strict"`, and `"ast-flex"`.
-            refiner_type: The type of refiner to use. Valid values are `"basic"`.
-            skip_refiner: Whether to skip the refiner.
-            skip_context: Whether to skip adding context to the prompt.
+            refiner_type: The type of refiner to use. Valid values:
+                - "parser"
+                - "reflection"
+                - None
+            retriever_type: The type of retriever to use. Valid values:
+                - "active_usings"
+                - None
         """
         self._changed_attrs: set = set()
 
@@ -138,12 +140,10 @@ class Converter:
         self._combiner: Combiner = Combiner()
 
         self._refiner_type: str
-        self._refiner: Refiner
+        self._refiner: JanusRefiner
 
         self._retriever_type: str = retriever_type
         self._retriever: JanusRetriever
-
-        self.skip_refiner = skip_refiner
 
         self.set_splitter(splitter_type=splitter_type)
         self.set_refiner(refiner_type=refiner_type)
@@ -154,8 +154,6 @@ class Converter:
         self.set_prune_node_types(prune_node_types)
         self.set_db_path(db_path=db_path)
         self.set_db_config(db_config=db_config)
-
-        self.skip_context = skip_context
 
         # Child class must call this. Should we enforce somehow?
         # self._load_parameters()
@@ -170,12 +168,9 @@ class Converter:
         super().__setattr__(key, value)
 
     def _load_parameters(self) -> None:
-        self._load_model()
-        self._load_prompt()
         self._load_splitter()
         self._load_vectorizer()
-        self._load_refiner()
-        self._load_retriever()
+        self._load_chain()
         self._changed_attrs.clear()
 
     def set_model(self, model_name: str, **custom_arguments: dict[str, Any]):
@@ -297,19 +292,27 @@ class Converter:
 
         self._splitter = CUSTOM_SPLITTERS[self._splitter_type](**kwargs)
 
-    @run_if_changed("_refiner_type", "_model_name")
+    @run_if_changed("_refiner_type", "_model_name", "max_prompts", "_parser", "_llm")
     def _load_refiner(self) -> None:
         """Load the refiner according to this instance's attributes.
 
         If the relevant fields have not been changed since the last time this method was
         called, nothing happens.
         """
-        if self._refiner_type == "basic":
-            self._refiner = BasicRefiner(
-                "basic_refinement", self._model_id, self._source_language
+        if self._refiner_type == "parser":
+            self._refiner = FixParserExceptions(
+                llm=self._llm,
+                parser=self._parser,
+                max_retries=self.max_prompts,
+            )
+        elif self._refiner_type == "reflection":
+            self._refiner = ReflectionRefiner(
+                llm=self._llm,
+                parser=self._parser,
+                max_retries=self.max_prompts,
             )
         else:
-            raise ValueError(f"Error: unknown refiner type {self._refiner_type}")
+            self._refiner = JanusRefiner(self._parser)
 
     @run_if_changed("_model_name", "_custom_model_arguments")
     def _load_model(self) -> None:
@@ -370,6 +373,24 @@ class Converter:
             self._retriever = ActiveUsingsRetriever()
         else:
             self._retriever = JanusRetriever()
+
+    def _load_chain(self):
+        self._load_retriever()
+        self._load_prompt()
+        self._load_model()
+        self._load_refiner()
+        self.chain = (
+            RunnableParallel(
+                SOURCE_CODE=self._parser.parse_input,
+                context=self._retriever,
+            )
+            | self._prompt
+            | RunnableParallel(
+                completion=self._llm,
+                prompt_value=RunnablePassthrough(),
+            )
+            | self._refiner.parse_runnable
+        )
 
     def translate(
         self,
@@ -615,115 +636,28 @@ class Converter:
         return root
 
     def _run_chain(self, block: TranslatedCodeBlock) -> str:
-        """Run the model with three nested error fixing schemes.
-        First, try to fix simple formatting errors by giving the model just
-        the output and the parsing error. After a number of attempts, try
-        giving the model the output, the parsing error, and the original
-        input. Again check/retry this output to solve for formatting errors.
-        If we still haven't succeeded after several attempts, the model may
-        be getting thrown off by a bad initial output; start from scratch
-        and try again.
-
-        The number of tries for each layer of this scheme is roughly equal
-        to the cube root of self.max_retries, so the total calls to the
-        LLM will be roughly as expected (up to sqrt(self.max_retries) over)
-        """
-        input = self._parser.parse_input(block.original)
-
-        # Retries with just the output and the error
-        n1 = round(self.max_prompts ** (1 / 2))
-
-        # Retries with the input, output, and error
-        n2 = round(self.max_prompts // n1)
-
-        if not self.skip_refiner:  # Make replacements in the prompt
-            refine_output = RefinerParser(
-                parser=self._parser,
-                initial_prompt=self._prompt.format(**{"SOURCE_CODE": input}),
-                refiner=self._refiner,
-                max_retries=n1,
-                llm=self._llm,
-            )
-        else:
-            refine_output = RetryWithErrorOutputParser.from_llm(
-                llm=self._llm,
-                parser=self._parser,
-                max_retries=n1,
-            )
-
-        chain = (
-            RunnableParallel(
-                SOURCE_CODE=self._parser.parse_input,
-                context=self._retriever,
-            )
-            | self._prompt
-            | RunnableParallel(
-                completion=self._llm,
-                prompt_value=RunnablePassthrough(),
-            )
-            | RunnableLambda(lambda x: refine_output.parse_with_prompt(**x))
-        )
-        for _ in range(n2):
-            try:
-                return chain.invoke(block.original)
-            except OutputParserException:
-                pass
-
-        raise OutputParserException(f"Failed to parse after {n1*n2} retries")
+        return self.chain.invoke(block.original)
 
     def _get_output_obj(
         self, block: TranslatedCodeBlock
-    ) -> dict[str, int | float | str | dict[str, str]]:
+    ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
         output_str = self._parser.parse_combined_output(block.complete_text)
 
-        output: str | dict[str, str]
+        output_obj: str | dict[str, str]
         try:
-            output = json.loads(output_str)
+            output_obj = json.loads(output_str)
         except json.JSONDecodeError:
-            output = output_str
+            output_obj = output_str
 
         return dict(
-            input=block.original.text,
+            input=block.original.text or "",
             metadata=dict(
                 retries=block.total_retries,
                 cost=block.total_cost,
                 processing_time=block.processing_time,
             ),
-            output=output,
+            output=output_obj,
         )
-
-    @staticmethod
-    def _get_prompt_additions(block) -> Optional[List[Tuple[str, str]]]:
-        """Get a list of strings to append to the prompt.
-
-        Arguments:
-            block: The `TranslatedCodeBlock` to save to a file.
-        """
-        return [(key, item) for key, item in block.context_tags.items()]
-
-    def _make_prompt_additions(self, block: CodeBlock):
-        # Prepare the additional context to prepend
-        additional_context = "".join(
-            [
-                f"{context_tag}: {context}\n"
-                for context_tag, context in self._get_prompt_additions(block)
-            ]
-        )
-
-        if not hasattr(self._prompt, "messages"):
-            log.debug("Skipping additions to prompt, no messages found on prompt object!")
-            return
-
-        # Iterate through existing messages to find and update the system message
-        for i, message in enumerate(self._prompt.messages):
-            if isinstance(message, SystemMessagePromptTemplate):
-                # Prepend the additional context to the system message
-                updated_system_message = SystemMessagePromptTemplate.from_template(
-                    additional_context + message.prompt.template
-                )
-                # Directly modify the message in the list
-                self._prompt.messages[i] = updated_system_message
-                break  # Assuming there's only one system message to update
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
         """Save a file to disk.

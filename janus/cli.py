@@ -341,14 +341,6 @@ def document(
             help="Whether to overwrite existing files in the output directory",
         ),
     ] = False,
-    skip_context: Annotated[
-        bool,
-        typer.Option(
-            "--skip-context",
-            help="Prompts will include any context information associated with source"
-            " code blocks, unless this option is specified",
-        ),
-    ] = False,
     doc_mode: Annotated[
         str,
         typer.Option(
@@ -379,7 +371,7 @@ def document(
         typer.Option("--temperature", "-t", help="Sampling temperature.", min=0, max=2),
     ] = 0.7,
     collection: Annotated[
-        str,
+        str | None,
         typer.Option(
             "--collection",
             "-c",
@@ -396,6 +388,24 @@ def document(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    refiner_type: Annotated[
+        str | None,
+        typer.Option(
+            "-r",
+            "--refiner",
+            help="Name of custom refiner to use",
+            click_type=click.Choice(["parser", "reflection"]),
+        ),
+    ] = None,
+    retriever_type: Annotated[
+        str | None,
+        typer.Option(
+            "-R",
+            "--retriever",
+            help="Name of custom retriever to use",
+            click_type=click.Choice(["active_usings"]),
+        ),
+    ] = None,
     max_tokens: Annotated[
         int,
         typer.Option(
@@ -405,13 +415,6 @@ def document(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
-    skip_refiner: Annotated[
-        bool,
-        typer.Option(
-            "--skip-refiner",
-            help="Whether to skip the refiner for generating output",
-        ),
-    ] = True,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -424,8 +427,8 @@ def document(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
-        skip_refiner=skip_refiner,
-        skip_context=skip_context,
+        refiner_type=refiner_type,
+        retriever_type=retriever_type,
     )
     if doc_mode == "madlibs":
         documenter = MadLibsDocumenter(
