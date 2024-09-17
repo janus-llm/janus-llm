@@ -3,13 +3,12 @@ import re
 
 from langchain.output_parsers import PydanticOutputParser
 from langchain.output_parsers.json import parse_json_markdown
-from langchain.schema.output_parser import BaseOutputParser
 from langchain_core.exceptions import OutputParserException
-from langchain_core.messages import AIMessage
+from langchain_core.messages import BaseMessage
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 from janus.language.block import CodeBlock
-from janus.parsers.code_parser import JanusParser
+from janus.parsers.parser import JanusParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -32,18 +31,21 @@ class MultiDoc(BaseModel):
     )
 
 
-class MultiDocumentationParser(PydanticOutputParser, JanusParser):
+class MultiDocumentationParser(JanusParser, PydanticOutputParser):
     block_name: str = ""
 
     def __init__(self):
         PydanticOutputParser.__init__(self, pydantic_object=MultiDoc)
 
-    def set_reference(self, block: CodeBlock):
-        self.block_name = block.name
+    def parse_input(self, block: CodeBlock) -> str:
+        text = super().parse_input(block)
+        self.block_name = str(block.name)
+        return text
 
-    def parse(self, text: str) -> str:
-        if isinstance(text, AIMessage):
-            text = text.content
+    def parse(self, text: str | BaseMessage) -> str:
+        if isinstance(text, BaseMessage):
+            text = str(text.content)
+
         try:
             docs = json.loads(super().parse(text).json())
         except (OutputParserException, json.JSONDecodeError):
@@ -81,22 +83,26 @@ class MultiDocumentationParser(PydanticOutputParser, JanusParser):
 
     @property
     def _type(self) -> str:
-        return self.__class__.name
+        return str(self.__class__.name)
 
 
-class MadlibsDocumentationParser(BaseOutputParser[str], JanusParser):
+class MadlibsDocumentationParser(JanusParser):
     expected_keys: set[str]
 
     def __init__(self):
         super().__init__(expected_keys=[])
 
-    def set_reference(self, block: CodeBlock):
-        comment_ids = re.findall(r"<(?:BLOCK|INLINE)_COMMENT (\w{8})>", block.text)
+    def parse_input(self, block: CodeBlock) -> str:
+        # TODO: Perform comment stripping/placeholding here rather than in script
+        text = super().parse_input(block)
+        comment_ids = re.findall(r"<(?:BLOCK|INLINE)_COMMENT (\w{8})>", text)
         self.expected_keys = set(comment_ids)
+        return text
 
-    def parse(self, text: str) -> str:
-        if isinstance(text, AIMessage):
-            text = text.content
+    def parse(self, text: str | BaseMessage) -> str:
+        if isinstance(text, BaseMessage):
+            text = str(text.content)
+
         try:
             obj = parse_json_markdown(text)
         except json.JSONDecodeError as e:
@@ -166,4 +172,4 @@ class MadlibsDocumentationParser(BaseOutputParser[str], JanusParser):
 
     @property
     def _type(self) -> str:
-        return self.__class__.name
+        return str(self.__class__.name)

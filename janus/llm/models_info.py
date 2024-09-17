@@ -47,6 +47,7 @@ load_dotenv()
 
 openai_model_reroutes = {
     "gpt-4o": "gpt-4o-2024-05-13",
+    "gpt-4o-mini": "gpt-4o-mini",
     "gpt-4": "gpt-4-0613",
     "gpt-4-turbo": "gpt-4-turbo-2024-04-09",
     "gpt-4-turbo-preview": "gpt-4-0125-preview",
@@ -56,6 +57,7 @@ openai_model_reroutes = {
 
 openai_models = [
     "gpt-4o",
+    "gpt-4o-mini",
     "gpt-4",
     "gpt-4-turbo",
     "gpt-4-turbo-preview",
@@ -208,7 +210,9 @@ def get_available_model_names() -> list[str]:
     return avaialable_models
 
 
-def load_model(user_model_name: str) -> tuple[BaseLanguageModel, int, dict[str, float]]:
+def load_model(
+    user_model_name: str,
+) -> tuple[BaseLanguageModel, str, int, dict[str, float]]:
     if not MODEL_CONFIG_DIR.exists():
         MODEL_CONFIG_DIR.mkdir(parents=True)
     model_config_file = MODEL_CONFIG_DIR / f"{user_model_name}.json"

@@ -1,16 +1,13 @@
 import functools
 import json
-import math
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, List, Optional, Tuple
 
 from langchain.output_parsers import RetryWithErrorOutputParser
-from langchain.output_parsers.fix import OutputFixingParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.output_parsers import BaseOutputParser
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate
 from langchain_core.runnables import RunnableLambda, RunnableParallel
 from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
@@ -28,7 +25,9 @@ from janus.language.splitter import (
 from janus.llm import load_model
 from janus.llm.model_callbacks import get_model_callback
 from janus.llm.models_info import MODEL_PROMPT_ENGINES
-from janus.parsers.code_parser import GenericParser
+from janus.parsers.parser import GenericParser, JanusParser
+from janus.parsers.refiner_parser import RefinerParser
+from janus.refiners.refiner import BasicRefiner, Refiner
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
@@ -75,6 +74,9 @@ class Converter:
         protected_node_types: tuple[str, ...] = (),
         prune_node_types: tuple[str, ...] = (),
         splitter_type: str = "file",
+        refiner_type: str = "basic",
+        skip_refiner: bool = True,
+        skip_context: bool = False,
     ) -> None:
         """Initialize a Converter instance.
 
@@ -84,6 +86,19 @@ class Converter:
                 values are `"code"`, `"text"`, `"eval"`, and `None` (default). If `None`,
                 the `Converter` assumes you won't be parsing an output (i.e., adding to an
                 embedding DB).
+            max_prompts: The maximum number of prompts to try before giving up.
+            max_tokens: The maximum number of tokens to use in the LLM. If `None`, the
+                converter will use half the model's token limit.
+            prompt_template: The name of the prompt template to use.
+            db_path: The path to the database to use for vectorization.
+            db_config: The configuration for the database.
+            protected_node_types: A set of node types that aren't to be merged.
+            prune_node_types: A set of node types which should be pruned.
+            splitter_type: The type of splitter to use. Valid values are `"file"`,
+                `"tag"`, `"chunk"`, `"ast-strict"`, and `"ast-flex"`.
+            refiner_type: The type of refiner to use. Valid values are `"basic"`.
+            skip_refiner: Whether to skip the refiner.
+            skip_context: Whether to skip adding context to the prompt.
         """
         self._changed_attrs: set = set()
 
@@ -113,10 +128,16 @@ class Converter:
         self._llm: BaseLanguageModel
         self._prompt: ChatPromptTemplate
 
-        self._parser: BaseOutputParser = GenericParser()
+        self._parser: JanusParser = GenericParser()
         self._combiner: Combiner = Combiner()
 
+        self._refiner_type: str
+        self._refiner: Refiner
+
+        self.skip_refiner = skip_refiner
+
         self.set_splitter(splitter_type=splitter_type)
+        self.set_refiner(refiner_type=refiner_type)
         self.set_model(model_name=model, **model_arguments)
         self.set_prompt(prompt_template=prompt_template)
         self.set_source_language(source_language)
@@ -124,6 +145,8 @@ class Converter:
         self.set_prune_node_types(prune_node_types)
         self.set_db_path(db_path=db_path)
         self.set_db_config(db_config=db_config)
+
+        self.skip_context = skip_context
 
         # Child class must call this. Should we enforce somehow?
         # self._load_parameters()
@@ -142,6 +165,7 @@ class Converter:
         self._load_prompt()
         self._load_splitter()
         self._load_vectorizer()
+        self._load_refiner()
         self._changed_attrs.clear()
 
     def set_model(self, model_name: str, **custom_arguments: dict[str, Any]):
@@ -178,6 +202,16 @@ class Converter:
                 (see janus/prompts/templates) or path to a directory.
         """
         self._splitter_type = splitter_type
+
+    def set_refiner(self, refiner_type: str) -> None:
+        """Validate and set the refiner name
+
+        The affected objects will not be updated until translate is called
+
+        Arguments:
+            refiner_type: the name of the refiner to use
+        """
+        self._refiner_type = refiner_type
 
     def set_source_language(self, source_language: str) -> None:
         """Validate and set the source language.
@@ -249,9 +283,23 @@ class Converter:
         )
 
         if self._splitter_type == "tag":
-            kwargs["tag"] = "<ITMOD_ALC_SPLIT>"
+            kwargs["tag"] = "<ITMOD_ALC_SPLIT>"  # Hardcoded for now
 
         self._splitter = CUSTOM_SPLITTERS[self._splitter_type](**kwargs)
+
+    @run_if_changed("_refiner_type", "_model_name")
+    def _load_refiner(self) -> None:
+        """Load the refiner according to this instance's attributes.
+
+        If the relevant fields have not been changed since the last time this method was
+        called, nothing happens.
+        """
+        if self._refiner_type == "basic":
+            self._refiner = BasicRefiner(
+                "basic_refinement", self._model_id, self._source_language
+            )
+        else:
+            raise ValueError(f"Error: unknown refiner type {self._refiner_type}")
 
     @run_if_changed("_model_name", "_custom_model_arguments")
     def _load_model(self) -> None:
@@ -279,6 +327,7 @@ class Converter:
         "_prompt_template_name",
         "_source_language",
         "_model_name",
+        "_parser",
     )
     def _load_prompt(self) -> None:
         """Load the prompt according to this instance's attributes.
@@ -291,6 +340,9 @@ class Converter:
             prompt_template=self._prompt_template_name,
         )
         self._prompt = prompt_engine.prompt
+        self._prompt = self._prompt.partial(
+            format_instructions=self._parser.get_format_instructions()
+        )
 
     @run_if_changed("_db_path", "_db_config")
     def _load_vectorizer(self) -> None:
@@ -396,6 +448,15 @@ class Converter:
             except FileSizeError:
                 log.warning("Current tile is too large for basic splitter, skipping")
                 continue
+            except ValueError as e:
+                if str(e).startswith(
+                    "Error raised by bedrock service"
+                ) and "maximum context length" in str(e):
+                    log.warning(
+                        "Input is too large for this model's context length, skipping"
+                    )
+                    continue
+                raise e
 
             # Don't attempt to write files for which translation failed
             if not out_block.translated:
@@ -550,40 +611,42 @@ class Converter:
         to the cube root of self.max_retries, so the total calls to the
         LLM will be roughly as expected (up to sqrt(self.max_retries) over)
         """
-        self._parser.set_reference(block.original)
+        input = self._parser.parse_input(block.original)
 
         # Retries with just the output and the error
-        n1 = round(self.max_prompts ** (1 / 3))
+        n1 = round(self.max_prompts ** (1 / 2))
 
         # Retries with the input, output, and error
-        n2 = round((self.max_prompts // n1) ** (1 / 2))
+        n2 = round(self.max_prompts // n1)
 
-        # Retries with just the input
-        n3 = math.ceil(self.max_prompts / (n1 * n2))
-
-        fix_format = OutputFixingParser.from_llm(
-            llm=self._llm,
-            parser=self._parser,
-            max_retries=n1,
-        )
-        retry = RetryWithErrorOutputParser.from_llm(
-            llm=self._llm,
-            parser=fix_format,
-            max_retries=n2,
-        )
+        if not self.skip_context:
+            self._make_prompt_additions(block)
+        if not self.skip_refiner:  # Make replacements in the prompt
+            refine_output = RefinerParser(
+                parser=self._parser,
+                initial_prompt=self._prompt.format(**{"SOURCE_CODE": input}),
+                refiner=self._refiner,
+                max_retries=n1,
+                llm=self._llm,
+            )
+        else:
+            refine_output = RetryWithErrorOutputParser.from_llm(
+                llm=self._llm,
+                parser=self._parser,
+                max_retries=n1,
+            )
 
         completion_chain = self._prompt | self._llm
         chain = RunnableParallel(
             completion=completion_chain, prompt_value=self._prompt
-        ) | RunnableLambda(lambda x: retry.parse_with_prompt(**x))
-
-        for _ in range(n3):
+        ) | RunnableLambda(lambda x: refine_output.parse_with_prompt(**x))
+        for _ in range(n2):
             try:
-                return chain.invoke({"SOURCE_CODE": block.original.text})
+                return chain.invoke({"SOURCE_CODE": input})
             except OutputParserException:
                 pass
 
-        raise OutputParserException(f"Failed to parse after {n1*n2*n3} retries")
+        raise OutputParserException(f"Failed to parse after {n1*n2} retries")
 
     def _get_output_obj(
         self, block: TranslatedCodeBlock
@@ -605,6 +668,39 @@ class Converter:
             ),
             output=output,
         )
+
+    @staticmethod
+    def _get_prompt_additions(block) -> Optional[List[Tuple[str, str]]]:
+        """Get a list of strings to append to the prompt.
+
+        Arguments:
+            block: The `TranslatedCodeBlock` to save to a file.
+        """
+        return [(key, item) for key, item in block.context_tags.items()]
+
+    def _make_prompt_additions(self, block: CodeBlock):
+        # Prepare the additional context to prepend
+        additional_context = "".join(
+            [
+                f"{context_tag}: {context}\n"
+                for context_tag, context in self._get_prompt_additions(block)
+            ]
+        )
+
+        if not hasattr(self._prompt, "messages"):
+            log.debug("Skipping additions to prompt, no messages found on prompt object!")
+            return
+
+        # Iterate through existing messages to find and update the system message
+        for i, message in enumerate(self._prompt.messages):
+            if isinstance(message, SystemMessagePromptTemplate):
+                # Prepend the additional context to the system message
+                updated_system_message = SystemMessagePromptTemplate.from_template(
+                    additional_context + message.prompt.template
+                )
+                # Directly modify the message in the list
+                self._prompt.messages[i] = updated_system_message
+                break  # Assuming there's only one system message to update
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
         """Save a file to disk.

@@ -3,7 +3,7 @@ import logging
 import os
 import subprocess  # nosec
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 import click
 import typer
@@ -13,6 +13,8 @@ from rich.console import Console
 from rich.prompt import Confirm
 from typing_extensions import Annotated
 
+from janus.converter.aggregator import Aggregator
+from janus.converter.converter import Converter
 from janus.converter.diagram import DiagramGenerator
 from janus.converter.document import Documenter, MadLibsDocumenter, MultiDocumenter
 from janus.converter.requirements import RequirementsDocumenter
@@ -184,7 +186,7 @@ def translate(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-4o",
+    ],
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -199,6 +201,14 @@ def translate(
         typer.Option(
             "--overwrite/--preserve",
             help="Whether to overwrite existing files in the output directory",
+        ),
+    ] = False,
+    skip_context: Annotated[
+        bool,
+        typer.Option(
+            "--skip-context",
+            help="Prompts will include any context information associated with source"
+            " code blocks, unless this option is specified",
         ),
     ] = False,
     temp: Annotated[
@@ -241,6 +251,13 @@ def translate(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
+    skip_refiner: Annotated[
+        bool,
+        typer.Option(
+            "--skip-refiner",
+            help="Whether to skip the refiner for generating output",
+        ),
+    ] = True,
 ):
     try:
         target_language, target_version = target_lang.split("-")
@@ -266,6 +283,8 @@ def translate(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
+        skip_context=skip_context,
+        skip_refiner=skip_refiner,
     )
     translator.translate(input_dir, output_dir, overwrite, collection)
 
@@ -306,7 +325,7 @@ def document(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-4o",
+    ],
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -321,6 +340,14 @@ def document(
         typer.Option(
             "--overwrite/--preserve",
             help="Whether to overwrite existing files in the output directory",
+        ),
+    ] = False,
+    skip_context: Annotated[
+        bool,
+        typer.Option(
+            "--skip-context",
+            help="Prompts will include any context information associated with source"
+            " code blocks, unless this option is specified",
         ),
     ] = False,
     doc_mode: Annotated[
@@ -379,6 +406,13 @@ def document(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
+    skip_refiner: Annotated[
+        bool,
+        typer.Option(
+            "--skip-refiner",
+            help="Whether to skip the refiner for generating output",
+        ),
+    ] = True,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -391,6 +425,8 @@ def document(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
+        skip_refiner=skip_refiner,
+        skip_context=skip_context,
     )
     if doc_mode == "madlibs":
         documenter = MadLibsDocumenter(
@@ -404,6 +440,126 @@ def document(
         documenter = Documenter(drop_comments=drop_comments, **kwargs)
 
     documenter.translate(input_dir, output_dir, overwrite, collection)
+
+
+def get_subclasses(cls):
+    return set(cls.__subclasses__()).union(
+        set(s for c in cls.__subclasses__() for s in get_subclasses(c))
+    )
+
+
+@app.command()
+def aggregate(
+    input_dir: Annotated[
+        Path,
+        typer.Option(
+            "--input",
+            "-i",
+            help="The directory containing the source code to be translated. "
+            "The files should all be in one flat directory.",
+        ),
+    ],
+    language: Annotated[
+        str,
+        typer.Option(
+            "--language",
+            "-l",
+            help="The language of the source code.",
+            click_type=click.Choice(sorted(LANGUAGES)),
+        ),
+    ],
+    output_dir: Annotated[
+        Path,
+        typer.Option(
+            "--output-dir", "-o", help="The directory to store the translated code in."
+        ),
+    ],
+    llm_name: Annotated[
+        str,
+        typer.Option(
+            "--llm",
+            "-L",
+            help="The custom name of the model set with 'janus llm add'.",
+        ),
+    ],
+    max_prompts: Annotated[
+        int,
+        typer.Option(
+            "--max-prompts",
+            "-m",
+            help="The maximum number of times to prompt a model on one functional block "
+            "before exiting the application. This is to prevent wasting too much money.",
+        ),
+    ] = 10,
+    overwrite: Annotated[
+        bool,
+        typer.Option(
+            "--overwrite/--preserve",
+            help="Whether to overwrite existing files in the output directory",
+        ),
+    ] = False,
+    temperature: Annotated[
+        float,
+        typer.Option("--temperature", "-t", help="Sampling temperature.", min=0, max=2),
+    ] = 0.7,
+    collection: Annotated[
+        str,
+        typer.Option(
+            "--collection",
+            "-c",
+            help="If set, will put the translated result into a Chroma DB "
+            "collection with the name provided.",
+        ),
+    ] = None,
+    splitter_type: Annotated[
+        str,
+        typer.Option(
+            "-S",
+            "--splitter",
+            help="Name of custom splitter to use",
+            click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
+        ),
+    ] = "file",
+    intermediate_converters: Annotated[
+        List[str],
+        typer.Option(
+            "-C",
+            "--converter",
+            help="Name of an intermediate converter to use",
+            click_type=click.Choice([c.__name__ for c in get_subclasses(Converter)]),
+        ),
+    ] = ["Documenter"],
+):
+    converter_subclasses = get_subclasses(Converter)
+    converter_subclasses_map = {c.__name__: c for c in converter_subclasses}
+    model_arguments = dict(temperature=temperature)
+    collections_config = get_collections_config()
+    converters = []
+    for ic in intermediate_converters:
+        converters.append(
+            converter_subclasses_map[ic](
+                model=llm_name,
+                model_arguments=model_arguments,
+                source_language=language,
+                max_prompts=max_prompts,
+                db_path=db_loc,
+                db_config=collections_config,
+                splitter_type=splitter_type,
+            )
+        )
+
+    aggregator = Aggregator(
+        intermediate_converters=converters,
+        model=llm_name,
+        model_arguments=model_arguments,
+        source_language=language,
+        max_prompts=max_prompts,
+        db_path=db_loc,
+        db_config=collections_config,
+        splitter_type=splitter_type,
+        prompt_template="basic_aggregation",
+    )
+    aggregator.translate(input_dir, output_dir, overwrite, collection)
 
 
 @app.command(
@@ -442,7 +598,7 @@ def diagram(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-4o",
+    ],
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -457,6 +613,14 @@ def diagram(
         typer.Option(
             "--overwrite/--preserve",
             help="Whether to overwrite existing files in the output directory",
+        ),
+    ] = False,
+    skip_context: Annotated[
+        bool,
+        typer.Option(
+            "--skip-context",
+            help="Prompts will include any context information associated with source"
+            " code blocks, unless this option is specified",
         ),
     ] = False,
     temperature: Annotated[
@@ -495,6 +659,13 @@ def diagram(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    skip_refiner: Annotated[
+        bool,
+        typer.Option(
+            "--skip-refiner",
+            help="Whether to skip the refiner for generating output",
+        ),
+    ] = True,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -508,6 +679,8 @@ def diagram(
         diagram_type=diagram_type,
         add_documentation=add_documentation,
         splitter_type=splitter_type,
+        skip_refiner=skip_refiner,
+        skip_context=skip_context,
     )
     diagram_generator.translate(input_dir, output_dir, overwrite, collection)
 

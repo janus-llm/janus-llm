@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 from langchain_core.exceptions import OutputParserException
+from langchain_core.messages import BaseMessage
 
 from janus.parsers.code_parser import CodeParser
 from janus.utils.logger import create_logger
@@ -12,7 +13,7 @@ log = create_logger(__name__)
 
 
 class UMLSyntaxParser(CodeParser):
-    def _get_uml_output(self, file: str) -> Tuple[str, str]:
+    def _get_uml_output(self, file: Path) -> Tuple[str, str]:
         # NOTE: running subprocess with shell=False, added nosec to label that we know
         # risk exists
         try:
@@ -33,7 +34,7 @@ class UMLSyntaxParser(CodeParser):
     def _get_errs(self, s: str) -> List[str]:
         return [x.group() for x in re.finditer(r"Error (.*)\n", s)]
 
-    def parse(self, text: str) -> str:
+    def parse(self, text: str | BaseMessage) -> str:
         text = super().parse(text)
         janus_path = Path.home().expanduser() / Path(".janus")
         if not janus_path.exists():
