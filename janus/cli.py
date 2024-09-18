@@ -371,7 +371,7 @@ def document(
         typer.Option("--temperature", "-t", help="Sampling temperature.", min=0, max=2),
     ] = 0.7,
     collection: Annotated[
-        str | None,
+        str,
         typer.Option(
             "--collection",
             "-c",
@@ -389,7 +389,7 @@ def document(
         ),
     ] = "file",
     refiner_type: Annotated[
-        str | None,
+        str,
         typer.Option(
             "-r",
             "--refiner",
@@ -398,7 +398,7 @@ def document(
         ),
     ] = None,
     retriever_type: Annotated[
-        str | None,
+        str,
         typer.Option(
             "-R",
             "--retriever",
