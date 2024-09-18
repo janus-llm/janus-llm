@@ -148,7 +148,7 @@ class AlcListingSplitter(AlcSplitter):
         lines = code.splitlines()
         lines = self.strip_header_and_left(lines)
         lines = self.strip_addresses(lines)
-        return "".join(str(line) for line in lines)
+        return "\n".join(str(line) for line in lines)
 
     def get_active_usings(self, code: str) -> Optional[str]:
         """Look for 'active usings' in the ALC listing header"""
