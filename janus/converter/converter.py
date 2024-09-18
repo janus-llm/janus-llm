@@ -128,25 +128,26 @@ class Converter:
         self._prune_node_types: tuple[str, ...] = ()
         self._max_tokens: int | None = max_tokens
         self._prompt_template_name: str
-        self._splitter_type: str
         self._db_path: str | None
         self._db_config: dict[str, Any] | None
 
-        self._splitter: Splitter
         self._llm: BaseLanguageModel
         self._prompt: ChatPromptTemplate
 
         self._parser: JanusParser = GenericParser()
         self._combiner: Combiner = Combiner()
 
-        self._refiner_type: str
-        self._refiner: JanusRefiner
+        self._splitter_type: str
+        self._refiner_type: str | None
+        self._retriever_type: str | None
 
-        self._retriever_type: str = retriever_type
+        self._splitter: Splitter
+        self._refiner: JanusRefiner
         self._retriever: JanusRetriever
 
         self.set_splitter(splitter_type=splitter_type)
         self.set_refiner(refiner_type=refiner_type)
+        self.set_retriever(retriever_type=retriever_type)
         self.set_model(model_name=model, **model_arguments)
         self.set_prompt(prompt_template=prompt_template)
         self.set_source_language(source_language)
@@ -168,6 +169,10 @@ class Converter:
         super().__setattr__(key, value)
 
     def _load_parameters(self) -> None:
+        self._load_model()
+        self._load_prompt()
+        self._load_retriever()
+        self._load_refiner()
         self._load_splitter()
         self._load_vectorizer()
         self._load_chain()
@@ -189,8 +194,6 @@ class Converter:
     def set_prompt(self, prompt_template: str) -> None:
         """Validate and set the prompt template name.
 
-        The affected objects will not be updated until translate() is called.
-
         Arguments:
             prompt_template: name of prompt template directory
                 (see janus/prompts/templates) or path to a directory.
@@ -200,28 +203,33 @@ class Converter:
     def set_splitter(self, splitter_type: str) -> None:
         """Validate and set the prompt template name.
 
-        The affected objects will not be updated until translate() is called.
-
         Arguments:
             prompt_template: name of prompt template directory
                 (see janus/prompts/templates) or path to a directory.
         """
+        if splitter_type not in CUSTOM_SPLITTERS:
+            raise ValueError(f'Splitter type "{splitter_type}" does not exist.')
+
         self._splitter_type = splitter_type
 
-    def set_refiner(self, refiner_type: str) -> None:
-        """Validate and set the refiner name
-
-        The affected objects will not be updated until translate is called
+    def set_refiner(self, refiner_type: str | None) -> None:
+        """Validate and set the refiner type
 
         Arguments:
-            refiner_type: the name of the refiner to use
+            refiner_type: the type of refiner to use
         """
         self._refiner_type = refiner_type
 
+    def set_retriever(self, retriever_type: str | None) -> None:
+        """Validate and set the retriever type
+
+        Arguments:
+            retriever_type: the type of retriever to use
+        """
+        self._retriever_type = retriever_type
+
     def set_source_language(self, source_language: str) -> None:
         """Validate and set the source language.
-
-        The affected objects will not be updated until _load_parameters() is called.
 
         Arguments:
             source_language: The source programming language.
@@ -292,28 +300,6 @@ class Converter:
 
         self._splitter = CUSTOM_SPLITTERS[self._splitter_type](**kwargs)
 
-    @run_if_changed("_refiner_type", "_model_name", "max_prompts", "_parser", "_llm")
-    def _load_refiner(self) -> None:
-        """Load the refiner according to this instance's attributes.
-
-        If the relevant fields have not been changed since the last time this method was
-        called, nothing happens.
-        """
-        if self._refiner_type == "parser":
-            self._refiner = FixParserExceptions(
-                llm=self._llm,
-                parser=self._parser,
-                max_retries=self.max_prompts,
-            )
-        elif self._refiner_type == "reflection":
-            self._refiner = ReflectionRefiner(
-                llm=self._llm,
-                parser=self._parser,
-                max_retries=self.max_prompts,
-            )
-        else:
-            self._refiner = JanusRefiner(self._parser)
-
     @run_if_changed("_model_name", "_custom_model_arguments")
     def _load_model(self) -> None:
         """Load the model according to this instance's attributes.
@@ -374,11 +360,30 @@ class Converter:
         else:
             self._retriever = JanusRetriever()
 
+    @run_if_changed("_refiner_type", "_model_name", "max_prompts", "_parser", "_llm")
+    def _load_refiner(self) -> None:
+        """Load the refiner according to this instance's attributes.
+
+        If the relevant fields have not been changed since the last time this method was
+        called, nothing happens.
+        """
+        if self._refiner_type == "parser":
+            self._refiner = FixParserExceptions(
+                llm=self._llm,
+                parser=self._parser,
+                max_retries=self.max_prompts,
+            )
+        elif self._refiner_type == "reflection":
+            self._refiner = ReflectionRefiner(
+                llm=self._llm,
+                parser=self._parser,
+                max_retries=self.max_prompts,
+            )
+        else:
+            self._refiner = JanusRefiner(self._parser)
+
+    @run_if_changed("_parser", "_retriever", "_prompt", "_llm", "_refiner")
     def _load_chain(self):
-        self._load_retriever()
-        self._load_prompt()
-        self._load_model()
-        self._load_refiner()
         self.chain = (
             RunnableParallel(
                 SOURCE_CODE=self._parser.parse_input,
