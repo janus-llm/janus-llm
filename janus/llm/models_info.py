@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_core.language_models import BaseLanguageModel
 from langchain_openai import ChatOpenAI
+from rich.prompt import Confirm
+from typer import Abort
 
 from janus.llm.model_callbacks import COST_PER_1K_TOKENS
 from janus.prompts.prompt import (
@@ -247,6 +249,12 @@ def load_model(
     model_args = model_config["model_args"]
     if model_config["model_type"] == "OpenAI":
         model_args.update(_open_ai_defaults)
+        confirmed = Confirm.ask(
+            "[red]Do NOT use this model in sensitive environments! Are you sure "
+            "you want to use an OpenAI model?"
+        )
+        if not confirmed:
+            raise Abort
     model = model_constructor(**model_args)
     return (
         model,
