@@ -7,7 +7,7 @@ from typing import Any
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+from langchain_core.runnables import Runnable, RunnableParallel, RunnablePassthrough
 from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
 
@@ -385,16 +385,19 @@ class Converter:
     @run_if_changed("_parser", "_retriever", "_prompt", "_llm", "_refiner")
     def _load_chain(self):
         self.chain = (
-            RunnableParallel(
-                SOURCE_CODE=self._parser.parse_input,
-                context=self._retriever,
-            )
+            self._input_runnable()
             | self._prompt
             | RunnableParallel(
                 completion=self._llm,
                 prompt_value=RunnablePassthrough(),
             )
             | self._refiner.parse_runnable
+        )
+
+    def _input_runnable(self) -> Runnable:
+        return RunnableParallel(
+            SOURCE_CODE=self._parser.parse_input,
+            context=self._retriever,
         )
 
     def translate(

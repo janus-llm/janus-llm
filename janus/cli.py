@@ -617,14 +617,6 @@ def diagram(
             help="Whether to overwrite existing files in the output directory",
         ),
     ] = False,
-    skip_context: Annotated[
-        bool,
-        typer.Option(
-            "--skip-context",
-            help="Prompts will include any context information associated with source"
-            " code blocks, unless this option is specified",
-        ),
-    ] = False,
     temperature: Annotated[
         float,
         typer.Option("--temperature", "-t", help="Sampling temperature.", min=0, max=2),
@@ -661,13 +653,24 @@ def diagram(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
-    skip_refiner: Annotated[
-        bool,
+    refiner_type: Annotated[
+        str,
         typer.Option(
-            "--skip-refiner",
-            help="Whether to skip the refiner for generating output",
+            "-r",
+            "--refiner",
+            help="Name of custom refiner to use",
+            click_type=click.Choice(["parser", "reflection"]),
         ),
-    ] = True,
+    ] = None,
+    retriever_type: Annotated[
+        str,
+        typer.Option(
+            "-R",
+            "--retriever",
+            help="Name of custom retriever to use",
+            click_type=click.Choice(["active_usings"]),
+        ),
+    ] = None,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -678,11 +681,11 @@ def diagram(
         max_prompts=max_prompts,
         db_path=db_loc,
         db_config=collections_config,
+        splitter_type=splitter_type,
+        refiner_type=refiner_type,
+        retriever_type=retriever_type,
         diagram_type=diagram_type,
         add_documentation=add_documentation,
-        splitter_type=splitter_type,
-        skip_refiner=skip_refiner,
-        skip_context=skip_context,
     )
     diagram_generator.translate(input_dir, output_dir, overwrite, collection)
 
