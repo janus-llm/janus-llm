@@ -25,29 +25,21 @@ class DiagramGenerator(Documenter):
         """
         self._diagram_type = diagram_type
         self._add_documentation = add_documentation
-
-        # A Documenter to use as the first step if add_documentation is enabled
         self._documenter = Documenter(**kwargs)
 
         super().__init__(**kwargs)
 
-        # Must use a different prompt if we want to add documentation
         self.set_prompt("diagram_with_documentation" if add_documentation else "diagram")
-
-        # Parser to check PLANTUML syntax
         self._parser = UMLSyntaxParser(language="plantuml")
 
         self._load_parameters()
 
     def _load_prompt(self):
         super()._load_prompt()
-
-        # Include diagram type in the diagram generation prompt prompt
         self._prompt = self._prompt.partial(DIAGRAM_TYPE=self._diagram_type)
 
     def _input_runnable(self) -> Runnable:
         if self._add_documentation:
-            # To add documentation, simply add the documenter chain up front
             return RunnableParallel(
                 SOURCE_CODE=self._parser.parse_input,
                 DOCUMENTATION=self._documenter.chain,
