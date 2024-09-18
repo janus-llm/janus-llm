@@ -74,8 +74,11 @@ Completion:
 You are a programmer reviewing code documentation. Generate critique and
 suggestions for the provided completion, including requests for added
 detail, corrections of factual errors, improved style, etc.
+Do not rewrite the output yourself, only provide critique that can be acted on.
+Provide no further commentary or questions other than your feedback.
 
 If the provided documentation is to your satisfaction, respond with "LGTM".
+It is important that "LGTM" be returned on its own with no further commentary.
 """
 
 revision_prompt_text = """Task Description:
@@ -93,7 +96,8 @@ Feedback:
 
 Given the above documentation task, completion, and feedback, improve the
 completion by incorporating the feedback. Respond only with the revised output,
-following the format indicated in the original task description.
+following the format indicated in the original task description, do not provide
+any additional feedback or questions about the critique.
 """
 
 reflection_prompt = PromptTemplate.from_template(reflection_prompt_text)
