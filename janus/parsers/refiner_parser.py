@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any
 
 from langchain.output_parsers import RetryWithErrorOutputParser
@@ -7,8 +5,13 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompt_values import PromptValue
 from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnableSerializable
 
 from janus.parsers.parser import JanusParser
+from janus.utils.logger import create_logger
+
+log = create_logger(__name__)
+
 
 retry_prompt_text = """Prompt:
 --------------
@@ -33,8 +36,8 @@ retry_prompt = PromptTemplate.from_template(retry_prompt_text)
 
 
 class JanusRefiner(JanusParser):
-    def __init__(self, parser: JanusParser):
-        self.parser = parser
+    parser: JanusParser
+    max_retries: int
 
     def parse_runnable(self, input: dict[str, Any]) -> Any:
         return self.parse_completion(**input)
@@ -98,11 +101,18 @@ revision_prompt = PromptTemplate.from_template(revision_prompt_text)
 
 
 class ReflectionRefiner(JanusRefiner):
+    reflection_chain: RunnableSerializable
+    revision_chain: RunnableSerializable
+
     def __init__(self, llm: BaseLanguageModel, parser: JanusParser, max_retries: int):
-        self.reflection_chain = reflection_prompt | llm | StrOutputParser()
-        self.revision_chain = revision_prompt | llm | StrOutputParser()
-        self.parser = parser
-        self.max_retries = max_retries
+        reflection_chain = reflection_prompt | llm | StrOutputParser()
+        revision_chain = revision_prompt | llm | StrOutputParser()
+        super().__init__(
+            reflection_chain=reflection_chain,
+            revision_chain=revision_chain,
+            parser=parser,
+            max_retries=max_retries,
+        )
 
     def parse_completion(
         self, completion: str, prompt_value: PromptValue, **kwargs
@@ -114,6 +124,7 @@ class ReflectionRefiner(JanusRefiner):
                     completion=completion,
                 )
             )
+            log.info(f"Reflection:\n{reflection}")
             if reflection.strip() == "LGTM":
                 return self.parser.parse(completion)
             completion = self.revision_chain.invoke(
@@ -123,5 +134,6 @@ class ReflectionRefiner(JanusRefiner):
                     reflection=reflection,
                 )
             )
+            log.info(f"Revision:\n{completion}")
 
         return self.parser.parse(completion)
