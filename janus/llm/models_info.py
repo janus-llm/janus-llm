@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from pathlib import Path
 from typing import Any, Callable
 
@@ -247,6 +248,12 @@ def load_model(
     model_args = model_config["model_args"]
     if model_config["model_type"] == "OpenAI":
         model_args.update(_open_ai_defaults)
+        log.warning("Do NOT use this model in sensitive environments!")
+        log.warning("If you would like to cancel, please press Ctrl+C.")
+        log.warning("Waiting 10 seconds...")
+        # Give enough time for the user to read the warnings and cancel
+        time.sleep(10)
+
     model = model_constructor(**model_args)
     return (
         model,
