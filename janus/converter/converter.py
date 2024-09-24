@@ -25,11 +25,7 @@ from janus.llm import load_model
 from janus.llm.model_callbacks import get_model_callback
 from janus.llm.models_info import MODEL_PROMPT_ENGINES
 from janus.parsers.parser import GenericParser, JanusParser
-from janus.parsers.refiner_parser import (
-    FixParserExceptions,
-    JanusRefiner,
-    ReflectionRefiner,
-)
+from janus.refiners.refiner import FixParserExceptions, JanusRefiner, ReflectionRefiner
 
 # from janus.refiners.refiner import BasicRefiner, Refiner
 from janus.retrievers.retriever import ActiveUsingsRetriever, JanusRetriever
