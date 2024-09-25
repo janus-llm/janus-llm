@@ -75,16 +75,18 @@ class ReflectionRefiner(JanusRefiner):
     def parse_completion(
         self, completion: str, prompt_value: PromptValue, **kwargs
     ) -> Any:
-        for _ in range(self.max_retries):
+        for retry_number in range(self.max_retries):
             reflection = self.reflection_chain.invoke(
                 dict(
                     prompt=prompt_value.to_string(),
                     completion=completion,
                 )
             )
-            log.info(f"Reflection:\n{reflection}")
             if reflection.strip() == "LGTM":
                 return self.parser.parse(completion)
+            if not retry_number:
+                log.info(f"Completion:\n{completion}")
+            log.info(f"Reflection:\n{reflection}")
             completion = self.revision_chain.invoke(
                 dict(
                     prompt=prompt_value.to_string(),
