@@ -1,12 +1,11 @@
 from typing import Any
 
 from langchain.output_parsers import RetryWithErrorOutputParser
-from langchain_core.language_models import BaseLanguageModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompt_values import PromptValue
 from langchain_core.runnables import RunnableSerializable
 
-from janus.llm.models_info import MODEL_PROMPT_ENGINES
+from janus.llm.models_info import MODEL_PROMPT_ENGINES, JanusModel
 from janus.parsers.parser import JanusParser
 from janus.utils.logger import create_logger
 
@@ -15,7 +14,6 @@ log = create_logger(__name__)
 
 class JanusRefiner(JanusParser):
     parser: JanusParser
-    max_retries: int
 
     def parse_runnable(self, input: dict[str, Any]) -> Any:
         return self.parse_completion(**input)
@@ -28,8 +26,8 @@ class JanusRefiner(JanusParser):
 
 
 class FixParserExceptions(JanusRefiner, RetryWithErrorOutputParser):
-    def __init__(self, llm: BaseLanguageModel, parser: JanusParser, max_retries: int):
-        retry_prompt = MODEL_PROMPT_ENGINES[llm.get_name()](
+    def __init__(self, llm: JanusModel, parser: JanusParser, max_retries: int):
+        retry_prompt = MODEL_PROMPT_ENGINES[llm.model_id](
             source_language="text",
             prompt_template="refinement/fix_exceptions",
         ).prompt
@@ -45,15 +43,22 @@ class FixParserExceptions(JanusRefiner, RetryWithErrorOutputParser):
 
 
 class ReflectionRefiner(JanusRefiner):
+    max_retries: int
     reflection_chain: RunnableSerializable
     revision_chain: RunnableSerializable
 
-    def __init__(self, llm: BaseLanguageModel, parser: JanusParser, max_retries: int):
-        reflection_prompt = MODEL_PROMPT_ENGINES[llm.get_name()](
+    def __init__(
+        self,
+        llm: JanusModel,
+        parser: JanusParser,
+        max_retries: int,
+        prompt_template_name: str = "refinement/reflection",
+    ):
+        reflection_prompt = MODEL_PROMPT_ENGINES[llm.model_id](
             source_language="text",
-            prompt_template="refinement/reflection",
+            prompt_template=prompt_template_name,
         ).prompt
-        revision_prompt = MODEL_PROMPT_ENGINES[llm.get_name()](
+        revision_prompt = MODEL_PROMPT_ENGINES[llm.model_id](
             source_language="text",
             prompt_template="refinement/revision",
         ).prompt
@@ -90,3 +95,19 @@ class ReflectionRefiner(JanusRefiner):
             log.info(f"Revision:\n{completion}")
 
         return self.parser.parse(completion)
+
+
+class HallucinationRefiner(ReflectionRefiner):
+    def __init__(self, **kwargs):
+        super().__init__(
+            prompt_template_name="refinement/hallucination",
+            **kwargs,
+        )
+
+
+REFINERS = dict(
+    none=JanusRefiner,
+    parser=FixParserExceptions,
+    reflection=ReflectionRefiner,
+    hallucination=HallucinationRefiner,
+)

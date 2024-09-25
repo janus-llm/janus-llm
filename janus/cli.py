@@ -42,6 +42,7 @@ from janus.llm.models_info import (
     openai_models,
 )
 from janus.metrics.cli import evaluate
+from janus.refiners.refiner import REFINERS
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
@@ -241,6 +242,24 @@ def translate(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    refiner_type: Annotated[
+        str,
+        typer.Option(
+            "-r",
+            "--refiner",
+            help="Name of custom refiner to use",
+            click_type=click.Choice(list(REFINERS.keys())),
+        ),
+    ] = "none",
+    retriever_type: Annotated[
+        str,
+        typer.Option(
+            "-R",
+            "--retriever",
+            help="Name of custom retriever to use",
+            click_type=click.Choice(["active_usings"]),
+        ),
+    ] = None,
     max_tokens: Annotated[
         int,
         typer.Option(
@@ -250,13 +269,6 @@ def translate(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
-    skip_refiner: Annotated[
-        bool,
-        typer.Option(
-            "--skip-refiner",
-            help="Whether to skip the refiner for generating output",
-        ),
-    ] = True,
 ):
     try:
         target_language, target_version = target_lang.split("-")
@@ -282,8 +294,8 @@ def translate(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
-        skip_context=skip_context,
-        skip_refiner=skip_refiner,
+        refiner_type=refiner_type,
+        retriever_type=retriever_type,
     )
     translator.translate(input_dir, output_dir, overwrite, collection)
 
@@ -394,9 +406,9 @@ def document(
             "-r",
             "--refiner",
             help="Name of custom refiner to use",
-            click_type=click.Choice(["parser", "reflection"]),
+            click_type=click.Choice(list(REFINERS.keys())),
         ),
-    ] = None,
+    ] = "none",
     retriever_type: Annotated[
         str,
         typer.Option(
@@ -659,9 +671,9 @@ def diagram(
             "-r",
             "--refiner",
             help="Name of custom refiner to use",
-            click_type=click.Choice(["parser", "reflection"]),
+            click_type=click.Choice(list(REFINERS.keys())),
         ),
-    ] = None,
+    ] = "none",
     retriever_type: Annotated[
         str,
         typer.Option(

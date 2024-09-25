@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any
 
 from langchain_core.exceptions import OutputParserException
-from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableParallel, RunnablePassthrough
 from openai import BadRequestError, RateLimitError
@@ -21,11 +20,15 @@ from janus.language.splitter import (
     Splitter,
     TokenLimitError,
 )
-from janus.llm import load_model
 from janus.llm.model_callbacks import get_model_callback
-from janus.llm.models_info import MODEL_PROMPT_ENGINES
+from janus.llm.models_info import MODEL_PROMPT_ENGINES, JanusModel, load_model
 from janus.parsers.parser import GenericParser, JanusParser
-from janus.refiners.refiner import FixParserExceptions, JanusRefiner, ReflectionRefiner
+from janus.refiners.refiner import (
+    FixParserExceptions,
+    HallucinationRefiner,
+    JanusRefiner,
+    ReflectionRefiner,
+)
 
 # from janus.refiners.refiner import BasicRefiner, Refiner
 from janus.retrievers.retriever import ActiveUsingsRetriever, JanusRetriever
@@ -111,7 +114,6 @@ class Converter:
         self.override_token_limit: bool = max_tokens is not None
 
         self._model_name: str
-        self._model_id: str
         self._custom_model_arguments: dict[str, Any]
 
         self._source_language: str
@@ -127,7 +129,7 @@ class Converter:
         self._db_path: str | None
         self._db_config: dict[str, Any] | None
 
-        self._llm: BaseLanguageModel
+        self._llm: JanusModel
         self._prompt: ChatPromptTemplate
 
         self._parser: JanusParser = GenericParser()
@@ -309,9 +311,9 @@ class Converter:
         # model_arguments.update(self._custom_model_arguments)
 
         # Load the model
-        self._llm, self._model_id, token_limit, self.model_cost = load_model(
-            self._model_name
-        )
+        self._llm = load_model(self._model_name)
+        token_limit = self._llm.token_limit
+
         # Set the max_tokens to less than half the model's limit to allow for enough
         # tokens at output
         # Only modify max_tokens if it is not specified by user
@@ -330,7 +332,7 @@ class Converter:
         If the relevant fields have not been changed since the last time this
         method was called, nothing happens.
         """
-        prompt_engine = MODEL_PROMPT_ENGINES[self._model_id](
+        prompt_engine = MODEL_PROMPT_ENGINES[self._llm.model_id](
             source_language=self._source_language,
             prompt_template=self._prompt_template_name,
         )
@@ -375,8 +377,14 @@ class Converter:
                 parser=self._parser,
                 max_retries=self.max_prompts,
             )
+        elif self._refiner_type == "hallucination":
+            self._refiner = HallucinationRefiner(
+                llm=self._llm,
+                parser=self._parser,
+                max_retries=self.max_prompts,
+            )
         else:
-            self._refiner = JanusRefiner(self._parser)
+            self._refiner = JanusRefiner(parser=self._parser)
 
     @run_if_changed("_parser", "_retriever", "_prompt", "_llm", "_refiner")
     def _load_chain(self):
