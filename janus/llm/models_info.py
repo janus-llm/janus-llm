@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from pathlib import Path
 from typing import Protocol, TypeVar
 
@@ -269,6 +270,11 @@ def load_model(model_id) -> JanusModel:
             openai_api_key=str(os.getenv("OPENAI_API_KEY")),
             openai_organization=str(os.getenv("OPENAI_ORG_ID")),
         )
+        log.warning("Do NOT use this model in sensitive environments!")
+        log.warning("If you would like to cancel, please press Ctrl+C.")
+        log.warning("Waiting 10 seconds...")
+        # Give enough time for the user to read the warnings and cancel
+        time.sleep(10)
 
     model_type = MODEL_TYPE_CONSTRUCTORS[model_type_name]
     prompt_engine = MODEL_PROMPT_ENGINES[model_id]

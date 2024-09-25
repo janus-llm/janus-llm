@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import subprocess  # nosec
 from pathlib import Path
 from typing import List, Optional
 
@@ -1172,6 +1173,34 @@ app.add_typer(db, name="db")
 app.add_typer(llm, name="llm")
 app.add_typer(evaluate, name="evaluate")
 app.add_typer(embedding, name="embedding")
+
+
+@app.command()
+def render(
+    input_dir: Annotated[
+        str,
+        typer.Option(
+            "--input",
+            "-i",
+        ),
+    ],
+    output_dir: Annotated[str, typer.Option("--output", "-o")],
+):
+    input_dir = Path(input_dir)
+    output_dir = Path(output_dir)
+    for input_file in input_dir.rglob("*.json"):
+        with open(input_file, "r") as f:
+            data = json.load(f)
+        input_tail = input_file.relative_to(input_dir)
+        output_file = output_dir / input_tail
+        output_file = output_file.with_suffix(".txt")
+        if not output_file.parent.exists():
+            output_file.parent.mkdir()
+        with open(output_file, "w") as f:
+            f.write(data["output"])
+        jar_path = homedir / ".janus/lib/plantuml.jar"
+        subprocess.run(["java", "-jar", jar_path, output_file])  # nosec
+        output_file.unlink()
 
 
 if __name__ == "__main__":
