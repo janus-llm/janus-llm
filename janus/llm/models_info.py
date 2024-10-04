@@ -281,6 +281,7 @@ def load_model(model_id) -> JanusModel:
 
     class JanusModel(model_type):
         model_id: str
+        short_model_id: str
         model_type_name: str
         token_limit: int
         input_token_cost: float
@@ -288,7 +289,8 @@ def load_model(model_id) -> JanusModel:
         prompt_engine: type[PromptEngine]
 
     model_args.update(
-        model_id=model_id,
+        model_id=MODEL_ID_TO_LONG_ID[model_id],
+        short_model_id=model_id,
     )
 
     return JanusModel(
