@@ -332,7 +332,7 @@ class Converter:
         If the relevant fields have not been changed since the last time this
         method was called, nothing happens.
         """
-        prompt_engine = MODEL_PROMPT_ENGINES[self._llm.model_id](
+        prompt_engine = MODEL_PROMPT_ENGINES[self._llm.short_model_id](
             source_language=self._source_language,
             prompt_template=self._prompt_template_name,
         )
