@@ -1,13 +1,12 @@
 import json
 import os
-import time
 from pathlib import Path
 from typing import Any, Callable
 
 from dotenv import load_dotenv
 from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_core.language_models import BaseLanguageModel
-from langchain_openai import ChatOpenAI
+from langchain_openai import AzureChatOpenAI, ChatOpenAI
 
 from janus.llm.model_callbacks import COST_PER_1K_TOKENS
 from janus.prompts.prompt import (
@@ -56,6 +55,12 @@ openai_model_reroutes = {
     "gpt-3.5-turbo-16k": "gpt-3.5-turbo-0125",
 }
 
+azure_model_reroutes = {
+    "gpt-4o": "gpt-4o-2024-08-06",
+    "gpt-4o-mini": "gpt-4o-mini",
+    "gpt-3.5-turbo-16k": "gpt35-turbo-16k",
+}
+
 openai_models = [
     "gpt-4o",
     "gpt-4o-mini",
@@ -63,6 +68,11 @@ openai_models = [
     "gpt-4-turbo",
     "gpt-4-turbo-preview",
     "gpt-3.5-turbo",
+    "gpt-3.5-turbo-16k",
+]
+azure_models = [
+    "gpt-4o",
+    "gpt-4o-mini",
     "gpt-3.5-turbo-16k",
 ]
 claude_models = [
@@ -103,11 +113,12 @@ bedrock_models = [
     *cohere_models,
     *mistral_models,
 ]
-all_models = [*openai_models, *bedrock_models]
+all_models = [*openai_models, *azure_models, *bedrock_models]
 
 MODEL_TYPE_CONSTRUCTORS: dict[str, Callable[[Any], BaseLanguageModel]] = {
     "OpenAI": ChatOpenAI,
     "HuggingFace": HuggingFaceTextGenInference,
+    "Azure": AzureChatOpenAI,
 }
 
 try:
@@ -124,6 +135,7 @@ except NameError:
 
 MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
     **{m: ChatGptPromptEngine for m in openai_models},
+    **{m: ChatGptPromptEngine for m in azure_models},
     **{m: ClaudePromptEngine for m in claude_models},
     **{m: Llama2PromptEngine for m in llama2_models},
     **{m: Llama3PromptEngine for m in llama3_models},
@@ -137,8 +149,18 @@ _open_ai_defaults: dict[str, str] = {
     "openai_organization": os.getenv("OPENAI_ORG_ID"),
 }
 
+_azure_defaults: dict[str, str] = {
+    "api_key": os.getenv("AZURE_OPENAI_API_KEY"),
+    "azure_endpoint": os.getenv(
+        "AZURE_OPENAI_ENDPOINT",
+        "https://aoai.apim.mitre.org/api-key",
+    ),
+    "api_version": os.getenv("OPENAI_API_VERSION", "2024-02-01"),
+}
+
 MODEL_ID_TO_LONG_ID = {
     **{m: mr for m, mr in openai_model_reroutes.items()},
+    **{m: mr for m, mr in azure_model_reroutes.items()},
     "bedrock-claude-v2": "anthropic.claude-v2",
     "bedrock-claude-instant-v1": "anthropic.claude-instant-v1",
     "bedrock-claude-haiku": "anthropic.claude-3-haiku-20240307-v1:0",
@@ -179,7 +201,10 @@ TOKEN_LIMITS: dict[str, int] = {
     "gpt-4-1106-preview": 128_000,
     "gpt-4-0125-preview": 128_000,
     "gpt-4o-2024-05-13": 128_000,
+    "gpt-4o-2024-08-06": 128_000,
+    "gpt-4o-mini": 128_000,
     "gpt-3.5-turbo-0125": 16_384,
+    "gpt35-turbo-16k": 16_384,
     "text-embedding-ada-002": 8191,
     "gpt4all": 16_384,
     "anthropic.claude-v2": 100_000,
@@ -248,11 +273,14 @@ def load_model(
     model_args = model_config["model_args"]
     if model_config["model_type"] == "OpenAI":
         model_args.update(_open_ai_defaults)
-        log.warning("Do NOT use this model in sensitive environments!")
-        log.warning("If you would like to cancel, please press Ctrl+C.")
-        log.warning("Waiting 10 seconds...")
+        # log.warning("Do NOT use this model in sensitive environments!")
+        # log.warning("If you would like to cancel, please press Ctrl+C.")
+        # log.warning("Waiting 10 seconds...")
         # Give enough time for the user to read the warnings and cancel
-        time.sleep(10)
+        # time.sleep(10)
+        raise NotImplementedError("OpenAI models are no longer supported.")
+    elif model_config["model_type"] == "Azure":
+        model_args.update(_azure_defaults)
 
     model = model_constructor(**model_args)
     return (
