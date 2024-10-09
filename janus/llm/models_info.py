@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Protocol, TypeVar
+from typing import Callable, Protocol, TypeVar
 
 from dotenv import load_dotenv
 from langchain_community.llms import HuggingFaceTextGenInference
@@ -135,7 +135,7 @@ MODEL_TYPE_CONSTRUCTORS: dict[str, ModelType] = {
 }
 
 
-MODEL_PROMPT_ENGINES: dict[str, callable[..., PromptEngine]] = {
+MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
     # **{m: ChatGptPromptEngine for m in openai_models},
     **{m: ChatGptPromptEngine for m in azure_models},
     **{m: ClaudePromptEngine for m in claude_models},
