@@ -6,7 +6,7 @@ from typing import Any, Callable
 from dotenv import load_dotenv
 from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_core.language_models import BaseLanguageModel
-from langchain_openai import AzureChatOpenAI, ChatOpenAI
+from langchain_openai import AzureChatOpenAI
 
 from janus.llm.model_callbacks import COST_PER_1K_TOKENS
 from janus.prompts.prompt import (
@@ -116,7 +116,7 @@ bedrock_models = [
 all_models = [*openai_models, *azure_models, *bedrock_models]
 
 MODEL_TYPE_CONSTRUCTORS: dict[str, Callable[[Any], BaseLanguageModel]] = {
-    "OpenAI": ChatOpenAI,
+    # "OpenAI": ChatOpenAI,
     "HuggingFace": HuggingFaceTextGenInference,
     "Azure": AzureChatOpenAI,
 }
@@ -134,7 +134,7 @@ except NameError:
 
 
 MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
-    **{m: ChatGptPromptEngine for m in openai_models},
+    # **{m: ChatGptPromptEngine for m in openai_models},
     **{m: ChatGptPromptEngine for m in azure_models},
     **{m: ClaudePromptEngine for m in claude_models},
     **{m: Llama2PromptEngine for m in llama2_models},
@@ -159,7 +159,7 @@ _azure_defaults: dict[str, str] = {
 }
 
 MODEL_ID_TO_LONG_ID = {
-    **{m: mr for m, mr in openai_model_reroutes.items()},
+    # **{m: mr for m, mr in openai_model_reroutes.items()},
     **{m: mr for m, mr in azure_model_reroutes.items()},
     "bedrock-claude-v2": "anthropic.claude-v2",
     "bedrock-claude-instant-v1": "anthropic.claude-instant-v1",
@@ -191,7 +191,8 @@ DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
 MODEL_CONFIG_DIR = Path.home().expanduser() / ".janus" / "llm"
 
 MODEL_TYPES: dict[str, PromptEngine] = {
-    **{m: "OpenAI" for m in openai_models},
+    # **{m: "OpenAI" for m in openai_models},
+    **{m: "Azure" for m in azure_models},
     **{m: "BedrockChat" for m in bedrock_models},
 }
 

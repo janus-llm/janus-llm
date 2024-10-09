@@ -979,6 +979,7 @@ def llm_add(
             "model_cost": {"input": in_cost, "output": out_cost},
         }
     elif model_type == "OpenAI":
+        print("DEPRECATED: Use 'Azure' instead. CTRL+C to exit.")
         model_id = typer.prompt(
             "Enter the model ID (list model IDs with `janus llm ls -a`)",
             default="gpt-4o",
