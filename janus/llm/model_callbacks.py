@@ -23,6 +23,11 @@ openai_model_reroutes = {
     "gpt-3.5-turbo-16k-0613": "gpt-3.5-turbo-0125",
 }
 
+azure_model_reroutes = {
+    "gpt-4o": "gpt-4o-2024-08-06",
+    "gpt-4o-mini": "gpt-4o-mini",
+    "gpt-3.5-turbo-16k": "gpt35-turbo-16k",
+}
 
 # Updated 2024-06-21
 COST_PER_1K_TOKENS: dict[str, dict[str, float]] = {
@@ -31,6 +36,10 @@ COST_PER_1K_TOKENS: dict[str, dict[str, float]] = {
     "gpt-4-0125-preview": {"input": 0.01, "output": 0.03},
     "gpt-4-0613": {"input": 0.03, "output": 0.06},
     "gpt-4o-2024-05-13": {"input": 0.005, "output": 0.015},
+    "gpt-4o-2024-08-06": {"input": 0.00275, "output": 0.011},
+    "gpt-4o-mini": {"input": 0.00015, "output": 0.0006},
+    "gpt35-turbo-16k": {"input": 0.003, "output": 0.004},
+    "gpt-35-turbo-16k": {"input": 0.003, "output": 0.004},
     "anthropic.claude-v2": {"input": 0.008, "output": 0.024},
     "anthropic.claude-instant-v1": {"input": 0.0008, "output": 0.0024},
     "anthropic.claude-3-haiku-20240307-v1:0": {"input": 0.00025, "output": 0.00125},

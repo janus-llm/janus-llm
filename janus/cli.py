@@ -39,6 +39,7 @@ from janus.llm.models_info import (
     MODEL_TYPE_CONSTRUCTORS,
     MODEL_TYPES,
     TOKEN_LIMITS,
+    azure_models,
     bedrock_models,
     openai_models,
 )
@@ -952,7 +953,7 @@ def llm_add(
             help="The type of the model",
             click_type=click.Choice(sorted(list(MODEL_TYPE_CONSTRUCTORS.keys()))),
         ),
-    ] = "OpenAI",
+    ] = "Azure",
 ):
     if not MODEL_CONFIG_DIR.exists():
         MODEL_CONFIG_DIR.mkdir(parents=True)
@@ -996,6 +997,7 @@ def llm_add(
             "model_cost": {"input": in_cost, "output": out_cost},
         }
     elif model_type == "OpenAI":
+        print("DEPRECATED: Use 'Azure' instead. CTRL+C to exit.")
         model_id = typer.prompt(
             "Enter the model ID (list model IDs with `janus llm ls -a`)",
             default="gpt-4o",
@@ -1005,6 +1007,28 @@ def llm_add(
         params = dict(
             # OpenAI uses the "model_name" key for what we're calling "long_model_id"
             model_name=MODEL_ID_TO_LONG_ID[model_id],
+            temperature=0.7,
+            n=1,
+        )
+        max_tokens = TOKEN_LIMITS[MODEL_ID_TO_LONG_ID[model_id]]
+        model_cost = COST_PER_1K_TOKENS[MODEL_ID_TO_LONG_ID[model_id]]
+        cfg = {
+            "model_type": model_type,
+            "model_id": model_id,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": model_cost,
+        }
+    elif model_type == "Azure":
+        model_id = typer.prompt(
+            "Enter the model ID (list model IDs with `janus llm ls -a`)",
+            default="gpt-4o",
+            type=click.Choice(azure_models),
+            show_choices=False,
+        )
+        params = dict(
+            # Azure uses the "azure_deployment" key for what we're calling "long_model_id"
+            azure_deployment=MODEL_ID_TO_LONG_ID[model_id],
             temperature=0.7,
             n=1,
         )

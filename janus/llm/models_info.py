@@ -1,15 +1,14 @@
 import json
 import os
-import time
 from pathlib import Path
-from typing import Protocol, TypeVar
+from typing import Callable, Protocol, TypeVar
 
 from dotenv import load_dotenv
 from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_core.runnables import Runnable
-from langchain_openai import ChatOpenAI
+from langchain_openai import AzureChatOpenAI
 
-from janus.llm.model_callbacks import COST_PER_1K_TOKENS, openai_model_reroutes
+from janus.llm.model_callbacks import COST_PER_1K_TOKENS, azure_model_reroutes
 from janus.prompts.prompt import (
     ChatGptPromptEngine,
     ClaudePromptEngine,
@@ -46,7 +45,7 @@ except ImportError:
 
 ModelType = TypeVar(
     "ModelType",
-    ChatOpenAI,
+    AzureChatOpenAI,
     HuggingFaceTextGenInference,
     Bedrock,
     BedrockChat,
@@ -72,7 +71,6 @@ class JanusModel(Runnable, JanusModelProtocol):
 
 load_dotenv()
 
-
 openai_models = [
     "gpt-4o",
     "gpt-4o-mini",
@@ -80,6 +78,11 @@ openai_models = [
     "gpt-4-turbo",
     "gpt-4-turbo-preview",
     "gpt-3.5-turbo",
+    "gpt-3.5-turbo-16k",
+]
+azure_models = [
+    "gpt-4o",
+    "gpt-4o-mini",
     "gpt-3.5-turbo-16k",
 ]
 claude_models = [
@@ -120,18 +123,21 @@ bedrock_models = [
     *cohere_models,
     *mistral_models,
 ]
-all_models = [*openai_models, *bedrock_models]
+all_models = [*azure_models, *bedrock_models]
 
 MODEL_TYPE_CONSTRUCTORS: dict[str, ModelType] = {
-    "OpenAI": ChatOpenAI,
+    # "OpenAI": ChatOpenAI,
     "HuggingFace": HuggingFaceTextGenInference,
+    "Azure": AzureChatOpenAI,
     "Bedrock": Bedrock,
     "BedrockChat": BedrockChat,
     "HuggingFaceLocal": HuggingFacePipeline,
 }
 
-MODEL_PROMPT_ENGINES: dict[str, type[PromptEngine]] = {
-    **{m: ChatGptPromptEngine for m in openai_models},
+
+MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
+    # **{m: ChatGptPromptEngine for m in openai_models},
+    **{m: ChatGptPromptEngine for m in azure_models},
     **{m: ClaudePromptEngine for m in claude_models},
     **{m: Llama2PromptEngine for m in llama2_models},
     **{m: Llama3PromptEngine for m in llama3_models},
@@ -141,7 +147,8 @@ MODEL_PROMPT_ENGINES: dict[str, type[PromptEngine]] = {
 }
 
 MODEL_ID_TO_LONG_ID = {
-    **{m: mr for m, mr in openai_model_reroutes.items()},
+    # **{m: mr for m, mr in openai_model_reroutes.items()},
+    **{m: mr for m, mr in azure_model_reroutes.items()},
     "bedrock-claude-v2": "anthropic.claude-v2",
     "bedrock-claude-instant-v1": "anthropic.claude-instant-v1",
     "bedrock-claude-haiku": "anthropic.claude-3-haiku-20240307-v1:0",
@@ -171,8 +178,9 @@ DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
 
 MODEL_CONFIG_DIR = Path.home().expanduser() / ".janus" / "llm"
 
-MODEL_TYPES: dict[str, str] = {
-    **{m: "OpenAI" for m in openai_models},
+MODEL_TYPES: dict[str, PromptEngine] = {
+    # **{m: "OpenAI" for m in openai_models},
+    **{m: "Azure" for m in azure_models},
     **{m: "BedrockChat" for m in bedrock_models},
 }
 
@@ -182,7 +190,10 @@ TOKEN_LIMITS: dict[str, int] = {
     "gpt-4-1106-preview": 128_000,
     "gpt-4-0125-preview": 128_000,
     "gpt-4o-2024-05-13": 128_000,
+    "gpt-4o-2024-08-06": 128_000,
+    "gpt-4o-mini": 128_000,
     "gpt-3.5-turbo-0125": 16_384,
+    "gpt35-turbo-16k": 16_384,
     "text-embedding-ada-002": 8191,
     "gpt4all": 16_384,
     "anthropic.claude-v2": 100_000,
@@ -270,11 +281,21 @@ def load_model(model_id) -> JanusModel:
             openai_api_key=str(os.getenv("OPENAI_API_KEY")),
             openai_organization=str(os.getenv("OPENAI_ORG_ID")),
         )
-        log.warning("Do NOT use this model in sensitive environments!")
-        log.warning("If you would like to cancel, please press Ctrl+C.")
-        log.warning("Waiting 10 seconds...")
+        # log.warning("Do NOT use this model in sensitive environments!")
+        # log.warning("If you would like to cancel, please press Ctrl+C.")
+        # log.warning("Waiting 10 seconds...")
         # Give enough time for the user to read the warnings and cancel
-        time.sleep(10)
+        # time.sleep(10)
+        raise DeprecationWarning("OpenAI models are no longer supported.")
+
+    elif model_type_name == "Azure":
+        model_args.update(
+            {
+                "api_key": os.getenv("AZURE_OPENAI_API_KEY"),
+                "azure_endpoint": os.getenv("AZURE_OPENAI_ENDPOINT"),
+                "api_version": os.getenv("OPENAI_API_VERSION", "2024-02-01"),
+            }
+        )
 
     model_type = MODEL_TYPE_CONSTRUCTORS[model_type_name]
     prompt_engine = MODEL_PROMPT_ENGINES[model_id]
