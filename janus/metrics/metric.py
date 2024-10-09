@@ -8,6 +8,7 @@ import typer
 from typing_extensions import Annotated
 
 from janus.llm import load_model
+from janus.llm.model_callbacks import COST_PER_1K_TOKENS
 from janus.metrics.cli import evaluate
 from janus.metrics.file_pairing import FILE_PAIRING_METHODS
 from janus.metrics.splitting import SPLITTING_METHODS
@@ -135,7 +136,7 @@ def metric(
                 **kwargs,
             ):
                 out = []
-                llm, _, token_limit, model_cost = load_model(llm_name)
+                llm = load_model(llm_name)
                 if json_file_name is not None:
                     with open(json_file_name, "r") as f:
                         json_obj = json.load(f)
@@ -171,8 +172,8 @@ def metric(
                         out_file=out_file,
                         lang=language,
                         llm=llm,
-                        token_limit=token_limit,
-                        model_cost=model_cost,
+                        token_limit=llm.token_limit,
+                        model_cost=COST_PER_1K_TOKENS[llm.model_id],
                     )
                 else:
                     raise ValueError(
@@ -187,8 +188,8 @@ def metric(
                             progress,
                             language,
                             llm,
-                            token_limit,
-                            model_cost,
+                            llm.token_limit,
+                            COST_PER_1K_TOKENS[llm.model_id],
                             *args,
                             **kwargs,
                         )
@@ -199,8 +200,8 @@ def metric(
                         progress,
                         language,
                         llm,
-                        token_limit,
-                        model_cost,
+                        llm.token_limit,
+                        COST_PER_1K_TOKENS[llm.model_id],
                         *args,
                         **kwargs,
                     )
@@ -296,7 +297,7 @@ def metric(
                 *args,
                 **kwargs,
             ):
-                llm, _, token_limit, model_cost = load_model(llm_name)
+                llm = load_model(llm_name)
                 if json_file_name is not None:
                     with open(json_file_name, "r") as f:
                         json_obj = json.load(f)
@@ -328,8 +329,8 @@ def metric(
                         out_file=out_file,
                         lang=language,
                         llm=llm,
-                        token_limit=token_limit,
-                        model_cost=model_cost,
+                        token_limit=llm.token_limit,
+                        model_cost=COST_PER_1K_TOKENS[llm.model_id],
                     )
                 else:
                     raise ValueError(
@@ -344,8 +345,8 @@ def metric(
                             progress,
                             language,
                             llm,
-                            token_limit,
-                            model_cost,
+                            llm.token_limit,
+                            COST_PER_1K_TOKENS[llm.model_id],
                             *args,
                             **kwargs,
                         )
@@ -356,8 +357,8 @@ def metric(
                         progress,
                         language,
                         llm,
-                        token_limit,
-                        model_cost,
+                        llm.token_limit,
+                        COST_PER_1K_TOKENS[llm.model_id],
                         *args,
                         **kwargs,
                     )

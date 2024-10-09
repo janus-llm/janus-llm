@@ -12,6 +12,17 @@ from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 
+openai_model_reroutes = {
+    "gpt-4o": "gpt-4o-2024-05-13",
+    "gpt-4o-mini": "gpt-4o-mini",
+    "gpt-4": "gpt-4-0613",
+    "gpt-4-turbo": "gpt-4-turbo-2024-04-09",
+    "gpt-4-turbo-preview": "gpt-4-0125-preview",
+    "gpt-3.5-turbo": "gpt-3.5-turbo-0125",
+    "gpt-3.5-turbo-16k": "gpt-3.5-turbo-0125",
+    "gpt-3.5-turbo-16k-0613": "gpt-3.5-turbo-0125",
+}
+
 
 # Updated 2024-06-21
 COST_PER_1K_TOKENS: dict[str, dict[str, float]] = {
@@ -45,6 +56,8 @@ def _get_token_cost(
     prompt_tokens: int, completion_tokens: int, model_id: str | None
 ) -> float:
     """Get the cost of tokens according to model ID"""
+    if model_id in openai_model_reroutes:
+        model_id = openai_model_reroutes[model_id]
     if model_id not in COST_PER_1K_TOKENS:
         raise ValueError(
             f"Unknown model: {model_id}. Please provide a valid model name."

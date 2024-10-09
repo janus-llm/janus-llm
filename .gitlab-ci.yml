@@ -4,7 +4,7 @@ before_script:
   - curl -ksSL https://gitlab.mitre.org/mitre-scripts/mitre-pki/raw/master/os_scripts/install_certs.sh | sh
   - python --version
   - apt update -y
-  - apt install -y pipx
+  - apt install -y pipx wget default-jre graphviz
   - pipx install poetry
   - pipx ensurepath
   - export PATH=$PATH:$HOME/.local/bin
@@ -103,6 +103,7 @@ coverage:
     "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
     "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
   script:
+    - bash scripts/install_plantuml.sh
     - poetry install --with coverage --all-extras
     - poetry run python -m coverage run -m pytest -v -m translate janus
     - poetry run python -m coverage report -i
@@ -114,7 +115,6 @@ coverage:
         coverage_format: cobertura
         path: coverage.xml
   needs: []
-  timeout: 20m
   only:
     refs:
       - merge_requests
