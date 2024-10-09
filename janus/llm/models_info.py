@@ -123,7 +123,7 @@ bedrock_models = [
     *cohere_models,
     *mistral_models,
 ]
-all_models = [*openai_models, *azure_models, *bedrock_models]
+all_models = [*azure_models, *bedrock_models]
 
 MODEL_TYPE_CONSTRUCTORS: dict[str, ModelType] = {
     # "OpenAI": ChatOpenAI,
@@ -292,10 +292,7 @@ def load_model(model_id) -> JanusModel:
         model_args.update(
             {
                 "api_key": os.getenv("AZURE_OPENAI_API_KEY"),
-                "azure_endpoint": os.getenv(
-                    "AZURE_OPENAI_ENDPOINT",
-                    "https://aoai.apim.mitre.org/api-key",
-                ),
+                "azure_endpoint": os.getenv("AZURE_OPENAI_ENDPOINT"),
                 "api_version": os.getenv("OPENAI_API_VERSION", "2024-02-01"),
             }
         )
