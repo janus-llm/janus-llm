@@ -1,73 +1,115 @@
-from langchain_core.prompts import ChatPromptTemplate
+from typing import Any
 
-from janus.llm.models_info import MODEL_PROMPT_ENGINES
+from langchain.output_parsers import RetryWithErrorOutputParser
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompt_values import PromptValue
+from langchain_core.runnables import RunnableSerializable
+
+from janus.llm.models_info import MODEL_PROMPT_ENGINES, JanusModel
+from janus.parsers.parser import JanusParser
+from janus.utils.logger import create_logger
+
+log = create_logger(__name__)
 
 
-class Refiner:
-    def refine(
-        self,
-        original_prompt: str,
-        previous_prompt: str,
-        previous_output: str,
-        errors: str,
-        **kwargs,
-    ) -> tuple[ChatPromptTemplate, dict[str, str]]:
-        """Creates a new prompt based on feedback from original results
+class JanusRefiner(JanusParser):
+    parser: JanusParser
 
-        Arguments:
-            original_prompt: original prompt used to produce output
-            original_output: origial output of llm
-            errors: list of errors detected by parser
+    def parse_runnable(self, input: dict[str, Any]) -> Any:
+        return self.parse_completion(**input)
 
-        Returns:
-            Tuple of new prompt and prompt arguments
-        """
+    def parse_completion(self, completion: str, **kwargs) -> Any:
+        return self.parser.parse(completion)
+
+    def parse(self, text: str) -> str:
         raise NotImplementedError
 
 
-class BasicRefiner(Refiner):
+class FixParserExceptions(JanusRefiner, RetryWithErrorOutputParser):
+    def __init__(self, llm: JanusModel, parser: JanusParser, max_retries: int):
+        retry_prompt = MODEL_PROMPT_ENGINES[llm.model_id](
+            source_language="text",
+            prompt_template="refinement/fix_exceptions",
+        ).prompt
+        chain = retry_prompt | llm | StrOutputParser()
+        RetryWithErrorOutputParser.__init__(
+            self, parser=parser, retry_chain=chain, max_retries=max_retries
+        )
+
+    def parse_completion(
+        self, completion: str, prompt_value: PromptValue, **kwargs
+    ) -> Any:
+        return self.parse_with_prompt(completion, prompt_value=prompt_value)
+
+
+class ReflectionRefiner(JanusRefiner):
+    max_retries: int
+    reflection_chain: RunnableSerializable
+    revision_chain: RunnableSerializable
+
     def __init__(
         self,
-        prompt_name: str,
-        model_id: str,
-        source_language: str,
-    ) -> None:
-        """Basic refiner, asks llm to fix output of previous prompt given errors
+        llm: JanusModel,
+        parser: JanusParser,
+        max_retries: int,
+        prompt_template_name: str = "refinement/reflection",
+    ):
+        reflection_prompt = MODEL_PROMPT_ENGINES[llm.model_id](
+            source_language="text",
+            prompt_template=prompt_template_name,
+        ).prompt
+        revision_prompt = MODEL_PROMPT_ENGINES[llm.model_id](
+            source_language="text",
+            prompt_template="refinement/revision",
+        ).prompt
 
-        Arguments:
-            prompt_name: refinement prompt name to use
-            model_id: ID of the llm to use. Found in models_info.py
-            source_language: source_langauge to use
-        """
-        self._prompt_name = prompt_name
-        self._model_id = model_id
-        self._source_language = source_language
-
-    def refine(
-        self,
-        original_prompt: str,
-        previous_prompt: str,
-        previous_output: str,
-        errors: str,
-        **kwargs,
-    ) -> tuple[ChatPromptTemplate, dict[str, str]]:
-        """Creates a new prompt based on feedback from original results
-
-        Arguments:
-            original_prompt: original prompt used to produce output
-            original_output: origial output of llm
-            errors: list of errors detected by parser
-
-        Returns:
-            Tuple of new prompt and prompt arguments
-        """
-        prompt_engine = MODEL_PROMPT_ENGINES[self._model_id](
-            prompt_template=self._prompt_name,
-            source_language=self._source_language,
+        reflection_chain = reflection_prompt | llm | StrOutputParser()
+        revision_chain = revision_prompt | llm | StrOutputParser()
+        super().__init__(
+            reflection_chain=reflection_chain,
+            revision_chain=revision_chain,
+            parser=parser,
+            max_retries=max_retries,
         )
-        prompt_arguments = {
-            "ORIGINAL_PROMPT": original_prompt,
-            "OUTPUT": previous_output,
-            "ERRORS": errors,
-        }
-        return prompt_engine.prompt, prompt_arguments
+
+    def parse_completion(
+        self, completion: str, prompt_value: PromptValue, **kwargs
+    ) -> Any:
+        for retry_number in range(self.max_retries):
+            reflection = self.reflection_chain.invoke(
+                dict(
+                    prompt=prompt_value.to_string(),
+                    completion=completion,
+                )
+            )
+            if reflection.strip() == "LGTM":
+                return self.parser.parse(completion)
+            if not retry_number:
+                log.info(f"Completion:\n{completion}")
+            log.info(f"Reflection:\n{reflection}")
+            completion = self.revision_chain.invoke(
+                dict(
+                    prompt=prompt_value.to_string(),
+                    completion=completion,
+                    reflection=reflection,
+                )
+            )
+            log.info(f"Revision:\n{completion}")
+
+        return self.parser.parse(completion)
+
+
+class HallucinationRefiner(ReflectionRefiner):
+    def __init__(self, **kwargs):
+        super().__init__(
+            prompt_template_name="refinement/hallucination",
+            **kwargs,
+        )
+
+
+REFINERS = dict(
+    none=JanusRefiner,
+    parser=FixParserExceptions,
+    reflection=ReflectionRefiner,
+    hallucination=HallucinationRefiner,
+)

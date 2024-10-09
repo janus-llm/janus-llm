@@ -7,10 +7,10 @@ from typing import Optional
 
 import tree_sitter
 from git import Repo
-from langchain.schema.language_model import BaseLanguageModel
 
 from janus.language.block import CodeBlock, NodeType
 from janus.language.splitter import Splitter
+from janus.llm.models_info import JanusModel
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
@@ -25,7 +25,7 @@ class TreeSitterSplitter(Splitter):
     def __init__(
         self,
         language: str,
-        model: None | BaseLanguageModel = None,
+        model: JanusModel | None = None,
         max_tokens: int = 4096,
         protected_node_types: tuple[str, ...] = (),
         prune_node_types: tuple[str, ...] = (),
