@@ -54,11 +54,11 @@ class ReflectionRefiner(JanusRefiner):
         max_retries: int,
         prompt_template_name: str = "refinement/reflection",
     ):
-        reflection_prompt = MODEL_PROMPT_ENGINES[llm.model_id](
+        reflection_prompt = MODEL_PROMPT_ENGINES[llm.short_model_id](
             source_language="text",
             prompt_template=prompt_template_name,
         ).prompt
-        revision_prompt = MODEL_PROMPT_ENGINES[llm.model_id](
+        revision_prompt = MODEL_PROMPT_ENGINES[llm.short_model_id](
             source_language="text",
             prompt_template="refinement/revision",
         ).prompt
