@@ -27,7 +27,7 @@ class JanusRefiner(JanusParser):
 
 class FixParserExceptions(JanusRefiner, RetryWithErrorOutputParser):
     def __init__(self, llm: JanusModel, parser: JanusParser, max_retries: int):
-        retry_prompt = MODEL_PROMPT_ENGINES[llm.model_id](
+        retry_prompt = MODEL_PROMPT_ENGINES[llm.short_model_id](
             source_language="text",
             prompt_template="refinement/fix_exceptions",
         ).prompt
