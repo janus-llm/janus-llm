@@ -27,7 +27,7 @@ class JanusRefiner(JanusParser):
 
 class FixParserExceptions(JanusRefiner, RetryWithErrorOutputParser):
     def __init__(self, llm: JanusModel, parser: JanusParser, max_retries: int):
-        retry_prompt = MODEL_PROMPT_ENGINES[llm.model_id](
+        retry_prompt = MODEL_PROMPT_ENGINES[llm.short_model_id](
             source_language="text",
             prompt_template="refinement/fix_exceptions",
         ).prompt
@@ -105,11 +105,3 @@ class HallucinationRefiner(ReflectionRefiner):
             prompt_template_name="refinement/hallucination",
             **kwargs,
         )
-
-
-REFINERS = dict(
-    none=JanusRefiner,
-    parser=FixParserExceptions,
-    reflection=ReflectionRefiner,
-    hallucination=HallucinationRefiner,
-)

@@ -128,6 +128,7 @@ class Converter:
         self._prompt: ChatPromptTemplate
 
         self._parser: JanusParser = GenericParser()
+        self._base_parser: JanusParser = GenericParser()
         self._combiner: Combiner = Combiner()
 
         self._splitter_type: str
@@ -355,32 +356,39 @@ class Converter:
 
     @run_if_changed("_refiner_types", "_model_name", "max_prompts", "_parser")
     def _load_refiner_chain(self) -> None:
-        self._refiner_chain = self._refiner_types[0](
-            llm=self._llm,
-            parser=self._parser,
-            max_retries=self.max_prompts,
-        ).parse_runnable
-        for refiner_type in self._refiner_types[1:]:
+        current_parser = self._base_parser
+        if len(self._refiner_types) == 0:
+            current_parser = self._parser
+        self._refiner_chain = (
+            RunnableParallel(
+                completion=self._llm,
+                prompt_value=RunnablePassthrough(),
+            )
+            | self._refiner_types[0](
+                llm=self._llm,
+                parser=current_parser,
+                max_retries=self.max_prompts,
+            ).parse_runnable
+        )
+        for i, refiner_type in enumerate(self._refiner_types[1:]):
+            if i == len(self._refiner_types) - 1:
+                current_parser = self._parser
             self._refiner_chain = (
                 self._refiner_chain
+                | RunnableParallel(
+                    completion=self._llm,
+                    prompt_value=RunnablePassthrough(),
+                )
                 | refiner_type(
                     llm=self._llm,
-                    parser=self._parser,
+                    parser=current_parser,
                     max_retries=self.max_prompts,
                 ).parse_runnable
             )
 
     @run_if_changed("_parser", "_retriever", "_prompt", "_llm", "_refiner")
     def _load_chain(self):
-        self.chain = (
-            self._input_runnable()
-            | self._prompt
-            | RunnableParallel(
-                completion=self._llm,
-                prompt_value=RunnablePassthrough(),
-            )
-            | self._refiner_chain
-        )
+        self.chain = self._input_runnable() | self._prompt | self._refiner_chain
 
     def _input_runnable(self) -> Runnable:
         return RunnableParallel(
