@@ -376,8 +376,8 @@ class Converter:
             self._refiner_chain = (
                 self._refiner_chain
                 | RunnableParallel(
-                    completion=self._llm,
-                    prompt_value=RunnablePassthrough(),
+                    completion=RunnablePassthrough(),
+                    prompt_value=self._prompt,
                 )
                 | refiner_type(
                     llm=self._llm,
