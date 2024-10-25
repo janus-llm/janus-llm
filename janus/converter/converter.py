@@ -371,7 +371,7 @@ class Converter:
             ).parse_runnable
         )
         for i, refiner_type in enumerate(self._refiner_types[1:]):
-            if i == len(self._refiner_types) - 1:
+            if i == len(self._refiner_types) - 2:
                 current_parser = self._parser
             self._refiner_chain = (
                 self._refiner_chain
