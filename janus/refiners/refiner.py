@@ -105,11 +105,3 @@ class HallucinationRefiner(ReflectionRefiner):
             prompt_template_name="refinement/hallucination",
             **kwargs,
         )
-
-
-REFINERS = dict(
-    none=JanusRefiner,
-    parser=FixParserExceptions,
-    reflection=ReflectionRefiner,
-    hallucination=HallucinationRefiner,
-)

@@ -23,12 +23,7 @@ from janus.language.splitter import (
 from janus.llm.model_callbacks import get_model_callback
 from janus.llm.models_info import MODEL_PROMPT_ENGINES, JanusModel, load_model
 from janus.parsers.parser import GenericParser, JanusParser
-from janus.refiners.refiner import (
-    FixParserExceptions,
-    HallucinationRefiner,
-    JanusRefiner,
-    ReflectionRefiner,
-)
+from janus.refiners.refiner import JanusRefiner
 
 # from janus.refiners.refiner import BasicRefiner, Refiner
 from janus.retrievers.retriever import ActiveUsingsRetriever, JanusRetriever
@@ -78,7 +73,7 @@ class Converter:
         protected_node_types: tuple[str, ...] = (),
         prune_node_types: tuple[str, ...] = (),
         splitter_type: str = "file",
-        refiner_type: str | None = None,
+        refiner_types: list[type[JanusRefiner]] = [JanusRefiner],
         retriever_type: str | None = None,
     ) -> None:
         """Initialize a Converter instance.
@@ -133,10 +128,11 @@ class Converter:
         self._prompt: ChatPromptTemplate
 
         self._parser: JanusParser = GenericParser()
+        self._base_parser: JanusParser = GenericParser()
         self._combiner: Combiner = Combiner()
 
         self._splitter_type: str
-        self._refiner_type: str | None
+        self._refiner_types: list[type[JanusRefiner]]
         self._retriever_type: str | None
 
         self._splitter: Splitter
@@ -144,7 +140,7 @@ class Converter:
         self._retriever: JanusRetriever
 
         self.set_splitter(splitter_type=splitter_type)
-        self.set_refiner(refiner_type=refiner_type)
+        self.set_refiner_types(refiner_types=refiner_types)
         self.set_retriever(retriever_type=retriever_type)
         self.set_model(model_name=model, **model_arguments)
         self.set_prompt(prompt_template=prompt_template)
@@ -170,7 +166,7 @@ class Converter:
         self._load_model()
         self._load_prompt()
         self._load_retriever()
-        self._load_refiner()
+        self._load_refiner_chain()
         self._load_splitter()
         self._load_vectorizer()
         self._load_chain()
@@ -210,13 +206,13 @@ class Converter:
 
         self._splitter_type = splitter_type
 
-    def set_refiner(self, refiner_type: str | None) -> None:
+    def set_refiner_types(self, refiner_types: list[type[JanusRefiner]]) -> None:
         """Validate and set the refiner type
 
         Arguments:
             refiner_type: the type of refiner to use
         """
-        self._refiner_type = refiner_type
+        self._refiner_types = refiner_types
 
     def set_retriever(self, retriever_type: str | None) -> None:
         """Validate and set the retriever type
@@ -358,45 +354,41 @@ class Converter:
         else:
             self._retriever = JanusRetriever()
 
-    @run_if_changed("_refiner_type", "_model_name", "max_prompts", "_parser", "_llm")
-    def _load_refiner(self) -> None:
-        """Load the refiner according to this instance's attributes.
-
-        If the relevant fields have not been changed since the last time this method was
-        called, nothing happens.
-        """
-        if self._refiner_type == "parser":
-            self._refiner = FixParserExceptions(
-                llm=self._llm,
-                parser=self._parser,
-                max_retries=self.max_prompts,
-            )
-        elif self._refiner_type == "reflection":
-            self._refiner = ReflectionRefiner(
-                llm=self._llm,
-                parser=self._parser,
-                max_retries=self.max_prompts,
-            )
-        elif self._refiner_type == "hallucination":
-            self._refiner = HallucinationRefiner(
-                llm=self._llm,
-                parser=self._parser,
-                max_retries=self.max_prompts,
-            )
-        else:
-            self._refiner = JanusRefiner(parser=self._parser)
-
-    @run_if_changed("_parser", "_retriever", "_prompt", "_llm", "_refiner")
-    def _load_chain(self):
-        self.chain = (
-            self._input_runnable()
-            | self._prompt
-            | RunnableParallel(
+    @run_if_changed("_refiner_types", "_model_name", "max_prompts", "_parser")
+    def _load_refiner_chain(self) -> None:
+        current_parser = self._base_parser
+        if len(self._refiner_types) == 0:
+            current_parser = self._parser
+        self._refiner_chain = (
+            RunnableParallel(
                 completion=self._llm,
                 prompt_value=RunnablePassthrough(),
             )
-            | self._refiner.parse_runnable
+            | self._refiner_types[0](
+                llm=self._llm,
+                parser=current_parser,
+                max_retries=self.max_prompts,
+            ).parse_runnable
         )
+        for i, refiner_type in enumerate(self._refiner_types[1:]):
+            if i == len(self._refiner_types) - 1:
+                current_parser = self._parser
+            self._refiner_chain = (
+                self._refiner_chain
+                | RunnableParallel(
+                    completion=RunnablePassthrough(),
+                    prompt_value=self._prompt,
+                )
+                | refiner_type(
+                    llm=self._llm,
+                    parser=current_parser,
+                    max_retries=self.max_prompts,
+                ).parse_runnable
+            )
+
+    @run_if_changed("_parser", "_retriever", "_prompt", "_llm", "_refiner")
+    def _load_chain(self):
+        self.chain = self._input_runnable() | self._prompt | self._refiner_chain
 
     def _input_runnable(self) -> Runnable:
         return RunnableParallel(
