@@ -82,7 +82,7 @@ class ReflectionRefiner(JanusRefiner):
                     completion=completion,
                 )
             )
-            if reflection.strip() == "LGTM":
+            if "LGTM" in reflection:
                 return self.parser.parse(completion)
             if not retry_number:
                 log.info(f"Completion:\n{completion}")
