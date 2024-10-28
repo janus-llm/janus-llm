@@ -90,6 +90,7 @@ claude_models = [
     "bedrock-claude-instant-v1",
     "bedrock-claude-haiku",
     "bedrock-claude-sonnet",
+    "bedrock-claude-sonnet-3.5",
 ]
 llama2_models = [
     "bedrock-llama2-70b",
@@ -153,6 +154,7 @@ MODEL_ID_TO_LONG_ID = {
     "bedrock-claude-instant-v1": "anthropic.claude-instant-v1",
     "bedrock-claude-haiku": "anthropic.claude-3-haiku-20240307-v1:0",
     "bedrock-claude-sonnet": "anthropic.claude-3-sonnet-20240229-v1:0",
+    "bedrock-claude-sonnet-3.5": "anthropic.claude-3-5-sonnet-20240620-v1:0",
     "bedrock-llama2-70b": "meta.llama2-70b-v1",
     "bedrock-llama2-70b-chat": "meta.llama2-70b-chat-v1",
     "bedrock-llama2-13b": "meta.llama2-13b-chat-v1",
@@ -200,6 +202,7 @@ TOKEN_LIMITS: dict[str, int] = {
     "anthropic.claude-instant-v1": 100_000,
     "anthropic.claude-3-haiku-20240307-v1:0": 248_000,
     "anthropic.claude-3-sonnet-20240229-v1:0": 248_000,
+    "anthropic.claude-3-5-sonnet-20240620-v1:0": 200_000,
     "meta.llama2-70b-v1": 4096,
     "meta.llama2-70b-chat-v1": 4096,
     "meta.llama2-13b-chat-v1": 4096,
