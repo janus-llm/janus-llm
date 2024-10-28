@@ -46,6 +46,7 @@ class ReflectionRefiner(JanusRefiner):
     max_retries: int
     reflection_chain: RunnableSerializable
     revision_chain: RunnableSerializable
+    reflection_prompt_name: str
 
     def __init__(
         self,
@@ -66,6 +67,7 @@ class ReflectionRefiner(JanusRefiner):
         reflection_chain = reflection_prompt | llm | StrOutputParser()
         revision_chain = revision_prompt | llm | StrOutputParser()
         super().__init__(
+            reflection_prompt_name=prompt_template_name,
             reflection_chain=reflection_chain,
             revision_chain=revision_chain,
             parser=parser,
@@ -75,6 +77,7 @@ class ReflectionRefiner(JanusRefiner):
     def parse_completion(
         self, completion: str, prompt_value: PromptValue, **kwargs
     ) -> Any:
+        log.info(f"Reflection Prompt: {self.reflection_prompt_name}")
         for retry_number in range(self.max_retries):
             reflection = self.reflection_chain.invoke(
                 dict(
