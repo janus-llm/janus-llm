@@ -367,7 +367,7 @@ class Converter:
         )
         for refiner_type in self._refiner_types[:-1]:
             self._refiner_chain = self._refiner_chain | RunnableParallel(
-                completion=lambda x: refiner_type(
+                completion=lambda x, refiner_type=refiner_type: refiner_type(
                     llm=self._llm,
                     parser=self._base_parser,
                     max_retries=self.max_prompts,
