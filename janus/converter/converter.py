@@ -6,7 +6,12 @@ from typing import Any
 
 from langchain_core.exceptions import OutputParserException
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import Runnable, RunnableParallel, RunnablePassthrough
+from langchain_core.runnables import (
+    Runnable,
+    RunnableLambda,
+    RunnableParallel,
+    RunnablePassthrough,
+)
 from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
 
@@ -356,37 +361,28 @@ class Converter:
 
     @run_if_changed("_refiner_types", "_model_name", "max_prompts", "_parser")
     def _load_refiner_chain(self) -> None:
-        current_parser = self._base_parser
-        if len(self._refiner_types) == 0:
-            current_parser = self._parser
-        self._refiner_chain = (
-            RunnableParallel(
-                completion=self._llm,
-                prompt_value=RunnablePassthrough(),
-            )
-            | self._refiner_types[0](
-                llm=self._llm,
-                parser=current_parser,
-                max_retries=self.max_prompts,
-            ).parse_runnable
+        self._refiner_chain = RunnableParallel(
+            completion=self._llm,
+            prompt_value=RunnablePassthrough(),
         )
-        for i, refiner_type in enumerate(self._refiner_types[1:]):
-            if i == len(self._refiner_types) - 2:
-                current_parser = self._parser
-            self._refiner_chain = (
-                self._refiner_chain
-                | RunnableParallel(
-                    completion=RunnablePassthrough(),
-                    prompt_value=self._prompt,
-                )
-                | refiner_type(
+        for refiner_type in self._refiner_types[:-1]:
+            self._refiner_chain = self._refiner_chain | RunnableParallel(
+                completion=lambda x: refiner_type(
                     llm=self._llm,
-                    parser=current_parser,
+                    parser=self._base_parser,
                     max_retries=self.max_prompts,
-                ).parse_runnable
+                ).parse_completion(**x),
+                prompt_value=lambda x: x["prompt_value"],
             )
+        self._refiner_chain = self._refiner_chain | RunnableLambda(
+            lambda x: self._refiner_types[-1](
+                llm=self._llm,
+                parser=self._parser,
+                max_retries=self.max_prompts,
+            ).parse_completion(**x)
+        )
 
-    @run_if_changed("_parser", "_retriever", "_prompt", "_llm", "_refiner")
+    @run_if_changed("_parser", "_retriever", "_prompt", "_llm", "_refiner_chain")
     def _load_chain(self):
         self.chain = self._input_runnable() | self._prompt | self._refiner_chain
 
