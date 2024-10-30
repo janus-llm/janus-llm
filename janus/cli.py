@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import subprocess  # nosec
 from pathlib import Path
 from typing import List, Optional
 
@@ -39,10 +40,12 @@ from janus.llm.models_info import (
     MODEL_TYPE_CONSTRUCTORS,
     MODEL_TYPES,
     TOKEN_LIMITS,
+    azure_models,
     bedrock_models,
     openai_models,
 )
 from janus.metrics.cli import evaluate
+from janus.refiners.refiner import REFINERS
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
@@ -186,7 +189,7 @@ def translate(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-4o",
+    ],
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -242,6 +245,24 @@ def translate(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    refiner_type: Annotated[
+        str,
+        typer.Option(
+            "-r",
+            "--refiner",
+            help="Name of custom refiner to use",
+            click_type=click.Choice(list(REFINERS.keys())),
+        ),
+    ] = "none",
+    retriever_type: Annotated[
+        str,
+        typer.Option(
+            "-R",
+            "--retriever",
+            help="Name of custom retriever to use",
+            click_type=click.Choice(["active_usings"]),
+        ),
+    ] = None,
     max_tokens: Annotated[
         int,
         typer.Option(
@@ -251,13 +272,6 @@ def translate(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
-    skip_refiner: Annotated[
-        bool,
-        typer.Option(
-            "--skip-refiner",
-            help="Whether to skip the refiner for generating output",
-        ),
-    ] = True,
 ):
     try:
         target_language, target_version = target_lang.split("-")
@@ -283,8 +297,8 @@ def translate(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
-        skip_context=skip_context,
-        skip_refiner=skip_refiner,
+        refiner_type=refiner_type,
+        retriever_type=retriever_type,
     )
     translator.translate(input_dir, output_dir, overwrite, collection)
 
@@ -325,7 +339,7 @@ def document(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-4o",
+    ],
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -340,14 +354,6 @@ def document(
         typer.Option(
             "--overwrite/--preserve",
             help="Whether to overwrite existing files in the output directory",
-        ),
-    ] = False,
-    skip_context: Annotated[
-        bool,
-        typer.Option(
-            "--skip-context",
-            help="Prompts will include any context information associated with source"
-            " code blocks, unless this option is specified",
         ),
     ] = False,
     doc_mode: Annotated[
@@ -397,6 +403,24 @@ def document(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    refiner_type: Annotated[
+        str,
+        typer.Option(
+            "-r",
+            "--refiner",
+            help="Name of custom refiner to use",
+            click_type=click.Choice(list(REFINERS.keys())),
+        ),
+    ] = "none",
+    retriever_type: Annotated[
+        str,
+        typer.Option(
+            "-R",
+            "--retriever",
+            help="Name of custom retriever to use",
+            click_type=click.Choice(["active_usings"]),
+        ),
+    ] = None,
     max_tokens: Annotated[
         int,
         typer.Option(
@@ -406,13 +430,6 @@ def document(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
-    skip_refiner: Annotated[
-        bool,
-        typer.Option(
-            "--skip-refiner",
-            help="Whether to skip the refiner for generating output",
-        ),
-    ] = True,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -425,8 +442,8 @@ def document(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
-        skip_refiner=skip_refiner,
-        skip_context=skip_context,
+        refiner_type=refiner_type,
+        retriever_type=retriever_type,
     )
     if doc_mode == "madlibs":
         documenter = MadLibsDocumenter(
@@ -481,7 +498,7 @@ def aggregate(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-4o",
+    ],
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -695,7 +712,7 @@ def diagram(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-4o",
+    ],
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -710,14 +727,6 @@ def diagram(
         typer.Option(
             "--overwrite/--preserve",
             help="Whether to overwrite existing files in the output directory",
-        ),
-    ] = False,
-    skip_context: Annotated[
-        bool,
-        typer.Option(
-            "--skip-context",
-            help="Prompts will include any context information associated with source"
-            " code blocks, unless this option is specified",
         ),
     ] = False,
     temperature: Annotated[
@@ -756,13 +765,24 @@ def diagram(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
-    skip_refiner: Annotated[
-        bool,
+    refiner_type: Annotated[
+        str,
         typer.Option(
-            "--skip-refiner",
-            help="Whether to skip the refiner for generating output",
+            "-r",
+            "--refiner",
+            help="Name of custom refiner to use",
+            click_type=click.Choice(list(REFINERS.keys())),
         ),
-    ] = True,
+    ] = "none",
+    retriever_type: Annotated[
+        str,
+        typer.Option(
+            "-R",
+            "--retriever",
+            help="Name of custom retriever to use",
+            click_type=click.Choice(["active_usings"]),
+        ),
+    ] = None,
 ):
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
@@ -773,11 +793,11 @@ def diagram(
         max_prompts=max_prompts,
         db_path=db_loc,
         db_config=collections_config,
+        splitter_type=splitter_type,
+        refiner_type=refiner_type,
+        retriever_type=retriever_type,
         diagram_type=diagram_type,
         add_documentation=add_documentation,
-        splitter_type=splitter_type,
-        skip_refiner=skip_refiner,
-        skip_context=skip_context,
     )
     diagram_generator.translate(input_dir, output_dir, overwrite, collection)
 
@@ -1031,7 +1051,7 @@ def llm_add(
             help="The type of the model",
             click_type=click.Choice(sorted(list(MODEL_TYPE_CONSTRUCTORS.keys()))),
         ),
-    ] = "OpenAI",
+    ] = "Azure",
 ):
     if not MODEL_CONFIG_DIR.exists():
         MODEL_CONFIG_DIR.mkdir(parents=True)
@@ -1075,6 +1095,7 @@ def llm_add(
             "model_cost": {"input": in_cost, "output": out_cost},
         }
     elif model_type == "OpenAI":
+        print("DEPRECATED: Use 'Azure' instead. CTRL+C to exit.")
         model_id = typer.prompt(
             "Enter the model ID (list model IDs with `janus llm ls -a`)",
             default="gpt-4o",
@@ -1084,6 +1105,28 @@ def llm_add(
         params = dict(
             # OpenAI uses the "model_name" key for what we're calling "long_model_id"
             model_name=MODEL_ID_TO_LONG_ID[model_id],
+            temperature=0.7,
+            n=1,
+        )
+        max_tokens = TOKEN_LIMITS[MODEL_ID_TO_LONG_ID[model_id]]
+        model_cost = COST_PER_1K_TOKENS[MODEL_ID_TO_LONG_ID[model_id]]
+        cfg = {
+            "model_type": model_type,
+            "model_id": model_id,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": model_cost,
+        }
+    elif model_type == "Azure":
+        model_id = typer.prompt(
+            "Enter the model ID (list model IDs with `janus llm ls -a`)",
+            default="gpt-4o",
+            type=click.Choice(azure_models),
+            show_choices=False,
+        )
+        params = dict(
+            # Azure uses the "azure_deployment" key for what we're calling "long_model_id"
+            azure_deployment=MODEL_ID_TO_LONG_ID[model_id],
             temperature=0.7,
             n=1,
         )
@@ -1252,6 +1295,35 @@ app.add_typer(db, name="db")
 app.add_typer(llm, name="llm")
 app.add_typer(evaluate, name="evaluate")
 app.add_typer(embedding, name="embedding")
+
+
+@app.command()
+def render(
+    input_dir: Annotated[
+        str,
+        typer.Option(
+            "--input",
+            "-i",
+        ),
+    ],
+    output_dir: Annotated[str, typer.Option("--output", "-o")],
+):
+    input_dir = Path(input_dir)
+    output_dir = Path(output_dir)
+    for input_file in input_dir.rglob("*.json"):
+        with open(input_file, "r") as f:
+            data = json.load(f)
+
+        output_file = output_dir / input_file.relative_to(input_dir).with_suffix(".txt")
+        if not output_file.parent.exists():
+            output_file.parent.mkdir()
+
+        text = data["output"].replace("\\n", "\n").strip()
+        output_file.write_text(text)
+
+        jar_path = homedir / ".janus/lib/plantuml.jar"
+        subprocess.run(["java", "-jar", jar_path, output_file])  # nosec
+        output_file.unlink()
 
 
 if __name__ == "__main__":

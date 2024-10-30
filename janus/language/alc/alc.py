@@ -1,12 +1,11 @@
 import re
 from typing import Optional
 
-from langchain.schema.language_model import BaseLanguageModel
-
 from janus.language.block import CodeBlock
 from janus.language.combine import Combiner
 from janus.language.node import NodeType
 from janus.language.treesitter import TreeSitterSplitter
+from janus.llm.models_info import JanusModel
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -27,7 +26,7 @@ class AlcSplitter(TreeSitterSplitter):
 
     def __init__(
         self,
-        model: None | BaseLanguageModel = None,
+        model: JanusModel | None = None,
         max_tokens: int = 4096,
         protected_node_types: tuple[str, ...] = (),
         prune_node_types: tuple[str, ...] = (),
@@ -63,7 +62,7 @@ class AlcSplitter(TreeSitterSplitter):
             #  instruction and containing all the subsequent nodes up until the
             #  next csect or dsect instruction
             sects: list[list[CodeBlock]] = [[]]
-            for c in block.children:
+            for c in sorted(block.children):
                 if c.node_type == "csect_instruction":
                     c.context_tags["alc_section"] = "CSECT"
                     sects.append([c])
@@ -101,7 +100,7 @@ class AlcListingSplitter(AlcSplitter):
 
     def __init__(
         self,
-        model: None | BaseLanguageModel = None,
+        model: JanusModel | None = None,
         max_tokens: int = 4096,
         protected_node_types: tuple[str, ...] = (),
         prune_node_types: tuple[str, ...] = (),
@@ -129,12 +128,18 @@ class AlcListingSplitter(AlcSplitter):
             prune_unprotected=prune_unprotected,
         )
 
-    def _get_ast(self, code: str) -> CodeBlock:
+    def split_string(self, code: str, name: str) -> CodeBlock:
+        # Override split_string to use processed code and track active usings
         active_usings = self.get_active_usings(code)
-        code = self.preproccess_assembly(code)
-        ast: CodeBlock = super()._get_ast(code)
-        ast.context_tags["active_usings"] = active_usings
-        return ast
+        processed_code = self.preproccess_assembly(code)
+        root = super().split_string(processed_code, name)
+        if active_usings is not None:
+            stack = [root]
+            while stack:
+                block = stack.pop()
+                block.context_tags["active_usings"] = active_usings
+                stack.extend(block.children)
+        return root
 
     def preproccess_assembly(self, code: str) -> str:
         """Remove non-essential lines from an assembly snippet"""
@@ -142,7 +147,7 @@ class AlcListingSplitter(AlcSplitter):
         lines = code.splitlines()
         lines = self.strip_header_and_left(lines)
         lines = self.strip_addresses(lines)
-        return "".join(str(line) for line in lines)
+        return "\n".join(str(line) for line in lines)
 
     def get_active_usings(self, code: str) -> Optional[str]:
         """Look for 'active usings' in the ALC listing header"""

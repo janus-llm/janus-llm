@@ -1,14 +1,14 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Callable
+from typing import Callable, Protocol, TypeVar
 
 from dotenv import load_dotenv
 from langchain_community.llms import HuggingFaceTextGenInference
-from langchain_core.language_models import BaseLanguageModel
-from langchain_openai import ChatOpenAI
+from langchain_core.runnables import Runnable
+from langchain_openai import AzureChatOpenAI
 
-from janus.llm.model_callbacks import COST_PER_1K_TOKENS
+from janus.llm.model_callbacks import COST_PER_1K_TOKENS, azure_model_reroutes
 from janus.prompts.prompt import (
     ChatGptPromptEngine,
     ClaudePromptEngine,
@@ -43,17 +43,33 @@ except ImportError:
     )
 
 
-load_dotenv()
+ModelType = TypeVar(
+    "ModelType",
+    AzureChatOpenAI,
+    HuggingFaceTextGenInference,
+    Bedrock,
+    BedrockChat,
+    HuggingFacePipeline,
+)
 
-openai_model_reroutes = {
-    "gpt-4o": "gpt-4o-2024-05-13",
-    "gpt-4o-mini": "gpt-4o-mini",
-    "gpt-4": "gpt-4-0613",
-    "gpt-4-turbo": "gpt-4-turbo-2024-04-09",
-    "gpt-4-turbo-preview": "gpt-4-0125-preview",
-    "gpt-3.5-turbo": "gpt-3.5-turbo-0125",
-    "gpt-3.5-turbo-16k": "gpt-3.5-turbo-0125",
-}
+
+class JanusModelProtocol(Protocol):
+    model_id: str
+    model_type_name: str
+    token_limit: int
+    input_token_cost: float
+    output_token_cost: float
+    prompt_engine: type[PromptEngine]
+
+    def get_num_tokens(self, text: str) -> int:
+        ...
+
+
+class JanusModel(Runnable, JanusModelProtocol):
+    ...
+
+
+load_dotenv()
 
 openai_models = [
     "gpt-4o",
@@ -64,11 +80,17 @@ openai_models = [
     "gpt-3.5-turbo",
     "gpt-3.5-turbo-16k",
 ]
+azure_models = [
+    "gpt-4o",
+    "gpt-4o-mini",
+    "gpt-3.5-turbo-16k",
+]
 claude_models = [
     "bedrock-claude-v2",
     "bedrock-claude-instant-v1",
     "bedrock-claude-haiku",
     "bedrock-claude-sonnet",
+    "bedrock-claude-sonnet-3.5",
 ]
 llama2_models = [
     "bedrock-llama2-70b",
@@ -102,27 +124,21 @@ bedrock_models = [
     *cohere_models,
     *mistral_models,
 ]
-all_models = [*openai_models, *bedrock_models]
+all_models = [*azure_models, *bedrock_models]
 
-MODEL_TYPE_CONSTRUCTORS: dict[str, Callable[[Any], BaseLanguageModel]] = {
-    "OpenAI": ChatOpenAI,
+MODEL_TYPE_CONSTRUCTORS: dict[str, ModelType] = {
+    # "OpenAI": ChatOpenAI,
     "HuggingFace": HuggingFaceTextGenInference,
+    "Azure": AzureChatOpenAI,
+    "Bedrock": Bedrock,
+    "BedrockChat": BedrockChat,
+    "HuggingFaceLocal": HuggingFacePipeline,
 }
-
-try:
-    MODEL_TYPE_CONSTRUCTORS.update(
-        {
-            "HuggingFaceLocal": HuggingFacePipeline.from_model_id,
-            "Bedrock": Bedrock,
-            "BedrockChat": BedrockChat,
-        }
-    )
-except NameError:
-    pass
 
 
 MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
-    **{m: ChatGptPromptEngine for m in openai_models},
+    # **{m: ChatGptPromptEngine for m in openai_models},
+    **{m: ChatGptPromptEngine for m in azure_models},
     **{m: ClaudePromptEngine for m in claude_models},
     **{m: Llama2PromptEngine for m in llama2_models},
     **{m: Llama3PromptEngine for m in llama3_models},
@@ -131,17 +147,14 @@ MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
     **{m: MistralPromptEngine for m in mistral_models},
 }
 
-_open_ai_defaults: dict[str, str] = {
-    "openai_api_key": os.getenv("OPENAI_API_KEY"),
-    "openai_organization": os.getenv("OPENAI_ORG_ID"),
-}
-
 MODEL_ID_TO_LONG_ID = {
-    **{m: mr for m, mr in openai_model_reroutes.items()},
+    # **{m: mr for m, mr in openai_model_reroutes.items()},
+    **{m: mr for m, mr in azure_model_reroutes.items()},
     "bedrock-claude-v2": "anthropic.claude-v2",
     "bedrock-claude-instant-v1": "anthropic.claude-instant-v1",
     "bedrock-claude-haiku": "anthropic.claude-3-haiku-20240307-v1:0",
     "bedrock-claude-sonnet": "anthropic.claude-3-sonnet-20240229-v1:0",
+    "bedrock-claude-sonnet-3.5": "anthropic.claude-3-5-sonnet-20240620-v1:0",
     "bedrock-llama2-70b": "meta.llama2-70b-v1",
     "bedrock-llama2-70b-chat": "meta.llama2-70b-chat-v1",
     "bedrock-llama2-13b": "meta.llama2-13b-chat-v1",
@@ -168,7 +181,8 @@ DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
 MODEL_CONFIG_DIR = Path.home().expanduser() / ".janus" / "llm"
 
 MODEL_TYPES: dict[str, PromptEngine] = {
-    **{m: "OpenAI" for m in openai_models},
+    # **{m: "OpenAI" for m in openai_models},
+    **{m: "Azure" for m in azure_models},
     **{m: "BedrockChat" for m in bedrock_models},
 }
 
@@ -178,13 +192,17 @@ TOKEN_LIMITS: dict[str, int] = {
     "gpt-4-1106-preview": 128_000,
     "gpt-4-0125-preview": 128_000,
     "gpt-4o-2024-05-13": 128_000,
+    "gpt-4o-2024-08-06": 128_000,
+    "gpt-4o-mini": 128_000,
     "gpt-3.5-turbo-0125": 16_384,
+    "gpt35-turbo-16k": 16_384,
     "text-embedding-ada-002": 8191,
     "gpt4all": 16_384,
     "anthropic.claude-v2": 100_000,
     "anthropic.claude-instant-v1": 100_000,
     "anthropic.claude-3-haiku-20240307-v1:0": 248_000,
     "anthropic.claude-3-sonnet-20240229-v1:0": 248_000,
+    "anthropic.claude-3-5-sonnet-20240620-v1:0": 200_000,
     "meta.llama2-70b-v1": 4096,
     "meta.llama2-70b-chat-v1": 4096,
     "meta.llama2-13b-chat-v1": 4096,
@@ -210,47 +228,100 @@ def get_available_model_names() -> list[str]:
     return avaialable_models
 
 
-def load_model(
-    user_model_name: str,
-) -> tuple[BaseLanguageModel, str, int, dict[str, float]]:
+def load_model(model_id) -> JanusModel:
     if not MODEL_CONFIG_DIR.exists():
         MODEL_CONFIG_DIR.mkdir(parents=True)
-    model_config_file = MODEL_CONFIG_DIR / f"{user_model_name}.json"
-    if not model_config_file.exists():
-        log.warning(
-            f"Model {user_model_name} not found in user-defined models, searching "
-            f"default models for {user_model_name}."
-        )
-        model_id = user_model_name
-        if user_model_name not in DEFAULT_MODELS:
-            message = (
-                f"Model {user_model_name} not found in default models. Make sure to run "
-                "`janus llm add` first."
-            )
-            log.error(message)
-            raise ValueError(message)
-        model_config = {
-            "model_type": MODEL_TYPES[model_id],
-            "model_id": model_id,
-            "model_args": MODEL_DEFAULT_ARGUMENTS[model_id],
-            "token_limit": TOKEN_LIMITS.get(MODEL_ID_TO_LONG_ID[model_id], 4096),
-            "model_cost": COST_PER_1K_TOKENS.get(
-                MODEL_ID_TO_LONG_ID[model_id], {"input": 0, "output": 0}
-            ),
-        }
-        with open(model_config_file, "w") as f:
-            json.dump(model_config, f)
-    else:
+    model_config_file = MODEL_CONFIG_DIR / f"{model_id}.json"
+
+    if model_config_file.exists():
+        log.info(f"Loading {model_id} from {model_config_file}.")
         with open(model_config_file, "r") as f:
             model_config = json.load(f)
-    model_constructor = MODEL_TYPE_CONSTRUCTORS[model_config["model_type"]]
-    model_args = model_config["model_args"]
-    if model_config["model_type"] == "OpenAI":
-        model_args.update(_open_ai_defaults)
-    model = model_constructor(**model_args)
-    return (
-        model,
-        model_config["model_id"],
-        model_config["token_limit"],
-        model_config["model_cost"],
+        model_type_name = model_config["model_type"]
+        model_id = model_config["model_id"]
+        model_args = model_config["model_args"]
+        token_limit = model_config["token_limit"]
+        input_token_cost = model_config["model_cost"]["input"]
+        output_token_cost = model_config["model_cost"]["output"]
+
+    elif model_id in DEFAULT_MODELS:
+        model_id = model_id
+        model_long_id = MODEL_ID_TO_LONG_ID[model_id]
+        model_type_name = MODEL_TYPES[model_id]
+        model_args = MODEL_DEFAULT_ARGUMENTS[model_id]
+
+        token_limit = 0
+        input_token_cost = 0.0
+        output_token_cost = 0.0
+        if model_long_id in TOKEN_LIMITS:
+            token_limit = TOKEN_LIMITS[model_long_id]
+        if model_long_id in COST_PER_1K_TOKENS:
+            token_limits = COST_PER_1K_TOKENS[model_long_id]
+            input_token_cost = token_limits["input"]
+            output_token_cost = token_limits["output"]
+
+    else:
+        model_list = "\n\t".join(DEFAULT_MODELS)
+        message = (
+            f"Model {model_id} not found in user-defined model directory "
+            f"({MODEL_CONFIG_DIR}), and is not a default model. Valid default "
+            f"models:\n\t{model_list}\n"
+            f"To use a custom model, first run `janus llm add`."
+        )
+        log.error(message)
+        raise ValueError(message)
+
+    if model_type_name == "HuggingFaceLocal":
+        model = HuggingFacePipeline.from_model_id(
+            model_id=model_id,
+            task="text-generation",
+            model_kwargs=model_args,
+        )
+        model_args.update(pipeline=model.pipeline)
+
+    elif model_type_name == "OpenAI":
+        model_args.update(
+            openai_api_key=str(os.getenv("OPENAI_API_KEY")),
+            openai_organization=str(os.getenv("OPENAI_ORG_ID")),
+        )
+        # log.warning("Do NOT use this model in sensitive environments!")
+        # log.warning("If you would like to cancel, please press Ctrl+C.")
+        # log.warning("Waiting 10 seconds...")
+        # Give enough time for the user to read the warnings and cancel
+        # time.sleep(10)
+        raise DeprecationWarning("OpenAI models are no longer supported.")
+
+    elif model_type_name == "Azure":
+        model_args.update(
+            {
+                "api_key": os.getenv("AZURE_OPENAI_API_KEY"),
+                "azure_endpoint": os.getenv("AZURE_OPENAI_ENDPOINT"),
+                "api_version": os.getenv("OPENAI_API_VERSION", "2024-02-01"),
+            }
+        )
+
+    model_type = MODEL_TYPE_CONSTRUCTORS[model_type_name]
+    prompt_engine = MODEL_PROMPT_ENGINES[model_id]
+
+    class JanusModel(model_type):
+        model_id: str
+        short_model_id: str
+        model_type_name: str
+        token_limit: int
+        input_token_cost: float
+        output_token_cost: float
+        prompt_engine: type[PromptEngine]
+
+    model_args.update(
+        model_id=MODEL_ID_TO_LONG_ID[model_id],
+        short_model_id=model_id,
+    )
+
+    return JanusModel(
+        model_type_name=model_type_name,
+        token_limit=token_limit,
+        input_token_cost=input_token_cost,
+        output_token_cost=output_token_cost,
+        prompt_engine=prompt_engine,
+        **model_args,
     )
