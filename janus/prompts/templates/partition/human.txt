@@ -5,37 +5,12 @@ Partition the {SOURCE_LANGUAGE} code into logical blocks. Each block should be r
 INPUT FORMAT:
 Each line of code has been prepended with an 8-character unique ID. a Python example would look like this:
 ```
-0d2f4f8d	def f(n):
-def2a953	    return n * f_memo(n - 1)
-75315253
-e7f928da	memo = {0: 1, 1: 1}
-1781b2a9	def f_memo(n):
-2fe21e27	    if n in memo:
-9aef6179	        return memo[n]
-6061bd82	    memo[n] = f(n)
-22bd0c30	    return memo[n]
-5d85e19e
-06027969	def combinations(n, k):
-91b722fb	    return f_memo(n) // (f_memo(k) * f_memo(n - k))
-4b3f79be
-k57w964a	def prob_n_heads(n, k):
-51638s96	    return combinations(n, k) / (2 ** n)
-065o6q32
-j5q6p852	print(f"Probability of 5/10 coin flips being heads: {prob_n_heads(10, 5)}.")
+{EXAMPLE_INPUT}
 ```
 
 And your output might look like this:
 ```
-[
-	{
-		"reasoning": "The `combinations` function can be understood without the above implementation of factorials. However, the definitions of `f` and `f_memo` cannot be understood without one another, so there should be no partitions between 0d2f4f8d and 06027969.",
-		"location": "06027969"
-	},
-	{
-		"reasoning": "The specific implementation of `combinations` is not necessary to understand the functionality of `prob_n_heads` or the print statement",
-		"location": "k57w964a"
-	}
-]
+{EXAMPLE_OUTPUT}
 ```
 
 You are to output a JSON object containing a subset of these IDs, corresponding to the lines that should start a new block. Each partition should be paired with an explanation (please output the explanation first, before giving the line ID).
