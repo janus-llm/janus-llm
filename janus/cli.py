@@ -261,7 +261,8 @@ def translate(
         typer.Option(
             "-r",
             "--refiner",
-            help="Names of custom refiners to use",
+            help="List of refiner types to use. Add -r for each refiner to use in\
+                refinement chain",
             click_type=click.Choice(list(REFINERS.keys())),
         ),
     ] = ["JanusRefiner"],
@@ -420,7 +421,8 @@ def document(
         typer.Option(
             "-r",
             "--refiner",
-            help="Name of custom refiner to use",
+            help="List of refiner types to use. Add -r for each refiner to use in\
+                refinement chain",
             click_type=click.Choice(list(REFINERS.keys())),
         ),
     ] = ["JanusRefiner"],
@@ -680,7 +682,8 @@ def diagram(
         typer.Option(
             "-r",
             "--refiner",
-            help="Name of custom refiner to use",
+            help="List of refiner types to use. Add -r for each refiner to use in\
+                refinement chain",
             click_type=click.Choice(list(REFINERS.keys())),
         ),
     ] = ["JanusRefiner"],
