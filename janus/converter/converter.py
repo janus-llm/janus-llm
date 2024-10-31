@@ -366,8 +366,8 @@ class Converter:
             prompt_value=RunnablePassthrough(),
         )
         for refiner_type in self._refiner_types[:-1]:
-            # NOTE: Do NOT remove refiner_type=refiner_type from lambda
-            # due to lambda capture, must be present or chain will not
+            # NOTE: Do NOT remove refiner_type=refiner_type from lambda.
+            # Due to lambda capture, must be present or chain will not
             # be correctly constructed.
             self._refiner_chain = self._refiner_chain | RunnableParallel(
                 completion=lambda x, refiner_type=refiner_type: refiner_type(
