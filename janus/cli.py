@@ -13,6 +13,7 @@ from rich.console import Console
 from rich.prompt import Confirm
 from typing_extensions import Annotated
 
+import janus.refiners.refiner
 from janus.converter.aggregator import Aggregator
 from janus.converter.converter import Converter
 from janus.converter.diagram import DiagramGenerator
@@ -45,7 +46,6 @@ from janus.llm.models_info import (
     openai_models,
 )
 from janus.metrics.cli import evaluate
-from janus.refiners.refiner import REFINERS
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
@@ -68,6 +68,18 @@ with open(db_file, "r") as f:
     db_loc = f.read()
 
 collections_config_file = Path(db_loc) / "collections.json"
+
+
+def get_subclasses(cls):
+    return set(cls.__subclasses__()).union(
+        set(s for c in cls.__subclasses__() for s in get_subclasses(c))
+    )
+
+
+REFINER_TYPES = get_subclasses(janus.refiners.refiner.JanusRefiner).union(
+    {janus.refiners.refiner.JanusRefiner}
+)
+REFINERS = {r.__name__: r for r in REFINER_TYPES}
 
 
 def get_collections_config():
@@ -245,15 +257,16 @@ def translate(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
-    refiner_type: Annotated[
-        str,
+    refiner_types: Annotated[
+        list[str],
         typer.Option(
             "-r",
             "--refiner",
-            help="Name of custom refiner to use",
+            help="List of refiner types to use. Add -r for each refiner to use in\
+                refinement chain",
             click_type=click.Choice(list(REFINERS.keys())),
         ),
-    ] = "none",
+    ] = ["JanusRefiner"],
     retriever_type: Annotated[
         str,
         typer.Option(
@@ -273,6 +286,7 @@ def translate(
         ),
     ] = None,
 ):
+    refiner_types = [REFINERS[r] for r in refiner_types]
     try:
         target_language, target_version = target_lang.split("-")
     except ValueError:
@@ -297,7 +311,7 @@ def translate(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
-        refiner_type=refiner_type,
+        refiner_types=refiner_types,
         retriever_type=retriever_type,
     )
     translator.translate(input_dir, output_dir, overwrite, collection)
@@ -403,15 +417,16 @@ def document(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
-    refiner_type: Annotated[
-        str,
+    refiner_types: Annotated[
+        list[str],
         typer.Option(
             "-r",
             "--refiner",
-            help="Name of custom refiner to use",
+            help="List of refiner types to use. Add -r for each refiner to use in\
+                refinement chain",
             click_type=click.Choice(list(REFINERS.keys())),
         ),
-    ] = "none",
+    ] = ["JanusRefiner"],
     retriever_type: Annotated[
         str,
         typer.Option(
@@ -431,6 +446,7 @@ def document(
         ),
     ] = None,
 ):
+    refiner_types = [REFINERS[r] for r in refiner_types]
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
     kwargs = dict(
@@ -442,7 +458,7 @@ def document(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
-        refiner_type=refiner_type,
+        refiner_types=refiner_types,
         retriever_type=retriever_type,
     )
     if doc_mode == "madlibs":
@@ -457,12 +473,6 @@ def document(
         documenter = Documenter(drop_comments=drop_comments, **kwargs)
 
     documenter.translate(input_dir, output_dir, overwrite, collection)
-
-
-def get_subclasses(cls):
-    return set(cls.__subclasses__()).union(
-        set(s for c in cls.__subclasses__() for s in get_subclasses(c))
-    )
 
 
 @app.command()
@@ -765,15 +775,16 @@ def diagram(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
-    refiner_type: Annotated[
-        str,
+    refiner_types: Annotated[
+        list[str],
         typer.Option(
             "-r",
             "--refiner",
-            help="Name of custom refiner to use",
+            help="List of refiner types to use. Add -r for each refiner to use in\
+                refinement chain",
             click_type=click.Choice(list(REFINERS.keys())),
         ),
-    ] = "none",
+    ] = ["JanusRefiner"],
     retriever_type: Annotated[
         str,
         typer.Option(
@@ -784,6 +795,7 @@ def diagram(
         ),
     ] = None,
 ):
+    refiner_types = [REFINERS[r] for r in refiner_types]
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
     diagram_generator = DiagramGenerator(
@@ -794,7 +806,7 @@ def diagram(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
-        refiner_type=refiner_type,
+        refiner_types=refiner_types,
         retriever_type=retriever_type,
         diagram_type=diagram_type,
         add_documentation=add_documentation,
