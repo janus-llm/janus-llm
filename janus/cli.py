@@ -17,6 +17,7 @@ from janus.converter.aggregator import Aggregator
 from janus.converter.converter import Converter
 from janus.converter.diagram import DiagramGenerator
 from janus.converter.document import Documenter, MadLibsDocumenter, MultiDocumenter
+from janus.converter.partition import Partitioner
 from janus.converter.requirements import RequirementsDocumenter
 from janus.converter.translate import Translator
 from janus.embedding.collections import Collections
@@ -576,6 +577,103 @@ def aggregate(
         prompt_template="basic_aggregation",
     )
     aggregator.translate(input_dir, output_dir, overwrite, collection)
+
+
+@app.command(
+    help="Partition input code using an LLM.",
+    no_args_is_help=True,
+)
+def partition(
+    input_dir: Annotated[
+        Path,
+        typer.Option(
+            "--input",
+            "-i",
+            help="The directory containing the source code to be partitioned. ",
+        ),
+    ],
+    language: Annotated[
+        str,
+        typer.Option(
+            "--language",
+            "-l",
+            help="The language of the source code.",
+            click_type=click.Choice(sorted(LANGUAGES)),
+        ),
+    ],
+    output_dir: Annotated[
+        Path,
+        typer.Option(
+            "--output-dir", "-o", help="The directory to store the partitioned code in."
+        ),
+    ],
+    llm_name: Annotated[
+        str,
+        typer.Option(
+            "--llm",
+            "-L",
+            help="The custom name of the model set with 'janus llm add'.",
+        ),
+    ] = "gpt-4o",
+    max_prompts: Annotated[
+        int,
+        typer.Option(
+            "--max-prompts",
+            "-m",
+            help="The maximum number of times to prompt a model on one functional block "
+            "before exiting the application. This is to prevent wasting too much money.",
+        ),
+    ] = 10,
+    overwrite: Annotated[
+        bool,
+        typer.Option(
+            "--overwrite/--preserve",
+            help="Whether to overwrite existing files in the output directory",
+        ),
+    ] = False,
+    temperature: Annotated[
+        float,
+        typer.Option("--temperature", "-t", help="Sampling temperature.", min=0, max=2),
+    ] = 0.7,
+    splitter_type: Annotated[
+        str,
+        typer.Option(
+            "-S",
+            "--splitter",
+            help="Name of custom splitter to use",
+            click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
+        ),
+    ] = "file",
+    max_tokens: Annotated[
+        int,
+        typer.Option(
+            "--max-tokens",
+            "-M",
+            help="The maximum number of tokens the model will take in. "
+            "If unspecificed, model's default max will be used.",
+        ),
+    ] = None,
+    partition_token_limit: Annotated[
+        int,
+        typer.Option(
+            "--partition-tokens",
+            "-pt",
+            help="The limit on the number of tokens per partition.",
+        ),
+    ] = 8192,
+):
+    model_arguments = dict(temperature=temperature)
+    kwargs = dict(
+        model=llm_name,
+        model_arguments=model_arguments,
+        source_language=language,
+        max_prompts=max_prompts,
+        max_tokens=max_tokens,
+        splitter_type=splitter_type,
+        partition_token_limit=partition_token_limit,
+    )
+    partitioner = Partitioner(**kwargs)
+    partitioner.translate(input_dir, output_dir, overwrite)
 
 
 @app.command(

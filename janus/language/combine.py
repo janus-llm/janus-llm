@@ -1,3 +1,5 @@
+import re
+
 from janus.language.block import CodeBlock, TranslatedCodeBlock
 from janus.language.file import FileManager
 from janus.utils.logger import create_logger
@@ -90,3 +92,23 @@ class ChunkCombiner(Combiner):
             root: The functional code block to combine with its children.
         """
         return root
+
+
+class PartitionCombiner(Combiner):
+    @staticmethod
+    def combine(root: CodeBlock) -> None:
+        """A combiner which inserts partition tags between code blocks"""
+        queue = [root]
+        while queue:
+            block = queue.pop(0)
+            if block.children:
+                queue.extend(block.children)
+            else:
+                block.affixes = (block.prefix, block.suffix + "\n<JANUS_PARTITION>\n")
+
+        super(PartitionCombiner, PartitionCombiner).combine(root)
+        root.text = re.sub(r"(?:\n<JANUS_PARTITION>\n)+$", "", root.text)
+        root.affixes = (
+            root.prefix,
+            re.sub(r"(?:\n<JANUS_PARTITION>\n)+$", "", root.suffix),
+        )
