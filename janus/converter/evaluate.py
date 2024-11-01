@@ -18,10 +18,8 @@ class Evaluator(Converter):
     "on an input target, with an associated prompt.
 
     Current valid evaluation types:
-    ['incose', 'comments', 'inline_comments']
+    ['incose', 'comments']
 
-    TODO:
-    ['incose_set']
     """
 
     def __init__(self, **kwargs) -> None:
@@ -84,7 +82,7 @@ class RequirementEvaluator(Evaluator):
         items = temp.get(eval_item_type, [])
 
         if not items:
-            log.info(f"[{block.name}] Skipping commentless block")
+            log.debug(f"[{block.name}] Skipping commentless block")
             block.translated = True
             block.text = None
             block.complete = True
@@ -153,6 +151,6 @@ class InlineCommentEvaluator(Evaluator):
         super().__init__(**kwargs)
         self._combiner = JsonCombiner()
         self._load_parameters()
-        print("Evaluating for: ", evaluation_type)
+        log.debug(f"Evaluating for:  {evaluation_type}")
         self._parser = InlineCommentParser()
         self.set_prompt("eval_prompts/inline_comments")

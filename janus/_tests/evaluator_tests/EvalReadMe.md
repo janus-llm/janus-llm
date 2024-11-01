@@ -33,7 +33,11 @@ janus llm-self-eval -i {path/to/input/files} -l json -o {path/to/output/files} -
 
  Example test command:
 ```
-janus llm-self-eval -i _tests/incose_tests/input/ -l json -o testOutput/ -e "incose" -rc 5
+janus llm-self-eval -i _tests/evaluator_tests/incose_tests/ -l json -o testOutput/incose/ -e "incose" -rc 5
+```
+or for an inline comment test
+```
+janus llm-self-eval -i _tests/evaluator_tests/inline_comment_tests/ -l 'mumps' -o testOutput/comments/ -e "comments"
 ```
 
 ## Adding an Evaluation Type 

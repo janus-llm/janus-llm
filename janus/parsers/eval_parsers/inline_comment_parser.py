@@ -34,19 +34,19 @@ class CommentList(BaseModel):
 
 class InlineCommentParser(PydanticOutputParser, JanusParser):
     block_name: str = ""
-    input_length: int = 0  # Define input_length as a Pydantic field with a default value
+    input_length: int = 0  #TODO: Define input_length as a Pydantic field with a default value
 
     def __init__(self):
         super().__init__(pydantic_object=CommentList)
-        self.input_length = 0  # Initialize input_length in the constructor
+        self.input_length = 0  #TODO: Initialize input_length in the constructor
 
     def parse(self, text: str):
-        log.info("Parsing text...")
+        log.debug("Parsing text...")
         if isinstance(text, AIMessage):
             text = text.content
         text = text.lstrip(
             "```json"
-        )  # change this to a regex or check for json in the front
+        )  #TODO: change this to a regex or check for json in the front
         text = text.rstrip("`")
         try:
             obj = parse_json_markdown(text)
@@ -58,7 +58,7 @@ class InlineCommentParser(PydanticOutputParser, JanusParser):
             raise OutputParserException(
                 f"Got invalid return object. Expected a dictionary, but got {type(obj)}"
             )
-        # move the check into this method
+        #TODO: move the check into this method
         return json.dumps(obj)
 
     def get_format_instructions(self) -> str:
