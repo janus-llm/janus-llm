@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 from langchain.output_parsers import RetryWithErrorOutputParser
@@ -85,7 +86,7 @@ class ReflectionRefiner(JanusRefiner):
                     completion=completion,
                 )
             )
-            if "LGTM" in reflection:
+            if re.search(r"\bLGTM\b", reflection) is not None:
                 return self.parser.parse(completion)
             if not retry_number:
                 log.info(f"Completion:\n{completion}")
