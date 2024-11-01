@@ -1,7 +1,7 @@
 from janus.converter.evaluate import Evaluator
 from janus.language.combine import JsonCombiner
-from janus.parsers.eval_parsers.inline_comment_parser import InlineCommentParser
-
+from janus.parsers.eval_parsers.inline_comment_parser import \
+    InlineCommentParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -14,9 +14,7 @@ class InlineCommentEvaluator(Evaluator):
     with an associated prompt.
     """
 
-    def __init__(
-        self, evaluation_type, **kwargs
-    ) -> None:
+    def __init__(self, evaluation_type, **kwargs) -> None:
         """Initialize the Evaluator class
 
         Arguments:

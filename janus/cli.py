@@ -13,31 +13,26 @@ from rich.prompt import Confirm
 from typing_extensions import Annotated
 
 from janus.converter.diagram import DiagramGenerator
-from janus.converter.document import Documenter, MadLibsDocumenter, MultiDocumenter
+from janus.converter.document import (Documenter, MadLibsDocumenter,
+                                      MultiDocumenter)
+from janus.converter.evaluators.inlineCommentEval import InlineCommentEvaluator
+from janus.converter.evaluators.requirementEval import RequirementEvaluator
 from janus.converter.requirements import RequirementsDocumenter
 from janus.converter.translate import Translator
-from janus.converter.evaluate import Evaluator
-from janus.converter.evaluators.requirementEval import RequirementEvaluator
-from janus.converter.evaluators.inlineCommentEval import InlineCommentEvaluator
 from janus.embedding.collections import Collections
 from janus.embedding.database import ChromaEmbeddingDatabase
-from janus.embedding.embedding_models_info import (
-    EMBEDDING_COST_PER_MODEL,
-    EMBEDDING_MODEL_CONFIG_DIR,
-    EMBEDDING_TOKEN_LIMITS,
-    EmbeddingModelType,
-)
+from janus.embedding.embedding_models_info import (EMBEDDING_COST_PER_MODEL,
+                                                   EMBEDDING_MODEL_CONFIG_DIR,
+                                                   EMBEDDING_TOKEN_LIMITS,
+                                                   EmbeddingModelType)
 from janus.embedding.vectorize import ChromaDBVectorizer
 from janus.language.binary import BinarySplitter
 from janus.language.mumps import MumpsSplitter
 from janus.language.naive.registry import CUSTOM_SPLITTERS
 from janus.language.treesitter import TreeSitterSplitter
 from janus.llm.model_callbacks import COST_PER_1K_TOKENS
-from janus.llm.models_info import (
-    MODEL_CONFIG_DIR,
-    MODEL_TYPE_CONSTRUCTORS,
-    TOKEN_LIMITS,
-)
+from janus.llm.models_info import (MODEL_CONFIG_DIR, MODEL_TYPE_CONSTRUCTORS,
+                                   TOKEN_LIMITS)
 from janus.metrics.cli import evaluate
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
@@ -552,7 +547,8 @@ def llm_self_eval(
         typer.Option(
             "--evaluation-type",
             "-e",
-            help="Type that is being evaluated. ['incose', 'incose_set', 'comments', 'comments_set']",
+            help="Type that is being evaluated. ['incose',"
+            "'incose_set', 'comments', 'comments_set']",
         ),
     ] = "incose",
     max_prompts: Annotated[
@@ -606,26 +602,29 @@ def llm_self_eval(
     # Setting parser type here
     if evaluation_type == "incose":
         self_evaluation_generator = RequirementEvaluator(
-        model=llm_name,
-        model_arguments=model_arguments,
-        source_language=language,
-        max_prompts=max_prompts,
-        splitter_type=splitter_type,
-        evaluation_type=evaluation_type,
-        eval_items_per_request=eval_items_per_request
-    )
+            model=llm_name,
+            model_arguments=model_arguments,
+            source_language=language,
+            max_prompts=max_prompts,
+            splitter_type=splitter_type,
+            evaluation_type=evaluation_type,
+            eval_items_per_request=eval_items_per_request,
+        )
     elif evaluation_type == "comments":
         self_evaluation_generator = InlineCommentEvaluator(
-        model=llm_name,
-        model_arguments=model_arguments,
-        source_language=language,
-        max_prompts=max_prompts,
-        splitter_type=splitter_type,
-        evaluation_type=evaluation_type
-    )
+            model=llm_name,
+            model_arguments=model_arguments,
+            source_language=language,
+            max_prompts=max_prompts,
+            splitter_type=splitter_type,
+            evaluation_type=evaluation_type,
+        )
     else:
-        raise ValueError("Parser not found. Please make sure the evaluation type is correct and the parser and prompt exsists.")
-    
+        raise ValueError(
+            "Parser not found. Please make sure the evaluation"
+            "type is correct and the parser and prompt exsists."
+        )
+
     self_evaluation_generator.translate(input_dir, output_dir, overwrite, collection)
 
 

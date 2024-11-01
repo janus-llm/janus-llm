@@ -4,7 +4,6 @@ from copy import deepcopy
 from janus.converter.evaluate import Evaluator
 from janus.language.block import TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
-
 # Parsers
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
 from janus.utils.logger import create_logger

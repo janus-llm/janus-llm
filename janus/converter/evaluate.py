@@ -4,10 +4,12 @@ from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 
+
 class Evaluator(Converter):
     """Evaluator
 
-    A class that performs an LLM self evaluation on an input target, with an associated prompt.
+    A class that performs an LLM self evaluation"
+    "on an input target, with an associated prompt.
 
     Current valid evaluation types:
     ['incose', 'comments', 'inline_comments']
@@ -15,9 +17,8 @@ class Evaluator(Converter):
     TODO:
     ['incose_set']
     """
-    def __init__(
-        self,
-         **kwargs)->None:
+
+    def __init__(self, **kwargs) -> None:
         """Initialize the Evaluator class
 
         Arguments:
@@ -29,4 +30,4 @@ class Evaluator(Converter):
         """
         super().__init__(**kwargs)
         self._combiner = JsonCombiner()
-        self._load_parameters()     
+        self._load_parameters()

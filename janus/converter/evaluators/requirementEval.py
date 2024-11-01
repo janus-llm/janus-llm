@@ -3,7 +3,6 @@ from copy import deepcopy
 
 from janus.converter.evaluate import Evaluator
 from janus.language.block import TranslatedCodeBlock
-
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
 from janus.utils.logger import create_logger
 
@@ -16,7 +15,7 @@ class RequirementEvaluator(Evaluator):
     A class that performs an LLM self evaluation on an input target,
     with an associated prompt.
 
-    The evaluation prompts are for Incose Evaluations 
+    The evaluation prompts are for Incose Evaluations
 
     Current valid evaluation types:
     ['incose']
