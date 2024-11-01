@@ -77,6 +77,21 @@ def flesch(target: str, **kwargs) -> float:
     return get_readability(target).flesch().score
 
 
+@metric(use_reference=False, help="The Flesch Grade Level Readability score")
+def flesch_grade(target: str, **kwargs) -> float:
+    """Calculate the Flesch Score using py-readability-metrics.
+
+    Arguments:
+        target: The target text.
+
+    Returns:
+        The Flesch-Kincaid Grade Level score.
+    """
+    if not target.strip():  # Check if the target text is blank
+        return None
+    return get_readability(target).flesch_kincaid().score
+
+
 @metric(use_reference=False, help="The Gunning-Fog Readability score")
 def gunning_fog(target: str, **kwargs) -> float:
     """Calculate the Gunning-Fog Score using py-readability-metrics.
@@ -90,3 +105,19 @@ def gunning_fog(target: str, **kwargs) -> float:
     if not target.strip():  # Check if the target text is blank
         return None
     return get_readability(target).gunning_fog().score
+
+
+@metric(use_reference=False, help="The Gunning-Fog Grade Level Readability score")
+def gunning_fog_grade(target: str, **kwargs) -> float:
+    """Calculate the Gunning-Fog Grade Level Score using py-readability-metrics.
+
+    Arguments:
+        target: The target text.
+
+    Returns:
+        The Gunning-Fog Grade Level score.
+    """
+    if not target.strip():  # Check if the target text is blank
+        return None
+    grade_level = get_readability(target).gunning_fog().grade_level
+    return None if grade_level == "na" else grade_level

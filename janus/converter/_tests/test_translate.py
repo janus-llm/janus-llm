@@ -90,14 +90,14 @@ class TestDiagramGenerator(unittest.TestCase):
     def setUp(self):
         """Set up the tests."""
         self.diagram_generator = DiagramGenerator(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             source_language="fortran",
             diagram_type="Activity",
         )
 
     def test_init(self):
         """Test __init__ method."""
-        self.assertEqual(self.diagram_generator._model_name, "gpt-4o")
+        self.assertEqual(self.diagram_generator._model_name, "gpt-4o-mini")
         self.assertEqual(self.diagram_generator._source_language, "fortran")
         self.assertEqual(self.diagram_generator._diagram_type, "Activity")
 

@@ -22,6 +22,11 @@ class RequirementsDocumenter(Documenter):
         self._combiner = ChunkCombiner()
         self._parser = RequirementsParser()
 
+    @staticmethod
+    def get_prompt_replacements(block) -> dict[str, str]:
+        prompt_replacements: dict[str, str] = {"SOURCE_CODE": block.original.text}
+        return prompt_replacements
+
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
         """Save a file to disk.
 

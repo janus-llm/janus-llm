@@ -40,11 +40,6 @@ class JanusParser(BaseOutputParser[str]):
             text = str(text.content)
         block.text = text
 
-    def parse(self, text: str | BaseMessage) -> str:
-        if isinstance(text, BaseMessage):
-            text = str(text.content)
-        return text
-
 
 class GenericParser(JanusParser, StrOutputParser):
     def parse(self, text: str | BaseMessage) -> str:

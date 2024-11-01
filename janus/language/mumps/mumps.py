@@ -1,11 +1,10 @@
 import re
 
-from langchain.schema.language_model import BaseLanguageModel
-
 from janus.language.block import CodeBlock
 from janus.language.combine import Combiner
 from janus.language.node import NodeType
 from janus.language.splitter import Splitter
+from janus.llm.models_info import JanusModel
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -44,7 +43,7 @@ class MumpsSplitter(Splitter):
 
     def __init__(
         self,
-        model: None | BaseLanguageModel = None,
+        model: JanusModel | None = None,
         max_tokens: int = 4096,
         protected_node_types: tuple[str] = ("routine_definition",),
         prune_node_types: tuple[str] = (),

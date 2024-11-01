@@ -12,7 +12,7 @@ class TestAlcSplitter(unittest.TestCase):
     def setUp(self):
         """Set up the tests."""
         model_name = "gpt-4o"
-        llm, _, _, _ = load_model(model_name)
+        llm = load_model(model_name)
         self.splitter = AlcSplitter(model=llm)
         self.combiner = Combiner(language="ibmhlasm")
         self.test_file = Path("janus/language/alc/_tests/alc.asm")

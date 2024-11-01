@@ -1,15 +1,17 @@
 import functools
 import json
-import math
 import time
 from pathlib import Path
 from typing import Any
 
-from langchain.output_parsers import RetryWithErrorOutputParser
 from langchain_core.exceptions import OutputParserException
-from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnableLambda, RunnableParallel
+from langchain_core.runnables import (
+    Runnable,
+    RunnableLambda,
+    RunnableParallel,
+    RunnablePassthrough,
+)
 from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
 
@@ -23,12 +25,13 @@ from janus.language.splitter import (
     Splitter,
     TokenLimitError,
 )
-from janus.llm import load_model
 from janus.llm.model_callbacks import get_model_callback
-from janus.llm.models_info import MODEL_PROMPT_ENGINES
+from janus.llm.models_info import MODEL_PROMPT_ENGINES, JanusModel, load_model
 from janus.parsers.parser import GenericParser, JanusParser
-from janus.parsers.refiner_parser import RefinerParser
-from janus.refiners.refiner import BasicRefiner, Refiner
+from janus.refiners.refiner import JanusRefiner
+
+# from janus.refiners.refiner import BasicRefiner, Refiner
+from janus.retrievers.retriever import ActiveUsingsRetriever, JanusRetriever
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
@@ -75,7 +78,8 @@ class Converter:
         protected_node_types: tuple[str, ...] = (),
         prune_node_types: tuple[str, ...] = (),
         splitter_type: str = "file",
-        refiner_type: str = "basic",
+        refiner_types: list[type[JanusRefiner]] = [JanusRefiner],
+        retriever_type: str | None = None,
     ) -> None:
         """Initialize a Converter instance.
 
@@ -95,7 +99,13 @@ class Converter:
             prune_node_types: A set of node types which should be pruned.
             splitter_type: The type of splitter to use. Valid values are `"file"`,
                 `"tag"`, `"chunk"`, `"ast-strict"`, and `"ast-flex"`.
-            refiner_type: The type of refiner to use. Valid values are `"basic"`.
+            refiner_type: The type of refiner to use. Valid values:
+                - "parser"
+                - "reflection"
+                - None
+            retriever_type: The type of retriever to use. Valid values:
+                - "active_usings"
+                - None
         """
         self._changed_attrs: set = set()
 
@@ -104,7 +114,6 @@ class Converter:
         self.override_token_limit: bool = max_tokens is not None
 
         self._model_name: str
-        self._model_id: str
         self._custom_model_arguments: dict[str, Any]
 
         self._source_language: str
@@ -117,22 +126,27 @@ class Converter:
         self._prune_node_types: tuple[str, ...] = ()
         self._max_tokens: int | None = max_tokens
         self._prompt_template_name: str
-        self._splitter_type: str
         self._db_path: str | None
         self._db_config: dict[str, Any] | None
 
-        self._splitter: Splitter
-        self._llm: BaseLanguageModel
+        self._llm: JanusModel
         self._prompt: ChatPromptTemplate
 
         self._parser: JanusParser = GenericParser()
+        self._base_parser: JanusParser = GenericParser()
         self._combiner: Combiner = Combiner()
 
-        self._refiner_type: str
-        self._refiner: Refiner
+        self._splitter_type: str
+        self._refiner_types: list[type[JanusRefiner]]
+        self._retriever_type: str | None
+
+        self._splitter: Splitter
+        self._refiner: JanusRefiner
+        self._retriever: JanusRetriever
 
         self.set_splitter(splitter_type=splitter_type)
-        self.set_refiner(refiner_type=refiner_type)
+        self.set_refiner_types(refiner_types=refiner_types)
+        self.set_retriever(retriever_type=retriever_type)
         self.set_model(model_name=model, **model_arguments)
         self.set_prompt(prompt_template=prompt_template)
         self.set_source_language(source_language)
@@ -156,9 +170,11 @@ class Converter:
     def _load_parameters(self) -> None:
         self._load_model()
         self._load_prompt()
+        self._load_retriever()
+        self._load_refiner_chain()
         self._load_splitter()
         self._load_vectorizer()
-        self._load_refiner()
+        self._load_chain()
         self._changed_attrs.clear()
 
     def set_model(self, model_name: str, **custom_arguments: dict[str, Any]):
@@ -177,8 +193,6 @@ class Converter:
     def set_prompt(self, prompt_template: str) -> None:
         """Validate and set the prompt template name.
 
-        The affected objects will not be updated until translate() is called.
-
         Arguments:
             prompt_template: name of prompt template directory
                 (see janus/prompts/templates) or path to a directory.
@@ -188,28 +202,33 @@ class Converter:
     def set_splitter(self, splitter_type: str) -> None:
         """Validate and set the prompt template name.
 
-        The affected objects will not be updated until translate() is called.
-
         Arguments:
             prompt_template: name of prompt template directory
                 (see janus/prompts/templates) or path to a directory.
         """
+        if splitter_type not in CUSTOM_SPLITTERS:
+            raise ValueError(f'Splitter type "{splitter_type}" does not exist.')
+
         self._splitter_type = splitter_type
 
-    def set_refiner(self, refiner_type: str) -> None:
-        """Validate and set the refiner name
-
-        The affected objects will not be updated until translate is called
+    def set_refiner_types(self, refiner_types: list[type[JanusRefiner]]) -> None:
+        """Validate and set the refiner type
 
         Arguments:
-            refiner_type: the name of the refiner to use
+            refiner_type: the type of refiner to use
         """
-        self._refiner_type = refiner_type
+        self._refiner_types = refiner_types
+
+    def set_retriever(self, retriever_type: str | None) -> None:
+        """Validate and set the retriever type
+
+        Arguments:
+            retriever_type: the type of retriever to use
+        """
+        self._retriever_type = retriever_type
 
     def set_source_language(self, source_language: str) -> None:
         """Validate and set the source language.
-
-        The affected objects will not be updated until _load_parameters() is called.
 
         Arguments:
             source_language: The source programming language.
@@ -280,20 +299,6 @@ class Converter:
 
         self._splitter = CUSTOM_SPLITTERS[self._splitter_type](**kwargs)
 
-    @run_if_changed("_refiner_type", "_model_name")
-    def _load_refiner(self) -> None:
-        """Load the refiner according to this instance's attributes.
-
-        If the relevant fields have not been changed since the last time this method was
-        called, nothing happens.
-        """
-        if self._refiner_type == "basic":
-            self._refiner = BasicRefiner(
-                "basic_refinement", self._model_name, self._source_language
-            )
-        else:
-            raise ValueError(f"Error: unknown refiner type {self._refiner_type}")
-
     @run_if_changed("_model_name", "_custom_model_arguments")
     def _load_model(self) -> None:
         """Load the model according to this instance's attributes.
@@ -307,9 +312,9 @@ class Converter:
         # model_arguments.update(self._custom_model_arguments)
 
         # Load the model
-        self._llm, self._model_id, token_limit, self.model_cost = load_model(
-            self._model_name
-        )
+        self._llm = load_model(self._model_name)
+        token_limit = self._llm.token_limit
+
         # Set the max_tokens to less than half the model's limit to allow for enough
         # tokens at output
         # Only modify max_tokens if it is not specified by user
@@ -328,7 +333,7 @@ class Converter:
         If the relevant fields have not been changed since the last time this
         method was called, nothing happens.
         """
-        prompt_engine = MODEL_PROMPT_ENGINES[self._model_id](
+        prompt_engine = MODEL_PROMPT_ENGINES[self._llm.short_model_id](
             source_language=self._source_language,
             prompt_template=self._prompt_template_name,
         )
@@ -345,6 +350,49 @@ class Converter:
         vectorizer_factory = ChromaDBVectorizer()
         self._vectorizer = vectorizer_factory.create_vectorizer(
             self._db_path, self._db_config
+        )
+
+    @run_if_changed("_retriever_type")
+    def _load_retriever(self):
+        if self._retriever_type == "active_usings":
+            self._retriever = ActiveUsingsRetriever()
+        else:
+            self._retriever = JanusRetriever()
+
+    @run_if_changed("_refiner_types", "_model_name", "max_prompts", "_parser")
+    def _load_refiner_chain(self) -> None:
+        self._refiner_chain = RunnableParallel(
+            completion=self._llm,
+            prompt_value=RunnablePassthrough(),
+        )
+        for refiner_type in self._refiner_types[:-1]:
+            # NOTE: Do NOT remove refiner_type=refiner_type from lambda.
+            # Due to lambda capture, must be present or chain will not
+            # be correctly constructed.
+            self._refiner_chain = self._refiner_chain | RunnableParallel(
+                completion=lambda x, refiner_type=refiner_type: refiner_type(
+                    llm=self._llm,
+                    parser=self._base_parser,
+                    max_retries=self.max_prompts,
+                ).parse_completion(**x),
+                prompt_value=lambda x: x["prompt_value"],
+            )
+        self._refiner_chain = self._refiner_chain | RunnableLambda(
+            lambda x: self._refiner_types[-1](
+                llm=self._llm,
+                parser=self._parser,
+                max_retries=self.max_prompts,
+            ).parse_completion(**x)
+        )
+
+    @run_if_changed("_parser", "_retriever", "_prompt", "_llm", "_refiner_chain")
+    def _load_chain(self):
+        self.chain = self._input_runnable() | self._prompt | self._refiner_chain
+
+    def _input_runnable(self) -> Runnable:
+        return RunnableParallel(
+            SOURCE_CODE=self._parser.parse_input,
+            context=self._retriever,
         )
 
     def translate(
@@ -441,6 +489,15 @@ class Converter:
             except FileSizeError:
                 log.warning("Current tile is too large for basic splitter, skipping")
                 continue
+            except ValueError as e:
+                if str(e).startswith(
+                    "Error raised by bedrock service"
+                ) and "maximum context length" in str(e):
+                    log.warning(
+                        "Input is too large for this model's context length, skipping"
+                    )
+                    continue
+                raise e
 
             # Don't attempt to write files for which translation failed
             if not out_block.translated:
@@ -582,73 +639,27 @@ class Converter:
         return root
 
     def _run_chain(self, block: TranslatedCodeBlock) -> str:
-        """Run the model with three nested error fixing schemes.
-        First, try to fix simple formatting errors by giving the model just
-        the output and the parsing error. After a number of attempts, try
-        giving the model the output, the parsing error, and the original
-        input. Again check/retry this output to solve for formatting errors.
-        If we still haven't succeeded after several attempts, the model may
-        be getting thrown off by a bad initial output; start from scratch
-        and try again.
-
-        The number of tries for each layer of this scheme is roughly equal
-        to the cube root of self.max_retries, so the total calls to the
-        LLM will be roughly as expected (up to sqrt(self.max_retries) over)
-        """
-        input = self._parser.parse_input(block.original)
-
-        # Retries with just the output and the error
-        n1 = round(self.max_prompts ** (1 / 3))
-
-        # Retries with the input, output, and error
-        n2 = round((self.max_prompts // n1) ** (1 / 2))
-
-        # Retries with just the input
-        n3 = math.ceil(self.max_prompts / (n1 * n2))
-
-        refine_output = RefinerParser(
-            parser=self._parser,
-            initial_prompt=self._prompt.format(**{"SOURCE_CODE": input}),
-            refiner=self._refiner,
-            max_retries=n1,
-            llm=self._llm,
-        )
-        retry = RetryWithErrorOutputParser.from_llm(
-            llm=self._llm,
-            parser=refine_output,
-            max_retries=n2,
-        )
-        completion_chain = self._prompt | self._llm
-        chain = RunnableParallel(
-            completion=completion_chain, prompt_value=self._prompt
-        ) | RunnableLambda(lambda x: retry.parse_with_prompt(**x))
-        for _ in range(n3):
-            try:
-                return chain.invoke({"SOURCE_CODE": input})
-            except OutputParserException:
-                pass
-
-        raise OutputParserException(f"Failed to parse after {n1*n2*n3} retries")
+        return self.chain.invoke(block.original)
 
     def _get_output_obj(
         self, block: TranslatedCodeBlock
-    ) -> dict[str, int | float | str | dict[str, str]]:
+    ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
         output_str = self._parser.parse_combined_output(block.complete_text)
 
-        output: str | dict[str, str]
+        output_obj: str | dict[str, str]
         try:
-            output = json.loads(output_str)
+            output_obj = json.loads(output_str)
         except json.JSONDecodeError:
-            output = output_str
+            output_obj = output_str
 
         return dict(
-            input=block.original.text,
+            input=block.original.text or "",
             metadata=dict(
                 retries=block.total_retries,
                 cost=block.total_cost,
                 processing_time=block.processing_time,
             ),
-            output=output,
+            output=output_obj,
         )
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:

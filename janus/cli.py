@@ -1,8 +1,9 @@
 import json
 import logging
 import os
+import subprocess  # nosec
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 import click
 import typer
@@ -12,6 +13,9 @@ from rich.console import Console
 from rich.prompt import Confirm
 from typing_extensions import Annotated
 
+import janus.refiners.refiner
+from janus.converter.aggregator import Aggregator
+from janus.converter.converter import Converter
 from janus.converter.diagram import DiagramGenerator
 from janus.converter.document import (Documenter, MadLibsDocumenter,
                                       MultiDocumenter)
@@ -31,8 +35,16 @@ from janus.language.mumps import MumpsSplitter
 from janus.language.naive.registry import CUSTOM_SPLITTERS
 from janus.language.treesitter import TreeSitterSplitter
 from janus.llm.model_callbacks import COST_PER_1K_TOKENS
-from janus.llm.models_info import (MODEL_CONFIG_DIR, MODEL_TYPE_CONSTRUCTORS,
-                                   TOKEN_LIMITS)
+from janus.llm.models_info import (
+    MODEL_CONFIG_DIR,
+    MODEL_ID_TO_LONG_ID,
+    MODEL_TYPE_CONSTRUCTORS,
+    MODEL_TYPES,
+    TOKEN_LIMITS,
+    azure_models,
+    bedrock_models,
+    openai_models,
+)
 from janus.metrics.cli import evaluate
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
@@ -56,6 +68,18 @@ with open(db_file, "r") as f:
     db_loc = f.read()
 
 collections_config_file = Path(db_loc) / "collections.json"
+
+
+def get_subclasses(cls):
+    return set(cls.__subclasses__()).union(
+        set(s for c in cls.__subclasses__() for s in get_subclasses(c))
+    )
+
+
+REFINER_TYPES = get_subclasses(janus.refiners.refiner.JanusRefiner).union(
+    {janus.refiners.refiner.JanusRefiner}
+)
+REFINERS = {r.__name__: r for r in REFINER_TYPES}
 
 
 def get_collections_config():
@@ -177,7 +201,7 @@ def translate(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-3.5-turbo-0125",
+    ],
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -192,6 +216,14 @@ def translate(
         typer.Option(
             "--overwrite/--preserve",
             help="Whether to overwrite existing files in the output directory",
+        ),
+    ] = False,
+    skip_context: Annotated[
+        bool,
+        typer.Option(
+            "--skip-context",
+            help="Prompts will include any context information associated with source"
+            " code blocks, unless this option is specified",
         ),
     ] = False,
     temp: Annotated[
@@ -225,6 +257,25 @@ def translate(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    refiner_types: Annotated[
+        list[str],
+        typer.Option(
+            "-r",
+            "--refiner",
+            help="List of refiner types to use. Add -r for each refiner to use in\
+                refinement chain",
+            click_type=click.Choice(list(REFINERS.keys())),
+        ),
+    ] = ["JanusRefiner"],
+    retriever_type: Annotated[
+        str,
+        typer.Option(
+            "-R",
+            "--retriever",
+            help="Name of custom retriever to use",
+            click_type=click.Choice(["active_usings"]),
+        ),
+    ] = None,
     max_tokens: Annotated[
         int,
         typer.Option(
@@ -235,6 +286,7 @@ def translate(
         ),
     ] = None,
 ):
+    refiner_types = [REFINERS[r] for r in refiner_types]
     try:
         target_language, target_version = target_lang.split("-")
     except ValueError:
@@ -259,6 +311,8 @@ def translate(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
+        refiner_types=refiner_types,
+        retriever_type=retriever_type,
     )
     translator.translate(input_dir, output_dir, overwrite, collection)
 
@@ -299,7 +353,7 @@ def document(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-3.5-turbo-0125",
+    ],
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -363,6 +417,25 @@ def document(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    refiner_types: Annotated[
+        list[str],
+        typer.Option(
+            "-r",
+            "--refiner",
+            help="List of refiner types to use. Add -r for each refiner to use in\
+                refinement chain",
+            click_type=click.Choice(list(REFINERS.keys())),
+        ),
+    ] = ["JanusRefiner"],
+    retriever_type: Annotated[
+        str,
+        typer.Option(
+            "-R",
+            "--retriever",
+            help="Name of custom retriever to use",
+            click_type=click.Choice(["active_usings"]),
+        ),
+    ] = None,
     max_tokens: Annotated[
         int,
         typer.Option(
@@ -373,6 +446,7 @@ def document(
         ),
     ] = None,
 ):
+    refiner_types = [REFINERS[r] for r in refiner_types]
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
     kwargs = dict(
@@ -384,6 +458,8 @@ def document(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
+        refiner_types=refiner_types,
+        retriever_type=retriever_type,
     )
     if doc_mode == "madlibs":
         documenter = MadLibsDocumenter(
@@ -397,6 +473,217 @@ def document(
         documenter = Documenter(drop_comments=drop_comments, **kwargs)
 
     documenter.translate(input_dir, output_dir, overwrite, collection)
+
+
+@app.command()
+def aggregate(
+    input_dir: Annotated[
+        Path,
+        typer.Option(
+            "--input",
+            "-i",
+            help="The directory containing the source code to be translated. "
+            "The files should all be in one flat directory.",
+        ),
+    ],
+    language: Annotated[
+        str,
+        typer.Option(
+            "--language",
+            "-l",
+            help="The language of the source code.",
+            click_type=click.Choice(sorted(LANGUAGES)),
+        ),
+    ],
+    output_dir: Annotated[
+        Path,
+        typer.Option(
+            "--output-dir", "-o", help="The directory to store the translated code in."
+        ),
+    ],
+    llm_name: Annotated[
+        str,
+        typer.Option(
+            "--llm",
+            "-L",
+            help="The custom name of the model set with 'janus llm add'.",
+        ),
+    ],
+    max_prompts: Annotated[
+        int,
+        typer.Option(
+            "--max-prompts",
+            "-m",
+            help="The maximum number of times to prompt a model on one functional block "
+            "before exiting the application. This is to prevent wasting too much money.",
+        ),
+    ] = 10,
+    overwrite: Annotated[
+        bool,
+        typer.Option(
+            "--overwrite/--preserve",
+            help="Whether to overwrite existing files in the output directory",
+        ),
+    ] = False,
+    temperature: Annotated[
+        float,
+        typer.Option("--temperature", "-t", help="Sampling temperature.", min=0, max=2),
+    ] = 0.7,
+    collection: Annotated[
+        str,
+        typer.Option(
+            "--collection",
+            "-c",
+            help="If set, will put the translated result into a Chroma DB "
+            "collection with the name provided.",
+        ),
+    ] = None,
+    splitter_type: Annotated[
+        str,
+        typer.Option(
+            "-S",
+            "--splitter",
+            help="Name of custom splitter to use",
+            click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
+        ),
+    ] = "file",
+    intermediate_converters: Annotated[
+        List[str],
+        typer.Option(
+            "-C",
+            "--converter",
+            help="Name of an intermediate converter to use",
+            click_type=click.Choice([c.__name__ for c in get_subclasses(Converter)]),
+        ),
+    ] = ["Documenter"],
+):
+    converter_subclasses = get_subclasses(Converter)
+    converter_subclasses_map = {c.__name__: c for c in converter_subclasses}
+    model_arguments = dict(temperature=temperature)
+    collections_config = get_collections_config()
+    converters = []
+    for ic in intermediate_converters:
+        converters.append(
+            converter_subclasses_map[ic](
+                model=llm_name,
+                model_arguments=model_arguments,
+                source_language=language,
+                max_prompts=max_prompts,
+                db_path=db_loc,
+                db_config=collections_config,
+                splitter_type=splitter_type,
+            )
+        )
+
+    aggregator = Aggregator(
+        intermediate_converters=converters,
+        model=llm_name,
+        model_arguments=model_arguments,
+        source_language=language,
+        max_prompts=max_prompts,
+        db_path=db_loc,
+        db_config=collections_config,
+        splitter_type=splitter_type,
+        prompt_template="basic_aggregation",
+    )
+    aggregator.translate(input_dir, output_dir, overwrite, collection)
+
+
+@app.command(
+    help="Partition input code using an LLM.",
+    no_args_is_help=True,
+)
+def partition(
+    input_dir: Annotated[
+        Path,
+        typer.Option(
+            "--input",
+            "-i",
+            help="The directory containing the source code to be partitioned. ",
+        ),
+    ],
+    language: Annotated[
+        str,
+        typer.Option(
+            "--language",
+            "-l",
+            help="The language of the source code.",
+            click_type=click.Choice(sorted(LANGUAGES)),
+        ),
+    ],
+    output_dir: Annotated[
+        Path,
+        typer.Option(
+            "--output-dir", "-o", help="The directory to store the partitioned code in."
+        ),
+    ],
+    llm_name: Annotated[
+        str,
+        typer.Option(
+            "--llm",
+            "-L",
+            help="The custom name of the model set with 'janus llm add'.",
+        ),
+    ] = "gpt-4o",
+    max_prompts: Annotated[
+        int,
+        typer.Option(
+            "--max-prompts",
+            "-m",
+            help="The maximum number of times to prompt a model on one functional block "
+            "before exiting the application. This is to prevent wasting too much money.",
+        ),
+    ] = 10,
+    overwrite: Annotated[
+        bool,
+        typer.Option(
+            "--overwrite/--preserve",
+            help="Whether to overwrite existing files in the output directory",
+        ),
+    ] = False,
+    temperature: Annotated[
+        float,
+        typer.Option("--temperature", "-t", help="Sampling temperature.", min=0, max=2),
+    ] = 0.7,
+    splitter_type: Annotated[
+        str,
+        typer.Option(
+            "-S",
+            "--splitter",
+            help="Name of custom splitter to use",
+            click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
+        ),
+    ] = "file",
+    max_tokens: Annotated[
+        int,
+        typer.Option(
+            "--max-tokens",
+            "-M",
+            help="The maximum number of tokens the model will take in. "
+            "If unspecificed, model's default max will be used.",
+        ),
+    ] = None,
+    partition_token_limit: Annotated[
+        int,
+        typer.Option(
+            "--partition-tokens",
+            "-pt",
+            help="The limit on the number of tokens per partition.",
+        ),
+    ] = 8192,
+):
+    model_arguments = dict(temperature=temperature)
+    kwargs = dict(
+        model=llm_name,
+        model_arguments=model_arguments,
+        source_language=language,
+        max_prompts=max_prompts,
+        max_tokens=max_tokens,
+        splitter_type=splitter_type,
+        partition_token_limit=partition_token_limit,
+    )
+    partitioner = Partitioner(**kwargs)
+    partitioner.translate(input_dir, output_dir, overwrite)
 
 
 @app.command(
@@ -435,7 +722,7 @@ def diagram(
             "-L",
             help="The custom name of the model set with 'janus llm add'.",
         ),
-    ] = "gpt-3.5-turbo-0125",
+    ],
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -488,7 +775,27 @@ def diagram(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    refiner_types: Annotated[
+        list[str],
+        typer.Option(
+            "-r",
+            "--refiner",
+            help="List of refiner types to use. Add -r for each refiner to use in\
+                refinement chain",
+            click_type=click.Choice(list(REFINERS.keys())),
+        ),
+    ] = ["JanusRefiner"],
+    retriever_type: Annotated[
+        str,
+        typer.Option(
+            "-R",
+            "--retriever",
+            help="Name of custom retriever to use",
+            click_type=click.Choice(["active_usings"]),
+        ),
+    ] = None,
 ):
+    refiner_types = [REFINERS[r] for r in refiner_types]
     model_arguments = dict(temperature=temperature)
     collections_config = get_collections_config()
     diagram_generator = DiagramGenerator(
@@ -498,9 +805,11 @@ def diagram(
         max_prompts=max_prompts,
         db_path=db_loc,
         db_config=collections_config,
+        splitter_type=splitter_type,
+        refiner_types=refiner_types,
+        retriever_type=retriever_type,
         diagram_type=diagram_type,
         add_documentation=add_documentation,
-        splitter_type=splitter_type,
     )
     diagram_generator.translate(input_dir, output_dir, overwrite, collection)
 
@@ -877,7 +1186,7 @@ def llm_add(
             help="The type of the model",
             click_type=click.Choice(sorted(list(MODEL_TYPE_CONSTRUCTORS.keys()))),
         ),
-    ] = "OpenAI",
+    ] = "Azure",
 ):
     if not MODEL_CONFIG_DIR.exists():
         MODEL_CONFIG_DIR.mkdir(parents=True)
@@ -921,7 +1230,13 @@ def llm_add(
             "model_cost": {"input": in_cost, "output": out_cost},
         }
     elif model_type == "OpenAI":
-        model_name = typer.prompt("Enter the model name", default="gpt-3.5-turbo-0125")
+        print("DEPRECATED: Use 'Azure' instead. CTRL+C to exit.")
+        model_id = typer.prompt(
+            "Enter the model ID (list model IDs with `janus llm ls -a`)",
+            default="gpt-4o",
+            type=click.Choice(openai_models),
+            show_choices=False,
+        )
         params = dict(
             model_name=model_name,
             temperature=0.7,
@@ -931,6 +1246,50 @@ def llm_add(
         model_cost = COST_PER_1K_TOKENS[model_name]
         cfg = {
             "model_type": model_type,
+            "model_id": model_id,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": model_cost,
+        }
+    elif model_type == "Azure":
+        model_id = typer.prompt(
+            "Enter the model ID (list model IDs with `janus llm ls -a`)",
+            default="gpt-4o",
+            type=click.Choice(azure_models),
+            show_choices=False,
+        )
+        params = dict(
+            # Azure uses the "azure_deployment" key for what we're calling "long_model_id"
+            azure_deployment=MODEL_ID_TO_LONG_ID[model_id],
+            temperature=0.7,
+            n=1,
+        )
+        max_tokens = TOKEN_LIMITS[MODEL_ID_TO_LONG_ID[model_id]]
+        model_cost = COST_PER_1K_TOKENS[MODEL_ID_TO_LONG_ID[model_id]]
+        cfg = {
+            "model_type": model_type,
+            "model_id": model_id,
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": model_cost,
+        }
+    elif model_type == "BedrockChat" or model_type == "Bedrock":
+        model_id = typer.prompt(
+            "Enter the model ID (list model IDs with `janus llm ls -a`)",
+            default="bedrock-claude-sonnet",
+            type=click.Choice(bedrock_models),
+            show_choices=False,
+        )
+        params = dict(
+            # Bedrock uses the "model_id" key for what we're calling "long_model_id"
+            model_id=MODEL_ID_TO_LONG_ID[model_id],
+            model_kwargs={"temperature": 0.7},
+        )
+        max_tokens = TOKEN_LIMITS[MODEL_ID_TO_LONG_ID[model_id]]
+        model_cost = COST_PER_1K_TOKENS[MODEL_ID_TO_LONG_ID[model_id]]
+        cfg = {
+            "model_type": model_type,
+            "model_id": model_id,
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": model_cost,
@@ -1045,6 +1404,35 @@ app.add_typer(db, name="db")
 app.add_typer(llm, name="llm")
 app.add_typer(evaluate, name="evaluate")
 app.add_typer(embedding, name="embedding")
+
+
+@app.command()
+def render(
+    input_dir: Annotated[
+        str,
+        typer.Option(
+            "--input",
+            "-i",
+        ),
+    ],
+    output_dir: Annotated[str, typer.Option("--output", "-o")],
+):
+    input_dir = Path(input_dir)
+    output_dir = Path(output_dir)
+    for input_file in input_dir.rglob("*.json"):
+        with open(input_file, "r") as f:
+            data = json.load(f)
+
+        output_file = output_dir / input_file.relative_to(input_dir).with_suffix(".txt")
+        if not output_file.parent.exists():
+            output_file.parent.mkdir()
+
+        text = data["output"].replace("\\n", "\n").strip()
+        output_file.write_text(text)
+
+        jar_path = homedir / ".janus/lib/plantuml.jar"
+        subprocess.run(["java", "-jar", jar_path, output_file])  # nosec
+        output_file.unlink()
 
 
 if __name__ == "__main__":
