@@ -83,7 +83,7 @@ class ReflectionRefiner(JanusRefiner):
                     completion=completion,
                 )
             )
-            if re.search("\\bLGTM\\n", reflection) is not None:
+            if re.search("\\bLGTM\\b", reflection) is not None:
                 return self.parser.parse(completion)
             if not retry_number:
                 log.info(f"Completion:\n{completion}")
