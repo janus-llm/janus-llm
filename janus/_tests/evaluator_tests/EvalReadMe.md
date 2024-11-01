@@ -20,7 +20,7 @@ The input directory structure will be maintained in the output evaluations. The 
 
 Structure: 
 ```
-janus llm-self-eval -i {path/to/input/files} -l json -o {path/to/output/files} -e {evaluator_type} -rc {# of items to evlauate at a time}
+janus llm-self-eval -i {path/to/input/files} -l json -o {path/to/output/files} -e {evaluator_type} -rc {# of items to evaluate at a time}
 
 ```
 | Flag | Meaning | Example |
