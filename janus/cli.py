@@ -683,6 +683,7 @@ def partition(
         ),
     ] = 8192,
 ):
+    refiner_types = [REFINERS[r] for r in refiner_types]
     model_arguments = dict(temperature=temperature)
     kwargs = dict(
         model=llm_name,
