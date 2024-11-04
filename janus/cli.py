@@ -655,6 +655,16 @@ def partition(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    refiner_types: Annotated[
+        list[str],
+        typer.Option(
+            "-r",
+            "--refiner",
+            help="List of refiner types to use. Add -r for each refiner to use in\
+                refinement chain",
+            click_type=click.Choice(list(REFINERS.keys())),
+        ),
+    ] = ["JanusRefiner"],
     max_tokens: Annotated[
         int,
         typer.Option(
@@ -681,6 +691,7 @@ def partition(
         max_prompts=max_prompts,
         max_tokens=max_tokens,
         splitter_type=splitter_type,
+        refiner_types=refiner_types,
         partition_token_limit=partition_token_limit,
     )
     partitioner = Partitioner(**kwargs)
