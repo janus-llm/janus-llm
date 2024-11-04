@@ -3,7 +3,7 @@ from janus.parsers.parser import JanusParser
 from janus.refiners.refiner import ReflectionRefiner
 
 
-class FixUMLVariablesRefiner(ReflectionRefiner):
+class ALCFixUMLVariablesRefiner(ReflectionRefiner):
     def __init__(
         self,
         llm: JanusModel,
@@ -14,7 +14,7 @@ class FixUMLVariablesRefiner(ReflectionRefiner):
             llm=llm,
             parser=parser,
             max_retries=max_retries,
-            prompt_template_name="refinement/uml/fix_variables",
+            prompt_template_name="refinement/uml/alc_fix_variables",
         )
 
 
