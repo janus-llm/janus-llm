@@ -8,8 +8,7 @@ from langchain_core.messages import AIMessage
 from langchain_core.pydantic_v1 import BaseModel, conint
 
 from janus.parsers.parser import JanusParser
-
-from ...utils.logger import create_logger
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 
