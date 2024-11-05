@@ -1,24 +1,24 @@
 
 
-# LLM Self Eval 
+# LLM Self Eval
 
-The `llm-self-eval` command leverages the converter class to perform evaluations on generated outputs from large language models. 
+The `llm-self-eval` command leverages the converter class to perform evaluations on generated outputs from large language models.
 
-The input directory structure will be maintained in the output evaluations. The input files should contain an array of items to be evaluated. Each item will be evaluated individually based off of the corresponding prompt. Set evaluations can be performed as well but please note that each file to be evaluated must contain only one array with the items to be evaluated. 
+The input directory structure will be maintained in the output evaluations. The input files should contain an array of items to be evaluated. Each item will be evaluated individually based off of the corresponding prompt. Set evaluations can be performed as well but please note that each file to be evaluated must contain only one array with the items to be evaluated.
 
 
-## Evaluation Types 
+## Evaluation Types
 
 | Evaluation Type | Status | Command |
 | ----------- | ----------- | ----------- |
 | Incose  | In progress | ```-e "incose"```
-| Incose sets  | TODO | n/a 
+| Incose sets  | TODO | n/a
 | Seedling comments   | TODO | n/a
-| Seedling comment sets  | TODO | n/a 
+| Seedling comment sets  | TODO | n/a
 
-## How to Run 
+## How to Run
 
-Structure: 
+Structure:
 ```
 janus llm-self-eval -i {path/to/input/files} -l json -o {path/to/output/files} -e {evaluator_type} -rc {# of items to evaluate at a time}
 
@@ -27,9 +27,9 @@ janus llm-self-eval -i {path/to/input/files} -l json -o {path/to/output/files} -
 | ----------- | ----------- | ----------- |
 | `-i`  | Input Directory | ```"path/to/input/files"```
 | `-o`  | Output Directory | ```"path/to/output/files"```
-| `-l` | Evaluation language | `json` 
+| `-l` | Evaluation language | `json`
 | `-e`  | Evaluation Type | ```"incose"```
-| `-rc`  | Number of lines to evaluate at a time (rec 5-10) | `5` 
+| `-rc`  | Number of lines to evaluate at a time (rec 5-10) | `5`
 
  Example test command:
 ```
@@ -40,19 +40,19 @@ or for an inline comment test
 janus llm-self-eval -i _tests/evaluator_tests/inline_comment_tests/ -l 'mumps' -o testOutput/comments/ -e "comments"
 ```
 
-## Adding an Evaluation Type 
-#### 1. Create a Parser 
+## Adding an Evaluation Type
+#### 1. Create a Parser
 
-- In ```janus/parsers/eval_parsers``` 
+- In ```janus/parsers/eval_parsers```
   - See `janus/janus/parsers/eval_parsers/incose_parser.py` for reference
 
 #### 2. Create a the Prompt
 
  - In ```janus/prompts/eval_prompts```
  - Create a new directory with the name of your evaluation type. **Note: The name that you use is how you will call the evaluation type eg** ```-e "incose"```
- - `human.txt`  - this is the main prompt that contains the scoring rubric and the commands for the llm to follow 
- - `system.txt`  - the initial instructions for the evaluating llm 
-- `variables.json`  - contains the structure for what the returned evaluation should look like 
+ - `human.txt`  - this is the main prompt that contains the scoring rubric and the commands for the llm to follow
+ - `system.txt`  - the initial instructions for the evaluating llm
+- `variables.json`  - contains the structure for what the returned evaluation should look like
 
 #### 3. Update ```evaluate.py```
 1. Import your new parser
@@ -84,4 +84,3 @@ janus llm-self-eval -i _tests/evaluator_tests/inline_comment_tests/ -l 'mumps' -
         "It worked!"
     ]
 }
-

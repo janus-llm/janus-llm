@@ -8,8 +8,7 @@ from langchain_core.messages import AIMessage
 from langchain_core.pydantic_v1 import BaseModel
 
 from janus.parsers.parser import JanusParser
-
-from ...utils.logger import create_logger
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 
@@ -38,11 +37,13 @@ class RequirementList(BaseModel):
 
 class IncoseParser(PydanticOutputParser, JanusParser):
     block_name: str = ""
-    input_length: int = 0  # TODO: Define input_length as a Pydantic field with a default value
+    input_length: int = (
+        0  # TODO: Define input_length as a Pydantic field with a default value
+    )
 
     def __init__(self):
         super().__init__(pydantic_object=RequirementList)
-        self.input_length = 0  #TODO: Initialize input_length in the constructor
+        self.input_length = 0  # TODO: Initialize input_length in the constructor
 
     def parse(self, text: str):
         log.debug("Parsing text...")
@@ -62,7 +63,7 @@ class IncoseParser(PydanticOutputParser, JanusParser):
             raise OutputParserException(
                 f"Got invalid return object. Expected a dictionary, but got {type(obj)}"
             )
-        #TODO: move the check into this method
+        # TODO: move the check into this method
         return json.dumps(obj)
 
     def get_format_instructions(self) -> str:

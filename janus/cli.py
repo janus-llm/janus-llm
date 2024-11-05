@@ -19,6 +19,7 @@ from janus.converter.converter import Converter
 from janus.converter.diagram import DiagramGenerator
 from janus.converter.document import Documenter, MadLibsDocumenter, MultiDocumenter
 from janus.converter.evaluate import InlineCommentEvaluator, RequirementEvaluator
+from janus.converter.partition import Partitioner
 from janus.converter.requirements import RequirementsDocumenter
 from janus.converter.translate import Translator
 from janus.embedding.collections import Collections
@@ -39,7 +40,6 @@ from janus.llm.models_info import (
     MODEL_CONFIG_DIR,
     MODEL_ID_TO_LONG_ID,
     MODEL_TYPE_CONSTRUCTORS,
-    MODEL_TYPES,
     TOKEN_LIMITS,
     azure_models,
     bedrock_models,

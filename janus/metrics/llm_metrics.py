@@ -9,7 +9,6 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 from typing_extensions import Annotated
 
-from janus.converter import evaluate
 from janus.metrics.metric import metric
 
 

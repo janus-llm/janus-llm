@@ -1,7 +1,3 @@
-import argparse
-import json
-import os
-
 """
 Script to format requirements for the evaluator, now with support
 for specifying an output directory
@@ -11,6 +7,10 @@ In: Directory to JSON files with multiple 'code' str and 'requirement' array
 Out: Same directory structure in the output directory,
 with individual 'code' + 'requirement' pairs.
 """
+
+import argparse
+import json
+import os
 
 
 def requirement_json_parser(input_dir, output_dir):

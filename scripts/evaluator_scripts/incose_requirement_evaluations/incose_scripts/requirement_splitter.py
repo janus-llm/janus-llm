@@ -1,13 +1,13 @@
-import argparse
-import json
-import os
-
 """Simple script to format requirements to be evaluated using the llm self eval.
 
 In: Directory to Json file with multiple 'code' str and 'requirement' array
 Out: All files in original directory formated for the evaluator split
 up into individual 'code' + 'requirement' pairs.
 """
+
+import argparse
+import json
+import os
 
 
 def requirement_json_parser(directory):
