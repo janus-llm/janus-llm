@@ -274,7 +274,7 @@ def translate(
             "-R",
             "--retriever",
             help="Name of custom retriever to use",
-            click_type=click.Choice(["active_usings"]),
+            click_type=click.Choice(["active_usings", "language_docs"]),
         ),
     ] = None,
     max_tokens: Annotated[
@@ -434,7 +434,7 @@ def document(
             "-R",
             "--retriever",
             help="Name of custom retriever to use",
-            click_type=click.Choice(["active_usings"]),
+            click_type=click.Choice(["active_usings", "language_docs"]),
         ),
     ] = None,
     max_tokens: Annotated[
@@ -792,7 +792,7 @@ def diagram(
             "-R",
             "--retriever",
             help="Name of custom retriever to use",
-            click_type=click.Choice(["active_usings"]),
+            click_type=click.Choice(["active_usings", "language_docs"]),
         ),
     ] = None,
 ):
