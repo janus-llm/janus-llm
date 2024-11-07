@@ -31,7 +31,11 @@ from janus.parsers.parser import GenericParser, JanusParser
 from janus.refiners.refiner import JanusRefiner
 
 # from janus.refiners.refiner import BasicRefiner, Refiner
-from janus.retrievers.retriever import ActiveUsingsRetriever, JanusRetriever
+from janus.retrievers.retriever import (
+    ActiveUsingsRetriever,
+    JanusRetriever,
+    LanguageDocsRetriever,
+)
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
@@ -105,6 +109,7 @@ class Converter:
                 - None
             retriever_type: The type of retriever to use. Valid values:
                 - "active_usings"
+                - "language_docs"
                 - None
         """
         self._changed_attrs: set = set()
@@ -356,6 +361,8 @@ class Converter:
     def _load_retriever(self):
         if self._retriever_type == "active_usings":
             self._retriever = ActiveUsingsRetriever()
+        elif self._retriever_type == "language_docs":
+            self._retriever = LanguageDocsRetriever(self._llm, self._source_language)
         else:
             self._retriever = JanusRetriever()
 
