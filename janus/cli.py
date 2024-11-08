@@ -856,8 +856,8 @@ def llm_self_eval(
         typer.Option(
             "--evaluation-type",
             "-e",
-            help="Type that is being evaluated. ['incose',"
-            "'incose_set', 'comments', 'comments_set']",
+            help="Type of output to evaluate.",
+            click_type=click.Choice(["incose", "comments"]),
         ),
     ] = "incose",
     max_prompts: Annotated[
@@ -898,6 +898,16 @@ def llm_self_eval(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    refiner_types: Annotated[
+        list[str],
+        typer.Option(
+            "-r",
+            "--refiner",
+            help="List of refiner types to use. Add -r for each refiner to use in\
+                refinement chain",
+            click_type=click.Choice(list(REFINERS.keys())),
+        ),
+    ] = ["JanusRefiner"],
     eval_items_per_request: Annotated[
         int,
         typer.Option(
@@ -908,33 +918,23 @@ def llm_self_eval(
     ] = None,
 ):
     model_arguments = dict(temperature=temperature)
+    refiner_types = [REFINERS[r] for r in refiner_types]
+    kwargs = dict(
+        eval_items_per_request=eval_items_per_request,
+        model=llm_name,
+        model_arguments=model_arguments,
+        source_language=language,
+        max_prompts=max_prompts,
+        splitter_type=splitter_type,
+        refiner_types=refiner_types,
+    )
     # Setting parser type here
     if evaluation_type == "incose":
-        self_evaluation_generator = RequirementEvaluator(
-            model=llm_name,
-            model_arguments=model_arguments,
-            source_language=language,
-            max_prompts=max_prompts,
-            splitter_type=splitter_type,
-            evaluation_type=evaluation_type,
-            eval_items_per_request=eval_items_per_request,
-        )
+        evaluator = RequirementEvaluator(**kwargs)
     elif evaluation_type == "comments":
-        self_evaluation_generator = InlineCommentEvaluator(
-            model=llm_name,
-            model_arguments=model_arguments,
-            source_language=language,
-            max_prompts=max_prompts,
-            splitter_type=splitter_type,
-            evaluation_type=evaluation_type,
-        )
-    else:
-        raise ValueError(
-            "Parser not found. Please make sure the evaluation"
-            "type is correct and the parser and prompt exsists."
-        )
+        evaluator = InlineCommentEvaluator(**kwargs)
 
-    self_evaluation_generator.translate(input_dir, output_dir, overwrite, collection)
+    evaluator.translate(input_dir, output_dir, overwrite, collection)
 
 
 @db.command("init", help="Connect to or create a database.")

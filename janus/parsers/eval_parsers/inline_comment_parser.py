@@ -1,12 +1,13 @@
 import json
-from typing import List
+import re
+from typing import Any
 
 from langchain.output_parsers import PydanticOutputParser
-from langchain.output_parsers.json import parse_json_markdown
 from langchain_core.exceptions import OutputParserException
-from langchain_core.messages import AIMessage
-from langchain_core.pydantic_v1 import BaseModel, conint
+from langchain_core.messages import BaseMessage
+from langchain_core.pydantic_v1 import BaseModel, Field, conint
 
+from janus.language.block import CodeBlock
 from janus.parsers.parser import JanusParser
 from janus.utils.logger import create_logger
 
@@ -14,53 +15,81 @@ log = create_logger(__name__)
 
 
 class Criteria(BaseModel):
-    reasoning: str
+    reasoning: str = Field(description="A short explanation for the given score")
     # Constrained to an integer between 1 and 4
-    score: conint(ge=1, le=4)  # type: ignore
+    score: conint(ge=1, le=4) = Field(  # type: ignore
+        description="An integer score between 1 and 4 (inclusive), 4 being the best"
+    )
 
 
 class Comment(BaseModel):
-    comment: str
-    Completeness: Criteria
-    Hallucination: Criteria
-    Readability: Criteria
-    Usefulness: Criteria
+    comment_id: str = Field(description="The 8-character comment ID")
+    completeness: Criteria = Field(description="The completeness of the comment")
+    hallucination: Criteria = Field(description="The factualness of the comment")
+    readability: Criteria = Field(description="The readability of the comment")
+    usefulness: Criteria = Field(description="The usefulness of the comment")
 
 
 class CommentList(BaseModel):
-    comments: List[Comment]
-
-
-class InlineCommentParser(PydanticOutputParser, JanusParser):
-    block_name: str = ""
-    input_length: int = (
-        0  # TODO: Define input_length as a Pydantic field with a default value
+    __root__: list[Comment] = Field(
+        description=(
+            "A list of inline comment evaluations. Each element should include"
+            " the comment's 8-character ID in the `comment_id` field, and four"
+            " score objects corresponding to each metric (`completeness`,"
+            " `hallucination`, `readability`, and `usefulness`)."
+        )
     )
 
-    def __init__(self):
-        super().__init__(pydantic_object=CommentList)
-        self.input_length = 0  # TODO: Initialize input_length in the constructor
 
-    def parse(self, text: str):
-        log.debug("Parsing text...")
-        if isinstance(text, AIMessage):
-            text = text.content
-        text = text.lstrip(
-            "```json"
-        )  # TODO: change this to a regex or check for json in the front
-        text = text.rstrip("`")
+class InlineCommentParser(JanusParser, PydanticOutputParser):
+    expected_keys: set[str]
+
+    def __init__(self):
+        PydanticOutputParser.__init__(
+            self,
+            pydantic_object=CommentList,
+            expected_keys=[],
+        )
+
+    def parse_input(self, block: CodeBlock) -> str:
+        # TODO: Perform comment stripping/placeholding here rather than in script
+        text = super().parse_input(block)
+        comment_ids = re.findall(
+            r"<(?:BLOCK|INLINE)_COMMENT (\w{8})>.*$",
+            text,
+            flags=re.MULTILINE,
+        )
+        self.expected_keys = set(comment_ids)
+        return text
+
+    def parse(self, text: str | BaseMessage) -> str:
+        if isinstance(text, BaseMessage):
+            text = str(text.content)
+
         try:
-            obj = parse_json_markdown(text)
+            out: CommentList = super().parse(text)
         except json.JSONDecodeError as e:
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise OutputParserException(f"Got invalid JSON object. Error: {e}")
 
-        if not isinstance(obj, dict):
+        evals: dict[str, Any] = {c.comment_id: c.dict() for c in out.__root__}
+        seen_keys = set(evals.keys())
+        missing_keys = self.expected_keys.difference(seen_keys)
+        invalid_keys = seen_keys.difference(self.expected_keys)
+        if missing_keys:
+            log.debug(f"Missing keys: {missing_keys}")
+            if invalid_keys:
+                log.debug(f"Invalid keys: {invalid_keys}")
+            log.debug(f"Missing keys: {missing_keys}")
             raise OutputParserException(
-                f"Got invalid return object. Expected a dictionary, but got {type(obj)}"
+                f"Got invalid return object. Missing the following expected "
+                f"keys: {missing_keys}"
             )
-        # TODO: move the check into this method
-        return json.dumps(obj)
+
+        for key in invalid_keys:
+            del evals[key]
+
+        return json.dumps(evals)
 
     def get_format_instructions(self) -> str:
         """Get the format instructions for the parser."""
