@@ -98,6 +98,10 @@ class PartitionParser(JanusParser, PydanticOutputParser):
         if isinstance(text, BaseMessage):
             text = str(text.content)
 
+        # Strip everything outside the JSON object
+        begin, end = text.find("["), text.rfind("]")
+        text = text[begin : end + 1]
+
         try:
             out: PartitionList = super().parse(text)
         except (OutputParserException, json.JSONDecodeError):
