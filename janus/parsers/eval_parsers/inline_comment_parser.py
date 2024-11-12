@@ -66,6 +66,10 @@ class InlineCommentParser(JanusParser, PydanticOutputParser):
         if isinstance(text, BaseMessage):
             text = str(text.content)
 
+        # Strip everything outside the JSON object
+        begin, end = text.find("["), text.rfind("]")
+        text = text[begin : end + 1]
+
         try:
             out: CommentList = super().parse(text)
         except json.JSONDecodeError as e:
@@ -94,11 +98,14 @@ class InlineCommentParser(JanusParser, PydanticOutputParser):
     def get_format_instructions(self) -> str:
         """Get the format instructions for the parser."""
         return (
-            "Output must contain all original comments specifications "
-            "in a JSON-formatted string. For each and every comment "
-            "there should be evaluated criteria  Completeness, "
-            "Hallucination, Readability, and Usefulness each including: "
-            "1) The LLM reasoning behind the score. "
-            "2) The 'Score' of either a 1,2,3, or 4'."
-            "Continue generating your response until all comments have been returned. "
+            "Each comment should be evaluated independently based on the above"
+            " criteria. Your response should be formatted as a list of JSON"
+            " objects, with each object corresponding to one comment. Each"
+            " object should include five keys: `comment_id`, `completeness`,"
+            " `hallucination`, `readability`, and `usefulness`. `comment_id`"
+            " should have a string value that holds the 8-character UUID"
+            " associated with the comment. The other four values should each"
+            " be a JSON object with two keys: `reasoning` (a clear explanation"
+            " of why the criteria is rated the way it is) and `score` (an"
+            " integer rating from 1 to 4)."
         )

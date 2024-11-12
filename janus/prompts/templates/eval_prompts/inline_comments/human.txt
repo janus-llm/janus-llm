@@ -1,4 +1,4 @@
-Please evaluate the each comment individually in the array based on the following criteria:
+Please evaluate each comment in the provided {SOURCE_LANGUAGE} code based on the following criteria:
 
 Completeness - Does the comment address all capabilities of the relevant source code?
 
@@ -31,14 +31,18 @@ Usefulness - Is the comment useful?
 1 - The comment is not useful at any level.
 
 
-Look through the code and find each individual comment, they will be deliniated by <BLOCK_COMMENT id> or <INLINE_COMMENT id> where "id" is a UUID to identify the comment that follows. The code you are recieving is written in mumps.
-Find every comment in the provided code and evaluated each one based on the above criateria. Explain your reasoning in a short sentance before providing score for each Completeness, Hallucination, Readability and Usefulness using the above rubric. Your explanation should be in plain English, do not include code snippets. At the end of your response, include the original comment and provide all four scores in JSON format. This must be done for each and every comment within the code. Put each evaluation in an array called "Comments". For example if there are three comments in the input original code the output should look like the following:
+You should rate each comment individually.
+Look through the code and find each individual comment, they will be deliniated by <BLOCK_COMMENT id> or <INLINE_COMMENT id> where "id" is an 8-character UUID for the comment that follows.
+
+Each comment should be evaluated independently based on the above criteria. Your response should be formatted as a list of JSON objects, with each object corresponding to one comment. Each object should include five keys: `comment_id`, `completeness`, `hallucination`, `readability`, and `usefulness`. `comment_id` should have a string value that holds the 8-character UUID associated with the comment. The other four values should each be a JSON object with two keys: `reasoning` (a clear explanation of why the criteria is rated the way it is) and `score` (an integer rating from 1 to 4).
+
+Below is an example output for a snippet of code with three labeled comments:
 ```{EXAMPLE_OUTPUT}```
 
-Here is the array of comments:
 
+Evaluate the following code:
 ```
 {SOURCE_CODE}
 ```
 
-Don't forget to include your final scores in JSON format between triple backticks!
+Don't forget to include your final scores in JSON format!
