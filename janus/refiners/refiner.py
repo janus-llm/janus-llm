@@ -78,7 +78,7 @@ class ReflectionRefiner(JanusRefiner):
     def parse_completion(
         self, completion: str, prompt_value: PromptValue, **kwargs
     ) -> Any:
-        log.info(f"Reflection Prompt: {self.reflection_prompt_name}")
+        log.debug(f"Reflection Prompt: {self.reflection_prompt_name}")
         for retry_number in range(self.max_retries):
             reflection = self.reflection_chain.invoke(
                 dict(
@@ -89,8 +89,8 @@ class ReflectionRefiner(JanusRefiner):
             if re.search(r"\bLGTM\b", reflection) is not None:
                 return self.parser.parse(completion)
             if not retry_number:
-                log.info(f"Completion:\n{completion}")
-            log.info(f"Reflection:\n{reflection}")
+                log.debug(f"Completion:\n{completion}")
+            log.debug(f"Reflection:\n{reflection}")
             completion = self.revision_chain.invoke(
                 dict(
                     prompt=prompt_value.to_string(),
@@ -98,7 +98,7 @@ class ReflectionRefiner(JanusRefiner):
                     reflection=reflection,
                 )
             )
-            log.info(f"Revision:\n{completion}")
+            log.debug(f"Revision:\n{completion}")
 
         return self.parser.parse(completion)
 
