@@ -1,25 +1,33 @@
 import json
-from typing import List, Literal
+import random
+import uuid
+from typing import List
 
 from langchain.output_parsers import PydanticOutputParser
-from langchain.output_parsers.json import parse_json_markdown
 from langchain_core.exceptions import OutputParserException
-from langchain_core.messages import AIMessage
-from langchain_core.pydantic_v1 import BaseModel
+from langchain_core.messages import BaseMessage
+from langchain_core.pydantic_v1 import BaseModel, Field, validator
 
+from janus.language.block import CodeBlock
 from janus.parsers.parser import JanusParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
+RNG = random.Random()
 
 
 class Criteria(BaseModel):
-    reasoning: str
-    score: Literal["pass", "fail"]
+    reasoning: str = Field(description="A short explanation for the given assessment")
+    score: str = Field("A simple `pass` or `fail`")
+
+    @validator("score")
+    def score_is_valid(cls, v: str):
+        assert v in {"pass", "fail"}
+        return v
 
 
 class Requirement(BaseModel):
-    requirement: str
+    requirement_id: str
     C1: Criteria
     C2: Criteria
     C3: Criteria
@@ -32,48 +40,82 @@ class Requirement(BaseModel):
 
 
 class RequirementList(BaseModel):
-    requirements: List[Requirement]
-
-
-class IncoseParser(PydanticOutputParser, JanusParser):
-    block_name: str = ""
-    input_length: int = (
-        0  # TODO: Define input_length as a Pydantic field with a default value
+    __root__: List[Requirement] = Field(
+        description=(
+            "A list of requirement evaluations. Each element should include"
+            " the requirement's 8-character ID in the `requirement_id` field,"
+            " and nine score objects corresponding to each criterion."
+        )
     )
 
-    def __init__(self):
-        super().__init__(pydantic_object=RequirementList)
-        self.input_length = 0  # TODO: Initialize input_length in the constructor
 
-    def parse(self, text: str):
-        log.debug("Parsing text...")
-        if isinstance(text, AIMessage):
-            text = text.content
-        text = text.lstrip(
-            "```json"
-        )  # TODO: change this to a regex or check for json in the front
-        text = text.rstrip("`")
+class IncoseParser(JanusParser, PydanticOutputParser):
+    requirements: dict[str, str]
+
+    def __init__(self):
+        PydanticOutputParser.__init__(
+            self,
+            pydantic_object=RequirementList,
+            requirements={},
+        )
+
+    def parse_input(self, block: CodeBlock) -> str:
+        # TODO: Perform comment stripping/placeholding here rather than in script
+        text = super().parse_input(block)
+        RNG.seed(text)
+
+        obj = json.loads(text)
+
+        # For some reason requirements objects are in a double list?
+        reqs = obj["requirements"]
+
+        # Generate a unique ID for each requirement (ensure they are unique)
+        req_ids = set()
+        while len(req_ids) < len(reqs):
+            req_ids.add(str(uuid.UUID(int=RNG.getrandbits(128), version=4))[:8])
+
+        self.requirements = dict(zip(req_ids, reqs))
+        reqs_str = "\n\n".join(
+            f"Requirement {rid} : {req}" for rid, req in self.requirements.items()
+        )
+        obj["requirements"] = reqs_str
+        return json.dumps(obj)
+
+    def parse(self, text: str | BaseMessage) -> str:
+        if isinstance(text, BaseMessage):
+            text = str(text.content)
+
+        # Strip everything outside the JSON object
+        begin, end = text.find("["), text.rfind("]")
+        text = text[begin : end + 1]
+
         try:
-            obj = parse_json_markdown(text)
+            out: RequirementList = super().parse(text)
         except json.JSONDecodeError as e:
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise OutputParserException(f"Got invalid JSON object. Error: {e}")
 
-        if not isinstance(obj, dict):
-            raise OutputParserException(
-                f"Got invalid return object. Expected a dictionary, but got {type(obj)}"
-            )
-        # TODO: move the check into this method
-        return json.dumps(obj)
+        evals: dict[str, dict] = {c.requirement_id: c.dict() for c in out.__root__}
 
-    def get_format_instructions(self) -> str:
-        """Get the format instructions for the parser."""
-        return (
-            "Output must contain all original requirements specifications "
-            "in a JSON-formatted string. For each and every requirement "
-            "there should be evaluated criteria C1-C9 each including: "
-            "1) The LLM reasoning behind the score. "
-            "2) The 'Score' of either a 'pass' or 'fail'."
-            "Continue generating your response until all requirements "
-            "have been returned. "
-        )
+        seen_keys = set(evals.keys())
+        expected_keys = set(self.requirements.keys())
+        missing_keys = expected_keys.difference(seen_keys)
+        invalid_keys = seen_keys.difference(expected_keys)
+        if missing_keys:
+            log.debug(f"Missing keys: {missing_keys}")
+            if invalid_keys:
+                log.debug(f"Invalid keys: {invalid_keys}")
+            log.debug(f"Missing keys: {missing_keys}")
+            raise OutputParserException(
+                f"Got invalid return object. Missing the following expected "
+                f"keys: {missing_keys}"
+            )
+
+        for key in invalid_keys:
+            del evals[key]
+
+        for rid in evals.keys():
+            evals[rid]["requirement"] = self.requirements[rid]
+            evals[rid].pop("requirement_id")
+
+        return json.dumps(evals)

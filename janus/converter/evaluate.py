@@ -2,6 +2,8 @@ import json
 import re
 from copy import deepcopy
 
+from langchain_core.runnables import Runnable, RunnableLambda, RunnableParallel
+
 from janus.converter.converter import Converter
 from janus.language.block import TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
@@ -63,6 +65,19 @@ class RequirementEvaluator(Evaluator):
         self._parser = IncoseParser()
         self.set_prompt("eval_prompts/incose")
 
+    def _input_runnable(self) -> Runnable:
+        def _get_code(json_text: str) -> str:
+            return json.loads(json_text)["code"]
+
+        def _get_reqs(json_text: str) -> str:
+            return json.dumps(json.loads(json_text)["requirements"])
+
+        return RunnableLambda(self._parser.parse_input) | RunnableParallel(
+            SOURCE_CODE=_get_code,
+            REQUIREMENTS=_get_reqs,
+            context=self._retriever,
+        )
+
     def _add_translation(self, block: TranslatedCodeBlock):
         if block.translated:
             return
@@ -74,36 +89,36 @@ class RequirementEvaluator(Evaluator):
         if self.eval_items_per_request is None:
             return super()._add_translation(block)
 
-        temp = json.loads(block.original.text)
-        eval_item_type = "requirements"
-        items = temp.get(eval_item_type, [])
+        input_obj = json.loads(block.original.text)
+        requirements = input_obj.get("requirements", [])
 
-        if not items:
-            log.debug(f"[{block.name}] Skipping commentless block")
+        if not requirements:
+            log.debug(f"[{block.name}] Skipping empty block")
             block.translated = True
             block.text = None
             block.complete = True
             return
 
-        if len(items) <= self.eval_items_per_request:
-            return super()._add_translation(block)
+        # For some reason requirements objects are in nested lists?
+        while isinstance(requirements[0], list):
+            requirements = [r for lst in requirements for r in lst]
 
-        # split the array into processable chunks.
-        chunk_size = self.eval_items_per_request
-        # chunks is the split up version of them
-        chunks = []
-        for i in range(0, len(items), chunk_size):
-            chunk = items[i : i + chunk_size]
-            chunks.append(chunk)
+        if len(requirements) <= self.eval_items_per_request:
+            input_obj["requirements"] = requirements
+            block.original.text = json.dumps(input_obj)
+            return super()._add_translation(block)
 
         block.processing_time = 0
         block.cost = 0
         block.retries = 0
         obj = {}
-        for chunk in chunks:
+        for i in range(0, len(requirements), self.eval_items_per_request):
             # Build a new TranslatedBlock using the new working text
+            working_requirements = requirements[i : i + self.eval_items_per_request]
             working_copy = deepcopy(block.original)
-            working_copy.text = str(chunk)
+            working_obj = json.loads(working_copy.text)  # type: ignore
+            working_obj["requirements"] = working_requirements
+            working_copy.text = json.dumps(working_obj)
             working_block = TranslatedCodeBlock(working_copy, self._target_language)
 
             # Run the LLM on the working text
@@ -115,17 +130,15 @@ class RequirementEvaluator(Evaluator):
             block.processing_time += working_block.processing_time
 
             # Update the output text to merge this section's output in
-            out_text = self._parser.parse(working_block.text)
-            if eval_item_type not in obj:
-                obj.update(json.loads(out_text))
-            else:
-                obj[eval_item_type] = obj[eval_item_type] + json.loads(out_text).get(
-                    eval_item_type, []
-                )
+            obj.update(json.loads(working_block.text))
 
-        block.text = self._parser.parse(json.dumps(obj))
+        block.text = json.dumps(obj)
         block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
+
+        log.debug(
+            f"[{block.name}] Output code:\n{json.dumps(json.loads(block.text), indent=2)}"
+        )
 
 
 class InlineCommentEvaluator(Evaluator):
