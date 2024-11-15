@@ -42,24 +42,25 @@ class CommentList(BaseModel):
 
 
 class InlineCommentParser(JanusParser, PydanticOutputParser):
-    expected_keys: set[str]
+    comments: dict[str, str]
 
     def __init__(self):
         PydanticOutputParser.__init__(
             self,
             pydantic_object=CommentList,
-            expected_keys=[],
+            comments=[],
         )
 
     def parse_input(self, block: CodeBlock) -> str:
         # TODO: Perform comment stripping/placeholding here rather than in script
         text = super().parse_input(block)
-        comment_ids = re.findall(
-            r"<(?:BLOCK|INLINE)_COMMENT (\w{8})>.*$",
-            text,
-            flags=re.MULTILINE,
+        self.comments = dict(
+            re.findall(
+                r"<(?:BLOCK|INLINE)_COMMENT (\w{8})> (.*)$",
+                text,
+                flags=re.MULTILINE,
+            )
         )
-        self.expected_keys = set(comment_ids)
         return text
 
     def parse(self, text: str | BaseMessage) -> str:
@@ -77,9 +78,11 @@ class InlineCommentParser(JanusParser, PydanticOutputParser):
             raise OutputParserException(f"Got invalid JSON object. Error: {e}")
 
         evals: dict[str, Any] = {c.comment_id: c.dict() for c in out.__root__}
+
         seen_keys = set(evals.keys())
-        missing_keys = self.expected_keys.difference(seen_keys)
-        invalid_keys = seen_keys.difference(self.expected_keys)
+        expected_keys = set(self.comments.keys())
+        missing_keys = expected_keys.difference(seen_keys)
+        invalid_keys = seen_keys.difference(expected_keys)
         if missing_keys:
             log.debug(f"Missing keys: {missing_keys}")
             if invalid_keys:
@@ -93,19 +96,8 @@ class InlineCommentParser(JanusParser, PydanticOutputParser):
         for key in invalid_keys:
             del evals[key]
 
-        return json.dumps(evals)
+        for cid in evals.keys():
+            evals[cid]["comment"] = self.comments[cid]
+            evals[cid].pop("comment_id")
 
-    def get_format_instructions(self) -> str:
-        """Get the format instructions for the parser."""
-        return (
-            "Each comment should be evaluated independently based on the above"
-            " criteria. Your response should be formatted as a list of JSON"
-            " objects, with each object corresponding to one comment. Each"
-            " object should include five keys: `comment_id`, `completeness`,"
-            " `hallucination`, `readability`, and `usefulness`. `comment_id`"
-            " should have a string value that holds the 8-character UUID"
-            " associated with the comment. The other four values should each"
-            " be a JSON object with two keys: `reasoning` (a clear explanation"
-            " of why the criteria is rated the way it is) and `score` (an"
-            " integer rating from 1 to 4)."
-        )
+        return json.dumps(evals)
