@@ -57,23 +57,18 @@ def create_logger(name: str) -> logging.Logger:
     """
     if (log_level := os.environ.get("LOGLEVEL")) is None:
         log_level = "INFO"
-    log_file_kwargs = {}
-    if (log_file := os.environ.get("JANUSLOGFILE")) is not None:
-        log_file_kwargs = dict(
-            filename=log_file,
-            filemode="a",
-        )
 
     FORMAT = "%(message)s"
     rh = RichHandler()
     rh.addFilter(LogFilter())
     handlers = [rh]
+    if (log_file := os.environ.get("JANUSLOGFILE")) is not None:
+        handlers.append(logging.FileHandler(filename=log_file))
     logging.basicConfig(
         level=log_level,
         format=FORMAT,
         datefmt="[%m/%d/%Y %I:%M:%S %p]",
         handlers=handlers,
-        **log_file_kwargs,
     )
 
     log = logging.getLogger(name)
