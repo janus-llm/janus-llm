@@ -10,8 +10,9 @@ Attributes
 .. autoapisummary::
 
    janus.llm.models_info.log
-   janus.llm.models_info.openai_model_reroutes
+   janus.llm.models_info.ModelType
    janus.llm.models_info.openai_models
+   janus.llm.models_info.azure_models
    janus.llm.models_info.claude_models
    janus.llm.models_info.llama2_models
    janus.llm.models_info.llama3_models
@@ -22,7 +23,7 @@ Attributes
    janus.llm.models_info.all_models
    janus.llm.models_info.MODEL_TYPE_CONSTRUCTORS
    janus.llm.models_info.MODEL_PROMPT_ENGINES
-   janus.llm.models_info.model_identifiers
+   janus.llm.models_info.MODEL_ID_TO_LONG_ID
    janus.llm.models_info.MODEL_DEFAULT_ARGUMENTS
    janus.llm.models_info.DEFAULT_MODELS
    janus.llm.models_info.MODEL_CONFIG_DIR
@@ -30,11 +31,21 @@ Attributes
    janus.llm.models_info.TOKEN_LIMITS
 
 
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.llm.models_info.JanusModelProtocol
+   janus.llm.models_info.JanusModel
+
+
 Functions
 ---------
 
 .. autoapisummary::
 
+   janus.llm.models_info.get_available_model_names
    janus.llm.models_info.load_model
 
 
@@ -43,14 +54,119 @@ Module Contents
 
 .. py:data:: log
 
-.. py:data:: openai_model_reroutes
+.. py:data:: ModelType
+
+.. py:class:: JanusModelProtocol
+
+   Bases: :py:obj:`Protocol`
+
+
+   Base class for protocol classes.
+
+   Protocol classes are defined as::
+
+       class Proto(Protocol):
+           def meth(self) -> int:
+               ...
+
+   Such classes are primarily used with static type checkers that recognize
+   structural subtyping (static duck-typing).
+
+   For example::
+
+       class C:
+           def meth(self) -> int:
+               return 0
+
+       def func(x: Proto) -> int:
+           return x.meth()
+
+       func(C())  # Passes static type check
+
+   See PEP 544 for details. Protocol classes decorated with
+   @typing.runtime_checkable act as simple-minded runtime protocols that check
+   only the presence of given attributes, ignoring their type signatures.
+   Protocol classes can be generic, they are defined as::
+
+       class GenProto(Protocol[T]):
+           def meth(self) -> T:
+               ...
+
+
+   .. py:attribute:: model_id
+      :type:  str
+
+
+   .. py:attribute:: model_type_name
+      :type:  str
+
+
+   .. py:attribute:: token_limit
+      :type:  int
+
+
+   .. py:attribute:: input_token_cost
+      :type:  float
+
+
+   .. py:attribute:: output_token_cost
+      :type:  float
+
+
+   .. py:attribute:: prompt_engine
+      :type:  type[janus.prompts.prompt.PromptEngine]
+
+
+   .. py:method:: get_num_tokens(text)
+
+
+.. py:class:: JanusModel
+
+   Bases: :py:obj:`langchain_core.runnables.Runnable`, :py:obj:`JanusModelProtocol`
+
+
+   Base class for protocol classes.
+
+   Protocol classes are defined as::
+
+       class Proto(Protocol):
+           def meth(self) -> int:
+               ...
+
+   Such classes are primarily used with static type checkers that recognize
+   structural subtyping (static duck-typing).
+
+   For example::
+
+       class C:
+           def meth(self) -> int:
+               return 0
+
+       def func(x: Proto) -> int:
+           return x.meth()
+
+       func(C())  # Passes static type check
+
+   See PEP 544 for details. Protocol classes decorated with
+   @typing.runtime_checkable act as simple-minded runtime protocols that check
+   only the presence of given attributes, ignoring their type signatures.
+   Protocol classes can be generic, they are defined as::
+
+       class GenProto(Protocol[T]):
+           def meth(self) -> T:
+               ...
+
 
 .. py:data:: openai_models
-   :value: ['gpt-4-0613', 'gpt-4-1106-preview', 'gpt-4-0125-preview', 'gpt-4o-2024-05-13', 'gpt-3.5-turbo-0125']
+   :value: ['gpt-4o', 'gpt-4o-mini', 'gpt-4', 'gpt-4-turbo', 'gpt-4-turbo-preview', 'gpt-3.5-turbo',...
+
+
+.. py:data:: azure_models
+   :value: ['gpt-4o', 'gpt-4o-mini', 'gpt-3.5-turbo-16k']
 
 
 .. py:data:: claude_models
-   :value: ['bedrock-claude-v2', 'bedrock-claude-instant-v1', 'bedrock-claude-haiku', 'bedrock-claude-sonnet']
+   :value: ['bedrock-claude-v2', 'bedrock-claude-instant-v1', 'bedrock-claude-haiku',...
 
 
 .. py:data:: llama2_models
@@ -78,12 +194,12 @@ Module Contents
 .. py:data:: all_models
 
 .. py:data:: MODEL_TYPE_CONSTRUCTORS
-   :type:  dict[str, Callable[[Any], langchain_core.language_models.BaseLanguageModel]]
+   :type:  dict[str, ModelType]
 
 .. py:data:: MODEL_PROMPT_ENGINES
    :type:  dict[str, Callable[Ellipsis, janus.prompts.prompt.PromptEngine]]
 
-.. py:data:: model_identifiers
+.. py:data:: MODEL_ID_TO_LONG_ID
 
 .. py:data:: MODEL_DEFAULT_ARGUMENTS
    :type:  dict[str, dict[str, str]]
@@ -98,5 +214,7 @@ Module Contents
 .. py:data:: TOKEN_LIMITS
    :type:  dict[str, int]
 
-.. py:function:: load_model(model_name)
+.. py:function:: get_available_model_names()
+
+.. py:function:: load_model(model_id)
 

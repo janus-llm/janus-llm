@@ -1,0 +1,68 @@
+janus.parsers.parser
+====================
+
+.. py:module:: janus.parsers.parser
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   janus.parsers.parser.log
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.parsers.parser.JanusParser
+   janus.parsers.parser.GenericParser
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+
+.. py:class:: JanusParser
+
+   Bases: :py:obj:`langchain.schema.output_parser.BaseOutputParser`\ [\ :py:obj:`str`\ ]
+
+
+   .. py:method:: parse_input(block)
+
+      Parse the input block into raw string input ready to be passed to
+      an LLM. Also perform any processing or saving of metadata.
+
+      :param block: The CodeBlock to be processed
+
+      :returns: A parsed version of the input text
+
+
+
+   .. py:method:: parse_combined_output(text)
+
+      Parse the output text from the LLM when multiple inputs are combined
+
+      :param text: The output text from the LLM
+
+      :returns: A parsed version of the text
+
+
+
+   .. py:method:: parse_into_block(text, block)
+
+
+.. py:class:: GenericParser
+
+   Bases: :py:obj:`JanusParser`, :py:obj:`langchain_core.output_parsers.StrOutputParser`
+
+
+   .. py:method:: parse(text)
+
+
+   .. py:method:: get_format_instructions()
+
+

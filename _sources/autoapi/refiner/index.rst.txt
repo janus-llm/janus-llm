@@ -1,0 +1,87 @@
+refiner
+=======
+
+.. py:module:: refiner
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   refiner.log
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   refiner.JanusRefiner
+   refiner.FixParserExceptions
+   refiner.ReflectionRefiner
+   refiner.HallucinationRefiner
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+
+.. py:class:: JanusRefiner
+
+   Bases: :py:obj:`janus.parsers.parser.JanusParser`
+
+
+   .. py:attribute:: parser
+      :type:  janus.parsers.parser.JanusParser
+
+
+   .. py:method:: parse_runnable(input)
+
+
+   .. py:method:: parse_completion(completion, **kwargs)
+
+
+   .. py:method:: parse(text)
+      :abstractmethod:
+
+
+
+.. py:class:: FixParserExceptions(llm, parser, max_retries)
+
+   Bases: :py:obj:`JanusRefiner`, :py:obj:`langchain.output_parsers.RetryWithErrorOutputParser`
+
+
+   .. py:method:: parse_completion(completion, prompt_value, **kwargs)
+
+
+.. py:class:: ReflectionRefiner(llm, parser, max_retries, prompt_template_name = 'refinement/reflection')
+
+   Bases: :py:obj:`JanusRefiner`
+
+
+   .. py:attribute:: max_retries
+      :type:  int
+
+
+   .. py:attribute:: reflection_chain
+      :type:  langchain_core.runnables.RunnableSerializable
+
+
+   .. py:attribute:: revision_chain
+      :type:  langchain_core.runnables.RunnableSerializable
+
+
+   .. py:attribute:: reflection_prompt_name
+      :type:  str
+
+
+   .. py:method:: parse_completion(completion, prompt_value, **kwargs)
+
+
+.. py:class:: HallucinationRefiner(**kwargs)
+
+   Bases: :py:obj:`ReflectionRefiner`
+
+

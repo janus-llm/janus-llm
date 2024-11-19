@@ -41,5 +41,28 @@ Module Contents
                        values are `"code"`, `"text"`, `"eval"`, and `None` (default). If `None`,
                        the `Converter` assumes you won't be parsing an output (i.e., adding to an
                        embedding DB).
+   :param max_prompts: The maximum number of prompts to try before giving up.
+   :param max_tokens: The maximum number of tokens to use in the LLM. If `None`, the
+                      converter will use half the model's token limit.
+   :param prompt_template: The name of the prompt template to use.
+   :param db_path: The path to the database to use for vectorization.
+   :param db_config: The configuration for the database.
+   :param protected_node_types: A set of node types that aren't to be merged.
+   :param prune_node_types: A set of node types which should be pruned.
+   :param splitter_type: The type of splitter to use. Valid values are `"file"`,
+                         `"tag"`, `"chunk"`, `"ast-strict"`, and `"ast-flex"`.
+   :param refiner_type: The type of refiner to use. Valid values:
+                        - "parser"
+                        - "reflection"
+                        - None
+   :param retriever_type: The type of retriever to use. Valid values:
+                          - "active_usings"
+                          - "language_docs"
+                          - None
+
+
+   .. py:method:: get_prompt_replacements(block)
+      :staticmethod:
+
 
 

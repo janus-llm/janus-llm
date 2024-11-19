@@ -19,6 +19,7 @@ Classes
 
    janus.language.alc.alc.AlcCombiner
    janus.language.alc.alc.AlcSplitter
+   janus.language.alc.alc.AlcListingSplitter
 
 
 Module Contents
@@ -47,5 +48,60 @@ Module Contents
    Initialize a AlcSplitter instance.
 
    :param max_tokens: The maximum number of tokens supported by the model
+
+
+.. py:class:: AlcListingSplitter(model = None, max_tokens = 4096, protected_node_types = (), prune_node_types = (), prune_unprotected = False)
+
+   Bases: :py:obj:`AlcSplitter`
+
+
+   A class for splitting ALC listing code into functional blocks to
+   prompt with for transcoding.
+
+   Initialize a AlcSplitter instance.
+
+
+   :param max_tokens: The maximum number of tokens supported by the model
+
+
+   .. py:method:: split_string(code, name)
+
+      Split the given code into functional code blocks.
+
+      :param code: The code as a string to split into functional blocks.
+      :param name: The filename of the code block.
+
+      :returns: A `CodeBlock` made up of nested `CodeBlock`s.
+
+
+
+   .. py:method:: preproccess_assembly(code)
+
+      Remove non-essential lines from an assembly snippet
+
+
+
+   .. py:method:: get_active_usings(code)
+
+      Look for 'active usings' in the ALC listing header
+
+
+
+   .. py:method:: strip_header_and_left(lines)
+
+      Remove the header and the left panel from the assembly sample
+
+
+
+   .. py:method:: strip_addresses(lines)
+
+      Strip the addresses which run down the right side of the assembly snippet
+
+
+
+   .. py:method:: strip_footer(lines)
+
+      Strip the footer from the assembly snippet
+
 
 

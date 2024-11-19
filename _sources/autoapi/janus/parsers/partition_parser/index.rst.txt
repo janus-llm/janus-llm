@@ -1,0 +1,87 @@
+janus.parsers.partition_parser
+==============================
+
+.. py:module:: janus.parsers.partition_parser
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   janus.parsers.partition_parser.log
+   janus.parsers.partition_parser.RNG
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.parsers.partition_parser.PartitionObject
+   janus.parsers.partition_parser.PartitionList
+   janus.parsers.partition_parser.PartitionParser
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+
+.. py:data:: RNG
+
+.. py:class:: PartitionObject
+
+   Bases: :py:obj:`langchain_core.pydantic_v1.BaseModel`
+
+
+   .. py:attribute:: reasoning
+      :type:  str
+
+
+   .. py:attribute:: location
+      :type:  str
+
+
+.. py:class:: PartitionList
+
+   Bases: :py:obj:`langchain_core.pydantic_v1.BaseModel`
+
+
+.. py:class:: PartitionParser(token_limit, model)
+
+   Bases: :py:obj:`janus.parsers.parser.JanusParser`, :py:obj:`langchain.output_parsers.PydanticOutputParser`
+
+
+   .. py:attribute:: token_limit
+      :type:  int
+
+
+   .. py:attribute:: model
+      :type:  langchain_core.language_models.BaseLanguageModel
+
+
+   .. py:attribute:: lines
+      :type:  list[str]
+      :value: []
+
+
+
+   .. py:attribute:: line_id_to_index
+      :type:  dict[str, int]
+
+
+   .. py:method:: parse_input(block)
+
+      Parse the input block into raw string input ready to be passed to
+      an LLM. Also perform any processing or saving of metadata.
+
+      :param block: The CodeBlock to be processed
+
+      :returns: A parsed version of the input text
+
+
+
+   .. py:method:: parse(text)
+
+

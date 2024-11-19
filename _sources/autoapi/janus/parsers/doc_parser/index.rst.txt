@@ -46,7 +46,7 @@ Module Contents
 
 .. py:class:: MultiDocumentationParser
 
-   Bases: :py:obj:`langchain.output_parsers.PydanticOutputParser`, :py:obj:`janus.parsers.code_parser.JanusParser`
+   Bases: :py:obj:`janus.parsers.parser.JanusParser`, :py:obj:`langchain.output_parsers.PydanticOutputParser`
 
 
    .. py:attribute:: block_name
@@ -55,7 +55,15 @@ Module Contents
 
 
 
-   .. py:method:: set_reference(block)
+   .. py:method:: parse_input(block)
+
+      Parse the input block into raw string input ready to be passed to
+      an LLM. Also perform any processing or saving of metadata.
+
+      :param block: The CodeBlock to be processed
+
+      :returns: A parsed version of the input text
+
 
 
    .. py:method:: parse(text)
@@ -81,14 +89,22 @@ Module Contents
 
 .. py:class:: MadlibsDocumentationParser
 
-   Bases: :py:obj:`langchain.schema.output_parser.BaseOutputParser`\ [\ :py:obj:`str`\ ], :py:obj:`janus.parsers.code_parser.JanusParser`
+   Bases: :py:obj:`janus.parsers.parser.JanusParser`
 
 
    .. py:attribute:: expected_keys
       :type:  set[str]
 
 
-   .. py:method:: set_reference(block)
+   .. py:method:: parse_input(block)
+
+      Parse the input block into raw string input ready to be passed to
+      an LLM. Also perform any processing or saving of metadata.
+
+      :param block: The CodeBlock to be processed
+
+      :returns: A parsed version of the input text
+
 
 
    .. py:method:: parse(text)

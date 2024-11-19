@@ -40,7 +40,7 @@ Module Contents
    method to be overridden to track parameter updates in _changed_attrs.
 
 
-.. py:class:: Converter(model = 'gpt-3.5-turbo-0125', model_arguments = {}, source_language = 'fortran', max_prompts = 10, max_tokens = None, prompt_template = 'simple', db_path = None, db_config = None, protected_node_types = (), prune_node_types = (), splitter_type = 'file')
+.. py:class:: Converter(model = 'gpt-4o', model_arguments = {}, source_language = 'fortran', max_prompts = 10, max_tokens = None, prompt_template = 'simple', db_path = None, db_config = None, protected_node_types = (), prune_node_types = (), splitter_type = 'file', refiner_types = [JanusRefiner], retriever_type = None)
 
    Parent class that converts code into something else.
 
@@ -55,6 +55,24 @@ Module Contents
                        values are `"code"`, `"text"`, `"eval"`, and `None` (default). If `None`,
                        the `Converter` assumes you won't be parsing an output (i.e., adding to an
                        embedding DB).
+   :param max_prompts: The maximum number of prompts to try before giving up.
+   :param max_tokens: The maximum number of tokens to use in the LLM. If `None`, the
+                      converter will use half the model's token limit.
+   :param prompt_template: The name of the prompt template to use.
+   :param db_path: The path to the database to use for vectorization.
+   :param db_config: The configuration for the database.
+   :param protected_node_types: A set of node types that aren't to be merged.
+   :param prune_node_types: A set of node types which should be pruned.
+   :param splitter_type: The type of splitter to use. Valid values are `"file"`,
+                         `"tag"`, `"chunk"`, `"ast-strict"`, and `"ast-flex"`.
+   :param refiner_type: The type of refiner to use. Valid values:
+                        - "parser"
+                        - "reflection"
+                        - None
+   :param retriever_type: The type of retriever to use. Valid values:
+                          - "active_usings"
+                          - "language_docs"
+                          - None
 
 
    .. py:method:: set_model(model_name, **custom_arguments)
@@ -73,8 +91,6 @@ Module Contents
 
       Validate and set the prompt template name.
 
-      The affected objects will not be updated until translate() is called.
-
       :param prompt_template: name of prompt template directory
                               (see janus/prompts/templates) or path to a directory.
 
@@ -84,18 +100,30 @@ Module Contents
 
       Validate and set the prompt template name.
 
-      The affected objects will not be updated until translate() is called.
-
       :param prompt_template: name of prompt template directory
                               (see janus/prompts/templates) or path to a directory.
+
+
+
+   .. py:method:: set_refiner_types(refiner_types)
+
+      Validate and set the refiner type
+
+      :param refiner_type: the type of refiner to use
+
+
+
+   .. py:method:: set_retriever(retriever_type)
+
+      Validate and set the retriever type
+
+      :param retriever_type: the type of retriever to use
 
 
 
    .. py:method:: set_source_language(source_language)
 
       Validate and set the source language.
-
-      The affected objects will not be updated until _load_parameters() is called.
 
       :param source_language: The source programming language.
 

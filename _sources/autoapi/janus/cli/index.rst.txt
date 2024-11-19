@@ -16,6 +16,8 @@ Attributes
    janus.cli.db_file
    janus.cli.db_loc
    janus.cli.collections_config_file
+   janus.cli.REFINER_TYPES
+   janus.cli.REFINERS
    janus.cli.app
    janus.cli.db
    janus.cli.llm
@@ -27,11 +29,14 @@ Functions
 
 .. autoapisummary::
 
+   janus.cli.get_subclasses
    janus.cli.get_collections_config
    janus.cli.version_callback
    janus.cli.common
    janus.cli.translate
    janus.cli.document
+   janus.cli.aggregate
+   janus.cli.partition
    janus.cli.diagram
    janus.cli.db_init
    janus.cli.db_status
@@ -39,7 +44,9 @@ Functions
    janus.cli.db_add
    janus.cli.db_rm
    janus.cli.llm_add
+   janus.cli.llm_ls
    janus.cli.embedding_add
+   janus.cli.render
 
 
 Module Contents
@@ -58,6 +65,12 @@ Module Contents
 .. py:data:: db_loc
 
 .. py:data:: collections_config_file
+
+.. py:function:: get_subclasses(cls)
+
+.. py:data:: REFINER_TYPES
+
+.. py:data:: REFINERS
 
 .. py:function:: get_collections_config()
 
@@ -81,11 +94,15 @@ Module Contents
    :param version: A boolean flag for the version
 
 
-.. py:function:: translate(input_dir, source_lang, output_dir, target_lang, llm_name = 'gpt-3.5-turbo-0125', max_prompts = 10, overwrite = False, temp = 0.7, prompt_template = 'simple', collection = None, splitter_type = 'file', max_tokens = None)
+.. py:function:: translate(input_dir, source_lang, output_dir, target_lang, llm_name, max_prompts = 10, overwrite = False, skip_context = False, temp = 0.7, prompt_template = 'simple', collection = None, splitter_type = 'file', refiner_types = ['JanusRefiner'], retriever_type = None, max_tokens = None)
 
-.. py:function:: document(input_dir, language, output_dir, llm_name = 'gpt-3.5-turbo-0125', max_prompts = 10, overwrite = False, doc_mode = 'madlibs', comments_per_request = None, drop_comments = False, temperature = 0.7, collection = None, splitter_type = 'file', max_tokens = None)
+.. py:function:: document(input_dir, language, output_dir, llm_name, max_prompts = 10, overwrite = False, doc_mode = 'madlibs', comments_per_request = None, drop_comments = False, temperature = 0.7, collection = None, splitter_type = 'file', refiner_types = ['JanusRefiner'], retriever_type = None, max_tokens = None)
 
-.. py:function:: diagram(input_dir, language, output_dir, llm_name = 'gpt-3.5-turbo-0125', max_prompts = 10, overwrite = False, temperature = 0.7, collection = None, diagram_type = 'Activity', add_documentation = False, splitter_type = 'file')
+.. py:function:: aggregate(input_dir, language, output_dir, llm_name, max_prompts = 10, overwrite = False, temperature = 0.7, collection = None, splitter_type = 'file', intermediate_converters = ['Documenter'])
+
+.. py:function:: partition(input_dir, language, output_dir, llm_name = 'gpt-4o', max_prompts = 10, overwrite = False, temperature = 0.7, splitter_type = 'file', max_tokens = None, partition_token_limit = 8192)
+
+.. py:function:: diagram(input_dir, language, output_dir, llm_name, max_prompts = 10, overwrite = False, temperature = 0.7, collection = None, diagram_type = 'Activity', add_documentation = False, splitter_type = 'file', refiner_types = ['JanusRefiner'], retriever_type = None)
 
 .. py:function:: db_init(path = str(janus_dir / 'chroma.db'), url = '')
 
@@ -114,7 +131,11 @@ Module Contents
    :param collection_name: The name of the collection to remove
 
 
-.. py:function:: llm_add(model_name, model_type = 'OpenAI')
+.. py:function:: llm_add(model_name, model_type = 'Azure')
+
+.. py:function:: llm_ls(all = False)
 
 .. py:function:: embedding_add(model_name, model_type = 'OpenAI')
+
+.. py:function:: render(input_dir, output_dir)
 
