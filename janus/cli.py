@@ -916,6 +916,15 @@ def llm_self_eval(
             help="The maximum number of evaluation items per request",
         ),
     ] = None,
+    max_tokens: Annotated[
+        int,
+        typer.Option(
+            "--max-tokens",
+            "-M",
+            help="The maximum number of tokens the model will take in. "
+            "If unspecificed, model's default max will be used.",
+        ),
+    ] = None,
 ):
     model_arguments = dict(temperature=temperature)
     refiner_types = [REFINERS[r] for r in refiner_types]
@@ -925,6 +934,7 @@ def llm_self_eval(
         model_arguments=model_arguments,
         source_language=language,
         max_prompts=max_prompts,
+        max_tokens=max_tokens,
         splitter_type=splitter_type,
         refiner_types=refiner_types,
     )
