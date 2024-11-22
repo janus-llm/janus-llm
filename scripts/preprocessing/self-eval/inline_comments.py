@@ -15,21 +15,22 @@ def process_comments_in_file(input_path: Path):
     generated_comments = data.get("output", {})
 
     comment_patterns = [
-        (r"<BLOCK_COMMENT (\w{8})>", "<BLOCK_COMMENT {}>"),
-        (r"<INLINE_COMMENT (\w{8})>", "<INLINE_COMMENT {}>"),
-        (r"<MODULE (\w{8})>", "<MODULE {}>"),
+        (r"<BLOCK_COMMENT (\w{8})>", "<BLOCK_COMMENT {}>", "<BLOCK_COMMENT {}>"),
+        (r"<INLINE_COMMENT (\w{8})>", "<INLINE_COMMENT {}>", "<INLINE_COMMENT {}>"),
+        (r"<MODULE (\w{8})>", "<MODULE {}>", "<BLOCK_COMMENT {}>"),
     ]
 
     missing_comments = 0
-    for pattern, replacement_template in comment_patterns:
+    for pattern, find_template, repl_template in comment_patterns:
         matches = re.findall(pattern, processed_str)
         for comment_id in matches:
-            tag = replacement_template.format(comment_id)
+            find_tag = find_template.format(comment_id)
+            repl_tag = repl_template.format(comment_id)
             if comment_id not in generated_comments:
                 missing_comments += 1
             comment = generated_comments.get(comment_id, "[comment missing]")
             comment = comment.replace("\n", "\\n")
-            processed_str = processed_str.replace(tag, f"{tag} {comment}")
+            processed_str = processed_str.replace(find_tag, f"{repl_tag} {comment}")
 
     if missing_comments:
         log.warning(f"{missing_comments} comments missing from {input_path}")
