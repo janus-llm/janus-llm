@@ -457,6 +457,7 @@ class Converter:
         for in_path, out_path in in_out_pairs:
             # Translate the file, skip it if there's a rate limit error
             try:
+                log.info(f"Processing {in_path.relative_to(input_directory)}")
                 out_block = self.translate_file(in_path)
                 total_cost += out_block.total_cost
             except RateLimitError:

@@ -293,11 +293,12 @@ def load_model(model_id) -> JanusModel:
 
     elif model_type_name == "Azure":
         model_args.update(
-            {
-                "api_key": os.getenv("AZURE_OPENAI_API_KEY"),
-                "azure_endpoint": os.getenv("AZURE_OPENAI_ENDPOINT"),
-                "api_version": os.getenv("OPENAI_API_VERSION", "2024-02-01"),
-            }
+            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            api_version=os.getenv("OPENAI_API_VERSION", "2024-02-01"),
+            azure_deployment=model_id,
+            request_timeout=3600,
+            max_tokens=4096,
         )
 
     model_type = MODEL_TYPE_CONSTRUCTORS[model_type_name]
