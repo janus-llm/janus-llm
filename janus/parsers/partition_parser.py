@@ -36,6 +36,29 @@ class PartitionList(BaseModel):
     )
 
 
+# The following IDs appear in the prompt example. If the LLM produces them,
+#  they should be ignored
+EXAMPLE_IDS = {
+    "0d2f4f8d",
+    "def2a953",
+    "75315253",
+    "e7f928da",
+    "1781b2a9",
+    "2fe21e27",
+    "9aef6179",
+    "6061bd82",
+    "22bd0c30",
+    "5d85e19e",
+    "06027969",
+    "91b722fb",
+    "4b3f79be",
+    "k57w964a",
+    "51638s96",
+    "065o6q32",
+    "j5q6p852",
+}
+
+
 class PartitionParser(JanusParser, PydanticOutputParser):
     token_limit: int
     model: BaseLanguageModel
@@ -59,7 +82,10 @@ class PartitionParser(JanusParser, PydanticOutputParser):
         # Generate a unique ID for each line (ensure they are unique)
         line_ids = set()
         while len(line_ids) < len(self.lines):
-            line_ids.add(str(uuid.UUID(int=RNG.getrandbits(128), version=4))[:8])
+            line_id = str(uuid.UUID(int=RNG.getrandbits(128), version=4))[:8]
+            if line_id in EXAMPLE_IDS:
+                continue
+            line_ids.add(line_id)
 
         # Prepend each line with the corresponding ID, save the mapping
         self.line_id_to_index = {lid: i for i, lid in enumerate(line_ids)}
@@ -72,18 +98,24 @@ class PartitionParser(JanusParser, PydanticOutputParser):
         if isinstance(text, BaseMessage):
             text = str(text.content)
 
+        # Strip everything outside the JSON object
+        begin, end = text.find("["), text.rfind("]")
+        text = text[begin : end + 1]
+
         try:
             out: PartitionList = super().parse(text)
         except (OutputParserException, json.JSONDecodeError):
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise
 
+        # Get partition locations, discard reasoning
+        partition_locations = {partition.location for partition in out.__root__}
+
+        # Ignore IDs from the example input
+        partition_locations.difference_update(EXAMPLE_IDS)
+
         # Locate any invalid line IDs, raise exception if any found
-        invalid_splits = [
-            partition.location
-            for partition in out.__root__
-            if partition.location not in self.line_id_to_index
-        ]
+        invalid_splits = partition_locations.difference(self.line_id_to_index)
         if invalid_splits:
             err_msg = (
                 f"{len(invalid_splits)} line ID(s) not found in input: "
@@ -95,9 +127,9 @@ class PartitionParser(JanusParser, PydanticOutputParser):
         # Map line IDs to indices (so they can be sorted and lines indexed)
         index_to_line_id = {0: "START", None: "END"}
         split_points = {0}
-        for partition in out.__root__:
-            index = self.line_id_to_index[partition.location]
-            index_to_line_id[index] = partition.location
+        for partition in partition_locations:
+            index = self.line_id_to_index[partition]
+            index_to_line_id[index] = partition
             split_points.add(index)
 
         # Get partition start/ends, chunks, chunk lengths
