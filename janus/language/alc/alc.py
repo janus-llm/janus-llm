@@ -79,10 +79,15 @@ class AlcSplitter(TreeSitterSplitter):
             if len(sects) > 1:
                 block.children = []
                 for sect in sects:
-                    if sect[0].node_type in sect_types:
-                        sect_node = self.merge_nodes(sect)
-                        sect_node.children = sect
-                        sect_node.node_type = NodeType(str(sect[0].node_type)[:5])
+                    node_type = sect[0].node_type
+                    if node_type in sect_types:
+                        if len(sect) == 1:
+                            # Don't make a node its own child
+                            sect_node = sect[0]
+                        else:
+                            sect_node = self.merge_nodes(sect)
+                            sect_node.children = sect
+                        sect_node.node_type = NodeType(str(node_type)[:5])
                         block.children.append(sect_node)
                     else:
                         block.children.extend(sect)
