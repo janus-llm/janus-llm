@@ -22,7 +22,9 @@ class Criteria(BaseModel):
 
     @validator("score")
     def score_is_valid(cls, v: str):
-        assert v in {"pass", "fail"}
+        v = v.lower().strip()
+        if v not in {"pass", "fail"}:
+            raise OutputParserException("Score must be either 'pass' or 'fail'")
         return v
 
 
