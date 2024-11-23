@@ -295,17 +295,20 @@ class Splitter(FileManager):
 
             # Update adjacent sum estimates
             if i0 > 0:
-                adj_sums[i0 - 1] += merged_text_length
+                adj_sums[i0 - 1] = lengths[i0 - 1] + merged_text_length
             if i1 < len(adj_sums) - 1:
-                adj_sums[i1 + 1] += merged_text_length
+                adj_sums[i1] = lengths[i1 + 1] + merged_text_length
 
-            if i0 > 0 and i1 < len(merge_allowed) - 1:
-                if not (merge_allowed[i0 - 1] and merge_allowed[i1 + 1]):
-                    merge_allowed[i0 - 1] = merge_allowed[i1 + 1] = False
+            # The merged node cannot be merged with the next node if it is protected
+            if i1 < len(merge_allowed):
+                merge_allowed[i1] = not protected[i1 + 1]
 
             # The potential merge length for this pair is removed
             adj_sums.pop(i0)
+
+            # The merged-in node is removed from the protected list
             merge_allowed.pop(i0)
+            protected.pop(i0)
 
             # Merge the pair of node groups
             groups[i0 : i1 + 1] = [groups[i0] + groups[i1]]
@@ -403,13 +406,13 @@ class Splitter(FileManager):
         self._split_into_lines(node)
 
     def _split_into_lines(self, node: CodeBlock):
-        split_text = re.split(r"(\n+)", node.text)
+        split_text = list(re.split(r"(\n+)", node.text))
 
         # If the string didn't start/end with newlines, make sure to include
         #  empty strings for the prefix/suffixes
-        if split_text[0].strip("\n"):
+        if not re.match(r"^\n+$", split_text[0]):
             split_text = [""] + split_text
-        if split_text[-1].strip("\n"):
+        if not re.match(r"^\n+$", split_text[-1]):
             split_text.append("")
         betweens = split_text[::2]
         lines = split_text[1::2]
