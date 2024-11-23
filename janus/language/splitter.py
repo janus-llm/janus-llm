@@ -275,45 +275,50 @@ class Splitter(FileManager):
 
         groups = [[n] for n in nodes]
         while len(groups) > 1 and min(adj_sums) <= self.max_tokens and any(merge_allowed):
-            # Get the indices of the adjacent nodes that would result in the
-            #  smallest possible merged snippet. Ignore protected nodes.
+            # Get the index of the node that would result in the smallest
+            #  merged snippet when merged with the node that follows it.
+            #  Ignore protected nodes.
             mergeable_indices = compress(range(len(adj_sums)), merge_allowed)
-            i0 = int(min(mergeable_indices, key=adj_sums.__getitem__))
-            i1 = i0 + 1
+            C = int(min(mergeable_indices, key=adj_sums.__getitem__))
+
+            # C: Central index
+            # L: Index to the left
+            # R: Index to the right (to be merged in to C)
+            # N: Next index (to the right of R, the "new R")
+            L, R, N = C - 1, C + 1, C + 2
 
             # Recalculate the length. We can't simply use the adj_sum, because
             #  it is an underestimate due to the adjoining suffix/prefix.
-            central_node = groups[i0][-1]
-            merged_text = "".join([text_chunks[i0], central_node.suffix, text_chunks[i1]])
+            central_node = groups[C][-1]
+            merged_text = "".join([text_chunks[C], central_node.suffix, text_chunks[R]])
             merged_text_length = self._count_tokens(merged_text)
 
             # If the true length of the merged pair is too long, don't merge them
             #  Instead, correct the estimate, since shorter pairs may yet exist
             if merged_text_length > self.max_tokens:
-                adj_sums[i0] = merged_text_length
+                adj_sums[C] = merged_text_length
                 continue
 
             # Update adjacent sum estimates
-            if i0 > 0:
-                adj_sums[i0 - 1] = lengths[i0 - 1] + merged_text_length
-            if i1 < len(adj_sums) - 1:
-                adj_sums[i1] = lengths[i1 + 1] + merged_text_length
-
-            # The merged node cannot be merged with the next node if it is protected
-            if i1 < len(merge_allowed):
-                merge_allowed[i1] = not protected[i1 + 1]
+            if L >= 0:
+                adj_sums[L] = lengths[L] + merged_text_length
+            if N < len(adj_sums):
+                adj_sums[R] = lengths[N] + merged_text_length
 
             # The potential merge length for this pair is removed
-            adj_sums.pop(i0)
+            adj_sums.pop(C)
 
             # The merged-in node is removed from the protected list
-            merge_allowed.pop(i0)
-            protected.pop(i0)
+            #  The merge_allowed list need not be updated - if the node now to
+            #  its right is protected, the merge_allowed element corresponding
+            #  to the merged neighbor will have been True, and now corresponds
+            #  to the merged node.
+            merge_allowed.pop(C)
 
             # Merge the pair of node groups
-            groups[i0 : i1 + 1] = [groups[i0] + groups[i1]]
-            text_chunks[i0 : i1 + 1] = [merged_text]
-            lengths[i0 : i1 + 1] = [merged_text_length]
+            groups[C:N] = [groups[C] + groups[R]]
+            text_chunks[C:N] = [merged_text]
+            lengths[C:N] = [merged_text_length]
 
         return groups
 
