@@ -213,8 +213,8 @@ class InlineCommentEvaluator(Evaluator):
             suffix = block.original.text[end_idx:]
 
             # Strip all comment placeholders outside of the section of interest
-            prefix = re.sub(comment_pattern, "", prefix)
-            suffix = re.sub(comment_pattern, "", suffix)
+            prefix = re.sub(comment_pattern, "", prefix, flags=re.MULTILINE)
+            suffix = re.sub(comment_pattern, "", suffix, flags=re.MULTILINE)
 
             # Build a new TranslatedBlock using the new working text
             working_copy = deepcopy(block.original)
