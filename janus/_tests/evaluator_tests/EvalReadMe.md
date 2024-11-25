@@ -11,10 +11,8 @@ The input directory structure will be maintained in the output evaluations. The 
 
 | Evaluation Type | Status | Command |
 | ----------- | ----------- | ----------- |
-| Incose  | In progress | ```-e "incose"```
-| Incose sets  | TODO | n/a
-| Seedling comments   | TODO | n/a
-| Seedling comment sets  | TODO | n/a
+| Incose (Requirements)  | Complete | ```-e "incose"```
+| Inline Comments  | Complete | ```-e "comments"```
 
 ## How to Run
 
@@ -33,11 +31,11 @@ janus llm-self-eval -i {path/to/input/files} -l json -o {path/to/output/files} -
 
  Example test command:
 ```
-janus llm-self-eval -i _tests/evaluator_tests/incose_tests/ -l json -o testOutput/incose/ -e "incose" -rc 5
+janus llm-self-eval -i _tests/evaluator_tests/incose_tests/ -l json -o EvalOutput/incose/ -e "incose" -rc 5
 ```
 or for an inline comment test
 ```
-janus llm-self-eval -i _tests/evaluator_tests/inline_comment_tests/ -l 'mumps' -o testOutput/comments/ -e "comments"
+janus llm-self-eval -i _tests/evaluator_tests/inline_comment_tests/ -l 'mumps' -o EvalOutput/comments/ -e "comments"
 ```
 
 ## Adding an Evaluation Type
@@ -54,18 +52,9 @@ janus llm-self-eval -i _tests/evaluator_tests/inline_comment_tests/ -l 'mumps' -
  - `system.txt`  - the initial instructions for the evaluating llm
 - `variables.json`  - contains the structure for what the returned evaluation should look like
 
-#### 3. Update ```evaluate.py```
-1. Import your new parser
-2. Append if statment with your new parser
-   ```
-   # Setting parser type here
-        if evaluation_type == "incose":
-            self._parser = IncoseParser()
-        if evaluation_type == {your_new_evaluation_type}
-            self._parser = {YourImportedParser()}}
-    ```
 
 ## Example Inputs
+
 ```
 {
     "code": "DFHEISTG DSECT\nAPPLID   DS    CL08               CICS Applid\nSYSID    DS    CL04               CICS SYSID\n*\n***********************************************************************\n* Dynamic Storage Area (End)                                          *\n***********************************************************************\n*\n***********************************************************************\n* DFHCOMMAREA                                                         *\n***********************************************************************\n*",
@@ -84,3 +73,14 @@ janus llm-self-eval -i _tests/evaluator_tests/inline_comment_tests/ -l 'mumps' -
         "It worked!"
     ]
 }
+```
+
+## Preprocessing Scripts
+Scripts can be found under `janus/scripts/preprocessing/self-eval/`
+
+| Eval | Script | Description |
+| ----------- | ----------- | ----------- |
+| Inline Comments  | `append_asm_comments.py` | `In`: Directory to json files that have 'code' + 'comments' `Out`: Same directory structure in the output directory, with ASM files that have comments appended.
+| Inline Comments  | `append_mumps_comments.py` | `In`: Directory to json files that have 'code' + 'comments' `Out`: Same directory structure in the output directory, with mumps files that have comments appended.
+| Inline Comments  | `split_processed_comments.py` | `In`: Path to processed.json file that have 'experiments' + 'generated_comment_texts' `Out`: 'experiments' as file names, with each 'processed' + 'generated_comment_texts' pair split into json.
+| Incose  | `split_processed_reqiurements.py` |`In`: Directory to JSON files with multiple 'code' str and 'requirement' array `Out`: Same directory structure in the output directory, with individual 'code' + 'requirement' pairs.

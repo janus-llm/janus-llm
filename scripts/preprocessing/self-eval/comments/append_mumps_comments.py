@@ -1,3 +1,13 @@
+"""
+Script for mumps to place comments inline
+at tags, with support for specifying an
+output directory and preserving the
+file structure of the input directory.
+
+In: Directory to json files that have 'code' + 'comments'
+Out: Same directory structure in the output directory,
+with mumps files that have comments appended.
+"""
 import argparse
 import json
 import re
@@ -14,6 +24,7 @@ def process_comments_in_file(input_path: Path):
     processed_str = data.get("input", "")
     generated_comments = data.get("output", {})
 
+    # Define patterns and templates for locating and replacing tags.
     comment_patterns = [
         (r"<BLOCK_COMMENT (\w{8})>", "<BLOCK_COMMENT {}>", "<BLOCK_COMMENT {}>"),
         (r"<INLINE_COMMENT (\w{8})>", "<INLINE_COMMENT {}>", "<INLINE_COMMENT {}>"),
@@ -22,14 +33,19 @@ def process_comments_in_file(input_path: Path):
 
     missing_comments = 0
     for pattern, find_template, repl_template in comment_patterns:
+        # Search for all tags matching the current pattern.
         matches = re.findall(pattern, processed_str)
         for comment_id in matches:
             find_tag = find_template.format(comment_id)
             repl_tag = repl_template.format(comment_id)
+
+            # Retrieve the corresponding comment or assign a placeholder.
             if comment_id not in generated_comments:
                 missing_comments += 1
             comment = generated_comments.get(comment_id, "[comment missing]")
             comment = comment.replace("\n", "\\n")
+
+            # Replace the tag in the code with the comment appended.
             processed_str = processed_str.replace(find_tag, f"{repl_tag} {comment}")
 
     if missing_comments:
