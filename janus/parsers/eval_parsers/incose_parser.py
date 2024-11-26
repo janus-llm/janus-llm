@@ -29,7 +29,8 @@ class Criteria(BaseModel):
 
 
 class Requirement(BaseModel):
-    requirement_id: str
+    requirement_id: str = Field(description="The 8-character comment ID")
+    requirement: str = Field(description="The original requirement being evaluated")
     C1: Criteria
     C2: Criteria
     C3: Criteria
@@ -46,6 +47,7 @@ class RequirementList(BaseModel):
         description=(
             "A list of requirement evaluations. Each element should include"
             " the requirement's 8-character ID in the `requirement_id` field,"
+            " the original requirement in the 'requirement' field, "
             " and nine score objects corresponding to each criterion."
         )
     )

@@ -1,5 +1,5 @@
 """
-Script to format requirements for the evaluator, now with support
+Script to format requirements for the evaluator, with support
 for specifying an output directory
 and preserving the file structure of the input directory.
 
