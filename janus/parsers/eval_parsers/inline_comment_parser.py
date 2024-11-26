@@ -101,3 +101,12 @@ class InlineCommentParser(JanusParser, PydanticOutputParser):
             evals[cid].pop("comment_id")
 
         return json.dumps(evals)
+
+    def parse_combined_output(self, text: str) -> str:
+        if not text.strip():
+            return str({})
+        objs = [json.loads(line.strip()) for line in text.split("\n") if line.strip()]
+        output_obj = {}
+        for obj in objs:
+            output_obj.update(obj)
+        return json.dumps(output_obj)
