@@ -13,6 +13,7 @@ import json
 import re
 from pathlib import Path
 
+from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -64,15 +65,17 @@ if __name__ == "__main__":
     )
     parser.add_argument("input_directory", help="Directory containing JSON files.")
     parser.add_argument("output_directory", help="Output directory for MUMPS files.")
+    parser.add_argument("source_language", help="Programming language")
     args = parser.parse_args()
 
     input_directory = Path(args.input_directory).expanduser()
     output_directory = Path(args.output_directory).expanduser()
+    ext = LANGUAGES[args.source_language]["suffix"]
 
     for input_path in input_directory.rglob("*.json"):
         modified_content = process_comments_in_file(input_path)
         output_path = output_directory / input_path.relative_to(
             input_directory
-        ).with_suffix(".m")
+        ).with_suffix(f".{ext}")
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(modified_content)
