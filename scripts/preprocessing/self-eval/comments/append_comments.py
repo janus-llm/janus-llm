@@ -5,8 +5,10 @@ output directory and preserving the
 file structure of the input directory.
 
 In: Directory to json files that have 'code' + 'comments'
++ "source language file suffix"
 Out: Same directory structure in the output directory,
-with mumps files that have comments appended.
+with files of a given source language
+that have comments appended.
 """
 import argparse
 import json
@@ -64,7 +66,8 @@ if __name__ == "__main__":
         )
     )
     parser.add_argument("input_directory", help="Directory containing JSON files.")
-    parser.add_argument("output_directory", help="Output directory for MUMPS files.")
+    parser.add_argument("output_directory", help="Output directory for appended files.")
+    # specify the output file suffix i.e. ".m" ".alc"
     parser.add_argument("source_language", help="Programming language")
     args = parser.parse_args()
 

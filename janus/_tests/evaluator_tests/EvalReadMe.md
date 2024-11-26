@@ -80,7 +80,6 @@ Scripts can be found under `janus/scripts/preprocessing/self-eval/`
 
 | Eval | Script | Description |
 | ----------- | ----------- | ----------- |
-| Inline Comments  | `append_asm_comments.py` | `In`: Directory to json files that have 'code' + 'comments' `Out`: Same directory structure in the output directory, with ASM files that have comments appended.
-| Inline Comments  | `append_mumps_comments.py` | `In`: Directory to json files that have 'code' + 'comments' `Out`: Same directory structure in the output directory, with mumps files that have comments appended.
+| Inline Comments  | `append_comments.py` | `In`: Directory to json files that have 'code' + 'comments' + "file ending" `Out`: Same directory structure in the output directory, with files of a given language that have comments appended.
 | Inline Comments  | `split_processed_comments.py` | `In`: Path to processed.json file that have 'experiments' + 'generated_comment_texts' `Out`: 'experiments' as file names, with each 'processed' + 'generated_comment_texts' pair split into json.
 | Incose  | `split_processed_reqiurements.py` |`In`: Directory to JSON files with multiple 'code' str and 'requirement' array `Out`: Same directory structure in the output directory, with individual 'code' + 'requirement' pairs.
