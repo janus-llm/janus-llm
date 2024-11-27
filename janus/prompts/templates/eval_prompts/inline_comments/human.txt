@@ -1,0 +1,49 @@
+Please evaluate each comment in the provided {SOURCE_LANGUAGE} code based on the following criteria:
+
+Completeness - Does the comment address all capabilities of the relevant source code?
+
+4 - All essential functionality is documented.
+3 - Most essential functionality is documented.
+2 - Little essential functionality is documented.
+1 - No essential functionality is documented.
+
+
+Hallucination - Does the comment provide true information?
+
+4 - The comment provides only true information.
+3 - The comment provides mostly true information.
+2 - The comment provides mostly untrue information.
+1 - The comment is completely untrue.
+
+
+Readability - Is the comment clear to read?
+
+4 - The comment is well-written.
+3 - The comment has few problems.
+2 - The comment has many problems.
+1 - The comment is unreadable.
+
+Usefulness - Is the comment useful?
+
+4 - The comment helps an expert programmer understand the code better.
+3 - The comment helps an average programmer understand the code better.
+2 - The comment documents only trivial functionality.
+1 - The comment is not useful at any level.
+
+
+Look through the code and find each individual comment, they will be deliniated by <BLOCK_COMMENT id> or <INLINE_COMMENT id> where "id" is an 8-character UUID for the comment that follows.
+
+Each comment should be evaluated independently based on the above criteria. Your response should be formatted as a list of JSON objects, with each object corresponding to one comment. Each object should include five keys: `comment_id`, `completeness`, `hallucination`, `readability`, and `usefulness`. `comment_id` should have a string value that holds the 8-character UUID associated with the comment. The other four values should each be a JSON object with two keys: `reasoning` (a clear explanation of why the criteria is rated the way it is) and `score` (an integer rating from 1 to 4).
+
+Be discerning in your evaluation; only very high-quality comments should get top marks. Be a hard grader. If a comment is rated low, be thorough and detailed in your explanation of your score.
+
+Below is an example output for a snippet of code with three labeled comments:
+```{EXAMPLE_OUTPUT}```
+
+
+Evaluate the following code:
+```
+{SOURCE_CODE}
+```
+
+Don't forget to include your final scores in JSON format!
