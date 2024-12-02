@@ -89,6 +89,20 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
         "url": "https://github.com/stsewd/tree-sitter-comment",
         "example": "# This is a comment\n",
     },
+    "cobol": {
+        "comment": "*",
+        "suffix": "cbl",
+        "url": "https://github.com/yutaro-sakamoto/tree-sitter-cobol",
+        "example": (
+            "       IDENTIFICATION DIVISION.\n"
+            "       PROGRAM-ID. HelloWorld.\n"
+            "       ENVIRONMENT DIVISION.\n"
+            "       DATA DIVISION.\n"
+            "       PROCEDURE DIVISION.\n"
+            '           DISPLAY "Hello, World!".\n'
+            "           STOP RUN.\n"
+        ),
+    },
     "commonlisp": {
         "comment": ";;",
         "suffix": "lisp",
