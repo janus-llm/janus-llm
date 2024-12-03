@@ -62,6 +62,8 @@ def create_logger(name: str) -> logging.Logger:
     rh = RichHandler()
     rh.addFilter(LogFilter())
     handlers = [rh]
+    if (log_file := os.environ.get("JANUSLOGFILE")) is not None:
+        handlers.append(logging.FileHandler(filename=log_file))
     logging.basicConfig(
         level=log_level,
         format=FORMAT,
