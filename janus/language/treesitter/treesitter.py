@@ -154,7 +154,15 @@ class TreeSitterSplitter(Splitter):
             The pointer to the language.
         """
         lib = cdll.LoadLibrary(os.fspath(so_file))
-        language_function = getattr(lib, f"tree_sitter_{self.language}")
+        # Added this try-except block to handle the case where the language is not
+        # supported in lowercase by the creator of the grammar. Ex: COBOL
+        # https://github.com/yutaro-sakamoto/tree-sitter-cobol/blob/main/grammar.js#L13
+        try:
+            language_function = getattr(lib, f"tree_sitter_{self.language}")
+        except AttributeError:
+            language = self.language.upper()
+            language_function = getattr(lib, f"tree_sitter_{language}")
+
         language_function.restype = c_void_p
         pointer = language_function()
         return pointer

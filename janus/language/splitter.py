@@ -275,42 +275,50 @@ class Splitter(FileManager):
 
         groups = [[n] for n in nodes]
         while len(groups) > 1 and min(adj_sums) <= self.max_tokens and any(merge_allowed):
-            # Get the indices of the adjacent nodes that would result in the
-            #  smallest possible merged snippet. Ignore protected nodes.
+            # Get the index of the node that would result in the smallest
+            #  merged snippet when merged with the node that follows it.
+            #  Ignore protected nodes.
             mergeable_indices = compress(range(len(adj_sums)), merge_allowed)
-            i0 = int(min(mergeable_indices, key=adj_sums.__getitem__))
-            i1 = i0 + 1
+            C = int(min(mergeable_indices, key=adj_sums.__getitem__))
+
+            # C: Central index
+            # L: Index to the left
+            # R: Index to the right (to be merged in to C)
+            # N: Next index (to the right of R, the "new R")
+            L, R, N = C - 1, C + 1, C + 2
 
             # Recalculate the length. We can't simply use the adj_sum, because
             #  it is an underestimate due to the adjoining suffix/prefix.
-            central_node = groups[i0][-1]
-            merged_text = "".join([text_chunks[i0], central_node.suffix, text_chunks[i1]])
+            central_node = groups[C][-1]
+            merged_text = "".join([text_chunks[C], central_node.suffix, text_chunks[R]])
             merged_text_length = self._count_tokens(merged_text)
 
             # If the true length of the merged pair is too long, don't merge them
             #  Instead, correct the estimate, since shorter pairs may yet exist
             if merged_text_length > self.max_tokens:
-                adj_sums[i0] = merged_text_length
+                adj_sums[C] = merged_text_length
                 continue
 
             # Update adjacent sum estimates
-            if i0 > 0:
-                adj_sums[i0 - 1] += merged_text_length
-            if i1 < len(adj_sums) - 1:
-                adj_sums[i1 + 1] += merged_text_length
-
-            if i0 > 0 and i1 < len(merge_allowed) - 1:
-                if not (merge_allowed[i0 - 1] and merge_allowed[i1 + 1]):
-                    merge_allowed[i0 - 1] = merge_allowed[i1 + 1] = False
+            if L >= 0:
+                adj_sums[L] = lengths[L] + merged_text_length
+            if N < len(adj_sums):
+                adj_sums[R] = lengths[N] + merged_text_length
 
             # The potential merge length for this pair is removed
-            adj_sums.pop(i0)
-            merge_allowed.pop(i0)
+            adj_sums.pop(C)
+
+            # The merged-in node is removed from the protected list
+            #  The merge_allowed list need not be updated - if the node now to
+            #  its right is protected, the merge_allowed element corresponding
+            #  to the merged neighbor will have been True, and now corresponds
+            #  to the merged node.
+            merge_allowed.pop(C)
 
             # Merge the pair of node groups
-            groups[i0 : i1 + 1] = [groups[i0] + groups[i1]]
-            text_chunks[i0 : i1 + 1] = [merged_text]
-            lengths[i0 : i1 + 1] = [merged_text_length]
+            groups[C:N] = [groups[C] + groups[R]]
+            text_chunks[C:N] = [merged_text]
+            lengths[C:N] = [merged_text_length]
 
         return groups
 
@@ -403,13 +411,13 @@ class Splitter(FileManager):
         self._split_into_lines(node)
 
     def _split_into_lines(self, node: CodeBlock):
-        split_text = re.split(r"(\n+)", node.text)
+        split_text = list(re.split(r"(\n+)", node.text))
 
         # If the string didn't start/end with newlines, make sure to include
         #  empty strings for the prefix/suffixes
-        if split_text[0].strip("\n"):
+        if not re.match(r"^\n+$", split_text[0]):
             split_text = [""] + split_text
-        if split_text[-1].strip("\n"):
+        if not re.match(r"^\n+$", split_text[-1]):
             split_text.append("")
         betweens = split_text[::2]
         lines = split_text[1::2]

@@ -19,6 +19,7 @@ from janus.converter.aggregator import Aggregator
 from janus.converter.converter import Converter
 from janus.converter.diagram import DiagramGenerator
 from janus.converter.document import Documenter, MadLibsDocumenter, MultiDocumenter
+from janus.converter.evaluate import InlineCommentEvaluator, RequirementEvaluator
 from janus.converter.partition import Partitioner
 from janus.converter.requirements import RequirementsDocumenter
 from janus.converter.translate import Translator
@@ -127,7 +128,7 @@ embedding = typer.Typer(
 
 def version_callback(value: bool) -> None:
     if value:
-        from janus import __version__ as version
+        from . import __version__ as version
 
         print(f"Janus CLI [blue]v{version}[/blue]")
         raise typer.Exit()
@@ -655,6 +656,16 @@ def partition(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    refiner_types: Annotated[
+        list[str],
+        typer.Option(
+            "-r",
+            "--refiner",
+            help="List of refiner types to use. Add -r for each refiner to use in\
+                refinement chain",
+            click_type=click.Choice(list(REFINERS.keys())),
+        ),
+    ] = ["JanusRefiner"],
     max_tokens: Annotated[
         int,
         typer.Option(
@@ -673,6 +684,7 @@ def partition(
         ),
     ] = 8192,
 ):
+    refiner_types = [REFINERS[r] for r in refiner_types]
     model_arguments = dict(temperature=temperature)
     kwargs = dict(
         model=llm_name,
@@ -681,6 +693,7 @@ def partition(
         max_prompts=max_prompts,
         max_tokens=max_tokens,
         splitter_type=splitter_type,
+        refiner_types=refiner_types,
         partition_token_limit=partition_token_limit,
     )
     partitioner = Partitioner(**kwargs)
@@ -813,6 +826,139 @@ def diagram(
         add_documentation=add_documentation,
     )
     diagram_generator.translate(input_dir, output_dir, overwrite, collection)
+
+
+@app.command(
+    help="LLM self evaluation",
+    no_args_is_help=True,
+)
+def llm_self_eval(
+    input_dir: Annotated[
+        Path,
+        typer.Option(
+            "--input",
+            "-i",
+            help="The directory containing the source code to be evaluated. "
+            "The files should all be in one flat directory.",
+        ),
+    ],
+    language: Annotated[
+        str,
+        typer.Option(
+            "--language",
+            "-l",
+            help="The language of the source code.",
+            click_type=click.Choice(sorted(LANGUAGES)),
+        ),
+    ],
+    output_dir: Annotated[
+        Path,
+        typer.Option(
+            "--output-dir", "-o", help="The directory to store the evaluations in."
+        ),
+    ],
+    llm_name: Annotated[
+        str,
+        typer.Option(
+            "--llm",
+            "-L",
+            help="The custom name of the model set with 'janus llm add'.",
+        ),
+    ] = "gpt-4o",
+    evaluation_type: Annotated[
+        str,
+        typer.Option(
+            "--evaluation-type",
+            "-e",
+            help="Type of output to evaluate.",
+            click_type=click.Choice(["incose", "comments"]),
+        ),
+    ] = "incose",
+    max_prompts: Annotated[
+        int,
+        typer.Option(
+            "--max-prompts",
+            "-m",
+            help="The maximum number of times to prompt a model on one functional block "
+            "before exiting the application. This is to prevent wasting too much money.",
+        ),
+    ] = 10,
+    overwrite: Annotated[
+        bool,
+        typer.Option(
+            "--overwrite/--preserve",
+            help="Whether to overwrite existing files in the output directory",
+        ),
+    ] = False,
+    temperature: Annotated[
+        float,
+        typer.Option("--temperature", "-t", help="Sampling temperature.", min=0, max=2),
+    ] = 0.7,
+    collection: Annotated[
+        str,
+        typer.Option(
+            "--collection",
+            "-c",
+            help="If set, will put the translated result into a Chroma DB "
+            "collection with the name provided.",
+        ),
+    ] = None,
+    splitter_type: Annotated[
+        str,
+        typer.Option(
+            "-S",
+            "--splitter",
+            help="Name of custom splitter to use",
+            click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
+        ),
+    ] = "file",
+    refiner_types: Annotated[
+        list[str],
+        typer.Option(
+            "-r",
+            "--refiner",
+            help="List of refiner types to use. Add -r for each refiner to use in\
+                refinement chain",
+            click_type=click.Choice(list(REFINERS.keys())),
+        ),
+    ] = ["JanusRefiner"],
+    eval_items_per_request: Annotated[
+        int,
+        typer.Option(
+            "--eval-items-per-request",
+            "-rc",
+            help="The maximum number of evaluation items per request",
+        ),
+    ] = None,
+    max_tokens: Annotated[
+        int,
+        typer.Option(
+            "--max-tokens",
+            "-M",
+            help="The maximum number of tokens the model will take in. "
+            "If unspecificed, model's default max will be used.",
+        ),
+    ] = None,
+):
+    model_arguments = dict(temperature=temperature)
+    refiner_types = [REFINERS[r] for r in refiner_types]
+    kwargs = dict(
+        eval_items_per_request=eval_items_per_request,
+        model=llm_name,
+        model_arguments=model_arguments,
+        source_language=language,
+        max_prompts=max_prompts,
+        max_tokens=max_tokens,
+        splitter_type=splitter_type,
+        refiner_types=refiner_types,
+    )
+    # Setting parser type here
+    if evaluation_type == "incose":
+        evaluator = RequirementEvaluator(**kwargs)
+    elif evaluation_type == "comments":
+        evaluator = InlineCommentEvaluator(**kwargs)
+
+    evaluator.translate(input_dir, output_dir, overwrite, collection)
 
 
 @db.command("init", help="Connect to or create a database.")
@@ -1116,13 +1262,12 @@ def llm_add(
             show_choices=False,
         )
         params = dict(
-            # OpenAI uses the "model_name" key for what we're calling "long_model_id"
-            model_name=MODEL_ID_TO_LONG_ID[model_id],
+            model_name=model_name,
             temperature=0.7,
             n=1,
         )
-        max_tokens = TOKEN_LIMITS[MODEL_ID_TO_LONG_ID[model_id]]
-        model_cost = COST_PER_1K_TOKENS[MODEL_ID_TO_LONG_ID[model_id]]
+        max_tokens = TOKEN_LIMITS[model_name]
+        model_cost = COST_PER_1K_TOKENS[model_name]
         cfg = {
             "model_type": model_type,
             "model_id": model_id,

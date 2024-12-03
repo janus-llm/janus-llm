@@ -2,6 +2,7 @@ import re
 from typing import Any
 
 from langchain.output_parsers import RetryWithErrorOutputParser
+from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompt_values import PromptValue
 from langchain_core.runnables import RunnableSerializable
@@ -24,6 +25,35 @@ class JanusRefiner(JanusParser):
 
     def parse(self, text: str) -> str:
         raise NotImplementedError
+
+
+class SimpleRetry(JanusRefiner):
+    max_retries: int
+    retry_chain: RunnableSerializable
+
+    def __init__(
+        self,
+        llm: JanusModel,
+        parser: JanusParser,
+        max_retries: int,
+    ):
+        retry_chain = llm | StrOutputParser()
+        super().__init__(
+            retry_chain=retry_chain,
+            parser=parser,
+            max_retries=max_retries,
+        )
+
+    def parse_completion(
+        self, completion: str, prompt_value: PromptValue, **kwargs
+    ) -> Any:
+        for retry_number in range(self.max_retries):
+            try:
+                return self.parser.parse(completion)
+            except OutputParserException:
+                completion = self.retry_chain.invoke(prompt_value)
+
+        return self.parser.parse(completion)
 
 
 class FixParserExceptions(JanusRefiner, RetryWithErrorOutputParser):
