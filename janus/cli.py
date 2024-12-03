@@ -7,6 +7,7 @@ from typing import List, Optional
 
 import click
 import typer
+from chromadb.errors import InvalidCollectionException
 from pydantic import AnyHttpUrl
 from rich import print
 from rich.console import Console
@@ -1192,7 +1193,7 @@ def _check_collection(collection_name: str, input_dir: str | Path) -> bool:
         added_to = True
         # if not confirm_add:
         #     raise typer.Abort()
-    except ValueError:
+    except InvalidCollectionException:
         pass
     return added_to
 
