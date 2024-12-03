@@ -38,6 +38,7 @@ Functions
    janus.cli.aggregate
    janus.cli.partition
    janus.cli.diagram
+   janus.cli.llm_self_eval
    janus.cli.db_init
    janus.cli.db_status
    janus.cli.db_ls
@@ -100,9 +101,11 @@ Module Contents
 
 .. py:function:: aggregate(input_dir, language, output_dir, llm_name, max_prompts = 10, overwrite = False, temperature = 0.7, collection = None, splitter_type = 'file', intermediate_converters = ['Documenter'])
 
-.. py:function:: partition(input_dir, language, output_dir, llm_name = 'gpt-4o', max_prompts = 10, overwrite = False, temperature = 0.7, splitter_type = 'file', max_tokens = None, partition_token_limit = 8192)
+.. py:function:: partition(input_dir, language, output_dir, llm_name = 'gpt-4o', max_prompts = 10, overwrite = False, temperature = 0.7, splitter_type = 'file', refiner_types = ['JanusRefiner'], max_tokens = None, partition_token_limit = 8192)
 
 .. py:function:: diagram(input_dir, language, output_dir, llm_name, max_prompts = 10, overwrite = False, temperature = 0.7, collection = None, diagram_type = 'Activity', add_documentation = False, splitter_type = 'file', refiner_types = ['JanusRefiner'], retriever_type = None)
+
+.. py:function:: llm_self_eval(input_dir, language, output_dir, llm_name = 'gpt-4o', evaluation_type = 'incose', max_prompts = 10, overwrite = False, temperature = 0.7, collection = None, splitter_type = 'file', refiner_types = ['JanusRefiner'], eval_items_per_request = None, max_tokens = None)
 
 .. py:function:: db_init(path = str(janus_dir / 'chroma.db'), url = '')
 

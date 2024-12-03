@@ -276,7 +276,9 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../refiner/index.html">refiner</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../retriever/index.html">retriever</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../incose_parser/index.html">incose_parser</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../decompile_script/index.html">decompile_script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../inline_comment_parser/index.html">inline_comment_parser</a></li>
 </ul>
 </li>
 </ul>
@@ -333,7 +335,13 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#janus.converter.evaluate.Evaluator" title="janus.converter.evaluate.Evaluator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Evaluator</span></code></a></p></td>
-<td><p>Parent class that converts code into something else.</p></td>
+<td><p>Evaluator</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#janus.converter.evaluate.RequirementEvaluator" title="janus.converter.evaluate.RequirementEvaluator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RequirementEvaluator</span></code></a></p></td>
+<td><p>INCOSE Requirement Evaluator</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#janus.converter.evaluate.InlineCommentEvaluator" title="janus.converter.evaluate.InlineCommentEvaluator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InlineCommentEvaluator</span></code></a></p></td>
+<td><p>Inline Comment Evaluator</p></td>
 </tr>
 </tbody>
 </table>
@@ -350,37 +358,65 @@
 <dt class="sig sig-object py" id="janus.converter.evaluate.Evaluator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.converter.evaluate.</span></span><span class="sig-name descname"><span class="pre">Evaluator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.converter.evaluate.Evaluator" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../converter/index.html#janus.converter.converter.Converter" title="janus.converter.converter.Converter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">janus.converter.converter.Converter</span></code></a></p>
-<p>Parent class that converts code into something else.</p>
-<p>Children will determine what the code gets converted into. Whether that’s translated
-into another language, into pseudocode, requirements, documentation, etc., or
-converted into embeddings</p>
-<p>Initialize a Converter instance.</p>
+<p>Evaluator</p>
+<p>A class that performs an LLM self evaluation”
+“on an input target, with an associated prompt.</p>
+<p>Current valid evaluation types:
+[‘incose’, ‘comments’]</p>
+<p>Initialize the Evaluator class</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>source_language</strong> – The source programming language.</p></li>
-<li><p><strong>parser_type</strong> – The type of parser to use for parsing the LLM output. Valid
-values are <cite>“code”</cite>, <cite>“text”</cite>, <cite>“eval”</cite>, and <cite>None</cite> (default). If <cite>None</cite>,
-the <cite>Converter</cite> assumes you won’t be parsing an output (i.e., adding to an
-embedding DB).</p></li>
+<li><p><strong>model</strong> – The LLM to use for translation. If an OpenAI model, the
+<cite>OPENAI_API_KEY</cite> environment variable must be set and the
+<cite>OPENAI_ORG_ID</cite> environment variable should be set if needed.</p></li>
+<li><p><strong>model_arguments</strong> – Additional arguments to pass to the LLM constructor.</p></li>
 <li><p><strong>max_prompts</strong> – The maximum number of prompts to try before giving up.</p></li>
-<li><p><strong>max_tokens</strong> – The maximum number of tokens to use in the LLM. If <cite>None</cite>, the
-converter will use half the model’s token limit.</p></li>
-<li><p><strong>prompt_template</strong> – The name of the prompt template to use.</p></li>
-<li><p><strong>db_path</strong> – The path to the database to use for vectorization.</p></li>
-<li><p><strong>db_config</strong> – The configuration for the database.</p></li>
-<li><p><strong>protected_node_types</strong> – A set of node types that aren’t to be merged.</p></li>
-<li><p><strong>prune_node_types</strong> – A set of node types which should be pruned.</p></li>
-<li><p><strong>splitter_type</strong> – The type of splitter to use. Valid values are <cite>“file”</cite>,
-<cite>“tag”</cite>, <cite>“chunk”</cite>, <cite>“ast-strict”</cite>, and <cite>“ast-flex”</cite>.</p></li>
-<li><p><strong>refiner_type</strong> – The type of refiner to use. Valid values:
-- “parser”
-- “reflection”
-- None</p></li>
-<li><p><strong>retriever_type</strong> – The type of retriever to use. Valid values:
-- “active_usings”
-- “language_docs”
-- None</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="janus.converter.evaluate.RequirementEvaluator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.converter.evaluate.</span></span><span class="sig-name descname"><span class="pre">RequirementEvaluator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eval_items_per_request</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.converter.evaluate.RequirementEvaluator" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#janus.converter.evaluate.Evaluator" title="janus.converter.evaluate.Evaluator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Evaluator</span></code></a></p>
+<p>INCOSE Requirement Evaluator</p>
+<p>A class that performs an LLM self evaluation on an input target,
+with an associated prompt.</p>
+<p>The evaluation prompts are for Incose Evaluations</p>
+<p>Initialize the Evaluator class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – The LLM to use for translation. If an OpenAI model, the
+<cite>OPENAI_API_KEY</cite> environment variable must be set and the
+<cite>OPENAI_ORG_ID</cite> environment variable should be set if needed.</p></li>
+<li><p><strong>model_arguments</strong> – Additional arguments to pass to the LLM constructor.</p></li>
+<li><p><strong>max_prompts</strong> – The maximum number of prompts to try before giving up.</p></li>
+<li><p><strong>eval_items_per_request</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="janus.converter.evaluate.InlineCommentEvaluator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.converter.evaluate.</span></span><span class="sig-name descname"><span class="pre">InlineCommentEvaluator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eval_items_per_request</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.converter.evaluate.InlineCommentEvaluator" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#janus.converter.evaluate.Evaluator" title="janus.converter.evaluate.Evaluator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Evaluator</span></code></a></p>
+<p>Inline Comment Evaluator</p>
+<p>A class that performs an LLM self evaluation on inline comments,
+with an associated prompt.</p>
+<p>Initialize the Evaluator class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – The LLM to use for translation. If an OpenAI model, the
+<cite>OPENAI_API_KEY</cite> environment variable must be set and the
+<cite>OPENAI_ORG_ID</cite> environment variable should be set if needed.</p></li>
+<li><p><strong>model_arguments</strong> – Additional arguments to pass to the LLM constructor.</p></li>
+<li><p><strong>max_prompts</strong> – The maximum number of prompts to try before giving up.</p></li>
+<li><p><strong>eval_items_per_request</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> | </em><em>None</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -450,6 +486,8 @@ converter will use half the model’s token limit.</p></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
 <li><a class="reference internal" href="#janus.converter.evaluate.log"><code class="docutils literal notranslate"><span class="pre">log</span></code></a></li>
 <li><a class="reference internal" href="#janus.converter.evaluate.Evaluator"><code class="docutils literal notranslate"><span class="pre">Evaluator</span></code></a></li>
+<li><a class="reference internal" href="#janus.converter.evaluate.RequirementEvaluator"><code class="docutils literal notranslate"><span class="pre">RequirementEvaluator</span></code></a></li>
+<li><a class="reference internal" href="#janus.converter.evaluate.InlineCommentEvaluator"><code class="docutils literal notranslate"><span class="pre">InlineCommentEvaluator</span></code></a></li>
 </ul>
 </li>
 </ul>

@@ -18,6 +18,7 @@ Classes
 .. autoapisummary::
 
    refiner.JanusRefiner
+   refiner.SimpleRetry
    refiner.FixParserExceptions
    refiner.ReflectionRefiner
    refiner.HallucinationRefiner
@@ -46,6 +47,22 @@ Module Contents
    .. py:method:: parse(text)
       :abstractmethod:
 
+
+
+.. py:class:: SimpleRetry(llm, parser, max_retries)
+
+   Bases: :py:obj:`JanusRefiner`
+
+
+   .. py:attribute:: max_retries
+      :type:  int
+
+
+   .. py:attribute:: retry_chain
+      :type:  langchain_core.runnables.RunnableSerializable
+
+
+   .. py:method:: parse_completion(completion, prompt_value, **kwargs)
 
 
 .. py:class:: FixParserExceptions(llm, parser, max_retries)

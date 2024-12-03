@@ -1,0 +1,106 @@
+inline_comment_parser
+=====================
+
+.. py:module:: inline_comment_parser
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   inline_comment_parser.log
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   inline_comment_parser.Criteria
+   inline_comment_parser.Comment
+   inline_comment_parser.CommentList
+   inline_comment_parser.InlineCommentParser
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+
+.. py:class:: Criteria
+
+   Bases: :py:obj:`langchain_core.pydantic_v1.BaseModel`
+
+
+   .. py:attribute:: reasoning
+      :type:  str
+
+
+   .. py:attribute:: score
+      :type:  conint(ge=1, le=4)
+
+
+.. py:class:: Comment
+
+   Bases: :py:obj:`langchain_core.pydantic_v1.BaseModel`
+
+
+   .. py:attribute:: comment_id
+      :type:  str
+
+
+   .. py:attribute:: completeness
+      :type:  Criteria
+
+
+   .. py:attribute:: hallucination
+      :type:  Criteria
+
+
+   .. py:attribute:: readability
+      :type:  Criteria
+
+
+   .. py:attribute:: usefulness
+      :type:  Criteria
+
+
+.. py:class:: CommentList
+
+   Bases: :py:obj:`langchain_core.pydantic_v1.BaseModel`
+
+
+.. py:class:: InlineCommentParser
+
+   Bases: :py:obj:`janus.parsers.parser.JanusParser`, :py:obj:`langchain.output_parsers.PydanticOutputParser`
+
+
+   .. py:attribute:: comments
+      :type:  dict[str, str]
+
+
+   .. py:method:: parse_input(block)
+
+      Parse the input block into raw string input ready to be passed to
+      an LLM. Also perform any processing or saving of metadata.
+
+      :param block: The CodeBlock to be processed
+
+      :returns: A parsed version of the input text
+
+
+
+   .. py:method:: parse(text)
+
+
+   .. py:method:: parse_combined_output(text)
+
+      Parse the output text from the LLM when multiple inputs are combined
+
+      :param text: The output text from the LLM
+
+      :returns: A parsed version of the text
+
+
+

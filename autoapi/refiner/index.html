@@ -276,7 +276,9 @@
 </li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">refiner</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../retriever/index.html">retriever</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../incose_parser/index.html">incose_parser</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../decompile_script/index.html">decompile_script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../inline_comment_parser/index.html">inline_comment_parser</a></li>
 </ul>
 </li>
 </ul>
@@ -335,13 +337,16 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#refiner.JanusRefiner" title="refiner.JanusRefiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JanusRefiner</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#refiner.FixParserExceptions" title="refiner.FixParserExceptions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FixParserExceptions</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#refiner.SimpleRetry" title="refiner.SimpleRetry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SimpleRetry</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#refiner.ReflectionRefiner" title="refiner.ReflectionRefiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReflectionRefiner</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#refiner.FixParserExceptions" title="refiner.FixParserExceptions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FixParserExceptions</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#refiner.HallucinationRefiner" title="refiner.HallucinationRefiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HallucinationRefiner</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#refiner.ReflectionRefiner" title="refiner.ReflectionRefiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReflectionRefiner</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#refiner.HallucinationRefiner" title="refiner.HallucinationRefiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HallucinationRefiner</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -399,6 +404,47 @@
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="refiner.SimpleRetry">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">refiner.</span></span><span class="sig-name descname"><span class="pre">SimpleRetry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_retries</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#refiner.SimpleRetry" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#refiner.JanusRefiner" title="refiner.JanusRefiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JanusRefiner</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>llm</strong> (<a class="reference internal" href="../janus/llm/models_info/index.html#janus.llm.models_info.JanusModel" title="janus.llm.models_info.JanusModel"><em>janus.llm.models_info.JanusModel</em></a>) – </p></li>
+<li><p><strong>parser</strong> (<a class="reference internal" href="../janus/parsers/parser/index.html#janus.parsers.parser.JanusParser" title="janus.parsers.parser.JanusParser"><em>janus.parsers.parser.JanusParser</em></a>) – </p></li>
+<li><p><strong>max_retries</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="refiner.SimpleRetry.max_retries">
+<span class="sig-name descname"><span class="pre">max_retries</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></em><a class="headerlink" href="#refiner.SimpleRetry.max_retries" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="refiner.SimpleRetry.retry_chain">
+<span class="sig-name descname"><span class="pre">retry_chain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">langchain_core.runnables.RunnableSerializable</span></em><a class="headerlink" href="#refiner.SimpleRetry.retry_chain" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="refiner.SimpleRetry.parse_completion">
+<span class="sig-name descname"><span class="pre">parse_completion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">completion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt_value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#refiner.SimpleRetry.parse_completion" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>completion</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
+<li><p><strong>prompt_value</strong> (<em>langchain_core.prompt_values.PromptValue</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Any</p>
 </dd>
 </dl>
 </dd></dl>
@@ -562,6 +608,12 @@
 <li><a class="reference internal" href="#refiner.JanusRefiner.parse_runnable"><code class="docutils literal notranslate"><span class="pre">JanusRefiner.parse_runnable()</span></code></a></li>
 <li><a class="reference internal" href="#refiner.JanusRefiner.parse_completion"><code class="docutils literal notranslate"><span class="pre">JanusRefiner.parse_completion()</span></code></a></li>
 <li><a class="reference internal" href="#refiner.JanusRefiner.parse"><code class="docutils literal notranslate"><span class="pre">JanusRefiner.parse()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#refiner.SimpleRetry"><code class="docutils literal notranslate"><span class="pre">SimpleRetry</span></code></a><ul>
+<li><a class="reference internal" href="#refiner.SimpleRetry.max_retries"><code class="docutils literal notranslate"><span class="pre">SimpleRetry.max_retries</span></code></a></li>
+<li><a class="reference internal" href="#refiner.SimpleRetry.retry_chain"><code class="docutils literal notranslate"><span class="pre">SimpleRetry.retry_chain</span></code></a></li>
+<li><a class="reference internal" href="#refiner.SimpleRetry.parse_completion"><code class="docutils literal notranslate"><span class="pre">SimpleRetry.parse_completion()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#refiner.FixParserExceptions"><code class="docutils literal notranslate"><span class="pre">FixParserExceptions</span></code></a><ul>
