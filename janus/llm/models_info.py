@@ -6,9 +6,13 @@ from typing import Callable, Protocol, TypeVar
 from dotenv import load_dotenv
 from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_core.runnables import Runnable
-from langchain_openai import AzureChatOpenAI
+from langchain_openai import AzureChatOpenAI, ChatOpenAI
 
-from janus.llm.model_callbacks import COST_PER_1K_TOKENS, azure_model_reroutes
+from janus.llm.model_callbacks import (
+    COST_PER_1K_TOKENS,
+    azure_model_reroutes,
+    openai_model_reroutes,
+)
 from janus.prompts.prompt import (
     ChatGptPromptEngine,
     ClaudePromptEngine,
@@ -61,12 +65,10 @@ class JanusModelProtocol(Protocol):
     output_token_cost: float
     prompt_engine: type[PromptEngine]
 
-    def get_num_tokens(self, text: str) -> int:
-        ...
+    def get_num_tokens(self, text: str) -> int: ...
 
 
-class JanusModel(Runnable, JanusModelProtocol):
-    ...
+class JanusModel(Runnable, JanusModelProtocol): ...
 
 
 load_dotenv()
