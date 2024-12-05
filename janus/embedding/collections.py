@@ -87,7 +87,7 @@ class Collections:
         """Get the Chroma collections.
 
         Returns:
-            The Chroma collections. Raises ValueError if not found.
+            The Chroma collections. Raises InvalidCollectionException if not found.
         """
         if isinstance(name, str):
             return [self._client.get_collection(name)]
