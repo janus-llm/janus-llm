@@ -12,6 +12,13 @@ class EmbeddingType(Enum):
 
 CUSTOM_SPLITTERS: Set[str] = {"mumps", "binary", "ibmhlasm"}
 
+# NOTE: When adding a new language, make sure to update the LANGUAGES dict below.
+# - The `comment` key is the single-line comment character used in the language.
+# - The `suffixes` key is a list of file suffixes for the language. The first suffix will
+#   be used as the default file extension when translating to that language.
+# - The `url` key is the URL to the tree-sitter grammar for the language.
+# - The `example` key is an example of code in the language.
+
 LANGUAGES: Dict[str, Dict[str, Any]] = {
     "ada": {
         "comment": "--",
