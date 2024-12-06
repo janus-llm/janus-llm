@@ -1091,9 +1091,13 @@ def db_add(
         )
         vectorizer.get_or_create_collection(collection_name, model_name=model_name)
         input_dir = Path(input_dir)
-        suffix = LANGUAGES[input_lang]["suffix"]
-        source_glob = f"**/*.{suffix}"
-        input_paths = [p for p in input_dir.rglob(source_glob)]
+        if isinstance(LANGUAGES[input_lang]["suffix"], list):
+            suffixes = [f".{ext}" for ext in LANGUAGES[input_lang]["suffix"]]
+        else:
+            ext = LANGUAGES[input_lang]["suffix"]
+            suffixes = [f".{ext}"]
+        input_paths = [file for ext in suffixes for file in input_dir.rglob(f"**/*{ext}")]
+
         if input_lang in CUSTOM_SPLITTERS:
             if input_lang == "mumps":
                 splitter = MumpsSplitter(
@@ -1121,18 +1125,18 @@ def db_add(
             f"\nAdded to [bold salmon1]{collection_name}[/bold salmon1]:\n"
             f"  Embedding Model: [green]{model_name}[/green]\n"
             f"  Input Directory: {input_dir.absolute()}\n"
-            f"  {input_lang.capitalize()} [green]*.{suffix}[/green] Files: "
+            f"  {input_lang.capitalize()} [green]*.{suffixes}[/green] Files: "
             f"{len(input_paths)}\n"
             "  Other Files (skipped): "
             f"{total_files - len(input_paths)}\n"
         )
-        [p for p in Path.glob(input_dir, f"**/*.{suffix}") if not p.is_dir()]
+        [p for p in Path.glob(input_dir, f"**/*.{suffixes}") if not p.is_dir()]
     else:
         print(
             f"\nCreated [bold salmon1]{collection_name}[/bold salmon1]:\n"
             f"  Embedding Model: '{model_name}'\n"
             f"  Input Directory: {input_dir.absolute()}\n"
-            f"  {input_lang.capitalize()} [green]*.{suffix}[/green] Files: "
+            f"  {input_lang.capitalize()} [green]*.{suffixes}[/green] Files: "
             f"{len(input_paths)}\n"
             "  Other Files (skipped): "
             f"{total_files - len(input_paths)}\n"
