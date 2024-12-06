@@ -15,49 +15,49 @@ CUSTOM_SPLITTERS: Set[str] = {"mumps", "binary", "ibmhlasm"}
 LANGUAGES: Dict[str, Dict[str, Any]] = {
     "ada": {
         "comment": "--",
-        "suffix": ["adb", "ads"],
+        "suffixes": ["adb", "ads"],
         "url": "https://github.com/briot/tree-sitter-ada",
         "example": 'put_line("Hello, World!");\n',
     },
     "agda": {
         "comment": "--",
-        "suffix": "agda",
+        "suffixes": ["agda"],
         "url": "https://github.com/tree-sitter/tree-sitter-agda",
         "example": 'postulate HelloWorld : String;\nHelloWorld = "Hello, World!";\n',
     },
     "x86asm": {
         "comment": "//",
-        "suffix": ["asm", "s"],
+        "suffixes": ["asm", "s"],
         "url": "https://github.com/bearcove/tree-sitter-x86asm",
         "example": "mov     rax, 60\nxor       rdi, rdi\n",
     },
     "bash": {
         "comment": "#",
-        "suffix": ["sh", "bash"],
+        "suffixes": ["sh", "bash"],
         "url": "https://github.com/tree-sitter/tree-sitter-bash",
         "example": 'echo "Hello world"\n',
     },
     "binary": {
         "comment": None,
-        "suffix": "bin",
+        "suffixes": ["bin"],
         "url": "https://github.com/tree-sitter/tree-sitter-c",
         "example": "04 00 00 00 cd 48 65 6c 6c 6f 2c 20 77 6f 72 6c 64",
     },
     "beancount": {
         "comment": ";",
-        "suffix": "beancount",
+        "suffixes": ["beancount"],
         "url": "https://github.com/zwpaper/tree-sitter-beancount",
         "example": '2023-01-01 custom "Hello, World!"\n',
     },
     "bigquery": {
         "comment": "--",
-        "suffix": ["bq", "sql"],
+        "suffixes": ["bq", "sql"],
         "url": "https://github.com/takegue/tree-sitter-sql-bigquery",
         "example": 'SELECT "Hello, World!" AS message;\n',
     },
     "c": {
         "comment": "//",
-        "suffix": ["c", "h"],
+        "suffixes": ["c", "h"],
         "url": "https://github.com/tree-sitter/tree-sitter-c",
         "example": (
             '#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n'
@@ -68,7 +68,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "capnp": {
         "comment": "#",
-        "suffix": "capnp",
+        "suffixes": ["capnp"],
         "url": "https://github.com/amaanq/tree-sitter-capnp",
         "example": (
             "using Capnp;\n\nstruct HelloWorld @0x1234 {\n  greeting @0 :Text;\n}\n"
@@ -76,7 +76,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "cmake": {
         "comment": "#",
-        "suffix": ["cmake", "CMakeLists.txt"],
+        "suffixes": ["cmake", "CMakeLists.txt"],
         "url": "https://github.com/uyha/tree-sitter-cmake",
         "example": (
             "cmake_minimum_required(VERSION 3.0)\nproject(HelloWorld)\n\n"
@@ -85,13 +85,13 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "comment": {
         "comment": "#",
-        "suffix": "comment",
+        "suffixes": ["comment"],
         "url": "https://github.com/stsewd/tree-sitter-comment",
         "example": "# This is a comment\n",
     },
     "cobol": {
         "comment": "*",
-        "suffix": ["cob", "cbl", "cpy"],
+        "suffixes": ["cob", "cbl", "cpy"],
         "url": "https://github.com/yutaro-sakamoto/tree-sitter-cobol",
         "example": (
             "       IDENTIFICATION DIVISION.\n"
@@ -105,13 +105,13 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "commonlisp": {
         "comment": ";;",
-        "suffix": ["lisp", "lsp", "cl"],
+        "suffixes": ["lisp", "lsp", "cl"],
         "url": "https://github.com/theHamsta/tree-sitter-commonlisp",
         "example": '(format t "Hello, World!~%")\n',
     },
     "config": {
         "comment": "#",
-        "suffix": ["conf", "ini", "cfg"],
+        "suffixes": ["conf", "ini", "cfg"],
         "url": "https://github.com/metio/tree-sitter-ssh-client-config",
         "example": (
             "# Configuration for SSH Client\nHost my_server\n"
@@ -120,13 +120,13 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "css": {
         "comment": "/*",
-        "suffix": "css",
+        "suffixes": ["css"],
         "url": "https://github.com/tree-sitter/tree-sitter-css",
         "example": 'body {\n    content: "Hello, World!";\n}\n',
     },
     "cuda": {
         "comment": "//",
-        "suffix": ["cu", "cuh"],
+        "suffixes": ["cu", "cuh"],
         "url": "https://github.com/theHamsta/tree-sitter-cuda",
         "example": (
             '#include <iostream>\n\n__global__ void hello() {\n    printf("Hello, '
@@ -136,7 +136,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "d": {
         "comment": "//",
-        "suffix": "d",
+        "suffixes": ["d"],
         "url": "https://github.com/gdamore/tree-sitter-d",
         "example": (
             'import std.stdio;\n\nvoid main() {\n    writeln("Hello, World!");\n}\n'
@@ -144,37 +144,37 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "dart": {
         "comment": "//",
-        "suffix": "dart",
+        "suffixes": ["dart"],
         "url": "https://github.com/UserNobody14/tree-sitter-dart",
         "example": "void main() {\n  print('Hello, World!');\n}\n",
     },
     "dockerfile": {
         "comment": "#",
-        "suffix": ["Dockerfile", "dockerfile"],
+        "suffixes": ["Dockerfile", "dockerfile"],
         "url": "https://github.com/camdencheek/tree-sitter-dockerfile",
         "example": "FROM ubuntu\n\nRUN echo 'Hello, World!'\n",
     },
     "dot": {
         "comment": "//",
-        "suffix": "dot",
+        "suffixes": ["dot"],
         "url": "https://github.com/rydesun/tree-sitter-dot",
         "example": 'graph HelloWorld {\n  label="Hello, World!"\n}\n',
     },
     "elisp": {
         "comment": ";;",
-        "suffix": "el",
+        "suffixes": ["el"],
         "url": "https://github.com/Wilfred/tree-sitter-elisp",
         "example": '(message "Hello, World!")\n',
     },
     "elixir": {
         "comment": "#",
-        "suffix": ["ex", "exs"],
+        "suffixes": ["ex", "exs"],
         "url": "https://github.com/elixir-lang/tree-sitter-elixir",
         "example": 'IO.puts "Hello, World!"\n',
     },
     "elm": {
         "comment": "--",
-        "suffix": "elm",
+        "suffixes": ["elm"],
         "url": "https://github.com/elm-tooling/tree-sitter-elm",
         "example": (
             'import Browser\n\nmain = Browser.sandbox { init = "Hello, World!" }\n'
@@ -182,13 +182,13 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "eno": {
         "comment": "#",
-        "suffix": "eno",
+        "suffixes": ["eno"],
         "url": "https://github.com/eno-lang/tree-sitter-eno",
         "example": "message: Hello, World!\n",
     },
     "erlang": {
         "comment": "%",
-        "suffix": ["erl", "hrl"],
+        "suffixes": ["erl", "hrl"],
         "url": "https://github.com/WhatsApp/tree-sitter-erlang",
         "example": (
             "-module(hello).\n-export([world/0]).\n\nworld() ->\n"
@@ -197,25 +197,25 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "fennel": {
         "comment": ";",
-        "suffix": "fnl",
+        "suffixes": ["fnl"],
         "url": "https://github.com/travonted/tree-sitter-fennel",
         "example": '(print "Hello, World!")\n',
     },
     "fish": {
         "comment": "#",
-        "suffix": "fish",
+        "suffixes": ["fish"],
         "url": "https://github.com/ram02z/tree-sitter-fish",
         "example": 'echo "Hello, World!"\n',
     },
     "formula": {
         "comment": ";",
-        "suffix": "rb",
+        "suffixes": ["rb"],
         "url": "https://github.com/siraben/tree-sitter-formula",
         "example": "A1: Hello, World!\n",
     },
     "fortran": {
         "comment": "!",
-        "suffix": ["f90", "f95", "f77", "for"],
+        "suffixes": ["f90", "f95", "f77", "for"],
         "url": "https://github.com/stadelmanma/tree-sitter-fortran",
         "example": (
             "program HelloWorld\n  print *, 'Hello, World!'\nend program HelloWorld\n"
@@ -225,31 +225,31 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "gitattributes": {
         "comment": "#",
-        "suffix": "gitattributes",
+        "suffixes": ["gitattributes"],
         "url": "https://github.com/ObserverOfTime/tree-sitter-gitattributes",
         "example": "* text=auto\n",
     },
     "gitignore": {
         "comment": "#",
-        "suffix": "gitignore",
+        "suffixes": ["gitignore"],
         "url": "https://github.com/shunsambongi/tree-sitter-gitignore",
         "example": "*.log\n",
     },
     "gleam": {
         "comment": "//",
-        "suffix": "gleam",
+        "suffixes": ["gleam"],
         "url": "https://github.com/gleam-lang/tree-sitter-gleam",
         "example": 'pub fn main() {\n    io.print("Hello, World!")\n}\n',
     },
     "glsl": {
         "comment": "//",
-        "suffix": ["glsl", "vert", "frag"],
+        "suffixes": ["glsl", "vert", "frag"],
         "url": "https://github.com/theHamsta/tree-sitter-glsl",
         "example": "void main() {\n    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n}\n",
     },
     "go": {
         "comment": "//",
-        "suffix": "go",
+        "suffixes": ["go"],
         "url": "https://github.com/tree-sitter/tree-sitter-go",
         "example": (
             'package main\n\nimport "fmt"\n\nfunc main() {\n'
@@ -258,31 +258,31 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "graphql": {
         "comment": "#",
-        "suffix": ["graphql", "gql"],
+        "suffixes": ["graphql", "gql"],
         "url": "https://github.com/bkegley/tree-sitter-graphql",
         "example": "query {\n  hello\n}\n",
     },
     "hack": {
         "comment": "//",
-        "suffix": ["hack", "hhi"],
+        "suffixes": ["hack", "hhi"],
         "url": "https://github.com/slackhq/tree-sitter-hack",
         "example": '<?hh\n\necho "Hello, World!";\n',
     },
     "haskell": {
         "comment": "--",
-        "suffix": ["hs", "lhs"],
+        "suffixes": ["hs", "lhs"],
         "url": "https://github.com/tree-sitter/tree-sitter-haskell",
         "example": 'main :: IO ()\nmain = putStrLn "Hello, World!"\n',
     },
     "hcl": {
         "comment": "#",
-        "suffix": ["hcl", "tf"],
+        "suffixes": ["hcl", "tf"],
         "url": "https://github.com/MichaHoffmann/tree-sitter-hcl",
         "example": 'variable "message" {\n  default = "Hello, World!"\n}\n',
     },
     "html": {
         "comment": "<!--",
-        "suffix": ["html", "htm"],
+        "suffixes": ["html", "htm"],
         "url": "https://github.com/tree-sitter/tree-sitter-html",
         "example": (
             "<html>\n<head>\n  <title>Hello, World!</title>\n</head>\n<body>\n  <h1>Hello"
@@ -291,7 +291,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "ibmhlasm": {
         "comment": "*",
-        "suffix": "asm",
+        "suffixes": ["asm"],
         "url": "https://github.com/janus-llm/tree-sitter-ibmhlasm.git",
         "branch": "metrics",
         "example": (
@@ -321,7 +321,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "java": {
         "comment": "//",
-        "suffix": "java",
+        "suffixes": ["java"],
         "url": "https://github.com/tree-sitter/tree-sitter-java",
         "example": (
             "public class HelloWorld {\n    public static void main(String[] args) {\n"
@@ -330,43 +330,43 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "javascript": {
         "comment": "//",
-        "suffix": ["js", "mjs", "cjs"],
+        "suffixes": ["js", "mjs", "cjs"],
         "url": "https://github.com/tree-sitter/tree-sitter-javascript",
         "example": "console.log('Hello, World!');\n",
     },
     "jq": {
         "comment": "#",
-        "suffix": "jq",
+        "suffixes": ["jq"],
         "url": "https://github.com/flurie/tree-sitter-jq",
         "example": ".\n",
     },
     "json": {
         "comment": "//",
-        "suffix": "json",
+        "suffixes": ["json"],
         "url": "https://github.com/tree-sitter/tree-sitter-json",
         "example": '{\n  "message": "Hello, World!"\n}\n',
     },
     "json5": {
         "comment": "//",
-        "suffix": "json5",
+        "suffixes": ["json5"],
         "url": "https://github.com/Joakker/tree-sitter-json5",
         "example": "{\n  message: 'Hello, World!'\n}\n",
     },
     "julia": {
         "comment": "#",
-        "suffix": "jl",
+        "suffixes": ["jl"],
         "url": "https://github.com/tree-sitter/tree-sitter-julia",
         "example": 'println("Hello, World!")\n',
     },
     "kotlin": {
         "comment": "//",
-        "suffix": ["kt", "kts"],
+        "suffixes": ["kt", "kts"],
         "url": "https://github.com/fwcd/tree-sitter-kotlin",
         "example": 'fun main() {\n    println("Hello, World!")\n}\n',
     },
     "lalrpop": {
         "comment": "//",
-        "suffix": "lalrpop",
+        "suffixes": ["lalrpop"],
         "url": "https://github.com/traxys/tree-sitter-lalrpop",
         "example": (
             "grammar Hello {\n    extern {\n        fn print(s: &str);\n    }\n\n"
@@ -376,7 +376,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "latex": {
         "comment": "%",
-        "suffix": ["tex", "sty", "cls"],
+        "suffixes": ["tex", "sty", "cls"],
         "url": "https://github.com/latex-lsp/tree-sitter-latex",
         "example": (
             "\\documentclass{article}\n\\begin{document}\n  Hello, "
@@ -385,13 +385,13 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "lean": {
         "comment": "--",
-        "suffix": "lean",
+        "suffixes": ["lean"],
         "url": "https://github.com/Julian/tree-sitter-lean",
         "example": 'def main : io io.unit := io.put_str_ln "Hello, World!"\n',
     },
     "llvm": {
         "comment": ";",
-        "suffix": "ll",
+        "suffixes": ["ll"],
         "url": "https://github.com/benwilliamgraham/tree-sitter-llvm",
         "example": (
             "; ModuleID = 'hello.ll'\n\ndefine void @main() {\nentry:\n  call void "
@@ -402,37 +402,37 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "lua": {
         "comment": "--",
-        "suffix": "lua",
+        "suffixes": ["lua"],
         "url": "https://github.com/Azganoth/tree-sitter-lua",
         "example": 'print("Hello, World!")\n',
     },
     "m68k": {
         "comment": ";",
-        "suffix": "asm",
+        "suffixes": ["asm"],
         "url": "https://github.com/grahambates/tree-sitter-m68k",
         "example": "moveq #0,d0\n",
     },
     "markdown": {
         "comment": "<!--",
-        "suffix": ["md", "markdown"],
+        "suffixes": ["md", "markdown"],
         "url": "https://github.com/ikatyang/tree-sitter-markdown",
         "example": "# Hello, World!\n\nThis is a Markdown document.\n",
     },
     "matlab": {
         "comment": "%",
-        "suffix": "m",
+        "suffixes": ["m"],
         "url": "https://github.com/acristoffers/tree-sitter-matlab",
         "example": "fprintf('Hello, World!\\n');\n",
     },
     "meson": {
         "comment": "#",
-        "suffix": "meson.build",
+        "suffixes": ["meson.build"],
         "url": "https://github.com/staysail/tree-sitter-meson",
         "example": "project('hello', 'c')\n\nexecutable('hello', 'hello.c')\n",
     },
     "mumps": {
         "comment": ";",
-        "suffix": ["m", "mps"],
+        "suffixes": ["m", "mps"],
         "url": "https://github.com/janus-llm/tree-sitter-mumps",
         "example": 'WRITE "Hello, World!"',
         "functional_node_types": ["routine_definition"],
@@ -448,13 +448,13 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "nix": {
         "comment": "#",
-        "suffix": "nix",
+        "suffixes": ["nix"],
         "url": "https://github.com/cstrahan/tree-sitter-nix",
         "example": '{ message = "Hello, World!"; }\n',
     },
     "objc": {
         "comment": "//",
-        "suffix": ["m", "mm", "h"],
+        "suffixes": ["m", "mm", "h"],
         "url": "https://github.com/jiyee/tree-sitter-objc",
         "example": (
             "#import <Foundation/Foundation.h>\n\nint main() {\n    "
@@ -464,67 +464,67 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "ocaml": {
         "comment": "(*",
-        "suffix": ["ml", "mli"],
+        "suffixes": ["ml", "mli"],
         "url": "https://github.com/tree-sitter/tree-sitter-ocaml",
         "example": 'print_endline "Hello, World!";;\n',
     },
     "org": {
         "comment": "#",
-        "suffix": "org",
+        "suffixes": ["org"],
         "url": "https://github.com/milisims/tree-sitter-org",
         "example": "#+TITLE: Hello, World!\n\nThis is an Org mode document.\n",
     },
     "pascal": {
         "comment": "//",
-        "suffix": ["pas", "pp", "p"],
+        "suffixes": ["pas", "pp", "p"],
         "url": "https://github.com/Isopod/tree-sitter-pascal",
         "example": "// Hello, World!\nWRITE 'Hello, World!'\n",
     },
     "perl": {
         "comment": "#",
-        "suffix": ["pl", "pm", "t"],
+        "suffixes": ["pl", "pm", "t"],
         "url": "https://github.com/tree-sitter-perl/tree-sitter-perl",
         "example": "# Hello, World!\nprint 'Hello, World!\\n';\n",
     },
     "pgn": {
         "comment": "%",
-        "suffix": "pgn",
+        "suffixes": ["pgn"],
         "url": "https://github.com/rolandwalker/tree-sitter-pgn",
         "example": '% Hello, World!\nWRITE "Hello, World!"\n',
     },
     "php": {
         "comment": "#",
-        "suffix": ["php", "php3", "php4", "phtml"],
+        "suffixes": ["php", "php3", "php4", "phtml"],
         "url": "https://github.com/tree-sitter/tree-sitter-php",
         "example": "<?php\n// Hello, World!\necho 'Hello, World!';\n",
     },
     "pod": {
         "comment": "=",
-        "suffix": "pod",
+        "suffixes": ["pod"],
         "url": "https://github.com/tree-sitter-perl/tree-sitter-pod",
         "example": "=head1 Hello, World!\n\nHello, World!\n\n=cut\n",
     },
     "powershell": {
         "comment": "#",
-        "suffix": ["ps1", "psm1", "psd1"],
+        "suffixes": ["ps1", "psm1", "psd1"],
         "url": "https://github.com/PowerShell/tree-sitter-PowerShell",
         "example": "# Hello, World!\nWrite-Host 'Hello, World!'\n",
     },
     "proto": {
         "comment": "//",
-        "suffix": "proto",
+        "suffixes": ["proto"],
         "url": "https://github.com/mitchellh/tree-sitter-proto",
         "example": "// Hello, World!\nmessage HelloWorld {\n  string message = 1;\n}\n",
     },
     "pseudocode": {
         "comment": "",
-        "suffix": "pseudo",
+        "suffixes": ["pseudo"],
         "url": "",
         "example": "print Hello, World!",
     },
     "python": {
         "comment": "#",
-        "suffix": ["py", "pyi"],
+        "suffixes": ["py", "pyi"],
         "url": "https://github.com/tree-sitter/tree-sitter-python",
         "example": "# Hello, World!\nprint('Hello, World!')\n",
         "functional_node_types": ["function_definition"],
@@ -532,7 +532,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "qmljs": {
         "comment": "//",
-        "suffix": ["qml", "js"],
+        "suffixes": ["qml", "js"],
         "url": "https://github.com/yuja/tree-sitter-qmljs",
         "example": (
             "// Hello, World!\nimport QtQuick 2.0\n\nItem {\n  Text { text: "
@@ -541,61 +541,61 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "r": {
         "comment": "#",
-        "suffix": ["r", "R"],
+        "suffixes": ["r", "R"],
         "url": "https://github.com/r-lib/tree-sitter-r",
         "example": "# Hello, World!\nprint('Hello, World!')\n",
     },
     "racket": {
         "comment": ";;",
-        "suffix": ["rkt", "rktl", "scm"],
+        "suffixes": ["rkt", "rktl", "scm"],
         "url": "https://github.com/6cdh/tree-sitter-racket",
         "example": ';; Hello, World!\n(displayln "Hello, World!")\n',
     },
     "rasi": {
         "comment": "#",
-        "suffix": "rasi",
+        "suffixes": ["rasi"],
         "url": "https://github.com/Fymyte/tree-sitter-rasi",
         "example": "# Hello, World!\nprint('Hello, World!')\n",
     },
     "re2c": {
         "comment": "//",
-        "suffix": "re",
+        "suffixes": ["re"],
         "url": "https://github.com/alemuller/tree-sitter-re2c",
         "example": '// Hello, World!\n{printf("Hello, World!\\n");}',
     },
     "regex": {
         "comment": "#",
-        "suffix": "regex",
+        "suffixes": ["regex"],
         "url": "https://github.com/tree-sitter/tree-sitter-regex",
         "example": "# Hello, World!\n# Match 'Hello, World!' with a regex\n",
     },
     "rego": {
         "comment": "#",
-        "suffix": "rego",
+        "suffixes": ["rego"],
         "url": "https://github.com/FallenAngel97/tree-sitter-rego",
         "example": '# Hello, World!\npackage hello\n\nmain = {\n  "Hello, World!"\n}\n',
     },
     "rst": {
         "comment": "..",
-        "suffix": "rst",
+        "suffixes": ["rst"],
         "url": "https://github.com/stsewd/tree-sitter-rst",
         "example": ".. Hello, World!\n\nHello, World!\n",
     },
     "ruby": {
         "comment": "#",
-        "suffix": "rb",
+        "suffixes": ["rb"],
         "url": "https://github.com/tree-sitter/tree-sitter-ruby",
         "example": "# Hello, World!\nputs 'Hello, World!'\n",
     },
     "rust": {
         "comment": "//",
-        "suffix": "rs",
+        "suffixes": ["rs"],
         "url": "https://github.com/tree-sitter/tree-sitter-rust",
         "example": '// Hello, World!\nfn main() {\n    println!("Hello, World!");\n}\n',
     },
     "scala": {
         "comment": "//",
-        "suffix": "scala",
+        "suffixes": ["scala"],
         "url": "https://github.com/tree-sitter/tree-sitter-scala",
         "example": (
             "// Hello, World!\nobject HelloWorld {\n  def main(args: "
@@ -604,25 +604,25 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "scheme": {
         "comment": ";;",
-        "suffix": ["scm", "ss"],
+        "suffixes": ["scm", "ss"],
         "url": "https://github.com/6cdh/tree-sitter-scheme",
         "example": ';; Hello, World!\n(displayln "Hello, World!")\n',
     },
     "scss": {
         "comment": "//",
-        "suffix": "scss",
+        "suffixes": ["scss"],
         "url": "https://github.com/serenadeai/tree-sitter-scss",
         "example": "// Hello, World!\n$variable: 'Hello, World!';\n",
     },
     "sexp": {
         "comment": ";",
-        "suffix": "sexp",
+        "suffixes": ["sexp"],
         "url": "https://github.com/AbstractMachinesLab/tree-sitter-sexp",
         "example": '; Hello, World!\n(println "Hello, World!")\n',
     },
     "sfapex": {
         "comment": "//",
-        "suffix": "cls",
+        "suffixes": ["cls"],
         "url": "https://github.com/aheber/tree-sitter-sfapex",
         "example": (
             "// Hello, World!\npublic class HelloWorld {\n    public static void "
@@ -632,7 +632,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "smali": {
         "comment": "#",
-        "suffix": "smali",
+        "suffixes": ["smali"],
         "url": "https://github.com/amaanq/tree-sitter-smali",
         "example": (
             ".class public LHelloWorld;\n.super Ljava/lang/Object;\n\n.method "
@@ -645,7 +645,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "sourcepawn": {
         "comment": "//",
-        "suffix": "sp",
+        "suffixes": ["sp"],
         "url": "https://github.com/nilshelmig/tree-sitter-sourcepawn",
         "example": (
             "#include <sourcemod>\n\npublic Plugin:myinfo = \n{\n    name    = "
@@ -656,37 +656,37 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "sparql": {
         "comment": "#",
-        "suffix": ["sparql", "rq"],
+        "suffixes": ["sparql", "rq"],
         "url": "https://github.com/BonaBeavis/tree-sitter-sparql",
         "example": 'SELECT "Hello, World!"',
     },
     "sql": {
         "comment": "--",
-        "suffix": "sql",
+        "suffixes": ["sql"],
         "url": "https://github.com/m-novikov/tree-sitter-sql",
         "example": "SELECT 'Hello, World!';",
     },
     "sqlite": {
         "comment": "--",
-        "suffix": ["sqlite", "db"],
+        "suffixes": ["sqlite", "db"],
         "url": "https://github.com/dhcmrlchtdj/tree-sitter-sqlite",
         "example": "SELECT 'Hello, World!';",
     },
     "svelte": {
         "comment": "<!--",
-        "suffix": "svelte",
+        "suffixes": ["svelte"],
         "url": "https://github.com/Himujjal/tree-sitter-svelte",
         "example": "<script>\n  console.log('Hello, World!');\n</script>\n",
     },
     "swift": {
         "comment": "//",
-        "suffix": "swift",
+        "suffixes": ["swift"],
         "url": "https://github.com/alex-pinkus/tree-sitter-swift",
         "example": 'print("Hello, World!")\n',
     },
     "systemrdl": {
         "comment": "//",
-        "suffix": "rdl",
+        "suffixes": ["rdl"],
         "url": "https://github.com/SystemRDL/tree-sitter-systemrdl",
         "example": (
             "address_space {\n  reg my_register {\n    address 0x0;\n    "
@@ -696,19 +696,19 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "template": {
         "comment": "<%#",
-        "suffix": ["tpl", "template"],
+        "suffixes": ["tpl", "template"],
         "url": "https://github.com/tree-sitter/tree-sitter-embedded-template",
         "example": "<%# Hello, World! %>\nHello, World!\n",
     },
     "text": {
         "comment": "",
-        "suffix": "txt",
+        "suffixes": ["txt"],
         "url": None,
         "example": "Hello, World!",
     },
     "thrift": {
         "comment": "//",
-        "suffix": "thrift",
+        "suffixes": ["thrift"],
         "url": "https://github.com/duskmoon314/tree-sitter-thrift",
         "example": (
             "namespace py tutorial\n\nconst string HELLO_URL = "
@@ -719,13 +719,13 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "toml": {
         "comment": "#",
-        "suffix": "toml",
+        "suffixes": ["toml"],
         "url": "https://github.com/ikatyang/tree-sitter-toml",
         "example": 'message = "Hello, World!"\n',
     },
     "turtle": {
         "comment": "#",
-        "suffix": "ttl",
+        "suffixes": ["ttl"],
         "url": "https://github.com/BonaBeavis/tree-sitter-turtle",
         "example": (
             "@prefix ex: <http://example.org/> .\n\nex:hello ex:message "
@@ -734,19 +734,19 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "twig": {
         "comment": "{#",
-        "suffix": "twig",
+        "suffixes": ["twig"],
         "url": "https://github.com/gbprod/tree-sitter-twig",
         "example": "{# Hello, World! #}\nHello, World!\n",
     },
     "typescript": {
         "comment": "//",
-        "suffix": ["ts", "tsx"],
+        "suffixes": ["ts", "tsx"],
         "url": "https://github.com/tree-sitter/tree-sitter-typescript",
         "example": "console.log('Hello, World!');\n",
     },
     "uml": {
         "comment": "'",
-        "suffix": "uml",
+        "suffixes": ["uml"],
         "url": "https://github.com/lyndsysimon/tree-sitter-plantuml",
         "example": (
             "@startuml\nAlice -> Bob: Authentication Request\nBob --> Alice: "
@@ -756,7 +756,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "verilog": {
         "comment": "//",
-        "suffix": ["v", "vh"],
+        "suffixes": ["v", "vh"],
         "url": "https://github.com/tree-sitter/tree-sitter-verilog",
         "example": (
             "module HelloWorld;\n  initial begin\n    "
@@ -765,7 +765,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "vhdl": {
         "comment": "--",
-        "suffix": ["vhdl", "vhd"],
+        "suffixes": ["vhdl", "vhd"],
         "url": "https://github.com/alemuller/tree-sitter-vhdl",
         "example": (
             "library IEEE;\nuse IEEE.STD_LOGIC_1164.ALL;\n\nentity "
@@ -776,13 +776,13 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "vue": {
         "comment": "//",
-        "suffix": "vue",
+        "suffixes": ["vue"],
         "url": "https://github.com/ikatyang/tree-sitter-vue",
         "example": "<template>\n  <div>\n    Hello, World!\n  </div>\n</template>\n",
     },
     "wasm": {
         "comment": ";;",
-        "suffix": "wasm",
+        "suffixes": ["wasm"],
         "url": "https://github.com/wasm-lsp/tree-sitter-wasm",
         "example": (
             '(module\n  (func $main (export "main")\n    (import "env" "puts" '
@@ -791,7 +791,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "wgsl": {
         "comment": "//",
-        "suffix": "wgsl",
+        "suffixes": ["wgsl"],
         "url": "https://github.com/mehmetoguzderin/tree-sitter-wgsl",
         "example": (
             "[[stage(fragment)]]\nfn main() -> [[builtin(position)]] "
@@ -800,13 +800,13 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "yaml": {
         "comment": "#",
-        "suffix": ["yaml", "yml"],
+        "suffixes": ["yaml", "yml"],
         "url": "https://github.com/ikatyang/tree-sitter-yaml",
         "example": "message: Hello, World!\n",
     },
     "yang": {
         "comment": "//",
-        "suffix": "yang",
+        "suffixes": ["yang"],
         "url": "https://github.com/Hubro/tree-sitter-yang",
         "example": (
             "module hello-world {\n  yang-version 1.1;\n  namespace "
@@ -817,7 +817,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     },
     "zig": {
         "comment": ";",
-        "suffix": "zig",
+        "suffixes": ["zig"],
         "url": "https://github.com/maxxnino/tree-sitter-zig",
         "example": (
             'const std = @import("std");\n\npub fn main() void {\n    const '
