@@ -1091,11 +1091,7 @@ def db_add(
         )
         vectorizer.get_or_create_collection(collection_name, model_name=model_name)
         input_dir = Path(input_dir)
-        if isinstance(LANGUAGES[input_lang]["suffix"], list):
-            suffixes = [f".{ext}" for ext in LANGUAGES[input_lang]["suffix"]]
-        else:
-            ext = LANGUAGES[input_lang]["suffix"]
-            suffixes = [f".{ext}"]
+        suffixes = [f".{ext}" for ext in LANGUAGES[input_lang]["suffixes"]]
         input_paths = [file for ext in suffixes for file in input_dir.rglob(f"**/*{ext}")]
 
         if input_lang in CUSTOM_SPLITTERS:
@@ -1119,24 +1115,25 @@ def db_add(
                 collection_name,
                 input_path.name,
             )
-    total_files = len([p for p in Path.glob(input_dir, "**/*") if not p.is_dir()])
+    total_files = len(
+        [path for path in Path.glob(input_dir, "**/*") if not path.is_dir()]
+    )
     if added_to:
         print(
             f"\nAdded to [bold salmon1]{collection_name}[/bold salmon1]:\n"
             f"  Embedding Model: [green]{model_name}[/green]\n"
             f"  Input Directory: {input_dir.absolute()}\n"
-            f"  {input_lang.capitalize()} [green]*.{suffixes}[/green] Files: "
+            f"  {input_lang.capitalize()} [green]{suffixes}[/green] Files: "
             f"{len(input_paths)}\n"
             "  Other Files (skipped): "
             f"{total_files - len(input_paths)}\n"
         )
-        [p for p in Path.glob(input_dir, f"**/*.{suffixes}") if not p.is_dir()]
     else:
         print(
             f"\nCreated [bold salmon1]{collection_name}[/bold salmon1]:\n"
             f"  Embedding Model: '{model_name}'\n"
             f"  Input Directory: {input_dir.absolute()}\n"
-            f"  {input_lang.capitalize()} [green]*.{suffixes}[/green] Files: "
+            f"  {input_lang.capitalize()} [green]{suffixes}[/green] Files: "
             f"{len(input_paths)}\n"
             "  Other Files (skipped): "
             f"{total_files - len(input_paths)}\n"

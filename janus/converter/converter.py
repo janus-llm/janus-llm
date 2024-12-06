@@ -245,13 +245,9 @@ class Converter:
                 "Valid source languages are found in `janus.utils.enums.LANGUAGES`."
             )
 
-        if isinstance(LANGUAGES[source_language]["suffix"], list):
-            self._source_suffixes = [
-                f".{ext}" for ext in LANGUAGES[source_language]["suffix"]
-            ]
-        else:
-            ext = LANGUAGES[source_language]["suffix"]
-            self._source_suffixes = [f".{ext}"]
+        self._source_suffixes = [
+            f".{ext}" for ext in LANGUAGES[source_language]["suffixes"]
+        ]
 
         self._source_language = source_language
 

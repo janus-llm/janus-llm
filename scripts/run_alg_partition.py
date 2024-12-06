@@ -48,7 +48,7 @@ in_dir = Path(args.input_dir).expanduser()
 out_dir = Path(args.output_dir).expanduser()
 
 model, _, model_token_limit, _ = load_model(args.llm)
-file_ext = LANGUAGES[args.language]["suffix"]
+file_ext = LANGUAGES[args.language]["suffixes"]
 combiner = PartitionCombiner(args.language)
 
 splitters = {
