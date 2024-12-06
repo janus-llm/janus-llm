@@ -18,8 +18,8 @@ stages:
   - Static Analysis
   - Security
   - Documentation
-  - Tests
   - Release
+  - Tests
   - Dummy
 
 ###################
@@ -114,7 +114,7 @@ coverage:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-  needs: ["flake8", "black", "isort", "bandit"]
+  needs: ["test-release"]
   only:
     refs:
       - merge_requests
@@ -205,7 +205,7 @@ test-release:
     # Remove the directory so that it's not using the directory to run the code and it uses the installed package
     - rm -rf janus
     - poetry run python tests/package.py
-  needs: ["coverage"]
+  needs: ["flake8", "black", "isort", "bandit"]
   only:
     refs:
       - merge_requests
