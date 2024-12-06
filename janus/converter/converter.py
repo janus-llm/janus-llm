@@ -430,11 +430,9 @@ class Converter:
         if output_directory is not None and not output_directory.exists():
             output_directory.mkdir(parents=True)
 
-        input_paths = [
-            file
-            for ext in self._source_suffixes
-            for file in input_directory.rglob(f"**/*{ext}")
-        ]
+        input_paths = []
+        for ext in self._source_suffixes:
+            input_paths.extend(input_directory.rglob(f"**/*{ext}"))
 
         log.info(f"Input directory: {input_directory.absolute()}")
         log.info(
