@@ -324,7 +324,7 @@ class Converter:
         # tokens at output
         # Only modify max_tokens if it is not specified by user
         if not self.override_token_limit:
-            self._max_tokens = int(token_limit // 2.5)
+            self._max_tokens = int(token_limit * self._llm.input_token_prop)
 
     @run_if_changed(
         "_prompt_template_name",
