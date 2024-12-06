@@ -122,7 +122,7 @@ class Converter:
         self._custom_model_arguments: dict[str, Any]
 
         self._source_language: str
-        self._source_suffix: str
+        self._source_suffixes: list[str]
 
         self._target_language = "json"
         self._target_suffix = ".json"
@@ -245,8 +245,10 @@ class Converter:
                 "Valid source languages are found in `janus.utils.enums.LANGUAGES`."
             )
 
-        ext = LANGUAGES[source_language]["suffix"]
-        self._source_suffix = f".{ext}"
+        self._source_suffixes = [
+            f".{ext}" for ext in LANGUAGES[source_language]["suffixes"]
+        ]
+
         self._source_language = source_language
 
     def set_protected_node_types(self, protected_node_types: tuple[str, ...]) -> None:
@@ -428,11 +430,13 @@ class Converter:
         if output_directory is not None and not output_directory.exists():
             output_directory.mkdir(parents=True)
 
-        input_paths = [p for p in input_directory.rglob(f"**/*{self._source_suffix}")]
+        input_paths = []
+        for ext in self._source_suffixes:
+            input_paths.extend(input_directory.rglob(f"**/*{ext}"))
 
         log.info(f"Input directory: {input_directory.absolute()}")
         log.info(
-            f"{self._source_language} '*{self._source_suffix}' files: "
+            f"{self._source_language} {self._source_suffixes} files: "
             f"{len(input_paths)}"
         )
         log.info(
@@ -453,11 +457,11 @@ class Converter:
                 ]
                 log.info(
                     f"Skipping {n_files - len(in_out_pairs)} existing "
-                    f"'*{self._source_suffix}' files"
+                    f"{self._source_suffixes} files"
                 )
         else:
             in_out_pairs = [(f, None) for f in input_paths]
-        log.info(f"Translating {len(in_out_pairs)} '*{self._source_suffix}' files")
+        log.info(f"Translating {len(in_out_pairs)} {self._source_suffixes} files")
 
         # Loop through each input file, convert and save it
         total_cost = 0.0

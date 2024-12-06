@@ -109,7 +109,7 @@ class PromptEngine(ABC):
         source_language = source_language.lower()
         self.variables = dict(
             SOURCE_LANGUAGE=source_language,
-            FILE_SUFFIX=LANGUAGES[source_language]["suffix"],
+            FILE_SUFFIX=LANGUAGES[source_language]["suffixes"],
             SOURCE_CODE_EXAMPLE=LANGUAGES[source_language]["example"],
         )
         if target_language is not None:
