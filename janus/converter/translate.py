@@ -67,7 +67,10 @@ class Translator(Converter):
             )
         self._target_language = target_language
         self._target_version = target_version
-        self._target_suffix = f".{LANGUAGES[target_language]['suffix']}"
+        if isinstance(suffixes := LANGUAGES[target_language]["suffix"], list):
+            self._target_suffix = f".{suffixes[0]}"
+        else:
+            self._target_suffix = f".{suffixes}"
 
     @run_if_changed(
         "_prompt_template_name",
