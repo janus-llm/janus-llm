@@ -68,7 +68,7 @@ class Translator(Converter):
         self._target_language = target_language
         self._target_version = target_version
         # Taking the first suffix as the default for output files
-        self._target_suffix = f".{LANGUAGES[target_language]["suffixes"][0]}"
+        self._target_suffix = f".{LANGUAGES[target_language]['suffixes'][0]}"
 
     @run_if_changed(
         "_prompt_template_name",
