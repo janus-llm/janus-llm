@@ -18,8 +18,8 @@ stages:
   - Static Analysis
   - Security
   - Documentation
-  - Tests
   - Release
+  - Tests
   - Dummy
 
 ###################
@@ -114,15 +114,42 @@ coverage:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-  needs: ["flake8", "black", "isort", "bandit"]
+  needs: ["test-release"]
   only:
     refs:
       - merge_requests
-      - main
     changes:
       - "**/*.py"
       - poetry.lock
 
+coverage:main:
+  stage: Tests
+  tags:
+    - docker
+  variables:
+    GIT_SSL_NO_VERIFY: '1'
+    "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt"
+    "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
+    "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
+  script:
+    - bash scripts/install_plantuml.sh
+    - poetry install --with coverage --all-extras
+    - poetry run python -m coverage run -m pytest -v -m translate janus
+    - poetry run python -m coverage report -i
+    - poetry run python -m coverage xml -i
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+  needs: ["bump-version"]
+  only:
+    refs:
+      - main
+    changes:
+      - "**/*.py"
+      - poetry.lock
 
 ################
 # GitLab Pages #
@@ -178,7 +205,7 @@ test-release:
     # Remove the directory so that it's not using the directory to run the code and it uses the installed package
     - rm -rf janus
     - poetry run python tests/package.py
-  needs: ["coverage"]
+  needs: ["flake8", "black", "isort", "bandit"]
   only:
     refs:
       - merge_requests
