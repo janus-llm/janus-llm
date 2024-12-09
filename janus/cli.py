@@ -1239,6 +1239,7 @@ def llm_add(
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": {"input": in_cost, "output": out_cost},
+            "input_token_proportion": 0.4,
         }
     elif model_type == "HuggingFaceLocal":
         model_id = typer.prompt("Enter the model ID")
@@ -1254,6 +1255,7 @@ def llm_add(
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": {"input": in_cost, "output": out_cost},
+            "input_token_proportion": 0.4,
         }
     elif model_type == "OpenAI":
         print("DEPRECATED: Use 'Azure' instead. CTRL+C to exit.")
@@ -1276,6 +1278,7 @@ def llm_add(
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": model_cost,
+            "input_token_proportion": 0.4,
         }
     elif model_type == "Azure":
         model_id = typer.prompt(
@@ -1298,6 +1301,7 @@ def llm_add(
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": model_cost,
+            "input_token_proportion": 0.4,
         }
     elif model_type == "BedrockChat" or model_type == "Bedrock":
         model_id = typer.prompt(
@@ -1319,6 +1323,7 @@ def llm_add(
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": model_cost,
+            "input_token_proportion": 0.4,
         }
     else:
         raise ValueError(f"Unknown model type {model_type}")
