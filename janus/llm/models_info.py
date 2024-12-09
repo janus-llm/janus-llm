@@ -243,7 +243,7 @@ def load_model(model_id) -> JanusModel:
         token_limit = model_config["token_limit"]
         input_token_cost = model_config["model_cost"]["input"]
         output_token_cost = model_config["model_cost"]["output"]
-        input_token_prop = model_config["input_token_prop"]
+        input_token_proportion = model_config["input_token_proportion"]
 
     elif model_id in DEFAULT_MODELS:
         model_id = model_id
@@ -254,7 +254,7 @@ def load_model(model_id) -> JanusModel:
         token_limit = 0
         input_token_cost = 0.0
         output_token_cost = 0.0
-        input_token_prop = 0.4
+        input_token_proportion = 0.4
         if model_long_id in TOKEN_LIMITS:
             token_limit = TOKEN_LIMITS[model_long_id]
         if model_long_id in COST_PER_1K_TOKENS:
@@ -311,7 +311,7 @@ def load_model(model_id) -> JanusModel:
         short_model_id: str
         model_type_name: str
         token_limit: int
-        input_token_prop: float
+        input_token_proportion: float
         input_token_cost: float
         output_token_cost: float
         prompt_engine: type[PromptEngine]
@@ -326,7 +326,7 @@ def load_model(model_id) -> JanusModel:
         token_limit=token_limit,
         input_token_cost=input_token_cost,
         output_token_cost=output_token_cost,
-        input_token_prop=input_token_prop,
+        input_token_proportion=input_token_proportion,
         prompt_engine=prompt_engine,
         **model_args,
     )
