@@ -40,3 +40,10 @@ class FormatRefiner(JanusRefiner):
 class CodeFormatRefiner(FormatRefiner):
     def __init__(self, llm: JanusModel, parser: JanusParser, max_retries: int):
         super().__init__(llm, parser, max_retries, "refinement/format/code_format")
+
+
+class RequirementsFormatRefiner(FormatRefiner):
+    def __init__(self, llm: JanusModel, parser: JanusParser, max_retries: int):
+        super().__init__(
+            llm, parser, max_retries, "refinement/format/requirements_format"
+        )
