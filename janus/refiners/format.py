@@ -32,7 +32,7 @@ class FormatRefiner(JanusRefiner):
         self, completion: str, prompt_value: PromptValue, **kwargs
     ) -> Any:
         completion = self.format_chain.invoke(
-            dict(completion=completion, prompt_value=prompt_value)
+            dict(completion=completion, prompt=prompt_value.to_string())
         )
         return self.parser.parse(completion)
 

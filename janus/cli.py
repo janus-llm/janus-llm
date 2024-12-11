@@ -14,6 +14,7 @@ from rich.console import Console
 from rich.prompt import Confirm
 from typing_extensions import Annotated
 
+import janus.refiners.format
 import janus.refiners.refiner
 import janus.refiners.uml
 from janus.converter.aggregator import Aggregator
