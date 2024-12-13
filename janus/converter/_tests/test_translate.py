@@ -11,6 +11,7 @@ from janus.converter.diagram import DiagramGenerator
 from janus.converter.requirements import RequirementsDocumenter
 from janus.converter.translate import Translator
 from janus.language.block import CodeBlock, TranslatedCodeBlock
+from janus.refiners.format import CodeFormatRefiner
 
 
 class MockCollection(VectorStore):
@@ -50,6 +51,7 @@ class TestTranslator(unittest.TestCase):
             target_language="python",
             target_version="3.10",
             splitter_type="ast-flex",
+            refiner_types=[CodeFormatRefiner],
         )
         self.test_file = Path("janus/language/treesitter/_tests/languages/fortran.f90")
         self.TEST_FILE_EMBEDDING_COUNT = 14
