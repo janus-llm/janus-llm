@@ -483,75 +483,13 @@ class Converter:
         total_cost = 0.0
         for in_path, out_path, fail_path in in_out_pairs:
             # Translate the file, skip it if there's a rate limit error
-            try:
-                log.info(f"Processing {in_path.relative_to(input_directory)}")
-                out_block = self.translate_file(in_path)
-            except RateLimitError:
-                if fail_path is not None and (overwrite or not fail_path.exist):
-                    self._save_to_file(out_block, fail_path)
-                continue
-            except OutputParserException as e:
-                log.error(f"Skipping {in_path.name}, failed to parse output: {e}.")
-                if fail_path is not None and (overwrite or not fail_path.exist):
-                    self._save_to_file(out_block, fail_path)
-                continue
-            except BadRequestError as e:
-                if fail_path is not None and (overwrite or not fail_path.exist):
-                    self._save_to_file(out_block, fail_path)
-                if str(e).startswith("Detected an error in the prompt"):
-                    log.warning("Malformed input, skipping")
-                    continue
-                raise e
-            except ValidationError as e:
-                if fail_path is not None and (overwrite or not fail_path.exist):
-                    self._save_to_file(out_block, fail_path)
-                # Only allow ValidationError to pass if token limit is manually set
-                if self.override_token_limit:
-                    log.warning(
-                        "Current file and manually set token "
-                        "limit is too large for this model, skipping"
-                    )
-                    continue
-                raise e
-            except TokenLimitError:
-                log.warning("Ran into irreducible node too large for context, skipping")
-                if fail_path is not None and (overwrite or not fail_path.exist):
-                    self._save_to_file(out_block, fail_path)
-                continue
-            except EmptyTreeError:
-                log.warning(
-                    f'Input file "{in_path.name}" has no nodes of interest, skipping'
-                )
-                if fail_path is not None and (overwrite or not fail_path.exist):
-                    self._save_to_file(out_block, fail_path)
-                continue
-            except FileSizeError:
-                log.warning("Current tile is too large for basic splitter, skipping")
-                if fail_path is not None and (overwrite or not fail_path.exist):
-                    self._save_to_file(out_block, fail_path)
-                continue
-            except ValueError as e:
-                if fail_path is not None and (overwrite or not fail_path.exist):
-                    self._save_to_file(out_block, fail_path)
-                if str(e).startswith(
-                    "Error raised by bedrock service"
-                ) and "maximum context length" in str(e):
-                    log.warning(
-                        "Input is too large for this model's context length, skipping"
-                    )
-                    continue
-                raise e
-            finally:
-                log.info(
-                    f"Resulting Block: {json.dumps(self._get_output_obj(out_block))}"
-                )
-                total_cost += out_block.total_cost
-                log.info(f"Current Running Cost: {total_cost}")
+            log.info(f"Processing {in_path.relative_to(input_directory)}")
+            out_block = self.translate_file(in_path, fail_path)
+            total_cost += out_block.total_cost
+            log.info(f"Current Running Cost: {total_cost}")
 
             # Don't attempt to write files for which translation failed
-            if not out_block.translated:
-                if fail_path is not None and (overwrite or not fail_path.exist):
-                    self._save_to_file(out_block, fail_path)
+            if not out_block.translated or out_block.error:
                 continue
 
             if collection_name is not None:
@@ -569,7 +507,9 @@ class Converter:
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
-    def translate_file(self, file: Path) -> TranslatedCodeBlock:
+    def translate_file(
+        self, file: Path, failure_path: Path | None = None
+    ) -> TranslatedCodeBlock:
         """Translate a single file.
 
         Arguments:
@@ -585,7 +525,7 @@ class Converter:
 
         input_block = self._split_file(file)
         t0 = time.time()
-        output_block = self._iterative_translate(input_block)
+        output_block = self._iterative_translate(input_block, failure_path)
         output_block.processing_time = time.time() - t0
         if output_block.translated:
             completeness = output_block.translation_completeness
@@ -605,7 +545,9 @@ class Converter:
             )
         return output_block
 
-    def _iterative_translate(self, root: CodeBlock) -> TranslatedCodeBlock:
+    def _iterative_translate(
+        self, root: CodeBlock, failure_path: Path | None = None
+    ) -> TranslatedCodeBlock:
         """Translate the passed CodeBlock representing a full file.
 
         Arguments:
@@ -617,22 +559,67 @@ class Converter:
         translated_root = TranslatedCodeBlock(root, self._target_language)
         last_prog, prog_delta = 0, 0.1
         stack = [translated_root]
-        while stack:
-            translated_block = stack.pop()
+        try:
+            while stack:
+                translated_block = stack.pop()
 
-            self._add_translation(translated_block)
+                self._add_translation(translated_block)
 
-            # If translating this block was unsuccessful, don't bother with its
-            #  children (they wouldn't show up in the final text anyway)
-            if not translated_block.translated:
-                continue
+                # If translating this block was unsuccessful, don't bother with its
+                #  children (they wouldn't show up in the final text anyway)
+                if not translated_block.translated:
+                    continue
 
-            stack.extend(translated_block.children)
+                stack.extend(translated_block.children)
 
-            progress = translated_root.translation_completeness
-            if progress - last_prog > prog_delta:
-                last_prog = int(progress / prog_delta) * prog_delta
-                log.info(f"[{root.name}] progress: {progress:.2%}")
+                progress = translated_root.translation_completeness
+                if progress - last_prog > prog_delta:
+                    last_prog = int(progress / prog_delta) * prog_delta
+                    log.info(f"[{root.name}] progress: {progress:.2%}")
+        except RateLimitError:
+            translated_root.error = True
+        except OutputParserException as e:
+            translated_root.error = True
+            log.error(f"Skipping file, failed to parse output: {e}.")
+        except BadRequestError as e:
+            translated_root.error = True
+            if str(e).startswith("Detected an error in the prompt"):
+                log.warning("Malformed input, skipping")
+            raise e
+        except ValidationError as e:
+            translated_root.error = True
+            # Only allow ValidationError to pass if token limit is manually set
+            if self.override_token_limit:
+                log.warning(
+                    "Current file and manually set token "
+                    "limit is too large for this model, skipping"
+                )
+            raise e
+        except TokenLimitError:
+            translated_root.error = True
+            log.warning("Ran into irreducible node too large for context, skipping")
+        except EmptyTreeError:
+            translated_root.error = True
+            log.warning("Input file has no nodes of interest, skipping")
+        except FileSizeError:
+            translated_root.error = True
+            log.warning("Current tile is too large for basic splitter, skipping")
+        except ValueError as e:
+            translated_root.error = True
+            if str(e).startswith(
+                "Error raised by bedrock service"
+            ) and "maximum context length" in str(e):
+                log.warning(
+                    "Input is too large for this model's context length, skipping"
+                )
+            raise e
+        finally:
+            log.info(
+                f"Resulting Block: {json.dumps(self._get_output_obj(translated_root))}"
+            )
+            if translated_root.error:
+                if failure_path is not None:
+                    self._save_to_file(translated_root, failure_path)
 
         return translated_root
 

@@ -215,6 +215,7 @@ class TranslatedCodeBlock(CodeBlock):
         self.original = original
 
         self.complete = original.complete
+        self.error = False
         self.translated = False
         self.cost = 0.0
         self.num_requests = 0
