@@ -205,6 +205,14 @@ def translate(
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ],
+    failure_dir: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--failure_dir",
+            "-f",
+            help="The directory to store failure files during translation",
+        ),
+    ] = None,
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -317,7 +325,7 @@ def translate(
         refiner_types=refiner_types,
         retriever_type=retriever_type,
     )
-    translator.translate(input_dir, output_dir, overwrite, collection)
+    translator.translate(input_dir, output_dir, failure_dir, overwrite, collection)
 
 
 @app.command(
@@ -357,6 +365,14 @@ def document(
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ],
+    failure_dir: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--failure_dir",
+            "-f",
+            help="The directory to store failure files during translation",
+        ),
+    ] = None,
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -475,7 +491,7 @@ def document(
     else:
         documenter = Documenter(drop_comments=drop_comments, **kwargs)
 
-    documenter.translate(input_dir, output_dir, overwrite, collection)
+    documenter.translate(input_dir, output_dir, failure_dir, overwrite, collection)
 
 
 @app.command()
@@ -512,6 +528,14 @@ def aggregate(
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ],
+    failure_dir: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--failure_dir",
+            "-f",
+            help="The directory to store failure files during translation",
+        ),
+    ] = None,
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -589,7 +613,7 @@ def aggregate(
         splitter_type=splitter_type,
         prompt_template="basic_aggregation",
     )
-    aggregator.translate(input_dir, output_dir, overwrite, collection)
+    aggregator.translate(input_dir, output_dir, failure_dir, overwrite, collection)
 
 
 @app.command(
@@ -628,6 +652,14 @@ def partition(
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ] = "gpt-4o",
+    failure_dir: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--failure_dir",
+            "-f",
+            help="The directory to store failure files during translation",
+        ),
+    ] = None,
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -698,7 +730,7 @@ def partition(
         partition_token_limit=partition_token_limit,
     )
     partitioner = Partitioner(**kwargs)
-    partitioner.translate(input_dir, output_dir, overwrite)
+    partitioner.translate(input_dir, output_dir, failure_dir, overwrite)
 
 
 @app.command(
@@ -738,6 +770,14 @@ def diagram(
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ],
+    failure_dir: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--failure_dir",
+            "-f",
+            help="The directory to store failure files during translation",
+        ),
+    ] = None,
     max_prompts: Annotated[
         int,
         typer.Option(
@@ -826,7 +866,7 @@ def diagram(
         diagram_type=diagram_type,
         add_documentation=add_documentation,
     )
-    diagram_generator.translate(input_dir, output_dir, overwrite, collection)
+    diagram_generator.translate(input_dir, output_dir, failure_dir, overwrite, collection)
 
 
 @app.command(
@@ -858,6 +898,14 @@ def llm_self_eval(
             "--output-dir", "-o", help="The directory to store the evaluations in."
         ),
     ],
+    failure_dir: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--failure_dir",
+            "-f",
+            help="The directory to store failure files during translation",
+        ),
+    ] = None,
     llm_name: Annotated[
         str,
         typer.Option(
@@ -959,7 +1007,7 @@ def llm_self_eval(
     elif evaluation_type == "comments":
         evaluator = InlineCommentEvaluator(**kwargs)
 
-    evaluator.translate(input_dir, output_dir, overwrite, collection)
+    evaluator.translate(input_dir, output_dir, failure_dir, overwrite, collection)
 
 
 @db.command("init", help="Connect to or create a database.")
