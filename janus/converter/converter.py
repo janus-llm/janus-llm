@@ -489,7 +489,7 @@ class Converter:
             log.info(f"Current Running Cost: {total_cost}")
 
             # Don't attempt to write files for which translation failed
-            if not out_block.translated or out_block.error:
+            if not out_block.translated:
                 continue
 
             if collection_name is not None:
@@ -533,7 +533,6 @@ class Converter:
                 f"[{filename}] Translation complete\n"
                 f"  {completeness:.2%} of input successfully translated\n"
                 f"  Total cost: ${output_block.total_cost:,.2f}\n"
-                f"  Total retries: {output_block.total_retries:,d}\n"
                 f"  Output CodeBlock Structure:\n{input_block.tree_str()}\n"
             )
 
@@ -541,7 +540,6 @@ class Converter:
             log.error(
                 f"[{filename}] Translation failed\n"
                 f"  Total cost: ${output_block.total_cost:,.2f}\n"
-                f"  Total retries: {output_block.total_retries:,d}\n"
             )
         return output_block
 
@@ -577,17 +575,14 @@ class Converter:
                     last_prog = int(progress / prog_delta) * prog_delta
                     log.info(f"[{root.name}] progress: {progress:.2%}")
         except RateLimitError:
-            translated_root.error = True
+            pass
         except OutputParserException as e:
-            translated_root.error = True
             log.error(f"Skipping file, failed to parse output: {e}.")
         except BadRequestError as e:
-            translated_root.error = True
             if str(e).startswith("Detected an error in the prompt"):
                 log.warning("Malformed input, skipping")
             raise e
         except ValidationError as e:
-            translated_root.error = True
             # Only allow ValidationError to pass if token limit is manually set
             if self.override_token_limit:
                 log.warning(
@@ -596,16 +591,12 @@ class Converter:
                 )
             raise e
         except TokenLimitError:
-            translated_root.error = True
             log.warning("Ran into irreducible node too large for context, skipping")
         except EmptyTreeError:
-            translated_root.error = True
             log.warning("Input file has no nodes of interest, skipping")
         except FileSizeError:
-            translated_root.error = True
             log.warning("Current tile is too large for basic splitter, skipping")
         except ValueError as e:
-            translated_root.error = True
             if str(e).startswith(
                 "Error raised by bedrock service"
             ) and "maximum context length" in str(e):
@@ -617,7 +608,7 @@ class Converter:
             log.info(
                 f"Resulting Block: {json.dumps(self._get_output_obj(translated_root))}"
             )
-            if translated_root.error:
+            if not translated_root.translated:
                 if failure_path is not None:
                     self._save_to_file(translated_root, failure_path)
 
@@ -660,7 +651,6 @@ class Converter:
             finally:
                 block.processing_time = time.time() - t0
                 block.cost = cb.total_cost
-                block.retries = max(0, cb.successful_requests - 1)
                 block.request_input_tokens = cb.prompt_tokens
                 block.request_output_tokens = cb.completion_tokens
                 block.num_requests = cb.successful_requests
@@ -698,7 +688,6 @@ class Converter:
         return dict(
             input=block.original.text or "",
             metadata=dict(
-                retries=block.total_retries,
                 cost=block.total_cost,
                 processing_time=block.processing_time,
                 num_requests=block.total_num_requests,

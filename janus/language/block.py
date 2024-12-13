@@ -181,7 +181,6 @@ class TranslatedCodeBlock(CodeBlock):
     Attributes:
         original: The original code block.
         cost: The total cost to translate the original code block.
-        retries: The number of times translation had to be retried for this code
         translated: Whether this block has been successfully translated
     """
 
@@ -215,12 +214,10 @@ class TranslatedCodeBlock(CodeBlock):
         self.original = original
 
         self.complete = original.complete
-        self.error = False
         self.translated = False
         self.cost = 0.0
         self.num_requests = 0
         self.tokens = 0
-        self.retries = 0
         self.processing_time = 0.0
 
         self.request_input_tokens = 0
@@ -234,16 +231,6 @@ class TranslatedCodeBlock(CodeBlock):
             The total cost spent translating this block and all its descendents
         """
         return self.cost + sum(c.total_cost for c in self.children)
-
-    @property
-    def total_retries(self) -> int:
-        """The total number of retries that were required to translate this block and
-        all its descendents
-
-        Returns:
-            The total number of retries that were required to translate this block and
-        """
-        return self.retries + sum(c.total_retries for c in self.children)
 
     @property
     def total_input_tokens(self) -> int:
