@@ -408,6 +408,7 @@ class Converter:
         self,
         input_directory: str | Path,
         output_directory: str | Path | None = None,
+        failure_directory: str | Path | None = None,
         overwrite: bool = False,
         collection_name: str | None = None,
     ) -> None:
@@ -425,10 +426,14 @@ class Converter:
             input_directory = Path(input_directory)
         if isinstance(output_directory, str):
             output_directory = Path(output_directory)
+        if isinstance(failure_directory, str):
+            failure_directory = Path(failure_directory)
 
         # Make sure the output directory exists
         if output_directory is not None and not output_directory.exists():
             output_directory.mkdir(parents=True)
+        if failure_directory is not None and not failure_directory.exists():
+            failure_directory.mkdir(parents=True)
 
         input_paths = []
         for ext in self._source_suffixes:
@@ -449,39 +454,57 @@ class Converter:
                 / p.relative_to(input_directory).with_suffix(self._target_suffix)
                 for p in input_paths
             ]
-            in_out_pairs = list(zip(input_paths, output_paths))
-            if not overwrite:
-                n_files = len(in_out_pairs)
-                in_out_pairs = [
-                    (inp, outp) for inp, outp in in_out_pairs if not outp.exists()
-                ]
-                log.info(
-                    f"Skipping {n_files - len(in_out_pairs)} existing "
-                    f"{self._source_suffixes} files"
-                )
         else:
-            in_out_pairs = [(f, None) for f in input_paths]
+            output_paths = [None for _ in input_paths]
+
+        if failure_directory is not None:
+            failure_paths = [
+                failure_directory
+                / p.relative_to(input_directory).with_suffix(self._target_suffix)
+                for p in input_paths
+            ]
+        else:
+            failure_paths = [None for _ in input_paths]
+        in_out_pairs = list(zip(input_paths, output_paths, failure_paths))
+        if not overwrite:
+            n_files = len(in_out_pairs)
+            in_out_pairs = [
+                (inp, outp, failp)
+                for inp, outp, failp in in_out_pairs
+                if outp is None or not outp.exists()
+            ]
+            log.info(
+                f"Skipping {n_files - len(in_out_pairs)} existing "
+                f"{self._source_suffixes} files"
+            )
         log.info(f"Translating {len(in_out_pairs)} {self._source_suffixes} files")
 
         # Loop through each input file, convert and save it
         total_cost = 0.0
-        for in_path, out_path in in_out_pairs:
+        for in_path, out_path, fail_path in in_out_pairs:
             # Translate the file, skip it if there's a rate limit error
             try:
                 log.info(f"Processing {in_path.relative_to(input_directory)}")
                 out_block = self.translate_file(in_path)
-                total_cost += out_block.total_cost
             except RateLimitError:
+                if fail_path is not None and (overwrite or not fail_path.exist):
+                    self._save_to_file(out_block, fail_path)
                 continue
             except OutputParserException as e:
                 log.error(f"Skipping {in_path.name}, failed to parse output: {e}.")
+                if fail_path is not None and (overwrite or not fail_path.exist):
+                    self._save_to_file(out_block, fail_path)
                 continue
             except BadRequestError as e:
+                if fail_path is not None and (overwrite or not fail_path.exist):
+                    self._save_to_file(out_block, fail_path)
                 if str(e).startswith("Detected an error in the prompt"):
                     log.warning("Malformed input, skipping")
                     continue
                 raise e
             except ValidationError as e:
+                if fail_path is not None and (overwrite or not fail_path.exist):
+                    self._save_to_file(out_block, fail_path)
                 # Only allow ValidationError to pass if token limit is manually set
                 if self.override_token_limit:
                     log.warning(
@@ -492,16 +515,24 @@ class Converter:
                 raise e
             except TokenLimitError:
                 log.warning("Ran into irreducible node too large for context, skipping")
+                if fail_path is not None and (overwrite or not fail_path.exist):
+                    self._save_to_file(out_block, fail_path)
                 continue
             except EmptyTreeError:
                 log.warning(
                     f'Input file "{in_path.name}" has no nodes of interest, skipping'
                 )
+                if fail_path is not None and (overwrite or not fail_path.exist):
+                    self._save_to_file(out_block, fail_path)
                 continue
             except FileSizeError:
                 log.warning("Current tile is too large for basic splitter, skipping")
+                if fail_path is not None and (overwrite or not fail_path.exist):
+                    self._save_to_file(out_block, fail_path)
                 continue
             except ValueError as e:
+                if fail_path is not None and (overwrite or not fail_path.exist):
+                    self._save_to_file(out_block, fail_path)
                 if str(e).startswith(
                     "Error raised by bedrock service"
                 ) and "maximum context length" in str(e):
@@ -510,9 +541,14 @@ class Converter:
                     )
                     continue
                 raise e
+            finally:
+                total_cost += out_block.total_cost
+                log.info(f"Current Running Cost: {total_cost}")
 
             # Don't attempt to write files for which translation failed
             if not out_block.translated:
+                if fail_path is not None and (overwrite or not fail_path.exist):
+                    self._save_to_file(out_block, fail_path)
                 continue
 
             if collection_name is not None:
@@ -628,11 +664,13 @@ class Converter:
         #  TODO: If non-OpenAI models with prices are added, this will need
         #   to be updated.
         with get_model_callback() as cb:
-            t0 = time.time()
-            block.text = self._run_chain(block)
-            block.processing_time = time.time() - t0
-            block.cost = cb.total_cost
-            block.retries = max(0, cb.successful_requests - 1)
+            try:
+                t0 = time.time()
+                block.text = self._run_chain(block)
+            finally:
+                block.processing_time = time.time() - t0
+                block.cost = cb.total_cost
+                block.retries = max(0, cb.successful_requests - 1)
 
         block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
