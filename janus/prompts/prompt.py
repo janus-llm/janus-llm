@@ -23,7 +23,7 @@ TEXT_OUTPUT = []
 # same language as the input, regardless of the `output-lang` argument.
 SAME_OUTPUT = ["document_inline"]
 
-JSON_OUTPUT = ["evaluate", "document", "document_madlibs", "requirements"]
+JSON_OUTPUT = ["evaluate", "document", "document_cloze", "requirements"]
 
 # Directory containing Janus prompt template directories and files
 JANUS_PROMPT_TEMPLATES_DIR = Path(__file__).parent / "templates"

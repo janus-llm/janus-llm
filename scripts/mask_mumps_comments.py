@@ -262,7 +262,7 @@ def process_directory(input_dir: Path, output_dir: Path, exhaustive: bool = Fals
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="Mask MUMPS Comments",
-        description="Replace MUMPS comments with ID'd tags, to be used in MadLibs-style"
+        description="Replace MUMPS comments with ID'd tags, to be used in Cloze-style"
         " automatic documentation generation.",
     )
 
