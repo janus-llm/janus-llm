@@ -542,6 +542,9 @@ class Converter:
                     continue
                 raise e
             finally:
+                log.info(
+                    f"Resulting Block: {json.dumps(self._get_output_obj(out_block))}"
+                )
                 total_cost += out_block.total_cost
                 log.info(f"Current Running Cost: {total_cost}")
 
@@ -671,6 +674,9 @@ class Converter:
                 block.processing_time = time.time() - t0
                 block.cost = cb.total_cost
                 block.retries = max(0, cb.successful_requests - 1)
+                block.request_input_tokens = cb.prompt_tokens
+                block.request_output_tokens = cb.completion_tokens
+                block.num_requests = cb.successful_requests
 
         block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
@@ -708,6 +714,9 @@ class Converter:
                 retries=block.total_retries,
                 cost=block.total_cost,
                 processing_time=block.processing_time,
+                num_requests=block.total_num_requests,
+                input_tokens=block.total_request_input_tokens,
+                output_tokens=block.total_request_output_tokens,
             ),
             output=output_obj,
         )
