@@ -550,6 +550,7 @@ class Converter:
 
         Arguments:
             root: A root block representing the top-level block of a file
+            failure_path: path to store data files for failed translations
 
         Returns:
             A `TranslatedCodeBlock`
