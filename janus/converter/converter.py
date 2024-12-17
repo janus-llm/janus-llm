@@ -27,7 +27,7 @@ from janus.language.splitter import (
 )
 from janus.llm.model_callbacks import get_model_callback
 from janus.llm.models_info import MODEL_PROMPT_ENGINES, JanusModel, load_model
-from janus.parsers.parser import GenericParser, JanusParser
+from janus.parsers.parser import GenericParser, JanusParser, JanusParserException
 from janus.refiners.refiner import JanusRefiner
 
 # from janus.refiners.refiner import BasicRefiner, Refiner
@@ -514,6 +514,7 @@ class Converter:
 
         Arguments:
             file: Input path to file
+            failure_path: path to directory to store failure summaries`
 
         Returns:
             A `TranslatedCodeBlock` object. This block does not have a path set, and its
@@ -649,6 +650,9 @@ class Converter:
             try:
                 t0 = time.time()
                 block.text = self._run_chain(block)
+            except JanusParserException as e:
+                block.text = e.unparsed_output
+                raise e
             finally:
                 block.processing_time = time.time() - t0
                 block.cost = cb.total_cost
