@@ -121,8 +121,8 @@ class MadLibsDocumenter(Documenter):
                 block.num_requests += working_block.num_requests
                 block.cost += working_block.cost
                 block.processing_time += working_block.processing_time
-                block.request_input_tokens += working_block.prompt_tokens
-                block.request_output_tokens += working_block.completion_tokens
+                block.request_input_tokens += working_block.request_input_tokens
+                block.request_output_tokens += working_block.request_output_tokens
 
             # Update the output text to merge this section's output in
             out_text = self._parser.parse(working_block.text)
