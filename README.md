@@ -1,6 +1,6 @@
 
 <p align="center">
-    <img src="assets/icons/logo_horizontal.png">
+    <img src="https://github.com/janus-llm/janus-llm/blob/public/assets/icons/logo_horizontal.png">
 </p>
 <p align="center">
 <a href="https://github.com/janus-llm/janus-llm/actions/workflows/pages.yml" target="_blank">
@@ -29,12 +29,6 @@ Janus (`janus-llm`) uses LLMs to aid in the modernization of legacy IT systems. 
 3. Translate from a binary file to a programming language using Ghidra decompilation.
 4. Do 1-3 with a CLI tool (`janus`).
 
-## Roadmap
-
-### Priorities
-
-1. Scripts interacting with Chroma Vector DB for RAG translation and understanding.
-2. Evaluation of outputs in CLI using LLM self-evaluation or static analysis.
 
 ## Installation
 
@@ -59,6 +53,10 @@ curl -sSkL https://install.python-poetry.org | python -
 export PATH=$PATH:$HOME/.local/bin
 poetry install
 ```
+
+### Documentation
+
+See [the documentation](https://janus-llm.github.io/janus-llm) for more information on how to use the package.
 
 ### Contributing
 
