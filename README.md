@@ -50,8 +50,6 @@ Clone the repository:
 git clone git@github.com:janus-llm/janus-llm.git
 ```
 
-**NOTE**: Make sure you're using Python 3.10 or 3.11.
-
 Then, install the requirements:
 
 ```shell
