@@ -5,10 +5,7 @@ from copy import deepcopy
 from janus.converter.converter import Converter
 from janus.language.block import TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
-from janus.parsers.doc_parser import (
-    ClozeDocumentationParser,
-    MultiDocumentationParser,
-)
+from janus.parsers.doc_parser import ClozeDocumentationParser, MultiDocumentationParser
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 

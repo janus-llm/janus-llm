@@ -19,7 +19,7 @@ import janus.refiners.uml
 from janus.converter.aggregator import Aggregator
 from janus.converter.converter import Converter
 from janus.converter.diagram import DiagramGenerator
-from janus.converter.document import Documenter, ClozeDocumenter, MultiDocumenter
+from janus.converter.document import ClozeDocumenter, Documenter, MultiDocumenter
 from janus.converter.evaluate import InlineCommentEvaluator, RequirementEvaluator
 from janus.converter.partition import Partitioner
 from janus.converter.requirements import RequirementsDocumenter
@@ -465,9 +465,7 @@ def document(
         retriever_type=retriever_type,
     )
     if doc_mode == "cloze":
-        documenter = ClozeDocumenter(
-            comments_per_request=comments_per_request, **kwargs
-        )
+        documenter = ClozeDocumenter(comments_per_request=comments_per_request, **kwargs)
     elif doc_mode == "multidoc":
         documenter = MultiDocumenter(drop_comments=drop_comments, **kwargs)
     elif doc_mode == "requirements":
