@@ -277,6 +277,15 @@ class TranslatedCodeBlock(CodeBlock):
         return children_sum + self.num_requests
 
     @property
+    def translation_completed(self) -> bool:
+        """Whether or not the code block was successfully translated
+
+        Returns:
+            Whether or not the code block was successfully translated
+        """
+        return self.translated and all(c.translation_completed for c in self.children)
+
+    @property
     def translation_completeness(self) -> float:
         """The share of the input that was successfully translated
 

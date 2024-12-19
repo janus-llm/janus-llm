@@ -652,6 +652,7 @@ class Converter:
                 block.text = self._run_chain(block)
             except JanusParserException as e:
                 block.text = e.unparsed_output
+                block.tokens = self._llm.get_num_tokens(block.text)
                 raise e
             finally:
                 block.processing_time = time.time() - t0
@@ -682,13 +683,16 @@ class Converter:
     def _get_output_obj(
         self, block: TranslatedCodeBlock
     ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
-        output_str = self._parser.parse_combined_output(block.complete_text)
-
         output_obj: str | dict[str, str]
-        try:
-            output_obj = json.loads(output_str)
-        except json.JSONDecodeError:
-            output_obj = output_str
+        if not block.translation_completed:
+            # translation wasn't completed, so combined parsing will likely fail
+            output_obj = block.complete_text
+        else:
+            output_str = self._parser.parse_combined_output(block.complete_text)
+            try:
+                output_obj = json.loads(output_str)
+            except json.JSONDecodeError:
+                output_obj = output_str
 
         return dict(
             input=block.original.text or "",
