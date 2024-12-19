@@ -9,6 +9,7 @@ from janus.parsers.doc_parser import (
     MadlibsDocumentationParser,
     MultiDocumentationParser,
 )
+from janus.parsers.parser import JanusParserException
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
@@ -92,7 +93,6 @@ class MadLibsDocumenter(Documenter):
 
         block.processing_time = 0
         block.cost = 0
-        block.retries = 0
         obj = {}
         for i in range(0, len(comments), self.comments_per_request):
             # Split the text into the section containing comments of interest,
@@ -116,6 +116,10 @@ class MadLibsDocumenter(Documenter):
             # Run the LLM on the working text
             try:
                 super()._add_translation(working_block)
+            except JanusParserException as e:
+                block.text += "\n===============\n" + working_block.text
+                block.tokens = self._llm.get_num_tokens(block.text)
+                raise e
             finally:
                 # Update metadata to include for all runs
                 block.num_requests += working_block.num_requests
@@ -127,6 +131,9 @@ class MadLibsDocumenter(Documenter):
             # Update the output text to merge this section's output in
             out_text = self._parser.parse(working_block.text)
             obj.update(json.loads(out_text))
+            # Set intermediate text, will be overwritten if file
+            # successfully completes
+            block.text = json.dumps(obj)
 
         self._parser.parse_input(block.original)
         block.text = self._parser.parse(json.dumps(obj))
