@@ -20,7 +20,7 @@ import janus.refiners.uml
 from janus.converter.aggregator import Aggregator
 from janus.converter.converter import Converter
 from janus.converter.diagram import DiagramGenerator
-from janus.converter.document import Documenter, MadLibsDocumenter, MultiDocumenter
+from janus.converter.document import ClozeDocumenter, Documenter, MultiDocumenter
 from janus.converter.evaluate import InlineCommentEvaluator, RequirementEvaluator
 from janus.converter.partition import Partitioner
 from janus.converter.requirements import RequirementsDocumenter
@@ -380,16 +380,16 @@ def document(
             "--doc-mode",
             "-d",
             help="The documentation mode.",
-            click_type=click.Choice(["madlibs", "summary", "multidoc", "requirements"]),
+            click_type=click.Choice(["cloze", "summary", "multidoc", "requirements"]),
         ),
-    ] = "madlibs",
+    ] = "cloze",
     comments_per_request: Annotated[
         int,
         typer.Option(
             "--comments-per-request",
             "-rc",
             help="The maximum number of comments to generate per request when using "
-            "MadLibs documentation mode.",
+            "Cloze documentation mode.",
         ),
     ] = None,
     drop_comments: Annotated[
@@ -465,10 +465,8 @@ def document(
         refiner_types=refiner_types,
         retriever_type=retriever_type,
     )
-    if doc_mode == "madlibs":
-        documenter = MadLibsDocumenter(
-            comments_per_request=comments_per_request, **kwargs
-        )
+    if doc_mode == "cloze":
+        documenter = ClozeDocumenter(comments_per_request=comments_per_request, **kwargs)
     elif doc_mode == "multidoc":
         documenter = MultiDocumenter(drop_comments=drop_comments, **kwargs)
     elif doc_mode == "requirements":
