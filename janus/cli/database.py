@@ -2,12 +2,9 @@ from pathlib import Path
 from typing import Optional
 
 import typer
-from rich import print
-from rich.console import Console
-from rich.prompt import Confirm
 from typing_extensions import Annotated
 
-from janus.cli.constants import db_file, db_loc, janus_dir
+from janus.cli.constants import db_loc, janus_dir
 
 db = typer.Typer(
     help="Database commands",
@@ -33,6 +30,9 @@ def db_init(
 ) -> None:
     import os
 
+    from rich import print
+
+    from janus.cli.constants import db_file
     from janus.embedding.database import ChromaEmbeddingDatabase
 
     global db_loc
@@ -53,6 +53,8 @@ def db_init(
 
 @db.command("status", help="Print current database location.")
 def db_status():
+    from rich import print
+
     print(f"Chroma DB currently pointing to {db_loc}")
 
 
@@ -71,6 +73,8 @@ def db_ls(
     ] = None,
 ) -> None:
     """List the current database's collections"""
+    from rich import print
+
     from janus.embedding.database import ChromaEmbeddingDatabase
 
     if peek is not None and collection_name is None:
@@ -141,6 +145,8 @@ def db_add(
     # TODO: import factory
     import json
     from pathlib import Path
+
+    from rich.console import Console
 
     from janus.cli.constants import collections_config_file, get_collections_config
     from janus.embedding.vectorize import ChromaDBVectorizer
@@ -236,6 +242,8 @@ def db_rm(
     Arguments:
         collection_name: The name of the collection to remove
     """
+    from rich.prompt import Confirm
+
     from janus.embedding.collections import Collections
     from janus.embedding.database import ChromaEmbeddingDatabase
 
