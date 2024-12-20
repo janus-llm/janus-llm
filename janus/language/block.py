@@ -181,7 +181,6 @@ class TranslatedCodeBlock(CodeBlock):
     Attributes:
         original: The original code block.
         cost: The total cost to translate the original code block.
-        retries: The number of times translation had to be retried for this code
         translated: Whether this block has been successfully translated
     """
 
@@ -217,8 +216,12 @@ class TranslatedCodeBlock(CodeBlock):
         self.complete = original.complete
         self.translated = False
         self.cost = 0.0
-        self.retries = 0
+        self.num_requests = 0
+        self.tokens = 0
         self.processing_time = 0.0
+
+        self.request_input_tokens = 0
+        self.request_output_tokens = 0
 
     @property
     def total_cost(self) -> float:
@@ -230,16 +233,6 @@ class TranslatedCodeBlock(CodeBlock):
         return self.cost + sum(c.total_cost for c in self.children)
 
     @property
-    def total_retries(self) -> int:
-        """The total number of retries that were required to translate this block and
-        all its descendents
-
-        Returns:
-            The total number of retries that were required to translate this block and
-        """
-        return self.retries + sum(c.total_retries for c in self.children)
-
-    @property
     def total_input_tokens(self) -> int:
         """The total number of input tokens represented by this block and all its
         successfully-translated descendents
@@ -249,6 +242,48 @@ class TranslatedCodeBlock(CodeBlock):
         """
         children_sum = sum(c.total_input_tokens for c in self.children)
         return children_sum + (self.original.tokens if self.translated else 0)
+
+    @property
+    def total_request_input_tokens(self) -> int:
+        """
+        The total number of tokens sent to LLM during all requests during translation
+
+        Returns:
+            The total number of tokens sent to LLM during all requests during translation
+        """
+        children_sum = sum(c.total_request_input_tokens for c in self.children)
+        return children_sum + self.request_input_tokens
+
+    @property
+    def total_request_output_tokens(self) -> int:
+        """
+        The total number of tokens output by an LLM during translation
+
+        Returns:
+            The total number of tokens output by an LLM during translation
+        """
+        children_sum = sum(c.total_request_output_tokens for c in self.children)
+        return children_sum + self.request_output_tokens
+
+    @property
+    def total_num_requests(self) -> int:
+        """
+        Total number of requests made to LLM during translation
+
+        Returns:
+            Total number of requests made to LLM during translation
+        """
+        children_sum = sum(c.total_num_requests for c in self.children)
+        return children_sum + self.num_requests
+
+    @property
+    def translation_completed(self) -> bool:
+        """Whether or not the code block was successfully translated
+
+        Returns:
+            Whether or not the code block was successfully translated
+        """
+        return self.translated and all(c.translation_completed for c in self.children)
 
     @property
     def translation_completeness(self) -> float:

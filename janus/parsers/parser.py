@@ -1,4 +1,5 @@
 from langchain.schema.output_parser import BaseOutputParser
+from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
 from langchain_core.output_parsers import StrOutputParser
 
@@ -49,3 +50,9 @@ class GenericParser(JanusParser, StrOutputParser):
 
     def get_format_instructions(self) -> str:
         return "Output should be a string"
+
+
+class JanusParserException(OutputParserException):
+    def __init__(self, unparsed_output, *args, **kwargs):
+        self.unparsed_output = unparsed_output
+        super().__init__(*args, **kwargs)

@@ -2,10 +2,9 @@ import json
 import re
 
 from langchain.output_parsers.json import parse_json_markdown
-from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
 
-from janus.parsers.parser import JanusParser
+from janus.parsers.parser import JanusParser, JanusParserException
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -20,6 +19,7 @@ class RequirementsParser(JanusParser):
     def parse(self, text: str | BaseMessage) -> str:
         if isinstance(text, BaseMessage):
             text = str(text.content)
+        original_text = text
 
         # TODO: This is an incorrect implementation (lstrip and rstrip take character
         #       lists and strip any instances of those characters, not the full str)
@@ -30,11 +30,14 @@ class RequirementsParser(JanusParser):
             obj = parse_json_markdown(text)
         except json.JSONDecodeError as e:
             log.debug(f"Invalid JSON object. Output:\n{text}")
-            raise OutputParserException(f"Got invalid JSON object. Error: {e}")
+            raise JanusParserException(
+                original_text, f"Got invalid JSON object. Error: {e}"
+            )
 
         if not isinstance(obj, dict):
-            raise OutputParserException(
-                f"Got invalid return object. Expected a dictionary, but got {type(obj)}"
+            raise JanusParserException(
+                original_text,
+                f"Got invalid return object. Expected a dictionary, but got {type(obj)}",
             )
         return json.dumps(obj)
 

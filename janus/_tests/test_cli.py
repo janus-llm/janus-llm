@@ -125,4 +125,4 @@ class TestCli(unittest.TestCase):
 
         # Assert
         mock_translate.assert_called_once()
-        mock_translate.assert_called_once_with(ANY, "janus/", "janus/", True, None)
+        mock_translate.assert_called_once_with(ANY, "janus/", "janus/", None, True, None)

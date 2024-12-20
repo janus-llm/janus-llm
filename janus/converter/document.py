@@ -6,6 +6,7 @@ from janus.converter.converter import Converter
 from janus.language.block import TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
 from janus.parsers.doc_parser import ClozeDocumentationParser, MultiDocumentationParser
+from janus.parsers.parser import JanusParserException
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
@@ -89,7 +90,6 @@ class ClozeDocumenter(Documenter):
 
         block.processing_time = 0
         block.cost = 0
-        block.retries = 0
         obj = {}
         for i in range(0, len(comments), self.comments_per_request):
             # Split the text into the section containing comments of interest,
@@ -111,16 +111,26 @@ class ClozeDocumenter(Documenter):
             working_block = TranslatedCodeBlock(working_copy, self._target_language)
 
             # Run the LLM on the working text
-            super()._add_translation(working_block)
-
-            # Update metadata to include for all runs
-            block.retries += working_block.retries
-            block.cost += working_block.cost
-            block.processing_time += working_block.processing_time
+            try:
+                super()._add_translation(working_block)
+            except JanusParserException as e:
+                block.text += "\n===============\n" + working_block.text
+                block.tokens = self._llm.get_num_tokens(block.text)
+                raise e
+            finally:
+                # Update metadata to include for all runs
+                block.num_requests += working_block.num_requests
+                block.cost += working_block.cost
+                block.processing_time += working_block.processing_time
+                block.request_input_tokens += working_block.request_input_tokens
+                block.request_output_tokens += working_block.request_output_tokens
 
             # Update the output text to merge this section's output in
             out_text = self._parser.parse(working_block.text)
             obj.update(json.loads(out_text))
+            # Set intermediate text, will be overwritten if file
+            # successfully completes
+            block.text = json.dumps(obj)
 
         self._parser.parse_input(block.original)
         block.text = self._parser.parse(json.dumps(obj))

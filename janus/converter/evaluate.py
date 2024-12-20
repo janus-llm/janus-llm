@@ -9,6 +9,7 @@ from janus.language.block import TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
 from janus.parsers.eval_parsers.inline_comment_parser import InlineCommentParser
+from janus.parsers.parser import JanusParserException
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -110,7 +111,6 @@ class RequirementEvaluator(Evaluator):
 
         block.processing_time = 0
         block.cost = 0
-        block.retries = 0
         obj = {}
         for i in range(0, len(requirements), self.eval_items_per_request):
             # Build a new TranslatedBlock using the new working text
@@ -122,15 +122,25 @@ class RequirementEvaluator(Evaluator):
             working_block = TranslatedCodeBlock(working_copy, self._target_language)
 
             # Run the LLM on the working text
-            super()._add_translation(working_block)
-
-            # Update metadata to include for all runs
-            block.retries += working_block.retries
-            block.cost += working_block.cost
-            block.processing_time += working_block.processing_time
+            try:
+                super()._add_translation(working_block)
+            except JanusParserException as e:
+                block.text += "\n==============\n" + working_block.text
+                block.tokens = self._llm.get_num_tokens(block.text)
+                raise e
+            finally:
+                # Update metadata to include for all runs
+                block.num_requests += working_block.num_requests
+                block.cost += working_block.cost
+                block.processing_time += working_block.processing_time
+                block.request_input_tokens += working_block.request_input_tokens
+                block.request_output_tokens += working_block.request_output_tokens
 
             # Update the output text to merge this section's output in
             obj.update(json.loads(working_block.text))
+            # intermediate result of block,
+            # will be overwritten if file completes successfully
+            block.text = json.dumps(obj)
 
         block.text = json.dumps(obj)
         block.tokens = self._llm.get_num_tokens(block.text)
