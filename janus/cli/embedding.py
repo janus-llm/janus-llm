@@ -32,9 +32,9 @@ def embedding_add(
 
     from pydantic import AnyHttpUrl
 
-    from janus.cli.constants import EMBEDDING_MODEL_CONFIG_DIR
     from janus.embedding.embedding_models_info import (
         EMBEDDING_COST_PER_MODEL,
+        EMBEDDING_MODEL_CONFIG_DIR,
         EMBEDDING_TOKEN_LIMITS,
     )
 

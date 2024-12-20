@@ -29,9 +29,9 @@ def llm_add(
 ):
     import json
 
-    from janus.cli.constants import MODEL_CONFIG_DIR
     from janus.llm.models_info import (
         COST_PER_1K_TOKENS,
+        MODEL_CONFIG_DIR,
         MODEL_ID_TO_LONG_ID,
         TOKEN_LIMITS,
         azure_models,
