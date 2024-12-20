@@ -86,7 +86,7 @@ class MultiDocumentationParser(JanusParser, PydanticOutputParser):
         return str(self.__class__.name)
 
 
-class MadlibsDocumentationParser(JanusParser):
+class ClozeDocumentationParser(JanusParser):
     expected_keys: set[str]
 
     def __init__(self):

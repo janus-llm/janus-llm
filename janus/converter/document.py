@@ -5,10 +5,7 @@ from copy import deepcopy
 from janus.converter.converter import Converter
 from janus.language.block import TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
-from janus.parsers.doc_parser import (
-    MadlibsDocumentationParser,
-    MultiDocumentationParser,
-)
+from janus.parsers.doc_parser import ClozeDocumentationParser, MultiDocumentationParser
 from janus.parsers.parser import JanusParserException
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
@@ -41,7 +38,7 @@ class MultiDocumenter(Documenter):
         self._parser = MultiDocumentationParser()
 
 
-class MadLibsDocumenter(Documenter):
+class ClozeDocumenter(Documenter):
     def __init__(
         self,
         comments_per_request: int | None = None,
@@ -49,9 +46,9 @@ class MadLibsDocumenter(Documenter):
     ) -> None:
         kwargs.update(drop_comments=False)
         super().__init__(**kwargs)
-        self.set_prompt("document_madlibs")
+        self.set_prompt("document_cloze")
         self._combiner = JsonCombiner()
-        self._parser = MadlibsDocumentationParser()
+        self._parser = ClozeDocumentationParser()
 
         self.comments_per_request = comments_per_request
 

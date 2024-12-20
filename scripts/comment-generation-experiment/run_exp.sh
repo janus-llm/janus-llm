@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INPUT_DIR="llm-data/ITMod/documentation-tests/chunking-experiments/mumps-irt-20240730/exhaustive-madlibs-input"
+INPUT_DIR="llm-data/ITMod/documentation-tests/chunking-experiments/mumps-irt-20240730/exhaustive-cloze-input"
 OUTPUT_DIR="llm-data/ITMod/documentation-tests/chunking-experiments/mumps-irt-20240730/generated-comments"
 LANGUAGE="mumps"
 
