@@ -209,7 +209,7 @@ def translate(
     failure_dir: Annotated[
         Optional[Path],
         typer.Option(
-            "--failure_dir",
+            "--failure-directory",
             "-f",
             help="The directory to store failure files during translation",
         ),
@@ -369,9 +369,9 @@ def document(
     failure_dir: Annotated[
         Optional[Path],
         typer.Option(
-            "--failure_dir",
+            "--failure-directory",
             "-f",
-            help="The directory to store failure files during translation",
+            help="The directory to store failure files during documentation",
         ),
     ] = None,
     max_prompts: Annotated[
@@ -530,7 +530,7 @@ def aggregate(
     failure_dir: Annotated[
         Optional[Path],
         typer.Option(
-            "--failure_dir",
+            "--failure-directory",
             "-f",
             help="The directory to store failure files during translation",
         ),
@@ -654,7 +654,7 @@ def partition(
     failure_dir: Annotated[
         Optional[Path],
         typer.Option(
-            "--failure_dir",
+            "--failure-directory",
             "-f",
             help="The directory to store failure files during translation",
         ),
@@ -772,7 +772,7 @@ def diagram(
     failure_dir: Annotated[
         Optional[Path],
         typer.Option(
-            "--failure_dir",
+            "--failure-directory",
             "-f",
             help="The directory to store failure files during translation",
         ),
@@ -900,7 +900,7 @@ def llm_self_eval(
     failure_dir: Annotated[
         Optional[Path],
         typer.Option(
-            "--failure_dir",
+            "--failure-directory",
             "-f",
             help="The directory to store failure files during translation",
         ),
