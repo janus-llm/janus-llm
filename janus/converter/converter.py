@@ -76,7 +76,7 @@ class Converter:
         source_language: str = "fortran",
         max_prompts: int = 10,
         max_tokens: int | None = None,
-        prompt_template: str = "simple",
+        prompt_templates: list(str) = ["simple"],
         db_path: str | None = None,
         db_config: dict[str, Any] | None = None,
         protected_node_types: tuple[str, ...] = (),
@@ -130,7 +130,7 @@ class Converter:
         self._protected_node_types: tuple[str, ...] = ()
         self._prune_node_types: tuple[str, ...] = ()
         self._max_tokens: int | None = max_tokens
-        self._prompt_template_name: str
+        self._prompt_template_names: list(str)
         self._db_path: str | None
         self._db_config: dict[str, Any] | None
 
@@ -153,7 +153,7 @@ class Converter:
         self.set_refiner_types(refiner_types=refiner_types)
         self.set_retriever(retriever_type=retriever_type)
         self.set_model(model_name=model, **model_arguments)
-        self.set_prompt(prompt_template=prompt_template)
+        self.set_prompts(prompt_templates=prompt_templates)
         self.set_source_language(source_language)
         self.set_protected_node_types(protected_node_types)
         self.set_prune_node_types(prune_node_types)
@@ -174,7 +174,7 @@ class Converter:
 
     def _load_parameters(self) -> None:
         self._load_model()
-        self._load_prompt()
+        self._load_translation_chain()
         self._load_retriever()
         self._load_refiner_chain()
         self._load_splitter()
@@ -195,14 +195,14 @@ class Converter:
         self._model_name = model_name
         self._custom_model_arguments = custom_arguments
 
-    def set_prompt(self, prompt_template: str) -> None:
+    def set_prompts(self, prompt_templates: list(str)) -> None:
         """Validate and set the prompt template name.
 
         Arguments:
             prompt_template: name of prompt template directory
                 (see janus/prompts/templates) or path to a directory.
         """
-        self._prompt_template_name = prompt_template
+        self._prompt_template_names = prompt_templates
 
     def set_splitter(self, splitter_type: str) -> None:
         """Validate and set the prompt template name.
@@ -328,26 +328,41 @@ class Converter:
         if not self.override_token_limit:
             self._max_tokens = int(token_limit * self._llm.input_token_proportion)
 
-    @run_if_changed(
-        "_prompt_template_name",
-        "_source_language",
-        "_model_name",
-        "_parser",
-    )
-    def _load_prompt(self) -> None:
-        """Load the prompt according to this instance's attributes.
-
-        If the relevant fields have not been changed since the last time this
-        method was called, nothing happens.
-        """
-        prompt_engine = MODEL_PROMPT_ENGINES[self._llm.short_model_id](
+    @run_if_changed("_prompt_template_names", "_source_language", "_model_name")
+    def _load_translation_chain(self) -> None:
+        prompt_template_name = self._prompt_template_names[0]
+        prompt = MODEL_PROMPT_ENGINES[self._llm.short_model_id](
             source_language=self._source_language,
-            prompt_template=self._prompt_template_name,
+            prompt_template=prompt_template_name,
         )
-        self._prompt = prompt_engine.prompt
-        self._prompt = self._prompt.partial(
-            format_instructions=self._parser.get_format_instructions()
+        self._translation_chain = RunnableParallel(
+            prompt_value=lambda x, prompt=prompt: prompt(**x),
+            original_inputs=RunnablePassthrough(),
+        ) | RunnableParallel(
+            completion=lambda x: self._llm(x["prompt_value"]),
+            original_inputs=lambda x: x["original_inputs"],
+            prompt_value=lambda x: x["prompt_value"],
         )
+        for prompt_template_name in self._prompt_template_names[1:]:
+            prompt_engine = MODEL_PROMPT_ENGINES[self._llm.short_model_id](
+                source_language=self._source_language,
+                prompt_template=prompt_template_name,
+            )
+            prompt = prompt_engine.prompt
+            self._translation_chain = (
+                self._translation_chain
+                | RunnableParallel(
+                    prompt_value=lambda x, prompt=prompt: prompt(
+                        completion=x["completion"], **x["original_inputs"]
+                    ),
+                    original_inputs=lambda x: x["original_inputs"],
+                )
+                | RunnableParallel(
+                    completion=lambda x: self._llm(x["prompt_value"]),
+                    original_inputs=lambda x: x["original_inputs"],
+                    prompt_value=lambda x: x["prompt_value"],
+                )
+            )
 
     @run_if_changed("_db_path", "_db_config")
     def _load_vectorizer(self) -> None:
@@ -370,11 +385,31 @@ class Converter:
 
     @run_if_changed("_refiner_types", "_model_name", "max_prompts", "_parser")
     def _load_refiner_chain(self) -> None:
-        self._refiner_chain = RunnableParallel(
-            completion=self._llm,
-            prompt_value=RunnablePassthrough(),
-        )
-        for refiner_type in self._refiner_types[:-1]:
+        if len(self._refiner_types) == 0:
+            self._refiner_chain = RunnableLambda(
+                lambda x: self._parser.parse(x["completion"])
+            )
+            return
+        refiner_type = self._refiner_types[0]
+        if len(self._refiner_types) == 1:
+            self._refiner_chain = RunnableLambda(
+                lambda x, refiner_type=refiner_type: refiner_type(
+                    llm=self._llm,
+                    parser=self._parser,
+                    max_retries=self.max_prompts,
+                ).parse_completion(**x)
+            )
+            return
+        else:
+            self._refiner_chain = RunnableParallel(
+                completion=lambda x, refiner_type=refiner_type: refiner_type(
+                    llm=self._llm,
+                    parser=self._base_parser,
+                    max_retries=self.max_prompts,
+                ).parse_completion(**x),
+                prompt_value=lambda x: x["prompt_value"],
+            )
+        for refiner_type in self._refiner_types[1:-1]:
             # NOTE: Do NOT remove refiner_type=refiner_type from lambda.
             # Due to lambda capture, must be present or chain will not
             # be correctly constructed.
@@ -396,7 +431,9 @@ class Converter:
 
     @run_if_changed("_parser", "_retriever", "_prompt", "_llm", "_refiner_chain")
     def _load_chain(self):
-        self.chain = self._input_runnable() | self._prompt | self._refiner_chain
+        self.chain = (
+            self._input_runnable() | self._translation_chain | self._refiner_chain
+        )
 
     def _input_runnable(self) -> Runnable:
         return RunnableParallel(
