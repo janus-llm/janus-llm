@@ -11,7 +11,7 @@ log = create_logger(__name__)
 class Partitioner(Converter):
     def __init__(self, partition_token_limit: int, **kwargs):
         super().__init__(**kwargs)
-        self.set_prompt("partition")
+        self.set_prompts("partition")
         self._load_model()
         self._parser = PartitionParser(
             token_limit=partition_token_limit,

@@ -19,7 +19,7 @@ class Documenter(Converter):
     ):
         kwargs.update(source_language=source_language)
         super().__init__(**kwargs)
-        self.set_prompt("document")
+        self.set_prompts("document")
 
         if drop_comments:
             comment_node_type = LANGUAGES[source_language].get(
@@ -33,7 +33,7 @@ class Documenter(Converter):
 class MultiDocumenter(Documenter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.set_prompt("multidocument")
+        self.set_prompts("multidocument")
         self._combiner = JsonCombiner()
         self._parser = MultiDocumentationParser()
 
@@ -46,7 +46,7 @@ class ClozeDocumenter(Documenter):
     ) -> None:
         kwargs.update(drop_comments=False)
         super().__init__(**kwargs)
-        self.set_prompt("document_cloze")
+        self.set_prompts("document_cloze")
         self._combiner = JsonCombiner()
         self._parser = ClozeDocumentationParser()
 

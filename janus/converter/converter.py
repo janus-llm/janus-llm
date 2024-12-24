@@ -76,7 +76,7 @@ class Converter:
         source_language: str = "fortran",
         max_prompts: int = 10,
         max_tokens: int | None = None,
-        prompt_templates: list(str) = ["simple"],
+        prompt_templates: list[str] | str = ["simple"],
         db_path: str | None = None,
         db_config: dict[str, Any] | None = None,
         protected_node_types: tuple[str, ...] = (),
@@ -130,7 +130,7 @@ class Converter:
         self._protected_node_types: tuple[str, ...] = ()
         self._prune_node_types: tuple[str, ...] = ()
         self._max_tokens: int | None = max_tokens
-        self._prompt_template_names: list(str)
+        self._prompt_template_names: list[str]
         self._db_path: str | None
         self._db_config: dict[str, Any] | None
 
@@ -195,14 +195,17 @@ class Converter:
         self._model_name = model_name
         self._custom_model_arguments = custom_arguments
 
-    def set_prompts(self, prompt_templates: list(str)) -> None:
+    def set_prompts(self, prompt_templates: list[str] | str) -> None:
         """Validate and set the prompt template name.
 
         Arguments:
             prompt_template: name of prompt template directory
                 (see janus/prompts/templates) or path to a directory.
         """
-        self._prompt_template_names = prompt_templates
+        if isinstance(prompt_templates, str):
+            self._prompt_template_names = [prompt_templates]
+        else:
+            self._prompt_template_names = prompt_templates
 
     def set_splitter(self, splitter_type: str) -> None:
         """Validate and set the prompt template name.
@@ -331,15 +334,16 @@ class Converter:
     @run_if_changed("_prompt_template_names", "_source_language", "_model_name")
     def _load_translation_chain(self) -> None:
         prompt_template_name = self._prompt_template_names[0]
-        prompt = MODEL_PROMPT_ENGINES[self._llm.short_model_id](
+        prompt_engine = MODEL_PROMPT_ENGINES[self._llm.short_model_id](
             source_language=self._source_language,
             prompt_template=prompt_template_name,
         )
+        prompt = prompt_engine.prompt
         self._translation_chain = RunnableParallel(
-            prompt_value=lambda x, prompt=prompt: prompt(**x),
+            prompt_value=lambda x, prompt=prompt: prompt.invoke(x),
             original_inputs=RunnablePassthrough(),
         ) | RunnableParallel(
-            completion=lambda x: self._llm(x["prompt_value"]),
+            completion=lambda x: self._llm.invoke(x["prompt_value"]),
             original_inputs=lambda x: x["original_inputs"],
             prompt_value=lambda x: x["prompt_value"],
         )
@@ -352,13 +356,13 @@ class Converter:
             self._translation_chain = (
                 self._translation_chain
                 | RunnableParallel(
-                    prompt_value=lambda x, prompt=prompt: prompt(
-                        completion=x["completion"], **x["original_inputs"]
+                    prompt_value=lambda x, prompt=prompt: prompt.invoke(
+                        dict(completion=x["completion"], **x["original_inputs"])
                     ),
                     original_inputs=lambda x: x["original_inputs"],
                 )
                 | RunnableParallel(
-                    completion=lambda x: self._llm(x["prompt_value"]),
+                    completion=lambda x: self._llm.invoke(x["prompt_value"]),
                     original_inputs=lambda x: x["original_inputs"],
                     prompt_value=lambda x: x["prompt_value"],
                 )

@@ -64,7 +64,7 @@ class RequirementEvaluator(Evaluator):
         super().__init__(**kwargs)
         self.eval_items_per_request = eval_items_per_request
         self._parser = IncoseParser()
-        self.set_prompt("eval_prompts/incose")
+        self.set_prompts("eval_prompts/incose")
 
     def _input_runnable(self) -> Runnable:
         def _get_code(json_text: str) -> str:
@@ -172,7 +172,7 @@ class InlineCommentEvaluator(Evaluator):
         self._combiner = JsonCombiner()
         self._load_parameters()
         self._parser = InlineCommentParser()
-        self.set_prompt("eval_prompts/inline_comments")
+        self.set_prompts("eval_prompts/inline_comments")
         self.eval_items_per_request = eval_items_per_request
 
     def _add_translation(self, block: TranslatedCodeBlock):

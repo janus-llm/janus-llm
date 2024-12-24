@@ -29,7 +29,7 @@ class DiagramGenerator(Documenter):
 
         super().__init__(**kwargs)
 
-        self.set_prompt("diagram_with_documentation" if add_documentation else "diagram")
+        self.set_prompts("diagram_with_documentation" if add_documentation else "diagram")
         self._parser = UMLSyntaxParser(language="plantuml")
 
         self._load_parameters()
@@ -44,8 +44,10 @@ class DiagramGenerator(Documenter):
                 SOURCE_CODE=self._parser.parse_input,
                 DOCUMENTATION=self._documenter.chain,
                 context=self._retriever,
+                DIAGRAM_TYPE=lambda x: self._diagram_type,
             )
         return RunnableParallel(
             SOURCE_CODE=self._parser.parse_input,
             context=self._retriever,
+            DIAGRAM_TYPE=lambda x: self._diagram_type,
         )
