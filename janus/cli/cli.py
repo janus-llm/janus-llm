@@ -63,44 +63,48 @@ def common(
     pass
 
 
-translate = app.command(
-    help="Translate code from one language to another using an LLM.",
+aggregate = app.command(
+    help=(
+        "Aggregate intermediate representations together up to higher levels of "
+        "abstraction."
+    ),
     no_args_is_help=True,
-)(translate)
-
-document = app.command(
-    help="Document input code using an LLM.",
-    no_args_is_help=True,
-)(document)
-
-
-aggregate = app.command()(aggregate)
-
-
-partition = app.command(
-    help="Partition input code using an LLM.",
-    no_args_is_help=True,
-)(partition)
+)(aggregate)
 
 diagram = app.command(
     help="Diagram input code using an LLM.",
     no_args_is_help=True,
 )(diagram)
 
+document = app.command(
+    help="Document input code using an LLM.",
+    no_args_is_help=True,
+)(document)
 
 llm_self_eval = app.command(
-    help="LLM self evaluation",
+    help="Use an LLM to evaluate its own performance.",
     no_args_is_help=True,
 )(llm_self_eval)
 
+partition = app.command(
+    help="Partition input code using an LLM.",
+    no_args_is_help=True,
+)(partition)
+
+render = app.command(
+    help="Render PlantUML from JSON output.",
+    no_args_is_help=True,
+)(render)
+
+translate = app.command(
+    help="Translate code from one language to another using an LLM.",
+    no_args_is_help=True,
+)(translate)
 
 app.add_typer(db, name="db")
 app.add_typer(llm, name="llm")
 app.add_typer(evaluate, name="evaluate")
 app.add_typer(embedding, name="embedding")
-
-
-render = app.command()(render)
 
 
 if __name__ == "__main__":
