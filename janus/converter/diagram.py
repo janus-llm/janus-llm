@@ -14,6 +14,7 @@ class DiagramGenerator(Documenter):
         self,
         diagram_type="Activity",
         add_documentation=False,
+        extract_variables=True,
         **kwargs,
     ) -> None:
         """Initialize the DiagramGenerator class
@@ -28,15 +29,14 @@ class DiagramGenerator(Documenter):
         self._documenter = Documenter(**kwargs)
 
         super().__init__(**kwargs)
-
-        self.set_prompts("diagram_with_documentation" if add_documentation else "diagram")
+        prompts = []
+        if extract_variables:
+            prompts.append("extract_variables")
+        prompts += ["diagram_with_documentation" if add_documentation else "diagram"]
+        self.set_prompts(prompts)
         self._parser = UMLSyntaxParser(language="plantuml")
 
         self._load_parameters()
-
-    def _load_prompt(self):
-        super()._load_prompt()
-        self._prompt = self._prompt.partial(DIAGRAM_TYPE=self._diagram_type)
 
     def _input_runnable(self) -> Runnable:
         if self._add_documentation:
