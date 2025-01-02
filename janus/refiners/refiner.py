@@ -197,7 +197,6 @@ class RequirementsReflectionRefiner(JanusRefiner):
         if isinstance(completion, AIMessage):
             completion = completion.content
         for retry_number in range(self.max_retries):
-
             # First, check if the generated requirements are redundant or too specific
             duplication_reflection = self.reflect_duplication_chain.invoke(
                 dict(
