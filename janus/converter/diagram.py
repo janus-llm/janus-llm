@@ -14,7 +14,7 @@ class DiagramGenerator(Documenter):
         self,
         diagram_type="Activity",
         add_documentation=False,
-        extract_variables=True,
+        extract_variables=False,
         **kwargs,
     ) -> None:
         """Initialize the DiagramGenerator class

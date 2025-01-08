@@ -122,6 +122,15 @@ def diagram(
             click_type=click.Choice(["active_usings", "language_docs"]),
         ),
     ] = None,
+    extract_variables: Annotated[
+        bool,
+        typer.Option(
+            "-ev",
+            "--extract-variables",
+            help="Present when diagram generator should \
+                extract variables before producing diagram",
+        ),
+    ] = False,
 ):
     from janus.cli.constants import db_loc, get_collections_config
     from janus.converter.diagram import DiagramGenerator
@@ -141,6 +150,7 @@ def diagram(
         retriever_type=retriever_type,
         diagram_type=diagram_type,
         add_documentation=add_documentation,
+        extract_variables=extract_variables,
     )
     diagram_generator.translate(input_dir, output_dir, failure_dir, overwrite, collection)
 
