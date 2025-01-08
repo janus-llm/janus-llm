@@ -15,6 +15,7 @@ from langchain_core.runnables import (
 from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
 
+from janus.converter.converter_chain import ConverterChain
 from janus.embedding.vectorize import ChromaDBVectorizer
 from janus.language.block import CodeBlock, TranslatedCodeBlock
 from janus.language.combine import Combiner
@@ -435,15 +436,29 @@ class Converter:
 
     @run_if_changed("_parser", "_retriever", "_prompt", "_llm", "_refiner_chain")
     def _load_chain(self):
-        self.chain = (
-            self._input_runnable() | self._translation_chain | self._refiner_chain
-        )
+        self.chain = self.get_chain(True)
 
     def _input_runnable(self) -> Runnable:
         return RunnableParallel(
             SOURCE_CODE=self._parser.parse_input,
             context=self._retriever,
         )
+
+    def _input_chain_runnable(self) -> Runnable:
+        return RunnableParallel(SOURCE_CODE=lambda x: x, context=self._retriever)
+
+    def get_chain(self, start: bool = False) -> Runnable:
+        """
+        Gets a chain that can be executed by langchain
+        Arugments:
+            start: whether or not chain is intended to be start of a chain
+        """
+        self._load_parameters()
+        if start:
+            input_runnable = self._input_runnable()
+        else:
+            input_runnable = self._input_chain_runnable()
+        return input_runnable | self._translation_chain | self._refiner_chain
 
     def translate(
         self,
@@ -756,3 +771,6 @@ class Converter:
         obj = self._get_output_obj(block)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
+
+    def __or__(self, other: "Converter"):
+        return ConverterChain(self, other)
