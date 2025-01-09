@@ -46,6 +46,11 @@ class CodeBlock:
         embedding_id: Optional[str] = None,
         affixes: Tuple[str, str] = ("", ""),
         context_tags: dict[str, str] = {},
+        initial_processing_time: float = 0,
+        initial_num_requests: int = 0,
+        initial_input_tokens: int = 0,
+        initial_output_tokens: int = 0,
+        initial_cost: float = 0,
     ) -> None:
         self.id: Hashable = id
         self.name: Optional[str] = name
@@ -65,6 +70,12 @@ class CodeBlock:
         self.complete = True
         self.omit_prefix = True
         self.omit_suffix = False
+
+        self.initial_processing_time = initial_processing_time
+        self.initial_num_requests = initial_num_requests
+        self.initial_input_tokens = initial_input_tokens
+        self.initial_output_tokens = initial_output_tokens
+        self.initial_cost = initial_cost
 
         if self.children:
             self.children[0].omit_prefix = False
@@ -215,13 +226,13 @@ class TranslatedCodeBlock(CodeBlock):
 
         self.complete = original.complete
         self.translated = False
-        self.cost = 0.0
-        self.num_requests = 0
+        self.cost = original.initial_cost
+        self.num_requests = original.initial_num_requests
         self.tokens = 0
-        self.processing_time = 0.0
+        self.processing_time = original.initial_processing_time
 
-        self.request_input_tokens = 0
-        self.request_output_tokens = 0
+        self.request_input_tokens = original.initial_input_tokens
+        self.request_output_tokens = original.initial_output_tokens
 
     @property
     def total_cost(self) -> float:
@@ -296,4 +307,26 @@ class TranslatedCodeBlock(CodeBlock):
             (self.total_input_tokens / self.original.total_tokens)
             if self.original.total_tokens
             else 0
+        )
+
+    def to_codeblock(self) -> CodeBlock:
+        return CodeBlock(
+            id=self.id,
+            name=self.name,
+            node_type=self.node_type,
+            language=self.language,
+            text=self.text,
+            start_point=self.start_point,
+            end_point=self.end_point,
+            start_byte=self.start_byte,
+            end_byte=self.end_byte,
+            embedding_id=self.embedding_id,
+            tokens=self.tokens,
+            children=[child.to_codeblock() for child in self.children],
+            affixes=self.affixes,
+            initial_processing_time=self.processing_time,
+            initial_cost=self.cost,
+            initial_num_requests=self.num_requests,
+            initial_input_tokens=self.request_input_tokens,
+            initial_output_tokens=self.request_output_tokens,
         )

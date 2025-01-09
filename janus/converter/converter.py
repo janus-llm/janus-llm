@@ -436,7 +436,7 @@ class Converter:
 
     @run_if_changed("_parser", "_retriever", "_prompt", "_llm", "_refiner_chain")
     def _load_chain(self):
-        self.chain = self.get_chain(True)
+        self.chain = self.get_chain()
 
     def _input_runnable(self) -> Runnable:
         return RunnableParallel(
@@ -444,21 +444,11 @@ class Converter:
             context=self._retriever,
         )
 
-    def _input_chain_runnable(self) -> Runnable:
-        return RunnableParallel(SOURCE_CODE=lambda x: x, context=self._retriever)
-
-    def get_chain(self, start: bool = False) -> Runnable:
+    def get_chain(self) -> Runnable:
         """
         Gets a chain that can be executed by langchain
-        Arugments:
-            start: whether or not chain is intended to be start of a chain
         """
-        self._load_parameters()
-        if start:
-            input_runnable = self._input_runnable()
-        else:
-            input_runnable = self._input_chain_runnable()
-        return input_runnable | self._translation_chain | self._refiner_chain
+        return self._input_runnable() | self._translation_chain | self._refiner_chain
 
     def translate(
         self,
@@ -563,6 +553,28 @@ class Converter:
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
+    def translate_block(
+        self, name: str, input_block: CodeBlock, failure_path: Path | None = None
+    ):
+        t0 = time.time()
+        output_block = self._iterative_translate(input_block, failure_path)
+        output_block.processing_time = time.time() - t0
+        if output_block.translated:
+            completeness = output_block.translation_completeness
+            log.info(
+                f"[{name}] Translation complete\n"
+                f"  {completeness:.2%} of input successfully translated\n"
+                f"  Total cost: ${output_block.total_cost:,.2f}\n"
+                f"  Output CodeBlock Structure:\n{input_block.tree_str()}\n"
+            )
+
+        else:
+            log.error(
+                f"[{name}] Translation failed\n"
+                f"  Total cost: ${output_block.total_cost:,.2f}\n"
+            )
+        return output_block
+
     def translate_file(
         self, file: Path, failure_path: Path | None = None
     ) -> TranslatedCodeBlock:
@@ -581,24 +593,19 @@ class Converter:
         filename = file.name
 
         input_block = self._split_file(file)
-        t0 = time.time()
-        output_block = self._iterative_translate(input_block, failure_path)
-        output_block.processing_time = time.time() - t0
-        if output_block.translated:
-            completeness = output_block.translation_completeness
-            log.info(
-                f"[{filename}] Translation complete\n"
-                f"  {completeness:.2%} of input successfully translated\n"
-                f"  Total cost: ${output_block.total_cost:,.2f}\n"
-                f"  Output CodeBlock Structure:\n{input_block.tree_str()}\n"
-            )
+        self.translate_block(filename, input_block, failure_path)
 
-        else:
-            log.error(
-                f"[{filename}] Translation failed\n"
-                f"  Total cost: ${output_block.total_cost:,.2f}\n"
-            )
-        return output_block
+    def translate_text(self, text: str, name: str, failure_path: Path | None = None):
+        """
+        Translates given text
+        Arguments:
+            text: text to translate
+            name: the name of the text (filename if from a file)
+            failure_path: path to write failure file if translation is not successful
+        """
+        self._load_parameters()
+        input_block = self._split_text(text, name)
+        self.translate_block(name, input_block, failure_path)
 
     def _iterative_translate(
         self, root: CodeBlock, failure_path: Path | None = None
@@ -721,6 +728,16 @@ class Converter:
         block.translated = True
 
         log.debug(f"[{block.name}] Output code:\n{block.text}")
+
+    def _split_text(self, text: str, name: str) -> CodeBlock:
+        log.info(f"[{name}] Splitting text")
+        root = self._splitter.split_string(text, name)
+        log.info(
+            f"[{name}] Text split into {root.n_descendents:,} blocks,"
+            f"tree of height {root.height}"
+        )
+        log.info(f"[{name}] Input CodeBlock Structure:\n{root.tree_str()}")
+        return root
 
     def _split_file(self, file: Path) -> CodeBlock:
         filename = file.name
