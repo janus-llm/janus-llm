@@ -33,6 +33,12 @@ REFINER_TYPES = get_subclasses(janus.refiners.refiner.JanusRefiner).union(
 )
 REFINERS = {r.__name__: r for r in REFINER_TYPES}
 
+CONVERTER_TYPES = get_subclasses(janus.converter.converter.Converter).union(
+    {janus.converter.converter.Converter}
+)
+
+CONVERTERS = {c.__name__: c for c in CONVERTER_TYPES}
+
 
 def get_collections_config():
     if collections_config_file.exists():

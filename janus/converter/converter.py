@@ -15,7 +15,6 @@ from langchain_core.runnables import (
 from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
 
-from janus.converter.converter_chain import ConverterChain
 from janus.embedding.vectorize import ChromaDBVectorizer
 from janus.language.block import CodeBlock, TranslatedCodeBlock
 from janus.language.combine import Combiner
@@ -790,4 +789,6 @@ class Converter:
         out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
 
     def __or__(self, other: "Converter"):
+        from janus.converter.converter_chain import ConverterChain
+
         return ConverterChain(self, other)
