@@ -2,7 +2,6 @@ from janus.converter.converter import Converter, run_if_changed
 from janus.llm.models_info import MODEL_PROMPT_ENGINES
 from janus.parsers.code_parser import CodeParser
 from janus.prompts.prompt import SAME_OUTPUT
-from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -35,8 +34,6 @@ class Translator(Converter):
         """
         super().__init__(**kwargs)
 
-        self._target_version: str | None
-
         self.set_target_language(
             target_language=target_language,
             target_version=target_version,
@@ -47,28 +44,6 @@ class Translator(Converter):
     def _load_parameters(self) -> None:
         self._load_parser()
         super()._load_parameters()
-
-    def set_target_language(
-        self, target_language: str, target_version: str | None
-    ) -> None:
-        """Validate and set the target language.
-
-        The affected objects will not be updated until translate() is called.
-
-        Arguments:
-            target_language: The target programming language.
-            target_version: The target version of the target programming language.
-        """
-        target_language = target_language.lower()
-        if target_language not in LANGUAGES:
-            raise ValueError(
-                f"Invalid target language: {target_language}. "
-                "Valid target languages are found in `janus.utils.enums.LANGUAGES`."
-            )
-        self._target_language = target_language
-        self._target_version = target_version
-        # Taking the first suffix as the default for output files
-        self._target_suffix = f".{LANGUAGES[target_language]['suffixes'][0]}"
 
     @run_if_changed(
         "_prompt_template_name",

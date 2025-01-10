@@ -126,6 +126,7 @@ class Converter:
 
         self._target_language = "json"
         self._target_suffix = ".json"
+        self._target_version: str | None = None
 
         self._protected_node_types: tuple[str, ...] = ()
         self._prune_node_types: tuple[str, ...] = ()
@@ -592,7 +593,7 @@ class Converter:
         filename = file.name
 
         input_block = self._split_file(file)
-        self.translate_block(filename, input_block, failure_path)
+        return self.translate_block(filename, input_block, failure_path)
 
     def translate_text(self, text: str, name: str, failure_path: Path | None = None):
         """
@@ -604,7 +605,7 @@ class Converter:
         """
         self._load_parameters()
         input_block = self._split_text(text, name)
-        self.translate_block(name, input_block, failure_path)
+        return self.translate_block(name, input_block, failure_path)
 
     def _iterative_translate(
         self, root: CodeBlock, failure_path: Path | None = None
@@ -792,3 +793,37 @@ class Converter:
         from janus.converter.converter_chain import ConverterChain
 
         return ConverterChain(self, other)
+
+    @property
+    def source_language(self):
+        return self._source_language
+
+    @property
+    def target_language(self):
+        return self._target_language
+
+    @property
+    def target_version(self):
+        return self._target_version
+
+    def set_target_language(
+        self, target_language: str, target_version: str | None
+    ) -> None:
+        """Validate and set the target language.
+
+        The affected objects will not be updated until translate() is called.
+
+        Arguments:
+            target_language: The target programming language.
+            target_version: The target version of the target programming language.
+        """
+        target_language = target_language.lower()
+        if target_language not in LANGUAGES:
+            raise ValueError(
+                f"Invalid target language: {target_language}. "
+                "Valid target languages are found in `janus.utils.enums.LANGUAGES`."
+            )
+        self._target_language = target_language
+        self._target_version = target_version
+        # Taking the first suffix as the default for output files
+        self._target_suffix = f".{LANGUAGES[target_language]['suffixes'][0]}"

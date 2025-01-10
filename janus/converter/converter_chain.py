@@ -15,7 +15,11 @@ class ConverterChain(Converter):
             if not isinstance(converter, Converter):
                 raise ValueError(f"Error: unrecognized type: {type(converter)}")
         self._converters = args
+        kwargs.update(source_language=self._converters[0].source_language)
         super().__init__(**kwargs)
+        self.set_target_language(
+            self._converters[-1].target_language, self._converters[-1].target_version
+        )
 
     def translate_file(
         self, file: Path, failure_path: Path | None = None
