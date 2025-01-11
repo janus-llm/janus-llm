@@ -119,7 +119,7 @@ class TestCli(unittest.TestCase):
             output_dir="janus/",
             overwrite=True,
             temp=0.7,
-            prompt_template="simple",
+            prompt_templates=["simple"],
             collection=None,
             llm_name="gpt-4o",
         )
