@@ -84,6 +84,10 @@ class Converter:
         splitter_type: str = "file",
         refiner_types: list[type[JanusRefiner]] = [JanusRefiner],
         retriever_type: str | None = None,
+        combine_output: bool = True,
+        janus_inputs: bool = False,  # TODO: rename
+        input_type: str | None = None,
+        output_type: str | None = None,
     ) -> None:
         """Initialize a Converter instance.
 
@@ -117,6 +121,7 @@ class Converter:
         self.max_prompts: int = max_prompts
         self._max_tokens: int | None = max_tokens
         self.override_token_limit: bool = max_tokens is not None
+        self._combine_output = combine_output
 
         self._model_name: str
         self._custom_model_arguments: dict[str, Any]
@@ -127,6 +132,10 @@ class Converter:
         self._target_language = "json"
         self._target_suffix = ".json"
         self._target_version: str | None = None
+        self._janus_inputs = janus_inputs
+
+        self._input_type = input_type
+        self._output_type = output_type
 
         self._protected_node_types: tuple[str, ...] = ()
         self._prune_node_types: tuple[str, ...] = ()
@@ -482,14 +491,17 @@ class Converter:
             failure_directory.mkdir(parents=True)
 
         input_paths = []
-        for ext in self._source_suffixes:
+        if self._janus_inputs:
+            source_language = "janus"
+            source_suffixes = [".json"]
+        else:
+            source_language = self._source_language
+            source_suffixes = self._source_suffixes
+        for ext in source_suffixes:
             input_paths.extend(input_directory.rglob(f"**/*{ext}"))
 
         log.info(f"Input directory: {input_directory.absolute()}")
-        log.info(
-            f"{self._source_language} {self._source_suffixes} files: "
-            f"{len(input_paths)}"
-        )
+        log.info(f"{source_language} {source_suffixes} files: " f"{len(input_paths)}")
         log.info(
             "Other files (skipped): "
             f"{len(list(input_directory.iterdir())) - len(input_paths)}\n"
@@ -530,13 +542,36 @@ class Converter:
         for in_path, out_path, fail_path in in_out_pairs:
             # Translate the file, skip it if there's a rate limit error
             log.info(f"Processing {in_path.relative_to(input_directory)}")
-            out_block = self.translate_file(in_path, fail_path)
-            total_cost += out_block.total_cost
+            if self._janus_inputs:
+                out_block = self.translate_janus_file(in_path, fail_path)
+            else:
+                out_block = self.translate_file(in_path, fail_path)
+
+            def _get_total_cost(block):
+                if isinstance(block, list):
+                    return sum(_get_total_cost(b) for b in block)
+                return block.total_cost
+
+            total_cost += _get_total_cost(out_block)
             log.info(f"Current Running Cost: {total_cost}")
 
             # Don't attempt to write files for which translation failed
-            if not out_block.translated:
+            def _is_empty(block):
+                if isinstance(block, list):
+                    return len(block) == 0
+                return not block.translated
+
+            def _remove_empty(block):
+                if isinstance(block, list):
+                    block = [_remove_empty(b) for b in block]
+                    block = [b for b in block if not _is_empty(b)]
+                return block
+
+            out_block = _remove_empty(out_block)
+            if _is_empty(out_block):
                 continue
+            while isinstance(out_block, list) and len(out_block) == 1:
+                out_block = out_block[0]
 
             if collection_name is not None:
                 self._vectorizer.add_nodes_recursively(
@@ -556,6 +591,9 @@ class Converter:
     def translate_block(
         self, name: str, input_block: CodeBlock, failure_path: Path | None = None
     ):
+        self._load_parameters()
+        if self._input_type is not None and self._input_type != input_block.type_name:
+            return
         t0 = time.time()
         output_block = self._iterative_translate(input_block, failure_path)
         output_block.processing_time = time.time() - t0
@@ -576,7 +614,9 @@ class Converter:
         return output_block
 
     def translate_file(
-        self, file: Path, failure_path: Path | None = None
+        self,
+        file: Path,
+        failure_path: Path | None = None,
     ) -> TranslatedCodeBlock:
         """Translate a single file.
 
@@ -589,11 +629,25 @@ class Converter:
             code is not guaranteed to be consolidated. To amend this, run
             `Combiner.combine_children` on the block.
         """
-        self._load_parameters()
         filename = file.name
-
         input_block = self._split_file(file)
         return self.translate_block(filename, input_block, failure_path)
+
+    def translate_janus_file(self, file: Path, failure_path: Path | None = None):
+        filename = file.name
+        with open(file, "r") as f:
+            file_obj = json.load(f)
+        return self.translate_janus_obj(file_obj, filename, failure_path)
+
+    def translate_janus_obj(self, obj: Any, name: str, failure_path: Path | None = None):
+        if isinstance(obj, dict):
+            return [
+                self.translate_janus_obj(o, name, failure_path) for o in obj["outputs"]
+            ]
+        elif isinstance(obj, str):
+            return self.translate_text(obj, name, failure_path)
+        else:
+            raise ValueError(f"Error: unrecognized janus object type: {type(obj)}")
 
     def translate_text(self, text: str, name: str, failure_path: Path | None = None):
         """
@@ -603,7 +657,6 @@ class Converter:
             name: the name of the text (filename if from a file)
             failure_path: path to write failure file if translation is not successful
         """
-        self._load_parameters()
         input_block = self._split_text(text, name)
         return self.translate_block(name, input_block, failure_path)
 
@@ -619,7 +672,9 @@ class Converter:
         Returns:
             A `TranslatedCodeBlock`
         """
-        translated_root = TranslatedCodeBlock(root, self._target_language)
+        translated_root = TranslatedCodeBlock(
+            root, self._target_language, type_name=self._output_type
+        )
         last_prog, prog_delta = 0, 0.1
         stack = [translated_root]
         try:
@@ -670,9 +725,8 @@ class Converter:
                 )
             raise e
         finally:
-            log.info(
-                f"Resulting Block: {json.dumps(self._get_output_obj(translated_root))}"
-            )
+            out_obj = self._get_output_obj(translated_root, self._combine_output)
+            log.info(f"Resulting Block:" f"{json.dumps(out_obj)}")
             if not translated_root.translated:
                 if failure_path is not None:
                     self._save_to_file(translated_root, failure_path)
@@ -753,19 +807,50 @@ class Converter:
     def _run_chain(self, block: TranslatedCodeBlock) -> str:
         return self.chain.invoke(block.original)
 
+    def _combine_metadata(self, metadatas: list[dict]):
+        return dict(
+            cost=sum(m["cost"] for m in metadatas),
+            processing_time=sum(m["processing_time"] for m in metadatas),
+            num_requests=sum(m["num_requests"] for m in metadatas),
+            input_tokens=sum(m["input_tokens"] for m in metadatas),
+            output_tokens=sum(m["output_tokens"] for m in metadatas),
+        )
+
+    def _combine_inputs(self, inputs: list[str]):
+        s = ""
+        for i in inputs:
+            s += i
+        return s
+
     def _get_output_obj(
-        self, block: TranslatedCodeBlock
+        self, block: TranslatedCodeBlock | list, combine_children: bool = True
     ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
+        if isinstance(block, list):
+            # TODO: run on all items in list
+            outputs = [self._get_output_obj(b, combine_children) for b in block]
+            metadata = self._combine_metadata([o["metadata"] for o in outputs])
+            input_agg = self._combine_inputs(o["input"] for o in outputs)
+            return dict(
+                input=input_agg,
+                metadata=metadata,
+                outputs=outputs,
+            )
+        if not combine_children and len(block.children) > 0:
+            outputs = self._get_output_obj_children(block)
+            metadata = self._combine_metadata([o["metadata"] for o in outputs])
+            input_agg = self._combine_inputs(o["input"] for o in outputs)
+            return dict(
+                input=input_agg,
+                metadata=metadata,
+                outputs=outputs,
+            )
         output_obj: str | dict[str, str]
         if not block.translation_completed:
             # translation wasn't completed, so combined parsing will likely fail
-            output_obj = block.complete_text
+            output_obj = [block.complete_text]
         else:
             output_str = self._parser.parse_combined_output(block.complete_text)
-            try:
-                output_obj = json.loads(output_str)
-            except json.JSONDecodeError:
-                output_obj = output_str
+            output_obj = [output_str]
 
         return dict(
             input=block.original.text or "",
@@ -776,8 +861,17 @@ class Converter:
                 input_tokens=block.total_request_input_tokens,
                 output_tokens=block.total_request_output_tokens,
             ),
-            output=output_obj,
+            outputs=output_obj,
         )
+
+    def _get_output_obj_children(self, block: TranslatedCodeBlock):
+        if len(block.children) > 0:
+            res = []
+            for c in block.children:
+                res += self._get_output_obj_children(c)
+            return res
+        else:
+            return [self._get_output_obj(block, combine_children=True)]
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
         """Save a file to disk.
@@ -785,7 +879,7 @@ class Converter:
         Arguments:
             block: The `TranslatedCodeBlock` to save to a file.
         """
-        obj = self._get_output_obj(block)
+        obj = self._get_output_obj(block, combine_children=self._combine_output)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
 

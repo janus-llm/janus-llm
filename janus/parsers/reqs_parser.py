@@ -55,7 +55,7 @@ class RequirementsParser(JanusParser):
         for i, json_string in enumerate(json_strings, 1):
             json_dict = json.loads(json_string)
             output_list.append(json_dict["requirements"])
-        return output_list
+        return json.dumps(output_list)
 
     def get_format_instructions(self) -> str:
         """Get the format instructions for the parser.

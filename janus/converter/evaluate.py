@@ -1,6 +1,8 @@
 import json
 import re
 from copy import deepcopy
+from pathlib import Path
+from typing import Any
 
 from langchain_core.runnables import Runnable, RunnableLambda, RunnableParallel
 
@@ -9,7 +11,6 @@ from janus.language.block import TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
 from janus.parsers.eval_parsers.inline_comment_parser import InlineCommentParser
-from janus.parsers.parser import JanusParserException
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -36,6 +37,7 @@ class Evaluator(Converter):
             model_arguments: Additional arguments to pass to the LLM constructor.
             max_prompts: The maximum number of prompts to try before giving up.
         """
+        kwargs.update(janus_inputs=True)
         super().__init__(**kwargs)
         self._combiner = JsonCombiner()
         self._load_parameters()
@@ -79,76 +81,42 @@ class RequirementEvaluator(Evaluator):
             context=self._retriever,
         )
 
-    def _add_translation(self, block: TranslatedCodeBlock):
-        if block.translated:
-            return
-
-        if block.original.text is None:
-            block.translated = True
-            return
-
-        if self.eval_items_per_request is None:
-            return super()._add_translation(block)
-
-        input_obj = json.loads(block.original.text)
-        requirements = input_obj.get("requirements", [])
-
-        if not requirements:
-            log.debug(f"[{block.name}] Skipping empty block")
-            block.translated = True
-            block.text = None
-            block.complete = True
-            return
-
-        # For some reason requirements objects are in nested lists?
-        while isinstance(requirements[0], list):
-            requirements = [r for lst in requirements for r in lst]
-
-        if len(requirements) <= self.eval_items_per_request:
-            input_obj["requirements"] = requirements
-            block.original.text = json.dumps(input_obj)
-            return super()._add_translation(block)
-
-        block.processing_time = 0
-        block.cost = 0
-        obj = {}
-        for i in range(0, len(requirements), self.eval_items_per_request):
-            # Build a new TranslatedBlock using the new working text
-            working_requirements = requirements[i : i + self.eval_items_per_request]
-            working_copy = deepcopy(block.original)
-            working_obj = json.loads(working_copy.text)  # type: ignore
-            working_obj["requirements"] = working_requirements
-            working_copy.text = json.dumps(working_obj)
-            working_block = TranslatedCodeBlock(working_copy, self._target_language)
-
-            # Run the LLM on the working text
-            try:
-                super()._add_translation(working_block)
-            except JanusParserException as e:
-                block.text += "\n==============\n" + working_block.text
-                block.tokens = self._llm.get_num_tokens(block.text)
-                raise e
-            finally:
-                # Update metadata to include for all runs
-                block.num_requests += working_block.num_requests
-                block.cost += working_block.cost
-                block.processing_time += working_block.processing_time
-                block.request_input_tokens += working_block.request_input_tokens
-                block.request_output_tokens += working_block.request_output_tokens
-
-            # Update the output text to merge this section's output in
-            obj.update(json.loads(working_block.text))
-            # intermediate result of block,
-            # will be overwritten if file completes successfully
-            block.text = json.dumps(obj)
-
-        block.text = json.dumps(obj)
-        block.tokens = self._llm.get_num_tokens(block.text)
-        block.translated = True
-
-        log.debug(
-            f"[{block.name}] Output code:\n{json.dumps(json.loads(block.text), indent=2)}"
-        )
+    def translate_janus_obj(self, obj: Any, name: str, failure_path: Path | None = None):
+        results = []
+        for o in obj["outputs"]:
+            if isinstance(o, dict):
+                results += self.translate_janus_obj(o, name, failure_path)
+            elif isinstance(o, str):
+                requirements = json.loads(o)
+                if not requirements:
+                    log.debug(f"[{name}] Skipping empty output")
+                    continue
+                if (
+                    not self.eval_items_per_request
+                    or len(requirements) < self.eval_items_per_request
+                ):
+                    obj_str = json.dumps(
+                        dict(
+                            requirements=requirements,
+                            code=obj["input"],
+                        )
+                    )
+                    results.append(self.translate_text(obj_str, name, failure_path))
+                else:
+                    for i in range(0, len(requirements), self.eval_items_per_request):
+                        working_requirements = requirements[
+                            i : i + self.eval_items_per_request
+                        ]
+                        obj_str = json.dumps(
+                            dict(
+                                requirements=working_requirements,
+                                code=obj["input"],
+                            )
+                        )
+                        results.append(self.translate_text(obj_str, name, failure_path))
+            else:
+                raise ValueError(f"Error: unable to find janus object: {type(o)}")
+        return results
 
 
 class InlineCommentEvaluator(Evaluator):
@@ -174,6 +142,9 @@ class InlineCommentEvaluator(Evaluator):
         self._parser = InlineCommentParser()
         self.set_prompts("eval_prompts/inline_comments")
         self.eval_items_per_request = eval_items_per_request
+
+    def translate_janus_file(self, file: Path, failure_path: Path | None = None):
+        return super().translate_janus_file(file, failure_path)
 
     def _add_translation(self, block: TranslatedCodeBlock):
         if block.translated:

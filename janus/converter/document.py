@@ -37,6 +37,8 @@ class MultiDocumenter(Documenter):
         self._combiner = JsonCombiner()
         self._parser = MultiDocumentationParser()
 
+        self._load_parameters()
+
 
 class ClozeDocumenter(Documenter):
     def __init__(
@@ -51,6 +53,8 @@ class ClozeDocumenter(Documenter):
         self._parser = ClozeDocumentationParser()
 
         self.comments_per_request = comments_per_request
+
+        self._load_parameters()
 
     def _add_translation(self, block: TranslatedCodeBlock):
         if block.translated:
