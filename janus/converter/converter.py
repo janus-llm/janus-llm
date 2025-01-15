@@ -593,11 +593,14 @@ class Converter:
         log.info(f"Total cost: ${total_cost:,.2f}")
 
     def translate_block(
-        self, name: str, input_block: CodeBlock, failure_path: Path | None = None
+        self,
+        input_block: CodeBlock | list[CodeBlock],
+        name: str,
+        failure_path: Path | None = None,
     ):
         self._load_parameters()
-        if self._input_type is not None and self._input_type != input_block.type_name:
-            return
+        if isinstance(input_block, list):
+            return [self.translate_block(b, name, failure_path) for b in input_block]
         t0 = time.time()
         output_block = self._iterative_translate(input_block, failure_path)
         output_block.processing_time = time.time() - t0
@@ -635,7 +638,7 @@ class Converter:
         """
         filename = file.name
         input_block = self._split_file(file)
-        return self.translate_block(filename, input_block, failure_path)
+        return self.translate_block(input_block, filename, failure_path)
 
     def translate_janus_file(self, file: Path, failure_path: Path | None = None):
         filename = file.name
@@ -662,7 +665,7 @@ class Converter:
             failure_path: path to write failure file if translation is not successful
         """
         input_block = self._split_text(text, name)
-        return self.translate_block(name, input_block, failure_path)
+        return self.translate_block(input_block, name, failure_path)
 
     def _iterative_translate(
         self, root: CodeBlock, failure_path: Path | None = None

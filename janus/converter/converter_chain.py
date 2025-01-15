@@ -26,30 +26,51 @@ class ConverterChain(Converter):
     ) -> TranslatedCodeBlock:
         filename = file.name
         translated_code_block = self._converters[0].translate_file(file, failure_path)
-        for converter in self._converters[1:]:
-            translated_code_block = converter.translate_block(
-                filename, translated_code_block.to_codeblock(), failure_path
-            )
+        for i, converter in enumerate(self._converters[1:]):
+            if converter._janus_inputs:
+                janus_obj = self._converters[i]._get_output_obj(translated_code_block)
+                translated_code_block = converter.translate_janus_obj(
+                    janus_obj, filename, failure_path
+                )
+            else:
+                translated_code_block = converter.translate_block(
+                    translated_code_block.to_codeblock(), filename, failure_path
+                )
         return translated_code_block
 
     def translate_text(self, text: str, name: str, failure_path: Path | None = None):
         translated_code_block = self._converters[0].translate_text(
             text, name, failure_path
         )
-        for converter in self._converters[1:]:
-            translated_code_block = converter.translate_block(
-                name, translated_code_block.to_codeblock(), failure_path
-            )
+        for i, converter in enumerate(self._converters[1:]):
+            if converter._janus_inputs:
+                janus_obj = self._converters[i]._get_output_obj(translated_code_block)
+                translated_code_block = converter.translate_janus_obj(
+                    janus_obj, name, failure_path
+                )
+            else:
+                translated_code_block = converter.translate_block(
+                    translated_code_block.to_codeblock(), name, failure_path
+                )
         return translated_code_block
 
     def translate_block(
-        self, name: str, input_block: CodeBlock, failure_path: Path | None = None
+        self,
+        input_block: CodeBlock | list[CodeBlock],
+        name: str,
+        failure_path: Path | None = None,
     ):
         translated_code_block = self._converters[0].translate_block(
-            name, input_block, failure_path
+            input_block, name, failure_path
         )
-        for converter in self._converters[1:]:
-            translated_code_block = converter.translate_block(
-                name, translated_code_block.to_codeblock(), failure_path
-            )
+        for i, converter in enumerate(self._converters[1:]):
+            if converter._janus_inputs:
+                janus_obj = self._converters[i]._get_output_obj(translated_code_block)
+                translated_code_block = converter.translate_janus_obj(
+                    janus_obj, name, failure_path
+                )
+            else:
+                translated_code_block = converter.translate_block(
+                    translated_code_block.to_codeblock(), name, failure_path
+                )
         return translated_code_block
