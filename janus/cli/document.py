@@ -142,6 +142,14 @@ def document(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
+    use_janus_inputs: Annotated[
+        bool,
+        typer.Option(
+            "-uj",
+            "--use-janus-inputs",
+            help="Present if converter should use janus files as inputs",
+        ),
+    ] = False,
 ):
     from janus.cli.constants import db_loc, get_collections_config
     from janus.converter.document import ClozeDocumenter, Documenter, MultiDocumenter
@@ -161,6 +169,7 @@ def document(
         splitter_type=splitter_type,
         refiner_types=refiner_types,
         retriever_type=retriever_type,
+        janus_inputs=use_janus_inputs,
     )
     if doc_mode == "cloze":
         documenter = ClozeDocumenter(comments_per_request=comments_per_request, **kwargs)

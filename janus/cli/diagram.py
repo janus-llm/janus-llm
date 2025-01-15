@@ -131,6 +131,15 @@ def diagram(
                 extract variables before producing diagram",
         ),
     ] = False,
+    use_janus_inputs: Annotated[
+        bool,
+        typer.Option(
+            "-uj",
+            "--use-janus-inputs",
+            help="Present when diagram generator should be\
+                  be using janus files as inputs",
+        ),
+    ] = False,
 ):
     from janus.cli.constants import db_loc, get_collections_config
     from janus.converter.diagram import DiagramGenerator
@@ -151,6 +160,7 @@ def diagram(
         diagram_type=diagram_type,
         add_documentation=add_documentation,
         extract_variables=extract_variables,
+        janus_inputs=use_janus_inputs,
     )
     diagram_generator.translate(input_dir, output_dir, failure_dir, overwrite, collection)
 
@@ -180,9 +190,18 @@ def render(
         if not output_file.parent.exists():
             output_file.parent.mkdir()
 
-        text = data["output"].replace("\\n", "\n").strip()
-        output_file.write_text(text)
+        def _render(obj, ind=0):
+            for o in obj["outputs"]:
+                if isinstance(o, dict):
+                    ind += _render(o, ind)
+                else:
+                    outfile_new = output_file.with_stem(f"{output_file.stem}_{ind}")
+                    text = o.replace("\\n", "\n").strip()
+                    outfile_new.write_text(text)
+                    jar_path = homedir / ".janus/lib/plantuml.jar"
+                    subprocess.run(["java", "-jar", jar_path, outfile_new])  # nosec
+                    outfile_new.unlink()
+                    ind += 1
+            return ind
 
-        jar_path = homedir / ".janus/lib/plantuml.jar"
-        subprocess.run(["java", "-jar", jar_path, output_file])  # nosec
-        output_file.unlink()
+        _render(data)

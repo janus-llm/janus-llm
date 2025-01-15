@@ -106,6 +106,14 @@ def partition(
             help="The limit on the number of tokens per partition.",
         ),
     ] = 8192,
+    use_janus_inputs: Annotated[
+        bool,
+        typer.Option(
+            "-uj",
+            "--use-janus-inputs",
+            help="Present if converter should use janus inputs",
+        ),
+    ] = False,
 ):
     from janus.converter.partition import Partitioner
 

@@ -31,10 +31,14 @@ def instiantiate(x):
         return x
 
 
-def instiantiate_pipeline(pipeline, language="text", model="gpt-4o"):
+def instiantiate_pipeline(
+    pipeline, language="text", model="gpt-4o", use_janus_inputs=None
+):
     if "kwargs" not in pipeline[0]:
         pipeline[0]["kwargs"] = {}
     pipeline[0]["kwargs"].update(source_language=language, model=model)
+    if use_janus_inputs is not None:
+        pipeline[0]["kwargs"].update(janus_inputs=use_janus_inputs)
     print(pipeline[0])
     converters = [instiantiate(pipeline[0])]
     for p in pipeline[1:]:
@@ -94,10 +98,20 @@ def pipeline(
             help="Whether to overwrite existing files in the output directory",
         ),
     ] = False,
+    use_janus_inputs: Annotated[
+        Optional[bool],
+        typer.Option(
+            "-uj",
+            "--use-janus-inputs",
+            help="Present if converter chain should use janus input files",
+        ),
+    ] = None,
 ):
     with open(pipeline_file, "r") as f:
         json_obj = json.load(f)
-    pipeline = instiantiate_pipeline(json_obj, language=language, model=llm_name)
+    pipeline = instiantiate_pipeline(
+        json_obj, language=language, model=llm_name, use_janus_inputs=use_janus_inputs
+    )
     pipeline.translate(
         input_directory=input_dir,
         output_directory=output_dir,
