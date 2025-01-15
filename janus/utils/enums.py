@@ -805,6 +805,12 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
             "vec4<f32> {\n    return vec4<f32>(1.0, 0.0, 0.0, 1.0);\n}\n"
         ),
     },
+    "xml": {
+        "comment": "<!--",
+        "suffixes": ["xml"],
+        "url": "https://github.com/panicinc/tree-sitter-xml",
+        "example": ("<message>\n  <text>Hello, World!</text>\n</message>\n"),
+    },
     "yaml": {
         "comment": "#",
         "suffixes": ["yaml", "yml"],
