@@ -173,7 +173,7 @@ def translate(
         target_version=target_version,
         max_prompts=max_prompts,
         max_tokens=max_tokens,
-        prompt_template=prompt_template,
+        prompt_templates=prompt_template,
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
