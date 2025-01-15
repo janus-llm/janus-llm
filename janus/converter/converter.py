@@ -347,6 +347,8 @@ class Converter:
         prompt_engine = MODEL_PROMPT_ENGINES[self._llm.short_model_id](
             source_language=self._source_language,
             prompt_template=prompt_template_name,
+            target_language=self._target_language,
+            target_version=self._target_version,
         )
         prompt = prompt_engine.prompt
         self._translation_chain = RunnableParallel(
@@ -361,6 +363,8 @@ class Converter:
             prompt_engine = MODEL_PROMPT_ENGINES[self._llm.short_model_id](
                 source_language=self._source_language,
                 prompt_template=prompt_template_name,
+                target_language=self._target_language,
+                target_version=self._target_version,
             )
             prompt = prompt_engine.prompt
             self._translation_chain = (

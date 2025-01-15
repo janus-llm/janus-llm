@@ -1,7 +1,5 @@
 from janus.converter.converter import Converter, run_if_changed
-from janus.llm.models_info import MODEL_PROMPT_ENGINES
 from janus.parsers.code_parser import CodeParser
-from janus.prompts.prompt import SAME_OUTPUT
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -44,35 +42,6 @@ class Translator(Converter):
     def _load_parameters(self) -> None:
         self._load_parser()
         super()._load_parameters()
-
-    @run_if_changed(
-        "_prompt_template_name",
-        "_source_language",
-        "_target_language",
-        "_target_version",
-        "_model_name",
-    )
-    def _load_prompt(self) -> None:
-        """Load the prompt according to this instance's attributes.
-
-        If the relevant fields have not been changed since the last time this
-        method was called, nothing happens.
-        """
-        if self._prompt_template_name in SAME_OUTPUT:
-            if self._target_language != self._source_language:
-                raise ValueError(
-                    f"Prompt template ({self._prompt_template_name}) suggests "
-                    f"source and target languages should match, but do not "
-                    f"({self._source_language} != {self._target_language})"
-                )
-
-        prompt_engine = MODEL_PROMPT_ENGINES[self._llm.short_model_id](
-            source_language=self._source_language,
-            target_language=self._target_language,
-            target_version=self._target_version,
-            prompt_template=self._prompt_template_name,
-        )
-        self._prompt = prompt_engine.prompt
 
     @run_if_changed("_target_language")
     def _load_parser(self) -> None:
