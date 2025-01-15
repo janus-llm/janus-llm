@@ -607,7 +607,7 @@ class Converter:
                 )
             raise e
         finally:
-            log.info(
+            log.debug(
                 f"Resulting Block: {json.dumps(self._get_output_obj(translated_root))}"
             )
             if not translated_root.translated:
