@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="Janus" />
 <meta property="og:description" content="Attributes: Classes: Module Contents:" />
 <meta name="description" content="Attributes: Classes: Module Contents:" />
-<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="retriever" href="../retriever/index.html" /><link rel="prev" title="janus.cli" href="../janus/cli/index.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="diagram" href="../diagram/index.html" /><link rel="prev" title="format" href="../format/index.html" />
 
     <link rel="shortcut icon" href="../../_static/favicon.ico"/><!-- Generated with Sphinx 6.2.1 and Furo 2023.09.10 -->
         <title>refiner - Janus latest documentation</title>
@@ -179,6 +179,8 @@
 <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../uml/index.html">uml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../llm/index.html">llm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cli/index.html">cli</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../janus/index.html">janus</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of janus</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../janus/converter/index.html">janus.converter</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of janus.converter</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../janus/converter/aggregator/index.html">janus.converter.aggregator</a></li>
@@ -271,10 +273,19 @@
 <li class="toctree-l4"><a class="reference internal" href="../janus/utils/progress/index.html">janus.utils.progress</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../janus/cli/index.html">janus.cli</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../format/index.html">format</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">refiner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../diagram/index.html">diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../database/index.html">database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../document/index.html">document</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../aggregate/index.html">aggregate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../embedding/index.html">embedding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constants/index.html">constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../translate/index.html">translate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../self_eval/index.html">self_eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../partition/index.html">partition</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../retriever/index.html">retriever</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../incose_parser/index.html">incose_parser</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../decompile_script/index.html">decompile_script</a></li>
@@ -346,7 +357,10 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#refiner.ReflectionRefiner" title="refiner.ReflectionRefiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReflectionRefiner</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#refiner.HallucinationRefiner" title="refiner.HallucinationRefiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HallucinationRefiner</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#refiner.RequirementsReflectionRefiner" title="refiner.RequirementsReflectionRefiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RequirementsReflectionRefiner</span></code></a></p></td>
+<td><p>This requirements-specific refiner is intended to address a common issue with</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#refiner.HallucinationRefiner" title="refiner.HallucinationRefiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HallucinationRefiner</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -535,6 +549,73 @@
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="refiner.RequirementsReflectionRefiner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">refiner.</span></span><span class="sig-name descname"><span class="pre">RequirementsReflectionRefiner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_retries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt_template_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'refinement/reflection/incose'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#refiner.RequirementsReflectionRefiner" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#refiner.JanusRefiner" title="refiner.JanusRefiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JanusRefiner</span></code></a></p>
+<p>This requirements-specific refiner is intended to address a common issue with
+requirements reflection, where over the course of several reflection loops,
+requirements lists grow increasingly verbose, eventually becoming too wordy
+to be useful. To reduce this, this refiner interlaces an additional reflection
+-&gt; revision loop which de-duplicates requirements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>llm</strong> (<a class="reference internal" href="../janus/llm/models_info/index.html#janus.llm.models_info.JanusModel" title="janus.llm.models_info.JanusModel"><em>janus.llm.models_info.JanusModel</em></a>) – </p></li>
+<li><p><strong>parser</strong> (<a class="reference internal" href="../janus/parsers/parser/index.html#janus.parsers.parser.JanusParser" title="janus.parsers.parser.JanusParser"><em>janus.parsers.parser.JanusParser</em></a>) – </p></li>
+<li><p><strong>max_retries</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – </p></li>
+<li><p><strong>prompt_template_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="refiner.RequirementsReflectionRefiner.max_retries">
+<span class="sig-name descname"><span class="pre">max_retries</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></em><a class="headerlink" href="#refiner.RequirementsReflectionRefiner.max_retries" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="refiner.RequirementsReflectionRefiner.reflection_chain">
+<span class="sig-name descname"><span class="pre">reflection_chain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">langchain_core.runnables.RunnableSerializable</span></em><a class="headerlink" href="#refiner.RequirementsReflectionRefiner.reflection_chain" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="refiner.RequirementsReflectionRefiner.revision_chain">
+<span class="sig-name descname"><span class="pre">revision_chain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">langchain_core.runnables.RunnableSerializable</span></em><a class="headerlink" href="#refiner.RequirementsReflectionRefiner.revision_chain" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="refiner.RequirementsReflectionRefiner.reflect_duplication_chain">
+<span class="sig-name descname"><span class="pre">reflect_duplication_chain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">langchain_core.runnables.RunnableSerializable</span></em><a class="headerlink" href="#refiner.RequirementsReflectionRefiner.reflect_duplication_chain" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="refiner.RequirementsReflectionRefiner.revise_duplication_chain">
+<span class="sig-name descname"><span class="pre">revise_duplication_chain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">langchain_core.runnables.RunnableSerializable</span></em><a class="headerlink" href="#refiner.RequirementsReflectionRefiner.revise_duplication_chain" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="refiner.RequirementsReflectionRefiner.reflection_prompt_name">
+<span class="sig-name descname"><span class="pre">reflection_prompt_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#refiner.RequirementsReflectionRefiner.reflection_prompt_name" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="refiner.RequirementsReflectionRefiner.parse_completion">
+<span class="sig-name descname"><span class="pre">parse_completion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">completion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt_value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#refiner.RequirementsReflectionRefiner.parse_completion" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>completion</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
+<li><p><strong>prompt_value</strong> (<em>langchain_core.prompt_values.PromptValue</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="refiner.HallucinationRefiner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">refiner.</span></span><span class="sig-name descname"><span class="pre">HallucinationRefiner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#refiner.HallucinationRefiner" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#refiner.ReflectionRefiner" title="refiner.ReflectionRefiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReflectionRefiner</span></code></a></p>
@@ -548,23 +629,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../retriever/index.html">
+          <a class="next-page" href="../diagram/index.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">retriever</div>
+                <div class="title">diagram</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../janus/cli/index.html">
+          <a class="prev-page" href="../format/index.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">janus.cli</div>
+                <div class="title">format</div>
                 
               </div>
             </a>
@@ -572,7 +653,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2024, MITRE
+                Copyright &#169; 2025, MITRE
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -626,6 +707,16 @@
 <li><a class="reference internal" href="#refiner.ReflectionRefiner.revision_chain"><code class="docutils literal notranslate"><span class="pre">ReflectionRefiner.revision_chain</span></code></a></li>
 <li><a class="reference internal" href="#refiner.ReflectionRefiner.reflection_prompt_name"><code class="docutils literal notranslate"><span class="pre">ReflectionRefiner.reflection_prompt_name</span></code></a></li>
 <li><a class="reference internal" href="#refiner.ReflectionRefiner.parse_completion"><code class="docutils literal notranslate"><span class="pre">ReflectionRefiner.parse_completion()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#refiner.RequirementsReflectionRefiner"><code class="docutils literal notranslate"><span class="pre">RequirementsReflectionRefiner</span></code></a><ul>
+<li><a class="reference internal" href="#refiner.RequirementsReflectionRefiner.max_retries"><code class="docutils literal notranslate"><span class="pre">RequirementsReflectionRefiner.max_retries</span></code></a></li>
+<li><a class="reference internal" href="#refiner.RequirementsReflectionRefiner.reflection_chain"><code class="docutils literal notranslate"><span class="pre">RequirementsReflectionRefiner.reflection_chain</span></code></a></li>
+<li><a class="reference internal" href="#refiner.RequirementsReflectionRefiner.revision_chain"><code class="docutils literal notranslate"><span class="pre">RequirementsReflectionRefiner.revision_chain</span></code></a></li>
+<li><a class="reference internal" href="#refiner.RequirementsReflectionRefiner.reflect_duplication_chain"><code class="docutils literal notranslate"><span class="pre">RequirementsReflectionRefiner.reflect_duplication_chain</span></code></a></li>
+<li><a class="reference internal" href="#refiner.RequirementsReflectionRefiner.revise_duplication_chain"><code class="docutils literal notranslate"><span class="pre">RequirementsReflectionRefiner.revise_duplication_chain</span></code></a></li>
+<li><a class="reference internal" href="#refiner.RequirementsReflectionRefiner.reflection_prompt_name"><code class="docutils literal notranslate"><span class="pre">RequirementsReflectionRefiner.reflection_prompt_name</span></code></a></li>
+<li><a class="reference internal" href="#refiner.RequirementsReflectionRefiner.parse_completion"><code class="docutils literal notranslate"><span class="pre">RequirementsReflectionRefiner.parse_completion()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#refiner.HallucinationRefiner"><code class="docutils literal notranslate"><span class="pre">HallucinationRefiner</span></code></a></li>

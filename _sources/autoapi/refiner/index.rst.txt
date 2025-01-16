@@ -21,6 +21,7 @@ Classes
    refiner.SimpleRetry
    refiner.FixParserExceptions
    refiner.ReflectionRefiner
+   refiner.RequirementsReflectionRefiner
    refiner.HallucinationRefiner
 
 
@@ -87,6 +88,45 @@ Module Contents
 
 
    .. py:attribute:: revision_chain
+      :type:  langchain_core.runnables.RunnableSerializable
+
+
+   .. py:attribute:: reflection_prompt_name
+      :type:  str
+
+
+   .. py:method:: parse_completion(completion, prompt_value, **kwargs)
+
+
+.. py:class:: RequirementsReflectionRefiner(llm, parser, max_retries, prompt_template_name = 'refinement/reflection/incose')
+
+   Bases: :py:obj:`JanusRefiner`
+
+
+   This requirements-specific refiner is intended to address a common issue with
+   requirements reflection, where over the course of several reflection loops,
+   requirements lists grow increasingly verbose, eventually becoming too wordy
+   to be useful. To reduce this, this refiner interlaces an additional reflection
+   -> revision loop which de-duplicates requirements.
+
+
+   .. py:attribute:: max_retries
+      :type:  int
+
+
+   .. py:attribute:: reflection_chain
+      :type:  langchain_core.runnables.RunnableSerializable
+
+
+   .. py:attribute:: revision_chain
+      :type:  langchain_core.runnables.RunnableSerializable
+
+
+   .. py:attribute:: reflect_duplication_chain
+      :type:  langchain_core.runnables.RunnableSerializable
+
+
+   .. py:attribute:: revise_duplication_chain
       :type:  langchain_core.runnables.RunnableSerializable
 
 

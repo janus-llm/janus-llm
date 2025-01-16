@@ -179,6 +179,8 @@
 <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../../../index.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../../../uml/index.html">uml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../llm/index.html">llm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../cli/index.html">cli</a></li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../../index.html">janus</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of janus</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3 current has-children"><a class="reference internal" href="../index.html">janus.converter</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of janus.converter</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../aggregator/index.html">janus.converter.aggregator</a></li>
@@ -271,10 +273,19 @@
 <li class="toctree-l4"><a class="reference internal" href="../../utils/progress/index.html">janus.utils.progress</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../cli/index.html">janus.cli</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../../format/index.html">format</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../refiner/index.html">refiner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../diagram/index.html">diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../database/index.html">database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../document/index.html">document</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../aggregate/index.html">aggregate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../embedding/index.html">embedding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../constants/index.html">constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../translate/index.html">translate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../self_eval/index.html">self_eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../partition/index.html">partition</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../retriever/index.html">retriever</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../incose_parser/index.html">incose_parser</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../decompile_script/index.html">decompile_script</a></li>
@@ -340,7 +351,7 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#janus.converter.document.MultiDocumenter" title="janus.converter.document.MultiDocumenter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiDocumenter</span></code></a></p></td>
 <td><p>Parent class that converts code into something else.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#janus.converter.document.MadLibsDocumenter" title="janus.converter.document.MadLibsDocumenter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MadLibsDocumenter</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#janus.converter.document.ClozeDocumenter" title="janus.converter.document.ClozeDocumenter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ClozeDocumenter</span></code></a></p></td>
 <td><p>Parent class that converts code into something else.</p></td>
 </tr>
 </tbody>
@@ -436,8 +447,8 @@ converter will use half the model’s token limit.</p></li>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="janus.converter.document.MadLibsDocumenter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.converter.document.</span></span><span class="sig-name descname"><span class="pre">MadLibsDocumenter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comments_per_request</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.converter.document.MadLibsDocumenter" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="janus.converter.document.ClozeDocumenter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.converter.document.</span></span><span class="sig-name descname"><span class="pre">ClozeDocumenter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comments_per_request</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.converter.document.ClozeDocumenter" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#janus.converter.document.Documenter" title="janus.converter.document.Documenter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Documenter</span></code></a></p>
 <p>Parent class that converts code into something else.</p>
 <p>Children will determine what the code gets converted into. Whether that’s translated
@@ -508,7 +519,7 @@ converter will use half the model’s token limit.</p></li>
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2024, MITRE
+                Copyright &#169; 2025, MITRE
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -541,7 +552,7 @@ converter will use half the model’s token limit.</p></li>
 <li><a class="reference internal" href="#janus.converter.document.log"><code class="docutils literal notranslate"><span class="pre">log</span></code></a></li>
 <li><a class="reference internal" href="#janus.converter.document.Documenter"><code class="docutils literal notranslate"><span class="pre">Documenter</span></code></a></li>
 <li><a class="reference internal" href="#janus.converter.document.MultiDocumenter"><code class="docutils literal notranslate"><span class="pre">MultiDocumenter</span></code></a></li>
-<li><a class="reference internal" href="#janus.converter.document.MadLibsDocumenter"><code class="docutils literal notranslate"><span class="pre">MadLibsDocumenter</span></code></a></li>
+<li><a class="reference internal" href="#janus.converter.document.ClozeDocumenter"><code class="docutils literal notranslate"><span class="pre">ClozeDocumenter</span></code></a></li>
 </ul>
 </li>
 </ul>
