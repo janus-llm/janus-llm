@@ -195,7 +195,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="Mask ASM Comments",
         description="Replace ASM comments with placeholders, to be used in "
-        "MadLibs-style automatic documentation evaluation.",
+        "Cloze-style automatic documentation evaluation.",
     )
 
     parser.add_argument(

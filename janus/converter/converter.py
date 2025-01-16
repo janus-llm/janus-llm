@@ -27,7 +27,7 @@ from janus.language.splitter import (
 )
 from janus.llm.model_callbacks import get_model_callback
 from janus.llm.models_info import MODEL_PROMPT_ENGINES, JanusModel, load_model
-from janus.parsers.parser import GenericParser, JanusParser
+from janus.parsers.parser import GenericParser, JanusParser, JanusParserException
 from janus.refiners.refiner import JanusRefiner
 
 # from janus.refiners.refiner import BasicRefiner, Refiner
@@ -122,7 +122,7 @@ class Converter:
         self._custom_model_arguments: dict[str, Any]
 
         self._source_language: str
-        self._source_suffix: str
+        self._source_suffixes: list[str]
 
         self._target_language = "json"
         self._target_suffix = ".json"
@@ -245,8 +245,10 @@ class Converter:
                 "Valid source languages are found in `janus.utils.enums.LANGUAGES`."
             )
 
-        ext = LANGUAGES[source_language]["suffix"]
-        self._source_suffix = f".{ext}"
+        self._source_suffixes = [
+            f".{ext}" for ext in LANGUAGES[source_language]["suffixes"]
+        ]
+
         self._source_language = source_language
 
     def set_protected_node_types(self, protected_node_types: tuple[str, ...]) -> None:
@@ -324,7 +326,7 @@ class Converter:
         # tokens at output
         # Only modify max_tokens if it is not specified by user
         if not self.override_token_limit:
-            self._max_tokens = int(token_limit // 2.5)
+            self._max_tokens = int(token_limit * self._llm.input_token_proportion)
 
     @run_if_changed(
         "_prompt_template_name",
@@ -406,6 +408,7 @@ class Converter:
         self,
         input_directory: str | Path,
         output_directory: str | Path | None = None,
+        failure_directory: str | Path | None = None,
         overwrite: bool = False,
         collection_name: str | None = None,
     ) -> None:
@@ -423,16 +426,22 @@ class Converter:
             input_directory = Path(input_directory)
         if isinstance(output_directory, str):
             output_directory = Path(output_directory)
+        if isinstance(failure_directory, str):
+            failure_directory = Path(failure_directory)
 
         # Make sure the output directory exists
         if output_directory is not None and not output_directory.exists():
             output_directory.mkdir(parents=True)
+        if failure_directory is not None and not failure_directory.exists():
+            failure_directory.mkdir(parents=True)
 
-        input_paths = [p for p in input_directory.rglob(f"**/*{self._source_suffix}")]
+        input_paths = []
+        for ext in self._source_suffixes:
+            input_paths.extend(input_directory.rglob(f"**/*{ext}"))
 
         log.info(f"Input directory: {input_directory.absolute()}")
         log.info(
-            f"{self._source_language} '*{self._source_suffix}' files: "
+            f"{self._source_language} {self._source_suffixes} files: "
             f"{len(input_paths)}"
         )
         log.info(
@@ -445,67 +454,39 @@ class Converter:
                 / p.relative_to(input_directory).with_suffix(self._target_suffix)
                 for p in input_paths
             ]
-            in_out_pairs = list(zip(input_paths, output_paths))
-            if not overwrite:
-                n_files = len(in_out_pairs)
-                in_out_pairs = [
-                    (inp, outp) for inp, outp in in_out_pairs if not outp.exists()
-                ]
-                log.info(
-                    f"Skipping {n_files - len(in_out_pairs)} existing "
-                    f"'*{self._source_suffix}' files"
-                )
         else:
-            in_out_pairs = [(f, None) for f in input_paths]
-        log.info(f"Translating {len(in_out_pairs)} '*{self._source_suffix}' files")
+            output_paths = [None for _ in input_paths]
+
+        if failure_directory is not None:
+            failure_paths = [
+                failure_directory
+                / p.relative_to(input_directory).with_suffix(self._target_suffix)
+                for p in input_paths
+            ]
+        else:
+            failure_paths = [None for _ in input_paths]
+        in_out_pairs = list(zip(input_paths, output_paths, failure_paths))
+        if not overwrite:
+            n_files = len(in_out_pairs)
+            in_out_pairs = [
+                (inp, outp, failp)
+                for inp, outp, failp in in_out_pairs
+                if outp is None or not outp.exists()
+            ]
+            log.info(
+                f"Skipping {n_files - len(in_out_pairs)} existing "
+                f"{self._source_suffixes} files"
+            )
+        log.info(f"Translating {len(in_out_pairs)} {self._source_suffixes} files")
 
         # Loop through each input file, convert and save it
         total_cost = 0.0
-        for in_path, out_path in in_out_pairs:
+        for in_path, out_path, fail_path in in_out_pairs:
             # Translate the file, skip it if there's a rate limit error
-            try:
-                log.info(f"Processing {in_path.relative_to(input_directory)}")
-                out_block = self.translate_file(in_path)
-                total_cost += out_block.total_cost
-            except RateLimitError:
-                continue
-            except OutputParserException as e:
-                log.error(f"Skipping {in_path.name}, failed to parse output: {e}.")
-                continue
-            except BadRequestError as e:
-                if str(e).startswith("Detected an error in the prompt"):
-                    log.warning("Malformed input, skipping")
-                    continue
-                raise e
-            except ValidationError as e:
-                # Only allow ValidationError to pass if token limit is manually set
-                if self.override_token_limit:
-                    log.warning(
-                        "Current file and manually set token "
-                        "limit is too large for this model, skipping"
-                    )
-                    continue
-                raise e
-            except TokenLimitError:
-                log.warning("Ran into irreducible node too large for context, skipping")
-                continue
-            except EmptyTreeError:
-                log.warning(
-                    f'Input file "{in_path.name}" has no nodes of interest, skipping'
-                )
-                continue
-            except FileSizeError:
-                log.warning("Current tile is too large for basic splitter, skipping")
-                continue
-            except ValueError as e:
-                if str(e).startswith(
-                    "Error raised by bedrock service"
-                ) and "maximum context length" in str(e):
-                    log.warning(
-                        "Input is too large for this model's context length, skipping"
-                    )
-                    continue
-                raise e
+            log.info(f"Processing {in_path.relative_to(input_directory)}")
+            out_block = self.translate_file(in_path, fail_path)
+            total_cost += out_block.total_cost
+            log.info(f"Current Running Cost: {total_cost}")
 
             # Don't attempt to write files for which translation failed
             if not out_block.translated:
@@ -526,11 +507,14 @@ class Converter:
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
-    def translate_file(self, file: Path) -> TranslatedCodeBlock:
+    def translate_file(
+        self, file: Path, failure_path: Path | None = None
+    ) -> TranslatedCodeBlock:
         """Translate a single file.
 
         Arguments:
             file: Input path to file
+            failure_path: path to directory to store failure summaries`
 
         Returns:
             A `TranslatedCodeBlock` object. This block does not have a path set, and its
@@ -542,7 +526,7 @@ class Converter:
 
         input_block = self._split_file(file)
         t0 = time.time()
-        output_block = self._iterative_translate(input_block)
+        output_block = self._iterative_translate(input_block, failure_path)
         output_block.processing_time = time.time() - t0
         if output_block.translated:
             completeness = output_block.translation_completeness
@@ -550,7 +534,6 @@ class Converter:
                 f"[{filename}] Translation complete\n"
                 f"  {completeness:.2%} of input successfully translated\n"
                 f"  Total cost: ${output_block.total_cost:,.2f}\n"
-                f"  Total retries: {output_block.total_retries:,d}\n"
                 f"  Output CodeBlock Structure:\n{input_block.tree_str()}\n"
             )
 
@@ -558,15 +541,17 @@ class Converter:
             log.error(
                 f"[{filename}] Translation failed\n"
                 f"  Total cost: ${output_block.total_cost:,.2f}\n"
-                f"  Total retries: {output_block.total_retries:,d}\n"
             )
         return output_block
 
-    def _iterative_translate(self, root: CodeBlock) -> TranslatedCodeBlock:
+    def _iterative_translate(
+        self, root: CodeBlock, failure_path: Path | None = None
+    ) -> TranslatedCodeBlock:
         """Translate the passed CodeBlock representing a full file.
 
         Arguments:
             root: A root block representing the top-level block of a file
+            failure_path: path to store data files for failed translations
 
         Returns:
             A `TranslatedCodeBlock`
@@ -574,22 +559,60 @@ class Converter:
         translated_root = TranslatedCodeBlock(root, self._target_language)
         last_prog, prog_delta = 0, 0.1
         stack = [translated_root]
-        while stack:
-            translated_block = stack.pop()
+        try:
+            while stack:
+                translated_block = stack.pop()
 
-            self._add_translation(translated_block)
+                self._add_translation(translated_block)
 
-            # If translating this block was unsuccessful, don't bother with its
-            #  children (they wouldn't show up in the final text anyway)
-            if not translated_block.translated:
-                continue
+                # If translating this block was unsuccessful, don't bother with its
+                #  children (they wouldn't show up in the final text anyway)
+                if not translated_block.translated:
+                    continue
 
-            stack.extend(translated_block.children)
+                stack.extend(translated_block.children)
 
-            progress = translated_root.translation_completeness
-            if progress - last_prog > prog_delta:
-                last_prog = int(progress / prog_delta) * prog_delta
-                log.info(f"[{root.name}] progress: {progress:.2%}")
+                progress = translated_root.translation_completeness
+                if progress - last_prog > prog_delta:
+                    last_prog = int(progress / prog_delta) * prog_delta
+                    log.info(f"[{root.name}] progress: {progress:.2%}")
+        except RateLimitError:
+            pass
+        except OutputParserException as e:
+            log.error(f"Skipping file, failed to parse output: {e}.")
+        except BadRequestError as e:
+            if str(e).startswith("Detected an error in the prompt"):
+                log.warning("Malformed input, skipping")
+            raise e
+        except ValidationError as e:
+            # Only allow ValidationError to pass if token limit is manually set
+            if self.override_token_limit:
+                log.warning(
+                    "Current file and manually set token "
+                    "limit is too large for this model, skipping"
+                )
+            raise e
+        except TokenLimitError:
+            log.warning("Ran into irreducible node too large for context, skipping")
+        except EmptyTreeError:
+            log.warning("Input file has no nodes of interest, skipping")
+        except FileSizeError:
+            log.warning("Current tile is too large for basic splitter, skipping")
+        except ValueError as e:
+            if str(e).startswith(
+                "Error raised by bedrock service"
+            ) and "maximum context length" in str(e):
+                log.warning(
+                    "Input is too large for this model's context length, skipping"
+                )
+            raise e
+        finally:
+            log.debug(
+                f"Resulting Block: {json.dumps(self._get_output_obj(translated_root))}"
+            )
+            if not translated_root.translated:
+                if failure_path is not None:
+                    self._save_to_file(translated_root, failure_path)
 
         return translated_root
 
@@ -624,11 +647,19 @@ class Converter:
         #  TODO: If non-OpenAI models with prices are added, this will need
         #   to be updated.
         with get_model_callback() as cb:
-            t0 = time.time()
-            block.text = self._run_chain(block)
-            block.processing_time = time.time() - t0
-            block.cost = cb.total_cost
-            block.retries = max(0, cb.successful_requests - 1)
+            try:
+                t0 = time.time()
+                block.text = self._run_chain(block)
+            except JanusParserException as e:
+                block.text = e.unparsed_output
+                block.tokens = self._llm.get_num_tokens(block.text)
+                raise e
+            finally:
+                block.processing_time = time.time() - t0
+                block.cost = cb.total_cost
+                block.request_input_tokens = cb.prompt_tokens
+                block.request_output_tokens = cb.completion_tokens
+                block.num_requests = cb.successful_requests
 
         block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
@@ -652,20 +683,25 @@ class Converter:
     def _get_output_obj(
         self, block: TranslatedCodeBlock
     ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
-        output_str = self._parser.parse_combined_output(block.complete_text)
-
         output_obj: str | dict[str, str]
-        try:
-            output_obj = json.loads(output_str)
-        except json.JSONDecodeError:
-            output_obj = output_str
+        if not block.translation_completed:
+            # translation wasn't completed, so combined parsing will likely fail
+            output_obj = block.complete_text
+        else:
+            output_str = self._parser.parse_combined_output(block.complete_text)
+            try:
+                output_obj = json.loads(output_str)
+            except json.JSONDecodeError:
+                output_obj = output_str
 
         return dict(
             input=block.original.text or "",
             metadata=dict(
-                retries=block.total_retries,
                 cost=block.total_cost,
                 processing_time=block.processing_time,
+                num_requests=block.total_num_requests,
+                input_tokens=block.total_request_input_tokens,
+                output_tokens=block.total_request_output_tokens,
             ),
             output=output_obj,
         )

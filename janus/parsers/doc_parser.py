@@ -8,7 +8,7 @@ from langchain_core.messages import BaseMessage
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 from janus.language.block import CodeBlock
-from janus.parsers.parser import JanusParser
+from janus.parsers.parser import JanusParser, JanusParserException
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -86,7 +86,7 @@ class MultiDocumentationParser(JanusParser, PydanticOutputParser):
         return str(self.__class__.name)
 
 
-class MadlibsDocumentationParser(JanusParser):
+class ClozeDocumentationParser(JanusParser):
     expected_keys: set[str]
 
     def __init__(self):
@@ -107,11 +107,12 @@ class MadlibsDocumentationParser(JanusParser):
             obj = parse_json_markdown(text)
         except json.JSONDecodeError as e:
             log.debug(f"Invalid JSON object. Output:\n{text}")
-            raise OutputParserException(f"Got invalid JSON object. Error: {e}")
+            raise JanusParserException(text, f"Got invalid JSON object. Error: {e}")
 
         if not isinstance(obj, dict):
-            raise OutputParserException(
-                f"Got invalid return object. Expected a dictionary, but got {type(obj)}"
+            raise JanusParserException(
+                text,
+                f"Got invalid return object. Expected a dictionary, but got {type(obj)}",
             )
 
         seen_keys = set(obj.keys())
@@ -122,9 +123,10 @@ class MadlibsDocumentationParser(JanusParser):
             if invalid_keys:
                 log.debug(f"Invalid keys: {invalid_keys}")
             log.debug(f"Missing keys: {missing_keys}")
-            raise OutputParserException(
+            raise JanusParserException(
+                text,
                 f"Got invalid return object. Missing the following expected "
-                f"keys: {missing_keys}"
+                f"keys: {missing_keys}",
             )
 
         for key in invalid_keys:
@@ -132,9 +134,10 @@ class MadlibsDocumentationParser(JanusParser):
 
         for value in obj.values():
             if not isinstance(value, str):
-                raise OutputParserException(
+                raise JanusParserException(
+                    text,
                     f"Got invalid return object. Expected all string values,"
-                    f' but got type "{type(value)}"'
+                    f' but got type "{type(value)}"',
                 )
 
         return json.dumps(obj)

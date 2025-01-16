@@ -9,7 +9,7 @@ from langchain_core.messages import BaseMessage
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 from janus.language.block import CodeBlock
-from janus.parsers.parser import JanusParser
+from janus.parsers.parser import JanusParser, JanusParserException
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -97,6 +97,7 @@ class PartitionParser(JanusParser, PydanticOutputParser):
     def parse(self, text: str | BaseMessage) -> str:
         if isinstance(text, BaseMessage):
             text = str(text.content)
+        original_text = text
 
         # Strip everything outside the JSON object
         begin, end = text.find("["), text.rfind("]")
@@ -122,7 +123,7 @@ class PartitionParser(JanusParser, PydanticOutputParser):
                 + ", ".join(invalid_splits)
             )
             log.warning(err_msg)
-            raise OutputParserException(err_msg)
+            raise JanusParserException(original_text, err_msg)
 
         # Map line IDs to indices (so they can be sorted and lines indexed)
         index_to_line_id = {0: "START", None: "END"}
@@ -160,9 +161,10 @@ class PartitionParser(JanusParser, PydanticOutputParser):
                 "Oversized chunks:\n"
                 + "\n#############\n".join(chunk for _, chunk, _ in data)
             )
-            raise OutputParserException(
+            raise JanusParserException(
+                original_text,
                 f"The following segments are too long and must be "
-                f"further subdivided:\n{problem_points}"
+                f"further subdivided:\n{problem_points}",
             )
 
         return "\n<JANUS_PARTITION>\n".join(chunks)

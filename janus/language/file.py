@@ -15,4 +15,4 @@ class FileManager:
         """
         self.language: str = language
         self.comment: str = LANGUAGES[self.language]["comment"]
-        self.suffix: str = LANGUAGES[self.language]["suffix"]
+        self.suffixes: list[str] = LANGUAGES[self.language]["suffixes"]

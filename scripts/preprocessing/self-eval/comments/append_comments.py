@@ -10,6 +10,7 @@ Out: Same directory structure in the output directory,
 with files of a given source language
 that have comments appended.
 """
+
 import argparse
 import json
 import re
@@ -73,7 +74,7 @@ if __name__ == "__main__":
 
     input_directory = Path(args.input_directory).expanduser()
     output_directory = Path(args.output_directory).expanduser()
-    ext = LANGUAGES[args.source_language]["suffix"]
+    ext = LANGUAGES[args.source_language]["suffixes"][0]
 
     for input_path in input_directory.rglob("*.json"):
         modified_content = process_comments_in_file(input_path)

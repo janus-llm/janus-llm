@@ -21,8 +21,7 @@ class Translator(Converter):
 
         Arguments:
             model: The LLM to use for translation. If an OpenAI model, the
-                `OPENAI_API_KEY` environment variable must be set and the
-                `OPENAI_ORG_ID` environment variable should be set if needed.
+                `OPENAI_API_KEY` environment variable must be set.
             model_arguments: Additional arguments to pass to the LLM constructor.
             source_language: The source programming language.
             target_language: The target programming language.
@@ -67,7 +66,8 @@ class Translator(Converter):
             )
         self._target_language = target_language
         self._target_version = target_version
-        self._target_suffix = f".{LANGUAGES[target_language]['suffix']}"
+        # Taking the first suffix as the default for output files
+        self._target_suffix = f".{LANGUAGES[target_language]['suffixes'][0]}"
 
     @run_if_changed(
         "_prompt_template_name",

@@ -4,7 +4,8 @@ from unittest.mock import ANY, patch
 
 from typer.testing import CliRunner
 
-from janus.cli import app, translate
+from janus.cli.cli import app
+from janus.cli.translate import translate
 from janus.embedding.embedding_models_info import EMBEDDING_MODEL_CONFIG_DIR
 from janus.llm.models_info import MODEL_CONFIG_DIR
 
@@ -125,4 +126,4 @@ class TestCli(unittest.TestCase):
 
         # Assert
         mock_translate.assert_called_once()
-        mock_translate.assert_called_once_with(ANY, "janus/", "janus/", True, None)
+        mock_translate.assert_called_once_with(ANY, "janus/", "janus/", None, True, None)

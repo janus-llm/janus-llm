@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 
 
-def parse_madlibs(
+def parse_cloze(
     input_file: Path,
     output_dir: Path,
 ) -> dict[str, dict[str, str | dict[str, str]]]:
@@ -107,7 +107,7 @@ def parse_module(output_dir: Path) -> dict[str, dict[str, str]]:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="Mask MUMPS Comments",
-        description="Replace MUMPS comments with numbers, to be used in MadLibs-style"
+        description="Replace MUMPS comments with numbers, to be used in Cloze-style"
         " automatic documentation evaluation.",
     )
 
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     output_dir = Path(args.output_dir).expanduser()
     if args.input_comments_file is not None:
         input_file = Path(args.input_comments_file).expanduser()
-        obj = parse_madlibs(input_file, output_dir)
+        obj = parse_cloze(input_file, output_dir)
     else:
         obj = parse_module(output_dir)
 

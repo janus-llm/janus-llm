@@ -23,7 +23,7 @@ TEXT_OUTPUT = []
 # same language as the input, regardless of the `output-lang` argument.
 SAME_OUTPUT = ["document_inline"]
 
-JSON_OUTPUT = ["evaluate", "document", "document_madlibs", "requirements"]
+JSON_OUTPUT = ["evaluate", "document", "document_cloze", "requirements"]
 
 # Directory containing Janus prompt template directories and files
 JANUS_PROMPT_TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -109,7 +109,7 @@ class PromptEngine(ABC):
         source_language = source_language.lower()
         self.variables = dict(
             SOURCE_LANGUAGE=source_language,
-            FILE_SUFFIX=LANGUAGES[source_language]["suffix"],
+            FILE_SUFFIX=LANGUAGES[source_language]["suffixes"],
             SOURCE_CODE_EXAMPLE=LANGUAGES[source_language]["example"],
         )
         if target_language is not None:

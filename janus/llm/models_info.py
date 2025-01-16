@@ -50,6 +50,7 @@ except ImportError:
 ModelType = TypeVar(
     "ModelType",
     AzureChatOpenAI,
+    ChatOpenAI,
     HuggingFaceTextGenInference,
     Bedrock,
     BedrockChat,
@@ -247,6 +248,7 @@ def load_model(model_id) -> JanusModel:
         token_limit = model_config["token_limit"]
         input_token_cost = model_config["model_cost"]["input"]
         output_token_cost = model_config["model_cost"]["output"]
+        input_token_proportion = model_config["input_token_proportion"]
 
     elif model_id in DEFAULT_MODELS:
         model_id = model_id
@@ -257,6 +259,7 @@ def load_model(model_id) -> JanusModel:
         token_limit = 0
         input_token_cost = 0.0
         output_token_cost = 0.0
+        input_token_proportion = 0.4
         if model_long_id in TOKEN_LIMITS:
             token_limit = TOKEN_LIMITS[model_long_id]
         if model_long_id in COST_PER_1K_TOKENS:
@@ -286,7 +289,6 @@ def load_model(model_id) -> JanusModel:
     elif model_type_name == "OpenAI":
         model_args.update(
             openai_api_key=str(os.getenv("OPENAI_API_KEY")),
-            openai_organization=str(os.getenv("OPENAI_ORG_ID")),
         )
         # log.warning("Do NOT use this model in sensitive environments!")
         # log.warning("If you would like to cancel, please press Ctrl+C.")
@@ -310,15 +312,20 @@ def load_model(model_id) -> JanusModel:
 
     class JanusModel(model_type):
         model_id: str
+        # model_name is for LangChain compatibility
+        # It searches for `self.model_name` when counting tokens
+        model_name: str
         short_model_id: str
         model_type_name: str
         token_limit: int
+        input_token_proportion: float
         input_token_cost: float
         output_token_cost: float
         prompt_engine: type[PromptEngine]
 
     model_args.update(
         model_id=MODEL_ID_TO_LONG_ID[model_id],
+        model_name=model_id,  # This is for LangChain compatibility
         short_model_id=model_id,
     )
 
@@ -327,6 +334,7 @@ def load_model(model_id) -> JanusModel:
         token_limit=token_limit,
         input_token_cost=input_token_cost,
         output_token_cost=output_token_cost,
+        input_token_proportion=input_token_proportion,
         prompt_engine=prompt_engine,
         **model_args,
     )
