@@ -284,7 +284,6 @@ def load_model(model_id) -> JanusModel:
     elif model_type_name == "OpenAI":
         model_args.update(
             openai_api_key=str(os.getenv("OPENAI_API_KEY")),
-            openai_organization=str(os.getenv("OPENAI_ORG_ID")),
         )
         # log.warning("Do NOT use this model in sensitive environments!")
         # log.warning("If you would like to cancel, please press Ctrl+C.")

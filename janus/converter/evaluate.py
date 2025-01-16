@@ -31,8 +31,7 @@ class Evaluator(Converter):
 
         Arguments:
             model: The LLM to use for translation. If an OpenAI model, the
-                `OPENAI_API_KEY` environment variable must be set and the
-                `OPENAI_ORG_ID` environment variable should be set if needed.
+                `OPENAI_API_KEY` environment variable must be set.
             model_arguments: Additional arguments to pass to the LLM constructor.
             max_prompts: The maximum number of prompts to try before giving up.
         """
@@ -56,8 +55,7 @@ class RequirementEvaluator(Evaluator):
 
         Arguments:
             model: The LLM to use for translation. If an OpenAI model, the
-                `OPENAI_API_KEY` environment variable must be set and the
-                `OPENAI_ORG_ID` environment variable should be set if needed.
+                `OPENAI_API_KEY` environment variable must be set.
             model_arguments: Additional arguments to pass to the LLM constructor.
             max_prompts: The maximum number of prompts to try before giving up.
         """
@@ -163,8 +161,7 @@ class InlineCommentEvaluator(Evaluator):
 
         Arguments:
             model: The LLM to use for translation. If an OpenAI model, the
-                `OPENAI_API_KEY` environment variable must be set and the
-                `OPENAI_ORG_ID` environment variable should be set if needed.
+                `OPENAI_API_KEY` environment variable must be set.
             model_arguments: Additional arguments to pass to the LLM constructor.
             max_prompts: The maximum number of prompts to try before giving up.
         """
