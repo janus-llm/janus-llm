@@ -86,8 +86,8 @@ class Converter:
         retriever_type: str | None = None,
         combine_output: bool = True,
         janus_inputs: bool = False,  # TODO: rename
-        input_type: str | None = None,
-        output_type: str | None = None,
+        target_language: str = "json",
+        target_version: str | None = None,
     ) -> None:
         """Initialize a Converter instance.
 
@@ -129,13 +129,11 @@ class Converter:
         self._source_language: str
         self._source_suffixes: list[str]
 
-        self._target_language = "json"
-        self._target_suffix = ".json"
-        self._target_version: str | None = None
+        self._target_language: str
+        self._target_suffix: str
+        self._target_version: str | None
+        self.set_target_language(target_language, target_version)
         self._janus_inputs = janus_inputs
-
-        self._input_type = input_type
-        self._output_type = output_type
 
         self._protected_node_types: tuple[str, ...] = ()
         self._prune_node_types: tuple[str, ...] = ()
@@ -679,9 +677,7 @@ class Converter:
         Returns:
             A `TranslatedCodeBlock`
         """
-        translated_root = TranslatedCodeBlock(
-            root, self._target_language, type_name=self._output_type
-        )
+        translated_root = TranslatedCodeBlock(root, self._target_language)
         last_prog, prog_delta = 0, 0.1
         stack = [translated_root]
         try:

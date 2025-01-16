@@ -8,6 +8,10 @@ log = create_logger(__name__)
 
 
 class ConverterChain(Converter):
+    """
+    Class for representing multiple converters chained together
+    """
+
     def __init__(self, *args, **kwargs):
         if len(args) == 0:
             raise ValueError("Error: Converter chain must be passed at least 1 converter")
@@ -15,11 +19,13 @@ class ConverterChain(Converter):
             if not isinstance(converter, Converter):
                 raise ValueError(f"Error: unrecognized type: {type(converter)}")
         self._converters = args
-        kwargs.update(source_language=self._converters[0].source_language)
-        super().__init__(**kwargs)
-        self.set_target_language(
-            self._converters[-1].target_language, self._converters[-1].target_version
+        kwargs.update(
+            source_language=self._converters[0].source_language,
+            target_language=self._converters[-1]._target_language,
+            target_version=self._converters[-1]._target_version,
+            janus_inputs=self._converters[0]._janus_inputs,
         )
+        super().__init__(**kwargs)
 
     def translate_file(
         self, file: Path, failure_path: Path | None = None
