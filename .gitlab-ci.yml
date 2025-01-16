@@ -220,7 +220,9 @@ bump-version:
     VERSION_FILE: "${CI_PROJECT_DIR}/pyproject.toml"
     INIT_FILE: "${CI_PROJECT_DIR}/janus/__init__.py"
   script:
+    - git fetch origin main  # Fetch the latest changes from main
     - git checkout main
+    - git pull origin main  # Ensure main is up-to-date
     - echo "Checking the author of the last commit"
     - LAST_COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
     - if [ "${LAST_COMMIT_AUTHOR}" == "${JANUS_CI_BOT_NAME}" ]; then
