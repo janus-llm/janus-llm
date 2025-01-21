@@ -41,7 +41,7 @@ class RequirementsParser(JanusParser):
             )
         return json.dumps(obj)
 
-    def parse_combined_output(self, text: str):
+    def parse_combined_output(self, text: str) -> str:
         """Parse the output text from the LLM when multiple inputs are combined.
 
         Arguments:
@@ -52,7 +52,7 @@ class RequirementsParser(JanusParser):
         """
         json_strings = re.findall(r"\{.*?\}", text)
         output_list = list()
-        for i, json_string in enumerate(json_strings, 1):
+        for _, json_string in enumerate(json_strings, 1):
             json_dict = json.loads(json_string)
             output_list.append(json_dict["requirements"])
         return json.dumps(output_list)
