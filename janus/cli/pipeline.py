@@ -7,7 +7,7 @@ import typer
 from typing_extensions import Annotated
 
 from janus.cli.constants import CONVERTERS
-from janus.converter.converter_chain import ConverterChain
+from janus.converter.chain import ConverterChain
 from janus.utils.enums import LANGUAGES
 
 
@@ -32,7 +32,10 @@ def instiantiate(x):
 
 
 def instiantiate_pipeline(
-    pipeline, language="text", model="gpt-4o", use_janus_inputs=None
+    pipeline: list[dict],
+    language: str = "text",
+    model: str = "gpt-4o",
+    use_janus_inputs: None | bool = None,
 ):
     if "kwargs" not in pipeline[0]:
         pipeline[0]["kwargs"] = {}

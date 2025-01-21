@@ -729,7 +729,7 @@ class Converter:
             raise e
         finally:
             out_obj = self._get_output_obj(translated_root, self._combine_output)
-            log.info(f"Resulting Block:" f"{json.dumps(out_obj)}")
+            log.debug(f"Resulting Block:" f"{json.dumps(out_obj)}")
             if not translated_root.translated:
                 if failure_path is not None:
                     self._save_to_file(translated_root, failure_path)
@@ -887,7 +887,7 @@ class Converter:
         out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
 
     def __or__(self, other: "Converter"):
-        from janus.converter.converter_chain import ConverterChain
+        from janus.converter.chain import ConverterChain
 
         return ConverterChain(self, other)
 
