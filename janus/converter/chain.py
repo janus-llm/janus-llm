@@ -12,7 +12,7 @@ class ConverterChain(Converter):
     Class for representing multiple converters chained together
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         if len(args) == 0:
             raise ValueError("Error: Converter chain must be passed at least 1 converter")
         for converter in args:
@@ -30,6 +30,15 @@ class ConverterChain(Converter):
     def translate_file(
         self, file: Path, failure_path: Path | None = None
     ) -> TranslatedCodeBlock:
+        """Translate a file using the chain of converters
+
+        Arguments:
+            file: The file to translate
+            failure_path: The path to write the failure file to
+
+        Returns:
+            The translated code block
+        """
         filename = file.name
         translated_code_block = self._converters[0].translate_file(file, failure_path)
         for i, converter in enumerate(self._converters[1:]):
@@ -44,7 +53,19 @@ class ConverterChain(Converter):
                 )
         return translated_code_block
 
-    def translate_text(self, text: str, name: str, failure_path: Path | None = None):
+    def translate_text(
+        self, text: str, name: str, failure_path: Path | None = None
+    ) -> TranslatedCodeBlock:
+        """Translate a text using the chain of converters
+
+        Arguments:
+            text: The text to translate
+            name: The name of the file
+            failure_path: The path to write the failure file to
+
+        Returns:
+            The translated code block
+        """
         translated_code_block = self._converters[0].translate_text(
             text, name, failure_path
         )
@@ -65,7 +86,17 @@ class ConverterChain(Converter):
         input_block: CodeBlock | list[CodeBlock],
         name: str,
         failure_path: Path | None = None,
-    ):
+    ) -> TranslatedCodeBlock:
+        """Translate a block of code using the chain of converters
+
+        Arguments:
+            input_block: The block of code to translate
+            name: The name of the file
+            failure_path: The path to write the failure file to
+
+        Returns:
+            The translated code block
+        """
         translated_code_block = self._converters[0].translate_block(
             input_block, name, failure_path
         )
