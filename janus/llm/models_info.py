@@ -284,7 +284,6 @@ def load_model(model_id) -> JanusModel:
     elif model_type_name == "OpenAI":
         model_args.update(
             openai_api_key=str(os.getenv("OPENAI_API_KEY")),
-            openai_organization=str(os.getenv("OPENAI_ORG_ID")),
         )
         # log.warning("Do NOT use this model in sensitive environments!")
         # log.warning("If you would like to cancel, please press Ctrl+C.")
@@ -308,6 +307,9 @@ def load_model(model_id) -> JanusModel:
 
     class JanusModel(model_type):
         model_id: str
+        # model_name is for LangChain compatibility
+        # It searches for `self.model_name` when counting tokens
+        model_name: str
         short_model_id: str
         model_type_name: str
         token_limit: int
@@ -318,6 +320,7 @@ def load_model(model_id) -> JanusModel:
 
     model_args.update(
         model_id=MODEL_ID_TO_LONG_ID[model_id],
+        model_name=model_id,  # This is for LangChain compatibility
         short_model_id=model_id,
     )
 
