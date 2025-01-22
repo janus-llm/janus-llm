@@ -104,7 +104,7 @@ def pipeline(
     use_janus_inputs: Annotated[
         Optional[bool],
         typer.Option(
-            "-uj",
+            "-j",
             "--use-janus-inputs",
             help="Present if converter chain should use janus input files",
         ),

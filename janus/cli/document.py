@@ -145,7 +145,7 @@ def document(
     use_janus_inputs: Annotated[
         bool,
         typer.Option(
-            "-uj",
+            "-j",
             "--use-janus-inputs",
             help="Present if converter should use janus files as inputs",
         ),

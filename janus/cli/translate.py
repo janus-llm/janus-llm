@@ -151,7 +151,7 @@ def translate(
     use_janus_inputs: Annotated[
         bool,
         typer.Option(
-            "-uj",
+            "-j",
             "--use-janus-inputs",
             help="Prsent if translator should use janus files as inputs",
         ),

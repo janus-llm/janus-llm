@@ -134,7 +134,7 @@ def diagram(
     use_janus_inputs: Annotated[
         bool,
         typer.Option(
-            "-uj",
+            "-j",
             "--use-janus-inputs",
             help="Present when diagram generator should be\
                   be using janus files as inputs",
