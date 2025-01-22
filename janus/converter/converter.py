@@ -100,7 +100,7 @@ class Converter:
             max_prompts: The maximum number of prompts to try before giving up.
             max_tokens: The maximum number of tokens to use in the LLM. If `None`, the
                 converter will use half the model's token limit.
-            prompt_template: The name of the prompt template to use.
+            prompt_templates: The name of the prompt templates to use.
             db_path: The path to the database to use for vectorization.
             db_config: The configuration for the database.
             protected_node_types: A set of node types that aren't to be merged.
@@ -219,8 +219,7 @@ class Converter:
         """Validate and set the prompt template name.
 
         Arguments:
-            prompt_template: name of prompt template directory
-                (see janus/prompts/templates) or path to a directory.
+            splitter_type: the type of splitter to use
         """
         if splitter_type not in CUSTOM_SPLITTERS:
             raise ValueError(f'Splitter type "{splitter_type}" does not exist.')

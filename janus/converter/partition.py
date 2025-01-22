@@ -15,5 +15,5 @@ class Partitioner(Converter):
             model=self._llm,
         )
         self._target_language = self._source_language
-        self._target_suffix = self._source_suffix
+        self._target_suffix = self._source_suffixes[0]
         self._load_parameters()
