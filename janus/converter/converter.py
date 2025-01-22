@@ -207,8 +207,8 @@ class Converter:
         """Validate and set the prompt template name.
 
         Arguments:
-            prompt_template: name of prompt template directory
-                (see janus/prompts/templates) or path to a directory.
+            prompt_templates: name of prompt template directories
+                (see janus/prompts/templates) or paths to directories.
         """
         if isinstance(prompt_templates, str):
             self._prompt_template_names = [prompt_templates]
