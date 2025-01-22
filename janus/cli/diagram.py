@@ -112,7 +112,7 @@ def diagram(
                 refinement chain",
             click_type=click.Choice(list(REFINERS.keys())),
         ),
-    ] = ["JanusRefiner"],
+    ] = ["CodeFormatRefiner"],
     retriever_type: Annotated[
         str,
         typer.Option(
