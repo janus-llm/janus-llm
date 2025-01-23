@@ -187,6 +187,6 @@ def translate(
         splitter_type=splitter_type,
         refiner_types=refiner_types,
         retriever_type=retriever_type,
-        janus_inputs=use_janus_inputs,
+        use_janus_inputs=use_janus_inputs,
     )
     translator.translate(input_dir, output_dir, failure_dir, overwrite, collection)

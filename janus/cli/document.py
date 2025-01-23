@@ -169,7 +169,7 @@ def document(
         splitter_type=splitter_type,
         refiner_types=refiner_types,
         retriever_type=retriever_type,
-        janus_inputs=use_janus_inputs,
+        use_janus_inputs=use_janus_inputs,
     )
     if doc_mode == "cloze":
         documenter = ClozeDocumenter(comments_per_request=comments_per_request, **kwargs)

@@ -23,7 +23,7 @@ class ConverterChain(Converter):
             source_language=self._converters[0].source_language,
             target_language=self._converters[-1]._target_language,
             target_version=self._converters[-1]._target_version,
-            janus_inputs=self._converters[0]._janus_inputs,
+            use_janus_inputs=self._converters[0]._janus_inputs,
         )
         super().__init__(**kwargs)
 

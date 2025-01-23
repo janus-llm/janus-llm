@@ -34,7 +34,7 @@ class Evaluator(Converter):
             model_arguments: Additional arguments to pass to the LLM constructor.
             max_prompts: The maximum number of prompts to try before giving up.
         """
-        kwargs.update(janus_inputs=True)
+        kwargs.update(use_janus_inputs=True)
         super().__init__(**kwargs)
         self._combiner = JsonCombiner()
         self._load_parameters()

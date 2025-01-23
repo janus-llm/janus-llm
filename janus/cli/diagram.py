@@ -160,7 +160,7 @@ def diagram(
         diagram_type=diagram_type,
         add_documentation=add_documentation,
         extract_variables=extract_variables,
-        janus_inputs=use_janus_inputs,
+        use_janus_inputs=use_janus_inputs,
     )
     diagram_generator.translate(input_dir, output_dir, failure_dir, overwrite, collection)
 

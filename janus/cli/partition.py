@@ -128,7 +128,7 @@ def partition(
         splitter_type=splitter_type,
         refiner_types=refiner_types,
         partition_token_limit=partition_token_limit,
-        janus_inputs=use_janus_inputs,
+        use_janus_inputs=use_janus_inputs,
     )
     partitioner = Partitioner(**kwargs)
     partitioner.translate(input_dir, output_dir, failure_dir, overwrite)
