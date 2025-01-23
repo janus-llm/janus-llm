@@ -85,7 +85,7 @@ class Converter:
         refiner_types: list[type[JanusRefiner]] = [JanusRefiner],
         retriever_type: str | None = None,
         combine_output: bool = True,
-        janus_inputs: bool = False,  # TODO: rename
+        use_janus_inputs: bool = False,
         target_language: str = "json",
         target_version: str | None = None,
     ) -> None:
@@ -115,6 +115,10 @@ class Converter:
                 - "active_usings"
                 - "language_docs"
                 - None
+            combine_output: Whether to combine the output into a single file or not.
+            use_janus_inputs: Whether to use janus inputs or not.
+            target_language: The target programming language.
+            target_version: The target programming language version.
         """
         self._changed_attrs: set = set()
 
@@ -133,7 +137,7 @@ class Converter:
         self._target_suffix: str
         self._target_version: str | None
         self.set_target_language(target_language, target_version)
-        self._janus_inputs = janus_inputs
+        self._use_janus_inputs = use_janus_inputs
 
         self._protected_node_types: tuple[str, ...] = ()
         self._prune_node_types: tuple[str, ...] = ()
@@ -492,7 +496,7 @@ class Converter:
             failure_directory.mkdir(parents=True)
 
         input_paths = []
-        if self._janus_inputs:
+        if self._use_janus_inputs:
             source_language = "janus"
             source_suffixes = [".json"]
         else:
@@ -543,7 +547,7 @@ class Converter:
         for in_path, out_path, fail_path in in_out_pairs:
             # Translate the file, skip it if there's a rate limit error
             log.info(f"Processing {in_path.relative_to(input_directory)}")
-            if self._janus_inputs:
+            if self._use_janus_inputs:
                 out_block = self.translate_janus_file(in_path, fail_path)
             else:
                 out_block = self.translate_file(in_path, fail_path)
