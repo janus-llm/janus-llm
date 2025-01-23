@@ -513,8 +513,7 @@ class Converter:
         )
         if output_directory is not None:
             output_paths = [
-                output_directory
-                / p.relative_to(input_directory).with_suffix(self._target_suffix)
+                output_directory / p.relative_to(input_directory).with_suffix(".json")
                 for p in input_paths
             ]
         else:
@@ -522,8 +521,7 @@ class Converter:
 
         if failure_directory is not None:
             failure_paths = [
-                failure_directory
-                / p.relative_to(input_directory).with_suffix(self._target_suffix)
+                failure_directory / p.relative_to(input_directory).with_suffix(".json")
                 for p in input_paths
             ]
         else:
