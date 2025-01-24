@@ -130,6 +130,6 @@ def aggregate(
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
-        prompt_template="basic_aggregation",
+        prompt_templates="basic_aggregation",
     )
     aggregator.translate(input_dir, output_dir, failure_dir, overwrite, collection)

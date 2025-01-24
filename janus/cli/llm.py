@@ -1,5 +1,6 @@
 import click
 import typer
+from rich import print
 from typing_extensions import Annotated
 
 from janus.llm.models_info import MODEL_TYPE_CONSTRUCTORS
@@ -172,8 +173,7 @@ def llm_ls(
 ):
     import json
 
-    from janus.cli.constants import MODEL_CONFIG_DIR
-    from janus.llm.models_info import MODEL_TYPES
+    from janus.llm.models_info import MODEL_CONFIG_DIR, MODEL_TYPES
 
     print("\n[green]User-configured models[/green]:")
     for model_cfg in MODEL_CONFIG_DIR.glob("*.json"):
