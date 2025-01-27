@@ -133,7 +133,7 @@ def metric(
                     out = converter_cls.eval_obj_reference(
                         target=target_obj,
                         reference=reference_obj,
-                        metric_func=func,
+                        metric_func=function,
                         *args,
                         **kwargs,
                     )

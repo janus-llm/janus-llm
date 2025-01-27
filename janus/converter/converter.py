@@ -952,11 +952,9 @@ class Converter:
             if isinstance(o, dict):
                 if not isinstance(r, dict):
                     raise ValueError("Error: format of reference doesn't match target")
-                results += cls.eval_obj_reference(
-                    target, metric_func, reference, *args, **kwargs
-                )
+                results += cls.eval_obj_reference(o, metric_func, r, *args, **kwargs)
             else:
                 if isinstance(r, dict):
                     raise ValueError("Error: format of reference doesn't match target")
-                results.append(metric_func(target, reference, *args, **kwargs))
+                results.append(metric_func(o, r, *args, **kwargs))
         return results
