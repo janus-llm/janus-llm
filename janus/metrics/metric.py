@@ -7,6 +7,8 @@ import click
 import typer
 from typing_extensions import Annotated
 
+from janus.cli.constants import CONVERTERS
+from janus.converter.converter import Converter
 from janus.llm import load_model
 from janus.llm.model_callbacks import COST_PER_1K_TOKENS
 from janus.metrics.cli import evaluate
@@ -241,23 +243,14 @@ def metric(
                         "--target", "-t", help="Target file or string to evaluate."
                     ),
                 ] = None,
-                json_file_name: Annotated[
-                    Optional[str],
+                use_janus_inputs: Annotated[
+                    bool,
                     typer.Option(
-                        "--json",
                         "-j",
-                        help="Json file to extract pairs from \
-                            (if set ignores --target)",
+                        "--use-janus-inputs",
+                        help="whether to use a janus output file as input",
                     ),
-                ] = None,
-                target_key: Annotated[
-                    str,
-                    typer.Option(
-                        "--target-key",
-                        "-tk",
-                        help="json key to extract list of target strings",
-                    ),
-                ] = "target",
+                ] = False,
                 splitting_method: Annotated[
                     str,
                     typer.Option(
@@ -298,25 +291,17 @@ def metric(
                 **kwargs,
             ):
                 llm = load_model(llm_name)
-                if json_file_name is not None:
-                    with open(json_file_name, "r") as f:
-                        json_obj = json.load(f)
-                    strings = {}
-                    for key in json_obj:
-                        doc = json_obj[key]
-                        experiments = doc["experiments"]
-                        for model_key in experiments:
-                            model_dict = experiments[model_key]
-                            if not isinstance(model_dict, dict):
-                                continue
-                            if target_key not in model_dict:
-                                continue
-                            if model_key not in strings:
-                                strings[model_key] = {}
-                            for k in model_dict[target_key]:
-                                strings[model_key][k] = model_dict[target_key][k]
-                        # strings += list(json_obj[key][target_key].values())
-                elif target is not None:
+                if use_janus_inputs:
+                    with open(target, "r") as f:
+                        target_obj = json.load(f)
+                    converter_cls = CONVERTERS.get(
+                        target_obj["metadata"].get("converter_name", "Converter"),
+                        Converter,
+                    )
+                    out = converter_cls.eval_obj(
+                        target=target_obj, metric_func=function, *args, **kwargs
+                    )
+                else:
                     if use_strings:
                         target_contents = target
                     else:
@@ -332,25 +317,6 @@ def metric(
                         token_limit=llm.token_limit,
                         model_cost=COST_PER_1K_TOKENS[llm.model_id],
                     )
-                else:
-                    raise ValueError(
-                        "Error: must specify either json file or target file/string"
-                    )
-                if isinstance(strings, dict):
-                    out = {}
-                    for k in strings:
-                        out[k] = apply_function_strings(
-                            strings[k],
-                            function,
-                            progress,
-                            language,
-                            llm,
-                            llm.token_limit,
-                            COST_PER_1K_TOKENS[llm.model_id],
-                            *args,
-                            **kwargs,
-                        )
-                else:
                     out = apply_function_strings(
                         strings,
                         function,
@@ -362,17 +328,14 @@ def metric(
                         *args,
                         **kwargs,
                     )
-                out_file = Path(out_file)
-                out_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(out_file, "w") as f:
-                    json.dump(out, f)
-                    log.info(f"Saved results to file: {out_file}")
+                    json.dump(out, out_file)
 
             sig1 = inspect.signature(function)
             sig2 = inspect.signature(func)
             func.__signature__ = sig2.replace(
                 parameters=tuple(
-                    list(sig2.parameters.values())[:9]
+                    list(sig2.parameters.values())[:7]
                     + list(sig1.parameters.values())[1:-1]
                 )
             )
