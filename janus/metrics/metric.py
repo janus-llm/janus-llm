@@ -1,6 +1,5 @@
 import inspect
 import json
-from pathlib import Path
 from typing import Callable, Optional
 
 import click
@@ -72,31 +71,6 @@ def metric(
                         help="Reference file or string to use as reference/baseline.",
                     ),
                 ] = None,
-                json_file_name: Annotated[
-                    Optional[str],
-                    typer.Option(
-                        "--json",
-                        "-j",
-                        help="Json file to extract pairs from \
-                            (if set ignores --target and --reference)",
-                    ),
-                ] = None,
-                target_key: Annotated[
-                    str,
-                    typer.Option(
-                        "--target-key",
-                        "-tk",
-                        help="json key to extract list of target strings",
-                    ),
-                ] = "target",
-                reference_key: Annotated[
-                    str,
-                    typer.Option(
-                        "--reference-key",
-                        "-rk",
-                        help="json key to extract list of reference strings",
-                    ),
-                ] = "reference",
                 file_pairing_method: Annotated[
                     str,
                     typer.Option(
@@ -125,6 +99,14 @@ def metric(
                         is_flag=True,
                     ),
                 ] = False,
+                use_janus_inputs: Annotated[
+                    bool,
+                    typer.Option(
+                        "-j",
+                        "--use-janus-inputs",
+                        help="present if janus output files should be evaluated",
+                    ),
+                ] = False,
                 use_strings: Annotated[
                     bool,
                     typer.Option(
@@ -139,25 +121,23 @@ def metric(
             ):
                 out = []
                 llm = load_model(llm_name)
-                if json_file_name is not None:
-                    with open(json_file_name, "r") as f:
-                        json_obj = json.load(f)
-                    pairs = {}
-                    for key in json_obj:
-                        doc = json_obj[key]
-                        ref = doc[reference_key]
-                        experiments = doc["experiments"]
-                        for model_key in experiments:
-                            model_dict = experiments[model_key]
-                            if not isinstance(model_dict, dict):
-                                continue
-                            if target_key not in model_dict:
-                                continue
-                            if model_key not in pairs:
-                                pairs[model_key] = {}
-                            for k in model_dict[target_key]:
-                                pairs[model_key][k] = (model_dict[target_key][k], ref[k])
-                elif target is not None and reference is not None:
+                if use_janus_inputs:
+                    with open(target, "r") as f:
+                        target_obj = json.load(f)
+                    with open(reference, "r") as f:
+                        reference_obj = json.load(f)
+                    converter_cls = CONVERTERS.get(
+                        target_obj["metadata"].get("converter_name", "Converter"),
+                        Converter,
+                    )
+                    out = converter_cls.eval_obj_reference(
+                        target=target_obj,
+                        reference=reference_obj,
+                        metric_func=func,
+                        *args,
+                        **kwargs,
+                    )
+                else:
                     if use_strings:
                         target_contents = target
                         reference_contents = reference
@@ -177,25 +157,6 @@ def metric(
                         token_limit=llm.token_limit,
                         model_cost=COST_PER_1K_TOKENS[llm.model_id],
                     )
-                else:
-                    raise ValueError(
-                        "Error, specify json or target and reference files/strings"
-                    )
-                if isinstance(pairs, dict):
-                    out = {}
-                    for k in pairs:
-                        out[k] = apply_function_pairs(
-                            pairs[k],
-                            function,
-                            progress,
-                            language,
-                            llm,
-                            llm.token_limit,
-                            COST_PER_1K_TOKENS[llm.model_id],
-                            *args,
-                            **kwargs,
-                        )
-                else:
                     out = apply_function_pairs(
                         pairs,
                         function,
@@ -207,17 +168,14 @@ def metric(
                         *args,
                         **kwargs,
                     )
-                out_file = Path(out_file)
-                out_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(out_file, "w") as f:
                     json.dump(out, f)
-                    log.info(f"Saved results to file: {out_file}")
 
             sig1 = inspect.signature(function)
             sig2 = inspect.signature(func)
             func.__signature__ = sig2.replace(
                 parameters=tuple(
-                    list(sig2.parameters.values())[:11]
+                    list(sig2.parameters.values())[:9]
                     + list(sig1.parameters.values())[2:-1]
                 )
             )
