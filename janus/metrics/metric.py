@@ -169,6 +169,7 @@ def metric(
                         **kwargs,
                     )
                 with open(out_file, "w") as f:
+                    log.info(f"Writing output to {out_file}")
                     json.dump(out, f)
 
             sig1 = inspect.signature(function)
@@ -287,7 +288,8 @@ def metric(
                         **kwargs,
                     )
                 with open(out_file, "w") as f:
-                    json.dump(out, out_file)
+                    log.info(f"Writing output to {out_file}")
+                    json.dump(out, f)
 
             sig1 = inspect.signature(function)
             sig2 = inspect.signature(func)

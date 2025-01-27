@@ -940,7 +940,7 @@ class Converter:
         results = []
         for o in target["outputs"]:
             if isinstance(o, dict):
-                results.append(cls.eval_obj_noreference(o, metric_func, *args, **kwargs))
+                results += cls.eval_obj_noreference(o, metric_func, *args, **kwargs)
             else:
                 results.append(metric_func(o, *args, **kwargs))
         return results
@@ -952,10 +952,8 @@ class Converter:
             if isinstance(o, dict):
                 if not isinstance(r, dict):
                     raise ValueError("Error: format of reference doesn't match target")
-                results.append(
-                    cls.eval_obj_reference(
-                        target, metric_func, reference, *args, **kwargs
-                    )
+                results += cls.eval_obj_reference(
+                    target, metric_func, reference, *args, **kwargs
                 )
             else:
                 if isinstance(r, dict):
