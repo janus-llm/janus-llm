@@ -818,6 +818,7 @@ class Converter:
             num_requests=sum(m["num_requests"] for m in metadatas),
             input_tokens=sum(m["input_tokens"] for m in metadatas),
             output_tokens=sum(m["output_tokens"] for m in metadatas),
+            converter_name=self.__class__.__name__,
         )
 
     def _combine_inputs(self, inputs: list[str]):
@@ -864,6 +865,7 @@ class Converter:
                 num_requests=block.total_num_requests,
                 input_tokens=block.total_request_input_tokens,
                 output_tokens=block.total_request_output_tokens,
+                converter_name=self.__class__.__name__,
             ),
             outputs=output_obj,
         )
@@ -925,3 +927,34 @@ class Converter:
         self._target_version = target_version
         # Taking the first suffix as the default for output files
         self._target_suffix = f".{LANGUAGES[target_language]['suffixes'][0]}"
+
+    @classmethod
+    def eval_obj(cls, target, metric_func, *args, **kwargs):
+        if "reference" in kwargs:
+            return cls.eval_obj_reference(target, metric_func, *args, **kwargs)
+        else:
+            return cls.eval_obj_noreference(target, metric_func, *args, **kwargs)
+
+    @classmethod
+    def eval_obj_noreference(cls, target, metric_func, *args, **kwargs):
+        results = []
+        for o in target["outputs"]:
+            if isinstance(o, dict):
+                results += cls.eval_obj_noreference(o, metric_func, *args, **kwargs)
+            else:
+                results.append(metric_func(o, *args, **kwargs))
+        return results
+
+    @classmethod
+    def eval_obj_reference(cls, target, metric_func, reference, *args, **kwargs):
+        results = []
+        for o, r in zip(target["outputs"], reference["outputs"]):
+            if isinstance(o, dict):
+                if not isinstance(r, dict):
+                    raise ValueError("Error: format of reference doesn't match target")
+                results += cls.eval_obj_reference(o, metric_func, r, *args, **kwargs)
+            else:
+                if isinstance(r, dict):
+                    raise ValueError("Error: format of reference doesn't match target")
+                results.append(metric_func(o, r, *args, **kwargs))
+        return results
