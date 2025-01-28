@@ -88,6 +88,7 @@ class Converter:
         use_janus_inputs: bool = False,
         target_language: str = "json",
         target_version: str | None = None,
+        intermediate_output_dir: str | None = None,
     ) -> None:
         """Initialize a Converter instance.
 
@@ -138,6 +139,7 @@ class Converter:
         self._target_version: str | None
         self.set_target_language(target_language, target_version)
         self._use_janus_inputs = use_janus_inputs
+        self._intermediate_output_dir = intermediate_output_dir
 
         self._protected_node_types: tuple[str, ...] = ()
         self._prune_node_types: tuple[str, ...] = ()
