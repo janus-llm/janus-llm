@@ -7,15 +7,15 @@ First, you need to add an LLM to your configuration. You can do this by running 
 ## Adding an LLM
 
 ```shell
-janus llm add my-gpt-4 --type OpenAI
+janus llm add my-gpt --type OpenAI
 ```
 
-This will add an LLM configuration file with the name `my-gpt-4`.
+This will add an LLM configuration file with the name `my-gpt`.
 
 Output:
 
 ```shell
-Model config written to /Users/mdoyle/.janus/llm/my-gpt-4.json
+Model config written to /Users/mdoyle/.janus/llm/my-gpt.json
 ```
 
 You can then modify this JSON file with different hyperparameters.
@@ -25,11 +25,11 @@ You can then modify this JSON file with different hyperparameters.
 You'll need to specify at least the source language and the target language as well as the input directory and output directory.
 
 ```shell
-janus translate --source-language matlab --target-language python --input janus/language/treesitter/_tests/languages --output python-tests --llm my-gpt-4
+janus translate --source-language matlab --target-language python --input janus/language/treesitter/_tests/languages --output python-tests --llm my-gpt
 ```
 
 Or you can specify that you would like to put the result into the Chroma DB:
 
 ```shell
-janus translate --source-lang matlab --target-lang python --input-dir janus/language/treesitter/_tests/languages --output-dir python-tests --llm-name my-gpt-4 --collection my-collection
+janus translate --source-language matlab --target-language python --input janus/language/treesitter/_tests/languages --output python-tests --llm my-gpt --collection my-collection
 ```

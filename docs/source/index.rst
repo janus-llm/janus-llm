@@ -4,7 +4,7 @@ Janus LLM
 Usage
 ----------------------
 :doc:`quickstart`
-   How to use `janus-llm` to load source code files into a Chroma vector database.
+   How to get started with `janus-llm`.
 
 :doc:`reading_binaries`
    How to read binaries and load the C-like pseudocode into a Chroma vector database.
@@ -34,6 +34,9 @@ API
    :hidden:
 
    quickstart
+   translating
+   documenting
+   adding_to_db
    reading_binaries
    supported_languages
 
