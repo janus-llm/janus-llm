@@ -3,7 +3,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from janus.cli import app
+from janus.cli.cli import app
 from janus.metrics.complexity_metrics import (
     TreeSitterMetric,
     cyclomatic_complexity,

@@ -3,10 +3,10 @@ import subprocess  # nosec
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
 
 from janus.parsers.code_parser import CodeParser
+from janus.parsers.parser import JanusParserException
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -14,6 +14,7 @@ log = create_logger(__name__)
 
 class UMLSyntaxParser(CodeParser):
     def _check_plantuml(self, text: str) -> None:
+        original_text = text
         # Leading newlines can break the parser, remove them
         text = text.replace("\\n", "\n").strip()
 
@@ -43,7 +44,7 @@ class UMLSyntaxParser(CodeParser):
             log.error(err_txt)
             raise Exception(err_txt)
 
-        # Check for bad outputs, raise OutputParserExceptions if so
+        # Check for bad outputs, raise JanusParserExceptions if so
         if "Error" in stderr or "Error" in stdout:
             err_txt = "Recieved UML parsing error(s)."
 
@@ -64,7 +65,7 @@ class UMLSyntaxParser(CodeParser):
                 err_txt += f"\nError located at line {i} must be fixed:\n"
                 err_txt += "\n".join(err_lines)
             log.warning(err_txt)
-            raise OutputParserException(err_txt)
+            raise JanusParserException(original_text, err_txt)
 
         if "Warning" in stdout or "Warning" in stderr:
             err_txt = "Recieved UML parsing warning (often due to missing PLANTUML)."
@@ -74,7 +75,7 @@ class UMLSyntaxParser(CodeParser):
                 err_txt += f"\nSTDOUT:\n```\n{stdout.strip()}\n```\n"
 
             log.warning(err_txt)
-            raise OutputParserException(err_txt)
+            raise JanusParserException(original_text, err_txt)
 
     def _get_error_lines(self, s: str) -> list[int]:
         return [int(x.group(1)) for x in re.finditer(r"Error line (\d+) in file:", s)]

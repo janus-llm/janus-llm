@@ -59,14 +59,14 @@ class TestTranslator(unittest.TestCase):
         self.req_translator = RequirementsDocumenter(
             model="gpt-4o-mini",
             source_language="fortran",
-            prompt_template="requirements",
+            prompt_templates="requirements",
         )
 
     @pytest.mark.translate
     def test_translate(self):
         """Test translate method."""
         # Delete a file if it's already there
-        python_file = self.test_file.parent / "python" / f"{self.test_file.stem}.py"
+        python_file = self.test_file.parent / "python" / f"{self.test_file.stem}.json"
         python_file.unlink(missing_ok=True)
         python_file.parent.rmdir() if python_file.parent.is_dir() else None
         self.translator.translate(self.test_file.parent, self.test_file.parent / "python")
@@ -82,7 +82,7 @@ class TestTranslator(unittest.TestCase):
         self.assertRaises(
             ValueError, self.translator.set_source_language, "scribbledy-doop"
         )
-        self.translator.set_prompt("pish posh")
+        self.translator.set_prompts(["pish posh"])
         self.assertRaises(ValueError, self.translator._load_parameters)
 
 
@@ -149,10 +149,10 @@ def test_language_combinations(
     translator.set_model("gpt-4o")
     translator.set_source_language(source_language)
     translator.set_target_language(expected_target_language, expected_target_version)
-    translator.set_prompt(prompt_template)
+    translator.set_prompts(prompt_template)
     translator._load_parameters()
     assert translator._target_language == expected_target_language  # nosec
     assert translator._target_version == expected_target_version  # nosec
     assert translator._splitter.language == source_language  # nosec
     assert translator._splitter.model.model_name == "gpt-4o"  # nosec
-    assert translator._prompt_template_name == prompt_template  # nosec
+    assert translator._prompt_template_names == [prompt_template]  # nosec

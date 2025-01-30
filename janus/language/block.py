@@ -46,6 +46,11 @@ class CodeBlock:
         embedding_id: Optional[str] = None,
         affixes: Tuple[str, str] = ("", ""),
         context_tags: dict[str, str] = {},
+        initial_processing_time: float = 0,
+        initial_num_requests: int = 0,
+        initial_input_tokens: int = 0,
+        initial_output_tokens: int = 0,
+        initial_cost: float = 0,
     ) -> None:
         self.id: Hashable = id
         self.name: Optional[str] = name
@@ -65,6 +70,12 @@ class CodeBlock:
         self.complete = True
         self.omit_prefix = True
         self.omit_suffix = False
+
+        self.initial_processing_time = initial_processing_time
+        self.initial_num_requests = initial_num_requests
+        self.initial_input_tokens = initial_input_tokens
+        self.initial_output_tokens = initial_output_tokens
+        self.initial_cost = initial_cost
 
         if self.children:
             self.children[0].omit_prefix = False
@@ -181,11 +192,12 @@ class TranslatedCodeBlock(CodeBlock):
     Attributes:
         original: The original code block.
         cost: The total cost to translate the original code block.
-        retries: The number of times translation had to be retried for this code
         translated: Whether this block has been successfully translated
     """
 
-    def __init__(self, original: CodeBlock, language: str) -> None:
+    def __init__(
+        self, original: CodeBlock, language: str, type_name: str | None = None
+    ) -> None:
         """Create an "empty" `TranslatedCodeBlock` from the given original
 
         Arguments:
@@ -216,9 +228,13 @@ class TranslatedCodeBlock(CodeBlock):
 
         self.complete = original.complete
         self.translated = False
-        self.cost = 0.0
-        self.retries = 0
-        self.processing_time = 0.0
+        self.cost = original.initial_cost
+        self.num_requests = original.initial_num_requests
+        self.tokens = 0
+        self.processing_time = original.initial_processing_time
+
+        self.request_input_tokens = original.initial_input_tokens
+        self.request_output_tokens = original.initial_output_tokens
 
     @property
     def total_cost(self) -> float:
@@ -228,16 +244,6 @@ class TranslatedCodeBlock(CodeBlock):
             The total cost spent translating this block and all its descendents
         """
         return self.cost + sum(c.total_cost for c in self.children)
-
-    @property
-    def total_retries(self) -> int:
-        """The total number of retries that were required to translate this block and
-        all its descendents
-
-        Returns:
-            The total number of retries that were required to translate this block and
-        """
-        return self.retries + sum(c.total_retries for c in self.children)
 
     @property
     def total_input_tokens(self) -> int:
@@ -251,6 +257,48 @@ class TranslatedCodeBlock(CodeBlock):
         return children_sum + (self.original.tokens if self.translated else 0)
 
     @property
+    def total_request_input_tokens(self) -> int:
+        """
+        The total number of tokens sent to LLM during all requests during translation
+
+        Returns:
+            The total number of tokens sent to LLM during all requests during translation
+        """
+        children_sum = sum(c.total_request_input_tokens for c in self.children)
+        return children_sum + self.request_input_tokens
+
+    @property
+    def total_request_output_tokens(self) -> int:
+        """
+        The total number of tokens output by an LLM during translation
+
+        Returns:
+            The total number of tokens output by an LLM during translation
+        """
+        children_sum = sum(c.total_request_output_tokens for c in self.children)
+        return children_sum + self.request_output_tokens
+
+    @property
+    def total_num_requests(self) -> int:
+        """
+        Total number of requests made to LLM during translation
+
+        Returns:
+            Total number of requests made to LLM during translation
+        """
+        children_sum = sum(c.total_num_requests for c in self.children)
+        return children_sum + self.num_requests
+
+    @property
+    def translation_completed(self) -> bool:
+        """Whether or not the code block was successfully translated
+
+        Returns:
+            Whether or not the code block was successfully translated
+        """
+        return self.translated and all(c.translation_completed for c in self.children)
+
+    @property
     def translation_completeness(self) -> float:
         """The share of the input that was successfully translated
 
@@ -261,4 +309,26 @@ class TranslatedCodeBlock(CodeBlock):
             (self.total_input_tokens / self.original.total_tokens)
             if self.original.total_tokens
             else 0
+        )
+
+    def to_codeblock(self) -> CodeBlock:
+        return CodeBlock(
+            id=self.id,
+            name=self.name,
+            node_type=self.node_type,
+            language=self.language,
+            text=self.text,
+            start_point=self.start_point,
+            end_point=self.end_point,
+            start_byte=self.start_byte,
+            end_byte=self.end_byte,
+            embedding_id=self.embedding_id,
+            tokens=self.tokens,
+            children=[child.to_codeblock() for child in self.children],
+            affixes=self.affixes,
+            initial_processing_time=self.processing_time,
+            initial_cost=self.cost,
+            initial_num_requests=self.num_requests,
+            initial_input_tokens=self.request_input_tokens,
+            initial_output_tokens=self.request_output_tokens,
         )
