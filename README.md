@@ -25,9 +25,11 @@
 Janus (`janus-llm`) uses LLMs to aid in the modernization of legacy IT systems. The repository can currently do the following:
 
 1. Chunk code of over 100 programming languages to fit within different model context windows and add to a [Chroma](https://trychroma.com) vector database.
-2. Translate from one programming language to another on a file-by-file basis using an LLM with varying results (with the `translate.py` script).
-3. Translate from a binary file to a programming language using Ghidra decompilation.
-4. Do 1-3 with a CLI tool (`janus`).
+2. Translate from one programming language to another on a file-by-file basis using an LLM.
+3. Translate from a binary file to a programming language using [Ghidra](https://github.com/NationalSecurityAgency/ghidra) decompilation.
+4. Generate requirements, UML diagrams, code comments, and summaries from source code.
+5. Evaluate the products that you generate.
+6. Do 1-5 with a CLI tool (`janus`).
 
 
 ## Installation
@@ -61,4 +63,4 @@ See [the documentation](https://janus-llm.github.io/janus-llm) for more informat
 See our [contributing pages](https://janus-llm.github.io/janus-llm/contributing.html)
 
 ### Copyright
-Copyright ©2024 The MITRE Corporation. ALL RIGHTS RESERVED. Approved for Public Release; Distribution Unlimited. Public Release Case Number 23-4084.
+Copyright ©2025 The MITRE Corporation. ALL RIGHTS RESERVED. Approved for Public Release; Distribution Unlimited. Public Release Case Number 23-4084.

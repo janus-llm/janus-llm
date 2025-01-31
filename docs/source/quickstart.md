@@ -38,3 +38,4 @@ With Janus LLM you can:
 - [Translate from one programming language to another](translating.md)
 - [Create documentation from source code](documenting.md)
 - [Generate Plant UML from source code](diagramming.md)
+- [Use an LLM to evaluate the products that you generate](evaluating.md)
