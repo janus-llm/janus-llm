@@ -36,19 +36,41 @@ Summary generation is a way to generate documentation from source code by summar
 janus document  --doc-mode summary --input janus/cli/ --output-dir janus-docs --llm my-gpt --language python
 ```
 
+### Output
+
+This is the output JSON for `translate.py` (trimmed for brevity):
+
+```json
+{
+  "input": "...",
+  "metadata": {
+    "cost": 0.00717475,
+    "processing_time": 4.554493188858032,
+    "num_requests": 1,
+    "input_tokens": 1465,
+    "output_tokens": 286
+  },
+  "outputs": [
+    "This Python code defines a command-line interface (CLI) function `translate` using Typer and Click libraries, which facilitates the translation of source code from one programming language to another. The function is part of a larger system that utilizes a language model to perform the translation, allowing users to specify various options such as the source and target languages, directories for input and output files, and parameters that influence the translation process like the model's temperature and maximum prompts. The function also includes options for handling translation failures, specifying custom splitters and refiners, and controlling whether existing files in the output directory should be overwritten. It is designed to enable flexible and customizable translations, making it suitable for different programming languages and versions, and it can integrate with a database to store translated results if desired.\n\nThe expected initial state includes having a directory (`input_dir`) containing source code files to be translated and specifying the source language (`source_lang`) and target language (`target_lang`). The user also needs to provide the desired output directory (`output_dir`) and possibly other optional parameters to customize the translation process. The terminal state results in translated code files being stored in the specified output directory. Potential exceptions that might arise include a `ValueError` if the output files would overwrite the input files due to overlapping directories and languages, or if invalid parameters are provided. Other issues may occur if directory paths are incorrect or if there are problems with the specified language model."
+  ]
+}
+```
+
 ## Requirement Generation
 
 Requirement generation is a way to generate documentation from source code by extracting requirements.
 
 ### Example
 
+When generating requirements, you have to specify the `RequirementsFormatRefiner` to ensure the requirements are formatted correctly with an extra call to the LLM:
+
 ```shell
 janus document  --doc-mode requirements --input janus/cli/ --output-dir janus-docs --llm my-gpt --language python -r RequirementsFormatRefiner
 ```
 
-## Output
+### Output
 
-In the output JSON for `translate.py`, this was the output (trimmed for brevity):
+This is the output JSON for `translate.py` (trimmed for brevity):
 
 ```json
 {
