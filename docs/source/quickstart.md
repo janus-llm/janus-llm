@@ -39,3 +39,6 @@ With Janus LLM you can:
 - [Create documentation from source code](documenting.md)
 - [Generate Plant UML from source code](diagramming.md)
 - [Use an LLM to evaluate the products that you generate](evaluating.md)
+- [Create multi-stage pipelines](pipelines.md)
+
+And most of these will output a standardized JSON file described in more detail [here](janus_json.md).

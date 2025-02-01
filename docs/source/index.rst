@@ -6,11 +6,23 @@ Usage
 :doc:`quickstart`
    How to get started with `janus-llm`.
 
-:doc:`reading_binaries`
-   How to read binaries and load the C-like pseudocode into a Chroma vector database.
-
 :doc:`translating`
    How to use LLMs to translate from one programming language to another.
+
+:doc:`documenting`
+   How to use LLMs create documentation from code.
+
+:doc:`adding_to_db`
+   How to add code to the Chroma vector database.
+
+:doc:`evaluating`
+   How to evaluate the quality of the generated products.
+
+:doc:`janus_json`
+   The format of the JSON files that are used to store the generated products.
+
+:doc:`reading_binaries`
+   How to read binaries and load the C-like pseudocode into a Chroma vector database.
 
 :doc:`supported_languages`
    The supported input languages. This depends on `tree-sitter` parsers that have been included or is based on custom parsers created for this project.
@@ -37,6 +49,8 @@ API
    translating
    documenting
    adding_to_db
+   evaluating
+   janus_json
    reading_binaries
    supported_languages
 
