@@ -40,10 +40,6 @@ class ConverterChain(Converter):
                 translated_code_block = converter.translate_block(
                     translated_code_block.to_codeblock(), name, failure_path
                 )
-            if converter._intermediate_output_dir is not None:
-                out_path = Path(converter._intermediate_output_dir) / name
-                out_path = out_path.with_suffix(".json")
-                converter._save_to_file(translated_code_block, out_path)
 
         return translated_code_block
 
@@ -61,10 +57,6 @@ class ConverterChain(Converter):
         """
         filename = file.name
         translated_code_block = self._converters[0].translate_file(file, failure_path)
-        if self._converters[0]._intermediate_output_dir is not None:
-            out_path = Path(self._converters[0]._intermediate_output_dir) / file
-            out_path = out_path.with_suffix(".json")
-            self._converters[0]._save_to_file(translated_code_block, out_path)
         translated_code_block = self._run_converters(
             translated_code_block, filename, failure_path
         )
@@ -86,10 +78,6 @@ class ConverterChain(Converter):
         translated_code_block = self._converters[0].translate_text(
             text, name, failure_path
         )
-        if self._converters[0]._intermediate_output_dir is not None:
-            out_path = Path(self._converters[0]._intermediate_output_dir) / name
-            out_path = out_path.with_suffix(".json")
-            self._converters[0]._save_to_file(translated_code_block, out_path)
         translated_code_block = self._run_converters(
             translated_code_block, name, failure_path
         )
@@ -114,11 +102,60 @@ class ConverterChain(Converter):
         translated_code_block = self._converters[0].translate_block(
             input_block, name, failure_path
         )
-        if self._converters[0]._intermediate_output_dir is not None:
-            out_path = Path(self._converter[0]._intermediate_output_dir) / name
-            out_path = out_path.with_suffix(".json")
-            self._converters[0]._save_to_file(translated_code_block, out_path)
         translated_code_block = self._run_converters(
             translated_code_block, name, failure_path
         )
         return translated_code_block
+
+    def _get_output_obj(
+        self, block: TranslatedCodeBlock | list, combine_children: bool = True
+    ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
+        output_obj = super()._get_output_obj(block, combine_children)
+        intermediate_outputs = []
+        for i, intermediate_out in enumerate(block.previous_generations):
+            if isinstance(intermediate_out, TranslatedCodeBlock):
+                intermediate_outputs.append(
+                    self._converters[i]._get_output_obj(intermediate_out)
+                )
+            else:
+                intermediate_outputs.append(intermediate_out)
+        intermediate_outputs.append(self._converters[-1]._get_output_obj(block))
+        output_obj["intermediate_outputs"] = intermediate_outputs
+        metadata = output_obj["metadata"]
+        metadata["cost"] += sum(
+            b.cost if isinstance(b, TranslatedCodeBlock) else b["metadata"]["cost"]
+            for b in block.previous_generations
+        )
+        metadata["processing_time"] += sum(
+            b.processing_time
+            if isinstance(b, TranslatedCodeBlock)
+            else b["metadata"]["processing_time"]
+            for b in block.previous_generations
+        )
+        metadata["num_requests"] += sum(
+            b.total_num_requests
+            if isinstance(b, TranslatedCodeBlock)
+            else b["metadata"]["num_requests"]
+            for b in block.previous_generations
+        )
+        metadata["input_tokens"] += sum(
+            b.total_request_input_tokens
+            if isinstance(b, TranslatedCodeBlock)
+            else b["metadata"]["input_tokens"]
+            for b in block.previous_generations
+        )
+        metadata["output_tokens"] += sum(
+            b.total_request_output_tokens
+            if isinstance(b, TranslatedCodeBlock)
+            else b["metadata"]["output_tokens"]
+            for b in block.previous_generations
+        )
+        output_obj["metadata"] = metadata
+        if len(block.previous_generations) > 0:
+            b = block.previous_generations[0]
+            output_obj["input"] = (
+                (b.original.text or "")
+                if isinstance(b, TranslatedCodeBlock)
+                else b["input"]
+            )
+        return output_obj

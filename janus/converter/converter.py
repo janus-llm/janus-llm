@@ -88,7 +88,6 @@ class Converter:
         use_janus_inputs: bool = False,
         target_language: str = "json",
         target_version: str | None = None,
-        intermediate_output_dir: str | None = None,
     ) -> None:
         """Initialize a Converter instance.
 
@@ -139,7 +138,6 @@ class Converter:
         self._target_version: str | None
         self.set_target_language(target_language, target_version)
         self._use_janus_inputs = use_janus_inputs
-        self._intermediate_output_dir = intermediate_output_dir
 
         self._protected_node_types: tuple[str, ...] = ()
         self._prune_node_types: tuple[str, ...] = ()
@@ -648,14 +646,8 @@ class Converter:
         return self.translate_janus_obj(file_obj, filename, failure_path)
 
     def translate_janus_obj(self, obj: Any, name: str, failure_path: Path | None = None):
-        if isinstance(obj, dict):
-            return [
-                self.translate_janus_obj(o, name, failure_path) for o in obj["outputs"]
-            ]
-        elif isinstance(obj, str):
-            return self.translate_text(obj, name, failure_path)
-        else:
-            raise ValueError(f"Error: unrecognized janus object type: {type(obj)}")
+        block = self._janus_object_to_codeblock(obj, name)
+        return self.translate_block(block)
 
     def translate_text(self, text: str, name: str, failure_path: Path | None = None):
         """
@@ -859,6 +851,7 @@ class Converter:
             output_str = self._parser.parse_combined_output(block.complete_text)
             output_obj = [output_str]
 
+        print(block.previous_generations)
         return dict(
             input=block.original.text or "",
             metadata=dict(
@@ -890,6 +883,27 @@ class Converter:
         obj = self._get_output_obj(block, combine_children=self._combine_output)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
+
+    def _janus_object_to_codeblock(self, janus_obj: dict, name: str):
+        results = []
+        for o in janus_obj["outputs"]:
+            if isinstance(o, str):
+                code_block = self._split_text(o, name)
+                meta_data = janus_obj["metadata"]
+                code_block.initial_cost = meta_data["cost"]
+                code_block.initial_input_tokens = meta_data["input_tokens"]
+                code_block.initial_output_tokens = meta_data["output_tokens"]
+                code_block.initial_num_requests = meta_data["num_requests"]
+                code_block.initial_processing_time = meta_data["processing_time"]
+                code_block.previous_generations = janus_obj.get(
+                    "intermediate_outputs", []
+                ) + [janus_obj]
+                results.append(code_block)
+            else:
+                results.append(self._janus_object_to_codeblock(o))
+        while isinstance(results, list) and len(results) == 1:
+            results = results[0]
+        return results
 
     def __or__(self, other: "Converter"):
         from janus.converter.chain import ConverterChain
