@@ -558,23 +558,20 @@ class Converter:
             total_cost += _get_total_cost(out_block)
             log.info(f"Current Running Cost: {total_cost}")
 
-            # Don't attempt to write files for which translation failed
-            def _is_empty(block):
+            # For files where translation failed, write to failure path instead
+
+            def _has_empty(block):
                 if isinstance(block, list):
-                    return len(block) == 0
+                    return len(block) == 0 or any(_has_empty(b) for b in block)
                 return not block.translated
 
-            def _remove_empty(block):
-                if isinstance(block, list):
-                    block = [_remove_empty(b) for b in block]
-                    block = [b for b in block if not _is_empty(b)]
-                return block
-
-            out_block = _remove_empty(out_block)
-            if _is_empty(out_block):
-                continue
             while isinstance(out_block, list) and len(out_block) == 1:
                 out_block = out_block[0]
+
+            if _has_empty(out_block):
+                if fail_path is not None:
+                    self._save_to_file(out_block, fail_path)
+                continue
 
             if collection_name is not None:
                 self._vectorizer.add_nodes_recursively(
@@ -646,14 +643,8 @@ class Converter:
         return self.translate_janus_obj(file_obj, filename, failure_path)
 
     def translate_janus_obj(self, obj: Any, name: str, failure_path: Path | None = None):
-        if isinstance(obj, dict):
-            return [
-                self.translate_janus_obj(o, name, failure_path) for o in obj["outputs"]
-            ]
-        elif isinstance(obj, str):
-            return self.translate_text(obj, name, failure_path)
-        else:
-            raise ValueError(f"Error: unrecognized janus object type: {type(obj)}")
+        block = self._janus_object_to_codeblock(obj, name)
+        return self.translate_block(block)
 
     def translate_text(self, text: str, name: str, failure_path: Path | None = None):
         """
@@ -888,6 +879,27 @@ class Converter:
         obj = self._get_output_obj(block, combine_children=self._combine_output)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
+
+    def _janus_object_to_codeblock(self, janus_obj: dict, name: str):
+        results = []
+        for o in janus_obj["outputs"]:
+            if isinstance(o, str):
+                code_block = self._split_text(o, name)
+                meta_data = janus_obj["metadata"]
+                code_block.initial_cost = meta_data["cost"]
+                code_block.initial_input_tokens = meta_data["input_tokens"]
+                code_block.initial_output_tokens = meta_data["output_tokens"]
+                code_block.initial_num_requests = meta_data["num_requests"]
+                code_block.initial_processing_time = meta_data["processing_time"]
+                code_block.previous_generations = janus_obj.get(
+                    "intermediate_outputs", []
+                ) + [janus_obj]
+                results.append(code_block)
+            else:
+                results.append(self._janus_object_to_codeblock(o))
+        while isinstance(results, list) and len(results) == 1:
+            results = results[0]
+        return results
 
     def __or__(self, other: "Converter"):
         from janus.converter.chain import ConverterChain

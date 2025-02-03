@@ -1,5 +1,6 @@
 import json
 import re
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -83,6 +84,7 @@ class RequirementEvaluator(Evaluator):
             if isinstance(o, dict):
                 results += self.translate_janus_obj(o, name, failure_path)
             elif isinstance(o, str):
+                temp_obj = deepcopy(obj)
                 requirements = json.loads(o)
                 if not requirements:
                     log.debug(f"[{name}] Skipping empty output")
@@ -97,7 +99,12 @@ class RequirementEvaluator(Evaluator):
                             code=obj["input"],
                         )
                     )
-                    results.append(self.translate_text(obj_str, name, failure_path))
+                    temp_obj["outputs"] = [obj_str]
+                    temp_block = self._janus_object_to_codeblock(temp_obj, name)
+                    translated_block = self.translate_block(temp_block, failure_path)
+                    translated_block.previous_generations[-1] = obj
+                    translated_block.original = self._janus_object_to_codeblock(obj, name)
+                    results.append(translated_block)
                 else:
                     for i in range(0, len(requirements), self.eval_items_per_request):
                         working_requirements = requirements[
@@ -109,7 +116,14 @@ class RequirementEvaluator(Evaluator):
                                 code=obj["input"],
                             )
                         )
-                        results.append(self.translate_text(obj_str, name, failure_path))
+                        temp_obj["outputs"] = [obj_str]
+                        temp_block = self._janus_object_to_codeblock(temp_obj, name)
+                        translated_block = self.translate_block(temp_block, failure_path)
+                        translated_block.previous_generations[-1] = obj
+                        translated_block.original = self._janus_object_to_codeblock(
+                            obj, name
+                        )
+                        results.append(translated_block)
             else:
                 raise ValueError(f"Error: unable to find janus object: {type(o)}")
         return results
@@ -170,6 +184,7 @@ class InlineCommentEvaluator(Evaluator):
             if isinstance(o, dict):
                 results += self.translate_janus_obj(o, name, failure_path)
             elif isinstance(o, str):
+                temp_obj = deepcopy(obj)
                 generated_comments = json.loads(o)
                 processed_input, missing_comments = self._process_comments(
                     input_str, generated_comments
@@ -186,9 +201,12 @@ class InlineCommentEvaluator(Evaluator):
                     self.eval_items_per_request is None
                     or len(comments) < self.eval_items_per_request
                 ):
-                    results.append(
-                        self.translate_text(processed_input, name, failure_path)
-                    )
+                    temp_obj["outputs"] = [processed_input]
+                    temp_block = self._janus_object_to_codeblock(temp_obj, name)
+                    translated_block = self.translate_block(temp_block, failure_path)
+                    translated_block.previous_generations[-1] = obj
+                    translated_block.original = self._janus_object_to_codeblock(obj, name)
+                    results.append(translated_block)
                     continue
                 comment_group_indices = list(
                     range(0, len(comments), self.eval_items_per_request)
@@ -211,9 +229,12 @@ class InlineCommentEvaluator(Evaluator):
                     # Strip all comment placeholders outside of the section of interest
                     prefix = re.sub(comment_pattern, "", prefix, flags=re.MULTILINE)
                     suffix = re.sub(comment_pattern, "", suffix, flags=re.MULTILINE)
-                    results.append(
-                        self.translate_text(prefix + keeper + suffix, name, failure_path)
-                    )
+                    temp_obj["outputs"] = [prefix + keeper + suffix]
+                    temp_block = self._janus_object_to_codeblock(temp_obj, name)
+                    translated_block = self.translate_block(temp_block, failure_path)
+                    translated_block.previous_generations[-1] = obj
+                    translated_block.original = self._janus_object_to_codeblock(obj, name)
+                    results.append(translated_block)
             else:
                 raise ValueError(f"Error: unrecognized janus object type: {type(o)}")
         return results
