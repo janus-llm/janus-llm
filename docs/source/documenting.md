@@ -23,7 +23,7 @@ Cloze comments are a way to generate documentation from source code by removing 
 ### Example
 
 ```shell
-janus document  --doc-mode cloze --input janus/cli/ --output-dir janus-docs --llm my-gpt --language python
+janus document  --doc-mode cloze --input janus/cli/ --output janus-docs --llm my-gpt --language python
 ```
 
 ## Summary Generation
@@ -33,7 +33,7 @@ Summary generation is a way to generate documentation from source code by summar
 ### Example
 
 ```shell
-janus document  --doc-mode summary --input janus/cli/ --output-dir janus-docs --llm my-gpt --language python
+janus document  --doc-mode summary --input janus/cli/ --output janus-docs --llm my-gpt --language python
 ```
 
 ### Output
@@ -65,7 +65,7 @@ Requirement generation is a way to generate documentation from source code by ex
 When generating requirements, you have to specify the `RequirementsFormatRefiner` to ensure the requirements are formatted correctly with an extra call to the LLM:
 
 ```shell
-janus document  --doc-mode requirements --input janus/cli/ --output-dir janus-docs --llm my-gpt --language python -r RequirementsFormatRefiner
+janus document  --doc-mode requirements --input janus/cli/ --output janus-docs --llm my-gpt --language python -r RequirementsFormatRefiner
 ```
 
 ### Output

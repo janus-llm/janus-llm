@@ -74,13 +74,13 @@ And then follow the CLI instructions to add the model to your configuration.
 First, generate this requirements with `janus`:
 
 ```shell
-janus document  --doc-mode requirements --input janus/cli/ --output-dir janus-docs --llm my-gpt --language python -r RequirementsFormatRefiner
+janus document  --doc-mode requirements --input janus/cli/ --output janus-docs --llm my-gpt --language python -r RequirementsFormatRefiner
 ```
 
 You can use an LLM to evaluate requirements against the [INCOSE standard](https://www.incose.org/docs/default-source/working-groups/requirements-wg/gtwr/incose_rwg_gtwr_v4_040423_final_drafts.pdf?sfvrsn=5c877fc7_2).
 
 ```shell
-janus llm-self-eval --input janus-docs --output-dir janus-evals --llm myazure --language python -e incose
+janus llm-self-eval --input janus-docs --output janus-evals --llm myazure --language python -e incose
 ```
 
 ## Evaluation without a Reference

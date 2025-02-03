@@ -56,7 +56,7 @@ Collection: binary-collection
 ## Translating
 
 ```shell
-janus translate --input-lang binary --output-lang python --input-dir janus/language/binary/_tests --output-dir python-tests
+janus translate --input-language binary --output-language python --input janus/language/binary/_tests --output python-tests
 ```
 
 Then we can `cat` the translated code we just created with ChatGPT:
