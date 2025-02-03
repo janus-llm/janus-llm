@@ -16,13 +16,13 @@ Every pipeline is configured with a JSON file made up of a list of JSON objects.
 
 Every pipeline must have at least one component. The following is an example of a pipeline that uses the `DiagramGenerator` component to generate a UML diagram from source code. The user can also specify some keyword arguments to the component.
 
-[`diagram.json`](https://github.com/janus-llm/janus-llm/tree/public/janus/pipelines/diagram.json):
+[`translate.json`](https://github.com/janus-llm/janus-llm/tree/public/pipelines/translate.json):
 
 ```json
 [
     {
-        "type": "DiagramGenerator",
-        "kwargs": {}
+        "type": "Translator",
+        "kwargs": {"source_language": "python", "target_language": "javascript"}
     }
 ]
 ```
@@ -30,12 +30,12 @@ Every pipeline must have at least one component. The following is an example of 
 This can then be run with the following command:
 
 ```shell
-janus pipeline --input janus/cli/ --output janus-diagrams --pipeline janus/pipelines/diagram.json --llm my-gpt -l python
+janus pipeline --input janus/cli/ --output janus-translation --pipeline janus/pipelines/translate.json --llm my-gpt -l python
 ```
 
 This is the equivalent to running the following command:
 
 ```shell
-janus diagram --input janus/cli/ --output janus-diagrams --llm my-gpt -l python
+janus translate --input janus/cli/ --output janus-translation --llm my-gpt -l python
 ```
 
