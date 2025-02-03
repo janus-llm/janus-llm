@@ -31,6 +31,12 @@ class ConverterChain(Converter):
         self, translated_code_block, name: str, failure_path: Path | None = None
     ):
         for i, converter in enumerate(self._converters[1:]):
+            if not translated_code_block.translated:
+                log.info(
+                    f"Error: chain failed to translate at step {i}:"
+                    f"{self._converters[i].__class__.__name__}"
+                )
+                break
             if converter._use_janus_inputs:
                 janus_obj = self._converters[i]._get_output_obj(translated_code_block)
                 translated_code_block = converter.translate_janus_obj(
@@ -40,6 +46,11 @@ class ConverterChain(Converter):
                 translated_code_block = converter.translate_block(
                     translated_code_block.to_codeblock(), name, failure_path
                 )
+        if not translated_code_block.translated:
+            log.info(
+                f"Error: chain failed to translate at step {len(self._converters)-1}: "
+                f"{self._converters[-1].__class__.__name__}"
+            )
 
         return translated_code_block
 

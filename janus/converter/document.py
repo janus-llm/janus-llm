@@ -138,6 +138,5 @@ class ClozeDocumenter(Documenter):
 
         self._parser.parse_input(block.original)
         block.text = self._parser.parse(json.dumps(obj))
-        print("HERE:!!! ", block.text)
         block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True

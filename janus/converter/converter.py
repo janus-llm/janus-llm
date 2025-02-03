@@ -558,23 +558,20 @@ class Converter:
             total_cost += _get_total_cost(out_block)
             log.info(f"Current Running Cost: {total_cost}")
 
-            # Don't attempt to write files for which translation failed
-            def _is_empty(block):
+            # For files where translation failed, write to failure path instead
+
+            def _has_empty(block):
                 if isinstance(block, list):
-                    return len(block) == 0
+                    return len(block) == 0 or any(_has_empty(b) for b in block)
                 return not block.translated
 
-            def _remove_empty(block):
-                if isinstance(block, list):
-                    block = [_remove_empty(b) for b in block]
-                    block = [b for b in block if not _is_empty(b)]
-                return block
-
-            out_block = _remove_empty(out_block)
-            if _is_empty(out_block):
-                continue
             while isinstance(out_block, list) and len(out_block) == 1:
                 out_block = out_block[0]
+
+            if _has_empty(out_block):
+                if fail_path is not None:
+                    self._save_to_file(out_block, fail_path)
+                continue
 
             if collection_name is not None:
                 self._vectorizer.add_nodes_recursively(
@@ -851,7 +848,6 @@ class Converter:
             output_str = self._parser.parse_combined_output(block.complete_text)
             output_obj = [output_str]
 
-        print(block.previous_generations)
         return dict(
             input=block.original.text or "",
             metadata=dict(
