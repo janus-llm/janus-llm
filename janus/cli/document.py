@@ -32,7 +32,7 @@ def document(
     output_dir: Annotated[
         Path,
         typer.Option(
-            "--output-dir", "-o", help="The directory to store the translated code in."
+            "--output", "-o", help="The directory to store the translated code in."
         ),
     ],
     llm_name: Annotated[
