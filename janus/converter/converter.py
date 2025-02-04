@@ -604,6 +604,18 @@ class Converter:
     ):
         if isinstance(input_blocks, CodeBlock):
             input_blocks = [input_blocks]
+
+        def _flatten(blocks):
+            out = []
+            for item in blocks:
+                if isinstance(item, list):
+                    out += _flatten(item)
+                else:
+                    out.append(item)
+            return out
+
+        input_blocks = _flatten(input_blocks)
+
         if self._input_types is not None:
             input_blocks = [b for b in input_blocks if b.block_type in self._input_types]
         if self._input_labels is not None:
