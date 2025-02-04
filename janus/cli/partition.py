@@ -31,7 +31,7 @@ def partition(
     output_dir: Annotated[
         Path,
         typer.Option(
-            "--output-dir", "-o", help="The directory to store the partitioned code in."
+            "--output", "-o", help="The directory to store the partitioned code in."
         ),
     ],
     llm_name: Annotated[

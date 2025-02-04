@@ -23,7 +23,7 @@ class ConverterChain(Converter):
             source_language=self._converters[0].source_language,
             target_language=self._converters[-1]._target_language,
             target_version=self._converters[-1]._target_version,
-            use_janus_inputs=self._converters[0]._janus_inputs,
+            use_janus_inputs=self._converters[0]._use_janus_inputs,
         )
         super().__init__(**kwargs)
 
@@ -70,7 +70,7 @@ class ConverterChain(Converter):
             text, name, failure_path
         )
         for i, converter in enumerate(self._converters[1:]):
-            if converter._janus_inputs:
+            if converter._use_janus_inputs:
                 janus_obj = self._converters[i]._get_output_obj(translated_code_block)
                 translated_code_block = converter.translate_janus_obj(
                     janus_obj, name, failure_path
@@ -101,7 +101,7 @@ class ConverterChain(Converter):
             input_block, name, failure_path
         )
         for i, converter in enumerate(self._converters[1:]):
-            if converter._janus_inputs:
+            if converter._use_janus_inputs:
                 janus_obj = self._converters[i]._get_output_obj(translated_code_block)
                 translated_code_block = converter.translate_janus_obj(
                     janus_obj, name, failure_path
