@@ -101,10 +101,11 @@ class RequirementEvaluator(Evaluator):
                     )
                     temp_obj["outputs"] = [obj_str]
                     temp_block = self._janus_object_to_codeblock(temp_obj, name)
-                    translated_block = self.translate_block(temp_block, failure_path)
-                    translated_block.previous_generations[-1] = obj
-                    translated_block.original = self._janus_object_to_codeblock(obj, name)
-                    results.append(translated_block)
+                    translated_block = self.translate_blocks(temp_block, failure_path)
+                    for b in translated_block:
+                        b.previous_generations[-1] = obj
+                        b.original = self._janus_object_to_codeblock(obj, name)
+                    results += translated_block
                 else:
                     for i in range(0, len(requirements), self.eval_items_per_request):
                         working_requirements = requirements[
@@ -118,12 +119,11 @@ class RequirementEvaluator(Evaluator):
                         )
                         temp_obj["outputs"] = [obj_str]
                         temp_block = self._janus_object_to_codeblock(temp_obj, name)
-                        translated_block = self.translate_block(temp_block, failure_path)
-                        translated_block.previous_generations[-1] = obj
-                        translated_block.original = self._janus_object_to_codeblock(
-                            obj, name
-                        )
-                        results.append(translated_block)
+                        translated_block = self.translate_blocks(temp_block, failure_path)
+                        for b in translated_block:
+                            b.previous_generations[-1] = obj
+                            b.original = self._janus_object_to_codeblock(obj, name)
+                        results += translated_block
             else:
                 raise ValueError(f"Error: unable to find janus object: {type(o)}")
         return results
@@ -203,10 +203,11 @@ class InlineCommentEvaluator(Evaluator):
                 ):
                     temp_obj["outputs"] = [processed_input]
                     temp_block = self._janus_object_to_codeblock(temp_obj, name)
-                    translated_block = self.translate_block(temp_block, failure_path)
-                    translated_block.previous_generations[-1] = obj
-                    translated_block.original = self._janus_object_to_codeblock(obj, name)
-                    results.append(translated_block)
+                    translated_block = self.translate_blocks(temp_block, failure_path)
+                    for b in translated_block:
+                        b.previous_generations[-1] = obj
+                        b.original = self._janus_object_to_codeblock(obj, name)
+                    results += translated_block
                     continue
                 comment_group_indices = list(
                     range(0, len(comments), self.eval_items_per_request)
@@ -231,10 +232,11 @@ class InlineCommentEvaluator(Evaluator):
                     suffix = re.sub(comment_pattern, "", suffix, flags=re.MULTILINE)
                     temp_obj["outputs"] = [prefix + keeper + suffix]
                     temp_block = self._janus_object_to_codeblock(temp_obj, name)
-                    translated_block = self.translate_block(temp_block, failure_path)
-                    translated_block.previous_generations[-1] = obj
-                    translated_block.original = self._janus_object_to_codeblock(obj, name)
-                    results.append(translated_block)
+                    translated_block = self.translate_blocks(temp_block, failure_path)
+                    for b in translated_block:
+                        b.previous_generations[-1] = obj
+                        b.original = self._janus_object_to_codeblock(obj, name)
+                    results += translated_block
             else:
                 raise ValueError(f"Error: unrecognized janus object type: {type(o)}")
         return results

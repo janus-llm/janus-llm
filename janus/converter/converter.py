@@ -88,6 +88,10 @@ class Converter:
         use_janus_inputs: bool = False,
         target_language: str = "json",
         target_version: str | None = None,
+        input_types: set[str] | str | None = None,
+        input_labels: set[str] | str | None = None,
+        output_type: str | None = None,
+        output_label: str | None = None,
     ) -> None:
         """Initialize a Converter instance.
 
@@ -171,6 +175,11 @@ class Converter:
         self.set_prune_node_types(prune_node_types)
         self.set_db_path(db_path=db_path)
         self.set_db_config(db_config=db_config)
+
+        self._input_types = input_types
+        self._input_labels = input_labels
+        self._output_type = output_type
+        self._output_label = output_label
 
         # Child class must call this. Should we enforce somehow?
         # self._load_parameters()
@@ -588,22 +597,36 @@ class Converter:
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
+    def translate_blocks(
+        self,
+        input_blocks: CodeBlock | list[CodeBlock],
+        failure_path: Path | None = None,
+    ):
+        if isinstance(input_blocks, CodeBlock):
+            input_blocks = [input_blocks]
+        if self._input_types is not None:
+            input_blocks = [b for b in input_blocks if b.block_type in self._input_types]
+        if self._input_labels is not None:
+            input_blocks = [
+                b for b in input_blocks if b.block_label in self._input_labels
+            ]
+        if len(input_blocks) == 0:
+            raise ValueError("Error: no valid input blocks found")
+        return [self.translate_block(b, failure_path) for b in input_blocks]
+
     def translate_block(
         self,
-        input_block: CodeBlock | list[CodeBlock],
-        name: str,
+        input_block: CodeBlock,
         failure_path: Path | None = None,
     ):
         self._load_parameters()
-        if isinstance(input_block, list):
-            return [self.translate_block(b, name, failure_path) for b in input_block]
         t0 = time.time()
         output_block = self._iterative_translate(input_block, failure_path)
         output_block.processing_time = time.time() - t0
         if output_block.translated:
             completeness = output_block.translation_completeness
             log.info(
-                f"[{name}] Translation complete\n"
+                f"[{output_block.name}] Translation complete\n"
                 f"  {completeness:.2%} of input successfully translated\n"
                 f"  Total cost: ${output_block.total_cost:,.2f}\n"
                 f"  Output CodeBlock Structure:\n{input_block.tree_str()}\n"
@@ -611,7 +634,7 @@ class Converter:
 
         else:
             log.error(
-                f"[{name}] Translation failed\n"
+                f"[{output_block.name}] Translation failed\n"
                 f"  Total cost: ${output_block.total_cost:,.2f}\n"
             )
         return output_block
@@ -632,9 +655,8 @@ class Converter:
             code is not guaranteed to be consolidated. To amend this, run
             `Combiner.combine_children` on the block.
         """
-        filename = file.name
         input_block = self._split_file(file)
-        return self.translate_block(input_block, filename, failure_path)
+        return self.translate_blocks(input_block, failure_path)
 
     def translate_janus_file(self, file: Path, failure_path: Path | None = None):
         filename = file.name
@@ -644,7 +666,7 @@ class Converter:
 
     def translate_janus_obj(self, obj: Any, name: str, failure_path: Path | None = None):
         block = self._janus_object_to_codeblock(obj, name)
-        return self.translate_block(block)
+        return self.translate_blocks(block, failure_path)
 
     def translate_text(self, text: str, name: str, failure_path: Path | None = None):
         """
@@ -655,7 +677,7 @@ class Converter:
             failure_path: path to write failure file if translation is not successful
         """
         input_block = self._split_text(text, name)
-        return self.translate_block(input_block, name, failure_path)
+        return self.translate_blocks(input_block, failure_path)
 
     def _iterative_translate(
         self, root: CodeBlock, failure_path: Path | None = None
@@ -669,7 +691,12 @@ class Converter:
         Returns:
             A `TranslatedCodeBlock`
         """
-        translated_root = TranslatedCodeBlock(root, self._target_language)
+        translated_root = TranslatedCodeBlock(
+            root,
+            self._target_language,
+            block_type=self._output_type,
+            block_label=self._output_label,
+        )
         last_prog, prog_delta = 0, 0.1
         stack = [translated_root]
         try:
@@ -810,6 +837,8 @@ class Converter:
             input_tokens=sum(m["input_tokens"] for m in metadatas),
             output_tokens=sum(m["output_tokens"] for m in metadatas),
             converter_name=self.__class__.__name__,
+            type=[m["type"] for m in metadatas],
+            label=[m["label"] for m in metadatas],
         )
 
     def _combine_inputs(self, inputs: list[str]):
@@ -857,6 +886,8 @@ class Converter:
                 input_tokens=block.total_request_input_tokens,
                 output_tokens=block.total_request_output_tokens,
                 converter_name=self.__class__.__name__,
+                type=block.block_type,
+                label=block.block_label,
             ),
             outputs=output_obj,
         )
@@ -883,17 +914,25 @@ class Converter:
     def _janus_object_to_codeblock(self, janus_obj: dict, name: str):
         results = []
         for o in janus_obj["outputs"]:
+            metadata = janus_obj["metadata"]
             if isinstance(o, str):
+                block_label = metadata["label"]
+                if isinstance(block_label, list):
+                    block_label = block_label[0]
+                block_type = metadata["type"]
+                if isinstance(block_type, list):
+                    block_type = block_type[0]
                 code_block = self._split_text(o, name)
-                meta_data = janus_obj["metadata"]
-                code_block.initial_cost = meta_data["cost"]
-                code_block.initial_input_tokens = meta_data["input_tokens"]
-                code_block.initial_output_tokens = meta_data["output_tokens"]
-                code_block.initial_num_requests = meta_data["num_requests"]
-                code_block.initial_processing_time = meta_data["processing_time"]
+                code_block.initial_cost = metadata["cost"]
+                code_block.initial_input_tokens = metadata["input_tokens"]
+                code_block.initial_output_tokens = metadata["output_tokens"]
+                code_block.initial_num_requests = metadata["num_requests"]
+                code_block.initial_processing_time = metadata["processing_time"]
                 code_block.previous_generations = janus_obj.get(
                     "intermediate_outputs", []
                 ) + [janus_obj]
+                code_block.block_type = block_type
+                code_block.block_label = block_label
                 results.append(code_block)
             else:
                 results.append(self._janus_object_to_codeblock(o))

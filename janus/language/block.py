@@ -47,6 +47,8 @@ class CodeBlock:
         affixes: Tuple[str, str] = ("", ""),
         context_tags: dict[str, str] = {},
         previous_generations: list["TranslatedCodeBlock"] = [],
+        block_type: str | None = None,
+        block_label: str | None = None,
     ) -> None:
         self.id: Hashable = id
         self.name: Optional[str] = name
@@ -67,6 +69,8 @@ class CodeBlock:
         self.omit_prefix = True
         self.omit_suffix = False
         self.previous_generations = previous_generations
+        self.block_type = block_type
+        self.block_label = block_label
 
         if self.children:
             self.children[0].omit_prefix = False
@@ -186,7 +190,13 @@ class TranslatedCodeBlock(CodeBlock):
         translated: Whether this block has been successfully translated
     """
 
-    def __init__(self, original: CodeBlock, language: str) -> None:
+    def __init__(
+        self,
+        original: CodeBlock,
+        language: str,
+        block_type: str | None = None,
+        block_label: str | None = None,
+    ) -> None:
         """Create an "empty" `TranslatedCodeBlock` from the given original
 
         Arguments:
@@ -209,10 +219,13 @@ class TranslatedCodeBlock(CodeBlock):
             end_byte=None,
             tokens=0,
             children=[
-                TranslatedCodeBlock(child, language) for child in original.children
+                TranslatedCodeBlock(child, language, block_type, block_label)
+                for child in original.children
             ],
             affixes=original.affixes,
             previous_generations=original.previous_generations,
+            block_type=block_type,
+            block_label=block_label,
         )
         self.original = original
 
@@ -317,6 +330,8 @@ class TranslatedCodeBlock(CodeBlock):
             children=[child.to_codeblock() for child in self.children],
             affixes=self.affixes,
             previous_generations=self.previous_generations + [self],
+            block_type=self.block_type,
+            block_label=self.block_label,
         )
 
     def __iadd__(self, other):

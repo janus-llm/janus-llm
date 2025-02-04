@@ -24,18 +24,29 @@ class ConverterChain(Converter):
             target_language=self._converters[-1]._target_language,
             target_version=self._converters[-1]._target_version,
             use_janus_inputs=self._converters[0]._use_janus_inputs,
+            input_types=self._converters[0]._input_types,
+            input_labels=self._converters[0]._input_labels,
+            output_type=self._converters[-1]._output_type,
+            output_label=self._converters[-1]._output_label,
         )
         super().__init__(**kwargs)
 
     def _run_converters(
         self, translated_code_block, name: str, failure_path: Path | None = None
     ):
+        def _failed(block):
+            if isinstance(block, list):
+                return any(_failed(b) for b in block)
+            return not block.translated
+
+        failed = False
         for i, converter in enumerate(self._converters[1:]):
-            if not translated_code_block.translated:
+            if _failed(translated_code_block):
                 log.info(
                     f"Error: chain failed to translate at step {i}:"
                     f"{self._converters[i].__class__.__name__}"
                 )
+                failed = True
                 break
             if converter._use_janus_inputs:
                 janus_obj = self._converters[i]._get_output_obj(translated_code_block)
@@ -43,10 +54,10 @@ class ConverterChain(Converter):
                     janus_obj, name, failure_path
                 )
             else:
-                translated_code_block = converter.translate_block(
+                translated_code_block = converter.translate_blocks(
                     translated_code_block.to_codeblock(), name, failure_path
                 )
-        if not translated_code_block.translated:
+        if not failed and _failed(translated_code_block):
             log.info(
                 f"Error: chain failed to translate at step {len(self._converters)-1}: "
                 f"{self._converters[-1].__class__.__name__}"
@@ -110,7 +121,7 @@ class ConverterChain(Converter):
         Returns:
             The translated code block
         """
-        translated_code_block = self._converters[0].translate_block(
+        translated_code_block = self._converters[0].translate_blocks(
             input_block, name, failure_path
         )
         translated_code_block = self._run_converters(
