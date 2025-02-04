@@ -10,7 +10,20 @@ Every pipeline is configured with a JSON file made up of a list of JSON objects.
 
 #### Converters
 
+- `Aggregator`: Aggregates multiple products into a single output product.
+- `Partitioner`: Partitions source code in different ways (with an LLM, etc.).
+- `Translator`: Translates source code from one programming language to another.
 
+#### Evaluators
+
+- `InlineCommentEvaluator`: Performs an LLM self evaluation on inline comments.
+- `RequirementEvaluator`: Performs an LLM self evaluation on requirements according to INCOSE standards.
+
+#### Documenters
+
+- `ClozeDocumenter`: Performs cloze commenting on source code.
+- `MultiDocumenter`: Performs multiple documentation tasks on source code.
+- `RequirementsDocumenter`: Generates requirements from source code.
 
 ### Example Single Stage Pipeline
 
@@ -36,6 +49,6 @@ janus pipeline --input janus/cli/ --output janus-translation --pipeline janus/pi
 This is the equivalent to running the following command:
 
 ```shell
-janus translate --input janus/cli/ --output janus-translation --llm my-gpt -l python
+janus translate --input janus/cli/ --output janus-translation --llm my-gpt --source-language python --target-language javascript
 ```
 
