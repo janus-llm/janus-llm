@@ -12,6 +12,9 @@ Usage
 :doc:`documenting`
    How to use LLMs create documentation from code.
 
+:doc:`pipelines`
+   How to use configure pipelines to process code.
+
 :doc:`adding_to_db`
    How to add code to the Chroma vector database.
 
@@ -48,6 +51,7 @@ API
    quickstart
    translating
    documenting
+   pipelines
    adding_to_db
    evaluating
    janus_json

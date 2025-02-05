@@ -8,7 +8,7 @@ Janus LLM (`janus-llm`) allows users to parse and chunk over 100 programming lan
 
 ### Installing via Pip
 
-```shell
+```bash
 pip install janus-llm
 ```
 
@@ -16,7 +16,7 @@ pip install janus-llm
 
 Clone the repository:
 
-```shell
+```bash
 git clone git@github.com:janus-llm/janus-llm.git
 ```
 
@@ -24,7 +24,7 @@ And install the requirements:
 
 **NOTE**: You'll need to have `poetry` installed. If you don't have it, you can install it with `pipx`:
 
-```shell
+```bash
 pipx install poetry
 pipx ensurepath
 export PATH=$PATH:$HOME/.local/bin

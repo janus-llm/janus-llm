@@ -55,13 +55,13 @@ Collection: binary-collection
 
 ## Translating
 
-```shell
+```bash
 janus translate --input-language binary --output-language python --input janus/language/binary/_tests --output python-tests
 ```
 
 Then we can `cat` the translated code we just created with ChatGPT:
 
-```shell
+```bash
 cat python-tests/hello.py
 ```
 

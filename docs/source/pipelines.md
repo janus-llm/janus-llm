@@ -4,7 +4,7 @@ Janus allows for the configuration and running of pipelines as of version 4.4.0.
 
 ## Configuring a Pipeline
 
-Every pipeline is configured with a JSON file made up of a list of JSON objects. Each object represents a step in the pipeline and can be any number of `Converter`s or `Refiner`s. The list of these objects can be seen below in the [Available Compoenents](#available-components) section.
+Every pipeline is configured with a JSON file made up of a list of JSON objects. Each object represents a step in the pipeline and can be any number of `Converter`s or `Refiner`s. The list of these objects can be seen below in the [Available Components](#available-components) section.
 
 ### Available Components
 
@@ -42,13 +42,13 @@ Every pipeline must have at least one component. The following is an example of 
 
 This can then be run with the following command:
 
-```shell
+```bash
 janus pipeline --input janus/cli/ --output janus-translation --pipeline janus/pipelines/translate.json --llm my-gpt -l python
 ```
 
 This is the equivalent to running the following command:
 
-```shell
+```bash
 janus translate --input janus/cli/ --output janus-translation --llm my-gpt --source-language python --target-language javascript
 ```
 

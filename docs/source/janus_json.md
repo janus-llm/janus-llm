@@ -39,7 +39,7 @@ The Janus JSON file is a standardized input/output format for the `janus` CLI to
 
 An example Janus JSON file is shown below. The command used to create this JSON file is here:
 
-```shell
+```bash
 janus translate -i janus/cli  -s python -o test-out -t javascript -L my-gpt -S ast-flex
 ```
 
@@ -62,7 +62,7 @@ janus translate -i janus/cli  -s python -o test-out -t javascript -L my-gpt -S a
 
 To use this same file as an input for a `janus translate` command that translates the code from JavaScript back to Python, you would run the following command:
 
-```shell
+```bash
 janus translate -i test-out/ -s javascript -o test-out-2 -t python -L my-gpt -S ast-flex -j
 ```
 

@@ -10,7 +10,7 @@ There are four different ways you can create documentation from source code:
 
 Before you can generate documentation, you need to add an LLM model to your configuration. You can do this by running the following command:
 
-```shell
+```bash
 janus llm add my-gpt --type OpenAI
 ```
 
@@ -22,7 +22,7 @@ Cloze comments are a way to generate documentation from source code by removing 
 
 ### Example
 
-```shell
+```bash
 janus document  --doc-mode cloze --input janus/cli/ --output janus-docs --llm my-gpt --language python
 ```
 
@@ -32,7 +32,7 @@ Summary generation is a way to generate documentation from source code by summar
 
 ### Example
 
-```shell
+```bash
 janus document  --doc-mode summary --input janus/cli/ --output janus-docs --llm my-gpt --language python
 ```
 
@@ -64,7 +64,7 @@ Requirement generation is a way to generate documentation from source code by ex
 
 When generating requirements, you have to specify the `RequirementsFormatRefiner` to ensure the requirements are formatted correctly with an extra call to the LLM:
 
-```shell
+```bash
 janus document  --doc-mode requirements --input janus/cli/ --output janus-docs --llm my-gpt --language python -r RequirementsFormatRefiner
 ```
 

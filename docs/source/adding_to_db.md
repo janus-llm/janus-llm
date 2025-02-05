@@ -2,31 +2,31 @@
 
 First, initialize the `janus` Chroma DB:
 
-```shell
+```bash
 janus db init
 ```
 
 You can check the status of the DB at any time:
 
-```shell
+```bash
 janus db status
 ```
 
 Then, add a directory of code to the Chroma DB:
 
-```shell
+```bash
 janus db add --input janus --language python janus-collection embedding-model
 ```
 
 To look at the collection you just created:
 
-```shell
+```bash
 janus db ls
 ```
 
 And to peek at the first entry:
 
-```shell
+```bash
 janus db ls janus-collection --peek 1
 ```
 

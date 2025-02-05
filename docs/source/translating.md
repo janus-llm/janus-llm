@@ -6,7 +6,7 @@ First, you need to add an LLM to your configuration. You can do this by running 
 
 ## Adding an LLM
 
-```shell
+```bash
 janus llm add my-gpt --type OpenAI
 ```
 
@@ -14,7 +14,7 @@ This will add an LLM configuration file with the name `my-gpt`.
 
 Output:
 
-```shell
+```bash
 Model config written to /Users/mdoyle/.janus/llm/my-gpt.json
 ```
 
@@ -24,12 +24,12 @@ You can then modify this JSON file with different hyperparameters.
 
 You'll need to specify at least the source language and the target language as well as the input directory and output directory.
 
-```shell
+```bash
 janus translate --source-language matlab --target-language python --input janus/language/treesitter/_tests/languages --output python-tests --llm my-gpt
 ```
 
 Or you can specify that you would like to put the result into the Chroma DB:
 
-```shell
+```bash
 janus translate --source-language matlab --target-language python --input janus/language/treesitter/_tests/languages --output python-tests --llm my-gpt --collection my-collection
 ```

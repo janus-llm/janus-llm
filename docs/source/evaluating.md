@@ -31,8 +31,6 @@ The output of `janus evaluate -h` is seen below:
 │ flesch-grade                 The Flesch Grade Level Readability score                                 │
 │ gunning-fog                  The Gunning-Fog Readability score                                        │
 │ gunning-fog-grade            The Gunning-Fog Grade Level Readability score                            │
-│ llm                          LLM self-evaluation on a target file                                     │
-│ llm-ref                      LLM self-evaluation on a target file and a reference file                │
 │ maintainability              Maintainability score                                                    │
 │ rouge                        ROUGE score                                                              │
 │ similarity-score             Distance between embeddings of strings.                                  │
@@ -50,7 +48,6 @@ There's also an LLM Self Evaluation command. The help command has been trimmed f
  Use an LLM to evaluate its own performance.                                                             
                                                                                                          
 ╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────────╮
-│                                                                            [default: gpt-4o]          │
 │    --evaluation-type         -e                 [incose|comments]          Type of output to          │
 │                                                                            evaluate.                  │
 │                                                                            [default: incose]          │
