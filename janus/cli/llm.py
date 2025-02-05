@@ -46,7 +46,10 @@ def llm_add(
     if model_type == "HuggingFace":
         url = typer.prompt("Enter the model's URL")
         max_tokens = typer.prompt(
-            "Enter the model's maximum tokens", default=4096, type=int
+            "Enter the model's token limit", default=65536, type=int
+        )
+        max_tokens = typer.prompt(
+            "Enter the model's max output tokens", default=8192, type=int
         )
         in_cost = typer.prompt("Enter the cost per input token", default=0, type=float)
         out_cost = typer.prompt("Enter the cost per output token", default=0, type=float)
@@ -62,6 +65,7 @@ def llm_add(
         )
         cfg = {
             "model_type": model_type,
+            "model_id": "gpt-4o",  # This is a placeholder to use the Azure PromptEngine
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": {"input": in_cost, "output": out_cost},

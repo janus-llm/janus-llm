@@ -138,27 +138,35 @@ class ConverterChain(Converter):
             for b in block.previous_generations
         )
         metadata["processing_time"] += sum(
-            b.processing_time
-            if isinstance(b, TranslatedCodeBlock)
-            else b["metadata"]["processing_time"]
+            (
+                b.processing_time
+                if isinstance(b, TranslatedCodeBlock)
+                else b["metadata"]["processing_time"]
+            )
             for b in block.previous_generations
         )
         metadata["num_requests"] += sum(
-            b.total_num_requests
-            if isinstance(b, TranslatedCodeBlock)
-            else b["metadata"]["num_requests"]
+            (
+                b.total_num_requests
+                if isinstance(b, TranslatedCodeBlock)
+                else b["metadata"]["num_requests"]
+            )
             for b in block.previous_generations
         )
         metadata["input_tokens"] += sum(
-            b.total_request_input_tokens
-            if isinstance(b, TranslatedCodeBlock)
-            else b["metadata"]["input_tokens"]
+            (
+                b.total_request_input_tokens
+                if isinstance(b, TranslatedCodeBlock)
+                else b["metadata"]["input_tokens"]
+            )
             for b in block.previous_generations
         )
         metadata["output_tokens"] += sum(
-            b.total_request_output_tokens
-            if isinstance(b, TranslatedCodeBlock)
-            else b["metadata"]["output_tokens"]
+            (
+                b.total_request_output_tokens
+                if isinstance(b, TranslatedCodeBlock)
+                else b["metadata"]["output_tokens"]
+            )
             for b in block.previous_generations
         )
         output_obj["metadata"] = metadata
