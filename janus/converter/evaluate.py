@@ -1,12 +1,11 @@
 import json
 import re
-from copy import deepcopy
 from pathlib import Path
-from typing import Any
 
 from langchain_core.runnables import Runnable, RunnableLambda, RunnableParallel
 
 from janus.converter.converter import Converter
+from janus.language.block import CodeBlock
 from janus.language.combine import JsonCombiner
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
 from janus.parsers.eval_parsers.inline_comment_parser import InlineCommentParser
@@ -78,55 +77,55 @@ class RequirementEvaluator(Evaluator):
             context=self._retriever,
         )
 
-    def translate_janus_obj(self, obj: Any, name: str, failure_path: Path | None = None):
-        results = []
-        for o in obj["outputs"]:
-            if isinstance(o, dict):
-                results += self.translate_janus_obj(o, name, failure_path)
-            elif isinstance(o, str):
-                temp_obj = deepcopy(obj)
-                requirements = json.loads(o)
-                if not requirements:
-                    log.debug(f"[{name}] Skipping empty output")
-                    continue
-                if (
-                    not self.eval_items_per_request
-                    or len(requirements) < self.eval_items_per_request
-                ):
-                    obj_str = json.dumps(
-                        dict(
-                            requirements=requirements,
-                            code=obj["input"],
-                        )
+    def translate_block(self, input_block: CodeBlock, failure_path: Path | None = None):
+        if len(input_block.previous_generations) == 0:
+            raise ValueError(
+                "Error: Evaluating requirements without previous generations"
+            )
+        if isinstance(input_block.previous_generations[-1], dict):
+            input_str = input_block.previous_generations[-1]["input"]
+        else:
+            input_str = input_block.previous_generations[-1].original.text
+        requirements = json.loads(input_block.text)
+        if not requirements:
+            log.debug(f"[{input_block.name}] Skipping empty output")
+            return []
+        if (
+            not self.eval_items_per_request
+            or len(requirements) < self.eval_items_per_request
+        ):
+            obj_str = json.dumps(
+                dict(
+                    requirements=requirements,
+                    code=input_str,
+                )
+            )
+            temp_block = self._split_text(obj_str, input_block.name)
+            translated_block = super().translate_block(temp_block, failure_path)
+        else:
+            translated_block = []
+            for i in range(0, len(requirements), self.eval_items_per_request):
+                working_requirements = requirements[i : i + self.eval_items_per_request]
+                obj_str = json.dumps(
+                    dict(
+                        requirements=working_requirements,
+                        code=input_str,
                     )
-                    temp_obj["outputs"] = [obj_str]
-                    temp_block = self._janus_object_to_codeblock(temp_obj, name)
-                    translated_block = self.translate_blocks(temp_block, failure_path)
-                    for b in translated_block:
-                        b.previous_generations[-1] = obj
-                        b.original = self._janus_object_to_codeblock(obj, name)
-                    results += translated_block
-                else:
-                    for i in range(0, len(requirements), self.eval_items_per_request):
-                        working_requirements = requirements[
-                            i : i + self.eval_items_per_request
-                        ]
-                        obj_str = json.dumps(
-                            dict(
-                                requirements=working_requirements,
-                                code=obj["input"],
-                            )
-                        )
-                        temp_obj["outputs"] = [obj_str]
-                        temp_block = self._janus_object_to_codeblock(temp_obj, name)
-                        translated_block = self.translate_blocks(temp_block, failure_path)
-                        for b in translated_block:
-                            b.previous_generations[-1] = obj
-                            b.original = self._janus_object_to_codeblock(obj, name)
-                        results += translated_block
-            else:
-                raise ValueError(f"Error: unable to find janus object: {type(o)}")
-        return results
+                )
+                temp_block = self._split_text()
+                new_block = super().translate_block(temp_block, failure_path)
+                if not isinstance(new_block, list):
+                    new_block = [new_block]
+                translated_block += new_block
+
+        def _set_original(block):
+            if isinstance(block, list):
+                return [_set_original(b) for b in block]
+            block.original = input_block
+            block.previous_generations = input_block.previous_generations
+            return block
+
+        return _set_original(translated_block)
 
 
 class InlineCommentEvaluator(Evaluator):
@@ -176,67 +175,67 @@ class InlineCommentEvaluator(Evaluator):
         processed_str = re.sub(r"\s*<JANUS_PARTITION>\s*\n", "\n", input_str)
         return processed_str.strip("\n"), missing_comments
 
-    def translate_janus_obj(self, obj: Any, name: str, failure_path: Path | None = None):
+    def translate_block(self, input_block: CodeBlock, failure_path: Path | None = None):
         comment_pattern = r"<(?:INLINE|BLOCK)_COMMENT \w{8}>.*$"
-        results = []
-        input_str = obj["input"]
-        for o in obj["outputs"]:
-            if isinstance(o, dict):
-                results += self.translate_janus_obj(o, name, failure_path)
-            elif isinstance(o, str):
-                temp_obj = deepcopy(obj)
-                generated_comments = json.loads(o)
-                processed_input, missing_comments = self._process_comments(
-                    input_str, generated_comments
-                )
-                if missing_comments:
-                    log.info(f"[{name}] Warning: missing {missing_comments} comments")
-                comments = list(
-                    re.finditer(comment_pattern, processed_input, flags=re.MULTILINE)
-                )
-                if not comments:
-                    log.info(f"[{name}] Skipping commentless block")
-                    continue
-                if (
-                    self.eval_items_per_request is None
-                    or len(comments) < self.eval_items_per_request
-                ):
-                    temp_obj["outputs"] = [processed_input]
-                    temp_block = self._janus_object_to_codeblock(temp_obj, name)
-                    translated_block = self.translate_blocks(temp_block, failure_path)
-                    for b in translated_block:
-                        b.previous_generations[-1] = obj
-                        b.original = self._janus_object_to_codeblock(obj, name)
-                    results += translated_block
-                    continue
-                comment_group_indices = list(
-                    range(0, len(comments), self.eval_items_per_request)
-                )
-                log.debug(
-                    f"[{name}] Block contains more than {self.eval_items_per_request}"
-                    f" comments, splitting {len(comments)} comments into"
-                    f" {len(comment_group_indices)} groups"
-                )
-                for comment_ind in comment_group_indices:
-                    working_comments = comments[
-                        comment_ind : comment_ind + self.eval_items_per_request
-                    ]
-                    start_idx = working_comments[0].start()
-                    end_idx = working_comments[-1].end()
-                    prefix = processed_input[:start_idx]
-                    keeper = processed_input[start_idx:end_idx]
-                    suffix = processed_input[end_idx:]
+        if len(input_block.previous_generations) == 0:
+            raise ValueError(
+                "Error: cannot evaluate block, no previous generations found"
+            )
+        if isinstance(input_block.previous_generations[-1], dict):
+            input_str = input_block.previous_generations[-1]["input"]
+        else:
+            input_str = input_block.previous_generations[-1].original.text
+        generated_comments = json.loads(input_block.text)
+        processed_input, missing_comments = self._process_comments(
+            input_str, generated_comments
+        )
+        if missing_comments:
+            log.info(f"[{input_block.name}] Warning: missing {missing_comments} comments")
+        comments = list(re.finditer(comment_pattern, processed_input, flags=re.MULTILINE))
+        if not comments:
+            log.info(f"[{input_block.name}] Skipping commentless block")
+            return []
+        if (
+            self.eval_items_per_request is None
+            or len(comments) < self.eval_items_per_request
+        ):
+            temp_block = self._split_text(processed_input, input_block.name)
+            translated_block = super().translate_block(temp_block, failure_path)
+        else:
+            comment_group_indices = list(
+                range(0, len(comments), self.eval_items_per_request)
+            )
+            log.debug(
+                f"[{input_block.name}]"
+                f" Block contains more than {self.eval_items_per_request}"
+                f" comments, splitting {len(comments)} comments into"
+                f" {len(comment_group_indices)} groups"
+            )
+            translated_block = []
+            for comment_ind in comment_group_indices:
+                working_comments = comments[
+                    comment_ind : comment_ind + self.eval_items_per_request
+                ]
+                start_idx = working_comments[0].start()
+                end_idx = working_comments[-1].end()
+                prefix = processed_input[:start_idx]
+                keeper = processed_input[start_idx:end_idx]
+                suffix = processed_input[end_idx:]
 
-                    # Strip all comment placeholders outside of the section of interest
-                    prefix = re.sub(comment_pattern, "", prefix, flags=re.MULTILINE)
-                    suffix = re.sub(comment_pattern, "", suffix, flags=re.MULTILINE)
-                    temp_obj["outputs"] = [prefix + keeper + suffix]
-                    temp_block = self._janus_object_to_codeblock(temp_obj, name)
-                    translated_block = self.translate_blocks(temp_block, failure_path)
-                    for b in translated_block:
-                        b.previous_generations[-1] = obj
-                        b.original = self._janus_object_to_codeblock(obj, name)
-                    results += translated_block
-            else:
-                raise ValueError(f"Error: unrecognized janus object type: {type(o)}")
-        return results
+                # Strip all comment placeholders outside of the section of interest
+                prefix = re.sub(comment_pattern, "", prefix, flags=re.MULTILINE)
+                suffix = re.sub(comment_pattern, "", suffix, flags=re.MULTILINE)
+                temp_block = self._split_text(prefix + keeper + suffix, input_block.name)
+                result_block = super().translate_block(temp_block, failure_path)
+                if not isinstance(result_block, list):
+                    result_block = [result_block]
+                translated_block += result_block
+
+        def _set_original(block):
+            if isinstance(block, list):
+                return [_set_original(b) for b in block]
+            block.original = input_block
+            block.previous_generations = input_block.previous_generations
+            return block
+
+        return _set_original(translated_block)

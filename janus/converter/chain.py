@@ -31,103 +31,38 @@ class ConverterChain(Converter):
         )
         super().__init__(**kwargs)
 
-    def _run_converters(
-        self, translated_code_block, name: str, failure_path: Path | None = None
+    def translate_blocks(
+        self, input_blocks: CodeBlock | list[CodeBlock], failure_path: Path | None = None
     ):
-        def _failed(block):
-            if isinstance(block, list):
-                return any(_failed(b) for b in block)
-            return not block.translated
+        input_blocks = self._filter_blocks(input_blocks)
+
+        def _failed(blocks):
+            if isinstance(blocks, list):
+                return any(_failed(b) for b in blocks)
+            return not blocks.translated
+
+        def _to_codeblock(blocks):
+            if isinstance(blocks, list):
+                return [_to_codeblock(b) for b in blocks]
+            return blocks.to_codeblock()
 
         failed = False
-        for i, converter in enumerate(self._converters[1:]):
-            if _failed(translated_code_block):
+        for i, converter in enumerate(self._converters):
+            translated_code_blocks = converter.translate_blocks(input_blocks)
+            if _failed(translated_code_blocks):
                 log.info(
                     f"Error: chain failed to translate at step {i}:"
                     f"{self._converters[i].__class__.__name__}"
                 )
                 failed = True
                 break
-            if converter._use_janus_inputs:
-                janus_obj = self._converters[i]._get_output_obj(translated_code_block)
-                translated_code_block = converter.translate_janus_obj(
-                    janus_obj, name, failure_path
-                )
-            else:
-                translated_code_block = converter.translate_blocks(
-                    translated_code_block.to_codeblock(), name, failure_path
-                )
-        if not failed and _failed(translated_code_block):
+            input_blocks = _to_codeblock(translated_code_blocks)
+        if not failed and _failed(translated_code_blocks):
             log.info(
                 f"Error: chain failed to translate at step {len(self._converters)-1}: "
                 f"{self._converters[-1].__class__.__name__}"
             )
-
-        return translated_code_block
-
-    def translate_file(
-        self, file: Path, failure_path: Path | None = None
-    ) -> TranslatedCodeBlock:
-        """Translate a file using the chain of converters
-
-        Arguments:
-            file: The file to translate
-            failure_path: The path to write the failure file to
-
-        Returns:
-            The translated code block
-        """
-        filename = file.name
-        translated_code_block = self._converters[0].translate_file(file, failure_path)
-        translated_code_block = self._run_converters(
-            translated_code_block, filename, failure_path
-        )
-        return translated_code_block
-
-    def translate_text(
-        self, text: str, name: str, failure_path: Path | None = None
-    ) -> TranslatedCodeBlock:
-        """Translate a text using the chain of converters
-
-        Arguments:
-            text: The text to translate
-            name: The name of the file
-            failure_path: The path to write the failure file to
-
-        Returns:
-            The translated code block
-        """
-        translated_code_block = self._converters[0].translate_text(
-            text, name, failure_path
-        )
-        translated_code_block = self._run_converters(
-            translated_code_block, name, failure_path
-        )
-        return translated_code_block
-
-    def translate_block(
-        self,
-        input_block: CodeBlock | list[CodeBlock],
-        name: str,
-        failure_path: Path | None = None,
-    ) -> TranslatedCodeBlock:
-        """Translate a block of code using the chain of converters
-
-        Arguments:
-            input_block: The block of code to translate
-            name: The name of the file
-            failure_path: The path to write the failure file to
-
-        Returns:
-            The translated code block
-        """
-        translated_code_block = self._converters[0].translate_blocks(
-            input_block, name, failure_path
-        )
-        translated_code_block = self._run_converters(
-            translated_code_block, name, failure_path
-        )
-        return translated_code_block
+        return translated_code_blocks
 
     def _get_output_obj(
         self, block: TranslatedCodeBlock | list, combine_children: bool = True

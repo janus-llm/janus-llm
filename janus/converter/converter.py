@@ -181,6 +181,8 @@ class Converter:
         self._output_type = output_type
         self._output_label = output_label
 
+        self._load_parameters()
+
         # Child class must call this. Should we enforce somehow?
         # self._load_parameters()
 
@@ -597,12 +599,8 @@ class Converter:
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
-    def translate_blocks(
-        self,
-        input_blocks: CodeBlock | list[CodeBlock],
-        failure_path: Path | None = None,
-    ):
-        if isinstance(input_blocks, CodeBlock):
+    def _filter_blocks(self, input_blocks):
+        if not isinstance(input_blocks, list):
             input_blocks = [input_blocks]
 
         def _flatten(blocks):
@@ -615,13 +613,21 @@ class Converter:
             return out
 
         input_blocks = _flatten(input_blocks)
-
         if self._input_types is not None:
             input_blocks = [b for b in input_blocks if b.block_type in self._input_types]
         if self._input_labels is not None:
             input_blocks = [
                 b for b in input_blocks if b.block_label in self._input_labels
             ]
+        return input_blocks
+
+    def translate_blocks(
+        self,
+        input_blocks: CodeBlock | list[CodeBlock],
+        failure_path: Path | None = None,
+    ):
+        input_blocks = self._filter_blocks(input_blocks)
+
         if len(input_blocks) == 0:
             raise ValueError("Error: no valid input blocks found")
         return [self.translate_block(b, failure_path) for b in input_blocks]
