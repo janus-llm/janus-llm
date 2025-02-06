@@ -637,8 +637,11 @@ class Converter:
                 output_blocks.append(self.translate_blocks(b, failure_path))
             else:
                 output_blocks.append(self.translate_block(b, failure_path))
-        if len(output_blocks) == 1:
-            return output_blocks[0]
+        while isinstance(output_blocks, list) and len(output_blocks) == 1:
+            output_blocks = output_blocks[0]
+        if not isinstance(output_blocks, list):
+            output_blocks.previous_generations = code_block.previous_generations
+            return output_blocks
         return BlockCollection(output_blocks, code_block.previous_generations)
 
     def translate_block(
