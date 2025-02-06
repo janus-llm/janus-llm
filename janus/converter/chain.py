@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from janus.converter.converter import Converter
-from janus.language.block import CodeBlock, TranslatedCodeBlock
+from janus.language.block import BlockCollection, CodeBlock, TranslatedCodeBlock
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -34,30 +34,18 @@ class ConverterChain(Converter):
     def translate_blocks(
         self, input_blocks: CodeBlock | list[CodeBlock], failure_path: Path | None = None
     ):
-        input_blocks = self._filter_blocks(input_blocks)
-
-        def _failed(blocks):
-            if isinstance(blocks, list):
-                return any(_failed(b) for b in blocks)
-            return not blocks.translated
-
-        def _to_codeblock(blocks):
-            if isinstance(blocks, list):
-                return [_to_codeblock(b) for b in blocks]
-            return blocks.to_codeblock()
-
         failed = False
         for i, converter in enumerate(self._converters):
             translated_code_blocks = converter.translate_blocks(input_blocks)
-            if _failed(translated_code_blocks):
+            if not translated_code_blocks.translation_completed:
                 log.info(
                     f"Error: chain failed to translate at step {i}:"
                     f"{self._converters[i].__class__.__name__}"
                 )
                 failed = True
                 break
-            input_blocks = _to_codeblock(translated_code_blocks)
-        if not failed and _failed(translated_code_blocks):
+            input_blocks = translated_code_blocks.to_codeblock()
+        if not failed and not translated_code_blocks.translation_completed:
             log.info(
                 f"Error: chain failed to translate at step {len(self._converters)-1}: "
                 f"{self._converters[-1].__class__.__name__}"
@@ -65,54 +53,38 @@ class ConverterChain(Converter):
         return translated_code_blocks
 
     def _get_output_obj(
-        self, block: TranslatedCodeBlock | list, combine_children: bool = True
+        self, block: TranslatedCodeBlock | BlockCollection, combine_children: bool = True
     ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
-        output_obj = super()._get_output_obj(block, combine_children)
         intermediate_outputs = []
-        for i, intermediate_out in enumerate(block.previous_generations):
-            if isinstance(intermediate_out, TranslatedCodeBlock):
-                intermediate_outputs.append(
-                    self._converters[i]._get_output_obj(intermediate_out)
-                )
+        c_index = 0
+        for g in block.previous_generations:
+            if isinstance(g, dict):
+                intermediate_outputs.append(g)
             else:
-                intermediate_outputs.append(intermediate_out)
-        intermediate_outputs.append(self._converters[-1]._get_output_obj(block))
-        output_obj["intermediate_outputs"] = intermediate_outputs
-        metadata = output_obj["metadata"]
-        metadata["cost"] += sum(
-            b.cost if isinstance(b, TranslatedCodeBlock) else b["metadata"]["cost"]
-            for b in block.previous_generations
-        )
-        metadata["processing_time"] += sum(
-            b.processing_time
-            if isinstance(b, TranslatedCodeBlock)
-            else b["metadata"]["processing_time"]
-            for b in block.previous_generations
-        )
-        metadata["num_requests"] += sum(
-            b.total_num_requests
-            if isinstance(b, TranslatedCodeBlock)
-            else b["metadata"]["num_requests"]
-            for b in block.previous_generations
-        )
-        metadata["input_tokens"] += sum(
-            b.total_request_input_tokens
-            if isinstance(b, TranslatedCodeBlock)
-            else b["metadata"]["input_tokens"]
-            for b in block.previous_generations
-        )
-        metadata["output_tokens"] += sum(
-            b.total_request_output_tokens
-            if isinstance(b, TranslatedCodeBlock)
-            else b["metadata"]["output_tokens"]
-            for b in block.previous_generations
-        )
-        output_obj["metadata"] = metadata
-        if len(block.previous_generations) > 0:
-            b = block.previous_generations[0]
-            output_obj["input"] = (
-                (b.original.text or "")
-                if isinstance(b, TranslatedCodeBlock)
-                else b["input"]
+                intermediate_outputs.append(
+                    self._converters[c_index]._get_output_obj(
+                        g, self._converters[c_index]._combine_output
+                    )
+                )
+                c_index += 1
+        assert c_index == len(self._converters) - 1
+        intermediate_outputs.append(
+            self._converters[-1]._get_output_obj(
+                block, self._converters[-1]._combine_output
             )
-        return output_obj
+        )
+        return dict(
+            input=intermediate_outputs[0]["input"],
+            metadata=dict(
+                cost=block.total_cost,
+                processing_time=block.total_processing_time,
+                num_requests=block.total_num_requests,
+                input_tokens=block.total_request_input_tokens,
+                output_tokens=block.total_request_output_tokens,
+                converter_name=self.__class__.__name__,
+                type=block.block_type,
+                label=block.block_label,
+            ),
+            outputs=intermediate_outputs[-1],
+            intermediate_outputs=intermediate_outputs,
+        )

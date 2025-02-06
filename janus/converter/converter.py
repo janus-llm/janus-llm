@@ -16,7 +16,7 @@ from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
 
 from janus.embedding.vectorize import ChromaDBVectorizer
-from janus.language.block import CodeBlock, TranslatedCodeBlock
+from janus.language.block import BlockCollection, CodeBlock, TranslatedCodeBlock
 from janus.language.combine import Combiner
 from janus.language.naive.registry import CUSTOM_SPLITTERS
 from janus.language.splitter import (
@@ -572,12 +572,11 @@ class Converter:
             # For files where translation failed, write to failure path instead
 
             def _has_empty(block):
-                if isinstance(block, list):
-                    return len(block) == 0 or any(_has_empty(b) for b in block)
+                if isinstance(block, BlockCollection):
+                    return len(block.blocks) == 0 or any(
+                        _has_empty(b) for b in block.blocks
+                    )
                 return not block.translated
-
-            while isinstance(out_block, list) and len(out_block) == 1:
-                out_block = out_block[0]
 
             if _has_empty(out_block):
                 if fail_path is not None:
@@ -593,54 +592,62 @@ class Converter:
 
             # Make sure the tree's code has been consolidated at the top level
             #  before writing to file
-            self._combiner.combine(out_block)
+            def _combine(block):
+                if isinstance(block, list):
+                    for b in block:
+                        _combine(b)
+                else:
+                    self._combiner.combine(block)
+
+            _combine(out_block)
             if out_path is not None and (overwrite or not out_path.exists()):
                 self._save_to_file(out_block, out_path)
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
-    def _filter_blocks(self, input_blocks):
-        if not isinstance(input_blocks, list):
-            input_blocks = [input_blocks]
+    def _filter_blocks(self, code_block):
+        if not isinstance(code_block, BlockCollection):
+            input_blocks = [code_block]
+        else:
+            input_blocks = code_block.blocks
 
-        def _flatten(blocks):
-            out = []
-            for item in blocks:
-                if isinstance(item, list):
-                    out += _flatten(item)
-                else:
-                    out.append(item)
-            return out
-
-        input_blocks = _flatten(input_blocks)
         if self._input_types is not None:
-            input_blocks = [b for b in input_blocks if b.block_type in self._input_types]
+            input_blocks = [
+                b
+                for b in input_blocks
+                if isinstance(b, BlockCollection) or b.block_type in self._input_types
+            ]
         if self._input_labels is not None:
             input_blocks = [
-                b for b in input_blocks if b.block_label in self._input_labels
+                b
+                for b in input_blocks
+                if isinstance(b, BlockCollection) or b.block_label in self._input_labels
             ]
         return input_blocks
 
     def translate_blocks(
         self,
-        input_blocks: CodeBlock | list[CodeBlock],
+        code_block: CodeBlock | BlockCollection,
         failure_path: Path | None = None,
-    ):
-        input_blocks = self._filter_blocks(input_blocks)
-
-        if len(input_blocks) == 0:
-            raise ValueError("Error: no valid input blocks found")
-        return [self.translate_block(b, failure_path) for b in input_blocks]
+    ) -> BlockCollection | TranslatedCodeBlock:
+        input_blocks = self._filter_blocks(code_block)
+        output_blocks = []
+        for b in input_blocks:
+            if isinstance(b, BlockCollection):
+                output_blocks.append(self.translate_blocks(b, failure_path))
+            else:
+                output_blocks.append(self.translate_block(b, failure_path))
+        if len(output_blocks) == 1:
+            return output_blocks[0]
+        return BlockCollection(output_blocks, code_block.previous_generations)
 
     def translate_block(
         self,
         input_block: CodeBlock,
         failure_path: Path | None = None,
-    ):
+    ) -> TranslatedCodeBlock:
         self._load_parameters()
-        t0 = time.time()
         output_block = self._iterative_translate(input_block, failure_path)
-        output_block.processing_time = time.time() - t0
         if output_block.translated:
             completeness = output_block.translation_completeness
             log.info(
@@ -866,40 +873,39 @@ class Converter:
         return s
 
     def _get_output_obj(
-        self, block: TranslatedCodeBlock | list, combine_children: bool = True
+        self,
+        block: TranslatedCodeBlock | BlockCollection | dict,
+        combine_children: bool = True,
     ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
-        if isinstance(block, list):
-            # TODO: run on all items in list
-            outputs = [self._get_output_obj(b, combine_children) for b in block]
-            metadata = self._combine_metadata([o["metadata"] for o in outputs])
-            input_agg = self._combine_inputs(o["input"] for o in outputs)
-            return dict(
-                input=input_agg,
-                metadata=metadata,
-                outputs=outputs,
-            )
-        if not combine_children and len(block.children) > 0:
+        if isinstance(block, dict):
+            # output object has already been generated
+            return block
+        if isinstance(block, BlockCollection):
+            outputs = [self._get_output_obj(b, combine_children) for b in block.blocks]
+        elif (
+            not isinstance(block, BlockCollection)
+            and not combine_children
+            and len(block.children) > 0
+        ):
             outputs = self._get_output_obj_children(block)
-            metadata = self._combine_metadata([o["metadata"] for o in outputs])
-            input_agg = self._combine_inputs(o["input"] for o in outputs)
-            return dict(
-                input=input_agg,
-                metadata=metadata,
-                outputs=outputs,
-            )
-        output_obj: str | dict[str, str]
-        if not block.translation_completed:
-            # translation wasn't completed, so combined parsing will likely fail
-            output_obj = [block.complete_text]
         else:
-            output_str = self._parser.parse_combined_output(block.complete_text)
-            output_obj = [output_str]
+            if not block.translation_completed:
+                # translation wasn't completed, so combined parsing will likely fail
+                outputs = [block.complete_text]
+            else:
+                output_str = self._parser.parse_combined_output(block.complete_text)
+                outputs = [output_str]
 
-        return dict(
-            input=block.original.text or "",
+        def _get_input(block):
+            if isinstance(block, BlockCollection):
+                return self._combine_inputs([_get_input(b) for b in block.blocks])
+            return block.original.text or ""
+
+        out = dict(
+            input=_get_input(block),
             metadata=dict(
                 cost=block.total_cost,
-                processing_time=block.processing_time,
+                processing_time=block.total_processing_time,
                 num_requests=block.total_num_requests,
                 input_tokens=block.total_request_input_tokens,
                 output_tokens=block.total_request_output_tokens,
@@ -907,8 +913,14 @@ class Converter:
                 type=block.block_type,
                 label=block.block_label,
             ),
-            outputs=output_obj,
+            outputs=outputs,
         )
+        if len(block.previous_generations) > 0:
+            out["intermediate_outputs"] = [
+                self._get_output_obj(g, combine_children)
+                for g in block.previous_generations
+            ]
+        return out
 
     def _get_output_obj_children(self, block: TranslatedCodeBlock):
         if len(block.children) > 0:
@@ -941,11 +953,6 @@ class Converter:
                 if isinstance(block_type, list):
                     block_type = block_type[0]
                 code_block = self._split_text(o, name)
-                code_block.initial_cost = metadata["cost"]
-                code_block.initial_input_tokens = metadata["input_tokens"]
-                code_block.initial_output_tokens = metadata["output_tokens"]
-                code_block.initial_num_requests = metadata["num_requests"]
-                code_block.initial_processing_time = metadata["processing_time"]
                 code_block.previous_generations = janus_obj.get(
                     "intermediate_outputs", []
                 ) + [janus_obj]
@@ -954,9 +961,8 @@ class Converter:
                 results.append(code_block)
             else:
                 results.append(self._janus_object_to_codeblock(o))
-        while isinstance(results, list) and len(results) == 1:
-            results = results[0]
-        return results
+        previous_generations = janus_obj.get("intermediate_outputs", []) + [janus_obj]
+        return BlockCollection(results, previous_generations)
 
     def __or__(self, other: "Converter"):
         from janus.converter.chain import ConverterChain

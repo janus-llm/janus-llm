@@ -293,6 +293,11 @@ class TranslatedCodeBlock(CodeBlock):
         return children_sum + self.num_requests
 
     @property
+    def total_processing_time(self) -> float:
+        children_sum = sum(c.total_processing_time for c in self.children)
+        return children_sum + self.processing_time
+
+    @property
     def translation_completed(self) -> bool:
         """Whether or not the code block was successfully translated
 
@@ -341,3 +346,54 @@ class TranslatedCodeBlock(CodeBlock):
         self.request_input_tokens += other.request_input_tokens
         self.request_output_tokens += other.request_output_tokens
         return self
+
+
+class BlockCollection:
+    def __init__(
+        self,
+        blocks: list[CodeBlock],
+        previous_generations: list[ForwardRef("BlockCollection")] = [],
+    ):
+        self.blocks = blocks
+        self.previous_generations = previous_generations
+
+    def to_codeblock(self) -> ForwardRef("BlockCollection"):
+        return BlockCollection(
+            [b.to_codeblock() for b in self.blocks], self.previous_generations + [self]
+        )
+
+    @property
+    def total_cost(self):
+        return sum(b.total_cost for b in self.blocks)
+
+    @property
+    def total_processing_time(self):
+        return sum(b.total_processing_time for b in self.blocks)
+
+    @property
+    def total_request_input_tokens(self):
+        return sum(b.total_request_input_tokens for b in self.blocks)
+
+    @property
+    def total_request_output_tokens(self):
+        return sum(b.total_request_output_tokens for b in self.blocks)
+
+    @property
+    def total_num_requests(self):
+        return sum(b.total_num_requests for b in self.blocks)
+
+    @property
+    def block_type(self):
+        return None
+
+    @property
+    def block_label(self):
+        return None
+
+    @property
+    def translation_completed(self):
+        return all(b.translation_completed for b in self.blocks)
+
+    @property
+    def complete(self):
+        return all(b.complete for b in self.blocks)
