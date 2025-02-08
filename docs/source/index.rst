@@ -2,7 +2,8 @@ Janus LLM
 =========
 
 Usage
-----------------------
+-----
+
 :doc:`quickstart`
    How to get started with `janus-llm`.
 
@@ -11,6 +12,9 @@ Usage
 
 :doc:`documenting`
    How to use LLMs create documentation from code.
+
+:doc:`diagramming`
+   How to use LLMs to create diagrams from code.
 
 :doc:`pipelines`
    How to configure pipelines to process code.
