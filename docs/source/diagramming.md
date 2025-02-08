@@ -30,7 +30,7 @@ janus diagram --input janus/language/treesitter/_tests/languages --output diagra
 
 The options for type of diagram are `Class`, `Sequence`, and `Activity`.
 
-You can also specify some refiners in a chain to improve the quality of the diagram:
+You can also specify some [refiners](refiners.md) in a chain to improve the quality of the diagram:
 
 ```bash
 janus diagram --input janus/language/treesitter/_tests/languages --output diagrams --llm my-gpt --language python --diagram-type Activity -r ReflectionRefiner -r CodeFormatRefiner -r FixParserExceptions

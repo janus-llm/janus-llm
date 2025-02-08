@@ -16,6 +16,9 @@ Usage
 :doc:`diagramming`
    How to use LLMs to create diagrams from code.
 
+:doc:`refiners`
+   How to use the `Refiner` classes to refine code.
+
 :doc:`pipelines`
    How to configure pipelines to process code.
 
@@ -55,6 +58,8 @@ API
    quickstart
    translating
    documenting
+   diagramming
+   refiners
    pipelines
    adding_to_db
    evaluating
