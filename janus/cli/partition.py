@@ -31,7 +31,7 @@ def partition(
     output_dir: Annotated[
         Path,
         typer.Option(
-            "--output-dir", "-o", help="The directory to store the partitioned code in."
+            "--output", "-o", help="The directory to store the partitioned code in."
         ),
     ],
     llm_name: Annotated[
@@ -106,6 +106,14 @@ def partition(
             help="The limit on the number of tokens per partition.",
         ),
     ] = 8192,
+    use_janus_inputs: Annotated[
+        bool,
+        typer.Option(
+            "-j",
+            "--use-janus-inputs",
+            help="Present if converter should use janus inputs",
+        ),
+    ] = False,
 ):
     from janus.converter.partition import Partitioner
 
@@ -120,6 +128,7 @@ def partition(
         splitter_type=splitter_type,
         refiner_types=refiner_types,
         partition_token_limit=partition_token_limit,
+        use_janus_inputs=use_janus_inputs,
     )
     partitioner = Partitioner(**kwargs)
     partitioner.translate(input_dir, output_dir, failure_dir, overwrite)

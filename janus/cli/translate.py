@@ -148,6 +148,14 @@ def translate(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
+    use_janus_inputs: Annotated[
+        bool,
+        typer.Option(
+            "-j",
+            "--use-janus-inputs",
+            help="Prsent if translator should use janus files as inputs",
+        ),
+    ] = False,
 ):
     from janus.cli.constants import db_loc, get_collections_config
     from janus.converter.translate import Translator
@@ -173,11 +181,12 @@ def translate(
         target_version=target_version,
         max_prompts=max_prompts,
         max_tokens=max_tokens,
-        prompt_template=prompt_template,
+        prompt_templates=prompt_template,
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
         refiner_types=refiner_types,
         retriever_type=retriever_type,
+        use_janus_inputs=use_janus_inputs,
     )
     translator.translate(input_dir, output_dir, failure_dir, overwrite, collection)

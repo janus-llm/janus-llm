@@ -46,6 +46,7 @@ class CodeBlock:
         embedding_id: Optional[str] = None,
         affixes: Tuple[str, str] = ("", ""),
         context_tags: dict[str, str] = {},
+        previous_generations: list["TranslatedCodeBlock"] = [],
     ) -> None:
         self.id: Hashable = id
         self.name: Optional[str] = name
@@ -65,6 +66,7 @@ class CodeBlock:
         self.complete = True
         self.omit_prefix = True
         self.omit_suffix = False
+        self.previous_generations = previous_generations
 
         if self.children:
             self.children[0].omit_prefix = False
@@ -210,15 +212,16 @@ class TranslatedCodeBlock(CodeBlock):
                 TranslatedCodeBlock(child, language) for child in original.children
             ],
             affixes=original.affixes,
+            previous_generations=original.previous_generations,
         )
         self.original = original
 
         self.complete = original.complete
         self.translated = False
-        self.cost = 0.0
+        self.cost = 0
         self.num_requests = 0
         self.tokens = 0
-        self.processing_time = 0.0
+        self.processing_time = 0
 
         self.request_input_tokens = 0
         self.request_output_tokens = 0
@@ -297,3 +300,29 @@ class TranslatedCodeBlock(CodeBlock):
             if self.original.total_tokens
             else 0
         )
+
+    def to_codeblock(self) -> CodeBlock:
+        return CodeBlock(
+            id=self.id,
+            name=self.name,
+            node_type=self.node_type,
+            language=self.language,
+            text=self.text,
+            start_point=self.start_point,
+            end_point=self.end_point,
+            start_byte=self.start_byte,
+            end_byte=self.end_byte,
+            embedding_id=self.embedding_id,
+            tokens=self.tokens,
+            children=[child.to_codeblock() for child in self.children],
+            affixes=self.affixes,
+            previous_generations=self.previous_generations + [self],
+        )
+
+    def __iadd__(self, other):
+        self.cost += other.cost
+        self.num_requests += other.num_requests
+        self.processing_time += other.processing_time
+        self.request_input_tokens += other.request_input_tokens
+        self.request_output_tokens += other.request_output_tokens
+        return self

@@ -1,5 +1,6 @@
 import click
 import typer
+from rich import print
 from typing_extensions import Annotated
 
 from janus.llm.models_info import MODEL_TYPE_CONSTRUCTORS
@@ -45,7 +46,10 @@ def llm_add(
     if model_type == "HuggingFace":
         url = typer.prompt("Enter the model's URL")
         max_tokens = typer.prompt(
-            "Enter the model's maximum tokens", default=4096, type=int
+            "Enter the model's token limit", default=65536, type=int
+        )
+        max_tokens = typer.prompt(
+            "Enter the model's max output tokens", default=8192, type=int
         )
         in_cost = typer.prompt("Enter the cost per input token", default=0, type=float)
         out_cost = typer.prompt("Enter the cost per output token", default=0, type=float)
@@ -61,6 +65,7 @@ def llm_add(
         )
         cfg = {
             "model_type": model_type,
+            "model_id": "gpt-4o",  # This is a placeholder to use the Azure PromptEngine
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": {"input": in_cost, "output": out_cost},
@@ -172,8 +177,7 @@ def llm_ls(
 ):
     import json
 
-    from janus.cli.constants import MODEL_CONFIG_DIR
-    from janus.llm.models_info import MODEL_TYPES
+    from janus.llm.models_info import MODEL_CONFIG_DIR, MODEL_TYPES
 
     print("\n[green]User-configured models[/green]:")
     for model_cfg in MODEL_CONFIG_DIR.glob("*.json"):

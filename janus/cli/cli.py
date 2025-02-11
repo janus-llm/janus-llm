@@ -10,6 +10,7 @@ from janus.cli.document import document
 from janus.cli.embedding import embedding
 from janus.cli.llm import llm
 from janus.cli.partition import partition
+from janus.cli.pipeline import pipeline
 from janus.cli.self_eval import llm_self_eval
 from janus.cli.translate import translate
 from janus.metrics.cli import evaluate
@@ -100,6 +101,11 @@ translate = app.command(
     help="Translate code from one language to another using an LLM.",
     no_args_is_help=True,
 )(translate)
+
+pipeline = app.command(
+    help="Run a janus pipeline",
+    no_args_is_help=True,
+)(pipeline)
 
 app.add_typer(db, name="db")
 app.add_typer(llm, name="llm")
