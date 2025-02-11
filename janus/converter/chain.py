@@ -75,16 +75,9 @@ class ConverterChain(Converter):
         )
         return dict(
             input=intermediate_outputs[0]["input"],
-            metadata=dict(
-                cost=block.total_cost,
-                processing_time=block.total_processing_time,
-                num_requests=block.total_num_requests,
-                input_tokens=block.total_request_input_tokens,
-                output_tokens=block.total_request_output_tokens,
-                converter_name=self.__class__.__name__,
-                type=block.block_type,
-                label=block.block_label,
+            metadata=self._combine_metadata(
+                [i["metadata"] for i in intermediate_outputs]
             ),
-            outputs=intermediate_outputs[-1],
+            outputs=intermediate_outputs[-1]["outputs"],
             intermediate_outputs=intermediate_outputs,
         )

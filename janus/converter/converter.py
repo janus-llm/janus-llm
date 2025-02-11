@@ -612,12 +612,16 @@ class Converter:
             input_blocks = code_block.blocks
 
         if self._input_types is not None:
+            if isinstance(self._input_types, str):
+                self._input_types = set([self._input_types])
             input_blocks = [
                 b
                 for b in input_blocks
                 if isinstance(b, BlockCollection) or b.block_type in self._input_types
             ]
         if self._input_labels is not None:
+            if isinstance(self._input_labels, str):
+                self._input_labels = set([self._input_labels])
             input_blocks = [
                 b
                 for b in input_blocks
@@ -919,10 +923,13 @@ class Converter:
             outputs=outputs,
         )
         if len(block.previous_generations) > 0:
-            out["intermediate_outputs"] = [
-                self._get_output_obj(g, combine_children)
-                for g in block.previous_generations
-            ]
+            intermediate_outputs = []
+            for p in block.previous_generations:
+                if isinstance(p, dict):
+                    # preserve intermediate outputs from previous runs
+                    intermediate_outputs.append(p)
+            if len(intermediate_outputs) > 0:
+                out["intermediate_outputs"] = intermediate_outputs
         return out
 
     def _get_output_obj_children(self, block: TranslatedCodeBlock):
