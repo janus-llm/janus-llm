@@ -40,7 +40,7 @@ Module Contents
    method to be overridden to track parameter updates in _changed_attrs.
 
 
-.. py:class:: Converter(model = 'gpt-4o', model_arguments = {}, source_language = 'fortran', max_prompts = 10, max_tokens = None, prompt_template = 'simple', db_path = None, db_config = None, protected_node_types = (), prune_node_types = (), splitter_type = 'file', refiner_types = [JanusRefiner], retriever_type = None)
+.. py:class:: Converter(model = 'gpt-4o', model_arguments = {}, source_language = 'fortran', max_prompts = 10, max_tokens = None, prompt_templates = ['simple'], db_path = None, db_config = None, protected_node_types = (), prune_node_types = (), splitter_type = 'file', refiner_types = [JanusRefiner], retriever_type = None, combine_output = True, use_janus_inputs = False, target_language = 'json', target_version = None)
 
    Parent class that converts code into something else.
 
@@ -58,7 +58,7 @@ Module Contents
    :param max_prompts: The maximum number of prompts to try before giving up.
    :param max_tokens: The maximum number of tokens to use in the LLM. If `None`, the
                       converter will use half the model's token limit.
-   :param prompt_template: The name of the prompt template to use.
+   :param prompt_templates: The name of the prompt templates to use.
    :param db_path: The path to the database to use for vectorization.
    :param db_config: The configuration for the database.
    :param protected_node_types: A set of node types that aren't to be merged.
@@ -73,6 +73,10 @@ Module Contents
                           - "active_usings"
                           - "language_docs"
                           - None
+   :param combine_output: Whether to combine the output into a single file or not.
+   :param use_janus_inputs: Whether to use janus inputs or not.
+   :param target_language: The target programming language.
+   :param target_version: The target programming language version.
 
 
    .. py:method:: set_model(model_name, **custom_arguments)
@@ -87,12 +91,12 @@ Module Contents
 
 
 
-   .. py:method:: set_prompt(prompt_template)
+   .. py:method:: set_prompts(prompt_templates)
 
       Validate and set the prompt template name.
 
-      :param prompt_template: name of prompt template directory
-                              (see janus/prompts/templates) or path to a directory.
+      :param prompt_templates: name of prompt template directories
+                               (see janus/prompts/templates) or paths to directories.
 
 
 
@@ -100,8 +104,7 @@ Module Contents
 
       Validate and set the prompt template name.
 
-      :param prompt_template: name of prompt template directory
-                              (see janus/prompts/templates) or path to a directory.
+      :param splitter_type: the type of splitter to use
 
 
 
@@ -157,6 +160,12 @@ Module Contents
    .. py:method:: set_db_config(db_config)
 
 
+   .. py:method:: get_chain()
+
+      Gets a chain that can be executed by langchain
+
+
+
    .. py:method:: translate(input_directory, output_directory = None, failure_directory = None, overwrite = False, collection_name = None)
 
       Convert code in the input directory from the source language to the target
@@ -169,6 +178,9 @@ Module Contents
 
 
 
+   .. py:method:: translate_block(input_block, name, failure_path = None)
+
+
    .. py:method:: translate_file(file, failure_path = None)
 
       Translate a single file.
@@ -179,6 +191,56 @@ Module Contents
       :returns: A `TranslatedCodeBlock` object. This block does not have a path set, and its
                 code is not guaranteed to be consolidated. To amend this, run
                 `Combiner.combine_children` on the block.
+
+
+
+   .. py:method:: translate_janus_file(file, failure_path = None)
+
+
+   .. py:method:: translate_janus_obj(obj, name, failure_path = None)
+
+
+   .. py:method:: translate_text(text, name, failure_path = None)
+
+      Translates given text
+      :param text: text to translate
+      :param name: the name of the text (filename if from a file)
+      :param failure_path: path to write failure file if translation is not successful
+
+
+
+   .. py:property:: source_language
+
+
+   .. py:property:: target_language
+
+
+   .. py:property:: target_version
+
+
+   .. py:method:: set_target_language(target_language, target_version)
+
+      Validate and set the target language.
+
+      The affected objects will not be updated until translate() is called.
+
+      :param target_language: The target programming language.
+      :param target_version: The target version of the target programming language.
+
+
+
+   .. py:method:: eval_obj(target, metric_func, *args, **kwargs)
+      :classmethod:
+
+
+
+   .. py:method:: eval_obj_noreference(target, metric_func, *args, **kwargs)
+      :classmethod:
+
+
+
+   .. py:method:: eval_obj_reference(target, metric_func, reference, *args, **kwargs)
+      :classmethod:
 
 
 

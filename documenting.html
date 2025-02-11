@@ -1,0 +1,519 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<meta property="og:title" content="Documenting" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="documenting.html" />
+<meta property="og:site_name" content="Janus" />
+<meta property="og:description" content="There are four different ways you can create documentation from source code: Cloze Commenting, Summary Generation, Requirement Generation. Adding a Model: Before you can generate documentation, you..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="/_images/social_previews/summary_documenting_b9d6c0ab.png" />
+<meta property="og:image:alt" content="There are four different ways you can create documentation from source code: Cloze Commenting, Summary Generation, Requirement Generation. Adding a Model: Be..." />
+<meta name="description" content="There are four different ways you can create documentation from source code: Cloze Commenting, Summary Generation, Requirement Generation. Adding a Model: Before you can generate documentation, you..." />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Diagramming" href="diagramming.html" /><link rel="prev" title="Translating" href="translating.html" />
+
+    <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 6.2.1 and Furo 2023.09.10 -->
+        <title>Documenting - Janus 4.4.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">Janus 4.4.5 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/janus_logo.png" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">Janus 4.4.5 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="translating.html">Translating</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Documenting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diagramming.html">Diagramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="refiners.html">Refiners</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipelines.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adding_to_db.html">Adding a Directory to a Chroma Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="evaluating.html">Evaluating</a></li>
+<li class="toctree-l1"><a class="reference internal" href="janus_json.html">Janus JSON Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reading_binaries.html">Reading Binaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supported_languages.html">Supported Languages</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="autoapi/index.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/llm/index.html">llm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/cli/index.html">cli</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/uml/index.html">uml</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/janus/index.html">janus</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of janus</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/janus/converter/index.html">janus.converter</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of janus.converter</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/aggregator/index.html">janus.converter.aggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/chain/index.html">janus.converter.chain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/converter/index.html">janus.converter.converter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/diagram/index.html">janus.converter.diagram</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/document/index.html">janus.converter.document</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/evaluate/index.html">janus.converter.evaluate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/partition/index.html">janus.converter.partition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/requirements/index.html">janus.converter.requirements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/translate/index.html">janus.converter.translate</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/janus/embedding/index.html">janus.embedding</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of janus.embedding</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/embedding/collections/index.html">janus.embedding.collections</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/embedding/database/index.html">janus.embedding.database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/embedding/embedding_models_info/index.html">janus.embedding.embedding_models_info</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/embedding/vectorize/index.html">janus.embedding.vectorize</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/janus/language/index.html">janus.language</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of janus.language</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/janus/language/alc/index.html">janus.language.alc</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of janus.language.alc</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/janus/language/alc/alc/index.html">janus.language.alc.alc</a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/janus/language/binary/index.html">janus.language.binary</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of janus.language.binary</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/janus/language/binary/binary/index.html">janus.language.binary.binary</a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/janus/language/mumps/index.html">janus.language.mumps</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of janus.language.mumps</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/janus/language/mumps/mumps/index.html">janus.language.mumps.mumps</a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/janus/language/mumps/patterns/index.html">janus.language.mumps.patterns</a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/janus/language/naive/index.html">janus.language.naive</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of janus.language.naive</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/janus/language/naive/basic_splitter/index.html">janus.language.naive.basic_splitter</a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/janus/language/naive/chunk_splitter/index.html">janus.language.naive.chunk_splitter</a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/janus/language/naive/registry/index.html">janus.language.naive.registry</a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/janus/language/naive/simple_ast/index.html">janus.language.naive.simple_ast</a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/janus/language/naive/tag_splitter/index.html">janus.language.naive.tag_splitter</a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/janus/language/treesitter/index.html">janus.language.treesitter</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of janus.language.treesitter</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/janus/language/treesitter/treesitter/index.html">janus.language.treesitter.treesitter</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/language/block/index.html">janus.language.block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/language/combine/index.html">janus.language.combine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/language/file/index.html">janus.language.file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/language/node/index.html">janus.language.node</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/language/splitter/index.html">janus.language.splitter</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/janus/llm/index.html">janus.llm</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of janus.llm</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/llm/model_callbacks/index.html">janus.llm.model_callbacks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/llm/models_info/index.html">janus.llm.models_info</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/janus/metrics/index.html">janus.metrics</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of janus.metrics</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/metrics/bleu/index.html">janus.metrics.bleu</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/metrics/chrf/index.html">janus.metrics.chrf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/metrics/cli/index.html">janus.metrics.cli</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/metrics/complexity_metrics/index.html">janus.metrics.complexity_metrics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/metrics/file_pairing/index.html">janus.metrics.file_pairing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/metrics/metric/index.html">janus.metrics.metric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/metrics/reading/index.html">janus.metrics.reading</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/metrics/rouge_score/index.html">janus.metrics.rouge_score</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/metrics/similarity/index.html">janus.metrics.similarity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/metrics/splitting/index.html">janus.metrics.splitting</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/janus/parsers/index.html">janus.parsers</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of janus.parsers</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/parsers/code_parser/index.html">janus.parsers.code_parser</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/parsers/doc_parser/index.html">janus.parsers.doc_parser</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/parsers/eval_parser/index.html">janus.parsers.eval_parser</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/parsers/parser/index.html">janus.parsers.parser</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/parsers/partition_parser/index.html">janus.parsers.partition_parser</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/parsers/reqs_parser/index.html">janus.parsers.reqs_parser</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/parsers/uml/index.html">janus.parsers.uml</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/janus/prompts/index.html">janus.prompts</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of janus.prompts</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/prompts/prompt/index.html">janus.prompts.prompt</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/janus/utils/index.html">janus.utils</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of janus.utils</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/utils/enums/index.html">janus.utils.enums</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/utils/logger/index.html">janus.utils.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/utils/pdf_docs_reader/index.html">janus.utils.pdf_docs_reader</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/utils/progress/index.html">janus.utils.progress</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/format/index.html">format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/diagram/index.html">diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/refiner/index.html">refiner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/pipeline/index.html">pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/database/index.html">database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/document/index.html">document</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/embedding/index.html">embedding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/partition/index.html">partition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/aggregate/index.html">aggregate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/self_eval/index.html">self_eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/translate/index.html">translate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/constants/index.html">constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/retriever/index.html">retriever</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/incose_parser/index.html">incose_parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/decompile_script/index.html">decompile_script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/inline_comment_parser/index.html">inline_comment_parser</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="documenting">
+<h1>Documenting<a class="headerlink" href="#documenting" title="Permalink to this heading">#</a></h1>
+<p>There are four different ways you can create documentation from source code:</p>
+<ol class="arabic simple">
+<li><p>Cloze Commenting</p></li>
+<li><p>Summary Generation</p></li>
+<li><p>Requirement Generation</p></li>
+</ol>
+<section id="adding-a-model">
+<h2>Adding a Model<a class="headerlink" href="#adding-a-model" title="Permalink to this heading">#</a></h2>
+<p>Before you can generate documentation, you need to add an LLM model to your configuration. You can do this by running the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>janus<span class="w"> </span>llm<span class="w"> </span>add<span class="w"> </span>my-gpt<span class="w"> </span>--type<span class="w"> </span>OpenAI
+</pre></div>
+</div>
+<p>And then follow the CLI instructions to add the model to your configuration.</p>
+</section>
+<section id="cloze-commenting">
+<h2>Cloze Commenting<a class="headerlink" href="#cloze-commenting" title="Permalink to this heading">#</a></h2>
+<p>Cloze comments are a way to generate documentation from source code by removing comments that already exist in the source code and replace them with LLM-generated comments.</p>
+<section id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>janus<span class="w"> </span>document<span class="w">  </span>--doc-mode<span class="w"> </span>cloze<span class="w"> </span>--input<span class="w"> </span>janus/cli/<span class="w"> </span>--output<span class="w"> </span>janus-docs<span class="w"> </span>--llm<span class="w"> </span>my-gpt<span class="w"> </span>--language<span class="w"> </span>python
+</pre></div>
+</div>
+</section>
+</section>
+<section id="summary-generation">
+<h2>Summary Generation<a class="headerlink" href="#summary-generation" title="Permalink to this heading">#</a></h2>
+<p>Summary generation is a way to generate documentation from source code by summarizing the source code into a single paragraph.</p>
+<section id="id1">
+<h3>Example<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>janus<span class="w"> </span>document<span class="w">  </span>--doc-mode<span class="w"> </span>summary<span class="w"> </span>--input<span class="w"> </span>janus/cli/<span class="w"> </span>--output<span class="w"> </span>janus-docs<span class="w"> </span>--llm<span class="w"> </span>my-gpt<span class="w"> </span>--language<span class="w"> </span>python
+</pre></div>
+</div>
+</section>
+<section id="output">
+<h3>Output<a class="headerlink" href="#output" title="Permalink to this heading">#</a></h3>
+<p>This is the output JSON for <code class="docutils literal notranslate"><span class="pre">translate.py</span></code> (trimmed for brevity):</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;input&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;cost&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.00717475</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;processing_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">4.554493188858032</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;num_requests&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;input_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1465</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;output_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">286</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;outputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;This Python code defines a command-line interface (CLI) function `translate` using Typer and Click libraries, which facilitates the translation of source code from one programming language to another. The function is part of a larger system that utilizes a language model to perform the translation, allowing users to specify various options such as the source and target languages, directories for input and output files, and parameters that influence the translation process like the model&#39;s temperature and maximum prompts. The function also includes options for handling translation failures, specifying custom splitters and refiners, and controlling whether existing files in the output directory should be overwritten. It is designed to enable flexible and customizable translations, making it suitable for different programming languages and versions, and it can integrate with a database to store translated results if desired.\n\nThe expected initial state includes having a directory (`input_dir`) containing source code files to be translated and specifying the source language (`source_lang`) and target language (`target_lang`). The user also needs to provide the desired output directory (`output_dir`) and possibly other optional parameters to customize the translation process. The terminal state results in translated code files being stored in the specified output directory. Potential exceptions that might arise include a `ValueError` if the output files would overwrite the input files due to overlapping directories and languages, or if invalid parameters are provided. Other issues may occur if directory paths are incorrect or if there are problems with the specified language model.&quot;</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="requirement-generation">
+<h2>Requirement Generation<a class="headerlink" href="#requirement-generation" title="Permalink to this heading">#</a></h2>
+<p>Requirement generation is a way to generate documentation from source code by extracting requirements.</p>
+<section id="id2">
+<h3>Example<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h3>
+<p>When generating requirements, you have to specify the <code class="docutils literal notranslate"><span class="pre">RequirementsFormatRefiner</span></code> to ensure the requirements are formatted correctly with an extra call to the LLM:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>janus<span class="w"> </span>document<span class="w">  </span>--doc-mode<span class="w"> </span>requirements<span class="w"> </span>--input<span class="w"> </span>janus/cli/<span class="w"> </span>--output<span class="w"> </span>janus-docs<span class="w"> </span>--llm<span class="w"> </span>my-gpt<span class="w"> </span>--language<span class="w"> </span>python<span class="w"> </span>-r<span class="w"> </span>RequirementsFormatRefiner
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h3>Output<a class="headerlink" href="#id3" title="Permalink to this heading">#</a></h3>
+<p>This is the output JSON for <code class="docutils literal notranslate"><span class="pre">translate.py</span></code> (trimmed for brevity):</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;input&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;cost&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.065085</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;processing_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">31.34817886352539</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;num_requests&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;input_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5280</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;output_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2579</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;outputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;[[\&quot;The tool must accept an input directory containing the source code files to be translated.\&quot;, \&quot;The tool must accept the source programming language of the files in the input directory.\&quot;, \&quot;The tool must accept an output directory to store the translated code.\&quot;, \&quot;The tool must accept the target programming language for translation.\&quot;, \&quot;The tool must accept the custom name of the language model to be used for translation.\&quot;, \&quot;The tool must optionally accept a directory to store failure files during translation.\&quot;, \&quot;The tool must accept a maximum number of prompts for a single functional block before exiting.\&quot;, \&quot;The tool must accept an option to control whether existing files in the output directory should be overwritten.\&quot;, \&quot;The tool must accept an option to skip including context information in translation prompts.\&quot;, \&quot;The tool must accept a sampling temperature for model configuration.\&quot;, \&quot;The tool must accept the name or path of the prompt template directory.\&quot;, \&quot;The tool must optionally accept a collection name to store translated results in a Chroma DB collection.\&quot;, \&quot;The tool must accept the name of a custom splitter to be used for splitting source code blocks.\&quot;, \&quot;The tool must accept a list of refiner types to use in the refinement chain.\&quot;, \&quot;The tool must optionally accept the name of a custom retriever to use.\&quot;, \&quot;The tool must optionally accept the maximum number of tokens the model should process.\&quot;, \&quot;The tool must accept an option to use Janus files as inputs for translation.\&quot;, \&quot;The tool must handle large directories of source code files efficiently.\&quot;, \&quot;The tool must minimize the translation time through optimized processing.\&quot;, \&quot;The tool must provide clear and concise help messages for each CLI option.\&quot;, \&quot;The tool must log errors and important events to facilitate debugging and monitoring.\&quot;, \&quot;The tool must be compatible with modern operating systems and environments.\&quot;, \&quot;The tool must be designed to facilitate easy porting to other programming languages.\&quot;, \&quot;The tool must ensure that output files do not overwrite input files.\&quot;, \&quot;The tool must handle translation errors gracefully and store relevant failure information.\&quot;, \&quot;The system must translate source code files from one programming language to another using a specified language model.\&quot;, \&quot;The system must provide various options to customize the translation process, including language selection, model configuration, prompt templates, and failure handling.\&quot;, \&quot;The system must support including or skipping context information in translation prompts based on user preference.\&quot;, \&quot;The system must support custom refiners and splitters to improve translation quality and handle different source code structures.\&quot;, \&quot;The tool must provide a command-line interface with options and help messages for user interaction.\&quot;, \&quot;The tool must interface with predefined language models and configurations.\&quot;, \&quot;The tool must interact with the file system to read input files and write output files.\&quot;, \&quot;The tool must be installable via common package managers for the target programming language.\&quot;, \&quot;The tool must comply with relevant software licensing and copyright laws.\&quot;, \&quot;The tool must include documentation for installation, usage, and configuration options.\&quot;]]&quot;</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="diagramming.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Diagramming</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="translating.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Translating</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, MITRE
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Documenting</a><ul>
+<li><a class="reference internal" href="#adding-a-model">Adding a Model</a></li>
+<li><a class="reference internal" href="#cloze-commenting">Cloze Commenting</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#summary-generation">Summary Generation</a><ul>
+<li><a class="reference internal" href="#id1">Example</a></li>
+<li><a class="reference internal" href="#output">Output</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#requirement-generation">Requirement Generation</a><ul>
+<li><a class="reference internal" href="#id2">Example</a></li>
+<li><a class="reference internal" href="#id3">Output</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    </body>
+</html>

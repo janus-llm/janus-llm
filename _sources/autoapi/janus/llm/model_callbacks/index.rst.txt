@@ -92,6 +92,27 @@ Module Contents
 
    .. py:method:: on_chat_model_start(*args, **kwargs)
 
+      Run when a chat model starts running.
+
+      **ATTENTION**: This method is called for chat models. If you're implementing
+          a handler for a non-chat model, you should use on_llm_start instead.
+
+      :param serialized: The serialized chat model.
+      :type serialized: Dict[str, Any]
+      :param messages: The messages.
+      :type messages: List[List[BaseMessage]]
+      :param run_id: The run ID. This is the ID of the current run.
+      :type run_id: UUID
+      :param parent_run_id: The parent run ID. This is the ID of the parent run.
+      :type parent_run_id: UUID
+      :param tags: The tags.
+      :type tags: Optional[List[str]]
+      :param metadata: The metadata.
+      :type metadata: Optional[Dict[str, Any]]
+      :param kwargs: Additional keyword arguments.
+      :type kwargs: Any
+
+
 
    .. py:method:: on_llm_start(serialized, prompts, **kwargs)
 

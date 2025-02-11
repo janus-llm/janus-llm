@@ -27,9 +27,19 @@ Module Contents
 
 .. py:data:: log
 
-.. py:class:: MultiDoc
+.. py:class:: MultiDoc(**data)
 
    Bases: :py:obj:`langchain_core.pydantic_v1.BaseModel`
+
+
+   Mixin to provide __str__, __repr__, and __pretty__ methods. See #884 for more details.
+
+   __pretty__ is used by [devtools](https://python-devtools.helpmanual.io/) to provide human readable representations
+   of objects.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises ValidationError if the input data cannot be parsed to form a valid model.
 
 
    .. py:attribute:: docstring
@@ -47,6 +57,33 @@ Module Contents
 .. py:class:: MultiDocumentationParser
 
    Bases: :py:obj:`janus.parsers.parser.JanusParser`, :py:obj:`langchain.output_parsers.PydanticOutputParser`
+
+
+   Base class to parse the output of an LLM call.
+
+   Output parsers help structure language model responses.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+       class BooleanOutputParser(BaseOutputParser[bool]):
+           true_val: str = "YES"
+           false_val: str = "NO"
+
+           def parse(self, text: str) -> bool:
+               cleaned_text = text.strip().upper()
+               if cleaned_text not in (self.true_val.upper(), self.false_val.upper()):
+                   raise OutputParserException(
+                       f"BooleanOutputParser expected output value to either be "
+                       f"{self.true_val} or {self.false_val} (case-insensitive). "
+                       f"Received {cleaned_text}."
+                   )
+               return cleaned_text == self.true_val.upper()
+
+           @property
+           def _type(self) -> str:
+               return "boolean_output_parser"
 
 
    .. py:attribute:: block_name
@@ -67,6 +104,13 @@ Module Contents
 
 
    .. py:method:: parse(text)
+
+      Parse a single string model output into some structure.
+
+      :param text: String output of a language model.
+
+      :returns: Structured output.
+
 
 
    .. py:method:: parse_combined_output(text)
@@ -92,6 +136,33 @@ Module Contents
    Bases: :py:obj:`janus.parsers.parser.JanusParser`
 
 
+   Base class to parse the output of an LLM call.
+
+   Output parsers help structure language model responses.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+       class BooleanOutputParser(BaseOutputParser[bool]):
+           true_val: str = "YES"
+           false_val: str = "NO"
+
+           def parse(self, text: str) -> bool:
+               cleaned_text = text.strip().upper()
+               if cleaned_text not in (self.true_val.upper(), self.false_val.upper()):
+                   raise OutputParserException(
+                       f"BooleanOutputParser expected output value to either be "
+                       f"{self.true_val} or {self.false_val} (case-insensitive). "
+                       f"Received {cleaned_text}."
+                   )
+               return cleaned_text == self.true_val.upper()
+
+           @property
+           def _type(self) -> str:
+               return "boolean_output_parser"
+
+
    .. py:attribute:: expected_keys
       :type:  set[str]
 
@@ -108,6 +179,13 @@ Module Contents
 
 
    .. py:method:: parse(text)
+
+      Parse a single string model output into some structure.
+
+      :param text: String output of a language model.
+
+      :returns: Structured output.
+
 
 
    .. py:method:: parse_combined_output(text)
