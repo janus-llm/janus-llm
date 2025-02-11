@@ -1,6 +1,6 @@
 
 <p align="center">
-    <img src="https://github.com/janus-llm/janus-llm/blob/public/assets/icons/logo_horizontal.png">
+    <img src="https://raw.githubusercontent.com/janus-llm/janus-llm/public/assets/icons/logo_horizontal.png">
 </p>
 <p align="center">
 <a href="https://github.com/janus-llm/janus-llm/actions/workflows/pages.yml" target="_blank">
