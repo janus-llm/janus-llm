@@ -24,12 +24,12 @@ class ConverterPool(Converter):
     def translate_blocks(
         self, input_blocks: CodeBlock | BlockCollection, failure_path: Path | None = None
     ):
-        output_blocks = [c.translate_blocks(input_blocks) for c in self._converters]
-        while isinstance(output_blocks, list) and len(output_blocks) == 1:
-            output_blocks = output_blocks[0]
-        if not isinstance(output_blocks, list):
-            output_blocks.previous_generations = input_blocks.previous_generations
-            return output_blocks
+        output_blocks = []
+        for c in self._converters:
+            collection = c.translate_blocks(input_blocks)
+            for b in collection.blocks:
+                c._combiner.combine(b)
+            output_blocks += collection.blocks
         return BlockCollection(output_blocks, input_blocks.previous_generations)
 
     def _combine_inputs(self, inputs: list[str]):
@@ -40,10 +40,12 @@ class ConverterPool(Converter):
         block: TranslatedCodeBlock | BlockCollection | dict,
         combine_children: bool = True,
     ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
-        outputs = [
-            c._get_output_obj(b, c._combine_output)
-            for c, b in zip(self._converters, block.blocks)
-        ]
+        outputs = []
+        for b in block.blocks:
+            for c in self._converters:
+                if c == b.converter:
+                    outputs.append(c._get_output_obj(b))
+                    break
 
         def _get_input(block):
             if isinstance(block, BlockCollection):
@@ -65,8 +67,11 @@ class ConverterPool(Converter):
             outputs=outputs,
         )
         if len(block.previous_generations) > 0:
-            out["intermediate_outputs"] = [
+            intermediate_outputs = [
                 self._get_output_obj(g, combine_children)
                 for g in block.previous_generations
+                if isinstance(g, dict)
             ]
+            if len(intermediate_outputs) > 0:
+                out["intermediate_outputs"] = intermediate_outputs
         return out

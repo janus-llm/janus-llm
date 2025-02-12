@@ -52,6 +52,14 @@ class ConverterChain(Converter):
             )
         return translated_code_blocks
 
+    def _combine_metadata(self, metadatas: list[dict]):
+        metadata = super()._combine_metadata(metadatas)
+        if isinstance(metadata["type"], list):
+            metadata["type"] = metadata["type"][-1]
+        if isinstance(metadata["label"], list):
+            metadata["label"] = metadata["label"][-1]
+        return metadata
+
     def _get_output_obj(
         self, block: TranslatedCodeBlock | BlockCollection, combine_children: bool = True
     ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:

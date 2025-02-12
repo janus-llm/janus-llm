@@ -1,6 +1,7 @@
 import functools
 import json
 import time
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -592,25 +593,18 @@ class Converter:
 
             # Make sure the tree's code has been consolidated at the top level
             #  before writing to file
-            def _combine(block):
-                if isinstance(block, list):
-                    for b in block:
-                        _combine(b)
-                else:
-                    self._combiner.combine(block)
-
-            _combine(out_block)
+            for b in out_block.blocks:
+                self._combiner.combine(b)
             if out_path is not None and (overwrite or not out_path.exists()):
                 self._save_to_file(out_block, out_path)
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
     def _filter_blocks(self, code_block):
-        if not isinstance(code_block, BlockCollection):
-            input_blocks = [code_block]
+        if isinstance(code_block, BlockCollection):
+            input_blocks = list(code_block.blocks)
         else:
-            input_blocks = code_block.blocks
-
+            input_blocks = [code_block]
         if self._input_types is not None:
             if isinstance(self._input_types, str):
                 self._input_types = set([self._input_types])
@@ -637,15 +631,8 @@ class Converter:
         input_blocks = self._filter_blocks(code_block)
         output_blocks = []
         for b in input_blocks:
-            if isinstance(b, BlockCollection):
-                output_blocks.append(self.translate_blocks(b, failure_path))
-            else:
-                output_blocks.append(self.translate_block(b, failure_path))
-        while isinstance(output_blocks, list) and len(output_blocks) == 1:
-            output_blocks = output_blocks[0]
-        if not isinstance(output_blocks, list):
-            output_blocks.previous_generations = code_block.previous_generations
-            return output_blocks
+            output_blocks.append(self.translate_block(b, failure_path))
+        print(output_blocks)
         return BlockCollection(output_blocks, code_block.previous_generations)
 
     def translate_block(
@@ -726,6 +713,7 @@ class Converter:
         translated_root = TranslatedCodeBlock(
             root,
             self._target_language,
+            self,
             block_type=self._output_type,
             block_label=self._output_label,
         )
@@ -884,11 +872,25 @@ class Converter:
         block: TranslatedCodeBlock | BlockCollection | dict,
         combine_children: bool = True,
     ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
+        block_type = None
+        block_label = None
         if isinstance(block, dict):
             # output object has already been generated
-            return block
+            new_block = deepcopy(block)
+            if "intermediate_outputs" in new_block:
+                del new_block["intermediate_outputs"]
+            return new_block
         if isinstance(block, BlockCollection):
-            outputs = [self._get_output_obj(b, combine_children) for b in block.blocks]
+            if len(block.blocks) == 1:
+                outputs = self._get_output_obj(block.blocks[0], combine_children)[
+                    "outputs"
+                ]
+                block_type = block.blocks[0].block_type
+                block_label = block.blocks[0].block_label
+            else:
+                outputs = [
+                    self._get_output_obj(b, combine_children) for b in block.blocks
+                ]
         elif (
             not isinstance(block, BlockCollection)
             and not combine_children
@@ -896,6 +898,8 @@ class Converter:
         ):
             outputs = self._get_output_obj_children(block)
         else:
+            block_type = block.block_type
+            block_label = block.block_label
             if not block.translation_completed:
                 # translation wasn't completed, so combined parsing will likely fail
                 outputs = [block.complete_text]
@@ -917,17 +921,17 @@ class Converter:
                 input_tokens=block.total_request_input_tokens,
                 output_tokens=block.total_request_output_tokens,
                 converter_name=self.__class__.__name__,
-                type=block.block_type,
-                label=block.block_label,
+                type=block_type,
+                label=block_label,
             ),
             outputs=outputs,
         )
-        if len(block.previous_generations) > 0:
+        if isinstance(block, BlockCollection) and len(block.previous_generations) > 0:
             intermediate_outputs = []
             for p in block.previous_generations:
                 if isinstance(p, dict):
                     # preserve intermediate outputs from previous runs
-                    intermediate_outputs.append(p)
+                    intermediate_outputs.append(self._get_output_obj(p, combine_children))
             if len(intermediate_outputs) > 0:
                 out["intermediate_outputs"] = intermediate_outputs
         return out
@@ -970,7 +974,7 @@ class Converter:
                 code_block.block_label = block_label
                 results.append(code_block)
             else:
-                results.append(self._janus_object_to_codeblock(o))
+                results.append(self._janus_object_to_codeblock(o, name))
         previous_generations = janus_obj.get("intermediate_outputs", []) + [janus_obj]
         return BlockCollection(results, previous_generations)
 

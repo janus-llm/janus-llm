@@ -131,7 +131,11 @@ class RequirementEvaluator(Evaluator):
                 translated_str = json.dumps(translate_obj)
 
         translated_block = TranslatedCodeBlock(
-            input_block, self._target_language, self._output_type, self._output_label
+            input_block,
+            self._target_language,
+            self,
+            self._output_type,
+            self._output_label,
         )
         translated_block.text = translated_str
         translated_block.children = translated_blocks
@@ -255,7 +259,11 @@ class InlineCommentEvaluator(Evaluator):
                 translate_obj.update(json.loads(translated_block.text))
                 translated_str = json.dumps(translate_obj)
             translated_block = TranslatedCodeBlock(
-                input_block, self._target_language, self._output_type, self._output_label
+                input_block,
+                self._target_language,
+                self,
+                self._output_type,
+                self._output_label,
             )
             translated_block.children = translated_blocks
             translated_block.text = translated_str

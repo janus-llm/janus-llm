@@ -1,8 +1,11 @@
 from functools import total_ordering
-from typing import ForwardRef, Hashable, Optional, Tuple
+from typing import TYPE_CHECKING, ForwardRef, Hashable, Optional, Tuple
 
 from janus.language.node import NodeType
 from janus.utils.logger import create_logger
+
+if TYPE_CHECKING:
+    from janus.converter.converter import Converter
 
 log = create_logger(__name__)
 
@@ -194,6 +197,7 @@ class TranslatedCodeBlock(CodeBlock):
         self,
         original: CodeBlock,
         language: str,
+        converter: ForwardRef("Converter"),
         block_type: str | None = None,
         block_label: str | None = None,
     ) -> None:
@@ -202,6 +206,10 @@ class TranslatedCodeBlock(CodeBlock):
         Arguments:
             original: The original code block
             language: The language to translate to
+            converter: the converter used to translate
+            block_type: type of the block
+            block_label: label for block
+            (for mapping outputs to inputs through ConverterChain)
 
         Returns:
             A `TranslatedCodeBlock` with the same attributes as the original, except
@@ -227,7 +235,9 @@ class TranslatedCodeBlock(CodeBlock):
             block_type=block_type,
             block_label=block_label,
         )
+
         self.original = original
+        self.converter = converter
 
         self.complete = original.complete
         self.translated = False
