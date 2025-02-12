@@ -61,7 +61,10 @@ class ConverterChain(Converter):
         return metadata
 
     def _get_output_obj(
-        self, block: TranslatedCodeBlock | BlockCollection, combine_children: bool = True
+        self,
+        block: TranslatedCodeBlock | BlockCollection,
+        combine_children: bool = True,
+        include_previous_outputs: bool = True,
     ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
         intermediate_outputs = []
         c_index = 0
@@ -71,21 +74,23 @@ class ConverterChain(Converter):
             else:
                 intermediate_outputs.append(
                     self._converters[c_index]._get_output_obj(
-                        g, self._converters[c_index]._combine_output
+                        g, self._converters[c_index]._combine_output, False
                     )
                 )
                 c_index += 1
         assert c_index == len(self._converters) - 1
         intermediate_outputs.append(
             self._converters[-1]._get_output_obj(
-                block, self._converters[-1]._combine_output
+                block, self._converters[-1]._combine_output, False
             )
         )
-        return dict(
+        out = dict(
             input=intermediate_outputs[0]["input"],
             metadata=self._combine_metadata(
                 [i["metadata"] for i in intermediate_outputs]
             ),
             outputs=intermediate_outputs[-1]["outputs"],
-            intermediate_outputs=intermediate_outputs,
         )
+        if include_previous_outputs:
+            out["intermediate_outputs"] = intermediate_outputs
+        return out

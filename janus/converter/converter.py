@@ -767,7 +767,9 @@ class Converter:
                 )
             raise e
         finally:
-            out_obj = self._get_output_obj(translated_root, self._combine_output)
+            out_obj = self._get_output_obj(
+                translated_root, self._combine_output, include_previous_outputs=True
+            )
             log.debug(f"Resulting Block:" f"{json.dumps(out_obj)}")
             if not translated_root.translated:
                 if failure_path is not None:
@@ -871,6 +873,7 @@ class Converter:
         self,
         block: TranslatedCodeBlock | BlockCollection | dict,
         combine_children: bool = True,
+        include_previous_outputs: bool = True,
     ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
         block_type = None
         block_label = None
@@ -882,21 +885,21 @@ class Converter:
             return new_block
         if isinstance(block, BlockCollection):
             if len(block.blocks) == 1:
-                outputs = self._get_output_obj(block.blocks[0], combine_children)[
+                outputs = self._get_output_obj(block.blocks[0], combine_children, False)[
                     "outputs"
                 ]
                 block_type = block.blocks[0].block_type
                 block_label = block.blocks[0].block_label
             else:
                 outputs = [
-                    self._get_output_obj(b, combine_children) for b in block.blocks
+                    self._get_output_obj(b, combine_children, False) for b in block.blocks
                 ]
         elif (
             not isinstance(block, BlockCollection)
             and not combine_children
             and len(block.children) > 0
         ):
-            outputs = self._get_output_obj_children(block)
+            outputs = self._get_output_obj_children(block, False)
         else:
             block_type = block.block_type
             block_label = block.block_label
@@ -926,24 +929,38 @@ class Converter:
             ),
             outputs=outputs,
         )
-        if isinstance(block, BlockCollection) and len(block.previous_generations) > 0:
+        if (
+            include_previous_outputs
+            and isinstance(block, BlockCollection)
+            and len(block.previous_generations) > 0
+        ):
             intermediate_outputs = []
             for p in block.previous_generations:
                 if isinstance(p, dict):
                     # preserve intermediate outputs from previous runs
-                    intermediate_outputs.append(self._get_output_obj(p, combine_children))
+                    intermediate_outputs.append(
+                        self._get_output_obj(p, combine_children, False)
+                    )
             if len(intermediate_outputs) > 0:
                 out["intermediate_outputs"] = intermediate_outputs
         return out
 
-    def _get_output_obj_children(self, block: TranslatedCodeBlock):
+    def _get_output_obj_children(
+        self, block: TranslatedCodeBlock, include_previous_outputs: bool = True
+    ):
         if len(block.children) > 0:
             res = []
             for c in block.children:
-                res += self._get_output_obj_children(c)
+                res += self._get_output_obj_children(c, include_previous_outputs)
             return res
         else:
-            return [self._get_output_obj(block, combine_children=True)]
+            return [
+                self._get_output_obj(
+                    block,
+                    combine_children=True,
+                    include_previous_outputs=include_previous_outputs,
+                )
+            ]
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
         """Save a file to disk.
@@ -951,7 +968,9 @@ class Converter:
         Arguments:
             block: The `TranslatedCodeBlock` to save to a file.
         """
-        obj = self._get_output_obj(block, combine_children=self._combine_output)
+        obj = self._get_output_obj(
+            block, combine_children=self._combine_output, include_previous_outputs=True
+        )
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
 
@@ -975,7 +994,9 @@ class Converter:
                 results.append(code_block)
             else:
                 results.append(self._janus_object_to_codeblock(o, name))
-        previous_generations = janus_obj.get("intermediate_outputs", []) + [janus_obj]
+        previous_generations = janus_obj.get("intermediate_outputs", [])
+        if janus_obj["metadata"]["converter_name"] != "ConverterChain":
+            previous_generations += [janus_obj]
         return BlockCollection(results, previous_generations)
 
     def __or__(self, other: "Converter"):

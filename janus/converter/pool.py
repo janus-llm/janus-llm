@@ -39,12 +39,13 @@ class ConverterPool(Converter):
         self,
         block: TranslatedCodeBlock | BlockCollection | dict,
         combine_children: bool = True,
+        include_previous_outputs: bool = True,
     ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
         outputs = []
         for b in block.blocks:
             for c in self._converters:
                 if c == b.converter:
-                    outputs.append(c._get_output_obj(b))
+                    outputs.append(c._get_output_obj(b, c._combine_output, False))
                     break
 
         def _get_input(block):
@@ -66,9 +67,9 @@ class ConverterPool(Converter):
             ),
             outputs=outputs,
         )
-        if len(block.previous_generations) > 0:
+        if include_previous_outputs and len(block.previous_generations) > 0:
             intermediate_outputs = [
-                self._get_output_obj(g, combine_children)
+                self._get_output_obj(g, combine_children, False)
                 for g in block.previous_generations
                 if isinstance(g, dict)
             ]
