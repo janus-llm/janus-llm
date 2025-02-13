@@ -601,6 +601,7 @@ class Converter:
         log.info(f"Total cost: ${total_cost:,.2f}")
 
     def _filter_blocks(self, code_block):
+        print(code_block.blocks)
         if isinstance(code_block, BlockCollection):
             input_blocks = list(code_block.blocks)
         else:
@@ -864,10 +865,7 @@ class Converter:
         )
 
     def _combine_inputs(self, inputs: list[str]):
-        s = ""
-        for i in inputs:
-            s += i
-        return s
+        return json.dumps(inputs)
 
     def _get_output_obj(
         self,
@@ -993,7 +991,7 @@ class Converter:
                 code_block.block_label = block_label
                 results.append(code_block)
             else:
-                results.append(self._janus_object_to_codeblock(o, name))
+                results += self._janus_object_to_codeblock(o, name).blocks
         previous_generations = janus_obj.get("intermediate_outputs", [])
         if janus_obj["metadata"]["converter_name"] != "ConverterChain":
             previous_generations += [janus_obj]

@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 
 from janus.converter.converter import Converter
@@ -31,9 +30,6 @@ class ConverterPool(Converter):
                 c._combiner.combine(b)
             output_blocks += collection.blocks
         return BlockCollection(output_blocks, input_blocks.previous_generations)
-
-    def _combine_inputs(self, inputs: list[str]):
-        return json.dumps(inputs)
 
     def _get_output_obj(
         self,

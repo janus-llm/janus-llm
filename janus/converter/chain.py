@@ -58,6 +58,8 @@ class ConverterChain(Converter):
             metadata["type"] = metadata["type"][-1]
         if isinstance(metadata["label"], list):
             metadata["label"] = metadata["label"][-1]
+        metadata["type"] = metadatas[-1]["type"]
+        metadata["label"] = metadatas[-1]["label"]
         return metadata
 
     def _get_output_obj(
@@ -68,9 +70,12 @@ class ConverterChain(Converter):
     ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
         intermediate_outputs = []
         c_index = 0
+        start_index = 0
         for g in block.previous_generations:
             if isinstance(g, dict):
                 intermediate_outputs.append(g)
+                # Find the first index where we generated code
+                start_index += 1
             else:
                 intermediate_outputs.append(
                     self._converters[c_index]._get_output_obj(
@@ -85,7 +90,7 @@ class ConverterChain(Converter):
             )
         )
         out = dict(
-            input=intermediate_outputs[0]["input"],
+            input=intermediate_outputs[start_index]["input"],
             metadata=self._combine_metadata(
                 [i["metadata"] for i in intermediate_outputs]
             ),

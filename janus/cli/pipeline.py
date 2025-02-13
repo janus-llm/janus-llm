@@ -42,7 +42,7 @@ def instiantiate_pipeline(
         pipeline[0]["kwargs"] = {}
     pipeline[0]["kwargs"].update(source_language=language, model=model)
     if use_janus_inputs is not None:
-        pipeline[0]["kwargs"].update(janus_inputs=use_janus_inputs)
+        pipeline[0]["kwargs"].update(use_janus_inputs=use_janus_inputs)
     print(pipeline[0])
     converters = [instiantiate(pipeline[0])]
     for p in pipeline[1:]:
