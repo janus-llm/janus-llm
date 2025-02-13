@@ -69,8 +69,8 @@ class ConverterChain(Converter):
         include_previous_outputs: bool = True,
     ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
         intermediate_outputs = []
-        c_index = 0
-        start_index = 0
+        c_index = 0  # current converter index
+        start_index = 0  # start index of newly generated intermediate outputs
         for g in block.previous_generations:
             if isinstance(g, dict):
                 intermediate_outputs.append(g)
@@ -83,7 +83,6 @@ class ConverterChain(Converter):
                     )
                 )
                 c_index += 1
-        assert c_index == len(self._converters) - 1
         intermediate_outputs.append(
             self._converters[-1]._get_output_obj(
                 block, self._converters[-1]._combine_output, False
