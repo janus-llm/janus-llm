@@ -601,7 +601,6 @@ class Converter:
         log.info(f"Total cost: ${total_cost:,.2f}")
 
     def _filter_blocks(self, code_block):
-        print(code_block.blocks)
         if isinstance(code_block, BlockCollection):
             input_blocks = list(code_block.blocks)
         else:
