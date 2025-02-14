@@ -2,15 +2,37 @@ Janus LLM
 =========
 
 Usage
-----------------------
-:doc:`quickstart`
-   How to use `janus-llm` to load source code files into a Chroma vector database.
+-----
 
-:doc:`reading_binaries`
-   How to read binaries and load the C-like pseudocode into a Chroma vector database.
+:doc:`quickstart`
+   How to get started with `janus-llm`.
 
 :doc:`translating`
    How to use LLMs to translate from one programming language to another.
+
+:doc:`documenting`
+   How to use LLMs create documentation from code.
+
+:doc:`diagramming`
+   How to use LLMs to create diagrams from code.
+
+:doc:`refiners`
+   How to use the `Refiner` classes to refine code.
+
+:doc:`pipelines`
+   How to configure pipelines to process code.
+
+:doc:`adding_to_db`
+   How to add code to the Chroma vector database.
+
+:doc:`evaluating`
+   How to evaluate the quality of the generated products.
+
+:doc:`janus_json`
+   The format of the JSON files that are used to store the generated products.
+
+:doc:`reading_binaries`
+   How to read binaries and load the C-like pseudocode into a Chroma vector database.
 
 :doc:`supported_languages`
    The supported input languages. This depends on `tree-sitter` parsers that have been included or is based on custom parsers created for this project.
@@ -34,6 +56,14 @@ API
    :hidden:
 
    quickstart
+   translating
+   documenting
+   diagramming
+   refiners
+   pipelines
+   adding_to_db
+   evaluating
+   janus_json
    reading_binaries
    supported_languages
 

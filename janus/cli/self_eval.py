@@ -31,9 +31,7 @@ def llm_self_eval(
     ],
     output_dir: Annotated[
         Path,
-        typer.Option(
-            "--output-dir", "-o", help="The directory to store the evaluations in."
-        ),
+        typer.Option("--output", "-o", help="The directory to store the evaluations in."),
     ],
     failure_dir: Annotated[
         Optional[Path],
