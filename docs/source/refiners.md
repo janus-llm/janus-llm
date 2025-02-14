@@ -10,6 +10,19 @@ Refiners can be used in the CLI with the `-r` flag. You can specify multiple ref
 janus translate --input janus/cli/ --output janus-translation --llm my-gpt -l python -r ReflectionRefiner -r CodeFormatRefiner
 ```
 
+Refiners can also be used in the [`pipeline`](pipelines.md) command by specifying them in a pipeline configuration file.
+
+```json
+[
+    {
+        "type": "RequirementsDocumenter",
+        "kwargs": {"refiner_types": ["RequirementsFormatRefiner"]}
+    }
+]
+```
+
+This will run the `RequirementsFormatRefiner` on the output of the `RequirementsDocumenter`.
+
 ## Available Refiners
 
 - [`FormatRefiner`](autoapi/janus/refiners/format/index): Base class for formatting refiners.
