@@ -10,8 +10,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
 from datetime import date
+
+from janus import __version__
 
 # import sys
 # sys.path.insert(0, os.path.abspath('../../'))
@@ -28,11 +29,7 @@ author = (
 )
 
 # The full version, including alpha/beta/rc tags
-if os.environ.get("CI_COMMIT_TAG"):
-    release = os.environ["CI_COMMIT_TAG"]
-else:
-    release = "latest"
-
+release = __version__
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
