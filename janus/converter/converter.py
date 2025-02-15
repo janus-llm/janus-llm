@@ -646,7 +646,6 @@ class Converter:
         output_blocks = []
         for b in input_blocks:
             output_blocks.append(self.translate_block(b, failure_path))
-        print(output_blocks)
         return BlockCollection(output_blocks, code_block.previous_generations)
 
     def translate_block(
