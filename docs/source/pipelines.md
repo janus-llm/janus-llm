@@ -84,3 +84,171 @@ janus document --doc-mode cloze --input janus/cli/ --output janus-translation --
 ```bash
 janus llm-self-eval --input janus-translation --output janus-evals --llm my-gpt -l python -e comments
 ```
+
+### Using `ConverterPool`s
+
+`ConverterPool`s allow for the parallel execution of multiple `Converter`s.
+
+#### Basic `ConverterPool`
+
+The following is an example of a pipeline that uses a `ConverterPool` to run multiple `Documenter`s in parallel.
+
+```json
+[
+    {
+        "type": "ConverterPool",
+        "args": [
+            {
+                "type": "Documenter",
+                "kwargs": {}
+            },
+            {
+                "type": "ClozeDocumenter",
+                "kwargs": {"comments_per_request": 5}
+            }
+        ]
+    }
+]
+```
+
+This runs the `Documenter` and `ClozeDocumenter` in parallel, producing two outputs in the output JSON.
+
+
+#### `ConverterPool` with Evaluation
+
+The following example runs two `ClozeDocumenter`s in parallel and then runs an `InlineCommentEvaluator` on the output of the `ClozeDocumenter`s.
+
+```json
+[
+    {
+        "type": "ConverterPool",
+        "args": [
+            {
+                "type": "ClozeDocumenter",
+                "kwargs": {}
+            },
+            {
+                "type": "ClozeDocumenter",
+                "kwargs": {"comments_per_request": 5}
+            }
+        ]
+    },
+    {
+        "type": "InlineCommentEvaluator",
+        "kwargs": {"eval_items_per_request": 5}
+    }
+]
+```
+
+#### `ConverterPool` with `ConverterPassthrough`
+
+The `ConverterPassthrough` component allows for the output of one `Converter` to be passed to the next stage of the pipeline without modification.
+
+```json
+[
+    {
+        "type": "ClozeDocumenter",
+        "kwargs": {"comments_per_request": 5}
+    },
+    {
+	"type": "ConverterPool",
+	"args": [
+	    {
+		"type": "InlineCommentEvaluator"
+	    },
+	    {
+		"type": "ConverterPassthrough"
+	    }
+	]
+    }
+]
+```
+
+In this example, the output of the `ClozeDocumenter` is passed to the `InlineCommentEvaluator` and the `ConverterPassthrough`. This produces two outputs in the output JSON: the output of the `InlineCommentEvaluator` and the output of the `ClozeDocumenter`.
+
+
+#### `ConverterPool` with Input and Output Labels
+
+Every `Converter` allows for the specification of input and output labels.
+
+```json
+[
+    {
+        "type": "ConverterPool",
+        "args": [
+            {
+                "type": "ClozeDocumenter",
+                "kwargs": {"output_label": "dtest"}
+            },
+            {
+                "type": "ClozeDocumenter",
+                "kwargs": {}
+            },
+            {
+                "type": "ClozeDocumenter",
+                "kwargs": {"output_label": "dtest"}
+            }
+        ]
+    },
+    {
+        "type": "ConverterPool",
+	    "args": [
+            {
+                "type": "InlineCommentEvaluator",
+                "kwargs": {"input_labels": "dtest"}
+            }
+	    ]
+    }
+]
+```
+
+The labels are used to specify which outputs are passed to which inputs. In this example, the output of the first and third `ClozeDocumenter`s are passed to the `InlineCommentEvaluator`, and the output of the second `ClozeDocumenter` is kept in the intermediate outputs of the resultant JSON file.
+
+
+#### `ConverterPool` with Input Types
+
+Every `Converter` has an associated `output_type` that informs other `Converters` of the type of output it produces. The `input_types` argument allows for the specification of the types of input that a `Converter` can accept.
+
+```json
+[
+    {
+        "type": "ConverterPool",
+        "args": [
+            {
+                "type": "Documenter",
+                "kwargs": {}
+            },
+            {
+                "type": "ClozeDocumenter",
+                "kwargs": {"comments_per_request": 5}
+            }
+        ]
+    },
+    {
+        "type": "ConverterPool",
+        "args": [
+            {
+	            "type": "Translator",
+		        "kwargs": {"input_types": "documentation"}
+            },
+            {
+                "type": "InlineCommentEvaluator"
+            }
+	]
+    }
+]
+```
+
+This example runs a `Documenter` and a `ClozeDocumenter` in parallel, producing two outputs in the output JSON. The outputs are then passed to a `ConverterPool` that runs a `Translator` and an `InlineCommentEvaluator` in parallel. The `Translator` is specified to accept only documentation as input, so it will only accept the output of the `Documenter` and not the `ClozeDocumenter`.
+
+##### Available Output Types
+
+The available output types for each converter are listed here:
+- `DiagramGenerator`: `diagram`
+- `Documenter`: `documentation`
+- `MultiDocumenter`: `multidocumentation`
+- `ClozeDocumenter`: `cloze_comments`
+- `RequirementsDocumenter`: `requirements`
+- `Partitioner`: `partition`
+- `RequirementEvaluator`: `requirements_eval`
+- `InlineCommentEvaluator`: `cloze_comments_eval`

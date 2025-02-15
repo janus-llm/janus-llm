@@ -124,6 +124,10 @@ class Converter:
             use_janus_inputs: Whether to use janus inputs or not.
             target_language: The target programming language.
             target_version: The target programming language version.
+            input_types: The types of input to accept.
+            input_labels: The labels of input to accept.
+            output_type: The type of output to produce.
+            output_label: The label of output to produce.
         """
         self._changed_attrs: set = set()
 
