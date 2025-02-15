@@ -12,9 +12,10 @@ class DiagramGenerator(Documenter):
 
     def __init__(
         self,
-        diagram_type="Activity",
-        add_documentation=False,
-        extract_variables=False,
+        diagram_type: str = "Activity",
+        add_documentation: bool = False,
+        extract_variables: bool = False,
+        output_type: str = "diagram",
         **kwargs,
     ) -> None:
         """Initialize the DiagramGenerator class
@@ -28,6 +29,7 @@ class DiagramGenerator(Documenter):
         self._add_documentation = add_documentation
         self._documenter = Documenter(**kwargs)
 
+        kwargs.update(dict(output_type=output_type))
         super().__init__(**kwargs)
         prompts = []
         if extract_variables:

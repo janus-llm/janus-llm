@@ -120,6 +120,7 @@ class TestDiagramGenerator(unittest.TestCase):
                 children=[],
             ),
             language="python",
+            converter=self.diagram_generator,
         )
         self.diagram_generator._add_translation(block)
         self.assertTrue(block.translated)

@@ -12,7 +12,10 @@ class RequirementsDocumenter(Documenter):
     A class that translates code from one programming language to its requirements.
     """
 
-    def __init__(self, combine_output: bool = False, **kwargs):
+    def __init__(
+        self, combine_output: bool = False, output_type: str = "requirements", **kwargs
+    ):
+        kwargs.update(output_type=output_type)
         super().__init__(combine_output=combine_output, **kwargs)
         self.set_prompts("requirements")
         self._combiner = ChunkCombiner()

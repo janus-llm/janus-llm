@@ -1,8 +1,11 @@
 from functools import total_ordering
-from typing import ForwardRef, Hashable, Optional, Tuple
+from typing import TYPE_CHECKING, ForwardRef, Hashable, Optional, Tuple
 
 from janus.language.node import NodeType
 from janus.utils.logger import create_logger
+
+if TYPE_CHECKING:
+    from janus.converter.converter import Converter
 
 log = create_logger(__name__)
 
@@ -47,6 +50,8 @@ class CodeBlock:
         affixes: Tuple[str, str] = ("", ""),
         context_tags: dict[str, str] = {},
         previous_generations: list["TranslatedCodeBlock"] = [],
+        block_type: str | None = None,
+        block_label: str | None = None,
     ) -> None:
         self.id: Hashable = id
         self.name: Optional[str] = name
@@ -67,6 +72,8 @@ class CodeBlock:
         self.omit_prefix = True
         self.omit_suffix = False
         self.previous_generations = previous_generations
+        self.block_type = block_type
+        self.block_label = block_label
 
         if self.children:
             self.children[0].omit_prefix = False
@@ -186,12 +193,23 @@ class TranslatedCodeBlock(CodeBlock):
         translated: Whether this block has been successfully translated
     """
 
-    def __init__(self, original: CodeBlock, language: str) -> None:
+    def __init__(
+        self,
+        original: CodeBlock,
+        language: str,
+        converter: ForwardRef("Converter"),
+        block_type: str | None = None,
+        block_label: str | None = None,
+    ) -> None:
         """Create an "empty" `TranslatedCodeBlock` from the given original
 
         Arguments:
             original: The original code block
             language: The language to translate to
+            converter: the converter used to translate
+            block_type: type of the block
+            block_label: label for block
+            (for mapping outputs to inputs through ConverterChain)
 
         Returns:
             A `TranslatedCodeBlock` with the same attributes as the original, except
@@ -209,12 +227,17 @@ class TranslatedCodeBlock(CodeBlock):
             end_byte=None,
             tokens=0,
             children=[
-                TranslatedCodeBlock(child, language) for child in original.children
+                TranslatedCodeBlock(child, language, block_type, block_label)
+                for child in original.children
             ],
             affixes=original.affixes,
             previous_generations=original.previous_generations,
+            block_type=block_type,
+            block_label=block_label,
         )
+
         self.original = original
+        self.converter = converter
 
         self.complete = original.complete
         self.translated = False
@@ -280,6 +303,11 @@ class TranslatedCodeBlock(CodeBlock):
         return children_sum + self.num_requests
 
     @property
+    def total_processing_time(self) -> float:
+        children_sum = sum(c.total_processing_time for c in self.children)
+        return children_sum + self.processing_time
+
+    @property
     def translation_completed(self) -> bool:
         """Whether or not the code block was successfully translated
 
@@ -317,6 +345,8 @@ class TranslatedCodeBlock(CodeBlock):
             children=[child.to_codeblock() for child in self.children],
             affixes=self.affixes,
             previous_generations=self.previous_generations + [self],
+            block_type=self.block_type,
+            block_label=self.block_label,
         )
 
     def __iadd__(self, other):
@@ -326,3 +356,54 @@ class TranslatedCodeBlock(CodeBlock):
         self.request_input_tokens += other.request_input_tokens
         self.request_output_tokens += other.request_output_tokens
         return self
+
+
+class BlockCollection:
+    def __init__(
+        self,
+        blocks: list[CodeBlock],
+        previous_generations: list[ForwardRef("BlockCollection")] = [],
+    ):
+        self.blocks = blocks
+        self.previous_generations = previous_generations
+
+    def to_codeblock(self) -> ForwardRef("BlockCollection"):
+        return BlockCollection(
+            [b.to_codeblock() for b in self.blocks], self.previous_generations + [self]
+        )
+
+    @property
+    def total_cost(self):
+        return sum(b.total_cost for b in self.blocks)
+
+    @property
+    def total_processing_time(self):
+        return sum(b.total_processing_time for b in self.blocks)
+
+    @property
+    def total_request_input_tokens(self):
+        return sum(b.total_request_input_tokens for b in self.blocks)
+
+    @property
+    def total_request_output_tokens(self):
+        return sum(b.total_request_output_tokens for b in self.blocks)
+
+    @property
+    def total_num_requests(self):
+        return sum(b.total_num_requests for b in self.blocks)
+
+    @property
+    def block_type(self):
+        return None
+
+    @property
+    def block_label(self):
+        return None
+
+    @property
+    def translation_completed(self):
+        return all(b.translation_completed for b in self.blocks)
+
+    @property
+    def complete(self):
+        return all(b.complete for b in self.blocks)
