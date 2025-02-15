@@ -82,7 +82,7 @@ class Converter:
         protected_node_types: tuple[str, ...] = (),
         prune_node_types: tuple[str, ...] = (),
         splitter_type: str = "file",
-        refiner_types: list[type[JanusRefiner]] = [JanusRefiner],
+        refiner_types: list[type[JanusRefiner] | str] = [JanusRefiner],
         retriever_type: str | None = None,
         combine_output: bool = True,
         use_janus_inputs: bool = False,
@@ -154,7 +154,7 @@ class Converter:
         self._combiner: Combiner = Combiner()
 
         self._splitter_type: str
-        self._refiner_types: list[type[JanusRefiner]]
+        self._refiner_types: list[type[JanusRefiner] | str]
         self._retriever_type: str | None
 
         self._splitter: Splitter
@@ -230,7 +230,7 @@ class Converter:
 
         self._splitter_type = splitter_type
 
-    def set_refiner_types(self, refiner_types: list[type[JanusRefiner]]) -> None:
+    def set_refiner_types(self, refiner_types: list[type[JanusRefiner] | str]) -> None:
         """Validate and set the refiner type
 
         Arguments:
@@ -404,12 +404,18 @@ class Converter:
 
     @run_if_changed("_refiner_types", "_model_name", "max_prompts", "_parser")
     def _load_refiner_chain(self) -> None:
+        from janus.cli.constants import REFINERS
+
         if len(self._refiner_types) == 0:
             self._refiner_chain = RunnableLambda(
                 lambda x: self._parser.parse(x["completion"])
             )
             return
         refiner_type = self._refiner_types[0]
+        if isinstance(refiner_type, str):
+            if refiner_type not in REFINERS:
+                raise ValueError(f"Error: unable to find refiner type {refiner_type}")
+            refiner_type = REFINERS[refiner_type]
         if len(self._refiner_types) == 1:
             self._refiner_chain = RunnableLambda(
                 lambda x, refiner_type=refiner_type: refiner_type(
@@ -429,6 +435,10 @@ class Converter:
                 prompt_value=lambda x: x["prompt_value"],
             )
         for refiner_type in self._refiner_types[1:-1]:
+            if isinstance(refiner_type, str):
+                if refiner_type not in REFINERS:
+                    raise ValueError(f"Error: unable to find refiner type {refiner_type}")
+                refiner_type = REFINERS[refiner_type]
             # NOTE: Do NOT remove refiner_type=refiner_type from lambda.
             # Due to lambda capture, must be present or chain will not
             # be correctly constructed.
