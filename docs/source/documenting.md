@@ -8,13 +8,7 @@ There are four different ways you can create documentation from source code:
 
 ## Adding a Model
 
-Before you can generate documentation, you need to add an LLM model to your configuration. You can do this by running the following command:
-
-```bash
-janus llm add my-gpt --type OpenAI
-```
-
-And then follow the CLI instructions to add the model to your configuration.
+Before you can generate documentation, you need to [add an LLM](quickstart.md) to your configuration.
 
 ## Cloze Commenting
 

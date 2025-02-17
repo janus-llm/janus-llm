@@ -58,13 +58,7 @@ There's also an LLM Self Evaluation command. The help command has been trimmed f
 
 ### Adding a Model
 
-Before you can evaluate with an LLM, you need to add an LLM model to your configuration. You can do this by running the following command:
-
-```shell
-janus llm add my-gpt --type OpenAI
-```
-
-And then follow the CLI instructions to add the model to your configuration.
+Before you can evaluate with an LLM, you need to [add an LLM](quickstart.md) to your configuration.
 
 ### Evaluating Requirements
 
