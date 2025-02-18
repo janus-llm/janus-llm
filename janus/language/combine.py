@@ -54,6 +54,7 @@ class Combiner(FileManager):
             if isinstance(block, TranslatedCodeBlock) and not child.translated:
                 missing_children.append(child)
                 continue
+            block += child
 
         if missing_children:
             missing_ids = [c.id for c in missing_children]
