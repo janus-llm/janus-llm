@@ -25,7 +25,7 @@ class TestCodeParser(unittest.TestCase):
     def test_get_format_instructions(self):
         self.assertEqual(
             self.parser.get_format_instructions(),
-            "Output must contain text contained within triple square brackets (```)",
+            "Output must contain text contained within triple backticks (```)",
         )
 
 

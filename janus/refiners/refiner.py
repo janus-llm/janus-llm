@@ -3,13 +3,15 @@ from typing import Any
 
 from langchain.output_parsers import RetryWithErrorOutputParser
 from langchain_core.exceptions import OutputParserException
-from langchain_core.messages import AIMessage
+from langchain_core.messages import BaseMessage
+
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompt_values import PromptValue
 from langchain_core.runnables import RunnableSerializable
 
 from janus.llm.models_info import MODEL_PROMPT_ENGINES, JanusModel
 from janus.parsers.parser import JanusParser
+from janus.parsers.code_parser import IncompleteCodeParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -194,7 +196,7 @@ class RequirementsReflectionRefiner(JanusRefiner):
         self, completion: str, prompt_value: PromptValue, **kwargs
     ) -> Any:
         log.debug(f"Reflection Prompt: {self.reflection_prompt_name}")
-        if isinstance(completion, AIMessage):
+        if isinstance(completion, BaseMessage):
             completion = completion.content
         for retry_number in range(self.max_retries):
             # First, check if the generated requirements are redundant or too specific
@@ -248,3 +250,57 @@ class HallucinationRefiner(ReflectionRefiner):
             prompt_template_name="refinement/hallucination",
             **kwargs,
         )
+
+
+class CodeContinuationRefiner(JanusRefiner):
+    max_retries: int
+    continuation_chain: RunnableSerializable
+
+    def __init__(
+        self,
+        llm: JanusModel,
+        parser: IncompleteCodeParser,
+        max_retries: int,
+        prompt_template_name: str = "refinement/continuation",
+    ):
+        continuation_prompt = MODEL_PROMPT_ENGINES[llm.short_model_id](
+            source_language="text",
+            prompt_template=prompt_template_name,
+        ).prompt
+        continuation_chain = continuation_prompt | llm | StrOutputParser()
+        super().__init__(
+            continuation_chain=continuation_chain,
+            parser=parser,
+            max_retries=max_retries,
+        )
+
+    def parse_completion(
+        self, completion: str | BaseMessage, prompt_value: PromptValue, **kwargs
+    ) -> Any:
+        if isinstance(completion, BaseMessage):
+            completion = str(completion.content)
+
+        log.info(f"Completion:\n{completion}")
+        
+        for retry_number in range(self.max_retries):
+            continuation = self.continuation_chain.invoke(
+                dict(
+                    prompt=prompt_value.to_string(),
+                    completion=completion,
+                )
+            )
+            if re.search(r"\bLGTM\b", continuation) is not None:
+                log.info(f"Got LGTM:\n{continuation}")
+                continuation = re.sub(r"\s*LGTM.*", "", continuation, flags=re.DOTALL)
+                completion += continuation
+                break
+
+            log.info(f"Continuation:\n{continuation}")
+            completion = self.parser.strip_tail(completion)
+            continuation = self.parser.strip_head(continuation)
+            completion += continuation
+
+        parsed = self.parser.strip_tail(completion)
+        parsed = self.parser.strip_head(parsed)
+        log.info(f"Final:\n{parsed}")
+        return parsed
