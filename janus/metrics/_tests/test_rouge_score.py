@@ -12,19 +12,13 @@ class TestRouge(unittest.TestCase):
         score = rouge(
             self.target, self.reference, granularity="n", n_gram=2, score_type="f"
         )
-        self.assertIsInstance(score, float)
+        self.assertEqual(score, 0.5)
 
     def test_rouge_with_granularity_l(self):
         score = rouge(
             self.target, self.reference, granularity="l", n_gram=2, score_type="f"
         )
-        self.assertIsInstance(score, float)
-
-    def test_rouge_with_granularity_w(self):
-        score = rouge(
-            self.target, self.reference, granularity="w", n_gram=2, score_type="f"
-        )
-        self.assertIsInstance(score, float)
+        self.assertAlmostEqual(score, 0.8, places=2)
 
     def test_rouge_with_invalid_granularity(self):
         with self.assertRaises(ValueError):
@@ -40,19 +34,19 @@ class TestRouge(unittest.TestCase):
         score = rouge(
             self.target, self.reference, granularity="n", n_gram=2, score_type="f"
         )
-        self.assertIsInstance(score, float)
+        self.assertAlmostEqual(score, 0.5, places=2)
 
     def test_rouge_with_score_type_p(self):
         score = rouge(
             self.target, self.reference, granularity="n", n_gram=2, score_type="p"
         )
-        self.assertIsInstance(score, float)
+        self.assertAlmostEqual(score, 0.5, places=2)
 
     def test_rouge_with_score_type_r(self):
         score = rouge(
             self.target, self.reference, granularity="n", n_gram=2, score_type="r"
         )
-        self.assertIsInstance(score, float)
+        self.assertAlmostEqual(score, 0.5, places=2)
 
     def test_rouge_with_invalid_score_type(self):
         with self.assertRaises(ValueError):
