@@ -92,7 +92,7 @@ def gunning_fog(target: str, **kwargs) -> float:
     if not target.strip():  # Check if the target text is blank
         return None
     target = _repeat_text(target)
-    return textstat.gunning_fog(target) * 2.025
+    return textstat.gunning_fog(target)
 
 
 @metric(use_reference=False, help="The Dale-Chall Readability score")
