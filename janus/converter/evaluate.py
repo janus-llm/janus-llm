@@ -124,7 +124,7 @@ class RequirementEvaluator(Evaluator):
                         code=input_str,
                     )
                 )
-                temp_block = self._split_text()
+                temp_block = self._split_text(obj_str, input_block.name)
                 translated_block = super().translate_block(temp_block, failure_path)
                 translated_blocks.append(translated_block)
                 translate_obj.update(json.loads(translated_block.text))
