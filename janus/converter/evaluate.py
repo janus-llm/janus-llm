@@ -94,6 +94,9 @@ class RequirementEvaluator(Evaluator):
         else:
             input_str = input_block.previous_generations[-1].original.text
         requirements = json.loads(input_block.text)
+        # The requirements are often a list of lists
+        if isinstance(requirements[0], list):
+            requirements = requirements[0]
         if not requirements:
             log.debug(f"[{input_block.name}] Skipping empty output")
             return []
