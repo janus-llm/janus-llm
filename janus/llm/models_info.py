@@ -6,9 +6,13 @@ from typing import Callable, Protocol, TypeVar
 from dotenv import load_dotenv
 from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_core.runnables import Runnable
-from langchain_openai import AzureChatOpenAI
+from langchain_openai import AzureChatOpenAI, ChatOpenAI
 
-from janus.llm.model_callbacks import COST_PER_1K_TOKENS, azure_model_reroutes
+from janus.llm.model_callbacks import (
+    COST_PER_1K_TOKENS,
+    azure_model_reroutes,
+    openai_model_reroutes,
+)
 from janus.prompts.prompt import (
     ChatGptPromptEngine,
     ClaudePromptEngine,
@@ -136,7 +140,7 @@ bedrock_models = [
 all_models = [*azure_models, *bedrock_models]
 
 MODEL_TYPE_CONSTRUCTORS: dict[str, ModelType] = {
-    # "OpenAI": ChatOpenAI,
+    "OpenAI": ChatOpenAI,
     "HuggingFace": HuggingFaceTextGenInference,
     "Azure": AzureChatOpenAI,
     "Bedrock": Bedrock,
@@ -146,7 +150,7 @@ MODEL_TYPE_CONSTRUCTORS: dict[str, ModelType] = {
 
 
 MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
-    # **{m: ChatGptPromptEngine for m in openai_models},
+    **{m: ChatGptPromptEngine for m in openai_models},
     **{m: ChatGptPromptEngine for m in azure_models},
     **{m: ClaudePromptEngine for m in claude_models},
     **{m: Llama2PromptEngine for m in llama2_models},
@@ -157,7 +161,7 @@ MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
 }
 
 MODEL_ID_TO_LONG_ID = {
-    # **{m: mr for m, mr in openai_model_reroutes.items()},
+    **{m: mr for m, mr in openai_model_reroutes.items()},
     **{m: mr for m, mr in azure_model_reroutes.items()},
     "bedrock-claude-v2": "anthropic.claude-v2",
     "bedrock-claude-instant-v1": "anthropic.claude-instant-v1",
@@ -195,7 +199,7 @@ DEFAULT_MODELS = list(MODEL_DEFAULT_ARGUMENTS.keys())
 MODEL_CONFIG_DIR = Path.home().expanduser() / ".janus" / "llm"
 
 MODEL_TYPES: dict[str, PromptEngine] = {
-    # **{m: "OpenAI" for m in openai_models},
+    **{m: "OpenAI" for m in openai_models},
     **{m: "Azure" for m in azure_models},
     **{m: "BedrockChat" for m in bedrock_models},
 }
@@ -309,7 +313,7 @@ def load_model(model_id) -> JanusModel:
         # log.warning("Waiting 10 seconds...")
         # Give enough time for the user to read the warnings and cancel
         # time.sleep(10)
-        raise DeprecationWarning("OpenAI models are no longer supported.")
+        # raise DeprecationWarning("OpenAI models are no longer supported.")
 
     elif model_type_name == "Azure":
         model_args.update(
