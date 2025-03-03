@@ -1,7 +1,6 @@
 import click
-import nltk
 import typer
-from rouge import Rouge
+from rouge_score import rouge_scorer
 from typing_extensions import Annotated
 
 from janus.metrics.metric import metric
@@ -18,9 +17,9 @@ def rouge(
             "-g",
             help=(
                 "The granularity of the ROUGE score. `n` refers to "
-                "ROUGE-N, `l` refers to ROUGE-L, and `w` refers to ROUGE-W."
+                "ROUGE-N, `l` refers to ROUGE-L."
             ),
-            click_type=click.Choice(["n", "l", "w"]),
+            click_type=click.Choice(["n", "l"]),
         ),
     ] = "n",
     n_gram: Annotated[
@@ -52,7 +51,7 @@ def rouge(
         target: The target text.
         reference: The reference text.
         granularity: The granularity of the ROUGE score. `n` refers to ROUGE-N, `l`
-            refers to ROUGE-L, and `w` refers to ROUGE-W.
+            refers to ROUGE-L.
         n_gram: The n-gram overlap calculated for ROUGE-N. Can be an integer.
         score_type: Whether to use the F-score, precision, or recall. For example, `f`
             refers to the F-score, `p` refers to precision, and `r` refers to recall.
@@ -60,37 +59,25 @@ def rouge(
     Returns:
         The ROUGE score.
     """
-    nltk.download("punkt", quiet=True)
-
     if granularity.lower() == "n":
-        metric_name = "rouge-n"
-        metric_name_output = f"rouge-{n_gram}"
-        max_n = n_gram
+        metric_name = f"rouge{n_gram}"
     elif granularity.lower() == "l":
-        metric_name = "rouge-l"
-        metric_name_output = "rouge-l"
-        max_n = 4
-    elif granularity.lower() == "w":
-        metric_name = "rouge-w"
-        metric_name_output = "rouge-w"
-        max_n = 4
+        metric_name = "rougeL"
     else:
-        raise ValueError("Invalid granularity. Must be one of `n`, `l`, or `w`.")
+        raise ValueError("Invalid granularity. Must be one of `n` or `l`")
 
-    if score_type.lower() not in ["f", "p", "r"]:
-        raise ValueError("Invalid score type. Must be one of `f`, `p`, or `r`.")
-
-    evaluator = Rouge(
-        metrics=[metric_name],
-        max_n=max_n,
-        limit_length=False,
-        length_limit=1_000,
-        length_limit_type="words",
-        apply_avg=False,
-        apply_best=False,
-        alpha=0.5,  # Default F1_score
-        weight_factor=1.2,
-        stemming=True,
+    evaluator = rouge_scorer.RougeScorer(
+        [metric_name],
+        use_stemmer=True,
     )
-    scores = evaluator.get_scores(target, reference)
-    return scores[metric_name_output][0][score_type.lower()][0]
+    scores = evaluator.score(target, reference)
+    scores_fpr = scores[metric_name]
+    if score_type.lower() == "f":
+        score = scores_fpr.fmeasure
+    elif score_type.lower() == "p":
+        score = scores_fpr.precision
+    elif score_type.lower() == "r":
+        score = scores_fpr.recall
+    else:
+        raise ValueError("Invalid score type. Must be one of `f`, `p`, or `r`.")
+    return score

@@ -94,6 +94,9 @@ class RequirementEvaluator(Evaluator):
         else:
             input_str = input_block.previous_generations[-1].original.text
         requirements = json.loads(input_block.text)
+        # The requirements are often a list of lists
+        if isinstance(requirements[0], list):
+            requirements = requirements[0]
         if not requirements:
             log.debug(f"[{input_block.name}] Skipping empty output")
             return []
@@ -124,7 +127,7 @@ class RequirementEvaluator(Evaluator):
                         code=input_str,
                     )
                 )
-                temp_block = self._split_text()
+                temp_block = self._split_text(obj_str, input_block.name)
                 translated_block = super().translate_block(temp_block, failure_path)
                 translated_blocks.append(translated_block)
                 translate_obj.update(json.loads(translated_block.text))
