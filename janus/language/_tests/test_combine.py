@@ -36,6 +36,7 @@ class TestCombiner(unittest.TestCase):
         self.translated_block = TranslatedCodeBlock(
             self.block,
             language="python",
+            converter=None,
         )
 
     def test_combine(self):

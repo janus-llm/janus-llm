@@ -2,23 +2,7 @@
 
 In order to translate from one programming language to another, you'll need to use the `janus translate` subcommand in the CLI. The following instructions will guide you through the process.
 
-First, you need to add an LLM to your configuration. You can do this by running the following command:
-
-## Adding an LLM
-
-```bash
-janus llm add my-gpt --type OpenAI
-```
-
-This will add an LLM configuration file with the name `my-gpt`.
-
-Output:
-
-```bash
-Model config written to /Users/mdoyle/.janus/llm/my-gpt.json
-```
-
-You can then modify this JSON file with different hyperparameters.
+First, you need to [add an LLM](quickstart.md) to your configuration.
 
 ## Translating Files
 

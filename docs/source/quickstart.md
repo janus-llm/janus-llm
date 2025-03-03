@@ -31,6 +31,22 @@ export PATH=$PATH:$HOME/.local/bin
 poetry install
 ```
 
+### Adding an LLM
+
+```bash
+janus llm add myazure
+```
+
+This will add an LLM configuration file with the name `myazure`.
+
+Output:
+
+```bash
+Model config written to /Users/mdoyle/.janus/llm/myazure.json
+```
+
+You can then modify this JSON file with different hyperparameters.
+
 ### Using Janus LLM
 
 With Janus LLM you can:

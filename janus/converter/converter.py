@@ -1,6 +1,7 @@
 import functools
 import json
 import time
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -16,7 +17,7 @@ from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
 
 from janus.embedding.vectorize import ChromaDBVectorizer
-from janus.language.block import CodeBlock, TranslatedCodeBlock
+from janus.language.block import BlockCollection, CodeBlock, TranslatedCodeBlock
 from janus.language.combine import Combiner
 from janus.language.naive.registry import CUSTOM_SPLITTERS
 from janus.language.splitter import (
@@ -82,12 +83,16 @@ class Converter:
         protected_node_types: tuple[str, ...] = (),
         prune_node_types: tuple[str, ...] = (),
         splitter_type: str = "file",
-        refiner_types: list[type[JanusRefiner]] = [JanusRefiner],
+        refiner_types: list[type[JanusRefiner] | str] = [JanusRefiner],
         retriever_type: str | None = None,
         combine_output: bool = True,
         use_janus_inputs: bool = False,
         target_language: str = "json",
         target_version: str | None = None,
+        input_types: set[str] | str | None = None,
+        input_labels: set[str] | str | None = None,
+        output_type: str | None = None,
+        output_label: str | None = None,
     ) -> None:
         """Initialize a Converter instance.
 
@@ -119,6 +124,10 @@ class Converter:
             use_janus_inputs: Whether to use janus inputs or not.
             target_language: The target programming language.
             target_version: The target programming language version.
+            input_types: The types of input to accept.
+            input_labels: The labels of input to accept.
+            output_type: The type of output to produce.
+            output_label: The label of output to produce.
         """
         self._changed_attrs: set = set()
 
@@ -154,7 +163,7 @@ class Converter:
         self._combiner: Combiner = Combiner()
 
         self._splitter_type: str
-        self._refiner_types: list[type[JanusRefiner]]
+        self._refiner_types: list[type[JanusRefiner] | str]
         self._retriever_type: str | None
 
         self._splitter: Splitter
@@ -171,6 +180,13 @@ class Converter:
         self.set_prune_node_types(prune_node_types)
         self.set_db_path(db_path=db_path)
         self.set_db_config(db_config=db_config)
+
+        self._input_types = input_types
+        self._input_labels = input_labels
+        self._output_type = output_type
+        self._output_label = output_label
+
+        self._load_parameters()
 
         # Child class must call this. Should we enforce somehow?
         # self._load_parameters()
@@ -230,7 +246,7 @@ class Converter:
 
         self._splitter_type = splitter_type
 
-    def set_refiner_types(self, refiner_types: list[type[JanusRefiner]]) -> None:
+    def set_refiner_types(self, refiner_types: list[type[JanusRefiner] | str]) -> None:
         """Validate and set the refiner type
 
         Arguments:
@@ -342,7 +358,13 @@ class Converter:
         if not self.override_token_limit:
             self._max_tokens = int(token_limit * self._llm.input_token_proportion)
 
-    @run_if_changed("_prompt_template_names", "_source_language", "_model_name")
+    @run_if_changed(
+        "_prompt_template_names",
+        "_source_language",
+        "_model_name",
+        "_target_language",
+        "_target_version",
+    )
     def _load_translation_chain(self) -> None:
         prompt_template_name = self._prompt_template_names[0]
         prompt_engine = MODEL_PROMPT_ENGINES[self._llm.short_model_id](
@@ -404,12 +426,18 @@ class Converter:
 
     @run_if_changed("_refiner_types", "_model_name", "max_prompts", "_parser")
     def _load_refiner_chain(self) -> None:
+        from janus.cli.constants import REFINERS
+
         if len(self._refiner_types) == 0:
             self._refiner_chain = RunnableLambda(
                 lambda x: self._parser.parse(x["completion"])
             )
             return
         refiner_type = self._refiner_types[0]
+        if isinstance(refiner_type, str):
+            if refiner_type not in REFINERS:
+                raise ValueError(f"Error: unable to find refiner type {refiner_type}")
+            refiner_type = REFINERS[refiner_type]
         if len(self._refiner_types) == 1:
             self._refiner_chain = RunnableLambda(
                 lambda x, refiner_type=refiner_type: refiner_type(
@@ -429,6 +457,10 @@ class Converter:
                 prompt_value=lambda x: x["prompt_value"],
             )
         for refiner_type in self._refiner_types[1:-1]:
+            if isinstance(refiner_type, str):
+                if refiner_type not in REFINERS:
+                    raise ValueError(f"Error: unable to find refiner type {refiner_type}")
+                refiner_type = REFINERS[refiner_type]
             # NOTE: Do NOT remove refiner_type=refiner_type from lambda.
             # Due to lambda capture, must be present or chain will not
             # be correctly constructed.
@@ -448,7 +480,15 @@ class Converter:
             ).parse_completion(**x)
         )
 
-    @run_if_changed("_parser", "_retriever", "_prompt", "_llm", "_refiner_chain")
+    @run_if_changed(
+        "_parser",
+        "_retriever",
+        "_prompt",
+        "_llm",
+        "_refiner_chain",
+        "_target_language",
+        "_target_version",
+    )
     def _load_chain(self):
         self.chain = self.get_chain()
 
@@ -561,12 +601,11 @@ class Converter:
             # For files where translation failed, write to failure path instead
 
             def _has_empty(block):
-                if isinstance(block, list):
-                    return len(block) == 0 or any(_has_empty(b) for b in block)
+                if isinstance(block, BlockCollection):
+                    return len(block.blocks) == 0 or any(
+                        _has_empty(b) for b in block.blocks
+                    )
                 return not block.translated
-
-            while isinstance(out_block, list) and len(out_block) == 1:
-                out_block = out_block[0]
 
             if _has_empty(out_block):
                 if fail_path is not None:
@@ -582,28 +621,58 @@ class Converter:
 
             # Make sure the tree's code has been consolidated at the top level
             #  before writing to file
-            self._combiner.combine(out_block)
+            for b in out_block.blocks:
+                self._combiner.combine(b)
             if out_path is not None and (overwrite or not out_path.exists()):
                 self._save_to_file(out_block, out_path)
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
+    def _filter_blocks(self, code_block):
+        if isinstance(code_block, BlockCollection):
+            input_blocks = list(code_block.blocks)
+        else:
+            input_blocks = [code_block]
+        if self._input_types is not None:
+            if isinstance(self._input_types, str):
+                self._input_types = set([self._input_types])
+            input_blocks = [
+                b
+                for b in input_blocks
+                if isinstance(b, BlockCollection) or b.block_type in self._input_types
+            ]
+        if self._input_labels is not None:
+            if isinstance(self._input_labels, str):
+                self._input_labels = set([self._input_labels])
+            input_blocks = [
+                b
+                for b in input_blocks
+                if isinstance(b, BlockCollection) or b.block_label in self._input_labels
+            ]
+        return input_blocks
+
+    def translate_blocks(
+        self,
+        code_block: CodeBlock | BlockCollection,
+        failure_path: Path | None = None,
+    ) -> BlockCollection | TranslatedCodeBlock:
+        input_blocks = self._filter_blocks(code_block)
+        output_blocks = []
+        for b in input_blocks:
+            output_blocks.append(self.translate_block(b, failure_path))
+        return BlockCollection(output_blocks, code_block.previous_generations)
+
     def translate_block(
         self,
-        input_block: CodeBlock | list[CodeBlock],
-        name: str,
+        input_block: CodeBlock,
         failure_path: Path | None = None,
-    ):
+    ) -> TranslatedCodeBlock:
         self._load_parameters()
-        if isinstance(input_block, list):
-            return [self.translate_block(b, name, failure_path) for b in input_block]
-        t0 = time.time()
         output_block = self._iterative_translate(input_block, failure_path)
-        output_block.processing_time = time.time() - t0
         if output_block.translated:
             completeness = output_block.translation_completeness
             log.info(
-                f"[{name}] Translation complete\n"
+                f"[{output_block.name}] Translation complete\n"
                 f"  {completeness:.2%} of input successfully translated\n"
                 f"  Total cost: ${output_block.total_cost:,.2f}\n"
                 f"  Output CodeBlock Structure:\n{input_block.tree_str()}\n"
@@ -611,7 +680,7 @@ class Converter:
 
         else:
             log.error(
-                f"[{name}] Translation failed\n"
+                f"[{output_block.name}] Translation failed\n"
                 f"  Total cost: ${output_block.total_cost:,.2f}\n"
             )
         return output_block
@@ -632,9 +701,8 @@ class Converter:
             code is not guaranteed to be consolidated. To amend this, run
             `Combiner.combine_children` on the block.
         """
-        filename = file.name
         input_block = self._split_file(file)
-        return self.translate_block(input_block, filename, failure_path)
+        return self.translate_blocks(input_block, failure_path)
 
     def translate_janus_file(self, file: Path, failure_path: Path | None = None):
         filename = file.name
@@ -644,7 +712,7 @@ class Converter:
 
     def translate_janus_obj(self, obj: Any, name: str, failure_path: Path | None = None):
         block = self._janus_object_to_codeblock(obj, name)
-        return self.translate_block(block)
+        return self.translate_blocks(block, failure_path)
 
     def translate_text(self, text: str, name: str, failure_path: Path | None = None):
         """
@@ -655,7 +723,7 @@ class Converter:
             failure_path: path to write failure file if translation is not successful
         """
         input_block = self._split_text(text, name)
-        return self.translate_block(input_block, name, failure_path)
+        return self.translate_blocks(input_block, failure_path)
 
     def _iterative_translate(
         self, root: CodeBlock, failure_path: Path | None = None
@@ -669,7 +737,13 @@ class Converter:
         Returns:
             A `TranslatedCodeBlock`
         """
-        translated_root = TranslatedCodeBlock(root, self._target_language)
+        translated_root = TranslatedCodeBlock(
+            root,
+            self._target_language,
+            self,
+            block_type=self._output_type,
+            block_label=self._output_label,
+        )
         last_prog, prog_delta = 0, 0.1
         stack = [translated_root]
         try:
@@ -692,7 +766,7 @@ class Converter:
         except RateLimitError:
             pass
         except OutputParserException as e:
-            log.error(f"Skipping file, failed to parse output: {e}.")
+            log.error(f"Skipping file, failed to parse output: {e}")
         except BadRequestError as e:
             if str(e).startswith("Detected an error in the prompt"):
                 log.warning("Malformed input, skipping")
@@ -720,7 +794,9 @@ class Converter:
                 )
             raise e
         finally:
-            out_obj = self._get_output_obj(translated_root, self._combine_output)
+            out_obj = self._get_output_obj(
+                translated_root, self._combine_output, include_previous_outputs=True
+            )
             log.debug(f"Resulting Block:" f"{json.dumps(out_obj)}")
             if not translated_root.translated:
                 if failure_path is not None:
@@ -810,65 +886,105 @@ class Converter:
             input_tokens=sum(m["input_tokens"] for m in metadatas),
             output_tokens=sum(m["output_tokens"] for m in metadatas),
             converter_name=self.__class__.__name__,
+            type=[m["type"] for m in metadatas],
+            label=[m["label"] for m in metadatas],
         )
 
     def _combine_inputs(self, inputs: list[str]):
-        s = ""
-        for i in inputs:
-            s += i
-        return s
+        return json.dumps(inputs)
 
     def _get_output_obj(
-        self, block: TranslatedCodeBlock | list, combine_children: bool = True
+        self,
+        block: TranslatedCodeBlock | BlockCollection | dict,
+        combine_children: bool = True,
+        include_previous_outputs: bool = True,
     ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
-        if isinstance(block, list):
-            # TODO: run on all items in list
-            outputs = [self._get_output_obj(b, combine_children) for b in block]
-            metadata = self._combine_metadata([o["metadata"] for o in outputs])
-            input_agg = self._combine_inputs(o["input"] for o in outputs)
-            return dict(
-                input=input_agg,
-                metadata=metadata,
-                outputs=outputs,
-            )
-        if not combine_children and len(block.children) > 0:
-            outputs = self._get_output_obj_children(block)
-            metadata = self._combine_metadata([o["metadata"] for o in outputs])
-            input_agg = self._combine_inputs(o["input"] for o in outputs)
-            return dict(
-                input=input_agg,
-                metadata=metadata,
-                outputs=outputs,
-            )
-        output_obj: str | dict[str, str]
-        if not block.translation_completed:
-            # translation wasn't completed, so combined parsing will likely fail
-            output_obj = [block.complete_text]
+        block_type = None
+        block_label = None
+        if isinstance(block, dict):
+            # output object has already been generated
+            new_block = deepcopy(block)
+            if "intermediate_outputs" in new_block:
+                del new_block["intermediate_outputs"]
+            return new_block
+        if isinstance(block, BlockCollection):
+            if len(block.blocks) == 1:
+                outputs = self._get_output_obj(block.blocks[0], combine_children, False)[
+                    "outputs"
+                ]
+                block_type = block.blocks[0].block_type
+                block_label = block.blocks[0].block_label
+            else:
+                outputs = [
+                    self._get_output_obj(b, combine_children, False) for b in block.blocks
+                ]
+        elif (
+            not isinstance(block, BlockCollection)
+            and not combine_children
+            and len(block.children) > 0
+        ):
+            outputs = self._get_output_obj_children(block, False)
         else:
-            output_str = self._parser.parse_combined_output(block.complete_text)
-            output_obj = [output_str]
+            block_type = block.block_type
+            block_label = block.block_label
+            if not block.translation_completed:
+                # translation wasn't completed, so combined parsing will likely fail
+                outputs = [block.complete_text]
+            else:
+                output_str = self._parser.parse_combined_output(block.complete_text)
+                outputs = [output_str]
 
-        return dict(
-            input=block.original.text or "",
+        def _get_input(block):
+            if isinstance(block, BlockCollection):
+                return self._combine_inputs([_get_input(b) for b in block.blocks])
+            return block.original.text or ""
+
+        out = dict(
+            input=_get_input(block),
             metadata=dict(
                 cost=block.total_cost,
-                processing_time=block.processing_time,
+                processing_time=block.total_processing_time,
                 num_requests=block.total_num_requests,
                 input_tokens=block.total_request_input_tokens,
                 output_tokens=block.total_request_output_tokens,
                 converter_name=self.__class__.__name__,
+                type=block_type,
+                label=block_label,
             ),
-            outputs=output_obj,
+            outputs=outputs,
         )
+        if (
+            include_previous_outputs
+            and isinstance(block, BlockCollection)
+            and len(block.previous_generations) > 0
+        ):
+            intermediate_outputs = []
+            for p in block.previous_generations:
+                if isinstance(p, dict):
+                    # preserve intermediate outputs from previous runs
+                    intermediate_outputs.append(
+                        self._get_output_obj(p, combine_children, False)
+                    )
+            if len(intermediate_outputs) > 0:
+                out["intermediate_outputs"] = intermediate_outputs
+        return out
 
-    def _get_output_obj_children(self, block: TranslatedCodeBlock):
+    def _get_output_obj_children(
+        self, block: TranslatedCodeBlock, include_previous_outputs: bool = True
+    ):
         if len(block.children) > 0:
             res = []
             for c in block.children:
-                res += self._get_output_obj_children(c)
+                res += self._get_output_obj_children(c, include_previous_outputs)
             return res
         else:
-            return [self._get_output_obj(block, combine_children=True)]
+            return [
+                self._get_output_obj(
+                    block,
+                    combine_children=True,
+                    include_previous_outputs=include_previous_outputs,
+                )
+            ]
 
     def _save_to_file(self, block: TranslatedCodeBlock, out_path: Path) -> None:
         """Save a file to disk.
@@ -876,30 +992,36 @@ class Converter:
         Arguments:
             block: The `TranslatedCodeBlock` to save to a file.
         """
-        obj = self._get_output_obj(block, combine_children=self._combine_output)
+        obj = self._get_output_obj(
+            block, combine_children=self._combine_output, include_previous_outputs=True
+        )
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
 
     def _janus_object_to_codeblock(self, janus_obj: dict, name: str):
         results = []
         for o in janus_obj["outputs"]:
+            metadata = janus_obj["metadata"]
             if isinstance(o, str):
+                block_label = metadata["label"]
+                if isinstance(block_label, list):
+                    block_label = block_label[0]
+                block_type = metadata["type"]
+                if isinstance(block_type, list):
+                    block_type = block_type[0]
                 code_block = self._split_text(o, name)
-                meta_data = janus_obj["metadata"]
-                code_block.initial_cost = meta_data["cost"]
-                code_block.initial_input_tokens = meta_data["input_tokens"]
-                code_block.initial_output_tokens = meta_data["output_tokens"]
-                code_block.initial_num_requests = meta_data["num_requests"]
-                code_block.initial_processing_time = meta_data["processing_time"]
                 code_block.previous_generations = janus_obj.get(
                     "intermediate_outputs", []
                 ) + [janus_obj]
+                code_block.block_type = block_type
+                code_block.block_label = block_label
                 results.append(code_block)
             else:
-                results.append(self._janus_object_to_codeblock(o))
-        while isinstance(results, list) and len(results) == 1:
-            results = results[0]
-        return results
+                results += self._janus_object_to_codeblock(o, name).blocks
+        previous_generations = janus_obj.get("intermediate_outputs", [])
+        if janus_obj["metadata"]["converter_name"] != "ConverterChain":
+            previous_generations += [janus_obj]
+        return BlockCollection(results, previous_generations)
 
     def __or__(self, other: "Converter"):
         from janus.converter.chain import ConverterChain
