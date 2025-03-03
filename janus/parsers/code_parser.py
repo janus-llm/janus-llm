@@ -19,9 +19,9 @@ class CodeParser(JanusParser):
         if code is None:
             raise JanusParserException(
                 text,
-                "Code not find code between triple square brackets",
+                "Code not find code between triple backticks",
             )
         return str(code.group(1))
 
     def get_format_instructions(self) -> str:
-        return "Output must contain text contained within triple square brackets (```)"
+        return "Output must contain text contained within triple backticks (```)"

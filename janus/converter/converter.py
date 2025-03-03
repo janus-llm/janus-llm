@@ -358,7 +358,13 @@ class Converter:
         if not self.override_token_limit:
             self._max_tokens = int(token_limit * self._llm.input_token_proportion)
 
-    @run_if_changed("_prompt_template_names", "_source_language", "_model_name")
+    @run_if_changed(
+        "_prompt_template_names",
+        "_source_language",
+        "_model_name",
+        "_target_language",
+        "_target_version",
+    )
     def _load_translation_chain(self) -> None:
         prompt_template_name = self._prompt_template_names[0]
         prompt_engine = MODEL_PROMPT_ENGINES[self._llm.short_model_id](
@@ -474,7 +480,15 @@ class Converter:
             ).parse_completion(**x)
         )
 
-    @run_if_changed("_parser", "_retriever", "_prompt", "_llm", "_refiner_chain")
+    @run_if_changed(
+        "_parser",
+        "_retriever",
+        "_prompt",
+        "_llm",
+        "_refiner_chain",
+        "_target_language",
+        "_target_version",
+    )
     def _load_chain(self):
         self.chain = self.get_chain()
 
@@ -752,7 +766,7 @@ class Converter:
         except RateLimitError:
             pass
         except OutputParserException as e:
-            log.error(f"Skipping file, failed to parse output: {e}.")
+            log.error(f"Skipping file, failed to parse output: {e}")
         except BadRequestError as e:
             if str(e).startswith("Detected an error in the prompt"):
                 log.warning("Malformed input, skipping")
