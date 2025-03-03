@@ -40,7 +40,7 @@ Module Contents
    method to be overridden to track parameter updates in _changed_attrs.
 
 
-.. py:class:: Converter(model = 'gpt-4o', model_arguments = {}, source_language = 'fortran', max_prompts = 10, max_tokens = None, prompt_templates = ['simple'], db_path = None, db_config = None, protected_node_types = (), prune_node_types = (), splitter_type = 'file', refiner_types = [JanusRefiner], retriever_type = None, combine_output = True, use_janus_inputs = False, target_language = 'json', target_version = None)
+.. py:class:: Converter(model = 'gpt-4o', model_arguments = {}, source_language = 'fortran', max_prompts = 10, max_tokens = None, prompt_templates = ['simple'], db_path = None, db_config = None, protected_node_types = (), prune_node_types = (), splitter_type = 'file', refiner_types = [JanusRefiner], retriever_type = None, combine_output = True, use_janus_inputs = False, target_language = 'json', target_version = None, input_types = None, input_labels = None, output_type = None, output_label = None)
 
    Parent class that converts code into something else.
 
@@ -77,6 +77,10 @@ Module Contents
    :param use_janus_inputs: Whether to use janus inputs or not.
    :param target_language: The target programming language.
    :param target_version: The target programming language version.
+   :param input_types: The types of input to accept.
+   :param input_labels: The labels of input to accept.
+   :param output_type: The type of output to produce.
+   :param output_label: The label of output to produce.
 
 
    .. py:method:: set_model(model_name, **custom_arguments)
@@ -178,7 +182,10 @@ Module Contents
 
 
 
-   .. py:method:: translate_block(input_block, name, failure_path = None)
+   .. py:method:: translate_blocks(code_block, failure_path = None)
+
+
+   .. py:method:: translate_block(input_block, failure_path = None)
 
 
    .. py:method:: translate_file(file, failure_path = None)

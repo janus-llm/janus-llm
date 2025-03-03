@@ -17,7 +17,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Pipelines" href="pipelines.html" /><link rel="prev" title="Diagramming" href="diagramming.html" />
 
     <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 6.2.1 and Furo 2023.09.10 -->
-        <title>Refiners - Janus 4.4.5 documentation</title>
+        <title>Refiners - Janus 4.5.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
@@ -136,7 +136,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Janus 4.4.5 documentation</div></a>
+      <a href="index.html"><div class="brand">Janus 4.5.4 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -162,7 +162,7 @@
     <img class="sidebar-logo" src="_static/janus_logo.png" alt="Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Janus 4.4.5 documentation</span>
+  <span class="sidebar-brand-text">Janus 4.5.4 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -203,6 +203,8 @@
 <li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/document/index.html">janus.converter.document</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/evaluate/index.html">janus.converter.evaluate</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/partition/index.html">janus.converter.partition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/passthrough/index.html">janus.converter.passthrough</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/pool/index.html">janus.converter.pool</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/requirements/index.html">janus.converter.requirements</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/translate/index.html">janus.converter.translate</a></li>
 </ul>
@@ -291,15 +293,15 @@
 <li class="toctree-l2"><a class="reference internal" href="autoapi/format/index.html">format</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/diagram/index.html">diagram</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/refiner/index.html">refiner</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autoapi/pipeline/index.html">pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autoapi/database/index.html">database</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/document/index.html">document</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autoapi/embedding/index.html">embedding</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autoapi/partition/index.html">partition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/database/index.html">database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/pipeline/index.html">pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/translate/index.html">translate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/aggregate/index.html">aggregate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/self_eval/index.html">self_eval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autoapi/translate/index.html">translate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/constants/index.html">constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/embedding/index.html">embedding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/partition/index.html">partition</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/retriever/index.html">retriever</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/incose_parser/index.html">incose_parser</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/decompile_script/index.html">decompile_script</a></li>
@@ -349,6 +351,16 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>janus<span class="w"> </span>translate<span class="w"> </span>--input<span class="w"> </span>janus/cli/<span class="w"> </span>--output<span class="w"> </span>janus-translation<span class="w"> </span>--llm<span class="w"> </span>my-gpt<span class="w"> </span>-l<span class="w"> </span>python<span class="w"> </span>-r<span class="w"> </span>ReflectionRefiner<span class="w"> </span>-r<span class="w"> </span>CodeFormatRefiner
 </pre></div>
 </div>
+<p>Refiners can also be used in the <a class="reference internal" href="pipelines.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">pipeline</span></code></span></a> command by specifying them in a pipeline configuration file.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RequirementsDocumenter&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;kwargs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;refiner_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;RequirementsFormatRefiner&quot;</span><span class="p">]}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>This will run the <code class="docutils literal notranslate"><span class="pre">RequirementsFormatRefiner</span></code> on the output of the <code class="docutils literal notranslate"><span class="pre">RequirementsDocumenter</span></code>.</p>
 </section>
 <section id="available-refiners">
 <h2>Available Refiners<a class="headerlink" href="#available-refiners" title="Permalink to this heading">#</a></h2>

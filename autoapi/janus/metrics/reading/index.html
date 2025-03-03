@@ -17,7 +17,7 @@
 <link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="janus.metrics.rouge_score" href="../rouge_score/index.html" /><link rel="prev" title="janus.metrics.metric" href="../metric/index.html" />
 
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/><!-- Generated with Sphinx 6.2.1 and Furo 2023.09.10 -->
-        <title>janus.metrics.reading - Janus 4.4.5 documentation</title>
+        <title>janus.metrics.reading - Janus 4.5.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
@@ -136,7 +136,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../../index.html"><div class="brand">Janus 4.4.5 documentation</div></a>
+      <a href="../../../../index.html"><div class="brand">Janus 4.5.4 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -162,7 +162,7 @@
     <img class="sidebar-logo" src="../../../../_static/janus_logo.png" alt="Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Janus 4.4.5 documentation</span>
+  <span class="sidebar-brand-text">Janus 4.5.4 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -203,6 +203,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../converter/document/index.html">janus.converter.document</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../converter/evaluate/index.html">janus.converter.evaluate</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../converter/partition/index.html">janus.converter.partition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../converter/passthrough/index.html">janus.converter.passthrough</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../converter/pool/index.html">janus.converter.pool</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../converter/requirements/index.html">janus.converter.requirements</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../converter/translate/index.html">janus.converter.translate</a></li>
 </ul>
@@ -291,15 +293,15 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../format/index.html">format</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../diagram/index.html">diagram</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../refiner/index.html">refiner</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../pipeline/index.html">pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../database/index.html">database</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../document/index.html">document</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../embedding/index.html">embedding</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../partition/index.html">partition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../database/index.html">database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../pipeline/index.html">pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../translate/index.html">translate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../aggregate/index.html">aggregate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../self_eval/index.html">self_eval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../translate/index.html">translate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../constants/index.html">constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../embedding/index.html">embedding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../partition/index.html">partition</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../retriever/index.html">retriever</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../incose_parser/index.html">incose_parser</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../decompile_script/index.html">decompile_script</a></li>
@@ -350,20 +352,23 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#janus.metrics.reading.word_count" title="janus.metrics.reading.word_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">word_count</span></code></a>(text)</p></td>
 <td><p>Calculates word count exactly how readability package does</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#janus.metrics.reading.get_readability" title="janus.metrics.reading.get_readability"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_readability</span></code></a>(target)</p></td>
-<td><p>Create a Readability object from an input string</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#janus.metrics.reading.flesch" title="janus.metrics.reading.flesch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flesch</span></code></a>(target, **kwargs)</p></td>
+<td><p>Calculate the Flesch Score using textstat.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#janus.metrics.reading.flesch" title="janus.metrics.reading.flesch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flesch</span></code></a>(target, **kwargs)</p></td>
-<td><p>Calculate the Flesch Score using py-readability-metrics.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#janus.metrics.reading.flesch_grade" title="janus.metrics.reading.flesch_grade"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flesch_grade</span></code></a>(target, **kwargs)</p></td>
+<td><p>Calculate the Flesch Score using textstat.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#janus.metrics.reading.flesch_grade" title="janus.metrics.reading.flesch_grade"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flesch_grade</span></code></a>(target, **kwargs)</p></td>
-<td><p>Calculate the Flesch Score using py-readability-metrics.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#janus.metrics.reading.gunning_fog" title="janus.metrics.reading.gunning_fog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gunning_fog</span></code></a>(target, **kwargs)</p></td>
+<td><p>Calculate the Gunning-Fog Score using textstat.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#janus.metrics.reading.gunning_fog" title="janus.metrics.reading.gunning_fog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gunning_fog</span></code></a>(target, **kwargs)</p></td>
-<td><p>Calculate the Gunning-Fog Score using py-readability-metrics.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#janus.metrics.reading.dale_chall" title="janus.metrics.reading.dale_chall"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dale_chall</span></code></a>(target, **kwargs)</p></td>
+<td><p>Calculate the Dale-Chall Readability Score using textstat.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#janus.metrics.reading.gunning_fog_grade" title="janus.metrics.reading.gunning_fog_grade"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gunning_fog_grade</span></code></a>(target, **kwargs)</p></td>
-<td><p>Calculate the Gunning-Fog Grade Level Score using py-readability-metrics.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#janus.metrics.reading.automated_readability" title="janus.metrics.reading.automated_readability"><code class="xref py py-obj docutils literal notranslate"><span class="pre">automated_readability</span></code></a>(target, **kwargs)</p></td>
+<td><p>Calculate the Automated Readability Index using textstat.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#janus.metrics.reading.coleman_liau" title="janus.metrics.reading.coleman_liau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coleman_liau</span></code></a>(target, **kwargs)</p></td>
+<td><p>Calculate the Coleman-Liau Index using textstat.</p></td>
 </tr>
 </tbody>
 </table>
@@ -386,26 +391,9 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="janus.metrics.reading.get_readability">
-<span class="sig-prename descclassname"><span class="pre">janus.metrics.reading.</span></span><span class="sig-name descname"><span class="pre">get_readability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.metrics.reading.get_readability" title="Permalink to this definition">#</a></dt>
-<dd><p>Create a Readability object from an input string</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The target text.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>py-readability-metrics Readability object for that text</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>readability.Readability</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="janus.metrics.reading.flesch">
 <span class="sig-prename descclassname"><span class="pre">janus.metrics.reading.</span></span><span class="sig-name descname"><span class="pre">flesch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.metrics.reading.flesch" title="Permalink to this definition">#</a></dt>
-<dd><p>Calculate the Flesch Score using py-readability-metrics.</p>
+<dd><p>Calculate the Flesch Score using textstat.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The target text.</p>
@@ -422,7 +410,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="janus.metrics.reading.flesch_grade">
 <span class="sig-prename descclassname"><span class="pre">janus.metrics.reading.</span></span><span class="sig-name descname"><span class="pre">flesch_grade</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.metrics.reading.flesch_grade" title="Permalink to this definition">#</a></dt>
-<dd><p>Calculate the Flesch Score using py-readability-metrics.</p>
+<dd><p>Calculate the Flesch Score using textstat.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The target text.</p>
@@ -439,7 +427,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="janus.metrics.reading.gunning_fog">
 <span class="sig-prename descclassname"><span class="pre">janus.metrics.reading.</span></span><span class="sig-name descname"><span class="pre">gunning_fog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.metrics.reading.gunning_fog" title="Permalink to this definition">#</a></dt>
-<dd><p>Calculate the Gunning-Fog Score using py-readability-metrics.</p>
+<dd><p>Calculate the Gunning-Fog Score using textstat.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The target text.</p>
@@ -454,15 +442,49 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="janus.metrics.reading.gunning_fog_grade">
-<span class="sig-prename descclassname"><span class="pre">janus.metrics.reading.</span></span><span class="sig-name descname"><span class="pre">gunning_fog_grade</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.metrics.reading.gunning_fog_grade" title="Permalink to this definition">#</a></dt>
-<dd><p>Calculate the Gunning-Fog Grade Level Score using py-readability-metrics.</p>
+<dt class="sig sig-object py" id="janus.metrics.reading.dale_chall">
+<span class="sig-prename descclassname"><span class="pre">janus.metrics.reading.</span></span><span class="sig-name descname"><span class="pre">dale_chall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.metrics.reading.dale_chall" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate the Dale-Chall Readability Score using textstat.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The target text.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The Gunning-Fog Grade Level score.</p>
+<dd class="field-even"><p>The Dale-Chall score.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="janus.metrics.reading.automated_readability">
+<span class="sig-prename descclassname"><span class="pre">janus.metrics.reading.</span></span><span class="sig-name descname"><span class="pre">automated_readability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.metrics.reading.automated_readability" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate the Automated Readability Index using textstat.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The target text.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Automated Readability score.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="janus.metrics.reading.coleman_liau">
+<span class="sig-prename descclassname"><span class="pre">janus.metrics.reading.</span></span><span class="sig-name descname"><span class="pre">coleman_liau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.metrics.reading.coleman_liau" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate the Coleman-Liau Index using textstat.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The target text.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Coleman-Liau Index.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
@@ -532,11 +554,12 @@
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
 <li><a class="reference internal" href="#janus.metrics.reading.word_count"><code class="docutils literal notranslate"><span class="pre">word_count()</span></code></a></li>
-<li><a class="reference internal" href="#janus.metrics.reading.get_readability"><code class="docutils literal notranslate"><span class="pre">get_readability()</span></code></a></li>
 <li><a class="reference internal" href="#janus.metrics.reading.flesch"><code class="docutils literal notranslate"><span class="pre">flesch()</span></code></a></li>
 <li><a class="reference internal" href="#janus.metrics.reading.flesch_grade"><code class="docutils literal notranslate"><span class="pre">flesch_grade()</span></code></a></li>
 <li><a class="reference internal" href="#janus.metrics.reading.gunning_fog"><code class="docutils literal notranslate"><span class="pre">gunning_fog()</span></code></a></li>
-<li><a class="reference internal" href="#janus.metrics.reading.gunning_fog_grade"><code class="docutils literal notranslate"><span class="pre">gunning_fog_grade()</span></code></a></li>
+<li><a class="reference internal" href="#janus.metrics.reading.dale_chall"><code class="docutils literal notranslate"><span class="pre">dale_chall()</span></code></a></li>
+<li><a class="reference internal" href="#janus.metrics.reading.automated_readability"><code class="docutils literal notranslate"><span class="pre">automated_readability()</span></code></a></li>
+<li><a class="reference internal" href="#janus.metrics.reading.coleman_liau"><code class="docutils literal notranslate"><span class="pre">coleman_liau()</span></code></a></li>
 </ul>
 </li>
 </ul>

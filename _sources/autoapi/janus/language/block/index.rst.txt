@@ -19,6 +19,7 @@ Classes
 
    janus.language.block.CodeBlock
    janus.language.block.TranslatedCodeBlock
+   janus.language.block.BlockCollection
 
 
 Module Contents
@@ -26,7 +27,7 @@ Module Contents
 
 .. py:data:: log
 
-.. py:class:: CodeBlock(id, name, node_type, language, text, start_point, end_point, start_byte, end_byte, tokens, children, embedding_id = None, affixes = ('', ''), context_tags = {}, previous_generations = [])
+.. py:class:: CodeBlock(id, name, node_type, language, text, start_point, end_point, start_byte, end_byte, tokens, children, embedding_id = None, affixes = ('', ''), context_tags = {}, previous_generations = [], block_type = None, block_label = None)
 
    A class that represents a functional block of code.
 
@@ -162,7 +163,7 @@ Module Contents
 
 
 
-.. py:class:: TranslatedCodeBlock(original, language)
+.. py:class:: TranslatedCodeBlock(original, language, converter, block_type = None, block_label = None)
 
    Bases: :py:obj:`CodeBlock`
 
@@ -185,6 +186,10 @@ Module Contents
 
    :param original: The original code block
    :param language: The language to translate to
+   :param converter: the converter used to translate
+   :param block_type: type of the block
+   :param block_label: label for block
+   :param (for mapping outputs to inputs through ConverterChain):
 
    :returns: A `TranslatedCodeBlock` with the same attributes as the original, except
              for `text`, `path`, `complete`, `language`, `tokens`, and `children`
@@ -231,6 +236,11 @@ Module Contents
       :returns: Total number of requests made to LLM during translation
 
 
+   .. py:property:: total_processing_time
+      :type: float
+
+
+
    .. py:property:: translation_completed
       :type: bool
 
@@ -248,5 +258,37 @@ Module Contents
 
 
    .. py:method:: to_codeblock()
+
+
+.. py:class:: BlockCollection(blocks, previous_generations = [])
+
+   .. py:method:: to_codeblock()
+
+
+   .. py:property:: total_cost
+
+
+   .. py:property:: total_processing_time
+
+
+   .. py:property:: total_request_input_tokens
+
+
+   .. py:property:: total_request_output_tokens
+
+
+   .. py:property:: total_num_requests
+
+
+   .. py:property:: block_type
+
+
+   .. py:property:: block_label
+
+
+   .. py:property:: translation_completed
+
+
+   .. py:property:: complete
 
 

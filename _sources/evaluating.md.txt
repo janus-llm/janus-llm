@@ -13,11 +13,11 @@ The output of `janus evaluate -h` is seen below:
 
 ```output
 > janus evaluate -h
-                                                                                                         
- Usage: janus evaluate [OPTIONS] COMMAND [ARGS]...                                                       
-                                                                                                         
- Evaluation of generated source code or documentation                                                    
-                                                                                                         
+
+ Usage: janus evaluate [OPTIONS] COMMAND [ARGS]...
+
+ Evaluation of generated source code or documentation
+
 ╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────────╮
 │ --help  -h        Show this message and exit.                                                         │
 ╰───────────────────────────────────────────────────────────────────────────────────────────────────────╯
@@ -42,11 +42,11 @@ There's also an LLM Self Evaluation command. The help command has been trimmed f
 
 ```output
 ❯ janus llm-self-eval -h
-                                                                                                         
- Usage: janus llm-self-eval [OPTIONS]                                                                    
-                                                                                                         
- Use an LLM to evaluate its own performance.                                                             
-                                                                                                         
+
+ Usage: janus llm-self-eval [OPTIONS]
+
+ Use an LLM to evaluate its own performance.
+
 ╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────────╮
 │    --evaluation-type         -e                 [incose|comments]          Type of output to          │
 │                                                                            evaluate.                  │
@@ -58,13 +58,7 @@ There's also an LLM Self Evaluation command. The help command has been trimmed f
 
 ### Adding a Model
 
-Before you can evaluate with an LLM, you need to add an LLM model to your configuration. You can do this by running the following command:
-
-```shell
-janus llm add my-gpt --type OpenAI
-```
-
-And then follow the CLI instructions to add the model to your configuration.
+Before you can evaluate with an LLM, you need to [add an LLM](quickstart.md) to your configuration.
 
 ### Evaluating Requirements
 
@@ -97,4 +91,3 @@ janus evaluate flesch-grade -o test-output.json -t "This is an example of the re
 ```shell
 janus evaluate bleu -o test-output.json -t "This is an example of the BLEU metric" -r "This is a test of the BLEU metric" -S
 ```
-

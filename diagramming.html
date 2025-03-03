@@ -17,7 +17,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Refiners" href="refiners.html" /><link rel="prev" title="Documenting" href="documenting.html" />
 
     <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 6.2.1 and Furo 2023.09.10 -->
-        <title>Diagramming - Janus 4.4.5 documentation</title>
+        <title>Diagramming - Janus 4.5.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
@@ -136,7 +136,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Janus 4.4.5 documentation</div></a>
+      <a href="index.html"><div class="brand">Janus 4.5.4 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -162,7 +162,7 @@
     <img class="sidebar-logo" src="_static/janus_logo.png" alt="Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Janus 4.4.5 documentation</span>
+  <span class="sidebar-brand-text">Janus 4.5.4 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -203,6 +203,8 @@
 <li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/document/index.html">janus.converter.document</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/evaluate/index.html">janus.converter.evaluate</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/partition/index.html">janus.converter.partition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/passthrough/index.html">janus.converter.passthrough</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/pool/index.html">janus.converter.pool</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/requirements/index.html">janus.converter.requirements</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/janus/converter/translate/index.html">janus.converter.translate</a></li>
 </ul>
@@ -291,15 +293,15 @@
 <li class="toctree-l2"><a class="reference internal" href="autoapi/format/index.html">format</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/diagram/index.html">diagram</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/refiner/index.html">refiner</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autoapi/pipeline/index.html">pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autoapi/database/index.html">database</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/document/index.html">document</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autoapi/embedding/index.html">embedding</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autoapi/partition/index.html">partition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/database/index.html">database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/pipeline/index.html">pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/translate/index.html">translate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/aggregate/index.html">aggregate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/self_eval/index.html">self_eval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autoapi/translate/index.html">translate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/constants/index.html">constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/embedding/index.html">embedding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/partition/index.html">partition</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/retriever/index.html">retriever</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/incose_parser/index.html">incose_parser</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/decompile_script/index.html">decompile_script</a></li>
@@ -346,26 +348,18 @@
 <section id="generating-diagrams">
 <h2>Generating Diagrams<a class="headerlink" href="#generating-diagrams" title="Permalink to this heading">#</a></h2>
 <p>To generate diagrams from source code, you’ll need to use the <code class="docutils literal notranslate"><span class="pre">janus</span> <span class="pre">diagram</span></code> subcommand in the CLI. The following instructions will guide you through the process.</p>
-<section id="adding-an-llm">
-<h3>Adding an LLM<a class="headerlink" href="#adding-an-llm" title="Permalink to this heading">#</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>janus<span class="w"> </span>llm<span class="w"> </span>add<span class="w"> </span>my-gpt<span class="w"> </span>--type<span class="w"> </span>OpenAI
-</pre></div>
-</div>
-<p>This will add an LLM configuration file with the name <code class="docutils literal notranslate"><span class="pre">my-gpt</span></code>.</p>
-<p>Output:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Model<span class="w"> </span>config<span class="w"> </span>written<span class="w"> </span>to<span class="w"> </span>/Users/mdoyle/.janus/llm/my-gpt.json
-</pre></div>
-</div>
-<p>You can then modify this JSON file with different hyperparameters.</p>
+<section id="adding-a-model">
+<h3>Adding a Model<a class="headerlink" href="#adding-a-model" title="Permalink to this heading">#</a></h3>
+<p>Before you can generate diagrams, you need to <a class="reference internal" href="quickstart.html"><span class="std std-doc">add an LLM</span></a> to your configuration.</p>
 </section>
 <section id="running-the-diagram-command">
 <h3>Running the Diagram Command<a class="headerlink" href="#running-the-diagram-command" title="Permalink to this heading">#</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>janus<span class="w"> </span>diagram<span class="w"> </span>--input<span class="w"> </span>janus/language/treesitter/_tests/languages<span class="w"> </span>--output<span class="w"> </span>diagrams<span class="w"> </span>--llm<span class="w"> </span>my-gpt<span class="w"> </span>--language<span class="w"> </span>python<span class="w"> </span>--diagram-type<span class="w"> </span>Activity
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>janus<span class="w"> </span>diagram<span class="w"> </span>--input<span class="w"> </span>janus/language/treesitter/_tests/languages<span class="w"> </span>--output<span class="w"> </span>diagrams<span class="w"> </span>--llm<span class="w"> </span>my-gpt<span class="w"> </span>--language<span class="w"> </span>matlab<span class="w"> </span>--diagram-type<span class="w"> </span>Activity
 </pre></div>
 </div>
 <p>The options for type of diagram are <code class="docutils literal notranslate"><span class="pre">Class</span></code>, <code class="docutils literal notranslate"><span class="pre">Sequence</span></code>, and <code class="docutils literal notranslate"><span class="pre">Activity</span></code>.</p>
 <p>You can also specify some <a class="reference internal" href="refiners.html"><span class="std std-doc">refiners</span></a> in a chain to improve the quality of the diagram:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>janus<span class="w"> </span>diagram<span class="w"> </span>--input<span class="w"> </span>janus/language/treesitter/_tests/languages<span class="w"> </span>--output<span class="w"> </span>diagrams<span class="w"> </span>--llm<span class="w"> </span>my-gpt<span class="w"> </span>--language<span class="w"> </span>python<span class="w"> </span>--diagram-type<span class="w"> </span>Activity<span class="w"> </span>-r<span class="w"> </span>ReflectionRefiner<span class="w"> </span>-r<span class="w"> </span>CodeFormatRefiner<span class="w"> </span>-r<span class="w"> </span>FixParserExceptions
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>janus<span class="w"> </span>diagram<span class="w"> </span>--input<span class="w"> </span>janus/language/treesitter/_tests/languages<span class="w"> </span>--output<span class="w"> </span>diagrams<span class="w"> </span>--llm<span class="w"> </span>my-gpt<span class="w"> </span>--language<span class="w"> </span>matlab<span class="w"> </span>--diagram-type<span class="w"> </span>Activity<span class="w"> </span>-r<span class="w"> </span>ReflectionRefiner<span class="w"> </span>-r<span class="w"> </span>CodeFormatRefiner<span class="w"> </span>-r<span class="w"> </span>FixParserExceptions
 </pre></div>
 </div>
 <p>This should output a <a class="reference internal" href="janus_json.html"><span class="std std-doc">Janus JSON</span></a> file that then can be used to render the diagram.</p>
@@ -379,6 +373,10 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>https://raw.githubusercontent.com/janus-llm/janus-llm/refs/heads/public/scripts/install_plantuml.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
 </pre></div>
 </div>
+</section>
+<section id="installing-java">
+<h3>Installing Java<a class="headerlink" href="#installing-java" title="Permalink to this heading">#</a></h3>
+<p>Rendering the diagrams requires Java. <a class="reference external" href="https://www.oracle.com/java/technologies/downloads/">Download</a> and install the latest JDK to render PlantUML diagrams.</p>
 </section>
 <section id="rendering-the-diagram">
 <h3>Rendering the Diagram<a class="headerlink" href="#rendering-the-diagram" title="Permalink to this heading">#</a></h3>
@@ -446,12 +444,13 @@
             <ul>
 <li><a class="reference internal" href="#">Diagramming</a><ul>
 <li><a class="reference internal" href="#generating-diagrams">Generating Diagrams</a><ul>
-<li><a class="reference internal" href="#adding-an-llm">Adding an LLM</a></li>
+<li><a class="reference internal" href="#adding-a-model">Adding a Model</a></li>
 <li><a class="reference internal" href="#running-the-diagram-command">Running the Diagram Command</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#rendering-diagrams">Rendering Diagrams</a><ul>
 <li><a class="reference internal" href="#installing-plantuml">Installing PlantUML</a></li>
+<li><a class="reference internal" href="#installing-java">Installing Java</a></li>
 <li><a class="reference internal" href="#rendering-the-diagram">Rendering the Diagram</a></li>
 </ul>
 </li>

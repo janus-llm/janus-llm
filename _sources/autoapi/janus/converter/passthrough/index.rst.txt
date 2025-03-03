@@ -1,0 +1,66 @@
+janus.converter.passthrough
+===========================
+
+.. py:module:: janus.converter.passthrough
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   janus.converter.passthrough.ConverterPassthrough
+
+
+Module Contents
+---------------
+
+.. py:class:: ConverterPassthrough(**kwargs)
+
+   Bases: :py:obj:`janus.converter.converter.Converter`
+
+
+   Parent class that converts code into something else.
+
+   Children will determine what the code gets converted into. Whether that's translated
+   into another language, into pseudocode, requirements, documentation, etc., or
+   converted into embeddings
+
+   Initialize a Converter instance.
+
+   :param source_language: The source programming language.
+   :param parser_type: The type of parser to use for parsing the LLM output. Valid
+                       values are `"code"`, `"text"`, `"eval"`, and `None` (default). If `None`,
+                       the `Converter` assumes you won't be parsing an output (i.e., adding to an
+                       embedding DB).
+   :param max_prompts: The maximum number of prompts to try before giving up.
+   :param max_tokens: The maximum number of tokens to use in the LLM. If `None`, the
+                      converter will use half the model's token limit.
+   :param prompt_templates: The name of the prompt templates to use.
+   :param db_path: The path to the database to use for vectorization.
+   :param db_config: The configuration for the database.
+   :param protected_node_types: A set of node types that aren't to be merged.
+   :param prune_node_types: A set of node types which should be pruned.
+   :param splitter_type: The type of splitter to use. Valid values are `"file"`,
+                         `"tag"`, `"chunk"`, `"ast-strict"`, and `"ast-flex"`.
+   :param refiner_type: The type of refiner to use. Valid values:
+                        - "parser"
+                        - "reflection"
+                        - None
+   :param retriever_type: The type of retriever to use. Valid values:
+                          - "active_usings"
+                          - "language_docs"
+                          - None
+   :param combine_output: Whether to combine the output into a single file or not.
+   :param use_janus_inputs: Whether to use janus inputs or not.
+   :param target_language: The target programming language.
+   :param target_version: The target programming language version.
+   :param input_types: The types of input to accept.
+   :param input_labels: The labels of input to accept.
+   :param output_type: The type of output to produce.
+   :param output_label: The label of output to produce.
+
+
+   .. py:method:: translate_block(input_block, failure_path = None)
+
+

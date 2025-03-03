@@ -17,7 +17,7 @@
 <link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="janus.language.combine" href="../combine/index.html" /><link rel="prev" title="janus.language.treesitter.treesitter" href="../treesitter/treesitter/index.html" />
 
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/><!-- Generated with Sphinx 6.2.1 and Furo 2023.09.10 -->
-        <title>janus.language.block - Janus 4.4.5 documentation</title>
+        <title>janus.language.block - Janus 4.5.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
@@ -136,7 +136,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../../index.html"><div class="brand">Janus 4.4.5 documentation</div></a>
+      <a href="../../../../index.html"><div class="brand">Janus 4.5.4 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -162,7 +162,7 @@
     <img class="sidebar-logo" src="../../../../_static/janus_logo.png" alt="Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Janus 4.4.5 documentation</span>
+  <span class="sidebar-brand-text">Janus 4.5.4 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -203,6 +203,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../converter/document/index.html">janus.converter.document</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../converter/evaluate/index.html">janus.converter.evaluate</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../converter/partition/index.html">janus.converter.partition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../converter/passthrough/index.html">janus.converter.passthrough</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../converter/pool/index.html">janus.converter.pool</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../converter/requirements/index.html">janus.converter.requirements</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../converter/translate/index.html">janus.converter.translate</a></li>
 </ul>
@@ -291,15 +293,15 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../format/index.html">format</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../diagram/index.html">diagram</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../refiner/index.html">refiner</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../pipeline/index.html">pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../database/index.html">database</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../document/index.html">document</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../embedding/index.html">embedding</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../partition/index.html">partition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../database/index.html">database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../pipeline/index.html">pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../translate/index.html">translate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../aggregate/index.html">aggregate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../self_eval/index.html">self_eval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../translate/index.html">translate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../constants/index.html">constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../embedding/index.html">embedding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../partition/index.html">partition</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../retriever/index.html">retriever</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../incose_parser/index.html">incose_parser</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../decompile_script/index.html">decompile_script</a></li>
@@ -365,6 +367,9 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#janus.language.block.TranslatedCodeBlock" title="janus.language.block.TranslatedCodeBlock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TranslatedCodeBlock</span></code></a></p></td>
 <td><p>A class that represents the translated functional block of code.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#janus.language.block.BlockCollection" title="janus.language.block.BlockCollection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockCollection</span></code></a></p></td>
+<td><p></p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -378,7 +383,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="janus.language.block.CodeBlock">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.language.block.</span></span><span class="sig-name descname"><span class="pre">CodeBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_byte</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_byte</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">affixes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('',</span> <span class="pre">'')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">previous_generations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.language.block.CodeBlock" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.language.block.</span></span><span class="sig-name descname"><span class="pre">CodeBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_byte</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_byte</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">affixes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('',</span> <span class="pre">'')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">previous_generations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.language.block.CodeBlock" title="Permalink to this definition">#</a></dt>
 <dd><p>A class that represents a functional block of code.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -398,6 +403,8 @@
 <li><p><strong>affixes</strong> (<em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em>) – </p></li>
 <li><p><strong>context_tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em>) – </p></li>
 <li><p><strong>previous_generations</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference internal" href="#janus.language.block.TranslatedCodeBlock" title="janus.language.block.TranslatedCodeBlock"><em>TranslatedCodeBlock</em></a><em>]</em>) – </p></li>
+<li><p><strong>block_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>block_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>None</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -624,7 +631,7 @@ to transfer the suffix from the first child of a node to its parent.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="janus.language.block.TranslatedCodeBlock">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.language.block.</span></span><span class="sig-name descname"><span class="pre">TranslatedCodeBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.language.block.TranslatedCodeBlock" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.language.block.</span></span><span class="sig-name descname"><span class="pre">TranslatedCodeBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">converter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.language.block.TranslatedCodeBlock" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#janus.language.block.CodeBlock" title="janus.language.block.CodeBlock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CodeBlock</span></code></a></p>
 <p>A class that represents the translated functional block of code.</p>
 <dl class="py attribute">
@@ -651,6 +658,10 @@ to transfer the suffix from the first child of a node to its parent.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>original</strong> (<a class="reference internal" href="#janus.language.block.CodeBlock" title="janus.language.block.CodeBlock"><em>CodeBlock</em></a>) – The original code block</p></li>
 <li><p><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The language to translate to</p></li>
+<li><p><strong>converter</strong> (<em>ForwardRef</em><em>(</em><em>'Converter'</em><em>)</em>) – the converter used to translate</p></li>
+<li><p><strong>block_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>None</em>) – type of the block</p></li>
+<li><p><strong>block_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>None</em>) – label for block</p></li>
+<li><p><strong>ConverterChain</strong><strong>)</strong> (<em>(</em><em>for mapping outputs to inputs through</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -730,6 +741,16 @@ successfully-translated descendents</p>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="janus.language.block.TranslatedCodeBlock.total_processing_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_processing_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></em><a class="headerlink" href="#janus.language.block.TranslatedCodeBlock.total_processing_time" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="janus.language.block.TranslatedCodeBlock.translation_completed">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">translation_completed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#janus.language.block.TranslatedCodeBlock.translation_completed" title="Permalink to this definition">#</a></dt>
 <dd><p>Whether or not the code block was successfully translated</p>
@@ -766,6 +787,74 @@ successfully-translated descendents</p>
 </dd>
 </dl>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="janus.language.block.BlockCollection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">janus.language.block.</span></span><span class="sig-name descname"><span class="pre">BlockCollection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blocks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">previous_generations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#janus.language.block.BlockCollection" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>blocks</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference internal" href="#janus.language.block.CodeBlock" title="janus.language.block.CodeBlock"><em>CodeBlock</em></a><em>]</em>) – </p></li>
+<li><p><strong>previous_generations</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>ForwardRef</em><em>(</em><em>'BlockCollection'</em><em>)</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="janus.language.block.BlockCollection.to_codeblock">
+<span class="sig-name descname"><span class="pre">to_codeblock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#janus.language.block.BlockCollection.to_codeblock" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ForwardRef(‘BlockCollection’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="janus.language.block.BlockCollection.total_cost">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_cost</span></span><a class="headerlink" href="#janus.language.block.BlockCollection.total_cost" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="janus.language.block.BlockCollection.total_processing_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_processing_time</span></span><a class="headerlink" href="#janus.language.block.BlockCollection.total_processing_time" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="janus.language.block.BlockCollection.total_request_input_tokens">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_request_input_tokens</span></span><a class="headerlink" href="#janus.language.block.BlockCollection.total_request_input_tokens" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="janus.language.block.BlockCollection.total_request_output_tokens">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_request_output_tokens</span></span><a class="headerlink" href="#janus.language.block.BlockCollection.total_request_output_tokens" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="janus.language.block.BlockCollection.total_num_requests">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_num_requests</span></span><a class="headerlink" href="#janus.language.block.BlockCollection.total_num_requests" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="janus.language.block.BlockCollection.block_type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">block_type</span></span><a class="headerlink" href="#janus.language.block.BlockCollection.block_type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="janus.language.block.BlockCollection.block_label">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">block_label</span></span><a class="headerlink" href="#janus.language.block.BlockCollection.block_label" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="janus.language.block.BlockCollection.translation_completed">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">translation_completed</span></span><a class="headerlink" href="#janus.language.block.BlockCollection.translation_completed" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="janus.language.block.BlockCollection.complete">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">complete</span></span><a class="headerlink" href="#janus.language.block.BlockCollection.complete" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -869,9 +958,23 @@ successfully-translated descendents</p>
 <li><a class="reference internal" href="#janus.language.block.TranslatedCodeBlock.total_request_input_tokens"><code class="docutils literal notranslate"><span class="pre">TranslatedCodeBlock.total_request_input_tokens</span></code></a></li>
 <li><a class="reference internal" href="#janus.language.block.TranslatedCodeBlock.total_request_output_tokens"><code class="docutils literal notranslate"><span class="pre">TranslatedCodeBlock.total_request_output_tokens</span></code></a></li>
 <li><a class="reference internal" href="#janus.language.block.TranslatedCodeBlock.total_num_requests"><code class="docutils literal notranslate"><span class="pre">TranslatedCodeBlock.total_num_requests</span></code></a></li>
+<li><a class="reference internal" href="#janus.language.block.TranslatedCodeBlock.total_processing_time"><code class="docutils literal notranslate"><span class="pre">TranslatedCodeBlock.total_processing_time</span></code></a></li>
 <li><a class="reference internal" href="#janus.language.block.TranslatedCodeBlock.translation_completed"><code class="docutils literal notranslate"><span class="pre">TranslatedCodeBlock.translation_completed</span></code></a></li>
 <li><a class="reference internal" href="#janus.language.block.TranslatedCodeBlock.translation_completeness"><code class="docutils literal notranslate"><span class="pre">TranslatedCodeBlock.translation_completeness</span></code></a></li>
 <li><a class="reference internal" href="#janus.language.block.TranslatedCodeBlock.to_codeblock"><code class="docutils literal notranslate"><span class="pre">TranslatedCodeBlock.to_codeblock()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#janus.language.block.BlockCollection"><code class="docutils literal notranslate"><span class="pre">BlockCollection</span></code></a><ul>
+<li><a class="reference internal" href="#janus.language.block.BlockCollection.to_codeblock"><code class="docutils literal notranslate"><span class="pre">BlockCollection.to_codeblock()</span></code></a></li>
+<li><a class="reference internal" href="#janus.language.block.BlockCollection.total_cost"><code class="docutils literal notranslate"><span class="pre">BlockCollection.total_cost</span></code></a></li>
+<li><a class="reference internal" href="#janus.language.block.BlockCollection.total_processing_time"><code class="docutils literal notranslate"><span class="pre">BlockCollection.total_processing_time</span></code></a></li>
+<li><a class="reference internal" href="#janus.language.block.BlockCollection.total_request_input_tokens"><code class="docutils literal notranslate"><span class="pre">BlockCollection.total_request_input_tokens</span></code></a></li>
+<li><a class="reference internal" href="#janus.language.block.BlockCollection.total_request_output_tokens"><code class="docutils literal notranslate"><span class="pre">BlockCollection.total_request_output_tokens</span></code></a></li>
+<li><a class="reference internal" href="#janus.language.block.BlockCollection.total_num_requests"><code class="docutils literal notranslate"><span class="pre">BlockCollection.total_num_requests</span></code></a></li>
+<li><a class="reference internal" href="#janus.language.block.BlockCollection.block_type"><code class="docutils literal notranslate"><span class="pre">BlockCollection.block_type</span></code></a></li>
+<li><a class="reference internal" href="#janus.language.block.BlockCollection.block_label"><code class="docutils literal notranslate"><span class="pre">BlockCollection.block_label</span></code></a></li>
+<li><a class="reference internal" href="#janus.language.block.BlockCollection.translation_completed"><code class="docutils literal notranslate"><span class="pre">BlockCollection.translation_completed</span></code></a></li>
+<li><a class="reference internal" href="#janus.language.block.BlockCollection.complete"><code class="docutils literal notranslate"><span class="pre">BlockCollection.complete</span></code></a></li>
 </ul>
 </li>
 </ul>
