@@ -67,13 +67,25 @@ MODEL_TYPE_CONSTRUCTORS: dict[str, ModelType] = {
     "Azure": AzureChatOpenAI,
 }
 
-if "Bedrock" in model_types:
+try:
     MODEL_TYPE_CONSTRUCTORS["Bedrock"] = Bedrock
     MODEL_TYPE_CONSTRUCTORS["BedrockChat"] = BedrockChat
     MODEL_TYPE_CONSTRUCTORS["Granite"] = BedrockChat
+except NameError:
+    log.warning(
+        "Could not import LangChain's Bedrock Client. If you would like to use Bedrock "
+        "models, please install LangChain's Bedrock Client by running 'pip install "
+        "janus-llm[bedrock]' or poetry install -E bedrock."
+    )
 
-if "HuggingFacePipeline" in model_types:
+try:
     MODEL_TYPE_CONSTRUCTORS["HuggingFaceLocal"] = HuggingFacePipeline
+except NameError:
+    log.warning(
+        "Could not import LangChain's HuggingFace Pipeline Client. If you would like to "
+        "use HuggingFace models, please install LangChain's HuggingFace Pipeline Client "
+        "by running 'pip install janus-llm[hf-local]' or poetry install -E hf-local."
+    )
 
 
 class JanusModelProtocol(Protocol):
