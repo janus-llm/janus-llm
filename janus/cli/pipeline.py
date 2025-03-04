@@ -9,6 +9,7 @@ from typing_extensions import Annotated
 from janus.cli.constants import CONVERTERS
 from janus.converter.chain import ConverterChain
 from janus.converter.pool import ConverterPool
+from janus.language.naive.registry import CUSTOM_SPLITTERS
 from janus.utils.enums import LANGUAGES
 
 
@@ -37,6 +38,7 @@ def instiantiate_pipeline(
     language: str = "text",
     model: str = "gpt-4o",
     use_janus_inputs: None | bool = None,
+    splitter_type: str = "file",
 ):
     if "kwargs" not in pipeline[0]:
         pipeline[0]["kwargs"] = {}
@@ -50,7 +52,7 @@ def instiantiate_pipeline(
                 source_language=converters[-1].target_language, model=model
             )
         converters.append(instiantiate(p))
-    return ConverterChain(*converters)
+    return ConverterChain(*converters, splitter_type=splitter_type)
 
 
 def pipeline(
@@ -112,11 +114,24 @@ def pipeline(
             help="Present if converter chain should use janus input files",
         ),
     ] = None,
+    splitter_type: Annotated[
+        str,
+        typer.Option(
+            "-S",
+            "--splitter",
+            help="Name of custom splitter to use",
+            click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
+        ),
+    ] = "file",
 ):
     with open(pipeline_file, "r") as f:
         json_obj = json.load(f)
     pipeline = instiantiate_pipeline(
-        json_obj, language=language, model=llm_name, use_janus_inputs=use_janus_inputs
+        json_obj,
+        language=language,
+        model=llm_name,
+        use_janus_inputs=use_janus_inputs,
+        splitter_type=splitter_type,
     )
     pipeline.translate(
         input_directory=input_dir,
