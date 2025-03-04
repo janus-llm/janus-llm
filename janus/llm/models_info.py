@@ -67,12 +67,12 @@ MODEL_TYPE_CONSTRUCTORS: dict[str, ModelType] = {
     "Azure": AzureChatOpenAI,
 }
 
-if "Bedrock" in model_types:
+if Bedrock in model_types:
     MODEL_TYPE_CONSTRUCTORS["Bedrock"] = Bedrock
     MODEL_TYPE_CONSTRUCTORS["BedrockChat"] = BedrockChat
     MODEL_TYPE_CONSTRUCTORS["Granite"] = BedrockChat
 
-if "HuggingFacePipeline" in model_types:
+if HuggingFacePipeline in model_types:
     MODEL_TYPE_CONSTRUCTORS["HuggingFaceLocal"] = HuggingFacePipeline
 
 
