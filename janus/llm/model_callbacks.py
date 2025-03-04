@@ -46,13 +46,17 @@ COST_PER_1K_TOKENS: dict[str, dict[str, float]] = {
     "anthropic.claude-3-sonnet-20240229-v1:0": {"input": 0.003, "output": 0.015},
     "anthropic.claude-3-5-sonnet-20240620-v1:0": {"input": 0.003, "output": 0.015},
     "anthropic.claude-3-5-sonnet-20241022-v2:0": {"input": 0.003, "output": 0.015},
+    "us.anthropic.claude-3-5-haiku-20241022-v1:0": {"input": 0.0008, "output": 0.004},
+    "anthropic.claude-3-opus-20240229-v1:0": {"input": 0.015, "output": 0.075},
+    "us.anthropic.claude-3-7-sonnet-20250219-v1:0": {"input": 0.003, "output": 0.015},
     "meta.llama2-13b-chat-v1": {"input": 0.00075, "output": 0.001},
     "meta.llama2-70b-chat-v1": {"input": 0.00195, "output": 0.00256},
     "meta.llama2-13b-v1": {"input": 0.0, "output": 0.0},
     "meta.llama2-70b-v1": {"input": 0.00265, "output": 0.0035},
     "meta.llama3-8b-instruct-v1:0": {"input": 0.0003, "output": 0.0006},
     "meta.llama3-70b-instruct-v1:0": {"input": 0.00265, "output": 0.0035},
-    "meta.llama3-3-70b-instruct-v1:0": {"input": 0.00072, "output": 0.00072},
+    "us.meta.llama3-1-405b-instruct-v1:0": {"input": 0.0024, "output": 0.0024},
+    "us.meta.llama3-3-70b-instruct-v1:0": {"input": 0.00072, "output": 0.00072},
     "amazon.nova-lite-v1:0": {"input": 0.00006, "output": 0.00024},
     "amazon.nova-micro-v1:0": {"input": 0.000035, "output": 0.00014},
     "amazon.nova-pro-v1:0": {"input": 0.0008, "output": 0.0032},
@@ -64,6 +68,10 @@ COST_PER_1K_TOKENS: dict[str, dict[str, float]] = {
     "mistral.mistral-7b-instruct-v0:2": {"input": 0.00015, "output": 0.0002},
     "mistral.mixtral-8x7b-instruct-v0:1": {"input": 0.00045, "output": 0.0007},
     "mistral.mistral-large-2402-v1:0": {"input": 0.004, "output": 0.012},
+    "arn:aws:bedrock:us-east-1:851725275899:imported-model/shp03b13vje5": {
+        "input": 0.00006,
+        "output": 0.00006,
+    },
 }
 
 

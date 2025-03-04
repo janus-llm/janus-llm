@@ -279,3 +279,23 @@ class MistralPromptEngine(PromptEngine):
         return PromptTemplate.from_template(
             f"<s>[INST] {system_prompt} [/INST] </s>[INST] {human_prompt}  [/INST]"
         )
+
+
+class GranitePromptEngine(PromptEngine):
+    # https://dataplatform.cloud.ibm.com/docs/content/wsj/analyze-data/fm-models-ibm-chat.html?context=wx
+    # Code model: https://dataplatform.cloud.ibm.com/docs/content/wsj/analyze-data/fm-
+    # models-ibm-code.html?context=wx&audience=wdp
+    def load_prompt_template(self, template_path: Path) -> ChatPromptTemplate:
+        system_prompt_path = template_path / SYSTEM_PROMPT_TEMPLATE_FILENAME
+        system_prompt = system_prompt_path.read_text()
+
+        human_prompt_path = template_path / HUMAN_PROMPT_TEMPLATE_FILENAME
+        human_prompt = human_prompt_path.read_text()
+
+        return PromptTemplate.from_template(
+            f"System:\n"
+            f'"{system_prompt}"\n\n'
+            f"Question:\n"
+            f"{human_prompt}\n\n"
+            f"Answer:\n"
+        )
