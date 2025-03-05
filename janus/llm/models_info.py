@@ -13,6 +13,7 @@ from janus.prompts.prompt import (
     ChatGptPromptEngine,
     ClaudePromptEngine,
     CoherePromptEngine,
+    GranitePromptEngine,
     Llama2PromptEngine,
     Llama3PromptEngine,
     MistralPromptEngine,
@@ -23,9 +24,22 @@ from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 
+model_types = [
+    "ModelType",
+    AzureChatOpenAI,
+    HuggingFaceTextGenInference,
+]
+
 try:
+    from boto3 import client
+    from botocore.config import Config
     from langchain_community.chat_models import BedrockChat
     from langchain_community.llms.bedrock import Bedrock
+
+    model_types += [
+        Bedrock,
+        BedrockChat,
+    ]
 except ImportError:
     log.warning(
         "Could not import LangChain's Bedrock Client. If you would like to use Bedrock "
@@ -35,6 +49,8 @@ except ImportError:
 
 try:
     from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
+
+    model_types += [HuggingFacePipeline]
 except ImportError:
     log.warning(
         "Could not import LangChain's HuggingFace Pipeline Client. If you would like to "
@@ -43,14 +59,33 @@ except ImportError:
     )
 
 
-ModelType = TypeVar(
-    "ModelType",
-    AzureChatOpenAI,
-    HuggingFaceTextGenInference,
-    Bedrock,
-    BedrockChat,
-    HuggingFacePipeline,
-)
+ModelType = TypeVar(*model_types)
+
+MODEL_TYPE_CONSTRUCTORS: dict[str, ModelType] = {
+    # "OpenAI": ChatOpenAI,
+    "HuggingFace": HuggingFaceTextGenInference,
+    "Azure": AzureChatOpenAI,
+}
+
+try:
+    MODEL_TYPE_CONSTRUCTORS["Bedrock"] = Bedrock
+    MODEL_TYPE_CONSTRUCTORS["BedrockChat"] = BedrockChat
+    MODEL_TYPE_CONSTRUCTORS["Granite"] = BedrockChat
+except NameError:
+    log.warning(
+        "Could not import LangChain's Bedrock Client. If you would like to use Bedrock "
+        "models, please install LangChain's Bedrock Client by running 'pip install "
+        "janus-llm[bedrock]' or poetry install -E bedrock."
+    )
+
+try:
+    MODEL_TYPE_CONSTRUCTORS["HuggingFaceLocal"] = HuggingFacePipeline
+except NameError:
+    log.warning(
+        "Could not import LangChain's HuggingFace Pipeline Client. If you would like to "
+        "use HuggingFace models, please install LangChain's HuggingFace Pipeline Client "
+        "by running 'pip install janus-llm[hf-local]' or poetry install -E hf-local."
+    )
 
 
 class JanusModelProtocol(Protocol):
@@ -91,16 +126,24 @@ claude_models = [
     "bedrock-claude-haiku",
     "bedrock-claude-sonnet",
     "bedrock-claude-sonnet-3.5",
+    "bedrock-claude-sonnet-3.5-v2",
+    "bedrock-claude-haiku-3.5",
+    "bedrock-claude-sonnet-3.7",
 ]
 llama2_models = [
     "bedrock-llama2-70b",
     "bedrock-llama2-70b-chat",
     "bedrock-llama2-13b",
     "bedrock-llama2-13b-chat",
+    "bedrock-llama3-1-405b-instruct",
+    "bedrock-llama3-8b-instruct",
+    "bedrock-llama3-70b-instruct",
+    "bedrock-llama3-3-70b-instruct",
 ]
 llama3_models = [
     "bedrock-llama3-8b-instruct",
     "bedrock-llama3-70b-instruct",
+    "bedrock-llama3-3-70b-instruct",
 ]
 titan_models = [
     "bedrock-titan-text-lite",
@@ -108,13 +151,22 @@ titan_models = [
     "bedrock-jurassic-2-mid",
     "bedrock-jurassic-2-ultra",
 ]
+nova_models = [
+    "bedrock-nova-lite",
+    "bedrock-nova-micro",
+    "bedrock-nova-pro",
+]
 cohere_models = [
     "bedrock-command-r-plus",
 ]
 mistral_models = [
     "bedrock-mistral-7b-instruct",
-    "bedrock-mistral-large",
+    "bedrock-mistral-large-32k",
+    "bedrock-mistral-large-131k",
     "bedrock-mixtral",
+]
+granite_models = [
+    "bedrock-granite-3b-code-instruct",
 ]
 bedrock_models = [
     *claude_models,
@@ -124,16 +176,7 @@ bedrock_models = [
     *cohere_models,
     *mistral_models,
 ]
-all_models = [*azure_models, *bedrock_models]
-
-MODEL_TYPE_CONSTRUCTORS: dict[str, ModelType] = {
-    # "OpenAI": ChatOpenAI,
-    "HuggingFace": HuggingFaceTextGenInference,
-    "Azure": AzureChatOpenAI,
-    "Bedrock": Bedrock,
-    "BedrockChat": BedrockChat,
-    "HuggingFaceLocal": HuggingFacePipeline,
-}
+all_models = [*azure_models, *bedrock_models, *granite_models]
 
 
 MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
@@ -145,6 +188,7 @@ MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
     **{m: TitanPromptEngine for m in titan_models},
     **{m: CoherePromptEngine for m in cohere_models},
     **{m: MistralPromptEngine for m in mistral_models},
+    **{m: GranitePromptEngine for m in granite_models},
 }
 
 MODEL_ID_TO_LONG_ID = {
@@ -155,12 +199,21 @@ MODEL_ID_TO_LONG_ID = {
     "bedrock-claude-haiku": "anthropic.claude-3-haiku-20240307-v1:0",
     "bedrock-claude-sonnet": "anthropic.claude-3-sonnet-20240229-v1:0",
     "bedrock-claude-sonnet-3.5": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+    "bedrock-claude-sonnet-3.5-v2": "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+    "bedrock-claude-haiku-3.5": "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+    "bedrock-claude-sonnet-3.7": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
     "bedrock-llama2-70b": "meta.llama2-70b-v1",
     "bedrock-llama2-70b-chat": "meta.llama2-70b-chat-v1",
     "bedrock-llama2-13b": "meta.llama2-13b-chat-v1",
     "bedrock-llama2-13b-chat": "meta.llama2-13b-v1",
     "bedrock-llama3-8b-instruct": "meta.llama3-8b-instruct-v1:0",
     "bedrock-llama3-70b-instruct": "meta.llama3-70b-instruct-v1:0",
+    "bedrock-llama3-1-405b-instruct": "us.meta.llama3-1-405b-instruct-v1:0",
+    "bedrock-llama3-3-70b-instruct": "us.meta.llama3-3-70b-instruct-v1:0",
+    "bedrock-llama3-3-70b-instruct": "us.meta.llama3-3-70b-instruct-v1:0",
+    "bedrock-nova-lite": "amazon.nova-lite-v1:0",
+    "bedrock-nova-micro": "amazon.nova-micro-v1:0",
+    "bedrock-nova-pro": "amazon.nova-pro-v1:0",
     "bedrock-titan-text-lite": "amazon.titan-text-lite-v1",
     "bedrock-titan-text-express": "amazon.titan-text-express-v1",
     "bedrock-jurassic-2-mid": "ai21.j2-mid-v1",
@@ -168,7 +221,11 @@ MODEL_ID_TO_LONG_ID = {
     "bedrock-command-r-plus": "cohere.command-r-plus-v1:0",
     "bedrock-mixtral": "mistral.mixtral-8x7b-instruct-v0:1",
     "bedrock-mistral-7b-instruct": "mistral.mistral-7b-instruct-v0:2",
-    "bedrock-mistral-large": "mistral.mistral-large-2402-v1:0",
+    "bedrock-mistral-large-32k": "mistral.mistral-large-2402-v1:0",
+    "bedrock-mistral-large-131k": "mistral.mistral-large-2407-v1:0",
+    "bedrock-granite-3b-code-instruct": (
+        "arn:aws:bedrock:us-east-1:851725275899:imported-model/shp03b13vje5"
+    ),
 }
 
 MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, str]] = {
@@ -184,6 +241,7 @@ MODEL_TYPES: dict[str, PromptEngine] = {
     # **{m: "OpenAI" for m in openai_models},
     **{m: "Azure" for m in azure_models},
     **{m: "BedrockChat" for m in bedrock_models},
+    **{m: "Granite" for m in granite_models},
 }
 
 TOKEN_LIMITS: dict[str, int] = {
@@ -203,12 +261,21 @@ TOKEN_LIMITS: dict[str, int] = {
     "anthropic.claude-3-haiku-20240307-v1:0": 248_000,
     "anthropic.claude-3-sonnet-20240229-v1:0": 248_000,
     "anthropic.claude-3-5-sonnet-20240620-v1:0": 200_000,
+    "us.anthropic.claude-3-5-sonnet-20241022-v2:0": 200_000,
+    "us.anthropic.claude-3-5-haiku-20241022-v1:0": 200_000,
+    "us.anthropic.claude-3-7-sonnet-20250219-v1:0": 200_000,
     "meta.llama2-70b-v1": 4096,
     "meta.llama2-70b-chat-v1": 4096,
     "meta.llama2-13b-chat-v1": 4096,
     "meta.llama2-13b-v1": 4096,
     "meta.llama3-8b-instruct-v1:0": 8000,
     "meta.llama3-70b-instruct-v1:0": 8000,
+    "us.meta.llama3-1-405b-instruct-v1:0": 120_000,
+    "us.meta.llama3-3-70b-instruct-v1:0": 128_000,
+    "us.meta.llama3-3-70b-instruct-v1:0": 128_000,
+    "amazon.nova-lite-v1:0": 300_000,
+    "amazon.nova-micro-v1:0": 128_000,
+    "amazon.nova-pro-v1:0": 300_000,
     "amazon.titan-text-lite-v1": 4096,
     "amazon.titan-text-express-v1": 8192,
     "ai21.j2-mid-v1": 8192,
@@ -217,6 +284,8 @@ TOKEN_LIMITS: dict[str, int] = {
     "mistral.mixtral-8x7b-instruct-v0:1": 32_000,
     "mistral.mistral-7b-instruct-v0:2": 32_000,
     "mistral.mistral-large-2402-v1:0": 32_000,
+    "mistral.mistral-large-2407-v1:0": 131_000,
+    "arn:aws:bedrock:us-east-1:851725275899:imported-model/shp03b13vje5": 128_000,
 }
 
 
@@ -300,6 +369,39 @@ def load_model(model_id) -> JanusModel:
             azure_deployment=model_id,
             request_timeout=3600,
             max_tokens=4096,
+        )
+
+    elif model_type_name == "Granite":
+        # This is a workaround for bedrock logic, which determines output keys by provider
+        # The API does not yet list IBM, but IBM models use the same key ('generation')
+        #  as Meta models do
+        model_args.update(provider="meta")
+
+    elif model_type_name.startswith("Bedrock"):
+        config = Config(read_timeout=1000)
+        cli = client(service_name="bedrock-runtime", config=config)
+        model_args.update(
+            client=cli,
+        )
+
+    log.info(f"Checking model provider: {model_long_id}")
+    if model_long_id.startswith("us.meta"):
+        log.info("Changing model provider")
+        model_args.update(provider="meta")
+    elif model_long_id.startswith("us.anthropic"):
+        log.info("Changing model provider")
+        model_args.update(provider="anthropic")
+
+    if model_id == "bedrock-claude-sonnet-3.7":
+        model_args.update(
+            model_kwargs=dict(
+                max_tokens=128_000,
+                # thinking=dict(
+                #     type="enabled",
+                #     budget_tokens=4_000,
+                # )
+            ),
+            # timeout=1000,
         )
 
     model_type = MODEL_TYPE_CONSTRUCTORS[model_type_name]

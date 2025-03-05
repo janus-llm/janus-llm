@@ -15,9 +15,13 @@ log = create_logger(__name__)
 
 class Documenter(Converter):
     def __init__(
-        self, source_language: str = "fortran", drop_comments: bool = True, **kwargs
+        self,
+        source_language: str = "fortran",
+        drop_comments: bool = True,
+        output_type: str = "documentation",
+        **kwargs,
     ):
-        kwargs.update(source_language=source_language)
+        kwargs.update(source_language=source_language, output_type=output_type)
         super().__init__(**kwargs)
         self.set_prompts("document")
 
@@ -31,7 +35,8 @@ class Documenter(Converter):
 
 
 class MultiDocumenter(Documenter):
-    def __init__(self, **kwargs):
+    def __init__(self, output_type: str = "multidocumentation", **kwargs):
+        kwargs.update(output_type=output_type)
         super().__init__(**kwargs)
         self.set_prompts("multidocument")
         self._combiner = JsonCombiner()
@@ -44,9 +49,10 @@ class ClozeDocumenter(Documenter):
     def __init__(
         self,
         comments_per_request: int | None = None,
+        output_type: str = "cloze_comments",
         **kwargs,
     ) -> None:
-        kwargs.update(drop_comments=False)
+        kwargs.update(drop_comments=False, output_type=output_type)
         super().__init__(**kwargs)
         self.set_prompts("document_cloze")
         self._combiner = JsonCombiner()

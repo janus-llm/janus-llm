@@ -8,6 +8,7 @@ from typing_extensions import Annotated
 
 from janus.cli.constants import CONVERTERS
 from janus.converter.chain import ConverterChain
+from janus.converter.pool import ConverterPool
 from janus.utils.enums import LANGUAGES
 
 
@@ -41,11 +42,13 @@ def instiantiate_pipeline(
         pipeline[0]["kwargs"] = {}
     pipeline[0]["kwargs"].update(source_language=language, model=model)
     if use_janus_inputs is not None:
-        pipeline[0]["kwargs"].update(janus_inputs=use_janus_inputs)
-    print(pipeline[0])
+        pipeline[0]["kwargs"].update(use_janus_inputs=use_janus_inputs)
     converters = [instiantiate(pipeline[0])]
     for p in pipeline[1:]:
-        p["kwargs"].update(source_language=converters[-1].target_language, model=model)
+        if not isinstance(converters[-1], ConverterPool) and p["type"] != "ConverterPool":
+            p["kwargs"].update(
+                source_language=converters[-1].target_language, model=model
+            )
         converters.append(instiantiate(p))
     return ConverterChain(*converters)
 

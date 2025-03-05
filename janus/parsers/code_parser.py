@@ -38,8 +38,7 @@ class IncompleteCodeParser(JanusParser):
         if re.search(code_start_pattern, text, flags=re.DOTALL) is None:
             log.info(f"Exception, bad output: {text}")
             raise JanusParserException(
-                text,
-                f"Code must start with annotated backticks (``` {self.language})"
+                text, f"Code must start with annotated backticks (``` {self.language})"
             )
         code = re.sub(code_start_pattern, "", text, flags=re.DOTALL)
 
@@ -47,7 +46,7 @@ class IncompleteCodeParser(JanusParser):
         code_end_pattern = r"\n*```.*$"
         if re.search(code_end_pattern, code, flags=re.DOTALL) is None:
             return text
-        
+
         return re.sub(code_end_pattern, "", code, flags=re.DOTALL)
 
     def strip_head(self, text: str) -> str:
@@ -72,7 +71,6 @@ class IncompleteCodeParser(JanusParser):
         #  all the code in the case of a missing closing ```
         idx = m.span()[1]
         return text[:idx] + re.sub(code_end_pattern, "", text[idx:], flags=re.DOTALL)
-
 
     def get_format_instructions(self) -> str:
         return (

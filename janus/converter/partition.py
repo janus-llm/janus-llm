@@ -6,7 +6,10 @@ log = create_logger(__name__)
 
 
 class Partitioner(Converter):
-    def __init__(self, partition_token_limit: int, **kwargs):
+    def __init__(
+        self, partition_token_limit: int, output_type: str = "partition", **kwargs
+    ):
+        kwargs.update(output_type=output_type)
         super().__init__(**kwargs)
         self.set_prompts("partition")
         self._load_model()

@@ -70,7 +70,6 @@ class IncoseParser(JanusParser, PydanticOutputParser):
 
         obj = json.loads(text)
 
-        # For some reason requirements objects are in a double list?
         reqs = obj["requirements"]
 
         # Generate a unique ID for each requirement (ensure they are unique)
@@ -91,10 +90,11 @@ class IncoseParser(JanusParser, PydanticOutputParser):
 
         # Strip everything outside the JSON object
         begin, end = text.find("["), text.rfind("]")
-        text = text[begin : end + 1]
+        end += 1 if end != -1 else 0
+        text = text[begin:end]
 
         try:
-            out: RequirementList = super().parse(text)
+            out: RequirementList = super(IncoseParser, self).parse(text)
         except json.JSONDecodeError as e:
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise OutputParserException(f"Got invalid JSON object. Error: {e}")

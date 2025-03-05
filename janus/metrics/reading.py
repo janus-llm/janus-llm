@@ -1,8 +1,7 @@
 import re
 
-import nltk
-import readability
 from nltk.tokenize import TweetTokenizer
+from textstat import textstat
 
 from janus.metrics.metric import metric
 
@@ -48,23 +47,9 @@ def _repeat_text(text):
     return repeated_text
 
 
-def get_readability(target: str) -> readability.Readability:
-    """Create a Readability object from an input string
-
-    Arguments:
-        target: The target text.
-
-    Returns:
-        py-readability-metrics Readability object for that text
-    """
-    nltk.download("punkt", quiet=True)
-    target = _repeat_text(target)
-    return readability.Readability(target)
-
-
 @metric(use_reference=False, help="The Flesch Readability score")
 def flesch(target: str, **kwargs) -> float:
-    """Calculate the Flesch Score using py-readability-metrics.
+    """Calculate the Flesch Score using textstat.
 
     Arguments:
         target: The target text.
@@ -74,12 +59,13 @@ def flesch(target: str, **kwargs) -> float:
     """
     if not target.strip():  # Check if the target text is blank
         return None
-    return get_readability(target).flesch().score
+    target = _repeat_text(target)
+    return textstat.flesch_reading_ease(target)
 
 
 @metric(use_reference=False, help="The Flesch Grade Level Readability score")
 def flesch_grade(target: str, **kwargs) -> float:
-    """Calculate the Flesch Score using py-readability-metrics.
+    """Calculate the Flesch Score using textstat.
 
     Arguments:
         target: The target text.
@@ -89,12 +75,13 @@ def flesch_grade(target: str, **kwargs) -> float:
     """
     if not target.strip():  # Check if the target text is blank
         return None
-    return get_readability(target).flesch_kincaid().score
+    target = _repeat_text(target)
+    return textstat.flesch_kincaid_grade(target)
 
 
 @metric(use_reference=False, help="The Gunning-Fog Readability score")
 def gunning_fog(target: str, **kwargs) -> float:
-    """Calculate the Gunning-Fog Score using py-readability-metrics.
+    """Calculate the Gunning-Fog Score using textstat.
 
     Arguments:
         target: The target text.
@@ -104,20 +91,53 @@ def gunning_fog(target: str, **kwargs) -> float:
     """
     if not target.strip():  # Check if the target text is blank
         return None
-    return get_readability(target).gunning_fog().score
+    target = _repeat_text(target)
+    return textstat.gunning_fog(target)
 
 
-@metric(use_reference=False, help="The Gunning-Fog Grade Level Readability score")
-def gunning_fog_grade(target: str, **kwargs) -> float:
-    """Calculate the Gunning-Fog Grade Level Score using py-readability-metrics.
+@metric(use_reference=False, help="The Dale-Chall Readability score")
+def dale_chall(target: str, **kwargs) -> float:
+    """Calculate the Dale-Chall Readability Score using textstat.
 
     Arguments:
         target: The target text.
 
     Returns:
-        The Gunning-Fog Grade Level score.
+        The Dale-Chall score.
     """
     if not target.strip():  # Check if the target text is blank
         return None
-    grade_level = get_readability(target).gunning_fog().grade_level
-    return None if grade_level == "na" else grade_level
+    target = _repeat_text(target)
+    return textstat.dale_chall_readability_score_v2(target)
+
+
+@metric(use_reference=False, help="The Automated Readability Index")
+def automated_readability(target: str, **kwargs) -> float:
+    """Calculate the Automated Readability Index using textstat.
+
+    Arguments:
+        target: The target text.
+
+    Returns:
+        The Automated Readability score.
+    """
+    if not target.strip():  # Check if the target text is blank
+        return None
+    target = _repeat_text(target)
+    return textstat.automated_readability_index(target)
+
+
+@metric(use_reference=False, help="The Coleman-Liau Index")
+def coleman_liau(target: str, **kwargs) -> float:
+    """Calculate the Coleman-Liau Index using textstat.
+
+    Arguments:
+        target: The target text.
+
+    Returns:
+        The Coleman-Liau Index.
+    """
+    if not target.strip():  # Check if the target text is blank
+        return None
+    target = _repeat_text(target)
+    return textstat.coleman_liau_index(target)

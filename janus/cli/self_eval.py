@@ -123,6 +123,14 @@ def llm_self_eval(
             "If unspecificed, model's default max will be used.",
         ),
     ] = None,
+    use_janus_inputs: Annotated[
+        bool,
+        typer.Option(
+            "-j",
+            "--use-janus-inputs",
+            help="Prsent if translator should use janus files as inputs",
+        ),
+    ] = False,
 ):
     from janus.converter.evaluate import InlineCommentEvaluator, RequirementEvaluator
 
@@ -137,6 +145,7 @@ def llm_self_eval(
         max_tokens=max_tokens,
         splitter_type=splitter_type,
         refiner_types=refiner_types,
+        use_janus_inputs=use_janus_inputs,
     )
     # Setting parser type here
     if evaluation_type == "incose":
