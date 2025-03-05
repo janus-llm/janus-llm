@@ -4,14 +4,13 @@ from typing import Any
 from langchain.output_parsers import RetryWithErrorOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
-
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompt_values import PromptValue
 from langchain_core.runnables import RunnableSerializable
 
 from janus.llm.models_info import MODEL_PROMPT_ENGINES, JanusModel
-from janus.parsers.parser import JanusParser
 from janus.parsers.code_parser import IncompleteCodeParser
+from janus.parsers.parser import JanusParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -281,7 +280,7 @@ class CodeContinuationRefiner(JanusRefiner):
             completion = str(completion.content)
 
         log.info(f"Completion:\n{completion}")
-        
+
         for retry_number in range(self.max_retries):
             continuation = self.continuation_chain.invoke(
                 dict(
