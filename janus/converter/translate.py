@@ -1,5 +1,5 @@
 from janus.converter.converter import Converter, run_if_changed
-from janus.parsers.code_parser import CodeParser
+from janus.parsers.code_parser import IncompleteCodeParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -49,4 +49,4 @@ class Translator(Converter):
         If the relevant fields have not been changed since the last time this
         method was called, nothing happens.
         """
-        self._parser = CodeParser(language=self._target_language)
+        self._parser = IncompleteCodeParser(language=self._target_language)
