@@ -227,7 +227,7 @@ class TranslatedCodeBlock(CodeBlock):
             end_byte=None,
             tokens=0,
             children=[
-                TranslatedCodeBlock(child, language, block_type, block_label)
+                TranslatedCodeBlock(child, language, converter, block_type, block_label)
                 for child in original.children
             ],
             affixes=original.affixes,

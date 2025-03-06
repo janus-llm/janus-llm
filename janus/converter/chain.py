@@ -31,6 +31,16 @@ class ConverterChain(Converter):
         )
         super().__init__(**kwargs)
 
+    def _combine_blocks(self, blocks):
+        c_ind = 0
+        for block in blocks.previous_generations:
+            if isinstance(block, dict):
+                continue
+            converter = self._converters[c_ind]
+            converter._combine_blocks(block)
+            c_ind += 1
+        self._converters[-1]._combine_blocks(blocks)
+
     def translate_blocks(
         self, input_blocks: CodeBlock | list[CodeBlock], failure_path: Path | None = None
     ):

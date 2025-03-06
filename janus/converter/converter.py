@@ -590,24 +590,13 @@ class Converter:
             else:
                 out_block = self.translate_file(in_path, fail_path)
 
-            def _get_total_cost(block):
-                if isinstance(block, list):
-                    return sum(_get_total_cost(b) for b in block)
-                return block.total_cost
-
-            total_cost += _get_total_cost(out_block)
+            total_cost += out_block.total_cost
             log.info(f"Current Running Cost: {total_cost}")
 
             # For files where translation failed, write to failure path instead
+            self._combine_blocks(out_block)
 
-            def _has_empty(block):
-                if isinstance(block, BlockCollection):
-                    return len(block.blocks) == 0 or any(
-                        _has_empty(b) for b in block.blocks
-                    )
-                return not block.translated
-
-            if _has_empty(out_block):
+            if not out_block.translation_completed:
                 if fail_path is not None:
                     self._save_to_file(out_block, fail_path)
                 continue
@@ -621,8 +610,6 @@ class Converter:
 
             # Make sure the tree's code has been consolidated at the top level
             #  before writing to file
-            for b in out_block.blocks:
-                self._combiner.combine(b)
             if out_path is not None and (overwrite or not out_path.exists()):
                 self._save_to_file(out_block, out_path)
 
@@ -937,7 +924,7 @@ class Converter:
         def _get_input(block):
             if isinstance(block, BlockCollection):
                 return self._combine_inputs([_get_input(b) for b in block.blocks])
-            return block.original.text or ""
+            return block.original.complete_text or ""
 
         out = dict(
             input=_get_input(block),
@@ -1022,6 +1009,15 @@ class Converter:
         if janus_obj["metadata"]["converter_name"] != "ConverterChain":
             previous_generations += [janus_obj]
         return BlockCollection(results, previous_generations)
+
+    def _combine_blocks(self, blocks):
+        for b in blocks.blocks:
+            self._combine_block(b)
+
+    def _combine_block(self, block):
+        if self._combine_output:
+            self._combiner.combine(block)
+            block.original.rebuild_text_from_children()
 
     def __or__(self, other: "Converter"):
         from janus.converter.chain import ConverterChain
