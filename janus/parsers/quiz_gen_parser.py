@@ -34,7 +34,7 @@ class QuizGenParser(JanusParser):
             ordered_question = {"question-id": str(index)}
             ordered_question.update(question)
             updated_data.append(ordered_question)
-        # log.info(f"VALID JSON object. Output:\n{text}")
+        log.info(f"VALID JSON object. Output:\n{text}")
         return json.dumps(updated_data)
 
     def get_format_instructions(self) -> str:

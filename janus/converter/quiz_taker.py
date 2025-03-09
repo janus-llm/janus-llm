@@ -1,4 +1,8 @@
+from pathlib import Path
+import json
+
 from janus.converter.converter import Converter, run_if_changed
+from janus.language.block import CodeBlock, TranslatedCodeBlock
 from janus.parsers.quiz_taker_parser import QuizTakerParser
 from janus.utils.logger import create_logger
 
@@ -50,3 +54,32 @@ class QuizTaker(Converter):
         method was called, nothing happens.
         """
         self._parser = QuizTakerParser(language=self._target_language)
+
+
+    def translate_block(self, input_block: CodeBlock, failure_path: Path | None = None):
+        self._load_parameters()
+        # Strip answers from quiz "correct-answer-number" before input
+        stripped_input_block = input_block
+        data = json.loads(input_block.text)
+        for question in data:
+            if "correct-answer-number" in question:
+                del question["correct-answer-number"]
+        stripped_data = json.dumps(data)
+        stripped_input_block.text = stripped_data
+        # Input stripped input into normal translate process
+        output_block = self._iterative_translate(stripped_input_block, failure_path)
+        if output_block.translated:
+            completeness = output_block.translation_completeness
+            log.info(
+                f"[{output_block.name}] Translation complete\n"
+                f"  {completeness:.2%} of input successfully translated\n"
+                f"  Total cost: ${output_block.total_cost:,.2f}\n"
+                f"  Output CodeBlock Structure:\n{stripped_input_block.tree_str()}\n"
+            )
+
+        else:
+            log.error(
+                f"[{output_block.name}] Translation failed\n"
+                f"  Total cost: ${output_block.total_cost:,.2f}\n"
+            )
+        return output_block

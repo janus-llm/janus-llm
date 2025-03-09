@@ -15,6 +15,7 @@ class QuizTakerParser(JanusParser):
         if isinstance(text, BaseMessage):
             text = str(text.content)
         original_text = text
+        log.info(f"TEST OUTPUT. Output:\n{text}")
         try:
             data = json.loads(text)
         except json.JSONDecodeError as e:
