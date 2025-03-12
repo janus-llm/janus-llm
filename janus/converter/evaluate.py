@@ -9,6 +9,7 @@ from janus.language.block import CodeBlock, TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
 from janus.parsers.eval_parsers.inline_comment_parser import InlineCommentParser
+from janus.parsers.eval_parsers.uml_parser import UMLParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -270,6 +271,112 @@ class InlineCommentEvaluator(Evaluator):
             )
             translated_block.children = translated_blocks
             translated_block.text = translated_str
+            translated_block.tokens = self._llm.get_num_tokens(translated_str)
+            translated_block.translated = True
+            return translated_block
+
+class UMLEvaluator(Evaluator):
+    """PLANTUML Diagram Evaluator
+
+    A class that performs an LLM self evaluation on PLANTUML diagrams,
+    with an associated prompt.
+    """
+
+    def __init__(
+        self,
+        eval_items_per_request: int | None = None,
+        input_types: str | set[str] = set(["uml"]),
+        output_type: str = "uml_eval",
+        **kwargs,
+    ) -> None:
+        """Initialize the Evaluator class
+
+        Arguments:
+            model: The LLM to use for translation. If an OpenAI model, the
+                `OPENAI_API_KEY` environment variable must be set.
+            model_arguments: Additional arguments to pass to the LLM constructor.
+            max_prompts: The maximum number of prompts to try before giving up.
+        """
+        kwargs.update(input_types=input_types, output_type=output_type)
+        super().__init__(**kwargs)
+        self._combiner = JsonCombiner()
+        self._parser = UMLParser()
+        self.set_prompts("eval_prompts/uml")
+        self.eval_items_per_request = eval_items_per_request
+        self._load_parameters()
+
+    def _input_runnable(self) -> Runnable:
+        def _get_code(json_text: str) -> str:
+            return json.loads(json_text)["code"]
+
+        def _get_diargams(json_text: str) -> str:
+            return json.dumps(json.loads(json_text)["diagrams"])
+
+        return RunnableLambda(self._parser.parse_input) | RunnableParallel(
+            SOURCE_CODE=_get_code,
+            PLANTUML_DIAGRAM=_get_diargams,
+            context=self._retriever,
+        )
+
+    def translate_block(self, input_block: CodeBlock, failure_path: Path | None = None):
+        if len(input_block.previous_generations) == 0:
+            raise ValueError(
+                "Error: Evaluating diagrams without previous generations"
+            )
+        if isinstance(input_block.previous_generations[-1], dict):
+            input_str = input_block.previous_generations[-1]["input"]
+        else:
+            input_str = input_block.previous_generations[-1].original.text
+        diagrams = json.loads(input_block.text)
+        # The requirements are often a list of lists
+        if isinstance(diagrams[0], list):
+            diagrams = diagrams[0]
+        if not diagrams:
+            log.debug(f"[{input_block.name}] Skipping empty output")
+            return []
+        if (
+            not self.eval_items_per_request
+            or len(diagrams) < self.eval_items_per_request
+        ):
+            obj_str = json.dumps(
+                dict(
+                    diagrams=diagrams,
+                    code=input_str,
+                )
+            )
+            temp_block = self._split_text(obj_str, input_block.name)
+            translated_block = super().translate_block(temp_block, failure_path)
+            translated_block.original = input_block
+            translated_block.previous_generations = input_block.previous_generations
+            return translated_block
+        else:
+            translated_blocks = []
+            translated_str: str
+            translate_obj = {}
+            for i in range(0, len(diagrams), self.eval_items_per_request):
+                working_diagrams = diagrams[i : i + self.eval_items_per_request]
+                obj_str = json.dumps(
+                    dict(
+                        requirements=working_diagrams,
+                        code=input_str,
+                    )
+                )
+                temp_block = self._split_text(obj_str, input_block.name)
+                translated_block = super().translate_block(temp_block, failure_path)
+                translated_blocks.append(translated_block)
+                translate_obj.update(json.loads(translated_block.text))
+                translated_str = json.dumps(translate_obj)
+
+
+            translated_block = TranslatedCodeBlock(
+                input_block,
+                self._target_language,
+                self,
+                self._output_type,
+                self._output_label,
+            )
+            translated_block.text = translated_str
+            translated_block.children = translated_blocks
             translated_block.tokens = self._llm.get_num_tokens(translated_str)
             translated_block.translated = True
             return translated_block
