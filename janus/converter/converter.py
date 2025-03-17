@@ -488,6 +488,7 @@ class Converter:
         "_refiner_chain",
         "_target_language",
         "_target_version",
+        "_translation_chain",
     )
     def _load_chain(self):
         self.chain = self.get_chain()
