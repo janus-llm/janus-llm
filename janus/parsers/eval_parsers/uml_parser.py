@@ -15,7 +15,6 @@ from janus.parsers.eval_parsers.inline_comment_parser import Criteria
 log = create_logger(__name__)
 
 class Diagram(BaseModel):
-    #diagram_id: str = Field(description="The 8-character diagram ID")
     completeness: Criteria = Field(description="The completeness of the diagram")
     hallucination: Criteria = Field(description="The factualness of the diagram")
     readability: Criteria = Field(description="The readability of the diagram")
@@ -32,9 +31,35 @@ class UMLParser(JanusParser, PydanticOutputParser):
         )
 
     def parse_input(self, block: CodeBlock) -> str:
-        text = ""
+        text = super().parse_input(block)
+        inputs = json.loads(text)
 
-        return text
+        # strong assumption every @startuml has an @enduml, aka valid uml
+        diagram_str = inputs["diagrams"][0]
+        start_indicies = []
+        end_indicies = []
+        start = 0
+        index = 0
+        end = len(diagram_str)
+        while index != -1:
+            index = diagram_str.find("@st", start)
+            if index != -1:
+                start_indicies.append(index)
+                start = index + 3
+                end_indicies.append(diagram_str.rfind("@enduml", end))
+                end = end_indicies[-1] - 3
+        
+        if len(start_indicies) == 1:
+            return json.dumps(inputs)
+        
+        diagram_list = []
+        for i, idx in enumerate(start_indicies):
+            end_idx = end_indicies[-1-i]
+            end_idx += 1
+            diagram_list.append(diagram_str[idx:end_idx])
+
+        inputs["diagrams"] = diagram_list
+        return json.dumps(inputs)
     
     def parse(self, text: str | BaseMessage) -> str:
         if isinstance(text, BaseMessage):

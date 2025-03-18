@@ -384,25 +384,25 @@ def load_model(model_id) -> JanusModel:
             client=cli,
         )
 
-    log.info(f"Checking model provider: {model_long_id}")
-    if model_long_id.startswith("us.meta"):
-        log.info("Changing model provider")
-        model_args.update(provider="meta")
-    elif model_long_id.startswith("us.anthropic"):
-        log.info("Changing model provider")
-        model_args.update(provider="anthropic")
+    # log.info(f"Checking model provider: {model_long_id}")
+    # if model_long_id.startswith("us.meta"):
+    #     log.info("Changing model provider")
+    #     model_args.update(provider="meta")
+    # elif model_long_id.startswith("us.anthropic"):
+    #     log.info("Changing model provider")
+    #     model_args.update(provider="anthropic")
 
-    if model_id == "bedrock-claude-sonnet-3.7":
-        model_args.update(
-            model_kwargs=dict(
-                max_tokens=128_000,
-                # thinking=dict(
-                #     type="enabled",
-                #     budget_tokens=4_000,
-                # )
-            ),
-            # timeout=1000,
-        )
+    # if model_id == "bedrock-claude-sonnet-3.7":
+    #     model_args.update(
+    #         model_kwargs=dict(
+    #             max_tokens=128_000,
+    #             # thinking=dict(
+    #             #     type="enabled",
+    #             #     budget_tokens=4_000,
+    #             # )
+    #         ),
+    #         # timeout=1000,
+    #     )
 
     model_type = MODEL_TYPE_CONSTRUCTORS[model_type_name]
     prompt_engine = MODEL_PROMPT_ENGINES[model_id]

@@ -309,12 +309,12 @@ class UMLEvaluator(Evaluator):
         def _get_code(json_text: str) -> str:
             return json.loads(json_text)["code"]
 
-        def _get_diargams(json_text: str) -> str:
+        def _get_diagrams(json_text: str) -> str:
             return json.dumps(json.loads(json_text)["diagrams"])
 
         return RunnableLambda(self._parser.parse_input) | RunnableParallel(
             SOURCE_CODE=_get_code,
-            PLANTUML_DIAGRAM=_get_diargams,
+            PLANTUML_DIAGRAM=_get_diagrams,
             context=self._retriever,
         )
 
@@ -327,56 +327,19 @@ class UMLEvaluator(Evaluator):
             input_str = input_block.previous_generations[-1]["input"]
         else:
             input_str = input_block.previous_generations[-1].original.text
-        diagrams = json.loads(input_block.text)
-        # The requirements are often a list of lists
-        if isinstance(diagrams[0], list):
-            diagrams = diagrams[0]
+        diagrams = json.loads(input_block.text) # why is this json.loads?
         if not diagrams:
             log.debug(f"[{input_block.name}] Skipping empty output")
             return []
-        if (
-            not self.eval_items_per_request
-            or len(diagrams) < self.eval_items_per_request
-        ):
-            obj_str = json.dumps(
-                dict(
-                    diagrams=diagrams,
-                    code=input_str,
-                )
+        # collect source code and diagram outputs together
+        obj_str = json.dumps(
+            dict(
+                diagrams=diagrams,
+                code=input_str,
             )
-            temp_block = self._split_text(obj_str, input_block.name)
-            translated_block = super().translate_block(temp_block, failure_path)
-            translated_block.original = input_block
-            translated_block.previous_generations = input_block.previous_generations
-            return translated_block
-        else:
-            translated_blocks = []
-            translated_str: str
-            translate_obj = {}
-            for i in range(0, len(diagrams), self.eval_items_per_request):
-                working_diagrams = diagrams[i : i + self.eval_items_per_request]
-                obj_str = json.dumps(
-                    dict(
-                        requirements=working_diagrams,
-                        code=input_str,
-                    )
-                )
-                temp_block = self._split_text(obj_str, input_block.name)
-                translated_block = super().translate_block(temp_block, failure_path)
-                translated_blocks.append(translated_block)
-                translate_obj.update(json.loads(translated_block.text))
-                translated_str = json.dumps(translate_obj)
-
-
-            translated_block = TranslatedCodeBlock(
-                input_block,
-                self._target_language,
-                self,
-                self._output_type,
-                self._output_label,
-            )
-            translated_block.text = translated_str
-            translated_block.children = translated_blocks
-            translated_block.tokens = self._llm.get_num_tokens(translated_str)
-            translated_block.translated = True
-            return translated_block
+        )
+        temp_block = self._split_text(obj_str, input_block.name)
+        translated_block = super().translate_block(temp_block, failure_path)
+        translated_block.original = input_block
+        translated_block.previous_generations = input_block.previous_generations
+        return translated_block
