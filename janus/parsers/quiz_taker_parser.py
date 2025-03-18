@@ -24,8 +24,6 @@ class QuizTakerParser(JanusParser):
             text = json_content
         else:
             text = None  # Return None if no JSON content is found
-        log.info(f"ORIGINAL TEXT:\n {original_text} \n")
-        log.info(f"STRIPPED TEXT:\n {text} \n")
         try:
             data = json.loads(text)
         except json.JSONDecodeError as e:
@@ -38,8 +36,6 @@ class QuizTakerParser(JanusParser):
                 original_text,
                 f"Got invalid return object. Expected a dictionary, but got {type(data)}",
             )
-        # TODO Faith add shuffling here
-        log.info(f"VALID JSON object. Output:\n{text}")
         return json.dumps(data)
 
     def get_format_instructions(self) -> str:

@@ -56,8 +56,6 @@ class QuizTaker(Converter):
         method was called, nothing happens.
         """
         self._parser = QuizTakerParser(language=self._target_language)
-
-
     
     def _input_runnable(self) -> Runnable:
         def _get_quiz(json_text: str) -> str:
@@ -81,13 +79,11 @@ class QuizTaker(Converter):
                 "Error: Taking quiz without code context"
             )
         input_str = json.loads(input_block.previous_generations[-1]["input"])
-        # log.info(f"Code:\n {code} \n")
         # Strip answers from quiz "correct-answer-number" before input
         data = json.loads(input_block.text)
         for question in data:
             if "correct-answer-number" in question:
                 del question["correct-answer-number"]
-        # log.info(f"Quiz:\n {data} \n")
         # Input stripped quiz plus code into the normal translate process
         obj_str = json.dumps(
             dict(
@@ -100,21 +96,4 @@ class QuizTaker(Converter):
         translated_block.original = input_block
         translated_block.previous_generations = input_block.previous_generations
         return translated_block
-        
-        
-        # output_block = self._iterative_translate(stripped_input_block, failure_path)
-        # if output_block.translated:
-        #     completeness = output_block.translation_completeness
-        #     log.info(
-        #         f"[{output_block.name}] Translation complete\n"
-        #         f"  {completeness:.2%} of input successfully translated\n"
-        #         f"  Total cost: ${output_block.total_cost:,.2f}\n"
-        #         f"  Output CodeBlock Structure:\n{stripped_input_block.tree_str()}\n"
-        #     )
-
-        # else:
-        #     log.error(
-        #         f"[{output_block.name}] Translation failed\n"
-        #         f"  Total cost: ${output_block.total_cost:,.2f}\n"
-        #     )
-        # return output_block
+    
