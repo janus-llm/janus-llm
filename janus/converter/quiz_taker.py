@@ -1,6 +1,8 @@
 from pathlib import Path
 import json
 
+from langchain_core.runnables import Runnable, RunnableLambda, RunnableParallel
+
 from janus.converter.converter import Converter, run_if_changed
 from janus.language.block import CodeBlock, TranslatedCodeBlock
 from janus.parsers.quiz_taker_parser import QuizTakerParser
@@ -56,30 +58,63 @@ class QuizTaker(Converter):
         self._parser = QuizTakerParser(language=self._target_language)
 
 
+    
+    def _input_runnable(self) -> Runnable:
+        def _get_quiz(json_text: str) -> str:
+            return json.loads(json_text)["quiz"]
+
+        def _get_code(json_text: str) -> str:
+            return json.loads(json_text)["code"]
+
+        return RunnableLambda(self._parser.parse_input) | RunnableParallel(
+            QUIZ=_get_quiz,
+            SOURCE_CODE=_get_code,
+            #TODO ADD TOPIC?
+            context=self._retriever,
+        )
+
     def translate_block(self, input_block: CodeBlock, failure_path: Path | None = None):
         self._load_parameters()
+        # Get code input from generation step
+        if len(input_block.previous_generations) == 0:
+            raise ValueError(
+                "Error: Taking quiz without code context"
+            )
+        input_str = json.loads(input_block.previous_generations[-1]["input"])
+        # log.info(f"Code:\n {code} \n")
         # Strip answers from quiz "correct-answer-number" before input
-        stripped_input_block = input_block
         data = json.loads(input_block.text)
         for question in data:
             if "correct-answer-number" in question:
                 del question["correct-answer-number"]
-        stripped_data = json.dumps(data)
-        stripped_input_block.text = stripped_data
-        # Input stripped input into normal translate process
-        output_block = self._iterative_translate(stripped_input_block, failure_path)
-        if output_block.translated:
-            completeness = output_block.translation_completeness
-            log.info(
-                f"[{output_block.name}] Translation complete\n"
-                f"  {completeness:.2%} of input successfully translated\n"
-                f"  Total cost: ${output_block.total_cost:,.2f}\n"
-                f"  Output CodeBlock Structure:\n{stripped_input_block.tree_str()}\n"
+        # log.info(f"Quiz:\n {data} \n")
+        # Input stripped quiz plus code into the normal translate process
+        obj_str = json.dumps(
+            dict(
+                quiz=data,
+                code=input_str,
             )
+        )
+        temp_block = self._split_text(obj_str, input_block.name)
+        translated_block = super().translate_block(temp_block, failure_path)
+        translated_block.original = input_block
+        translated_block.previous_generations = input_block.previous_generations
+        return translated_block
+        
+        
+        # output_block = self._iterative_translate(stripped_input_block, failure_path)
+        # if output_block.translated:
+        #     completeness = output_block.translation_completeness
+        #     log.info(
+        #         f"[{output_block.name}] Translation complete\n"
+        #         f"  {completeness:.2%} of input successfully translated\n"
+        #         f"  Total cost: ${output_block.total_cost:,.2f}\n"
+        #         f"  Output CodeBlock Structure:\n{stripped_input_block.tree_str()}\n"
+        #     )
 
-        else:
-            log.error(
-                f"[{output_block.name}] Translation failed\n"
-                f"  Total cost: ${output_block.total_cost:,.2f}\n"
-            )
-        return output_block
+        # else:
+        #     log.error(
+        #         f"[{output_block.name}] Translation failed\n"
+        #         f"  Total cost: ${output_block.total_cost:,.2f}\n"
+        #     )
+        # return output_block

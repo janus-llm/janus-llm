@@ -15,6 +15,17 @@ class QuizGenParser(JanusParser):
         if isinstance(text, BaseMessage):
             text = str(text.content)
         original_text = text
+        #strip out anything before or after the json
+        json_start_index = text.find('[')
+        json_end_index = text.rfind(']') + 1
+        # If the opening bracket is found, slice the string from that index
+        if json_start_index != -1 and json_end_index != -1 and json_end_index > json_start_index:
+            json_content = text[json_start_index:json_end_index]
+            text = json_content
+        else:
+            text = None  # Return None if no JSON content is found
+        log.info(f"ORIGINAL TEXT:\n {original_text} \n")
+        log.info(f"STRIPPED TEXT:\n {text} \n")
         try:
             data = json.loads(text)
         except json.JSONDecodeError as e:

@@ -11,21 +11,23 @@ if __name__ == "__main__":
     print('running main function!')
 
 
-    # quiz_gen = QuizGenerator(
-    #     model="bedrock-mixtral",
-    #     source_language="python",
-    #     target_language="json",
-    #     prompt_templates="quiz/quiz_generator"
-    # )
+    quiz_gen = QuizGenerator(
+        # model="bedrock-mixtral",
+        model="bedrock-claude-sonnet",
+        source_language="python",
+        target_language="json",
+        prompt_templates="quiz/quiz_generator"
+    )
 
-    # quiz_gen.translate(
-    #     input_directory="/home/faithmorgan/janus_dev/test_docs/python_stuff",
-    #     output_directory="/home/faithmorgan/janus_dev/test_docs/quiz_gen_outputs",
-    #     overwrite=True
-    # )
+    quiz_gen.translate(
+        input_directory="/home/faithmorgan/janus_dev/test_docs/python_stuff",
+        output_directory="/home/faithmorgan/janus_dev/test_docs/quiz_gen_outputs",
+        overwrite=True
+    )
 
     quiz_take = QuizTaker(
-        model="bedrock-mixtral",
+        # model="bedrock-mixtral",
+        model="bedrock-claude-sonnet",
         source_language="python",
         target_language="json",
         prompt_templates="quiz/quiz_taker",
@@ -37,6 +39,9 @@ if __name__ == "__main__":
         output_directory="/home/faithmorgan/janus_dev/test_docs/quiz_taker_outputs",
         overwrite=True
     )
+
+
+
 
     # chain = quiz_gen|quiz_take
     # chain.translate(
