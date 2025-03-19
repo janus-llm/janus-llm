@@ -12,6 +12,7 @@ from janus.cli.llm import llm
 from janus.cli.partition import partition
 from janus.cli.pipeline import pipeline
 from janus.cli.self_eval import llm_self_eval
+from janus.cli.tokenizer import tokenizer
 from janus.cli.translate import translate
 from janus.metrics.cli import evaluate
 from janus.utils.logger import create_logger
@@ -111,6 +112,7 @@ app.add_typer(db, name="db")
 app.add_typer(llm, name="llm")
 app.add_typer(evaluate, name="evaluate")
 app.add_typer(embedding, name="embedding")
+app.add_typer(tokenizer, name="tokenizer")
 
 
 if __name__ == "__main__":
