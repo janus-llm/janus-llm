@@ -73,7 +73,9 @@ def document(
             "--doc-mode",
             "-d",
             help="The documentation mode.",
-            click_type=click.Choice(["cloze", "summary", "multidoc", "pseudocode", "requirements"]),
+            click_type=click.Choice(
+                ["cloze", "summary", "multidoc", "pseudocode", "requirements"]
+            ),
         ),
     ] = "cloze",
     comments_per_request: Annotated[
@@ -152,7 +154,12 @@ def document(
     ] = False,
 ):
     from janus.cli.constants import db_loc, get_collections_config
-    from janus.converter.document import ClozeDocumenter, Documenter, MultiDocumenter, PseudocodeDocumenter
+    from janus.converter.document import (
+        ClozeDocumenter,
+        Documenter,
+        MultiDocumenter,
+        PseudocodeDocumenter,
+    )
     from janus.converter.requirements import RequirementsDocumenter
 
     refiner_types = [REFINERS[r] for r in refiner_types]

@@ -150,6 +150,7 @@ class ClozeDocumenter(Documenter):
         block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
 
+
 class PseudocodeDocumenter(Documenter):
     def __init__(self, output_type: str = "pseudocode", **kwargs):
         kwargs.update(output_type=output_type)
