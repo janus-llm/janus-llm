@@ -16,6 +16,7 @@ from langchain_core.runnables import (
 from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
 
+from janus.cli.constants import REFINERS
 from janus.embedding.vectorize import ChromaDBVectorizer, Vectorizer
 from janus.language.block import BlockCollection, CodeBlock, TranslatedCodeBlock
 from janus.language.combine import Combiner
@@ -170,7 +171,7 @@ class Converter:
         self._llm: JanusModel
         self._splitter: Splitter
         self._retriever: JanusRetriever
-        self._vectorizer: Vectorizer
+        self._vectorizer: Vectorizer | None
         self._prompts: list[ChatPromptTemplate]
         self._chain: Runnable
 
@@ -201,8 +202,6 @@ class Converter:
         self._splitter_type = splitter_type
 
     def _set_refiner_types(self, refiner_types: list[type[JanusRefiner] | str]) -> None:
-        from janus.cli.constants import REFINERS
-
         self._refiner_types = []
         for refiner_type in refiner_types:
             if isinstance(refiner_type, str):
@@ -337,7 +336,7 @@ class Converter:
                     prompt_template=template,
                     target_language=self._target_language,
                     target_version=self._target_version,
-                )
+                ).prompt
             )
 
     def _get_translation_chain(self) -> Runnable:
