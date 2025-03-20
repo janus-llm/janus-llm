@@ -90,8 +90,11 @@ except NameError:
 
 class JanusModelProtocol(Protocol):
     model_id: str
+    model_name: str
+    short_model_id: str
     model_type_name: str
     token_limit: int
+    input_token_proportion: float
     input_token_cost: float
     output_token_cost: float
     prompt_engine: type[PromptEngine]
