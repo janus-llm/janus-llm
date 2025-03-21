@@ -45,8 +45,9 @@ class UMLParser(JanusParser, PydanticOutputParser):
             if index != -1:
                 start_indicies.append(index)
                 start = index + 3
-                end_indicies.append(diagram_str.rfind("@enduml", end))
-                end = end_indicies[-1] - 3
+                temp_idx = diagram_str[:end].rfind("@enduml")
+                end_indicies.append(temp_idx+6)
+                end = end_indicies[-1] - 3 - 6
         
         if len(start_indicies) == 1:
             inputs["diagrams"] = [diagram_str]
@@ -57,7 +58,6 @@ class UMLParser(JanusParser, PydanticOutputParser):
             end_idx = end_indicies[-1-i]
             end_idx += 1
             diagram_list.append(diagram_str[idx:end_idx])
-        print(diagram_list)
         inputs["diagrams"] = diagram_list
         return json.dumps(inputs)
     
