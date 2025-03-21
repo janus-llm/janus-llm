@@ -285,7 +285,7 @@ class UMLEvaluator(Evaluator):
     def __init__(
         self,
         eval_items_per_request: int | None = None,
-        input_types: str | set[str] = set(["uml"]),
+        input_types: str | set[str] = set(["diagram"]),
         output_type: str = "uml_eval",
         **kwargs,
     ) -> None:
@@ -310,7 +310,7 @@ class UMLEvaluator(Evaluator):
             return json.loads(json_text)["code"]
 
         def _get_diagrams(json_text: str) -> str:
-            return json.dumps(json.loads(json_text)["diagrams"])
+            return json.loads(json_text)["diagrams"]
 
         return RunnableLambda(self._parser.parse_input) | RunnableParallel(
             SOURCE_CODE=_get_code,
@@ -327,7 +327,7 @@ class UMLEvaluator(Evaluator):
             input_str = input_block.previous_generations[-1]["input"]
         else:
             input_str = input_block.previous_generations[-1].original.text
-        diagrams = json.loads(input_block.text) # why is this json.loads?
+        diagrams = input_block.text
         if not diagrams:
             log.debug(f"[{input_block.name}] Skipping empty output")
             return []

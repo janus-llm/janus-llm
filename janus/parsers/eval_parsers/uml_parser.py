@@ -33,9 +33,8 @@ class UMLParser(JanusParser, PydanticOutputParser):
     def parse_input(self, block: CodeBlock) -> str:
         text = super().parse_input(block)
         inputs = json.loads(text)
-
         # strong assumption every @startuml has an @enduml, aka valid uml
-        diagram_str = inputs["diagrams"][0]
+        diagram_str = inputs["diagrams"]
         start_indicies = []
         end_indicies = []
         start = 0
@@ -50,6 +49,7 @@ class UMLParser(JanusParser, PydanticOutputParser):
                 end = end_indicies[-1] - 3
         
         if len(start_indicies) == 1:
+            inputs["diagrams"] = [diagram_str]
             return json.dumps(inputs)
         
         diagram_list = []
@@ -57,7 +57,7 @@ class UMLParser(JanusParser, PydanticOutputParser):
             end_idx = end_indicies[-1-i]
             end_idx += 1
             diagram_list.append(diagram_str[idx:end_idx])
-
+        print(diagram_list)
         inputs["diagrams"] = diagram_list
         return json.dumps(inputs)
     
@@ -65,7 +65,18 @@ class UMLParser(JanusParser, PydanticOutputParser):
         if isinstance(text, BaseMessage):
             text = str(text.content)
 
-        return text
+        # Strip everything outside the JSON object, do I need this?
+        begin, end = text.find("{"), text.rfind("}")
+        end += 1 if end != -1 else 0
+        text = text[begin:end]
+
+        try:
+            out: Diagram = super(UMLParser, self).parse(text)
+        except json.JSONDecodeError as e:
+            log.debug(f"Invalid JSON object. Output:\n{text}")
+            raise OutputParserException(f"Got invalid JSON object. Error: {e}")
+
+        return out.json()
     
     def parse_combined_output(self, text: str) -> str:
         if not text.strip():

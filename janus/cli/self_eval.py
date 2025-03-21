@@ -145,7 +145,7 @@ def llm_self_eval(
         max_tokens=max_tokens,
         splitter_type=splitter_type,
         refiner_types=refiner_types,
-        use_janus_inputs=use_janus_inputs,
+        use_janus_inputs=use_janus_inputs
     )
     # Setting parser type here
     if evaluation_type == "incose":
