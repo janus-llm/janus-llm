@@ -1,10 +1,10 @@
-from pathlib import Path
 import json
+from pathlib import Path
 
 from langchain_core.runnables import Runnable, RunnableLambda, RunnableParallel
 
 from janus.converter.converter import Converter, run_if_changed
-from janus.language.block import CodeBlock, TranslatedCodeBlock
+from janus.language.block import CodeBlock
 from janus.parsers.quiz_taker_parser import QuizTakerParser
 from janus.utils.logger import create_logger
 
@@ -12,7 +12,7 @@ log = create_logger(__name__)
 
 
 class QuizTaker(Converter):
-    """A class that translates code from one programming language into a multiple choice quiz."""
+    """A class that takes a multiple choice quiz about code."""
 
     def __init__(
         self,
@@ -56,7 +56,7 @@ class QuizTaker(Converter):
         method was called, nothing happens.
         """
         self._parser = QuizTakerParser(language=self._target_language)
-    
+
     def _input_runnable(self) -> Runnable:
         def _get_quiz(json_text: str) -> str:
             return json.loads(json_text)["quiz"]
@@ -67,7 +67,7 @@ class QuizTaker(Converter):
         return RunnableLambda(self._parser.parse_input) | RunnableParallel(
             QUIZ=_get_quiz,
             SOURCE_CODE=_get_code,
-            #TODO ADD TOPIC?
+            # TODO ADD TOPIC?
             context=self._retriever,
         )
 
@@ -75,9 +75,7 @@ class QuizTaker(Converter):
         self._load_parameters()
         # Get code input from generation step
         if len(input_block.previous_generations) == 0:
-            raise ValueError(
-                "Error: Taking quiz without code context"
-            )
+            raise ValueError("Error: Taking quiz without code context")
         input_str = json.loads(input_block.previous_generations[-1]["input"])
         # Strip answers from quiz "correct-answer-number" before input
         data = json.loads(input_block.text)
@@ -96,4 +94,3 @@ class QuizTaker(Converter):
         translated_block.original = input_block
         translated_block.previous_generations = input_block.previous_generations
         return translated_block
-    

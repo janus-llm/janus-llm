@@ -6,7 +6,7 @@ log = create_logger(__name__)
 
 
 class QuizGenerator(Converter):
-    """A class that translates code from one programming language into a multiple choice quiz."""
+    """A class that creates a multiple choice quiz about code."""
 
     def __init__(
         self,
