@@ -308,6 +308,7 @@ def load_model(model_id) -> JanusModel:
             model_config = json.load(f)
         model_type_name = model_config["model_type"]
         model_id = model_config["model_id"]
+        model_long_id = model_config["model_long_id"]
         model_args = model_config["model_args"]
         token_limit = model_config["token_limit"]
         input_token_cost = model_config["model_cost"]["input"]

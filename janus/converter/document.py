@@ -118,7 +118,9 @@ class ClozeDocumenter(Documenter):
             # Build a new TranslatedBlock using the new working text
             working_copy = deepcopy(block.original)
             working_copy.text = prefix + keeper + suffix
-            working_block = TranslatedCodeBlock(working_copy, self._target_language)
+            working_block = TranslatedCodeBlock(
+                working_copy, self._target_language, converter=self
+            )
 
             # Run the LLM on the working text
             try:

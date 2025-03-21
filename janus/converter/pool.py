@@ -20,14 +20,16 @@ class ConverterPool(Converter):
                 c.set_model(kwargs["model"])
         super().__init__(**kwargs)
 
+    def _combine_blocks(self, blocks):
+        for b in blocks.blocks:
+            b.converter._combine_block(b)
+
     def translate_blocks(
         self, input_blocks: CodeBlock | BlockCollection, failure_path: Path | None = None
     ):
         output_blocks = []
         for c in self._converters:
             collection = c.translate_blocks(input_blocks)
-            for b in collection.blocks:
-                c._combiner.combine(b)
             output_blocks += collection.blocks
         return BlockCollection(output_blocks, input_blocks.previous_generations)
 

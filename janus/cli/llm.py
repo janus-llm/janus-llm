@@ -66,6 +66,7 @@ def llm_add(
         cfg = {
             "model_type": model_type,
             "model_id": "gpt-4o",  # This is a placeholder to use the Azure PromptEngine
+            "model_long_id": MODEL_ID_TO_LONG_ID["gpt-4o"],
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": {"input": in_cost, "output": out_cost},
@@ -88,7 +89,6 @@ def llm_add(
             "input_token_proportion": 0.4,
         }
     elif model_type == "OpenAI":
-        print("DEPRECATED: Use 'Azure' instead. CTRL+C to exit.")
         model_id = typer.prompt(
             "Enter the model ID (list model IDs with `janus llm ls -a`)",
             default="gpt-4o",
@@ -105,6 +105,7 @@ def llm_add(
         cfg = {
             "model_type": model_type,
             "model_id": model_id,
+            "model_long_id": MODEL_ID_TO_LONG_ID[model_id],
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": model_cost,
@@ -128,6 +129,7 @@ def llm_add(
         cfg = {
             "model_type": model_type,
             "model_id": model_id,
+            "model_long_id": MODEL_ID_TO_LONG_ID[model_id],
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": model_cost,
@@ -150,6 +152,7 @@ def llm_add(
         cfg = {
             "model_type": model_type,
             "model_id": model_id,
+            "model_long_id": MODEL_ID_TO_LONG_ID[model_id],
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": model_cost,
