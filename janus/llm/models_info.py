@@ -96,12 +96,10 @@ class JanusModelProtocol(Protocol):
     output_token_cost: float
     prompt_engine: type[PromptEngine]
 
-    def get_num_tokens(self, text: str) -> int:
-        ...
+    def get_num_tokens(self, text: str) -> int: ...
 
 
-class JanusModel(Runnable, JanusModelProtocol):
-    ...
+class JanusModel(Runnable, JanusModelProtocol): ...
 
 
 load_dotenv()

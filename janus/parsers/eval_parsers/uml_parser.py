@@ -1,24 +1,24 @@
 import json
-import re
-from typing import Any
 
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
-from langchain_core.pydantic_v1 import BaseModel, Field, conint
+from langchain_core.pydantic_v1 import BaseModel, Field
 
 from janus.language.block import CodeBlock
+from janus.parsers.eval_parsers.inline_comment_parser import Criteria
 from janus.parsers.parser import JanusParser
 from janus.utils.logger import create_logger
-from janus.parsers.eval_parsers.inline_comment_parser import Criteria
 
 log = create_logger(__name__)
+
 
 class Diagram(BaseModel):
     completeness: Criteria = Field(description="The completeness of the diagram")
     hallucination: Criteria = Field(description="The factualness of the diagram")
     readability: Criteria = Field(description="The readability of the diagram")
     usefulness: Criteria = Field(description="The usefulness of the diagram")
+
 
 class UMLParser(JanusParser, PydanticOutputParser):
     diagrams: dict[str, str]
@@ -46,21 +46,21 @@ class UMLParser(JanusParser, PydanticOutputParser):
                 start_indicies.append(index)
                 start = index + 3
                 temp_idx = diagram_str[:end].rfind("@enduml")
-                end_indicies.append(temp_idx+6)
+                end_indicies.append(temp_idx + 6)
                 end = end_indicies[-1] - 3 - 6
-        
+
         if len(start_indicies) == 1:
             inputs["diagrams"] = [diagram_str]
             return json.dumps(inputs)
-        
+
         diagram_list = []
         for i, idx in enumerate(start_indicies):
-            end_idx = end_indicies[-1-i]
+            end_idx = end_indicies[-1 - i]
             end_idx += 1
             diagram_list.append(diagram_str[idx:end_idx])
         inputs["diagrams"] = diagram_list
         return json.dumps(inputs)
-    
+
     def parse(self, text: str | BaseMessage) -> str:
         if isinstance(text, BaseMessage):
             text = str(text.content)
@@ -77,7 +77,7 @@ class UMLParser(JanusParser, PydanticOutputParser):
             raise OutputParserException(f"Got invalid JSON object. Error: {e}")
 
         return out.json()
-    
+
     def parse_combined_output(self, text: str) -> str:
         if not text.strip():
             return str({})

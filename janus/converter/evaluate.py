@@ -275,6 +275,7 @@ class InlineCommentEvaluator(Evaluator):
             translated_block.translated = True
             return translated_block
 
+
 class UMLEvaluator(Evaluator):
     """PLANTUML Diagram Evaluator
 
@@ -320,9 +321,7 @@ class UMLEvaluator(Evaluator):
 
     def translate_block(self, input_block: CodeBlock, failure_path: Path | None = None):
         if len(input_block.previous_generations) == 0:
-            raise ValueError(
-                "Error: Evaluating diagrams without previous generations"
-            )
+            raise ValueError("Error: Evaluating diagrams without previous generations")
         if isinstance(input_block.previous_generations[-1], dict):
             input_str = input_block.previous_generations[-1]["input"]
         else:

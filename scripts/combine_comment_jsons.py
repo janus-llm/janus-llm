@@ -73,9 +73,11 @@ def parse_cloze(
         }
         obj["raw_generated_comments"] = {
             k: "\n".join(
-                master_obj[key]["comment_prefixes"][k] + line.lstrip(" .;")
-                if i
-                else line.lstrip(" ;")
+                (
+                    master_obj[key]["comment_prefixes"][k] + line.lstrip(" .;")
+                    if i
+                    else line.lstrip(" ;")
+                )
                 for i, line in enumerate(v.strip("\n; .").split("\n"))
             )
             for k, v in generated_comments.items()
