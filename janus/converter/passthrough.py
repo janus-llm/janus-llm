@@ -11,15 +11,16 @@ class ConverterPassthrough(Converter):
     def translate_block(
         self, input_block: CodeBlock, failure_path: Path | None = None
     ) -> TranslatedCodeBlock:
+        self._load_parameters()
         self._output_label = input_block.block_label
         self._output_type = input_block.block_type
         res = super().translate_block(input_block, failure_path)
-        if isinstance(input_block.previous_generations[-1], dict):
-            res.original = self._split_text(
-                input_block.previous_generations[-1]["input"], res.name
-            )
+
+        last_gen = input_block.previous_generations[-1]
+        if isinstance(last_gen, dict):
+            res.original = self._split_text(last_gen["input"], res.name)
         else:
-            res.original = input_block.previous_generations[-1].original
+            res.original = last_gen.original
         res.previous_generations = input_block.previous_generations[:-1]
         return res
 

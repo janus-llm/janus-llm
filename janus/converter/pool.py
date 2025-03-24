@@ -11,13 +11,13 @@ class ConverterPool(Converter):
         for converter in args:
             if not isinstance(converter, Converter):
                 raise ValueError(f"Error: unrecognized type: {type(converter)}")
-        self._converters = args
+        self._converters: list[Converter] = args
         if "source_language" in kwargs:
             for c in self._converters:
-                c.set_source_language(kwargs["source_language"])
+                c._set_source_language(kwargs["source_language"])
         if "model" in kwargs:
             for c in self._converters:
-                c.set_model(kwargs["model"])
+                c._model_name = kwargs["model"]
         super().__init__(**kwargs)
 
     def _combine_blocks(self, blocks):
@@ -27,6 +27,7 @@ class ConverterPool(Converter):
     def translate_blocks(
         self, input_blocks: CodeBlock | BlockCollection, failure_path: Path | None = None
     ):
+        self._load_parameters()
         output_blocks = []
         for c in self._converters:
             collection = c.translate_blocks(input_blocks)

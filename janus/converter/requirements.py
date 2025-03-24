@@ -15,9 +15,7 @@ class RequirementsDocumenter(Documenter):
     def __init__(
         self, combine_output: bool = False, output_type: str = "requirements", **kwargs
     ):
-        kwargs.update(output_type=output_type)
-        super().__init__(combine_output=combine_output, **kwargs)
-        self.set_prompts("requirements")
+        super().__init__(output_type=output_type, combine_output=combine_output, **kwargs)
+        self._prompt_template_names = ["requirements"]
         self._combiner = ChunkCombiner()
         self._parser = RequirementsParser()
-        self._load_parameters()

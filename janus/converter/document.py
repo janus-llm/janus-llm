@@ -19,30 +19,30 @@ class Documenter(Converter):
         source_language: str = "fortran",
         drop_comments: bool = True,
         output_type: str = "documentation",
+        prune_node_types: tuple[str, ...] = (),
         **kwargs,
     ):
-        kwargs.update(source_language=source_language, output_type=output_type)
-        super().__init__(**kwargs)
-        self.set_prompts("document")
-
         if drop_comments:
             comment_node_type = LANGUAGES[source_language].get(
                 "comment_node_type", "comment"
             )
-            self.set_prune_node_types((comment_node_type,))
+            prune_node_types = (comment_node_type, *prune_node_types)
 
-        self._load_parameters()
+        super().__init__(
+            source_language=source_language,
+            output_type=output_type,
+            prune_node_types=prune_node_types,
+            **kwargs,
+        )
+        self._prompt_template_names = ["document"]
 
 
 class MultiDocumenter(Documenter):
     def __init__(self, output_type: str = "multidocumentation", **kwargs):
-        kwargs.update(output_type=output_type)
-        super().__init__(**kwargs)
-        self.set_prompts("multidocument")
+        super().__init__(output_type=output_type, **kwargs)
+        self._prompt_template_names = ["multidocument"]
         self._combiner = JsonCombiner()
         self._parser = MultiDocumentationParser()
-
-        self._load_parameters()
 
 
 class ClozeDocumenter(Documenter):
@@ -52,15 +52,16 @@ class ClozeDocumenter(Documenter):
         output_type: str = "cloze_comments",
         **kwargs,
     ) -> None:
-        kwargs.update(drop_comments=False, output_type=output_type)
-        super().__init__(**kwargs)
-        self.set_prompts("document_cloze")
+        kwargs.update(drop_comments=False)
+        super().__init__(
+            output_type=output_type,
+            **kwargs,
+        )
+        self._prompt_template_names = ["document_cloze"]
         self._combiner = JsonCombiner()
         self._parser = ClozeDocumentationParser()
 
-        self.comments_per_request = comments_per_request
-
-        self._load_parameters()
+        self._comments_per_request: int | None = comments_per_request
 
     def _add_translation(self, block: TranslatedCodeBlock):
         if block.translated:
@@ -70,7 +71,7 @@ class ClozeDocumenter(Documenter):
             block.translated = True
             return
 
-        if self.comments_per_request is None:
+        if self._comments_per_request is None:
             return super()._add_translation(block)
 
         comment_pattern = r"<(?:INLINE|BLOCK)_COMMENT \w{8}>"
@@ -88,12 +89,12 @@ class ClozeDocumenter(Documenter):
             block.complete = True
             return
 
-        if len(comments) <= self.comments_per_request:
+        if len(comments) <= self._comments_per_request:
             return super()._add_translation(block)
 
-        comment_group_indices = list(range(0, len(comments), self.comments_per_request))
+        comment_group_indices = list(range(0, len(comments), self._comments_per_request))
         log.debug(
-            f"[{block.name}] Block contains more than {self.comments_per_request}"
+            f"[{block.name}] Block contains more than {self._comments_per_request}"
             f" comments, splitting {len(comments)} comments into"
             f" {len(comment_group_indices)} groups"
         )
@@ -101,10 +102,10 @@ class ClozeDocumenter(Documenter):
         block.processing_time = 0
         block.cost = 0
         obj = {}
-        for i in range(0, len(comments), self.comments_per_request):
+        for i in range(0, len(comments), self._comments_per_request):
             # Split the text into the section containing comments of interest,
             #  all the text prior to those comments, and all the text after them
-            working_comments = comments[i : i + self.comments_per_request]
+            working_comments = comments[i : i + self._comments_per_request]
             start_idx = working_comments[0].start()
             end_idx = working_comments[-1].end()
             prefix = block.original.text[:start_idx]

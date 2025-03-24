@@ -230,6 +230,26 @@ class Converter:
 
         self._source_language = source_language
 
+    def _set_target_language(
+        self, target_language: str, target_version: str | None
+    ) -> None:
+        """Validate and set the target language.
+
+        Arguments:
+            target_language: The target programming language.
+            target_version: The target version of the target programming language.
+        """
+        target_language = target_language.lower()
+        if target_language not in LANGUAGES:
+            raise ValueError(
+                f"Invalid target language: {target_language}. "
+                "Valid target languages are found in `janus.utils.enums.LANGUAGES`."
+            )
+        self._target_language = target_language
+        self._target_version = target_version
+        # Taking the first suffix as the default for output files
+        self._target_suffix = f".{LANGUAGES[target_language]['suffixes'][0]}"
+
     def _set_input_token_limit(self, max_tokens: int | None) -> None:
         """Validate and set the input token limit.
 
@@ -712,7 +732,7 @@ class Converter:
             raise e
         except ValidationError as e:
             # Only allow ValidationError to pass if token limit is manually set
-            if self.override_token_limit:
+            if self._override_token_limit:
                 log.warning(
                     "Current file and manually set token "
                     "limit is too large for this model, skipping"
@@ -988,26 +1008,6 @@ class Converter:
     @property
     def target_version(self):
         return self._target_version
-
-    def set_target_language(
-        self, target_language: str, target_version: str | None
-    ) -> None:
-        """Validate and set the target language.
-
-        Arguments:
-            target_language: The target programming language.
-            target_version: The target version of the target programming language.
-        """
-        target_language = target_language.lower()
-        if target_language not in LANGUAGES:
-            raise ValueError(
-                f"Invalid target language: {target_language}. "
-                "Valid target languages are found in `janus.utils.enums.LANGUAGES`."
-            )
-        self._target_language = target_language
-        self._target_version = target_version
-        # Taking the first suffix as the default for output files
-        self._target_suffix = f".{LANGUAGES[target_language]['suffixes'][0]}"
 
     @classmethod
     def eval_obj(cls, target, metric_func, *args, **kwargs):
