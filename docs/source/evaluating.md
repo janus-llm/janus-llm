@@ -74,6 +74,20 @@ You can use an LLM to evaluate requirements against the [INCOSE standard](https:
 janus llm-self-eval --input janus-docs --output janus-evals --llm myazure --language python -e incose
 ```
 
+### Evaluating UML Diagrams
+
+First, generate the diagrm with `janus`:
+
+```shell
+janus diagram -i janus/cli/ -l python -o janus-diagrams -L myazure -r ReflectionRefiner -r CodeFormatRefiner -r FixParserExceptions
+```
+
+You can then use the LLM to evaluate the generated diagrams on their **Completeness**, **Hallucination**, **Readability**, and **Usefulness** with the following command:
+
+```shell
+janus llm-self-eval -e uml -i janus-diagrams -o janus-diagrams-eval -L myazure -r FixParserExceptions -l json -j
+```
+
 ## Evaluation without a Reference
 
 ### Flesch Grade Level

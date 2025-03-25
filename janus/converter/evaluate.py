@@ -22,7 +22,7 @@ class Evaluator(Converter):
     "on an input target, with an associated prompt.
 
     Current valid evaluation types:
-    ['incose', 'comments']
+    ['incose', 'comments', 'uml']
 
     """
 
@@ -96,11 +96,11 @@ class RequirementEvaluator(Evaluator):
             input_str = input_block.previous_generations[-1].original.text
         requirements = json.loads(input_block.text)
         # The requirements are often a list of lists
-        if isinstance(requirements[0], list):
-            requirements = requirements[0]
         if not requirements:
             log.debug(f"[{input_block.name}] Skipping empty output")
             return []
+        if isinstance(requirements[0], list):
+            requirements = requirements[0]
         if (
             not self.eval_items_per_request
             or len(requirements) < self.eval_items_per_request
