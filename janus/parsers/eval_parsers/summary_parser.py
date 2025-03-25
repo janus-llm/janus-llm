@@ -21,21 +21,17 @@ class Summary(BaseModel):
 
 
 class SummaryParser(JanusParser, PydanticOutputParser):
-
     def __init__(self):
-        PydanticOutputParser.__init__(
-            self,
-            pydantic_object=Summary
-        )
-    
+        PydanticOutputParser.__init__(self, pydantic_object=Summary)
+
     def parse_input(self, block: CodeBlock) -> str:
         text = super().parse_input(block)
-        # summary is a long string 
+        # summary is a long string
         obj = json.loads(text)
-        return json.dumps(obj) 
+        return json.dumps(obj)
 
     def parse(self, text: str | BaseMessage) -> str:
-        # parsing the output evaluation object 
+        # parsing the output evaluation object
         if isinstance(text, BaseMessage):
             text = str(text.content)
 
@@ -45,11 +41,11 @@ class SummaryParser(JanusParser, PydanticOutputParser):
         text = text[begin:end]
 
         try:
-            out: Summary = super(SummaryParser,self).parse(text)
+            out: Summary = super(SummaryParser, self).parse(text)
         except json.JSONDecodeError as e:
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise OutputParserException(f"Got invalid JSON object. Error: {e}")
-        
+
         return out.json()
 
     def parse_combined_output(self, text: str) -> str:
@@ -60,4 +56,3 @@ class SummaryParser(JanusParser, PydanticOutputParser):
         for obj in objs:
             output_obj.update(obj)
         return json.dumps(output_obj)
-

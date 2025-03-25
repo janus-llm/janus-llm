@@ -275,6 +275,7 @@ class InlineCommentEvaluator(Evaluator):
             translated_block.translated = True
             return translated_block
 
+
 class SummaryEvaluator(Evaluator):
     """Summary Evaluator
 
@@ -304,7 +305,7 @@ class SummaryEvaluator(Evaluator):
         self.set_prompts("eval_prompts/summary")
         self.eval_items_per_request = eval_items_per_request
         self._load_parameters()
-    
+
     def _input_runnable(self) -> Runnable:
         def _get_code(json_text: str) -> str:
             return json.loads(json_text)["code"]

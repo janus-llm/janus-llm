@@ -55,7 +55,7 @@ def llm_self_eval(
             "--evaluation-type",
             "-e",
             help="Type of output to evaluate.",
-            click_type=click.Choice(["incose", "comments","summary"]),
+            click_type=click.Choice(["incose", "comments", "summary"]),
         ),
     ] = "incose",
     max_prompts: Annotated[
@@ -132,7 +132,11 @@ def llm_self_eval(
         ),
     ] = False,
 ):
-    from janus.converter.evaluate import InlineCommentEvaluator, RequirementEvaluator, SummaryEvaluator
+    from janus.converter.evaluate import (
+        InlineCommentEvaluator,
+        RequirementEvaluator,
+        SummaryEvaluator,
+    )
 
     model_arguments = dict(temperature=temperature)
     refiner_types = [REFINERS[r] for r in refiner_types]
