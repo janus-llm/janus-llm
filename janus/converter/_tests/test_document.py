@@ -1,6 +1,6 @@
-from pathlib import Path
 import tempfile
 import unittest
+from pathlib import Path
 
 from janus.converter.document import PseudocodeDocumenter
 
@@ -19,6 +19,6 @@ class TestDocumenter(unittest.TestCase):
                 model="gpt-4o-mini", source_language="ibmhlasm"
             )
             documenter.translate(test_file.parent, tmpdirname)
-            # Only check the top-most level functionality, since it should be handled by other
-            # unit tests anyway
+            # Only check the top-most level functionality,
+            # since it should be handled by other unit tests anyway
             self.assertTrue(python_file.exists())
