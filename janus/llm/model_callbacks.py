@@ -68,6 +68,7 @@ COST_PER_1K_TOKENS: dict[str, dict[str, float]] = {
     "mistral.mistral-7b-instruct-v0:2": {"input": 0.00015, "output": 0.0002},
     "mistral.mixtral-8x7b-instruct-v0:1": {"input": 0.00045, "output": 0.0007},
     "mistral.mistral-large-2402-v1:0": {"input": 0.004, "output": 0.012},
+    "mistral.mistral-large-2407-v1:0": {"input": 0.002, "output": 0.006},
     "arn:aws:bedrock:us-east-1:851725275899:imported-model/shp03b13vje5": {
         "input": 0.00006,
         "output": 0.00006,
