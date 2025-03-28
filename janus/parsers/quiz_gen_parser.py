@@ -1,4 +1,5 @@
 import json
+import random
 
 from langchain_core.messages import BaseMessage
 
@@ -10,6 +11,22 @@ log = create_logger(__name__)
 
 class QuizGenParser(JanusParser):
     language: str
+
+    def shuffle_options(self, questions):
+        for question in questions:
+            # Extract options and correct answer number
+            options = [question[f'option-{i+1}'] for i in range(4)]
+            correct_answer_index = int(question['correct-answer-number']) - 1     
+            # Shuffle options
+            shuffled_options = options[:]
+            random.shuffle(shuffled_options)
+            # Find new correct answer index
+            new_correct_answer_index = shuffled_options.index(options[correct_answer_index])
+            # Update question dictionary with shuffled options and new correct answer number
+            for i in range(4):
+                question[f'option-{i+1}'] = shuffled_options[i]
+            question['correct-answer-number'] = str(new_correct_answer_index + 1)
+        return questions
 
     def parse(self, text: str | BaseMessage) -> str:
         if isinstance(text, BaseMessage):
@@ -40,7 +57,8 @@ class QuizGenParser(JanusParser):
                 original_text,
                 f"Got invalid return object. Expected a dictionary, but got {type(data)}",
             )
-        # TODO Faith add shuffling here
+        # Shuffle the answer options
+        data = self.shuffle_options(data)
         # Add a question ID to each question, put as the first field in each object
         updated_data = []
         for index, question in enumerate(data, start=1):
