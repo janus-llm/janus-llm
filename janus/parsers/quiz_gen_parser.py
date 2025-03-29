@@ -11,6 +11,7 @@ log = create_logger(__name__)
 
 class QuizGenParser(JanusParser):
     language: str
+    topic: str
 
     def shuffle_options(self, questions):
         for question in questions:
@@ -31,6 +32,7 @@ class QuizGenParser(JanusParser):
     def parse(self, text: str | BaseMessage) -> str:
         if isinstance(text, BaseMessage):
             text = str(text.content)
+        log.info(f"TEST JSON OBJECT PRE-PRINT. Output:\n{text}\n")
         original_text = text
         # Strip out anything before or after the json
         json_start_index = text.find("[")
@@ -64,6 +66,7 @@ class QuizGenParser(JanusParser):
         for index, question in enumerate(data, start=1):
             ordered_question = {"question-id": str(index)}
             ordered_question.update(question)
+            ordered_question["topic"] = self.topic
             updated_data.append(ordered_question)
         log.info(f"VALID JSON object. Output:\n{text}")
         return json.dumps(updated_data)

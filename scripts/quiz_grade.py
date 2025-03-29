@@ -41,6 +41,7 @@ def combine_outputs(main_outputs, intermediate_outputs):
             "option-3": entry.get("option-3", ""),
             "option-4": entry.get("option-4", ""),
             "correct-answer-number": entry.get("correct-answer-number", ""),
+            "topic": entry.get("topic", ""),
             "reasoning": None,  # Placeholder for reasoning
             "selected-answer-number": None,  # Placeholder for selected-answer-number
             "grading-result": None,  # Placeholder for grading result
@@ -69,6 +70,7 @@ def quiz_to_csv(quiz, file_path):
     # Define the headers based on the keys of the dictionary entries
     headers = [
         "question-id",
+        "topic",
         "question",
         "option-1",
         "option-2",
@@ -94,12 +96,11 @@ def quiz_to_csv(quiz, file_path):
 
 # Filepaths
 input_file_path = (
-    "/home/faithmorgan/janus_dev/test_docs/quiz_taker_outputs/converter.json"
+    "/home/faithmorgan/janus_dev/test_docs/quiz_taker_outputs/Language Features/converter.json"
 )
 output_file_path = (
-    "/home/faithmorgan/janus_dev/test_docs/quiz_grader_outputs/quiz_output.csv"
+    "/home/faithmorgan/janus_dev/test_docs/quiz_grader_outputs/quiz_output_language_features.csv"
 )
-
 main_outputs, intermediate_outputs = extract_outputs_from_json(input_file_path)
 combined_list = combine_outputs(main_outputs, intermediate_outputs)
 quiz_to_csv(combined_list, output_file_path)

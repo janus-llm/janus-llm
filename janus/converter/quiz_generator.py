@@ -2,6 +2,8 @@ from janus.converter.converter import Converter, run_if_changed
 from janus.parsers.quiz_gen_parser import QuizGenParser
 from janus.utils.logger import create_logger
 
+from langchain_core.runnables import Runnable, RunnableLambda, RunnableParallel
+
 log = create_logger(__name__)
 
 
@@ -12,6 +14,8 @@ class QuizGenerator(Converter):
         self,
         target_language: str = "json",
         target_version: str | None = "1.0",
+        quiz_topic: str | None = "General",
+        quiz_topic_description: str | None = "Questions about any aspect of the code.",
         **kwargs,
     ) -> None:
         """Initialize a Quiz Generator instance.
@@ -29,6 +33,9 @@ class QuizGenerator(Converter):
             prompt_templates: name of prompt template directories
                 (see janus/prompts/templates) or paths to directories.
         """
+        self._quiz_topic = quiz_topic
+        self._quiz_topic_description = quiz_topic_description
+
         super().__init__(**kwargs)
 
         self.set_target_language(
@@ -49,4 +56,12 @@ class QuizGenerator(Converter):
         If the relevant fields have not been changed since the last time this
         method was called, nothing happens.
         """
-        self._parser = QuizGenParser(language=self._target_language)
+        self._parser = QuizGenParser(language=self._target_language,topic=self._quiz_topic)
+
+    def _input_runnable(self) -> Runnable:
+        return RunnableParallel(
+            SOURCE_CODE=self._parser.parse_input,
+            QUIZ_TOPIC=lambda x: self._quiz_topic,
+            QUIZ_TOPIC_DESCRIPTION=lambda x: self._quiz_topic_description,
+            context=self._retriever,
+        )
