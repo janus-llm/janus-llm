@@ -490,7 +490,7 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
     "perl": {
         "comment": "#",
         "suffixes": ["pl", "pm", "t"],
-        "url": "https://github.com/tree-sitter-perl/tree-sitter-perl",
+        "url": "https://github.com/ganezdragon/tree-sitter-perl",
         "example": "# Hello, World!\nprint 'Hello, World!\\n';\n",
     },
     "pgn": {
