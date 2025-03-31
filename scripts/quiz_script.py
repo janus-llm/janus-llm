@@ -4,13 +4,28 @@ from janus.converter.quiz_taker import QuizTaker
 if __name__ == "__main__":
     print("running main function!")
 
-    variables = [("Algorithm","Logic and flow of algorithms used in the code."),
-                 ("Data","Types of data structures used and their roles."),
-                 ("Code","Interpret and explain the purpose of specific code segments."),
-                 ("Design Patterns","Pattern implementation, Architectural principles, Component interactions, Separation of concerns, Code organization principles."),
-                 ("Language Features","Understanding of language-specific constructs and idioms."),
-                 ("Error Handling", "Exception handling patterns, input validation, boundary conditions."),
-                 ("Function","Know how to convert function signatures, parameters, and return types between languages.")
+    variables = [
+        ("Algorithm", "Logic and flow of algorithms used in the code."),
+        ("Data", "Types of data structures used and their roles."),
+        ("Code", "Interpret and explain the purpose of specific code segments."),
+        (
+            "Design Patterns",
+            """Pattern implementation, Architectural principles, Component interactions,
+            Separation of concerns, Code organization principles.""",
+        ),
+        (
+            "Language Features",
+            "Understanding of language-specific constructs and idioms.",
+        ),
+        (
+            "Error Handling",
+            "Exception handling patterns, input validation, boundary conditions.",
+        ),
+        (
+            "Function",
+            """Know how to convert function signatures, parameters, and
+            return types between languages.""",
+        ),
     ]
 
     for topic, description in variables:
@@ -27,8 +42,10 @@ if __name__ == "__main__":
                 )
 
                 quiz_gen.translate(
-                    input_directory="/home/faithmorgan/janus_dev/test_docs/python_stuff",
-                    output_directory=f"/home/faithmorgan/janus_dev/test_docs/quiz_gen_outputs/{topic}/",
+                    input_directory="""/home/fm/itmod/test_docs
+                                    /python_stuff""",
+                    output_directory=f"""/home/fm/itmod/test_docs
+                                    /quiz_gen_outputs/{topic}/""",
                     overwrite=False,
                 )
 
@@ -42,12 +59,13 @@ if __name__ == "__main__":
                 )
 
                 quiz_take.translate(
-                    input_directory=f"/home/faithmorgan/janus_dev/test_docs/quiz_gen_outputs/{topic}/",
-                    output_directory=f"/home/faithmorgan/janus_dev/test_docs/quiz_taker_outputs/{topic}/",
+                    input_directory=f"""/home/fm/itmod/test_docs
+                                    /quiz_gen_outputs/{topic}/""",
+                    output_directory=f"""/home/fm/itmod/test_docs
+                                    /quiz_taker_outputs/{topic}/""",
                     overwrite=False,
                 )
 
                 break  # Exit the loop if successful
             except Exception as e:
                 print(f"Attempt {attempt} failed: {e}")
-

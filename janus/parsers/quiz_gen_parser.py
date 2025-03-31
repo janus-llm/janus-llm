@@ -16,17 +16,19 @@ class QuizGenParser(JanusParser):
     def shuffle_options(self, questions):
         for question in questions:
             # Extract options and correct answer number
-            options = [question[f'option-{i+1}'] for i in range(4)]
-            correct_answer_index = int(question['correct-answer-number']) - 1     
+            options = [question[f"option-{i+1}"] for i in range(4)]
+            correct_answer_index = int(question["correct-answer-number"]) - 1
             # Shuffle options
             shuffled_options = options[:]
             random.shuffle(shuffled_options)
             # Find new correct answer index
-            new_correct_answer_index = shuffled_options.index(options[correct_answer_index])
-            # Update question dictionary with shuffled options and new correct answer number
+            new_correct_answer_index = shuffled_options.index(
+                options[correct_answer_index]
+            )
+            # Update question with shuffled options and new correct answer
             for i in range(4):
-                question[f'option-{i+1}'] = shuffled_options[i]
-            question['correct-answer-number'] = str(new_correct_answer_index + 1)
+                question[f"option-{i+1}"] = shuffled_options[i]
+            question["correct-answer-number"] = str(new_correct_answer_index + 1)
         return questions
 
     def parse(self, text: str | BaseMessage) -> str:

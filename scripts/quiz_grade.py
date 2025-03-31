@@ -95,12 +95,12 @@ def quiz_to_csv(quiz, file_path):
 
 
 # Filepaths
-input_file_path = (
-    "/home/faithmorgan/janus_dev/test_docs/quiz_taker_outputs/Language Features/converter.json"
-)
-output_file_path = (
-    "/home/faithmorgan/janus_dev/test_docs/quiz_grader_outputs/quiz_output_language_features.csv"
-)
+input_file_path = """/home/fm/itmod/test_docs
+                /quiz_taker_outputs/Language Features/converter.json
+                """
+output_file_path = """/home/fm/itmod/test_docs
+                /quiz_grader_outputs/quiz_output_language_features.csv
+                """
 main_outputs, intermediate_outputs = extract_outputs_from_json(input_file_path)
 combined_list = combine_outputs(main_outputs, intermediate_outputs)
 quiz_to_csv(combined_list, output_file_path)

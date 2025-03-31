@@ -1,8 +1,8 @@
+from langchain_core.runnables import Runnable, RunnableParallel
+
 from janus.converter.converter import Converter, run_if_changed
 from janus.parsers.quiz_gen_parser import QuizGenParser
 from janus.utils.logger import create_logger
-
-from langchain_core.runnables import Runnable, RunnableLambda, RunnableParallel
 
 log = create_logger(__name__)
 
@@ -56,7 +56,9 @@ class QuizGenerator(Converter):
         If the relevant fields have not been changed since the last time this
         method was called, nothing happens.
         """
-        self._parser = QuizGenParser(language=self._target_language,topic=self._quiz_topic)
+        self._parser = QuizGenParser(
+            language=self._target_language, topic=self._quiz_topic
+        )
 
     def _input_runnable(self) -> Runnable:
         return RunnableParallel(
