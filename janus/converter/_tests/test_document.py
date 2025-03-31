@@ -2,12 +2,15 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import pytest
+
 from janus.converter.document import PseudocodeDocumenter
 
 
 class TestDocumenter(unittest.TestCase):
     """Tests for the Documenter class"""
 
+    @pytest.mark.translate
     def test_pseudocode(self):
         """Test pseudocode documenter"""
         test_file = Path("janus/language/treesitter/_tests/languages/ibmhlasm.asm")
