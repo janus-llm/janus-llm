@@ -2,8 +2,8 @@ import unittest
 
 from janus.language.block import CodeBlock
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
-from janus.parsers.eval_parsers.uml_parser import UMLParser
 from janus.parsers.eval_parsers.summary_parser import SummaryParser
+from janus.parsers.eval_parsers.uml_parser import UMLParser
 
 
 class TestUMLParser(unittest.TestCase):
@@ -46,7 +46,8 @@ class TestUMLParser(unittest.TestCase):
             " function. It highlights important steps and the sequence of "
             "operations, which "
             'aids in comprehension.", "score": 3}'
-         )
+        )
+
     def test_parse_input(self):
         self.assertEqual(
             self.parser.parse_input(self.test_codeblock),
@@ -55,6 +56,7 @@ class TestUMLParser(unittest.TestCase):
 
     def test_parse(self):
         self.assertIsInstance(self.parser.parse(self.test_response), str)
+
 
 class TestSummaryParser(unittest.TestCase):
     def setUp(self):
