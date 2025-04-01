@@ -10,7 +10,6 @@ log = create_logger(__name__)
 
 
 class Experimenter:
-
     """
     A class that conducts a series of comment generation experiments using different
     partitioning methods and token sizes for mumps or alc code.

@@ -10,6 +10,7 @@ from janus.language.combine import JsonCombiner
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
 from janus.parsers.eval_parsers.inline_comment_parser import InlineCommentParser
 from janus.parsers.eval_parsers.summary_parser import SummaryParser
+from janus.parsers.eval_parsers.uml_parser import UMLParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -22,7 +23,7 @@ class Evaluator(Converter):
     "on an input target, with an associated prompt.
 
     Current valid evaluation types:
-    ['incose', 'comments']
+    ['incose', 'comments', 'uml']
 
     """
 
@@ -96,11 +97,11 @@ class RequirementEvaluator(Evaluator):
             input_str = input_block.previous_generations[-1].original.text
         requirements = json.loads(input_block.text)
         # The requirements are often a list of lists
-        if isinstance(requirements[0], list):
-            requirements = requirements[0]
         if not requirements:
             log.debug(f"[{input_block.name}] Skipping empty output")
             return []
+        if isinstance(requirements[0], list):
+            requirements = requirements[0]
         if (
             not self.eval_items_per_request
             or len(requirements) < self.eval_items_per_request
@@ -334,6 +335,74 @@ class SummaryEvaluator(Evaluator):
         obj_str = json.dumps(
             dict(
                 summary=summary,
+                code=input_str,
+            )
+        )
+        temp_block = self._split_text(obj_str, input_block.name)
+        translated_block = super().translate_block(temp_block, failure_path)
+        translated_block.original = input_block
+        translated_block.previous_generations = input_block.previous_generations
+        return translated_block
+
+
+class UMLEvaluator(Evaluator):
+    """PLANTUML Diagram Evaluator
+
+    A class that performs an LLM self evaluation on PLANTUML diagrams,
+    with an associated prompt.
+    """
+
+    def __init__(
+        self,
+        eval_items_per_request: int | None = None,
+        input_types: str | set[str] = set(["diagram"]),
+        output_type: str = "uml_eval",
+        **kwargs,
+    ) -> None:
+        """Initialize the Evaluator class
+
+        Arguments:
+            model: The LLM to use for translation. If an OpenAI model, the
+                `OPENAI_API_KEY` environment variable must be set.
+            model_arguments: Additional arguments to pass to the LLM constructor.
+            max_prompts: The maximum number of prompts to try before giving up.
+        """
+        kwargs.update(input_types=input_types, output_type=output_type)
+        super().__init__(**kwargs)
+        self._combiner = JsonCombiner()
+        self._parser = UMLParser()
+        self.set_prompts("eval_prompts/uml")
+        self.eval_items_per_request = eval_items_per_request
+        self._load_parameters()
+
+    def _input_runnable(self) -> Runnable:
+        def _get_code(json_text: str) -> str:
+            return json.loads(json_text)["code"]
+
+        def _get_diagrams(json_text: str) -> str:
+            return json.loads(json_text)["diagrams"]
+
+        return RunnableLambda(self._parser.parse_input) | RunnableParallel(
+            SOURCE_CODE=_get_code,
+            PLANTUML_DIAGRAM=_get_diagrams,
+            context=self._retriever,
+        )
+
+    def translate_block(self, input_block: CodeBlock, failure_path: Path | None = None):
+        if len(input_block.previous_generations) == 0:
+            raise ValueError("Error: Evaluating diagrams without previous generations")
+        if isinstance(input_block.previous_generations[-1], dict):
+            input_str = input_block.previous_generations[-1]["input"]
+        else:
+            input_str = input_block.previous_generations[-1].original.text
+        diagrams = input_block.text
+        if not diagrams:
+            log.debug(f"[{input_block.name}] Skipping empty output")
+            return []
+        # collect source code and diagram outputs together
+        obj_str = json.dumps(
+            dict(
+                diagrams=diagrams,
                 code=input_str,
             )
         )

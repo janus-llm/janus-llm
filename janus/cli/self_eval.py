@@ -55,7 +55,7 @@ def llm_self_eval(
             "--evaluation-type",
             "-e",
             help="Type of output to evaluate.",
-            click_type=click.Choice(["incose", "comments", "summary"]),
+            click_type=click.Choice(["incose", "comments", "uml", "summary"]),
         ),
     ] = "incose",
     max_prompts: Annotated[
@@ -136,6 +136,7 @@ def llm_self_eval(
         InlineCommentEvaluator,
         RequirementEvaluator,
         SummaryEvaluator,
+        UMLEvaluator,
     )
 
     model_arguments = dict(temperature=temperature)
@@ -156,6 +157,8 @@ def llm_self_eval(
         evaluator = RequirementEvaluator(**kwargs)
     elif evaluation_type == "comments":
         evaluator = InlineCommentEvaluator(**kwargs)
+    elif evaluation_type == "uml":
+        evaluator = UMLEvaluator(**kwargs)
     elif evaluation_type == "summary":
         evaluator = SummaryEvaluator(**kwargs)
 
