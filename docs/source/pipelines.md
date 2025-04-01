@@ -248,6 +248,7 @@ The available output types for each converter are listed here:
 - `Documenter`: `documentation`
 - `MultiDocumenter`: `multidocumentation`
 - `ClozeDocumenter`: `cloze_comments`
+- `PseudocodeDocumenter`: `pseudocode`
 - `RequirementsDocumenter`: `requirements`
 - `Partitioner`: `partition`
 - `RequirementEvaluator`: `requirements_eval`
