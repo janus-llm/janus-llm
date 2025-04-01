@@ -37,6 +37,7 @@ def llm_add(
         TOKEN_LIMITS,
         azure_models,
         bedrock_models,
+        granite_models,
         openai_models,
     )
 
@@ -140,6 +141,29 @@ def llm_add(
             "Enter the model ID (list model IDs with `janus llm ls -a`)",
             default="bedrock-claude-sonnet",
             type=click.Choice(bedrock_models),
+            show_choices=False,
+        )
+        params = dict(
+            # Bedrock uses the "model_id" key for what we're calling "long_model_id"
+            model_id=MODEL_ID_TO_LONG_ID[model_id],
+            model_kwargs={"temperature": 0.7},
+        )
+        max_tokens = TOKEN_LIMITS[MODEL_ID_TO_LONG_ID[model_id]]
+        model_cost = COST_PER_1K_TOKENS[MODEL_ID_TO_LONG_ID[model_id]]
+        cfg = {
+            "model_type": model_type,
+            "model_id": model_id,
+            "model_long_id": MODEL_ID_TO_LONG_ID[model_id],
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": model_cost,
+            "input_token_proportion": 0.4,
+        }
+    elif model_type == "Granite":
+        model_id = typer.prompt(
+            "Enter the model ID (list model IDs with `janus llm ls -a`)",
+            default="bedrock-granite-3b-code-instruct",
+            type=click.Choice(granite_models),
             show_choices=False,
         )
         params = dict(

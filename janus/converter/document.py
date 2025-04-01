@@ -5,6 +5,7 @@ from copy import deepcopy
 from janus.converter.converter import Converter
 from janus.language.block import TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
+from janus.parsers.code_parser import CodeParser
 from janus.parsers.doc_parser import ClozeDocumentationParser, MultiDocumentationParser
 from janus.parsers.parser import JanusParserException
 from janus.utils.enums import LANGUAGES
@@ -148,3 +149,13 @@ class ClozeDocumenter(Documenter):
         block.text = self._parser.parse(json.dumps(obj))
         block.tokens = self._llm.get_num_tokens(block.text)
         block.translated = True
+
+
+class PseudocodeDocumenter(Documenter):
+    def __init__(self, output_type: str = "pseudocode", **kwargs):
+        kwargs.update(output_type=output_type)
+        super().__init__(**kwargs)
+        self.set_prompts("pseudocode")
+        self._parser = CodeParser(language=self.source_language)
+
+        self._load_parameters()

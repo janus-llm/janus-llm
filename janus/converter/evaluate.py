@@ -9,6 +9,7 @@ from janus.language.block import CodeBlock, TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
 from janus.parsers.eval_parsers.inline_comment_parser import InlineCommentParser
+from janus.parsers.eval_parsers.summary_parser import SummaryParser
 from janus.parsers.eval_parsers.uml_parser import UMLParser
 from janus.utils.logger import create_logger
 
@@ -274,6 +275,74 @@ class InlineCommentEvaluator(Evaluator):
             translated_block.tokens = self._llm.get_num_tokens(translated_str)
             translated_block.translated = True
             return translated_block
+
+
+class SummaryEvaluator(Evaluator):
+    """Summary Evaluator
+
+    A class that performs an LLM self evaluation on code summaries,
+    with an associated prompt.
+    """
+
+    def __init__(
+        self,
+        eval_items_per_request: int | None = None,
+        input_types: str | set[str] = set(["documentation"]),
+        output_type: str = "summary_eval",
+        **kwargs,
+    ) -> None:
+        """Initialize the Evaluator class
+
+        Arguments:
+            model: The LLM to use for translation. If an OpenAI model, the
+                `OPENAI_API_KEY` environment variable must be set.
+            model_arguments: Additional arguments to pass to the LLM constructor.
+            max_prompts: The maximum number of prompts to try before giving up.
+        """
+        kwargs.update(input_types=input_types, output_type=output_type)
+        super().__init__(**kwargs)
+        self._combiner = JsonCombiner()
+        self._parser = SummaryParser()
+        self.set_prompts("eval_prompts/summary")
+        self.eval_items_per_request = eval_items_per_request
+        self._load_parameters()
+
+    def _input_runnable(self) -> Runnable:
+        def _get_code(json_text: str) -> str:
+            return json.loads(json_text)["code"]
+
+        def _get_summary(json_text: str) -> str:
+            return json.loads(json_text)["summary"]
+
+        return RunnableLambda(self._parser.parse_input) | RunnableParallel(
+            SOURCE_CODE=_get_code,
+            CODE_SUMMARY=_get_summary,
+            context=self._retriever,
+        )
+
+    def translate_block(self, input_block: CodeBlock, failure_path: Path | None = None):
+        if len(input_block.previous_generations) == 0:
+            raise ValueError("Error: Evaluating the summary without previous generations")
+        if isinstance(input_block.previous_generations[-1], dict):
+            input_str = input_block.previous_generations[-1]["input"]
+        else:
+            input_str = input_block.previous_generations[-1].original.text
+        summary = input_block.text
+        if not summary:
+            log.debug(f"[{input_block.name}] Skipping empty output")
+            return []
+        # collect source input code and summary outputs together
+        obj_str = json.dumps(
+            dict(
+                summary=summary,
+                code=input_str,
+            )
+        )
+        temp_block = self._split_text(obj_str, input_block.name)
+        translated_block = super().translate_block(temp_block, failure_path)
+        translated_block.original = input_block
+        translated_block.previous_generations = input_block.previous_generations
+        return translated_block
 
 
 class UMLEvaluator(Evaluator):

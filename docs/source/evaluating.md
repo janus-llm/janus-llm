@@ -73,6 +73,19 @@ You can use an LLM to evaluate requirements against the [INCOSE standard](https:
 ```shell
 janus llm-self-eval --input janus-docs --output janus-evals --llm myazure --language python -e incose
 ```
+### Evaluating Summary
+
+First, generate the summaries with `janus`:
+
+```shell
+janus document  -d summary -i janus/cli/ -o janus-summary -L myazure -l python
+```
+
+You can then use an LLM to evaluate the code summaries based on the following metrics of Completeness, Hallucination, Readability, and Usefulness:
+
+```shell
+janus llm-self-eval -e summary -i janus-summary -o janus-summary-evals -L myazure -j -l python
+```
 
 ### Evaluating UML Diagrams
 

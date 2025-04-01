@@ -55,7 +55,7 @@ def llm_self_eval(
             "--evaluation-type",
             "-e",
             help="Type of output to evaluate.",
-            click_type=click.Choice(["incose", "comments", "uml"]),
+            click_type=click.Choice(["incose", "comments", "uml", "summary"]),
         ),
     ] = "incose",
     max_prompts: Annotated[
@@ -134,7 +134,9 @@ def llm_self_eval(
 ):
     from janus.converter.evaluate import (
         InlineCommentEvaluator,
+       
         RequirementEvaluator,
+        SummaryEvaluator,
         UMLEvaluator,
     )
 
@@ -158,5 +160,7 @@ def llm_self_eval(
         evaluator = InlineCommentEvaluator(**kwargs)
     elif evaluation_type == "uml":
         evaluator = UMLEvaluator(**kwargs)
+    elif evaluation_type == "summary":
+        evaluator = SummaryEvaluator(**kwargs)
 
     evaluator.translate(input_dir, output_dir, failure_dir, overwrite, collection)
