@@ -1,5 +1,6 @@
 import csv
 import json
+from pathlib import Path
 
 
 def extract_outputs_from_json(file_path):
@@ -66,7 +67,7 @@ def combine_outputs(main_outputs, intermediate_outputs):
     return combined_outputs
 
 
-def quiz_to_csv(quiz, file_path):
+def quiz_to_csv(quiz: dict, file_path: str | Path):
     # Define the headers based on the keys of the dictionary entries
     headers = [
         "question-id",
@@ -82,6 +83,15 @@ def quiz_to_csv(quiz, file_path):
         "grading-result",
     ]
 
+    # Ensure the file path is a Path object
+    file_path = Path(file_path)
+    # Create the directory if it doesn't exist
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    # Check if the file already exists
+    if file_path.exists():
+        # Remove the existing file
+        file_path.unlink()
+
     # Open the file for writing
     with open(file_path, mode="w", newline="", encoding="utf-8") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=headers)
@@ -90,17 +100,13 @@ def quiz_to_csv(quiz, file_path):
         writer.writeheader()
 
         # Write each row
-        for key, entry in quiz.items():
+        for _, entry in quiz.items():
             writer.writerow(entry)
 
 
 # Filepaths
-input_file_path = """/home/fm/itmod/test_docs
-                /quiz_taker_outputs/Language Features/converter.json
-                """
-output_file_path = """/home/fm/itmod/test_docs
-                /quiz_grader_outputs/quiz_output_language_features.csv
-                """
+input_file_path = "janus-quiz-results/Language Features/llm.json"
+output_file_path = "janus-quiz-grades/quiz_output_language_features.csv"
 main_outputs, intermediate_outputs = extract_outputs_from_json(input_file_path)
 combined_list = combine_outputs(main_outputs, intermediate_outputs)
 quiz_to_csv(combined_list, output_file_path)

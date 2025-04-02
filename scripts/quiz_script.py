@@ -33,7 +33,7 @@ if __name__ == "__main__":
             try:
                 quiz_gen = QuizGenerator(
                     # model="bedrock-mixtral",
-                    model="bedrock-claude-sonnet",
+                    model="myazure",
                     source_language="python",
                     target_language="json",
                     prompt_templates="quiz/quiz_generator",
@@ -42,16 +42,14 @@ if __name__ == "__main__":
                 )
 
                 quiz_gen.translate(
-                    input_directory="""/home/fm/itmod/test_docs
-                                    /python_stuff""",
-                    output_directory=f"""/home/fm/itmod/test_docs
-                                    /quiz_gen_outputs/{topic}/""",
+                    input_directory="janus/cli",
+                    output_directory=f"janus-quiz/{topic}/",
                     overwrite=False,
                 )
 
                 quiz_take = QuizTaker(
                     # model="bedrock-mixtral",
-                    model="bedrock-claude-sonnet",
+                    model="myazure",
                     source_language="python",
                     target_language="json",
                     prompt_templates="quiz/quiz_taker",
@@ -59,10 +57,8 @@ if __name__ == "__main__":
                 )
 
                 quiz_take.translate(
-                    input_directory=f"""/home/fm/itmod/test_docs
-                                    /quiz_gen_outputs/{topic}/""",
-                    output_directory=f"""/home/fm/itmod/test_docs
-                                    /quiz_taker_outputs/{topic}/""",
+                    input_directory=f"janus-quiz/{topic}/",
+                    output_directory=f"janus-quiz-results/{topic}/" "",
                     overwrite=False,
                 )
 
