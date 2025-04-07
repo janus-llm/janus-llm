@@ -15,7 +15,7 @@ class TestDocumenter(unittest.TestCase):
         """Test pseudocode documenter"""
         test_file = Path("janus/language/treesitter/_tests/languages/ibmhlasm.asm")
 
-        with open("janus/converter/_tests/test_document_llm_response.txt") as f:
+        with open("janus/converter/_tests/test_document_llm_response.txt", "r") as f:
             mock_translate.return_value = f.read()
 
         with tempfile.TemporaryDirectory(dir=test_file.parent) as tmpdirname:
@@ -29,7 +29,7 @@ class TestDocumenter(unittest.TestCase):
             with open("janus/converter/_tests/test_document_expected.json", "r") as f:
                 expected = json.load(f)
 
-            with open(python_file) as f:
+            with open(python_file, "r") as f:
                 actual = json.load(f)
 
             self.assertEqual(expected["outputs"], actual["outputs"])

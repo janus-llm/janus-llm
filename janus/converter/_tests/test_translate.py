@@ -69,7 +69,7 @@ class TestTranslator(unittest.TestCase):
     def test_translate(self, mock_translate):
         """Test translate method."""
 
-        with open("janus/converter/_tests/test_translate_llm_response.txt") as f:
+        with open("janus/converter/_tests/test_translate_llm_response.txt", "r") as f:
             mock_translate.return_value = f.read()
 
         with tempfile.TemporaryDirectory(dir=self.test_file.parent) as tmpdirname:
@@ -77,10 +77,10 @@ class TestTranslator(unittest.TestCase):
 
             self.translator.translate(self.test_file.parent, tmpdirname)
 
-            with open("janus/converter/_tests/test_translate_expected.json") as f:
+            with open("janus/converter/_tests/test_translate_expected.json", "r") as f:
                 expected = json.load(f)
 
-            with open(python_file) as f:
+            with open(python_file, "r") as f:
                 actual = json.load(f)
 
             self.assertEqual(expected["outputs"], actual["outputs"])
