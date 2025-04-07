@@ -1,5 +1,5 @@
 from functools import total_ordering
-from typing import TYPE_CHECKING, ForwardRef, Hashable, Optional, Tuple
+from typing import TYPE_CHECKING, Hashable, Optional, Tuple
 
 from janus.language.node import NodeType
 from janus.utils.logger import create_logger
@@ -45,7 +45,7 @@ class CodeBlock:
         start_byte: Optional[int],
         end_byte: Optional[int],
         tokens: int,
-        children: list[ForwardRef("CodeBlock")],
+        children: list["CodeBlock"],
         embedding_id: Optional[str] = None,
         affixes: Tuple[str, str] = ("", ""),
         context_tags: dict[str, str] = {},
@@ -63,7 +63,7 @@ class CodeBlock:
         self.start_byte: Optional[int] = start_byte
         self.end_byte: Optional[int] = end_byte
         self.tokens: int = tokens
-        self.children: list[ForwardRef("CodeBlock")] = sorted(children)
+        self.children: list["CodeBlock"] = sorted(children)
         self.embedding_id: Optional[str] = embedding_id
         self.affixes: Tuple[str, str] = affixes
         self.context_tags: dict[str, str] = context_tags
@@ -78,10 +78,10 @@ class CodeBlock:
         if self.children:
             self.children[0].omit_prefix = False
 
-    def __lt__(self, other: ForwardRef("CodeBlock")) -> bool:
+    def __lt__(self, other: "CodeBlock") -> bool:
         return (self.start_byte, self.end_byte) < (other.start_byte, other.end_byte)
 
-    def __eq__(self, other: ForwardRef("CodeBlock")) -> bool:
+    def __eq__(self, other: "CodeBlock") -> bool:
         return (self.start_byte, self.end_byte) == (other.start_byte, other.end_byte)
 
     @property
@@ -164,7 +164,7 @@ class CodeBlock:
             A string representation of the tree with this block as the root
         """
         tokens = self.tokens
-        identifier = self.id
+        identifier = str(self.id)
         if self.text is None:
             identifier = f"({identifier})"
             tokens = self.total_tokens
@@ -197,7 +197,7 @@ class TranslatedCodeBlock(CodeBlock):
         self,
         original: CodeBlock,
         language: str,
-        converter: ForwardRef("Converter"),
+        converter: Converter,
         block_type: str | None = None,
         block_label: str | None = None,
     ) -> None:
@@ -215,6 +215,7 @@ class TranslatedCodeBlock(CodeBlock):
             A `TranslatedCodeBlock` with the same attributes as the original, except
             for `text`, `path`, `complete`, `language`, `tokens`, and `children`
         """
+        self.children: list[TranslatedCodeBlock]
         super().__init__(
             id=original.id,
             name=original.name,
@@ -362,35 +363,45 @@ class BlockCollection:
     def __init__(
         self,
         blocks: list[CodeBlock],
-        previous_generations: list[ForwardRef("BlockCollection")] = [],
+        previous_generations: list["TranslatedBlockCollection"] = [],
     ):
         self.blocks = blocks
         self.previous_generations = previous_generations
 
-    def to_codeblock(self) -> ForwardRef("BlockCollection"):
+
+class TranslatedBlockCollection:
+    def __init__(
+        self,
+        blocks: list[TranslatedCodeBlock],
+        previous_generations: list["TranslatedBlockCollection"] = [],
+    ):
+        self.blocks = blocks
+        self.previous_generations = previous_generations
+
+    def to_block_collection(self) -> "BlockCollection":
         return BlockCollection(
             [b.to_codeblock() for b in self.blocks], self.previous_generations + [self]
         )
 
     @property
     def total_cost(self):
-        return sum(b.total_cost for b in self.blocks)
+        return sum(b.total_cost for b in self.blocks)  # type: ignore
 
     @property
     def total_processing_time(self):
-        return sum(b.total_processing_time for b in self.blocks)
+        return sum(b.total_processing_time for b in self.blocks)  # type: ignore
 
     @property
     def total_request_input_tokens(self):
-        return sum(b.total_request_input_tokens for b in self.blocks)
+        return sum(b.total_request_input_tokens for b in self.blocks)  # type: ignore
 
     @property
     def total_request_output_tokens(self):
-        return sum(b.total_request_output_tokens for b in self.blocks)
+        return sum(b.total_request_output_tokens for b in self.blocks)  # type: ignore
 
     @property
     def total_num_requests(self):
-        return sum(b.total_num_requests for b in self.blocks)
+        return sum(b.total_num_requests for b in self.blocks)  # type: ignore
 
     @property
     def block_type(self):
@@ -402,7 +413,7 @@ class BlockCollection:
 
     @property
     def translation_completed(self):
-        return all(b.translation_completed for b in self.blocks)
+        return all(b.translation_completed for b in self.blocks)  # type: ignore
 
     @property
     def complete(self):
