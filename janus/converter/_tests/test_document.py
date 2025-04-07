@@ -32,4 +32,4 @@ class TestDocumenter(unittest.TestCase):
             with open(python_file) as f:
                 actual = json.load(f)
 
-            self.assertEquals(expected["outputs"], actual["outputs"])
+            self.assertEqual(expected["outputs"], actual["outputs"])

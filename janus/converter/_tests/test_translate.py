@@ -83,7 +83,7 @@ class TestTranslator(unittest.TestCase):
             with open(python_file) as f:
                 actual = json.load(f)
 
-            self.assertEquals(expected["outputs"], actual["outputs"])
+            self.assertEqual(expected["outputs"], actual["outputs"])
 
     def test_invalid_selections(self) -> None:
         """Tests that settings values for the translator will raise exceptions"""
