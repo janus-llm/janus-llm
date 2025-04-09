@@ -11,8 +11,11 @@ class TestDocumenter(unittest.TestCase):
     """Tests for the Documenter class"""
 
     @patch("janus.converter.Converter._run_chain")
-    def test_pseudocode(self, mock_translate):
+    @patch("time.time")
+    def test_pseudocode(self, mock_time, mock_translate):
         """Test pseudocode documenter"""
+        mock_time.return_value = 1
+
         test_file = Path("janus/language/treesitter/_tests/languages/ibmhlasm.asm")
 
         with open("janus/converter/_tests/test_document_llm_response.txt", "r") as f:
@@ -32,4 +35,4 @@ class TestDocumenter(unittest.TestCase):
             with open(python_file, "r") as f:
                 actual = json.load(f)
 
-            self.assertEqual(expected["outputs"], actual["outputs"])
+            self.assertEqual(expected, actual)
