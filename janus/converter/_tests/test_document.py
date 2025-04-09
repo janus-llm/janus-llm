@@ -12,14 +12,14 @@ class TestDocumenter(unittest.TestCase):
 
     @patch("janus.converter.Converter._run_chain")
     @patch("time.time")
-    def test_pseudocode(self, mock_time, mock_translate):
+    def test_pseudocode(self, mock_time, mock_run_chain):
         """Test pseudocode documenter"""
         mock_time.return_value = 1
 
         test_file = Path("janus/language/treesitter/_tests/languages/ibmhlasm.asm")
 
         with open("janus/converter/_tests/test_document_llm_response.txt", "r") as f:
-            mock_translate.return_value = f.read()
+            mock_run_chain.return_value = f.read()
 
         with tempfile.TemporaryDirectory(dir=test_file.parent) as tmpdirname:
             python_file = Path(tmpdirname) / f"{test_file.stem}.json"
