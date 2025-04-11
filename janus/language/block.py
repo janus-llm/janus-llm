@@ -1,5 +1,5 @@
 from functools import total_ordering
-from typing import TYPE_CHECKING, Hashable, Optional, Tuple
+from typing import TYPE_CHECKING, Hashable, Optional, Tuple, TypedDict
 
 from janus.language.node import NodeType
 from janus.utils.logger import create_logger
@@ -8,6 +8,24 @@ if TYPE_CHECKING:
     from janus.converter.converter import Converter
 
 log = create_logger(__name__)
+
+
+class JanusMetadata(TypedDict):
+    cost: float
+    processing_time: float
+    num_requests: int
+    input_tokens: int
+    output_tokens: int
+    converter_name: str
+    type: str | None
+    label: str | None
+
+
+class JanusOutputObject(TypedDict):
+    input: str
+    metadata: JanusMetadata
+    outputs: "JanusOutputObject" | list["JanusOutputObject"] | list[str]
+    intermediate_outputs: list["JanusOutputObject"]
 
 
 @total_ordering
@@ -49,7 +67,7 @@ class CodeBlock:
         embedding_id: Optional[str] = None,
         affixes: Tuple[str, str] = ("", ""),
         context_tags: dict[str, str] = {},
-        previous_generations: list["TranslatedCodeBlock"] = [],
+        previous_generations: list[JanusOutputObject] = [],
         block_type: str | None = None,
         block_label: str | None = None,
     ) -> None:
@@ -330,7 +348,27 @@ class TranslatedCodeBlock(CodeBlock):
             else 0
         )
 
+    def to_janus_output_object(self) -> JanusOutputObject:
+        metadata: JanusMetadata = {
+            "cost": self.total_cost,
+            "processing_time": self.total_processing_time,
+            "num_requests": self.total_num_requests,
+            "input_tokens": self.total_request_input_tokens,
+            "output_tokens": self.total_request_output_tokens,
+            "converter_name": self.converter.__class__.__name__,
+            "type": self.block_type,
+            "label": self.block_label,
+        }
+        obj: JanusOutputObject = {
+            "input": self.original.complete_text,
+            "metadata": metadata,
+            "outputs": [self.complete_text],
+            "intermediate_outputs": self.previous_generations,
+        }
+        return obj
+
     def to_codeblock(self) -> CodeBlock:
+        prev_gen = self.previous_generations + [self.to_janus_output_object()]
         return CodeBlock(
             id=self.id,
             name=self.name,
@@ -345,7 +383,7 @@ class TranslatedCodeBlock(CodeBlock):
             tokens=self.tokens,
             children=[child.to_codeblock() for child in self.children],
             affixes=self.affixes,
-            previous_generations=self.previous_generations + [self],
+            previous_generations=prev_gen,
             block_type=self.block_type,
             block_label=self.block_label,
         )
@@ -385,23 +423,23 @@ class TranslatedBlockCollection:
 
     @property
     def total_cost(self):
-        return sum(b.total_cost for b in self.blocks)  # type: ignore
+        return sum(b.total_cost for b in self.blocks)
 
     @property
     def total_processing_time(self):
-        return sum(b.total_processing_time for b in self.blocks)  # type: ignore
+        return sum(b.total_processing_time for b in self.blocks)
 
     @property
     def total_request_input_tokens(self):
-        return sum(b.total_request_input_tokens for b in self.blocks)  # type: ignore
+        return sum(b.total_request_input_tokens for b in self.blocks)
 
     @property
     def total_request_output_tokens(self):
-        return sum(b.total_request_output_tokens for b in self.blocks)  # type: ignore
+        return sum(b.total_request_output_tokens for b in self.blocks)
 
     @property
     def total_num_requests(self):
-        return sum(b.total_num_requests for b in self.blocks)  # type: ignore
+        return sum(b.total_num_requests for b in self.blocks)
 
     @property
     def block_type(self):
@@ -413,7 +451,7 @@ class TranslatedBlockCollection:
 
     @property
     def translation_completed(self):
-        return all(b.translation_completed for b in self.blocks)  # type: ignore
+        return all(b.translation_completed for b in self.blocks)
 
     @property
     def complete(self):

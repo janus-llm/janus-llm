@@ -21,11 +21,14 @@ from janus.embedding.vectorize import ChromaDBVectorizer, Vectorizer
 from janus.language.block import (
     BlockCollection,
     CodeBlock,
+    JanusMetadata,
+    JanusOutputObject,
     TranslatedBlockCollection,
     TranslatedCodeBlock,
 )
 from janus.language.combine import Combiner
 from janus.language.naive.registry import CUSTOM_SPLITTERS
+from janus.language.node import NodeType
 from janus.language.splitter import (
     EmptyTreeError,
     FileSizeError,
@@ -47,12 +50,6 @@ from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
-
-
-JanusMetadata = dict[str, int | float | str | None]
-JanusOutputObject = dict[
-    str, str | JanusMetadata | "JanusOutputObject" | list[str] | list["JanusOutputObject"]
-]
 
 
 class Converter:
@@ -711,29 +708,29 @@ class Converter:
             block_type=self._output_type,
             block_label=self._output_label,
         )
+        translation_successful = False
         last_prog, prog_delta = 0, 0.1
         stack = [translated_root]
         try:
             while stack:
                 translated_block = stack.pop()
-
-                self._add_translation(translated_block)
-
-                # If translating this block was unsuccessful, don't bother with its
-                #  children (they wouldn't show up in the final text anyway)
-                if not translated_block.translated:
-                    continue
-
                 stack.extend(translated_block.children)
 
+                self._add_translation(translated_block)
                 progress = translated_root.translation_completeness
                 if progress - last_prog > prog_delta:
                     last_prog = int(progress / prog_delta) * prog_delta
                     log.info(f"[{root.name}] progress: {progress:.2%}")
-        except RateLimitError:
-            pass
+        except EmptyTreeError:
+            log.warning("Input file has no nodes of interest, skipping")
+        except TokenLimitError:
+            log.error("Ran into irreducible node too large for context, skipping")
+        except FileSizeError:
+            log.error("Current tile is too large for basic splitter, skipping")
         except OutputParserException as e:
             log.error(f"Skipping file, failed to parse output: {e}")
+        except RateLimitError:
+            log.error("Hit rate limit, skipping file")
         except BadRequestError as e:
             if str(e).startswith("Detected an error in the prompt"):
                 log.warning("Malformed input, skipping")
@@ -745,13 +742,8 @@ class Converter:
                     "Current file and manually set token "
                     "limit is too large for this model, skipping"
                 )
-            raise e
-        except TokenLimitError:
-            log.warning("Ran into irreducible node too large for context, skipping")
-        except EmptyTreeError:
-            log.warning("Input file has no nodes of interest, skipping")
-        except FileSizeError:
-            log.warning("Current tile is too large for basic splitter, skipping")
+            else:
+                raise e
         except ValueError as e:
             if str(e).startswith(
                 "Error raised by bedrock service"
@@ -759,13 +751,17 @@ class Converter:
                 log.warning(
                     "Input is too large for this model's context length, skipping"
                 )
-            raise e
+            else:
+                raise e
+        else:
+            translation_successful = True
         finally:
             out_obj = self._get_output_obj(
                 translated_root, self._combine_output, include_previous_outputs=True
             )
             log.debug(f"Resulting Block:" f"{json.dumps(out_obj)}")
-            if not translated_root.translated:
+            if not translation_successful:
+                translated_root.translated = False
                 if failure_path is not None:
                     self._save_to_file(translated_root, failure_path)
 
@@ -799,8 +795,6 @@ class Converter:
         log.debug(f"[{block.name}] Input text:\n{block.original.text}")
 
         # Track the cost of translating this block
-        #  TODO: If non-OpenAI models with prices are added, this will need
-        #   to be updated.
         with get_model_callback() as cb:
             try:
                 t0 = time.time()
@@ -847,18 +841,16 @@ class Converter:
         return self._chain.invoke(block.original)
 
     def _combine_metadata(self, metadatas: list[JanusMetadata]) -> JanusMetadata:
-        metadata_keys = set([k for metadata in metadatas for k in metadata.keys()])
-        metadata = dict()
-        for k in metadata_keys:
-            values = [m[k] for m in metadatas if k in m and m[k] is not None]
-            numeric = all(isinstance(v, int) or isinstance(v, float) for v in values)
-            if numeric:
-                metadata[k] = sum(v for v in values)  # type: ignore
-            else:
-                metadata[k] = ", ".join(map(str, values))
-
-        metadata["converter_name"] = self.__class__.__name__
-        return metadata
+        return {
+            "cost": sum((m["cost"] for m in metadatas), 0.0),
+            "processing_time": sum((m["processing_time"] for m in metadatas), 0.0),
+            "num_requests": sum((m["num_requests"] for m in metadatas), 0),
+            "input_tokens": sum((m["input_tokens"] for m in metadatas), 0),
+            "output_tokens": sum((m["output_tokens"] for m in metadatas), 0),
+            "converter_name": self.__class__.__name__,
+            "type": ", ".join(m["type"] for m in metadatas if m["type"] is not None),
+            "label": ", ".join(m["label"] for m in metadatas if m["label"] is not None),
+        }
 
     def _combine_inputs(self, inputs: list[str]):
         return json.dumps(inputs)
@@ -871,6 +863,7 @@ class Converter:
     ) -> JanusOutputObject:
         block_type = None
         block_label = None
+        outputs: JanusOutputObject | list[JanusOutputObject] | list[str]
         if isinstance(block, TranslatedBlockCollection):
             outputs = [
                 self._get_output_obj(b, combine_children, False)
@@ -905,20 +898,22 @@ class Converter:
                 return self._combine_inputs([_get_input(b) for b in block.blocks])
             return block.original.complete_text or ""
 
-        out = dict(
-            input=_get_input(block),
-            metadata=dict(
-                cost=block.total_cost,
-                processing_time=block.total_processing_time,
-                num_requests=block.total_num_requests,
-                input_tokens=block.total_request_input_tokens,
-                output_tokens=block.total_request_output_tokens,
-                converter_name=self.__class__.__name__,
-                type=block_type,
-                label=block_label,
-            ),
-            outputs=outputs,
-        )
+        metadata: JanusMetadata = {
+            "cost": block.total_cost,
+            "processing_time": block.total_processing_time,
+            "num_requests": block.total_num_requests,
+            "input_tokens": block.total_request_input_tokens,
+            "output_tokens": block.total_request_output_tokens,
+            "converter_name": self.__class__.__name__,
+            "type": block_type,
+            "label": block_label,
+        }
+        out: JanusOutputObject = {
+            "input": _get_input(block),
+            "metadata": metadata,
+            "outputs": outputs,
+            "intermediate_outputs": [],
+        }
         if (
             include_previous_outputs
             and isinstance(block, BlockCollection)
@@ -933,6 +928,7 @@ class Converter:
                     )
             if len(intermediate_outputs) > 0:
                 out["intermediate_outputs"] = intermediate_outputs
+
         return out
 
     def _get_output_obj_children(
@@ -969,7 +965,7 @@ class Converter:
         out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
 
     def _janus_object_to_block_collection(
-        self, janus_obj: dict[str, Any]
+        self, janus_obj: JanusOutputObject
     ) -> TranslatedBlockCollection:
         metadata: JanusMetadata = janus_obj["metadata"]
 
@@ -985,18 +981,32 @@ class Converter:
         results: list[TranslatedCodeBlock] = []
         for i, o in enumerate(janus_obj["outputs"]):
             if isinstance(o, str):
-                block_label: str | None = metadata["label"]  # type: ignore
+                block_label: str | None = metadata["label"]
                 if isinstance(block_label, list):
                     block_label = block_label[0]
-                block_type: str | None = metadata["type"]  # type: ignore
+                block_type: str | None = metadata["type"]
                 if isinstance(block_type, list):
                     block_type = block_type[0]
 
                 # Create a TranslatedCodeBlock using the input text and metadata
-                code_block = self._split_text(metadata["input"], str(i))  # type: ignore
+                # code_block = self._split_text(metadata["input"], str(i))
+                code_block = CodeBlock(
+                    id="dummy",
+                    name="dummy",
+                    node_type=NodeType("dummy"),
+                    language="unk",
+                    text=metadata["input"],
+                    start_point=(0, 0),
+                    end_point=(-1, -1),
+                    start_byte=0,
+                    end_byte=-1,
+                    tokens=0,
+                    children=[],
+                    previous_generations=previous_generations,
+                )
                 translated_block = TranslatedCodeBlock(
                     original=code_block,
-                    language="",
+                    language="unk",
                     converter=metadata["converter_name"],  # type: ignore
                     block_type=block_type,
                     block_label=block_label,
