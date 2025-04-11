@@ -7,6 +7,7 @@ In: Directory to JSON files with multiple 'code' str and 'requirement' array
 Out: Same directory structure in the output directory,
 with individual 'code' + 'requirement' pairs.
 """
+
 import argparse
 import json
 import os

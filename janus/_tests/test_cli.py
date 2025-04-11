@@ -55,6 +55,31 @@ class TestCli(unittest.TestCase):
         self.assertTrue(llm_model_path.exists())
         llm_model_path.unlink()
 
+        if llm_model_path.exists():
+            llm_model_path.unlink()
+        result = self.runner.invoke(app, ["llm", "add", "-t", "Azure", "test-model-name"])
+        self.assertEqual(result.exit_code, 0)
+        self.assertTrue(llm_model_path.exists())
+        llm_model_path.unlink()
+
+        if llm_model_path.exists():
+            llm_model_path.unlink()
+        result = self.runner.invoke(
+            app, ["llm", "add", "-t", "BedrockChat", "test-model-name"]
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertTrue(llm_model_path.exists())
+        llm_model_path.unlink()
+
+        if llm_model_path.exists():
+            llm_model_path.unlink()
+        result = self.runner.invoke(
+            app, ["llm", "add", "-t", "Granite", "test-model-name"]
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertTrue(llm_model_path.exists())
+        llm_model_path.unlink()
+
     def test_db_ls(self):
         result = self.runner.invoke(app, ["db", "ls"])
         self.assertEqual(result.exit_code, 0)
