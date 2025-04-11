@@ -215,7 +215,7 @@ def render(
                         subprocess.run(
                             ["java", "-jar", str(jar_path), "-tpng", str(temp_file)],
                             capture_output=True,
-                        ) # nosec
+                        )  # nosec
 
                         png_files = list(temp_dir_path.glob("*.png"))
                         for i, png_file in enumerate(sorted(png_files)):
