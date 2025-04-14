@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import call, patch
 
 from janus.converter.evaluate import (
+    InlineCommentEvaluator,
     RequirementEvaluator,
     SummaryEvaluator,
     UMLEvaluator,
@@ -216,3 +217,133 @@ class TestSummaryEvaluator(unittest.TestCase):
 
         self.assertEqual(actual.original, source)
         self.assertEqual(actual.previous_generations, source.previous_generations)
+
+
+class TestInlineCommentEvaluator(unittest.TestCase):
+    """Tests for the InlineCommentEvaluator class"""
+
+    def setUp(self):
+        """Set up the tests"""
+        self.evaluator = InlineCommentEvaluator(
+            model="gpt-4o",
+            source_language="json",
+            refiner_types=[FixParserExceptions],
+            use_janus_inputs=True,
+        )
+
+    def test_init(self):
+        """Test __init__ method."""
+        self.assertEqual(self.evaluator._model_name, "gpt-4o")
+        self.assertEqual(self.evaluator._source_language, "json")
+        self.assertEqual(self.evaluator._use_janus_inputs, True)
+
+    def test_translate_block_with_no_comments(self):
+        """Test translate_block method"""
+
+        source = CodeBlock(
+            id="test",
+            name="Test Block",
+            node_type="function",
+            language="json",
+            text='{"14b80530": "first line", "dadfa102": "second line"}',
+            start_point=(0, 0),
+            end_point=(1, 0),
+            start_byte=0,
+            end_byte=1,
+            tokens=5,
+            children=[],
+            previous_generations=[{"input": "test"}],
+        )
+
+        actual = self.evaluator.translate_block(source)
+
+        self.assertEqual(actual, [])
+
+    @patch("janus.converter.Converter._split_text")
+    @patch("janus.converter.Converter.translate_block")
+    def test_translate_block(self, mock_translate_block, mock_split_text):
+        """Test translate_block method"""
+
+        self.evaluator._use_janus_inputs = False
+
+        source = CodeBlock(
+            id="test",
+            name="Test Block",
+            node_type="function",
+            language="json",
+            text='{"14b80530": "first line", "dadfa102": "second line"}',
+            start_point=(0, 0),
+            end_point=(1, 0),
+            start_byte=0,
+            end_byte=1,
+            tokens=5,
+            children=[],
+            previous_generations=[
+                {
+                    "input": "*\n* <BLOCK_COMMENT 14b80530>\nDFHEISTG DSECT<INLINE_COMMENT dadfa102>"  # noqa E501
+                }
+            ],
+        )
+
+        translated_block = TranslatedCodeBlock(source, source.language, self.evaluator)
+        mock_translate_block.return_value = translated_block
+
+        actual = self.evaluator.translate_block(source)
+        obj_str = "*\n* <BLOCK_COMMENT 14b80530> first line\nDFHEISTG DSECT<INLINE_COMMENT dadfa102> second line"  # noqa E501
+        mock_split_text.assert_called_with(obj_str, source.name)
+
+        self.assertEqual(actual.original, source)
+        self.assertEqual(actual.previous_generations, source.previous_generations)
+
+    @patch("janus.converter.Converter._split_text")
+    @patch("janus.converter.Converter.translate_block")
+    def test_translate_block_with_eval_items_per_request(
+        self, mock_translate_block, mock_split_text
+    ):
+        """Test translate_block method with eval_items_per_request set"""
+
+        self.evaluator._use_janus_inputs = False
+        self.evaluator.eval_items_per_request = 1
+
+        source = CodeBlock(
+            id="test",
+            name="Test Block",
+            node_type="function",
+            language="json",
+            text='{"14b80530": "first line", "dadfa102": "second line"}',
+            start_point=(0, 0),
+            end_point=(1, 0),
+            start_byte=0,
+            end_byte=1,
+            tokens=5,
+            children=[],
+            previous_generations=[
+                {
+                    "input": "*\n* <BLOCK_COMMENT 14b80530>\nDFHEISTG DSECT<INLINE_COMMENT dadfa102>"  # noqa E501
+                }
+            ],
+        )
+
+        translated_block = TranslatedCodeBlock(source, source.language, self.evaluator)
+        translated_block.text = '{"a":"b"}'
+        translated_block2 = TranslatedCodeBlock(source, source.language, self.evaluator)
+        translated_block2.text = '{"b":"c"}'
+
+        mock_translate_block.side_effect = [translated_block, translated_block2]
+
+        actual = self.evaluator.translate_block(source)
+
+        mock_split_text.assert_has_calls(
+            [
+                call(
+                    "*\n* <BLOCK_COMMENT 14b80530> first line\nDFHEISTG DSECT",
+                    source.name,
+                ),
+                call(
+                    "*\n* \nDFHEISTG DSECT<INLINE_COMMENT dadfa102> second line",
+                    source.name,
+                ),
+            ]
+        )
+
+        self.assertEqual(actual.text, '{"a": "b", "b": "c"}')
