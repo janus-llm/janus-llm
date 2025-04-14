@@ -1,7 +1,8 @@
 import unittest
+from unittest.mock import call, patch
 
 from janus.converter.evaluate import RequirementEvaluator, UMLEvaluator
-from janus.language.block import CodeBlock
+from janus.language.block import CodeBlock, TranslatedCodeBlock
 from janus.refiners.refiner import FixParserExceptions
 
 
@@ -64,17 +65,19 @@ class TestRequirementEvaluator(unittest.TestCase):
         self.assertEqual(self.req_evaluator._source_language, "json")
         self.assertEqual(self.req_evaluator._use_janus_inputs, True)
 
-    def test_partial_translate_block(self):
-        """Test part of the translate_block method in the
-        RequirementsEvaluator. We aren't testing the full method, since that requires
-        sending an LLM request."""
+    @patch("janus.converter.Converter._split_text")
+    @patch("janus.converter.Converter.translate_block")
+    def test_translate_block(self, mock_translate_block, mock_split_text):
+        """Test translate_block method"""
+
+        self.req_evaluator._use_janus_inputs = False
 
         source = CodeBlock(
             id="test",
             name="Test Block",
             node_type="function",
             language="json",
-            text="{}",
+            text='[["The program shall return 0"]]',
             start_point=(0, 0),
             end_point=(1, 0),
             start_byte=0,
@@ -84,4 +87,67 @@ class TestRequirementEvaluator(unittest.TestCase):
             previous_generations=[{"input": "test"}],
         )
 
-        self.assertEqual(self.req_evaluator.translate_block(source), [])
+        translated_block = TranslatedCodeBlock(
+            source, source.language, self.req_evaluator
+        )
+        mock_translate_block.return_value = translated_block
+
+        actual = self.req_evaluator.translate_block(source)
+        obj_str = '{"requirements": ["The program shall return 0"], "code": "test"}'
+        mock_split_text.assert_called_with(obj_str, source.name)
+
+        self.assertEqual(actual.original, source)
+        self.assertEqual(actual.previous_generations, source.previous_generations)
+
+    @patch("janus.converter.Converter._split_text")
+    @patch("janus.converter.Converter.translate_block")
+    def test_translate_block_with_eval_items_per_request(
+        self, mock_translate_block, mock_split_text
+    ):
+        """Test translate_block method with eval_items_per_request set"""
+
+        self.req_evaluator._use_janus_inputs = False
+        self.req_evaluator.eval_items_per_request = 1
+
+        source = CodeBlock(
+            id="test",
+            name="Test Block",
+            node_type="function",
+            language="json",
+            text='[["The program shall return 0", "The program will not crash"]]',
+            start_point=(0, 0),
+            end_point=(1, 0),
+            start_byte=0,
+            end_byte=1,
+            tokens=5,
+            children=[],
+            previous_generations=[{"input": "test"}],
+        )
+
+        translated_block = TranslatedCodeBlock(
+            source, source.language, self.req_evaluator
+        )
+        translated_block.text = '{"a":"b"}'
+        translated_block2 = TranslatedCodeBlock(
+            source, source.language, self.req_evaluator
+        )
+        translated_block2.text = '{"b":"c"}'
+
+        mock_translate_block.side_effect = [translated_block, translated_block2]
+
+        actual = self.req_evaluator.translate_block(source)
+
+        mock_split_text.assert_has_calls(
+            [
+                call(
+                    '{"requirements": ["The program shall return 0"], "code": "test"}',
+                    source.name,
+                ),
+                call(
+                    '{"requirements": ["The program will not crash"], "code": "test"}',
+                    source.name,
+                ),
+            ]
+        )
+
+        self.assertEqual(actual.text, '{"a": "b", "b": "c"}')
