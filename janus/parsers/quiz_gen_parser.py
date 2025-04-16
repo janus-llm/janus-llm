@@ -79,7 +79,7 @@ class QuizGenParser(JanusParser):
             ordered_question.update(question)
             ordered_question["topic"] = self.topic
             updated_data.append(ordered_question)
-        log.info(f"VALID JSON object. Output:\n{text}")
+        log.debug(f"VALID JSON object. Output:\n{text}")
         return json.dumps(updated_data)
 
     def get_format_instructions(self) -> str:
