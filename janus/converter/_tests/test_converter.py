@@ -1,6 +1,8 @@
 import unittest
+from unittest.mock import patch
 
 from janus.converter.converter import Converter
+from janus.language.block import CodeBlock
 from janus.refiners.refiner import FixParserExceptions
 
 
@@ -22,3 +24,42 @@ class TestConverter(unittest.TestCase):
         self.converter._load_translation_chain()
 
         self.assertEqual(4, len(self.converter._translation_chain.steps))
+
+    @patch("janus.converter.Converter._run_chain")
+    def test_iterative_translate(self, mock_run_chain):
+        source = CodeBlock(
+            id="test",
+            name="Test Block",
+            node_type="function",
+            language="json",
+            text="This is UML",
+            start_point=(0, 0),
+            end_point=(1, 0),
+            start_byte=0,
+            end_byte=1,
+            tokens=5,
+            children=[
+                CodeBlock(
+                    id="test2",
+                    name="Test Block",
+                    node_type="function",
+                    language="json",
+                    text="This is UML",
+                    start_point=(0, 0),
+                    end_point=(1, 0),
+                    start_byte=0,
+                    end_byte=1,
+                    tokens=5,
+                    children=[],
+                    previous_generations=[],
+                )
+            ],
+            previous_generations=[{"input": "test"}],
+        )
+
+        mock_run_chain.side_effect = ['{"a":"b"}', '{"c":"d"}']
+
+        translated = self.converter._iterative_translate(source)
+
+        self.assertEqual('{"a":"b"}', translated.text)
+        self.assertEqual('{"c":"d"}', translated.children[0].text)
