@@ -63,3 +63,24 @@ class TestConverter(unittest.TestCase):
 
         self.assertEqual('{"a":"b"}', translated.text)
         self.assertEqual('{"c":"d"}', translated.children[0].text)
+
+    def test_janus_object_to_codeblock(self):
+        obj = {
+            "input": "hello",
+            "outputs": ["welcome", "world"],
+            "metadata": {
+                "cost": 3,
+                "processing_time": 1,
+                "num_requests": 1,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "converter_name": "Documenter",
+                "type": "documentation",
+                "label": None,
+            },
+        }
+
+        actual = self.converter._janus_object_to_codeblock(obj, "name")
+
+        self.assertEqual("welcome", actual.blocks[0].text)
+        self.assertEqual("world", actual.blocks[1].text)
