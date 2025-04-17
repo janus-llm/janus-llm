@@ -114,7 +114,8 @@ class TestDiagramGenerator(unittest.TestCase):
         self.assertEqual(self.diagram_generator._source_language, "fortran")
         self.assertEqual(self.diagram_generator._diagram_type, "Activity")
 
-    def test_add_translation(self):
+    @patch("janus.converter.Converter._run_chain")
+    def test_add_translation(self, mock_run_chain):
         """Test _add_translation method."""
         block = TranslatedCodeBlock(
             original=CodeBlock(
@@ -133,6 +134,7 @@ class TestDiagramGenerator(unittest.TestCase):
             language="python",
             converter=self.diagram_generator,
         )
+        mock_run_chain.return_value = "@startuml\n\nstart\n\n:Initialize Program;\n\n:Print 'Hello, World!';\n\n:End Program;\n\nstop\n\n@enduml"  # noqa E501
         self.diagram_generator._add_translation(block)
         self.assertTrue(block.translated)
         self.assertIsNotNone(block.text)
