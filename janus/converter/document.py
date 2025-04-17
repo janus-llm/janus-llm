@@ -64,7 +64,7 @@ class ClozeDocumenter(Documenter):
 
         self._comments_per_request: int | None = comments_per_request
 
-    def _add_translation(self, block: TranslatedCodeBlock):
+    def _add_translation(self, block: TranslatedCodeBlock) -> None:
         if block.translated:
             return
 
@@ -156,7 +156,5 @@ class PseudocodeDocumenter(Documenter):
     def __init__(self, output_type: str = "pseudocode", **kwargs):
         kwargs.update(output_type=output_type)
         super().__init__(**kwargs)
-        self.set_prompts("pseudocode")
+        self._prompt_template_names = ["pseudocode"]
         self._parser = CodeParser(language=self.source_language)
-
-        self._load_parameters()
