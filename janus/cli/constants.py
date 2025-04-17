@@ -1,9 +1,11 @@
 import json
 from pathlib import Path
+from typing import Type
 
 import janus.refiners.format
 import janus.refiners.refiner
 import janus.refiners.uml
+from janus.converter.converter import Converter
 
 homedir = Path.home().expanduser()
 
@@ -37,7 +39,7 @@ CONVERTER_TYPES = get_subclasses(janus.converter.converter.Converter).union(
     {janus.converter.converter.Converter}
 )
 
-CONVERTERS = {c.__name__: c for c in CONVERTER_TYPES}
+CONVERTERS: dict[str, Type[Converter]] = {c.__name__: c for c in CONVERTER_TYPES}
 
 
 def get_collections_config():

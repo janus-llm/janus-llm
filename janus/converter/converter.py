@@ -17,18 +17,17 @@ from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
 
 from janus.cli.constants import REFINERS
+from janus.converter.chain import ConverterChain
 from janus.embedding.vectorize import ChromaDBVectorizer, Vectorizer
 from janus.language.block import (
     BlockCollection,
     CodeBlock,
-    JanusMetadata,
     JanusOutputObject,
     TranslatedBlockCollection,
     TranslatedCodeBlock,
 )
 from janus.language.combine import Combiner
 from janus.language.naive.registry import CUSTOM_SPLITTERS
-from janus.language.node import NodeType
 from janus.language.splitter import (
     EmptyTreeError,
     FileSizeError,
@@ -563,15 +562,15 @@ class Converter:
             log.info(f"Processing {in_path.relative_to(input_directory)}")
             if self._use_janus_inputs:
                 out_block = self.translate_janus_file(in_path, fail_path)
+                self._combine_blocks(out_block)
             else:
                 out_block = self.translate_file(in_path, fail_path)
+                self._combine_block(out_block)
 
             total_cost += out_block.total_cost
             log.info(f"Current Running Cost: {total_cost}")
 
             # For files where translation failed, write to failure path instead
-            self._combine_blocks(out_block)
-
             if not out_block.translation_completed:
                 if fail_path is not None:
                     self._save_to_file(out_block, fail_path)
@@ -671,7 +670,7 @@ class Converter:
     def _translate_janus_obj(
         self, obj: JanusOutputObject, failure_path: Path | None = None
     ) -> TranslatedBlockCollection:
-        translated_block_collection = self._janus_object_to_block_collection(obj)
+        translated_block_collection = TranslatedBlockCollection.from_janus_object(obj)
         block_collection = translated_block_collection.to_block_collection()
         return self.translate_blocks(block_collection, failure_path)
 
@@ -840,113 +839,41 @@ class Converter:
         self._load_parameters()
         return self._chain.invoke(block.original)
 
-    def _combine_metadata(self, metadatas: list[JanusMetadata]) -> JanusMetadata:
-        return {
-            "cost": sum((m["cost"] for m in metadatas), 0.0),
-            "processing_time": sum((m["processing_time"] for m in metadatas), 0.0),
-            "num_requests": sum((m["num_requests"] for m in metadatas), 0),
-            "input_tokens": sum((m["input_tokens"] for m in metadatas), 0),
-            "output_tokens": sum((m["output_tokens"] for m in metadatas), 0),
-            "converter_name": self.__class__.__name__,
-            "type": ", ".join(m["type"] for m in metadatas if m["type"] is not None),
-            "label": ", ".join(m["label"] for m in metadatas if m["label"] is not None),
-        }
-
-    def _combine_inputs(self, inputs: list[str]):
-        return json.dumps(inputs)
-
     def _get_output_obj(
         self,
         block: TranslatedCodeBlock | TranslatedBlockCollection | JanusOutputObject,
         combine_children: bool = True,
         include_previous_outputs: bool = True,
     ) -> JanusOutputObject:
-        block_type = None
-        block_label = None
-        outputs: JanusOutputObject | list[JanusOutputObject] | list[str]
-        if isinstance(block, TranslatedBlockCollection):
-            outputs = [
-                self._get_output_obj(b, combine_children, False)
-                for b in block.blocks
-                if isinstance(b, TranslatedCodeBlock)
-            ]
-            if len(outputs) == 1:
-                block_type = block.blocks[0].block_type
-                block_label = block.blocks[0].block_label
-                outputs = outputs[0]
-        elif isinstance(block, TranslatedCodeBlock):
-            if block.children and not combine_children:
-                outputs = self._get_output_obj_children(block, False)
-            else:
-                block_type = block.block_type
-                block_label = block.block_label
-                if not block.translation_completed:
-                    # translation wasn't completed, so combined parsing will likely fail
-                    outputs = [block.complete_text]
-                else:
-                    output_str = self._parser.parse_combined_output(block.complete_text)
-                    outputs = [output_str]
-        else:
+        if isinstance(block, dict):
             # output object has already been generated
             new_block = deepcopy(block)
-            if "intermediate_outputs" in new_block:
+            if "intermediate_outputs" in new_block and not include_previous_outputs:
                 del new_block["intermediate_outputs"]
+            elif include_previous_outputs and "intermediate_outputs" not in new_block:
+                new_block["intermediate_outputs"] = []
             return new_block
 
-        def _get_input(block) -> str:
-            if isinstance(block, BlockCollection):
-                return self._combine_inputs([_get_input(b) for b in block.blocks])
-            return block.original.complete_text or ""
+        janus_obj = block.to_janus_object(combine_children)
+        if not include_previous_outputs:
+            del janus_obj["intermediate_outputs"]
 
-        metadata: JanusMetadata = {
-            "cost": block.total_cost,
-            "processing_time": block.total_processing_time,
-            "num_requests": block.total_num_requests,
-            "input_tokens": block.total_request_input_tokens,
-            "output_tokens": block.total_request_output_tokens,
-            "converter_name": self.__class__.__name__,
-            "type": block_type,
-            "label": block_label,
-        }
-        out: JanusOutputObject = {
-            "input": _get_input(block),
-            "metadata": metadata,
-            "outputs": outputs,
-            "intermediate_outputs": [],
-        }
-        if (
-            include_previous_outputs
-            and isinstance(block, BlockCollection)
-            and len(block.previous_generations) > 0
-        ):
-            intermediate_outputs: list[JanusOutputObject] = []
-            for p in block.previous_generations:
-                if isinstance(p, dict):
-                    # preserve intermediate outputs from previous runs
-                    intermediate_outputs.append(
-                        self._get_output_obj(p, combine_children, False)
-                    )
-            if len(intermediate_outputs) > 0:
-                out["intermediate_outputs"] = intermediate_outputs
+        if not (combine_children and block.translation_completed):
+            return janus_obj
 
-        return out
+        # Parse combined output if output was combined
+        if isinstance(block, TranslatedBlockCollection):
+            for obj in janus_obj["outputs"]:
+                if not isinstance(obj, dict):
+                    continue
+                out_str: str = obj["outputs"][0]  # type: ignore
+                obj["outputs"] = [self._parser.parse_combined_output(out_str)]
 
-    def _get_output_obj_children(
-        self, block: TranslatedCodeBlock, include_previous_outputs: bool = True
-    ) -> list[JanusOutputObject]:
-        if len(block.children) > 0:
-            res = []
-            for c in block.children:
-                res += self._get_output_obj_children(c, include_previous_outputs)
-            return res
-        else:
-            return [
-                self._get_output_obj(
-                    block,
-                    combine_children=True,
-                    include_previous_outputs=include_previous_outputs,
-                )
-            ]
+        elif isinstance(block, TranslatedCodeBlock):
+            out_str: str = janus_obj["outputs"][0]  # type: ignore
+            janus_obj["outputs"] = [self._parser.parse_combined_output(out_str)]
+
+        return janus_obj
 
     def _save_to_file(
         self, translation: TranslatedCodeBlock | TranslatedBlockCollection, out_path: Path
@@ -964,81 +891,17 @@ class Converter:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
 
-    def _janus_object_to_block_collection(
-        self, janus_obj: JanusOutputObject
-    ) -> TranslatedBlockCollection:
-        metadata: JanusMetadata = janus_obj["metadata"]
-
-        previous_generations: list[JanusOutputObject] = janus_obj.get(
-            "intermediate_outputs", []
-        )
-        if metadata["converter_name"] != "ConverterChain":
-            previous_generations += [janus_obj]
-
-        previous_generation_blocks: list[TranslatedBlockCollection] = [
-            self._janus_object_to_block_collection(o) for o in previous_generations
-        ]
-        results: list[TranslatedCodeBlock] = []
-        for i, o in enumerate(janus_obj["outputs"]):
-            if isinstance(o, str):
-                block_label: str | None = metadata["label"]
-                if isinstance(block_label, list):
-                    block_label = block_label[0]
-                block_type: str | None = metadata["type"]
-                if isinstance(block_type, list):
-                    block_type = block_type[0]
-
-                # Create a TranslatedCodeBlock using the input text and metadata
-                # code_block = self._split_text(metadata["input"], str(i))
-                code_block = CodeBlock(
-                    id="dummy",
-                    name="dummy",
-                    node_type=NodeType("dummy"),
-                    language="unk",
-                    text=metadata["input"],
-                    start_point=(0, 0),
-                    end_point=(-1, -1),
-                    start_byte=0,
-                    end_byte=-1,
-                    tokens=0,
-                    children=[],
-                    previous_generations=previous_generations,
-                )
-                translated_block = TranslatedCodeBlock(
-                    original=code_block,
-                    language="unk",
-                    converter=metadata["converter_name"],  # type: ignore
-                    block_type=block_type,
-                    block_label=block_label,
-                )
-                # Copy over the output text and the rest of the metadata
-                translated_block.text = o
-                translated_block.cost = metadata["cost"]
-                translated_block.processing_time = metadata["processing_time"]
-                translated_block.num_requests = metadata["num_requests"]
-                translated_block.request_input_tokens = metadata["input_tokens"]
-                translated_block.request_output_tokens = metadata["output_tokens"]
-                results.append(translated_block)
-
-            else:
-                # If the output is a janus output object, recurse
-                results.extend(self._janus_object_to_block_collection(o).blocks)
-
-        return TranslatedBlockCollection(results, previous_generation_blocks)
-
-    def _combine_blocks(self, blocks):
+    def _combine_blocks(self, blocks: TranslatedBlockCollection) -> None:
         for b in blocks.blocks:
             self._combine_block(b)
 
-    def _combine_block(self, block):
+    def _combine_block(self, block: TranslatedCodeBlock) -> None:
         if self._combine_output:
             self._combiner.combine(block)
             block.original.rebuild_text_from_children()
 
-    def __or__(self, other: "Converter"):
-        from janus.converter.chain import ConverterChain
-
-        return ConverterChain(self, other)
+    def __or__(self, other: "Converter") -> ConverterChain:
+        return ConverterChain(converters=[self, other])
 
     @property
     def source_language(self):

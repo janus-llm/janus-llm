@@ -1,17 +1,22 @@
 from pathlib import Path
 
 from janus.converter.converter import Converter
-from janus.language.block import BlockCollection, CodeBlock, TranslatedCodeBlock
+from janus.language.block import (
+    BlockCollection,
+    JanusOutputObject,
+    TranslatedBlockCollection,
+    TranslatedCodeBlock,
+)
 
 
 class ConverterPool(Converter):
-    def __init__(self, *args, **kwargs):
-        if len(args) == 0:
+    def __init__(self, converters: list[Converter], **kwargs):
+        if len(converters) == 0:
             raise ValueError("Error: Converter chain must be passed at least 1 converter")
-        for converter in args:
+        for converter in converters:
             if not isinstance(converter, Converter):
                 raise ValueError(f"Error: unrecognized type: {type(converter)}")
-        self._converters: list[Converter] = args
+        self._converters: list[Converter] = converters
         if "source_language" in kwargs:
             for c in self._converters:
                 c._set_source_language(kwargs["source_language"])
@@ -20,58 +25,51 @@ class ConverterPool(Converter):
                 c._model_name = kwargs["model"]
         super().__init__(**kwargs)
 
-    def _combine_blocks(self, blocks):
+    def _combine_blocks(self, blocks: TranslatedBlockCollection) -> None:
         for b in blocks.blocks:
-            b.converter._combine_block(b)
+            if isinstance(b.converter, Converter):
+                b.converter._combine_block(b)
 
     def translate_blocks(
-        self, input_blocks: CodeBlock | BlockCollection, failure_path: Path | None = None
+        self, input_blocks: BlockCollection, failure_path: Path | None = None
     ):
+        # TODO: Figure out how to handle partial failure (sp. writing to file)
         self._load_parameters()
-        output_blocks = []
+        output_blocks: list[TranslatedCodeBlock] = []
         for c in self._converters:
             collection = c.translate_blocks(input_blocks)
             output_blocks += collection.blocks
-        return BlockCollection(output_blocks, input_blocks.previous_generations)
+        return TranslatedBlockCollection(output_blocks, input_blocks.previous_generations)
 
     def _get_output_obj(
         self,
-        block: TranslatedCodeBlock | BlockCollection | dict,
+        block: TranslatedCodeBlock | TranslatedBlockCollection | JanusOutputObject,
         combine_children: bool = True,
         include_previous_outputs: bool = True,
-    ) -> dict[str, int | float | str | dict[str, str] | dict[str, float]]:
-        outputs = []
-        for b in block.blocks:
-            for c in self._converters:
-                if c == b.converter:
-                    outputs.append(c._get_output_obj(b, c._combine_output, False))
-                    break
+    ) -> JanusOutputObject:
+        # If this is not a collection, no special processing needed
+        #  (this should probably never happen, though)
+        if isinstance(block, dict) or isinstance(block, TranslatedCodeBlock):
+            return super()._get_output_obj(
+                block=block,
+                combine_children=combine_children,
+                include_previous_outputs=include_previous_outputs,
+            )
 
-        def _get_input(block):
-            if isinstance(block, BlockCollection):
-                return self._combine_inputs([_get_input(b) for b in block.blocks])
-            return block.original.text or ""
+        janus_obj = block.to_janus_object(combine_children)
+        if not include_previous_outputs:
+            del janus_obj["intermediate_outputs"]
 
-        out = dict(
-            input=_get_input(block),
-            metadata=dict(
-                cost=block.total_cost,
-                processing_time=block.total_processing_time,
-                num_requests=block.total_num_requests,
-                input_tokens=block.total_request_input_tokens,
-                output_tokens=block.total_request_output_tokens,
-                converter_name=self.__class__.__name__,
-                type=block.block_type,
-                label=block.block_label,
-            ),
-            outputs=outputs,
-        )
-        if include_previous_outputs and len(block.previous_generations) > 0:
-            intermediate_outputs = [
-                self._get_output_obj(g, combine_children, False)
-                for g in block.previous_generations
-                if isinstance(g, dict)
-            ]
-            if len(intermediate_outputs) > 0:
-                out["intermediate_outputs"] = intermediate_outputs
-        return out
+        # Make sure we use the converter-specific logic for constructing outputs
+        janus_obj["outputs"] = [
+            b.converter._get_output_obj(
+                block=b,
+                combine_children=b.converter._combine_output,
+                include_previous_outputs=False,
+            )
+            if isinstance(b.converter, Converter)
+            else b.to_janus_object()
+            for b in block.blocks
+        ]
+
+        return janus_obj
