@@ -1,6 +1,9 @@
+import json
+import tempfile
 import unittest
 from pathlib import Path
 from typing import Any, Iterable, List, Optional, Type
+from unittest.mock import patch
 
 import pytest
 from langchain.schema import Document
@@ -62,17 +65,25 @@ class TestTranslator(unittest.TestCase):
             prompt_templates="requirements",
         )
 
-    @pytest.mark.translate
-    def test_translate(self):
+    @patch("janus.converter.Converter._run_chain")
+    def test_translate(self, mock_translate):
         """Test translate method."""
-        # Delete a file if it's already there
-        python_file = self.test_file.parent / "python" / f"{self.test_file.stem}.json"
-        python_file.unlink(missing_ok=True)
-        python_file.parent.rmdir() if python_file.parent.is_dir() else None
-        self.translator.translate(self.test_file.parent, self.test_file.parent / "python")
-        # Only check the top-most level functionality, since it should be handled by other
-        # unit tests anyway
-        self.assertTrue(python_file.exists())
+
+        with open("janus/converter/_tests/test_translate_llm_response.txt", "r") as f:
+            mock_translate.return_value = f.read()
+
+        with tempfile.TemporaryDirectory(dir=self.test_file.parent) as tmpdirname:
+            python_file = Path(tmpdirname) / f"{self.test_file.stem}.json"
+
+            self.translator.translate(self.test_file.parent, tmpdirname)
+
+            with open("janus/converter/_tests/test_translate_expected.json", "r") as f:
+                expected = json.load(f)
+
+            with open(python_file, "r") as f:
+                actual = json.load(f)
+
+            self.assertEqual(expected["outputs"], actual["outputs"])
 
     def test_invalid_selections(self) -> None:
         """Tests that settings values for the translator will raise exceptions"""

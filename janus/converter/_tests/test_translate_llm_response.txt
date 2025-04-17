@@ -1,0 +1,275 @@
+```
+```python
+# *****************************************************************************
+# MODULE ELMFIRE_IGNITION
+# *****************************************************************************
+
+from mpi4py import MPI
+import numpy as np
+
+# Assume other modules and variables are defined elsewhere
+
+XLL, XSPAN, YLL, YSPAN, RCOUNT_SUM, RCOUNT_NOERC_SUM = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+def determine_num_cases_total():
+    IWX_BAND_STOP = IWX_BAND_START
+    NUM_CASES_TOTAL_MAX = 10000000
+    NUM_CASES_PER_STARTING_WX_BAND = np.zeros(IWX_BAND_STOP - IWX_BAND_START + 1, dtype=int)
+
+    if not RANDOM_IGNITIONS:
+        if MODE != 2:
+            NUM_CASES_PER_STARTING_WX_BAND[:] = NUM_ENSEMBLE_MEMBERS
+            NUM_CASES_TOTAL = NUM_ENSEMBLE_MEMBERS
+            NUM_STARTING_WX_BANDS = 1
+    else:
+        NUM_CASES_PER_STARTING_WX_BAND = np.zeros(IWX_BAND_STOP - IWX_BAND_START + 1, dtype=int)
+        NUM_CASES_COMPLETE_PER_STARTING_WX_BAND = np.zeros(IWX_BAND_STOP - IWX_BAND_START + 1, dtype=int)
+        HOURLY_OUTPUTS_FROM_STARTING_WX_BAND_DUMPED = np.full(IWX_BAND_STOP - IWX_BAND_START + 1, False)
+
+        if USE_IGNITION_MASK:
+            IXL_EDGEBUFFER = int(EDGEBUFFER / IGN_MASK['CELLSIZE']) + 1
+            IYL_EDGEBUFFER = int(EDGEBUFFER / IGN_MASK['CELLSIZE']) + 1
+            IXH_EDGEBUFFER = IGN_MASK['NCOLS'] - int(EDGEBUFFER / IGN_MASK['CELLSIZE'])
+            IYH_EDGEBUFFER = IGN_MASK['NROWS'] - int(EDGEBUFFER / IGN_MASK['CELLSIZE'])
+
+            for IROW in range(1, IGN_MASK['NROWS'] + 1):
+                if float(IROW) * IGN_MASK['CELLSIZE'] < EDGEBUFFER:
+                    IGN_MASK['R4'][:, IROW - 1, 0] = ASP['NODATA_VALUE']
+                if float(IGN_MASK['NROWS'] + 1 - IROW) * IGN_MASK['CELLSIZE'] < EDGEBUFFER:
+                    IGN_MASK['R4'][:, IROW - 1, 0] = ASP['NODATA_VALUE']
+
+            for ICOL in range(1, IGN_MASK['NCOLS'] + 1):
+                if float(ICOL) * IGN_MASK['CELLSIZE'] < EDGEBUFFER:
+                    IGN_MASK['R4'][ICOL - 1, :, 0] = ASP['NODATA_VALUE']
+                if float(IGN_MASK['NCOLS'] + 1 - ICOL) * IGN_MASK['CELLSIZE'] < EDGEBUFFER:
+                    IGN_MASK['R4'][ICOL - 1, :, 0] = ASP['NODATA_VALUE']
+
+            XSPAN = float(IGN_MASK['NCOLS']) * IGN_MASK['CELLSIZE'] - 2.0 * EDGEBUFFER
+            YSPAN = float(IGN_MASK['NROWS']) * IGN_MASK['CELLSIZE'] - 2.0 * EDGEBUFFER
+            XLL = IGN_MASK['XLLCORNER'] + EDGEBUFFER
+            YLL = IGN_MASK['YLLCORNER'] + EDGEBUFFER
+
+            N = 0
+            for IROW in range(IYL_EDGEBUFFER, IYH_EDGEBUFFER + 1):
+                for ICOL in range(IXL_EDGEBUFFER, IXH_EDGEBUFFER + 1):
+                    if IGN_MASK['R4'][ICOL - 1, IROW - 1, 0] < IGN_MASK_CRIT:
+                        continue
+                    if ISNONBURNABLE(ICOL, IROW) and not ALLOW_NONBURNABLE_PIXEL_IGNITION:
+                        continue
+                    N += 1
+
+            NUM_IGNITABLE_PIXELS = N
+
+            N_ARR = np.zeros(NUM_IGNITABLE_PIXELS, dtype=int)
+            ICOL_ARR = np.zeros(NUM_IGNITABLE_PIXELS, dtype=int)
+            IROW_ARR = np.zeros(NUM_IGNITABLE_PIXELS, dtype=int)
+            IGN_MASK_ARR = np.zeros(NUM_IGNITABLE_PIXELS)
+            PROB = np.zeros(NUM_IGNITABLE_PIXELS + 1)
+
+            N = 0
+            for IROW in range(IYL_EDGEBUFFER, IYH_EDGEBUFFER + 1):
+                for ICOL in range(IXL_EDGEBUFFER, IXH_EDGEBUFFER + 1):
+                    if IGN_MASK['R4'][ICOL - 1, IROW - 1, 0] < IGN_MASK_CRIT:
+                        continue
+                    if ISNONBURNABLE(ICOL, IROW) and not ALLOW_NONBURNABLE_PIXEL_IGNITION:
+                        continue
+                    N += 1
+                    N_ARR[N - 1] = N
+                    ICOL_ARR[N - 1] = ICOL
+                    IROW_ARR[N - 1] = IROW
+
+        IWX_BAND_START_TEMP = np.zeros(NUM_CASES_TOTAL_MAX, dtype=int)
+        IWX_SERIAL_BAND_TEMP = np.zeros(NUM_CASES_TOTAL_MAX, dtype=int)
+
+        NUM_STARTING_WX_BANDS = 0
+        NUM_CASES_TOTAL = 0
+
+        if USE_ERC:
+            IX_IGNFAC = np.zeros(IGN_MASK['NCOLS'], dtype=int)
+            for ICOL in range(1, IGN_MASK['NCOLS'] + 1):
+                X = x_from_icol(ICOL, IGN_MASK['XLLCORNER'], IGN_MASK['CELLSIZE'])
+                IX_IGNFAC[ICOL - 1] = min(max(ic_from_x(X, IGNFAC['XLLCORNER'], IGNFAC['CELLSIZE']), 1), IGNFAC['NCOLS'])
+
+            IY_IGNFAC = np.zeros(IGN_MASK['NROWS'], dtype=int)
+            for IROW in range(1, IGN_MASK['NROWS'] + 1):
+                Y = y_from_irow(IROW, IGN_MASK['YLLCORNER'], IGN_MASK['CELLSIZE'])
+                IY_IGNFAC[IROW - 1] = min(max(ir_from_y(Y, IGNFAC['YLLCORNER'], IGNFAC['CELLSIZE']), 1), IGNFAC['NROWS'])
+
+        RCOUNT_SUM = 0.0
+        for IWX_BAND in range(IWX_BAND_START, IWX_BAND_STOP + 1, IWX_BAND_SKIP):
+            NUM_STARTING_WX_BANDS += 1
+
+            if RANDOM_IGNITIONS_TYPE == 1:
+                RCOUNT = float(NUM_IGNITABLE_PIXELS)
+            elif RANDOM_IGNITIONS_TYPE == 2:
+                RCOUNT = 0.0
+                if USE_ERC:
+                    if IWX_BAND == IWX_BAND_START:
+                        RCOUNT_NOERC = 0.0
+                        for I in range(1, NUM_IGNITABLE_PIXELS + 1):
+                            IROW = IROW_ARR[I - 1]
+                            ICOL = ICOL_ARR[I - 1]
+                            if USE_PYROMES and CALIBRATION_CONSTANTS_BY_PYROME:
+                                IPYROME = min(max(PYROMES['I2'][ICOL - 1, IROW - 1, 0], 1), 128)
+                                RCOUNT_NOERC += IGNITION_MASK_SCALE_FACTOR * IGNITION_DENSITY_ADJ_PYROME(IPYROME) * IGN_MASK['R4'][ICOL - 1, IROW - 1, 0]
+                            else:
+                                RCOUNT_NOERC += IGNITION_MASK_SCALE_FACTOR * IGN_MASK['R4'][ICOL - 1, IROW - 1, 0]
+                        RCOUNT_NOERC_SUM = RCOUNT_NOERC
+                    else:
+                        RCOUNT_NOERC_SUM += RCOUNT_NOERC
+
+                    for I in range(1, NUM_IGNITABLE_PIXELS + 1):
+                        IROW = IROW_ARR[I - 1]
+                        ICOL = ICOL_ARR[I - 1]
+                        if USE_PYROMES and CALIBRATION_CONSTANTS_BY_PYROME:
+                            IPYROME = min(max(PYROMES['I2'][ICOL - 1, IROW - 1, 0], 1), 128)
+                            RCOUNT += IGNITION_MASK_SCALE_FACTOR * IGNITION_DENSITY_ADJ_PYROME(IPYROME) * IGN_MASK['R4'][ICOL - 1, IROW - 1, 0] * IGNFAC['R4'][IX_IGNFAC[ICOL - 1], IY_IGNFAC[IROW - 1], IWX_BAND]
+                        else:
+                            RCOUNT += IGNITION_MASK_SCALE_FACTOR * IGN_MASK['R4'][ICOL - 1, IROW - 1, 0] * IGNFAC['R4'][IX_IGNFAC[ICOL - 1], IY_IGNFAC[IROW - 1], IWX_BAND]
+                    RCOUNT_SUM += RCOUNT
+                else:
+                    for I in range(1, NUM_IGNITABLE_PIXELS + 1):
+                        IROW = IROW_ARR[I - 1]
+                        ICOL = ICOL_ARR[I - 1]
+                        if IGN_MASK['R4'][ICOL - 1, IROW - 1, 0] > 0.0:
+                            if USE_PYROMES and CALIBRATION_CONSTANTS_BY_PYROME:
+                                IPYROME = min(max(PYROMES['I2'][ICOL - 1, IROW - 1, 0], 1), 128)
+                                RCOUNT += IGNITION_MASK_SCALE_FACTOR * IGNITION_DENSITY_ADJ_PYROME(IPYROME) * IGN_MASK['R4'][ICOL - 1, IROW - 1, 0]
+                            else:
+                                RCOUNT += IGNITION_MASK_SCALE_FACTOR * IGN_MASK['R4'][ICOL - 1, IROW - 1, 0]
+
+            else:
+                print('Error: Set RANDOM_IGNITIONS_TYPE to 1 or 2')
+                raise ValueError("Invalid RANDOM_IGNITIONS_TYPE")
+
+            if NUM_ENSEMBLE_MEMBERS0 < 0:
+                RNUM_ENSEMBLE_MEMBERS = 0.01 * PERCENT_OF_PIXELS_TO_IGNITE * RCOUNT
+                FLOOR_NUM_ENSEMBLE_MEMBERS = np.floor(RNUM_ENSEMBLE_MEMBERS)
+                FRAC = RNUM_ENSEMBLE_MEMBERS - float(FLOOR_NUM_ENSEMBLE_MEMBERS)
+                R0 = np.random.rand()
+                if R0 <= FRAC:
+                    NUM_ENSEMBLE_MEMBERS = FLOOR_NUM_ENSEMBLE_MEMBERS + 1
+                else:
+                    NUM_ENSEMBLE_MEMBERS = FLOOR_NUM_ENSEMBLE_MEMBERS
+                if NUM_ENSEMBLE_MEMBERS != NUM_ENSEMBLE_MEMBERS:
+                    NUM_ENSEMBLE_MEMBERS = 0
+            else:
+                if NUM_ENSEMBLE_MEMBERS > round(RCOUNT) and not ALLOW_MULTIPLE_IGNITIONS_AT_A_PIXEL:
+                    print('Error:  NUM_ENSEMBLE_MEMBERS is greater than the total number of ignitable pixels')
+                    raise ValueError("Invalid NUM_ENSEMBLE_MEMBERS")
+
+            if NUM_ENSEMBLE_MEMBERS > 0:
+                NUM_CASES_PER_STARTING_WX_BAND[IWX_BAND - IWX_BAND_START] = NUM_ENSEMBLE_MEMBERS
+                I1 = NUM_CASES_TOTAL + 1
+                I2 = NUM_CASES_TOTAL + NUM_ENSEMBLE_MEMBERS
+                for I in range(I1, I2 + 1):
+                    IWX_BAND_START_TEMP[I - 1] = IWX_BAND
+                    NUM_CASES_TOTAL += 1
+                    IWX_SERIAL_BAND_TEMP[I - 1] = NUM_STARTING_WX_BANDS
+
+        if DUMP_CASES_TO_RUN_UP_FRONT:
+            write_cases_to_run()
+
+def determine_ignition_locations():
+    global STATS_IWX_BAND_START, STATS_IWX_SERIAL_BAND, STATS_X, STATS_Y, STATS_PROB
+    STATS_IWX_BAND_START = IWX_BAND_START_TEMP[:NUM_CASES_TOTAL]
+    del IWX_BAND_START_TEMP
+
+    STATS_IWX_SERIAL_BAND = IWX_SERIAL_BAND_TEMP[:NUM_CASES_TOTAL]
+    del IWX_SERIAL_BAND_TEMP
+
+    ICASE = 0
+    if USE_ERC:
+        for IWX_BAND in range(IWX_BAND_START, IWX_BAND_STOP + 1, IWX_BAND_SKIP):
+            if NUM_CASES_PER_STARTING_WX_BAND[IWX_BAND - IWX_BAND_START] < 1:
+                continue
+
+            IGN_MASK_SUM = 0.0
+            for I in range(1, NUM_IGNITABLE_PIXELS + 1):
+                IROW = IROW_ARR[I - 1]
+                ICOL = ICOL_ARR[I - 1]
+                IGN_MASK_ARR[I - 1] = IGN_MASK['R4'][ICOL - 1, IROW - 1, 0] * IGNFAC['R4'][IX_IGNFAC[ICOL - 1], IY_IGNFAC[IROW - 1], IWX_BAND]
+                IGN_MASK_SUM += IGN_MASK_ARR[I - 1]
+
+            IGN_MASK_ARR[:] /= IGN_MASK_SUM
+
+            PROB = np.zeros(NUM_IGNITABLE_PIXELS + 1)
+            for I in range(2, NUM_IGNITABLE_PIXELS + 1):
+                PROB[I] = PROB[I - 1] + IGN_MASK_ARR[I - 1]
+            PROB[NUM_IGNITABLE_PIXELS] = 1.0
+
+            for ICASE_FOR_WX_BAND in range(1, NUM_CASES_PER_STARTING_WX_BAND[IWX_BAND - IWX_BAND_START] + 1):
+                ICASE += 1
+
+                R0 = np.random.rand()
+                I = np.searchsorted(PROB, R0) - 1
+                I = min(max(1, I), NUM_IGNITABLE_PIXELS)
+                STATS_X[ICASE - 1] = x_from_icol(ICOL_ARR[I - 1], IGN_MASK['XLLCORNER'], IGN_MASK['CELLSIZE'])
+                STATS_Y[ICASE - 1] = y_from_irow(IROW_ARR[I - 1], IGN_MASK['YLLCORNER'], IGN_MASK['CELLSIZE'])
+
+                if RANDOM_IGNITIONS_TYPE == 1:
+                    STATS_PROB[ICASE - 1] = IGN_MASK['R4'][ICOL_ARR[I - 1], IROW_ARR[I - 1], 0]
+                else:
+                    STATS_PROB[ICASE - 1] = 1.0
+    else:
+        IGN_MASK_SUM = 0.0
+        for I in range(1, NUM_IGNITABLE_PIXELS + 1):
+            IROW = IROW_ARR[I - 1]
+            ICOL = ICOL_ARR[I - 1]
+            IGN_MASK_ARR[I - 1] = IGN_MASK['R4'][ICOL - 1, IROW - 1, 0]
+            IGN_MASK_SUM += IGN_MASK_ARR[I - 1]
+
+        IGN_MASK_ARR[:] /= IGN_MASK_SUM
+
+        PROB = np.zeros(NUM_IGNITABLE_PIXELS + 1)
+        for I in range(2, NUM_IGNITABLE_PIXELS + 1):
+            PROB[I] = PROB[I - 1] + IGN_MASK_ARR[I - 1]
+        PROB[NUM_IGNITABLE_PIXELS] = 1.0
+
+        for ICASE in range(1, NUM_CASES_TOTAL + 1):
+            R0 = np.random.rand()
+            I = np.searchsorted(PROB, R0) - 1
+            I = min(max(1, I), NUM_IGNITABLE_PIXELS)
+            STATS_X[ICASE - 1] = x_from_icol(ICOL_ARR[I - 1], IGN_MASK['XLLCORNER'], IGN_MASK['CELLSIZE'])
+            STATS_Y[ICASE - 1] = y_from_irow(IROW_ARR[I - 1], IGN_MASK['YLLCORNER'], IGN_MASK['CELLSIZE'])
+
+            if RANDOM_IGNITIONS_TYPE == 1:
+                STATS_PROB[ICASE - 1] = IGN_MASK['R4'][ICOL_ARR[I - 1], IROW_ARR[I - 1], 0]
+            else:
+                STATS_PROB[ICASE - 1] = 1.0
+
+    del N_ARR, ICOL_ARR, IROW_ARR, IGN_MASK_ARR, PROB
+    if USE_ERC:
+        del IX_IGNFAC, IY_IGNFAC
+
+def write_cases_to_run():
+    FN = OUTPUTS_DIRECTORY + 'cases_to_run.csv'
+    with open(FN, 'w') as LUOUTPUT:
+        LUOUTPUT.write(f"{RCOUNT_SUM:.9f}, {RCOUNT_NOERC_SUM:.9f}\\n")
+        LUOUTPUT.write('weather band,# cases\\n')
+
+        for IWX_BAND in range(IWX_BAND_START, IWX_BAND_STOP + 1, IWX_BAND_SKIP):
+            LUOUTPUT.write(f"{IWX_BAND},{NUM_CASES_PER_STARTING_WX_BAND[IWX_BAND - IWX_BAND_START]}\\n")
+
+def determine_num_cases_total_csv():
+    IOS = 0
+    FN = FUELS_AND_TOPOGRAPHY_DIRECTORY + '/' + IGNITIONS_CSV_FILENAME
+    with open(FN, 'r') as LUINPUT:
+        header = LUINPUT.readline()
+        if not header:
+            print(f"Error:  {FN} not found")
+            raise FileNotFoundError()
+
+        N = 0
+        for line in LUINPUT:
+            N += 1
+
+    CSV_ICASEARR = np.zeros(N, dtype=int)
+    CSV_IBANDARR = np.zeros(N, dtype=int)
+    CSV_XARR = np.zeros(N)
+    CSV_YARR = np.zeros(N)
+
+    with open(FN, 'r') as LUINPUT:
+        header = LUINPUT.readline()
+        for I in range(N):
+            line = LUINPUT.readline().split
