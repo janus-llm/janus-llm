@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 from typing import Callable, Protocol, TypeVar
 
+from boto3 import client
+from botocore.config import Config
 from dotenv import load_dotenv
 from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_core.runnables import Runnable
@@ -31,8 +33,6 @@ model_types = [
 ]
 
 try:
-    from boto3 import client
-    from botocore.config import Config
     from langchain_community.chat_models import BedrockChat
     from langchain_community.llms.bedrock import Bedrock
 

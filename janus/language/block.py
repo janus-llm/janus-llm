@@ -1,6 +1,14 @@
 import json
 from functools import total_ordering
-from typing import TYPE_CHECKING, Hashable, NotRequired, Optional, Tuple, TypedDict
+from typing import (
+    TYPE_CHECKING,
+    ForwardRef,
+    Hashable,
+    NotRequired,
+    Optional,
+    Tuple,
+    TypedDict,
+)
 
 from janus.language.node import NodeType
 from janus.utils.logger import create_logger
@@ -271,7 +279,7 @@ class TranslatedCodeBlock(CodeBlock):
         self,
         original: CodeBlock,
         language: str,
-        converter: Converter | str,
+        converter: str | ForwardRef("Converter"),
         model_name: str | None = None,
         block_type: str | None = None,
         block_label: str | None = None,

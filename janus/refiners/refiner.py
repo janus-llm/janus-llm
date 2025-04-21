@@ -19,7 +19,6 @@ log = create_logger(__name__)
 class JanusRefiner(JanusParser):
     parser: JanusParser
     max_retries: int
-    llm: JanusModel
 
     def parse_runnable(self, input: dict[str, Any]) -> Any:
         return self.parse_completion(**input)

@@ -3,7 +3,7 @@ import time
 from copy import deepcopy
 from operator import itemgetter
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from langchain_core.exceptions import OutputParserException
 from langchain_core.prompts import ChatPromptTemplate
@@ -16,8 +16,6 @@ from langchain_core.runnables import (
 from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
 
-from janus.cli.constants import REFINERS
-from janus.converter.chain import ConverterChain
 from janus.embedding.vectorize import ChromaDBVectorizer, Vectorizer
 from janus.language.block import (
     BlockCollection,
@@ -38,8 +36,6 @@ from janus.llm.model_callbacks import get_model_callback
 from janus.llm.models_info import MODEL_PROMPT_ENGINES, JanusModel, load_model
 from janus.parsers.parser import GenericParser, JanusParser, JanusParserException
 from janus.refiners.refiner import JanusRefiner
-
-# from janus.refiners.refiner import BasicRefiner, Refiner
 from janus.retrievers.retriever import (
     ActiveUsingsRetriever,
     JanusRetriever,
@@ -48,7 +44,20 @@ from janus.retrievers.retriever import (
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
+if TYPE_CHECKING:
+    from janus.converter.chain import ConverterChain
+
 log = create_logger(__name__)
+
+
+def get_subclasses(cls):
+    return set(cls.__subclasses__()).union(
+        set(s for c in cls.__subclasses__() for s in get_subclasses(c))
+    )
+
+
+REFINER_TYPES = get_subclasses(JanusRefiner).union({JanusRefiner})
+REFINERS = {r.__name__: r for r in REFINER_TYPES}
 
 
 class Converter:
@@ -725,7 +734,7 @@ class Converter:
         except TokenLimitError:
             log.error("Ran into irreducible node too large for context, skipping")
         except FileSizeError:
-            log.error("Current tile is too large for basic splitter, skipping")
+            log.error("Current file is too large for basic splitter, skipping")
         except OutputParserException as e:
             log.error(f"Skipping file, failed to parse output: {e}")
         except RateLimitError:
@@ -900,7 +909,10 @@ class Converter:
             self._combiner.combine(block)
             block.original.rebuild_text_from_children()
 
-    def __or__(self, other: "Converter") -> ConverterChain:
+    def __or__(self, other: "Converter") -> "ConverterChain":
+        # Import here to avoid circular imports
+        from janus.converter.chain import ConverterChain
+
         return ConverterChain(converters=[self, other])
 
     @property

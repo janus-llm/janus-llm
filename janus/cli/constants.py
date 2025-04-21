@@ -2,10 +2,8 @@ import json
 from pathlib import Path
 from typing import Type
 
-import janus.refiners.format
-import janus.refiners.refiner
-import janus.refiners.uml
 from janus.converter.converter import Converter
+from janus.refiners.refiner import JanusRefiner
 
 homedir = Path.home().expanduser()
 
@@ -30,14 +28,10 @@ def get_subclasses(cls):
     )
 
 
-REFINER_TYPES = get_subclasses(janus.refiners.refiner.JanusRefiner).union(
-    {janus.refiners.refiner.JanusRefiner}
-)
+REFINER_TYPES = get_subclasses(JanusRefiner).union({JanusRefiner})
 REFINERS = {r.__name__: r for r in REFINER_TYPES}
 
-CONVERTER_TYPES = get_subclasses(janus.converter.converter.Converter).union(
-    {janus.converter.converter.Converter}
-)
+CONVERTER_TYPES = get_subclasses(Converter).union({Converter})
 
 CONVERTERS: dict[str, Type[Converter]] = {c.__name__: c for c in CONVERTER_TYPES}
 
