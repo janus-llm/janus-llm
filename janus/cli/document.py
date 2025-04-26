@@ -152,6 +152,13 @@ def document(
             help="Present if converter should use janus files as inputs",
         ),
     ] = False,
+    separate_outputs: Annotated[
+        bool,
+        typer.Option(
+            "--separate-outputs",
+            help="Present if converter should combine outputs",
+        ),
+    ] = False,
 ):
     from janus.cli.constants import db_loc, get_collections_config
     from janus.converter.document import (
@@ -177,6 +184,7 @@ def document(
         refiner_types=refiner_types,
         retriever_type=retriever_type,
         use_janus_inputs=use_janus_inputs,
+        combine_output=not separate_outputs,
     )
     if doc_mode == "cloze":
         documenter = ClozeDocumenter(comments_per_request=comments_per_request, **kwargs)

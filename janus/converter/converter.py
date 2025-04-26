@@ -18,11 +18,11 @@ from pydantic import ValidationError
 
 from janus.embedding.vectorize import ChromaDBVectorizer, Vectorizer
 from janus.language.block import (
-    BlockCollection,
     CodeBlock,
     JanusOutputObject,
-    TranslatedBlockCollection,
     TranslatedCodeBlock,
+    codeblocks_to_janus_object,
+    sort_janus_obj,
 )
 from janus.language.combine import Combiner
 from janus.language.naive.registry import CUSTOM_SPLITTERS
@@ -35,7 +35,7 @@ from janus.language.splitter import (
 from janus.llm.model_callbacks import get_model_callback
 from janus.llm.models_info import MODEL_PROMPT_ENGINES, JanusModel, load_model
 from janus.parsers.parser import GenericParser, JanusParser, JanusParserException
-from janus.refiners.refiner import JanusRefiner
+from janus.refiners import JanusRefiner
 from janus.retrievers.retriever import (
     ActiveUsingsRetriever,
     JanusRetriever,
@@ -58,6 +58,19 @@ def get_subclasses(cls):
 
 REFINER_TYPES = get_subclasses(JanusRefiner).union({JanusRefiner})
 REFINERS = {r.__name__: r for r in REFINER_TYPES}
+
+
+class IncompleteTranslationException(Exception):
+    def __init__(
+        self,
+        exception: Exception,
+        partial_translation: TranslatedCodeBlock,
+        *args,
+        **kwargs,
+    ):
+        self.exception = exception
+        self.partial_translation = partial_translation
+        super().__init__(*args, **kwargs)
 
 
 class Converter:
@@ -569,90 +582,57 @@ class Converter:
         for in_path, out_path, fail_path in in_out_pairs:
             # Translate the file, skip it if there's a rate limit error
             log.info(f"Processing {in_path.relative_to(input_directory)}")
-            if self._use_janus_inputs:
-                out_block = self.translate_janus_file(in_path, fail_path)
-                self._combine_blocks(out_block)
-            else:
-                out_block = self.translate_file(in_path, fail_path)
-                self._combine_block(out_block)
+            try:
+                if self._use_janus_inputs:
+                    out_blocks = self.translate_janus_file(in_path)
+                else:
+                    out_blocks = self.translate_file(in_path)
+            except IncompleteTranslationException as e:
+                out_obj = e.partial_translation.to_janus_object()
+                log.debug(f"Untranslated block:" f"{json.dumps(out_obj)}")
+                if fail_path is not None:
+                    self._save_to_file(out_obj, fail_path)
+                raise e.exception
 
-            total_cost += out_block.total_cost
+            self._combine_blocks(out_blocks)
+
+            total_cost += sum(
+                block.total_cost
+                for block in out_blocks
+                if isinstance(block, TranslatedCodeBlock)
+            )
             log.info(f"Current Running Cost: {total_cost}")
 
+            translation_completed = all(
+                block.translation_completed
+                for block in out_blocks
+                if isinstance(block, TranslatedCodeBlock)
+            )
             # For files where translation failed, write to failure path instead
-            if not out_block.translation_completed:
+            if not translation_completed:
                 if fail_path is not None:
-                    self._save_to_file(out_block, fail_path)
+                    self._save_to_file(out_blocks, fail_path)
                 continue
 
-            if (
-                collection_name is not None
-                and self._vectorizer is not None
-                and isinstance(out_block, TranslatedCodeBlock)
-            ):
-                self._vectorizer.add_nodes_recursively(
-                    out_block,
-                    collection_name,
-                    in_path.name,
-                )
+            if collection_name is not None and self._vectorizer is not None:
+                for block in out_blocks:
+                    self._vectorizer.add_nodes_recursively(
+                        block,
+                        collection_name,
+                        in_path.name,
+                    )
 
             # Make sure the tree's code has been consolidated at the top level
             #  before writing to file
             if out_path is not None and (overwrite or not out_path.exists()):
-                self._save_to_file(out_block, out_path)
+                self._save_to_file(out_blocks, out_path)
 
         log.info(f"Total cost: ${total_cost:,.2f}")
-
-    def translate_blocks(
-        self,
-        block_collection: BlockCollection,
-        failure_path: Path | None = None,
-    ) -> TranslatedBlockCollection:
-        self._load_parameters()
-        input_blocks = list(block_collection.blocks)
-
-        # Filter out blocks that don't match the input type or label
-        if self._input_types is not None:
-            input_blocks = [b for b in input_blocks if b.block_type in self._input_types]
-        if self._input_labels is not None:
-            input_blocks = [
-                b for b in input_blocks if b.block_label in self._input_labels
-            ]
-
-        output_blocks = [self.translate_block(b, failure_path) for b in input_blocks]
-        return TranslatedBlockCollection(
-            blocks=output_blocks,
-            previous_generations=block_collection.previous_generations,
-        )
-
-    def translate_block(
-        self,
-        input_block: CodeBlock,
-        failure_path: Path | None = None,
-    ) -> TranslatedCodeBlock:
-        self._load_parameters()
-        output_block = self._iterative_translate(input_block, failure_path)
-        if output_block.translated:
-            completeness = output_block.translation_completeness
-            log.info(
-                f"[{output_block.name}] Translation complete\n"
-                f"  {completeness:.2%} of input successfully translated\n"
-                f"  Total cost: ${output_block.total_cost:,.2f}\n"
-                f"  Output CodeBlock Structure:\n{input_block.tree_str()}\n"
-            )
-
-        else:
-            log.error(
-                f"[{output_block.name}] Translation failed\n"
-                f"  Total cost: ${output_block.total_cost:,.2f}\n"
-            )
-        return output_block
 
     def translate_file(
         self,
         file: Path,
-        failure_path: Path | None = None,
-    ) -> TranslatedCodeBlock:
+    ) -> list[TranslatedCodeBlock | CodeBlock]:
         """Translate a single file.
 
         Arguments:
@@ -666,26 +646,18 @@ class Converter:
         """
         self._load_parameters()
         input_block = self._split_file(file)
-        return self.translate_block(input_block, failure_path)
+        return self._translate_blocks([input_block])
 
-    def translate_janus_file(
-        self, file: Path, failure_path: Path | None = None
-    ) -> TranslatedBlockCollection:
+    def translate_janus_file(self, file: Path) -> list[TranslatedCodeBlock | CodeBlock]:
         self._load_parameters()
         with open(file, "r") as f:
             file_obj: JanusOutputObject = json.load(f)
-        return self._translate_janus_obj(file_obj, failure_path)
-
-    def _translate_janus_obj(
-        self, obj: JanusOutputObject, failure_path: Path | None = None
-    ) -> TranslatedBlockCollection:
-        translated_block_collection = TranslatedBlockCollection.from_janus_object(obj)
-        block_collection = translated_block_collection.to_block_collection()
-        return self.translate_blocks(block_collection, failure_path)
+        code_block = CodeBlock.from_janus_object(file_obj)
+        return self._translate_blocks([code_block])
 
     def translate_text(
-        self, text: str, name: str, failure_path: Path | None = None
-    ) -> TranslatedCodeBlock:
+        self, text: str, name: str
+    ) -> list[TranslatedCodeBlock | CodeBlock]:
         """
         Translates given text
         Arguments:
@@ -695,12 +667,39 @@ class Converter:
         """
         self._load_parameters()
         input_block = self._split_text(text, name)
-        return self.translate_block(input_block, failure_path)
+        return self._translate_blocks([input_block])
 
-    def _iterative_translate(
-        self, root: CodeBlock, failure_path: Path | None = None
-    ) -> TranslatedCodeBlock:
+    def _translate_blocks(
+        self,
+        blocks: list[CodeBlock],
+    ) -> list[TranslatedCodeBlock | CodeBlock]:
+        """Translate a list of blocks. Child classes that must change translation
+        logic (beyond input/output formatting, prompts, etc.) should override
+        this function.
+
+        Takes a list of blocks, returns a list of translated blocks. If a block
+        was not translated due to not matching the input type or label, it
+        is passed on without translation.
+        """
+        return [self._translate_block(b) for b in blocks]
+
+    def _translate_block(self, block: CodeBlock) -> TranslatedCodeBlock | CodeBlock:
+        """Translate a CodeBlock, expected to be the root node of a tree representing
+        a full file. If the block should not be translated due to not matching
+        the expected input type or label, the CodeBlock is returned untranslated.
+        """
+        # Filter out blocks that don't match the input type or label
+        if self._input_types is not None and block.block_type not in self._input_types:
+            return block
+
+        if self._input_labels is not None and block.block_label not in self._input_labels:
+            return block
+
+        return self._iterative_translate(block)
+
+    def _iterative_translate(self, root: CodeBlock) -> TranslatedCodeBlock:
         """Translate the passed CodeBlock representing a full file.
+            In most cases, Converter subclasses should not override this function
 
         Arguments:
             root: A root block representing the top-level block of a file
@@ -709,6 +708,7 @@ class Converter:
         Returns:
             A `TranslatedCodeBlock`
         """
+        self._load_parameters()
         translated_root = TranslatedCodeBlock(
             root,
             self._target_language,
@@ -716,6 +716,7 @@ class Converter:
             block_type=self._output_type,
             block_label=self._output_label,
         )
+        translated_block: TranslatedCodeBlock | None = None
         translation_successful = False
         last_prog, prog_delta = 0, 0.1
         stack = [translated_root]
@@ -730,48 +731,63 @@ class Converter:
                     last_prog = int(progress / prog_delta) * prog_delta
                     log.info(f"[{root.name}] progress: {progress:.2%}")
         except EmptyTreeError:
-            log.warning("Input file has no nodes of interest, skipping")
+            log.warning("Skipping file (no nodes of interest)")
+            translation_successful = True
         except TokenLimitError:
-            log.error("Ran into irreducible node too large for context, skipping")
+            if translated_block is None:
+                raise
+            log.error(
+                "Skipping file, contains irreducible node too large for context "
+                f"({translated_block.name}, {translated_block.tokens} tokens)"
+            )
         except FileSizeError:
-            log.error("Current file is too large for basic splitter, skipping")
+            # FileSizeError only thrown by BasicSplitter (which does no splitting)
+            log.error("Skipping file too large for context (splitting required)")
         except OutputParserException as e:
-            log.error(f"Skipping file, failed to parse output: {e}")
-        except RateLimitError:
-            log.error("Hit rate limit, skipping file")
+            log.error(f"Skipping file due to malformed output: {e}")
+        except RateLimitError as e:
+            log.error(f"Skipping file due to rate limit: {e}")
         except BadRequestError as e:
-            if str(e).startswith("Detected an error in the prompt"):
-                log.warning("Malformed input, skipping")
-            raise e
+            if not str(e).startswith("Detected an error in the prompt"):
+                log.error(f"Bad request: {e}")
+                raise IncompleteTranslationException(e, translated_root)
+            log.warning(f"Skipping file due to malformed input: {e}")
         except ValidationError as e:
             # Only allow ValidationError to pass if token limit is manually set
-            if self._override_token_limit:
-                log.warning(
-                    "Current file and manually set token "
-                    "limit is too large for this model, skipping"
-                )
-            else:
-                raise e
+            if not self._override_token_limit:
+                log.exception(f"Token limit exceeded: {e}")
+                raise IncompleteTranslationException(e, translated_root)
+            log.warning(
+                f"Skipping file, manually set token limit ({self._max_tokens:,d}) is too"
+                f" large for this model ({self._model_name}, {self._llm.token_limit:,d})"
+            )
         except ValueError as e:
-            if str(e).startswith(
-                "Error raised by bedrock service"
-            ) and "maximum context length" in str(e):
-                log.warning(
-                    "Input is too large for this model's context length, skipping"
-                )
-            else:
-                raise e
+            if not (
+                str(e).startswith("Error raised by bedrock service")
+                and "maximum context length" in str(e)
+            ):
+                log.error(f"Unknown error: {e}")
+                raise IncompleteTranslationException(e, translated_root)
+            log.warning("Skipping file, too large for this model")
+        except Exception as e:
+            log.error(f"Uncaught error: {e}")
+            raise IncompleteTranslationException(e, translated_root)
         else:
             translation_successful = True
         finally:
-            out_obj = self._get_output_obj(
-                translated_root, self._combine_output, include_previous_outputs=True
-            )
-            log.debug(f"Resulting Block:" f"{json.dumps(out_obj)}")
             if not translation_successful:
                 translated_root.translated = False
-                if failure_path is not None:
-                    self._save_to_file(translated_root, failure_path)
+                log.error(
+                    f"[{translated_root.name}] Translation failed\n"
+                    f"  Total cost: ${translated_root.total_cost:,.2f}\n"
+                )
+            else:
+                completeness = translated_root.translation_completeness
+                log.info(
+                    f"[{translated_root.name}] Translation complete\n"
+                    f"  {completeness:.2%} of input successfully translated\n"
+                    f"  Total cost: ${translated_root.total_cost:,.2f}\n"
+                )
 
         return translated_root
 
@@ -850,63 +866,36 @@ class Converter:
 
     def _get_output_obj(
         self,
-        block: TranslatedCodeBlock | TranslatedBlockCollection | JanusOutputObject,
-        combine_children: bool = True,
-        include_previous_outputs: bool = True,
+        translation: list[TranslatedCodeBlock | CodeBlock] | JanusOutputObject,
     ) -> JanusOutputObject:
-        if isinstance(block, dict):
-            # output object has already been generated
-            new_block = deepcopy(block)
-            if "intermediate_outputs" in new_block and not include_previous_outputs:
-                del new_block["intermediate_outputs"]
-            elif include_previous_outputs and "intermediate_outputs" not in new_block:
-                new_block["intermediate_outputs"] = []
-            return new_block
-
-        janus_obj = block.to_janus_object(combine_children)
-        if not include_previous_outputs:
-            del janus_obj["intermediate_outputs"]
-
-        if not (combine_children and block.translation_completed):
-            return janus_obj
-
-        # Parse combined output if output was combined
-        if isinstance(block, TranslatedBlockCollection):
-            for obj in janus_obj["outputs"]:
-                if not isinstance(obj, dict):
-                    continue
-                out_str: str = obj["outputs"][0]  # type: ignore
-                obj["outputs"] = [self._parser.parse_combined_output(out_str)]
-
-        elif isinstance(block, TranslatedCodeBlock):
-            out_str: str = janus_obj["outputs"][0]  # type: ignore
-            janus_obj["outputs"] = [self._parser.parse_combined_output(out_str)]
-
-        return janus_obj
+        if isinstance(translation, dict):
+            return deepcopy(translation)
+        return codeblocks_to_janus_object(translation)
 
     def _save_to_file(
-        self, translation: TranslatedCodeBlock | TranslatedBlockCollection, out_path: Path
+        self,
+        translation: list[TranslatedCodeBlock | CodeBlock] | JanusOutputObject,
+        out_path: Path,
     ) -> None:
         """Save a file to disk.
 
         Arguments:
             block: The `TranslatedCodeBlock` to save to a file.
         """
-        obj = self._get_output_obj(
-            translation,
-            combine_children=self._combine_output,
-            include_previous_outputs=True,
-        )
+        obj = sort_janus_obj(self._get_output_obj(translation))
+        out_str = json.dumps(obj, indent=2, sort_keys=False)
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
+        out_path.write_text(out_str, encoding="utf-8")
 
-    def _combine_blocks(self, blocks: TranslatedBlockCollection) -> None:
-        for b in blocks.blocks:
-            self._combine_block(b)
+    def _combine_blocks(self, blocks: list[TranslatedCodeBlock | CodeBlock]) -> None:
+        for b in blocks:
+            if isinstance(b, TranslatedCodeBlock):
+                self._combine_block(b)
 
     def _combine_block(self, block: TranslatedCodeBlock) -> None:
         if self._combine_output:
             self._combiner.combine(block)
+            block.text = self._parser.parse_combined_output(block.text)
             block.original.rebuild_text_from_children()
 
     def __or__(self, other: "Converter") -> "ConverterChain":

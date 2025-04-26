@@ -1,0 +1,57 @@
+[
+    {
+        "type": "RequirementsDocumenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "source_language": "mumps",
+            "refiner_types": ["RequirementsFormatRefiner"],
+            "output_label": "requirements"
+        }
+    },
+    {
+        "type": "Documenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "source_language": "mumps",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "summaries"
+        }
+    },
+    {
+        "type": "Translator",
+        "kwargs": {
+            "input_labels": ["requirements"],
+            "prompt_templates": ["requirement_to_java"],
+            "target_language": "java",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "java_from_requirements"
+        }
+    },
+    {
+        "type": "RequirementsDocumenter",
+        "kwargs": {
+            "input_labels": ["java_from_requirements"],
+            "source_language": "java",
+            "refiner_types": ["RequirementsFormatRefiner"],
+            "output_label": "round_trip_requirements"
+        }
+    },
+    {
+        "type": "Translator",
+        "kwargs": {
+            "input_labels": ["summaries"],
+            "prompt_templates": ["summary_to_java"],
+            "target_language": "java",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "java_from_summaries"
+        }
+    },
+    {
+        "type": "RequirementEvaluator",
+        "kwargs": {
+            "input_labels": ["requirements", "round_trip_requirements"],
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "requirement_eval"
+        }
+    }
+]

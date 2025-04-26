@@ -20,6 +20,19 @@ class JanusRefiner(JanusParser):
     parser: JanusParser
     max_retries: int
 
+    def __init__(
+        self,
+        llm: JanusModel,
+        parser: JanusParser,
+        max_retries: int,
+        **kwargs,
+    ):
+        super().__init__(
+            parser=parser,  # type: ignore
+            max_retries=max_retries,  # type: ignore
+            **kwargs,
+        )
+
     def parse_runnable(self, input: dict[str, Any]) -> Any:
         return self.parse_completion(**input)
 

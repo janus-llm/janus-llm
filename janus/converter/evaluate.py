@@ -5,7 +5,7 @@ import re
 from langchain_core.runnables import Runnable, RunnableLambda, RunnableParallel
 
 from janus.converter.converter import Converter
-from janus.language.block import TranslatedCodeBlock
+from janus.language.block import JanusOutputObject, TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
 from janus.parsers.eval_parsers.inline_comment_parser import InlineCommentParser
@@ -40,6 +40,22 @@ class Evaluator(Converter):
         super().__init__(**kwargs)
         self._eval_items_per_request: int | None = eval_items_per_request
         self._combiner = JsonCombiner()
+
+    def _filter_inputs(self, inputs: list[JanusOutputObject]) -> str:
+        """Get single string input according to block types and labels"""
+        if self._input_types is not None:
+            inputs = [b for b in inputs if b["metadata"]["type"] in self._input_types]
+        if self._input_labels is not None:
+            inputs = [b for b in inputs if b["metadata"]["label"] in self._input_labels]
+
+        if len(inputs) != 1:
+            raise ValueError("Error: ambiguous input to evaluation")
+
+        input = inputs[0]
+        if "output" in input:
+            return input["output"]
+
+        return self._filter_inputs(input["outputs"])
 
 
 class RequirementEvaluator(Evaluator):
@@ -91,13 +107,16 @@ class RequirementEvaluator(Evaluator):
             block.translated = True
             return
 
-        if len(block.previous_generations) == 0:
-            raise ValueError(
-                "Error: cannot evaluate block, no previous generations found"
-            )
+        if block.previous_generation is None:
+            raise ValueError("Error: cannot evaluate block, no previous generation found")
 
         # Get original code from the input to requirements generation
-        input_str = block.previous_generations[-1]["input"]
+        if isinstance(block.previous_generation["input"], str):
+            input_str = block.previous_generation["input"]
+        elif "output" in block.previous_generation["input"]:
+            input_str = block.previous_generation["input"]["output"]
+        else:
+            input_str = self._filter_inputs(block.previous_generation["input"]["outputs"])
 
         requirements = json.loads(block.original.text)
 
@@ -106,7 +125,7 @@ class RequirementEvaluator(Evaluator):
             return
 
         # Requirements list can be a list of lists; flatten
-        if isinstance(requirements[0], list):
+        if isinstance(requirements, list) and isinstance(requirements[0], list):
             requirements = requirements[0]
 
         # Collect source input code and requirement outputs together
@@ -219,14 +238,19 @@ class InlineCommentEvaluator(Evaluator):
             block.translated = True
             return
 
-        if len(block.previous_generations) == 0:
+        if block.previous_generation is None:
             raise ValueError(
                 "Error: cannot evaluate block, no previous generations found"
             )
 
         # Get input to comment generation, which includes the original code
         #  and all the tagged comment placeholders
-        input_str = block.previous_generations[-1]["input"]
+        if isinstance(block.previous_generation["input"], str):
+            input_str = block.previous_generation["input"]
+        elif "output" in block.previous_generation["input"]:
+            input_str = block.previous_generation["input"]["output"]
+        else:
+            input_str = self._filter_inputs(block.previous_generation["input"]["outputs"])
 
         generated_comments = json.loads(block.original.text)
 
@@ -334,13 +358,18 @@ class SummaryEvaluator(Evaluator):
             block.translated = True
             return
 
-        if len(block.previous_generations) == 0:
+        if block.previous_generation is None:
             raise ValueError(
                 "Error: cannot evaluate block, no previous generations found"
             )
 
         # Get original code from the input to summary generation
-        input_str = block.previous_generations[-1]["input"]
+        if isinstance(block.previous_generation["input"], str):
+            input_str = block.previous_generation["input"]
+        elif "output" in block.previous_generation["input"]:
+            input_str = block.previous_generation["input"]["output"]
+        else:
+            input_str = self._filter_inputs(block.previous_generation["input"]["outputs"])
 
         summary = block.original.text
 
@@ -404,13 +433,18 @@ class UMLEvaluator(Evaluator):
             block.translated = True
             return
 
-        if len(block.previous_generations) == 0:
+        if block.previous_generation is None:
             raise ValueError(
                 "Error: cannot evaluate block, no previous generations found"
             )
 
         # Get original code from the input to requirements generation
-        input_str = block.previous_generations[-1]["input"]
+        if isinstance(block.previous_generation["input"], str):
+            input_str = block.previous_generation["input"]
+        elif "output" in block.previous_generation["input"]:
+            input_str = block.previous_generation["input"]["output"]
+        else:
+            input_str = self._filter_inputs(block.previous_generation["input"]["outputs"])
 
         diagrams = block.original.text
 

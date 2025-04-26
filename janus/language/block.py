@@ -1,9 +1,11 @@
-import json
+import random
+from collections import OrderedDict
 from functools import total_ordering
 from typing import (
     TYPE_CHECKING,
     ForwardRef,
     Hashable,
+    Iterable,
     NotRequired,
     Optional,
     Tuple,
@@ -17,50 +19,160 @@ if TYPE_CHECKING:
     from janus.converter.converter import Converter
 
 log = create_logger(__name__)
+RNG = random.Random()
 
 
 class JanusMetadata(TypedDict):
-    cost: float
-    processing_time: float
-    num_requests: int
-    input_tokens: int
+    cost: NotRequired[float]
+    processing_time: NotRequired[float]
+    num_requests: NotRequired[int]
+    request_input_tokens: NotRequired[int]
+    request_output_tokens: NotRequired[int]
+    input_tokens: NotRequired[int]
     output_tokens: int
-    converter_name: str
+    start_line: int
+    start_char: int
+    start_byte: int
+    end_line: int
+    end_char: int
+    end_byte: int
+    converter_name: NotRequired[str]
     language: str
-    model_name: str
-    type: str | None
-    label: str | None
+    model_name: NotRequired[str]
+    type: NotRequired[str]
+    label: NotRequired[str]
+    translation_complete: bool
 
 
 class JanusOutputObject(TypedDict):
-    input: str
+    input: str | ForwardRef("JanusOutputObject")
     metadata: JanusMetadata
-    outputs: list["JanusOutputObject"] | list[str]
-    intermediate_outputs: NotRequired[list["JanusOutputObject"]]
+    output: NotRequired[str]
+    outputs: list["JanusOutputObject"]
 
 
-def combine_metadata(metadatas: list[JanusMetadata]) -> JanusMetadata:
-    def _sum_metadata(key: str) -> float:
-        return sum((m[key] for m in metadatas), start=0.0)
+def sort_janus_obj(obj: JanusOutputObject) -> OrderedDict:
+    metadata_key_order = [
+        "converter_name",
+        "translation_complete",
+        "language",
+        "model_name",
+        "type",
+        "label",
+        "cost",
+        "processing_time",
+        "request_input_tokens",
+        "request_output_tokens",
+        "num_requests",
+        "input_tokens",
+        "output_tokens",
+        "start_line",
+        "start_char",
+        "start_byte",
+        "end_line",
+        "end_char",
+        "end_byte",
+    ]
+    ordered_metadata = OrderedDict()
+    for k in metadata_key_order:
+        if k in obj["metadata"]:
+            ordered_metadata[k] = obj["metadata"][k]
 
-    def _concat_metadata(key: str) -> str:
-        if len(set(m[key] for m in metadatas)) == 1:
-            return metadatas[0][key]
-        lst = ", ".join(str(m[key]) for m in metadatas)
+    ordered_obj = OrderedDict()
+    ordered_obj["metadata"] = ordered_metadata
+    if "output" in obj:
+        ordered_obj["output"] = obj["output"]
+    ordered_obj["outputs"] = [sort_janus_obj(o) for o in obj["outputs"]]
+    if isinstance(obj["input"], dict):
+        ordered_obj["input"] = sort_janus_obj(obj["input"])
+    else:
+        ordered_obj["input"] = obj["input"]
+
+    return ordered_obj
+
+
+def combine_metadata(metadatas: Iterable[JanusMetadata]) -> JanusMetadata:
+    metadatas = list(metadatas)
+    if not metadatas:
+        return JanusMetadata(
+            output_tokens=0,
+            start_line=0,
+            start_char=0,
+            start_byte=0,
+            end_line=-1,
+            end_char=-1,
+            end_byte=-1,
+            language="",
+            translation_complete=False,
+        )
+
+    def _get_vals(key: str) -> list:
+        return [m[key] for m in metadatas if key in m]
+
+    def _sum_metadata(key: str) -> float | None:
+        if not (vals := _get_vals(key)):
+            return None
+        return sum(vals, start=0.0)
+
+    def _min_metadata(key: str) -> float | None:
+        if not (vals := _get_vals(key)):
+            return None
+        return min(vals)
+
+    def _max_metadata(key: str) -> float | None:
+        if not (vals := _get_vals(key)):
+            return None
+        return max(vals)
+
+    def _merge_metadata(key: str) -> str | None:
+        if len(vals := _get_vals(key)) != len(metadatas):
+            return None
+
+        if len(set(vals)) == 1:
+            return vals[0]
+
+        return None
+        lst = ", ".join(map(str, vals))
         return f"[{lst}]"
 
-    return {
-        "cost": _sum_metadata("cost"),
-        "processing_time": _sum_metadata("processing_time"),
-        "num_requests": int(_sum_metadata("num_requests")),
-        "input_tokens": int(_sum_metadata("input_tokens")),
-        "output_tokens": int(_sum_metadata("output_tokens")),
-        "converter_name": _concat_metadata("converter_name"),
-        "model_name": _concat_metadata("model_name"),
-        "language": _concat_metadata("language"),
-        "type": _concat_metadata("type"),
-        "label": _concat_metadata("label"),
+    def _all_metadata(key: str) -> bool | None:
+        if not (vals := _get_vals(key)):
+            return None
+        return all(vals)
+
+    first_line_idx = min(range(len(metadatas)), key=lambda i: metadatas[i]["start_line"])
+    last_line_idx = max(range(len(metadatas)), key=lambda i: metadatas[i]["end_line"])
+
+    metadata: JanusMetadata = {
+        "output_tokens": int(_sum_metadata("output_tokens") or 0),
+        "start_line": metadatas[first_line_idx]["start_line"],
+        "start_char": metadatas[first_line_idx]["start_char"],
+        "start_byte": int(_min_metadata("start_byte") or 0),
+        "end_line": metadatas[last_line_idx]["end_line"],
+        "end_char": metadatas[last_line_idx]["end_char"],
+        "end_byte": int(_max_metadata("end_byte") or -1),
+        "language": _merge_metadata("language") or "UNKNOWN",
+        "translation_complete": _all_metadata("translation_complete") or False,
     }
+
+    optional_metadata = {
+        "cost": _sum_metadata("cost") or 0.0,
+        "processing_time": _sum_metadata("processing_time") or 0.0,
+        "num_requests": int(_sum_metadata("num_requests") or 0),
+        "request_input_tokens": int(_sum_metadata("request_input_tokens") or 0),
+        "request_output_tokens": int(_sum_metadata("request_output_tokens") or 0),
+        "input_tokens": int(_sum_metadata("input_tokens") or 0),
+        "converter_name": _merge_metadata("converter_name") or None,
+        "model_name": _merge_metadata("model_name") or None,
+        "type": _merge_metadata("type") or None,
+        "label": _merge_metadata("label") or None,
+    }
+
+    for k, v in optional_metadata.items():
+        if v is not None:
+            metadata[k] = v
+
+    return metadata
 
 
 @total_ordering
@@ -93,16 +205,16 @@ class CodeBlock:
         node_type: NodeType,
         language: str,
         text: Optional[str],
-        start_point: Optional[Tuple[int, int]],
-        end_point: Optional[Tuple[int, int]],
-        start_byte: Optional[int],
-        end_byte: Optional[int],
+        start_point: Tuple[int, int],
+        end_point: Tuple[int, int],
+        start_byte: int,
+        end_byte: int,
         tokens: int,
         children: list["CodeBlock"],
         embedding_id: Optional[str] = None,
         affixes: Tuple[str, str] = ("", ""),
         context_tags: dict[str, str] = {},
-        previous_generations: list[JanusOutputObject] = [],
+        previous_generation: JanusOutputObject | None = None,
         block_type: str | None = None,
         block_label: str | None = None,
     ) -> None:
@@ -111,10 +223,10 @@ class CodeBlock:
         self.node_type: NodeType = node_type
         self.language: str = language
         self.text: Optional[str] = text
-        self.start_point: Optional[Tuple[int, int]] = start_point
-        self.end_point: Optional[Tuple[int, int]] = end_point
-        self.start_byte: Optional[int] = start_byte
-        self.end_byte: Optional[int] = end_byte
+        self.start_point: tuple[int, int] = start_point
+        self.end_point: tuple[int, int] = end_point
+        self.start_byte: int = start_byte
+        self.end_byte: int = end_byte
         self.tokens: int = tokens
         self.children: list["CodeBlock"] = sorted(children)
         self.embedding_id: Optional[str] = embedding_id
@@ -124,18 +236,42 @@ class CodeBlock:
         self.complete = True
         self.omit_prefix = True
         self.omit_suffix = False
-        self.previous_generations = previous_generations
+        self.previous_generation = previous_generation
         self.block_type = block_type
         self.block_label = block_label
 
         if self.children:
             self.children[0].omit_prefix = False
 
+    @classmethod
+    def get_empty(cls) -> "CodeBlock":
+        return CodeBlock(
+            id="NULL",
+            name="NULL",
+            node_type=NodeType("NULL"),
+            language="UNKNOWN",
+            text=None,
+            start_point=(0, 0),
+            start_byte=0,
+            end_point=(-1, -1),
+            end_byte=-1,
+            tokens=0,
+            children=[],
+            previous_generation=None,
+            block_label=None,
+            block_type=None,
+        )
+
     def __lt__(self, other: "CodeBlock") -> bool:
         return (self.start_byte, self.end_byte) < (other.start_byte, other.end_byte)
 
     def __eq__(self, other: "CodeBlock") -> bool:
         return (self.start_byte, self.end_byte) == (other.start_byte, other.end_byte)
+
+    def __hash__(self) -> int:
+        if self.previous_generation is not None:
+            return hash((self.text, hash(self.previous_generation["output"])))
+        return hash(self.text)
 
     @property
     def prefix(self) -> str:
@@ -237,33 +373,54 @@ class CodeBlock:
         )
 
     @classmethod
-    def extract_from_janus_object(cls, janus_obj: JanusOutputObject) -> "CodeBlock":
-        source_language = "UNKNOWN"
-        previous_generations: list[JanusOutputObject] = janus_obj["intermediate_outputs"]
-        if previous_generations:
-            source_language = previous_generations[-1]["metadata"]["language"]
+    def extract_input(cls, janus_obj: JanusOutputObject) -> "CodeBlock":
+        """Get the CodeBlock corresponding to the input of the given JanusOutputObject"""
+        if isinstance(janus_obj["input"], dict):
+            return TranslatedCodeBlock.from_janus_object(janus_obj["input"])
 
-        input = janus_obj["input"]
-        input_lines = input.split("\n")
-        end_line = len(input_lines) - 1
-        end_char = len(input_lines[-1]) - 1
-        end_byte = len(bytes(input, "utf-8")) - 1
+        metadata = combine_metadata(obj["metadata"] for obj in janus_obj["outputs"])
 
-        # Create a TranslatedCodeBlock using the input text and metadata
-        return CodeBlock(
-            id="dummy",
-            name="dummy",
-            node_type=NodeType("dummy"),
-            language=source_language,
-            text=input,
-            start_point=(0, 0),
-            end_point=(end_line, end_char),
-            start_byte=0,
-            end_byte=end_byte,
-            tokens=0,
-            children=[],
-            previous_generations=previous_generations,
-        )
+        # Create a CodeBlock using the input text and metadata
+        block = cls.get_empty()
+        block.text = janus_obj["input"]
+        block.start_byte = metadata["start_byte"]
+        block.end_byte = metadata["end_byte"]
+        block.start_point = (metadata["start_line"], metadata["start_char"])
+        block.end_point = (metadata["end_line"], metadata["end_char"])
+        if "input_tokens" in metadata:
+            block.tokens = metadata["input_tokens"]
+        return block
+
+    def to_janus_object(self) -> JanusOutputObject:
+        if self.previous_generation is not None:
+            return self.previous_generation
+        metadata: JanusMetadata = {
+            "output_tokens": self.tokens,
+            "start_line": self.start_point[0],
+            "start_char": self.start_point[-1],
+            "start_byte": self.start_byte,
+            "end_line": self.end_point[0],
+            "end_char": self.end_point[-1],
+            "end_byte": self.end_byte,
+            "language": self.language,
+            "translation_complete": False,
+        }
+        janus_object: JanusOutputObject = {
+            "input": self.complete_text,
+            "metadata": metadata,
+            "output": self.complete_text,
+            "outputs": self.descendant_janus_objects() if self.children else [],
+        }
+        return janus_object
+
+    def descendant_janus_objects(self) -> list[JanusOutputObject]:
+        if not self.children:
+            return [self.to_janus_object()]
+        return [obj for c in self.children for obj in c.descendant_janus_objects()]
+
+    @classmethod
+    def from_janus_object(cls, janus_obj: JanusOutputObject) -> "CodeBlock":
+        return TranslatedCodeBlock.from_janus_object(janus_obj).to_codeblock()
 
 
 class TranslatedCodeBlock(CodeBlock):
@@ -277,7 +434,7 @@ class TranslatedCodeBlock(CodeBlock):
 
     def __init__(
         self,
-        original: CodeBlock,
+        original: CodeBlock | None,
         language: str,
         converter: str | ForwardRef("Converter"),
         model_name: str | None = None,
@@ -299,6 +456,8 @@ class TranslatedCodeBlock(CodeBlock):
             for `text`, `path`, `complete`, `language`, `tokens`, and `children`
         """
         self.children: list[TranslatedCodeBlock]
+        if original is None:
+            original = CodeBlock.get_empty()
         super().__init__(
             id=original.id,
             name=original.name,
@@ -307,15 +466,15 @@ class TranslatedCodeBlock(CodeBlock):
             text=None,
             start_point=original.start_point,
             end_point=original.end_point,
-            start_byte=None,
-            end_byte=None,
+            start_byte=original.start_byte,
+            end_byte=original.end_byte,
             tokens=0,
             children=[
                 TranslatedCodeBlock(child, language, converter, block_type, block_label)
                 for child in original.children
             ],
             affixes=original.affixes,
-            previous_generations=original.previous_generations,
+            previous_generation=original.previous_generation,
             block_type=block_type,
             block_label=block_label,
         )
@@ -336,6 +495,9 @@ class TranslatedCodeBlock(CodeBlock):
 
         self.request_input_tokens = 0
         self.request_output_tokens = 0
+
+    def __hash__(self) -> int:
+        return hash((self.text, hash(self.original)))
 
     @property
     def total_cost(self) -> float:
@@ -417,35 +579,41 @@ class TranslatedCodeBlock(CodeBlock):
             else 0
         )
 
-    def to_janus_object(self, combine_children: bool = True) -> JanusOutputObject:
+    def to_janus_object(self) -> JanusOutputObject:
+        converter = self.converter
+        if not isinstance(converter, str):
+            converter = converter.__class__.__name__
+
         metadata: JanusMetadata = {
             "cost": self.total_cost,
             "processing_time": self.total_processing_time,
             "num_requests": self.total_num_requests,
-            "input_tokens": self.total_request_input_tokens,
-            "output_tokens": self.total_request_output_tokens,
-            "converter_name": self.converter.__class__.__name__,
+            "input_tokens": self.total_input_tokens,
+            "output_tokens": self.tokens,
+            "request_input_tokens": self.total_request_input_tokens,
+            "request_output_tokens": self.total_request_output_tokens,
+            "converter_name": converter,
+            "start_line": self.start_point[0],
+            "start_char": self.start_point[-1],
+            "start_byte": self.start_byte,
+            "end_line": self.end_point[0],
+            "end_char": self.end_point[-1],
+            "end_byte": self.end_byte,
             "language": self.language,
             "model_name": self.model_name,
-            "type": self.block_type,
-            "label": self.block_label,
+            "translation_complete": self.translation_completed,
         }
-        if combine_children:
-            outputs = [self.complete_text]
-        else:
-            outputs = self.descendant_janus_objects()
-        obj: JanusOutputObject = {
-            "input": self.original.complete_text,
+        if self.block_type is not None:
+            metadata["type"] = self.block_type
+        if self.block_label is not None:
+            metadata["label"] = self.block_label
+        janus_object: JanusOutputObject = {
+            "input": self.original.to_janus_object(),
             "metadata": metadata,
-            "outputs": outputs,
-            "intermediate_outputs": self.previous_generations,
+            "output": self.complete_text,
+            "outputs": self.descendant_janus_objects() if self.children else [],
         }
-        return obj
-
-    def descendant_janus_objects(self) -> list[JanusOutputObject]:
-        if not self.children:
-            return [self.to_janus_object()]
-        return [obj for c in self.children for obj in c.descendant_janus_objects()]
+        return janus_object
 
     @classmethod
     def from_janus_object(
@@ -453,41 +621,58 @@ class TranslatedCodeBlock(CodeBlock):
         janus_obj: JanusOutputObject,
     ) -> "TranslatedCodeBlock":
         metadata = janus_obj["metadata"]
-
-        code_block = CodeBlock.extract_from_janus_object(janus_obj)
         translated_block = TranslatedCodeBlock(
-            original=code_block,
+            original=CodeBlock.extract_input(janus_obj),
             language=metadata["language"],
-            converter=metadata["converter_name"],
-            model_name=metadata["model_name"],
-            block_type=janus_obj["type"],
-            block_label=janus_obj["label"],
+            converter=metadata.get("converter_name", "None"),
+            model_name=metadata.get("model_name", None),
+            block_type=metadata.get("type", None),
+            block_label=metadata.get("label", None),
         )
-        translated_block.text = json.dumps(janus_obj["outputs"])
-        translated_block.cost = metadata["cost"]
-        translated_block.processing_time = metadata["processing_time"]
-        translated_block.num_requests = metadata["num_requests"]
-        translated_block.request_input_tokens = metadata["input_tokens"]
-        translated_block.request_output_tokens = metadata["output_tokens"]
+
+        translated_block.translated = metadata["translation_complete"]
+        if "output" in janus_obj:
+            translated_block.text = janus_obj["output"]
+
+        translated_block.children = [
+            cls.from_janus_object(obj) for obj in janus_obj["outputs"]
+        ]
+
+        translated_block.cost = metadata.get("cost", 0.0)
+        translated_block.processing_time = metadata.get("processing_time", 0.0)
+        translated_block.num_requests = metadata.get("num_requests", 0)
+        translated_block.tokens = metadata.get("output_tokens", 0)
+        translated_block.request_input_tokens = metadata.get("request_input_tokens", 0)
+        translated_block.request_output_tokens = metadata.get("request_output_tokens", 0)
+
         return translated_block
 
     def to_codeblock(self) -> CodeBlock:
-        prev_gen = self.previous_generations + [self.to_janus_object()]
+        """Prepare this translated block to feed into a downstream Converter"""
+        # The input to the next Converter is the entirety of this block
+        start_line, start_char, start_byte = 0, 0, 0
+        end_line, end_char, end_byte = -1, -1, -1
+        if self.text is not None:
+            input_lines = self.text.split("\n")
+            end_line = len(input_lines) - 1
+            end_char = len(input_lines[-1]) - 1
+            end_byte = len(bytes(self.text, "utf-8")) - 1
+
         return CodeBlock(
             id=self.id,
             name=self.name,
             node_type=self.node_type,
             language=self.language,
             text=self.text,
-            start_point=self.start_point,
-            end_point=self.end_point,
-            start_byte=self.start_byte,
-            end_byte=self.end_byte,
+            start_point=(start_line, start_char),
+            start_byte=start_byte,
+            end_point=(end_line, end_char),
+            end_byte=end_byte,
             embedding_id=self.embedding_id,
             tokens=self.tokens,
             children=[child.to_codeblock() for child in self.children],
             affixes=self.affixes,
-            previous_generations=prev_gen,
+            previous_generation=self.to_janus_object(),
             block_type=self.block_type,
             block_label=self.block_label,
         )
@@ -501,121 +686,42 @@ class TranslatedCodeBlock(CodeBlock):
         return self
 
 
-class BlockCollection:
-    def __init__(
-        self,
-        blocks: list[CodeBlock],
-        previous_generations: list["TranslatedBlockCollection"] = [],
-    ):
-        self.blocks = blocks
-        self.previous_generations = previous_generations
+def codeblocks_to_janus_object(
+    blocks: list[TranslatedCodeBlock | CodeBlock],
+) -> JanusOutputObject:
+    janus_objs = [b.to_janus_object() for b in blocks]
+    return combine_janus_objects(janus_objs)
 
 
-class TranslatedBlockCollection:
-    def __init__(
-        self,
-        blocks: list[TranslatedCodeBlock],
-        previous_generations: list["TranslatedBlockCollection"] = [],
-    ):
-        self.blocks = blocks
-        self.previous_generations = previous_generations
+def combine_janus_objects(janus_objects: list[JanusOutputObject]) -> JanusOutputObject:
+    if len(janus_objects) == 1:
+        return janus_objects[0]
 
-    def to_block_collection(self) -> "BlockCollection":
-        return BlockCollection(
-            blocks=[b.to_codeblock() for b in self.blocks],
-            previous_generations=self.previous_generations + [self],
-        )
+    if len(janus_objects) == 0:
+        raise ValueError("Cannot combine zero objects")
 
-    @classmethod
-    def from_janus_object(
-        cls, janus_obj: JanusOutputObject
-    ) -> "TranslatedBlockCollection":
-        metadata: JanusMetadata = janus_obj["metadata"]
-        previous_generations: list[JanusOutputObject] = janus_obj["intermediate_outputs"]
+    metadata = combine_metadata(obj["metadata"] for obj in janus_objects)
 
-        previous_generation_blocks: list[TranslatedBlockCollection] = list(
-            map(
-                cls.from_janus_object,
-                previous_generations,
-            )
-        )
+    inputs = [obj["input"] for obj in janus_objects]
+    if all(isinstance(x, str) for x in inputs) and len(set(inputs)) == 1:
+        input = inputs[0]
+    else:
+        input_blocks = []
+        for input in inputs:
+            if isinstance(input, str):
+                block = CodeBlock.get_empty()
+                block.text = input
+                input_blocks.append(block)
+            else:
+                input_blocks.append(CodeBlock.from_janus_object(input))
+        if len(set(hash(x) for x in input_blocks)) == 1:
+            input = inputs[0]
+        else:
+            input = codeblocks_to_janus_object(input_blocks)
 
-        code_block = CodeBlock.extract_from_janus_object(janus_obj)
-
-        results: list[TranslatedCodeBlock] = []
-        for i, out_obj in enumerate(janus_obj["outputs"]):
-            if not isinstance(out_obj, str):
-                # If the output is a janus output object, recurse
-                results.extend(cls.from_janus_object(out_obj).blocks)
-                continue
-
-            # Create a TranslatedCodeBlock using the input text and metadata
-            translated_block = TranslatedCodeBlock(
-                original=code_block,
-                language=metadata["language"],
-                converter=metadata["converter_name"],
-                model_name=metadata["model_name"],
-                block_type=metadata["type"],
-                block_label=metadata["label"],
-            )
-            # Copy over the output text and the rest of the metadata
-            translated_block.text = out_obj
-            translated_block.cost = metadata["cost"]
-            translated_block.processing_time = metadata["processing_time"]
-            translated_block.num_requests = metadata["num_requests"]
-            translated_block.request_input_tokens = metadata["input_tokens"]
-            translated_block.request_output_tokens = metadata["output_tokens"]
-            results.append(translated_block)
-
-        return TranslatedBlockCollection(results, previous_generation_blocks)
-
-    def to_janus_object(self, combine_children: bool = True) -> JanusOutputObject:
-        input = json.dumps([block.original.complete_text for block in self.blocks])
-        outputs = [block.to_janus_object(combine_children) for block in self.blocks]
-        metadata = combine_metadata([obj["metadata"] for obj in outputs])
-        prev_gens = [c.to_janus_object() for c in self.previous_generations]
-
-        out: JanusOutputObject = {
-            "input": input,
-            "metadata": metadata,
-            "outputs": outputs,
-            "intermediate_outputs": prev_gens,
-        }
-
-        return out
-
-    @property
-    def total_cost(self):
-        return sum(b.total_cost for b in self.blocks)
-
-    @property
-    def total_processing_time(self):
-        return sum(b.total_processing_time for b in self.blocks)
-
-    @property
-    def total_request_input_tokens(self):
-        return sum(b.total_request_input_tokens for b in self.blocks)
-
-    @property
-    def total_request_output_tokens(self):
-        return sum(b.total_request_output_tokens for b in self.blocks)
-
-    @property
-    def total_num_requests(self):
-        return sum(b.total_num_requests for b in self.blocks)
-
-    @property
-    def block_type(self):
-        return None
-
-    @property
-    def block_label(self):
-        return None
-
-    @property
-    def translation_completed(self):
-        return all(b.translation_completed for b in self.blocks)
-
-    @property
-    def complete(self):
-        return all(b.complete for b in self.blocks)
+    janus_object: JanusOutputObject = {
+        "input": input,
+        "metadata": metadata,
+        "outputs": janus_objects,
+    }
+    return janus_object

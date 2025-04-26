@@ -1,3 +1,4 @@
+from janus.converter.chain import ConverterChain
 from janus.converter.converter import Converter
 from janus.converter.diagram import DiagramGenerator
 from janus.converter.document import ClozeDocumenter, Documenter, MultiDocumenter

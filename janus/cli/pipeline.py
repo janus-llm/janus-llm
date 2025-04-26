@@ -39,6 +39,11 @@ def instantiate(
     ConverterClass = CONVERTERS[converter_type]
 
     kwargs = pipeline_definition.get("kwargs", {})
+    kwargs.update(model=model)
+    if source_language is not None and "source_language" not in kwargs:
+        kwargs.update(source_language=source_language)
+    if use_janus_inputs is not None and "use_janus_inputs" not in kwargs:
+        kwargs.update(use_janus_inputs=use_janus_inputs)
 
     if converter_type in {"ConverterPool", "ConverterChain"}:
         if "converters" not in pipeline_definition:
@@ -56,22 +61,7 @@ def instantiate(
                 )
             )
 
-            # In a sequential chain, the source language of a component should
-            #  match the target language of its predecessor. Also, only the
-            #  first component need match the use_janus_inputs parameter
-            if converter_type == "ConverterChain":
-                source_language = converters[-1].target_language
-                use_janus_inputs = None
-
         kwargs["converters"] = converters
-
-    # If not a "multi-converter" Converter, just apply the relevant arguments
-    else:
-        kwargs.update(model=model)
-        if source_language is not None:
-            kwargs.update(source_language=source_language)
-        if use_janus_inputs is not None:
-            kwargs.update(use_janus_inputs=use_janus_inputs)
 
     return ConverterClass(**kwargs)
 
@@ -89,7 +79,10 @@ def instantiate_pipeline(
         kwargs=dict(splitter_type=splitter_type),
     )
     return instantiate(
-        conv_def, source_language=language, model=model, use_janus_inputs=use_janus_inputs
+        conv_def,
+        source_language=language,
+        model=model,
+        use_janus_inputs=use_janus_inputs,
     )
 
 
