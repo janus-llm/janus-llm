@@ -46,11 +46,11 @@ def instantiate(
     if use_janus_inputs is not None and "use_janus_inputs" not in kwargs:
         kwargs.update(use_janus_inputs=use_janus_inputs)
 
-    if converter_type in {"ConverterPool", "ConverterChain"}:
+    if converter_type == "ConverterChain":
         if "converters" not in pipeline_definition:
             raise ValueError(f"Error: {converter_type} requires a 'converter' entry")
 
-        # For converter pools and chains, recursively instantiate components
+        # For converter chains, recursively instantiate components
         converters = []
         for conv_def in pipeline_definition["converters"]:
             converters.append(
