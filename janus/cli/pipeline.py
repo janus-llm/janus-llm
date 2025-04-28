@@ -39,7 +39,8 @@ def instantiate(
     ConverterClass = CONVERTERS[converter_type]
 
     kwargs = pipeline_definition.get("kwargs", {})
-    kwargs.update(model=model)
+    if "model" not in kwargs:
+        kwargs.update(model=model)
     if source_language is not None and "source_language" not in kwargs:
         kwargs.update(source_language=source_language)
     if use_janus_inputs is not None and "use_janus_inputs" not in kwargs:

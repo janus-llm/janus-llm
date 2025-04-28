@@ -340,6 +340,8 @@ class CodeBlock:
 
     def rebuild_text_from_children(self):
         if self.children:
+            for child in self.children:
+                child.rebuild_text_from_children()
             prefix = self.affixes[0] + self.children[0].pop_prefix()
             suffix = self.children[-1].pop_suffix() + self.affixes[1]
             self.text = "".join(c.complete_text for c in self.children)

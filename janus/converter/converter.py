@@ -594,6 +594,8 @@ class Converter:
                     self._save_to_file(out_obj, fail_path)
                 raise e.exception
 
+            # Make sure the tree's code has been consolidated at the top level
+            #  before writing to file
             self._combine_blocks(out_blocks)
 
             total_cost += sum(
@@ -622,8 +624,6 @@ class Converter:
                         in_path.name,
                     )
 
-            # Make sure the tree's code has been consolidated at the top level
-            #  before writing to file
             if out_path is not None and (overwrite or not out_path.exists()):
                 self._save_to_file(out_blocks, out_path)
 
@@ -893,7 +893,7 @@ class Converter:
                 self._combine_block(b)
 
     def _combine_block(self, block: TranslatedCodeBlock) -> None:
-        if self._combine_output:
+        if self._combine_output and block.translated:
             self._combiner.combine(block)
             block.text = self._parser.parse_combined_output(block.text)
             block.original.rebuild_text_from_children()
