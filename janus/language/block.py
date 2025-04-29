@@ -283,7 +283,10 @@ class CodeBlock:
 
     @property
     def complete_text(self) -> str:
-        return f"{self.prefix}{self.text or ''}{self.suffix}"
+        text = self.text
+        if text is None and self.children:
+            text = "".join(c.complete_text for c in self.children)
+        return f"{self.prefix}{text or ''}{self.suffix}"
 
     @property
     def n_descendents(self) -> int:
@@ -396,6 +399,7 @@ class CodeBlock:
     def to_janus_object(self) -> JanusOutputObject:
         if self.previous_generation is not None:
             return self.previous_generation
+
         metadata: JanusMetadata = {
             "output_tokens": self.tokens,
             "start_line": self.start_point[0],
@@ -407,12 +411,14 @@ class CodeBlock:
             "language": self.language,
             "translation_complete": False,
         }
+
         janus_object: JanusOutputObject = {
             "input": self.complete_text,
             "metadata": metadata,
-            "output": self.complete_text,
             "outputs": self.descendant_janus_objects() if self.children else [],
         }
+        if self.text is not None:
+            janus_object["output"] = self.complete_text
         return janus_object
 
     def descendant_janus_objects(self) -> list[JanusOutputObject]:
@@ -609,12 +615,14 @@ class TranslatedCodeBlock(CodeBlock):
             metadata["type"] = self.block_type
         if self.block_label is not None:
             metadata["label"] = self.block_label
+
         janus_object: JanusOutputObject = {
             "input": self.original.to_janus_object(),
             "metadata": metadata,
-            "output": self.complete_text,
             "outputs": self.descendant_janus_objects() if self.children else [],
         }
+        if self.text is not None:
+            janus_object["output"] = self.complete_text
         return janus_object
 
     @classmethod
