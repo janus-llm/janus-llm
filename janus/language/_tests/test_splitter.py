@@ -8,8 +8,8 @@ class TestSplitter(unittest.TestCase):
         self.splitter = Splitter(language="python")
 
     def test_split(self):
-        input_data = "janus/__main__.py"
-        self.assertRaises(NotImplementedError, self.splitter.split, input_data)
+        self.assertRaises(FileNotFoundError, self.splitter.split, "not-a-real-file.py")
+        self.assertRaises(NotImplementedError, self.splitter.split, __file__)
 
 
 if __name__ == "__main__":

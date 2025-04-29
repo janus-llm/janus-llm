@@ -205,12 +205,12 @@ class CodeBlock:
         node_type: NodeType,
         language: str,
         text: Optional[str],
-        start_point: Tuple[int, int],
-        end_point: Tuple[int, int],
-        start_byte: int,
-        end_byte: int,
-        tokens: int,
         children: list["CodeBlock"],
+        start_point: Tuple[int, int] = (0, 0),
+        end_point: Tuple[int, int] = (-1, -1),
+        start_byte: int = 0,
+        end_byte: int = -1,
+        tokens: int = 0,
         embedding_id: Optional[str] = None,
         affixes: Tuple[str, str] = ("", ""),
         context_tags: dict[str, str] = {},
@@ -228,7 +228,6 @@ class CodeBlock:
         self.start_byte: int = start_byte
         self.end_byte: int = end_byte
         self.tokens: int = tokens
-        self.children: list["CodeBlock"] = sorted(children)
         self.embedding_id: Optional[str] = embedding_id
         self.affixes: Tuple[str, str] = affixes
         self.context_tags: dict[str, str] = context_tags
@@ -240,8 +239,8 @@ class CodeBlock:
         self.block_type = block_type
         self.block_label = block_label
 
-        if self.children:
-            self.children[0].omit_prefix = False
+        self.children: list["CodeBlock"]
+        self.set_children(children)
 
     @classmethod
     def get_empty(cls) -> "CodeBlock":
@@ -251,15 +250,7 @@ class CodeBlock:
             node_type=NodeType("NULL"),
             language="UNKNOWN",
             text=None,
-            start_point=(0, 0),
-            start_byte=0,
-            end_point=(-1, -1),
-            end_byte=-1,
-            tokens=0,
             children=[],
-            previous_generation=None,
-            block_label=None,
-            block_type=None,
         )
 
     def __lt__(self, other: "CodeBlock") -> bool:
@@ -272,6 +263,64 @@ class CodeBlock:
         if self.previous_generation is not None:
             return hash((self.text, hash(self.previous_generation["output"])))
         return hash(self.text)
+
+    def set_children(self, children: list["CodeBlock"]) -> None:
+        self.children = children
+        self.sort_children()
+
+    def sort_children(self) -> None:
+        self.children = sorted(self.children)
+        for child in self.children:
+            child.omit_prefix = True
+            child.omit_suffix = False
+            child.sort_children()
+        if self.children:
+            self.children[0].mark_first()
+            self.children[-1].mark_last()
+
+    def mark_first(self) -> None:
+        self.omit_prefix = False
+        if self.children:
+            self.children[0].mark_first()
+
+    def mark_last(self) -> None:
+        self.omit_suffix = False
+        if self.children:
+            self.children[-1].mark_last()
+
+    def mark_root(self) -> None:
+        self.mark_first()
+        self.mark_last()
+        self.set_start_index(0, 0, 0)
+
+    def set_start_index(self, byte: int, line: int, char: int) -> None:
+        self.start_byte = byte
+        self.start_point = (line, char)
+
+        def _increment_indices(text: str):
+            nonlocal byte, line, char
+            byte += len(bytes(text, "utf-8"))
+            newlines = text.count("\n")
+            if newlines:
+                char = len(text.rsplit("\n", 1)[1])
+            else:
+                char += len(text)
+            line += newlines
+
+        _increment_indices(self.prefix)
+
+        if self.text is not None:
+            _increment_indices(self.text)
+
+        for child in self.children:
+            child.set_start_index(byte=byte, line=line, char=char)
+            byte = child.end_byte
+            line, char = child.end_point
+
+        _increment_indices(self.suffix)
+
+        self.end_byte = byte
+        self.end_point = (line, char)
 
     @property
     def prefix(self) -> str:
@@ -478,7 +527,13 @@ class TranslatedCodeBlock(CodeBlock):
             end_byte=original.end_byte,
             tokens=0,
             children=[
-                TranslatedCodeBlock(child, language, converter, block_type, block_label)
+                TranslatedCodeBlock(
+                    original=child,
+                    language=language,
+                    converter=converter,
+                    block_type=block_type,
+                    block_label=block_label,
+                )
                 for child in original.children
             ],
             affixes=original.affixes,
@@ -486,6 +541,8 @@ class TranslatedCodeBlock(CodeBlock):
             block_type=block_type,
             block_label=block_label,
         )
+        self.omit_prefix = original.omit_prefix
+        self.omit_suffix = original.omit_suffix
 
         self.original = original
         self.converter = converter

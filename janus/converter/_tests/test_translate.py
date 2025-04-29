@@ -77,13 +77,22 @@ class TestTranslator(unittest.TestCase):
     def test_invalid_selections(self) -> None:
         """Tests that settings values for the translator will raise exceptions"""
         self.assertRaises(
-            ValueError, self.translator.set_target_language, "gobbledy", "goobledy"
+            ValueError, self.translator._set_target_language, "fake-lang", "1.0.0"
         )
+        self.assertRaises(ValueError, self.translator._set_source_language, "fake-lang")
+        self.assertRaises(ValueError, self.translator._set_splitter, "fake-splitter")
         self.assertRaises(
-            ValueError, self.translator.set_source_language, "scribbledy-doop"
+            ValueError, self.translator._set_refiner_types, ["fake-refiner"]
         )
-        self.translator.set_prompts(["pish posh"])
+
+        self.translator._prompt_template_names = ["fake-prompt"]
         self.assertRaises(ValueError, self.translator._load_parameters)
+
+        self.translator._initialized = True
+        try:
+            self.translator._load_parameters()
+        except Exception:
+            self.fail("Initialization called after already being initialized")
 
 
 class TestDiagramGenerator(unittest.TestCase):
@@ -96,6 +105,7 @@ class TestDiagramGenerator(unittest.TestCase):
             source_language="fortran",
             diagram_type="Activity",
         )
+        self.diagram_generator._load_parameters()
 
     def test_init(self):
         """Test __init__ method."""
@@ -146,11 +156,13 @@ def test_language_combinations(
     """Tests that translator target language settings are consistent
     with prompt template expectations.
     """
-    translator = Translator(model="gpt-4o")
-    translator.set_model("gpt-4o")
-    translator.set_source_language(source_language)
-    translator.set_target_language(expected_target_language, expected_target_version)
-    translator.set_prompts(prompt_template)
+    translator = Translator(
+        model="gpt-4o",
+        source_language=source_language,
+        target_language=expected_target_language,
+        target_version=expected_target_version,
+        prompt_templates=prompt_template,
+    )
     translator._load_parameters()
     assert translator._target_language == expected_target_language  # nosec
     assert translator._target_version == expected_target_version  # nosec

@@ -1,7 +1,7 @@
 import unittest
 
 from janus.converter.evaluate import RequirementEvaluator, UMLEvaluator
-from janus.language.block import CodeBlock
+from janus.language.block import CodeBlock, combine_metadata
 from janus.refiners.refiner import FixParserExceptions
 
 
@@ -40,10 +40,14 @@ class TestUMLEvaluator(unittest.TestCase):
             end_byte=1,
             tokens=5,
             children=[],
-            previous_generations=[{"input": "test"}],
+            previous_generation={
+                "input": "test",
+                "metadata": combine_metadata([]),
+                "outputs": [],
+            },
         )
 
-        self.assertEqual(self.uml_evaluator.translate_block(source), [])
+        self.assertEqual(self.uml_evaluator._translate_block(source), source)
 
 
 class TestRequirementEvaluator(unittest.TestCase):
@@ -81,7 +85,11 @@ class TestRequirementEvaluator(unittest.TestCase):
             end_byte=1,
             tokens=5,
             children=[],
-            previous_generations=[{"input": "test"}],
+            previous_generation={
+                "input": "test",
+                "metadata": combine_metadata([]),
+                "outputs": [],
+            },
         )
 
-        self.assertEqual(self.req_evaluator.translate_block(source), [])
+        self.assertEqual(self.req_evaluator._translate_block(source), source)

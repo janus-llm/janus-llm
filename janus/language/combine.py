@@ -20,7 +20,8 @@ class Combiner(FileManager):
             root: The functional code block to combine with its children.
         """
         Combiner.combine_children(root)
-        root.omit_prefix = False
+        root.mark_first()
+        root.mark_last()
 
     @staticmethod
     def combine_children(block: CodeBlock) -> None:
