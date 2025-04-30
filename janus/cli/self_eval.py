@@ -137,6 +137,7 @@ def llm_self_eval(
         RequirementEvaluator,
         SummaryEvaluator,
         UMLEvaluator,
+        JavaCategoryEvaluator,
     )
 
     model_arguments = dict(temperature=temperature)
@@ -161,5 +162,7 @@ def llm_self_eval(
         evaluator = UMLEvaluator(**kwargs)
     elif evaluation_type == "summary":
         evaluator = SummaryEvaluator(**kwargs)
+    elif evaluation_type == "java-category":
+        evaluator = JavaCategoryEvaluator(**kwargs)
 
     evaluator.translate(input_dir, output_dir, failure_dir, overwrite, collection)
