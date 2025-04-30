@@ -55,7 +55,9 @@ def llm_self_eval(
             "--evaluation-type",
             "-e",
             help="Type of output to evaluate.",
-            click_type=click.Choice(["incose", "comments", "uml", "summary"]),
+            click_type=click.Choice(
+                ["incose", "comments", "uml", "summary", "java-category"]
+            ),
         ),
     ] = "incose",
     max_prompts: Annotated[
@@ -134,10 +136,10 @@ def llm_self_eval(
 ):
     from janus.converter.evaluate import (
         InlineCommentEvaluator,
+        JavaCategoryEvaluator,
         RequirementEvaluator,
         SummaryEvaluator,
         UMLEvaluator,
-        JavaCategoryEvaluator,
     )
 
     model_arguments = dict(temperature=temperature)

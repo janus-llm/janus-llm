@@ -1,5 +1,5 @@
 import json
-from typing import List, Any
+from typing import Any, List
 
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException
@@ -17,15 +17,19 @@ log = create_logger(__name__)
 class LabeledJava(BaseModel):
     start_line: int = Field(description="Start line of the code block")
     end_line: int = Field(description="End line of the code block")
-    section_reasoning: str = Field(description="Brief reasoning for the evaluation of this block")
+    section_reasoning: str = Field(
+        description="Brief reasoning for the evaluation of this block"
+    )
     section_label: str = Field(
         description="Assigned label for the block",
-        regex="^(non_code_text|lazy_implementation|placeholder_implementation|commented_implementation|syntax_error|general_error|clean_implementation)$"
+        regex="^(non_code_text|lazy_implementation|placeholder_implementation|commented_implementation|syntax_error|general_error|clean_implementation)$",
     )
     section_quality: int = Field(description="Integer score from 1 to 100")
 
+
 class LabeledJavaList(BaseModel):
     __root__: List[LabeledJava]
+
 
 class LabeledJavaListParser(JanusParser, PydanticOutputParser):
     def __init__(self):

@@ -9,9 +9,9 @@ from janus.language.block import CodeBlock, TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
 from janus.parsers.eval_parsers.inline_comment_parser import InlineCommentParser
+from janus.parsers.eval_parsers.java_category_parser import LabeledJavaListParser
 from janus.parsers.eval_parsers.summary_parser import SummaryParser
 from janus.parsers.eval_parsers.uml_parser import UMLParser
-from janus.parsers.eval_parsers.java_category_parser import LabeledJavaListParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -413,15 +413,17 @@ class UMLEvaluator(Evaluator):
         translated_block.previous_generations = input_block.previous_generations
         return translated_block
 
+
 class JavaCategoryEvaluator(Evaluator):
     """Java Category Evaluator
 
     A class that performs LLM-based labelling/evals of llm generated Java,
     appends line numbers so the llm can track things in prompts.
     """
+
     def __init__(
         self,
-        eval_items_per_request: int | None = None, # not used
+        eval_items_per_request: int | None = None,  # not used
         input_types: str | set[str] = None,  # disable filtering by type
         output_type: str = "java_category_eval",
         **kwargs,
@@ -438,7 +440,7 @@ class JavaCategoryEvaluator(Evaluator):
         super().__init__(**kwargs)
         self.set_prompts("eval_prompts/java_category")
         self._parser = LabeledJavaListParser()
-        self.eval_items_per_request = eval_items_per_request # not used
+        self.eval_items_per_request = eval_items_per_request  # not used
         self._load_parameters()
 
     def translate_block(self, input_block: CodeBlock, failure_path: Path | None = None):
@@ -447,19 +449,25 @@ class JavaCategoryEvaluator(Evaluator):
 
         last_gen = input_block.previous_generations[-1]
         raw_code = last_gen["outputs"] if isinstance(last_gen, dict) else last_gen.outputs
-        
+
         if isinstance(raw_code, list):
             raw_code = "\n".join(raw_code)
         if not raw_code.strip():
-            log.warning(f"[{input_block.name}] Warning: empty 'outputs' field found, skipping block")
+            log.warning(
+                f"[{input_block.name}] Warning: empty 'outputs' field found, skipping block"
+            )
             return []
 
-        log.debug(f"[{input_block.name}] Prepared code for evaluation with {len(raw_code.splitlines())} lines")
+        log.debug(
+            f"[{input_block.name}] Prepared code for evaluation with {len(raw_code.splitlines())} lines"
+        )
         temp_block = self._split_text(raw_code, input_block.name)
         translated_block = super().translate_block(temp_block, failure_path)
 
         translated_block.original = input_block
         translated_block.previous_generations = input_block.previous_generations
-        log.debug(f"[{input_block.name}] Evaluation completed. Output tokens: {translated_block.tokens}")
+        log.debug(
+            f"[{input_block.name}] Evaluation completed. Output tokens: {translated_block.tokens}"
+        )
 
         return translated_block
