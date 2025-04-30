@@ -454,12 +454,12 @@ class JavaCategoryEvaluator(Evaluator):
             raw_code = "\n".join(raw_code)
         if not raw_code.strip():
             log.warning(
-                f"[{input_block.name}] Warning: empty 'outputs' field found, skipping block"
+                f"[{input_block.name}] Warning: empty 'outputs' field, skipping block"
             )
             return []
 
         log.debug(
-            f"[{input_block.name}] Prepared code for evaluation with {len(raw_code.splitlines())} lines"
+            f"[{input_block.name}] Code for evals:" f"{len(raw_code.splitlines())} lines"
         )
         temp_block = self._split_text(raw_code, input_block.name)
         translated_block = super().translate_block(temp_block, failure_path)
@@ -467,7 +467,8 @@ class JavaCategoryEvaluator(Evaluator):
         translated_block.original = input_block
         translated_block.previous_generations = input_block.previous_generations
         log.debug(
-            f"[{input_block.name}] Evaluation completed. Output tokens: {translated_block.tokens}"
+            f"[{input_block.name}] Evals complete."
+            f"Output tokens: {translated_block.tokens}"
         )
 
         return translated_block
