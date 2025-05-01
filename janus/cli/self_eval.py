@@ -1,11 +1,11 @@
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import click
 import typer
 from typing_extensions import Annotated
 
-from janus.cli.constants import REFINERS
+from janus.cli.constants import REFINERS, key_value_arg
 from janus.language.naive.registry import CUSTOM_SPLITTERS
 from janus.utils.enums import LANGUAGES
 
@@ -131,6 +131,19 @@ def llm_self_eval(
             help="Prsent if translator should use janus files as inputs",
         ),
     ] = False,
+    model_kwargs: Annotated[
+        list[str],
+        typer.Option(
+            "--kw",
+            help=(
+                "Keyword arguments to pass to model kwargs. Expects key=val pair."
+                " For multiple, supply this argument multiple times. For example,"
+                " `--kw max_tokens=4000 --kw temperature=0.7` (this would set the"
+                " maximum *output* tokens to 4000, not to be confused with the"
+                " --max-tokens/-M argument)"
+            ),
+        ),
+    ] = [],
 ):
     from janus.converter.evaluate import (
         InlineCommentEvaluator,
@@ -139,12 +152,16 @@ def llm_self_eval(
         UMLEvaluator,
     )
 
-    model_arguments = dict(temperature=temperature)
+    model_arguments: dict[str, Any] = {}
+    if model_kwargs:
+        kwargs = dict(map(key_value_arg, model_kwargs))
+        model_arguments.update(kwargs)
+
     refiner_types = [REFINERS[r] for r in refiner_types]
     kwargs = dict(
         eval_items_per_request=eval_items_per_request,
         model=llm_name,
-        model_arguments=model_arguments,
+        model_kwargs=model_arguments,
         source_language=language,
         max_prompts=max_prompts,
         max_tokens=max_tokens,

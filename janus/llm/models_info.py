@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Callable, Protocol, TypeVar
+from typing import Any, Callable, Protocol, TypeVar
 
 from boto3 import client
 from botocore.config import Config
@@ -231,7 +231,7 @@ MODEL_ID_TO_LONG_ID = {
     ),
 }
 
-MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, str]] = {
+MODEL_DEFAULT_ARGUMENTS: dict[str, dict[str, Any]] = {
     k: (dict(model_name=k) if k in openai_models else dict(model_id=v))
     for k, v in MODEL_ID_TO_LONG_ID.items()
 }
@@ -300,7 +300,7 @@ def get_available_model_names() -> list[str]:
     return avaialable_models
 
 
-def load_model(model_id) -> JanusModel:
+def load_model(model_id: str, model_kwargs: dict[str, Any] | None = None) -> JanusModel:
     if not MODEL_CONFIG_DIR.exists():
         MODEL_CONFIG_DIR.mkdir(parents=True)
     model_config_file = MODEL_CONFIG_DIR / f"{model_id}.json"
@@ -397,16 +397,20 @@ def load_model(model_id) -> JanusModel:
         model_args.update(provider="anthropic")
 
     if model_id == "bedrock-claude-sonnet-3.7":
-        model_args.update(
-            model_kwargs=dict(
-                max_tokens=128_000,
-                # thinking=dict(
-                #     type="enabled",
-                #     budget_tokens=4_000,
-                # )
-            ),
-            # timeout=1000,
-        )
+        if "model_kwargs" not in model_args:
+            model_args.update(model_kwargs=dict(max_tokens=128_000))
+        elif "max_tokens" not in model_args["model_kwargs"]:
+            model_args["model_kwargs"].update(max_tokens=128_000)
+
+    if model_kwargs is not None:
+        if "model_kwargs" not in model_args:
+            model_args.update(model_kwargs={})
+
+        for k, v in model_kwargs.items():
+            if k in model_args:
+                model_args[k] = v
+            else:
+                model_args["model_kwargs"][k] = v
 
     model_type = MODEL_TYPE_CONSTRUCTORS[model_type_name]
     prompt_engine = MODEL_PROMPT_ENGINES[model_id]

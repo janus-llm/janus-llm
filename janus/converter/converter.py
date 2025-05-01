@@ -84,7 +84,7 @@ class Converter:
     def __init__(
         self,
         model: str = "gpt-4o",
-        model_arguments: dict[str, Any] = {},
+        model_kwargs: dict[str, Any] | None = None,
         source_language: str = "fortran",
         max_prompts: int = 10,
         max_tokens: int | None = None,
@@ -170,6 +170,7 @@ class Converter:
 
         # Set simple members
         self._model_name: str = model
+        self._model_kwargs: dict[str, Any] | None = model_kwargs
         self._max_prompts: int = max_prompts
         self._combine_output = combine_output
         self._db_path: str | None = db_path
@@ -300,10 +301,11 @@ class Converter:
 
         Depends on:
         _model_name
+        _model_kwargs
         _max_tokens
         """
         # Load the model
-        self._llm = load_model(self._model_name)
+        self._llm = load_model(self._model_name, self._model_kwargs)
 
         # Set the max_tokens to less than half the model's limit to allow for enough
         # tokens at output

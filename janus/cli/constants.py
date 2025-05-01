@@ -43,3 +43,20 @@ def get_collections_config():
     else:
         config = {}
     return config
+
+
+def key_value_arg(value: str) -> tuple[str, str | int | float]:
+    try:
+        key, val = value.split("=", 1)
+    except ValueError:
+        raise ValueError(f"{value!r} is not a valid key=value pair")
+
+    try:
+        val = float(val)
+    except ValueError:
+        pass
+    else:
+        if int(val) == val:
+            val = int(val)
+
+    return key, val
