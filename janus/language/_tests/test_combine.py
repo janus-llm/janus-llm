@@ -55,23 +55,23 @@ class TestCombiner(unittest.TestCase):
         suffix = "\n[suffix b]\n[suffix]"
 
         # An untranslated TranslatedBlock is empty, so it will be all affixes
-        self.assertEquals(
+        self.assertEqual(
             f"{prefix}\n[suffix a]\n  {suffix}", self.translated_block.complete_text
         )
 
         # CodeBlock.complete_text should give the full string
-        self.assertEquals(f"{prefix}{central}{suffix}", self.block.complete_text)
+        self.assertEqual(f"{prefix}{central}{suffix}", self.block.complete_text)
 
         # Before combining, self.block.text should be None
-        self.assertEquals(None, self.block.text)
+        self.assertEqual(None, self.block.text)
 
         self.combiner.combine(self.block)
 
         # After combining, self.block.text should be the contents of its children
-        self.assertEquals(central, self.block.text)
+        self.assertEqual(central, self.block.text)
 
         # CodeBlock.complete_text should not have been changed
-        self.assertEquals(f"{prefix}{central}{suffix}", self.block.complete_text)
+        self.assertEqual(f"{prefix}{central}{suffix}", self.block.complete_text)
 
 
 if __name__ == "__main__":

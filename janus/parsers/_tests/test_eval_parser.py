@@ -15,14 +15,9 @@ class TestUMLParser(unittest.TestCase):
             node_type="function",
             language="json",
             text='{"diagrams":"@startuml test @enduml"}',
-            start_point=(0, 0),
-            end_point=(1, 0),
-            start_byte=0,
-            end_byte=1,
             tokens=5,
-            children=[],
-            previous_generations=[{"input": "test"}],
         )
+        self.test_codeblock.mark_root()
         self.test_response = (
             '{"completeness": {"reasoning": "The diagram addresses most '
             "of the essential functionality of the provided source code. It covers "
@@ -67,14 +62,9 @@ class TestSummaryParser(unittest.TestCase):
             node_type="function",
             language="json",
             text='{"summary":"test code summary"}',
-            start_point=(0, 0),
-            end_point=(1, 0),
-            start_byte=0,
-            end_byte=1,
             tokens=5,
-            children=[],
-            previous_generations=[{"input": "test"}],
         )
+        self.test_codeblock.mark_root()
         self.test_response = (
             '{"completeness": {"reasoning": "The summary covers most '
             "of the essential functionality of the provided source code. "
@@ -137,14 +127,9 @@ class TestIncoseParser(unittest.TestCase):
             node_type="function",
             language="json",
             text=self.test_input,
-            start_point=(0, 0),
-            end_point=(1, 0),
-            start_byte=0,
-            end_byte=1,
             tokens=5,
-            children=[],
-            previous_generations=[{"input": "test"}],
         )
+        self.test_codeblock.mark_root()
 
     def test_parse_input(self):
         self.assertIsInstance(self.parser.parse_input(self.test_codeblock), str)

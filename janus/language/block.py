@@ -205,7 +205,7 @@ class CodeBlock:
         node_type: NodeType,
         language: str,
         text: Optional[str],
-        children: list["CodeBlock"],
+        children: list["CodeBlock"] | None = None,
         start_point: Tuple[int, int] = (0, 0),
         end_point: Tuple[int, int] = (-1, -1),
         start_byte: int = 0,
@@ -239,8 +239,9 @@ class CodeBlock:
         self.block_type = block_type
         self.block_label = block_label
 
-        self.children: list["CodeBlock"]
-        self.set_children(children)
+        self.children: list["CodeBlock"] = []
+        if children is not None:
+            self.set_children(children)
 
     @classmethod
     def get_empty(cls) -> "CodeBlock":
