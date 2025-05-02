@@ -1,5 +1,6 @@
 import random
 from collections import OrderedDict
+from copy import deepcopy
 from functools import total_ordering
 from typing import (
     TYPE_CHECKING,
@@ -564,6 +565,23 @@ class TranslatedCodeBlock(CodeBlock):
 
     def __hash__(self) -> int:
         return hash((self.text, hash(self.original)))
+
+    def __deepcopy__(self, memo) -> "CodeBlock":
+        # Prevent the converter from getting duplicated by deepcopy,
+        #  as this can cause issues with certain LLM objects
+        deepcopy_method = self.__deepcopy__
+        converter = self.converter
+        self.__deepcopy__ = None
+        self.converter = converter.__class__.__name__
+
+        cp = deepcopy(self, memo)
+
+        self.converter = converter
+        cp.converter = converter
+        self.__deepcopy__ = deepcopy_method
+        cp.__deepcopy__ = deepcopy_method
+
+        return cp
 
     @property
     def total_cost(self) -> float:

@@ -140,8 +140,7 @@ class ClozeDocumenter(Documenter):
                 block.request_output_tokens += working_block.request_output_tokens
 
             # Update the output text to merge this section's output in
-            out_text = self._parser.parse(working_block.text)
-            obj.update(json.loads(out_text))
+            obj.update(json.loads(working_block.text))
             # Set intermediate text, will be overwritten if file
             # successfully completes
             block.text = json.dumps(obj)

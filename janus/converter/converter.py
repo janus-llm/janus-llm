@@ -721,11 +721,11 @@ class Converter:
         translated_block: TranslatedCodeBlock | None = None
         translation_successful = False
         last_prog, prog_delta = 0, 0.1
-        stack = [translated_root]
+        queue = [translated_root]
         try:
-            while stack:
-                translated_block = stack.pop()
-                stack.extend(translated_block.children)
+            while queue:
+                translated_block = queue.pop(0)
+                queue.extend(translated_block.children)
 
                 self._add_translation(translated_block)
                 progress = translated_root.translation_completeness

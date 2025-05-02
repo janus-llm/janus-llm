@@ -1,6 +1,9 @@
+import json
+import tempfile
 import unittest
 from pathlib import Path
 from typing import Any, Iterable, List, Optional, Type
+from unittest.mock import patch
 
 import pytest
 from langchain.schema import Document
@@ -62,17 +65,25 @@ class TestTranslator(unittest.TestCase):
             prompt_templates="requirements",
         )
 
-    @pytest.mark.translate
-    def test_translate(self):
+    @patch("janus.converter.Converter._run_chain")
+    def test_translate(self, mock_run_chain):
         """Test translate method."""
-        # Delete a file if it's already there
-        python_file = self.test_file.parent / "python" / f"{self.test_file.stem}.json"
-        python_file.unlink(missing_ok=True)
-        python_file.parent.rmdir() if python_file.parent.is_dir() else None
-        self.translator.translate(self.test_file.parent, self.test_file.parent / "python")
-        # Only check the top-most level functionality, since it should be handled by other
-        # unit tests anyway
-        self.assertTrue(python_file.exists())
+
+        with open("janus/converter/_tests/fortran.json", "r") as f:
+            expected = json.load(f)
+            mock_run_chain.return_value = expected["output"].strip("\n")
+
+        with tempfile.TemporaryDirectory(dir=self.test_file.parent) as tmpdirname:
+            python_file = Path(tmpdirname) / f"{self.test_file.stem}.json"
+
+            self.translator.translate(self.test_file.parent, tmpdirname)
+
+            with open(python_file, "r") as f:
+                actual = json.load(f)
+
+            del expected["metadata"]
+            del actual["metadata"]
+            self.assertEqual(expected, actual)
 
     def test_invalid_selections(self) -> None:
         """Tests that settings values for the translator will raise exceptions"""
@@ -113,7 +124,8 @@ class TestDiagramGenerator(unittest.TestCase):
         self.assertEqual(self.diagram_generator._source_language, "fortran")
         self.assertEqual(self.diagram_generator._diagram_type, "Activity")
 
-    def test_add_translation(self):
+    @patch("janus.converter.Converter._run_chain")
+    def test_add_translation(self, mock_run_chain):
         """Test _add_translation method."""
         block = TranslatedCodeBlock(
             original=CodeBlock(
@@ -132,6 +144,7 @@ class TestDiagramGenerator(unittest.TestCase):
             language="python",
             converter=self.diagram_generator,
         )
+        mock_run_chain.return_value = "@startuml\n\nstart\n\n:Initialize Program;\n\n:Print 'Hello, World!';\n\n:End Program;\n\nstop\n\n@enduml"  # noqa E501
         self.diagram_generator._add_translation(block)
         self.assertTrue(block.translated)
         self.assertIsNotNone(block.text)
