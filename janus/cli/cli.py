@@ -15,6 +15,7 @@ from janus.cli.self_eval import llm_self_eval
 from janus.cli.tokenizer import tokenizer
 from janus.cli.translate import translate
 from janus.cli.quiz import quiz
+from janus.cli.quiz_taker import quiz_taker
 from janus.metrics.cli import evaluate
 from janus.utils.logger import create_logger
 
@@ -108,6 +109,11 @@ quiz = app.command(
     help="Generate a quiz about code using an LLM.",
     no_args_is_help=True,
 )(quiz)
+
+quiz_taker = app.command(
+    help="Take a quiz about code using an LLM.",
+    no_args_is_help=True,
+)(quiz_taker)
 
 pipeline = app.command(
     help="Run a janus pipeline",

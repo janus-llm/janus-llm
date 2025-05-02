@@ -1,5 +1,6 @@
 import csv
 import json
+import argparse
 from pathlib import Path
 
 
@@ -43,9 +44,9 @@ def combine_outputs(main_outputs, intermediate_outputs):
             "option-4": entry.get("option-4", ""),
             "correct-answer-number": entry.get("correct-answer-number", ""),
             "topic": entry.get("topic", ""),
-            "reasoning": None,  # Placeholder for reasoning
             "selected-answer-number": None,  # Placeholder for selected-answer-number
             "grading-result": None,  # Placeholder for grading result
+            "reasoning": None,  # Placeholder for reasoning
         }
 
     # Update the dictionary with entries from main_outputs
@@ -78,9 +79,9 @@ def quiz_to_csv(quiz: dict, file_path: str | Path):
         "option-3",
         "option-4",
         "correct-answer-number",
-        "reasoning",
         "selected-answer-number",
         "grading-result",
+        "reasoning",
     ]
 
     # Ensure the file path is a Path object
@@ -103,10 +104,14 @@ def quiz_to_csv(quiz: dict, file_path: str | Path):
         for _, entry in quiz.items():
             writer.writerow(entry)
 
+# Parse input and output filepath args
+parser = argparse.ArgumentParser(description="Process input and output files.")
+parser.add_argument("-i", "--input", required=True, help="Path to the input file")
+parser.add_argument("-o", "--output", required=True, help="Path to the output file")
+args = parser.parse_args()
+input_file_path = args.input
+output_file_path = args.output
 
-# Filepaths
-input_file_path = "janus-quiz-results/Language Features/llm.json"
-output_file_path = "janus-quiz-grades/quiz_output_language_features.csv"
 main_outputs, intermediate_outputs = extract_outputs_from_json(input_file_path)
 combined_list = combine_outputs(main_outputs, intermediate_outputs)
 quiz_to_csv(combined_list, output_file_path)
