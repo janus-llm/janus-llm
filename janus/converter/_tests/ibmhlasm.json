@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "converter_name": "PseudocodeDocumenter",
+    "translation_complete": true,
+    "language": "json",
+    "model_name": "mchat",
+    "type": "pseudocode",
+    "cost": 0.0,
+    "processing_time": 4.827666759490967,
+    "request_input_tokens": 0,
+    "request_output_tokens": 0,
+    "num_requests": 0,
+    "input_tokens": 138,
+    "output_tokens": 403,
+    "start_line": 0,
+    "start_char": 0,
+    "start_byte": 0,
+    "end_line": 16,
+    "end_char": 0,
+    "end_byte": 382
+  },
+  "output": "# This pseudocode represents the functionality of the given Assembly program in an abstract and easy-to-understand form.\n\n# Program Title: 'Hello, World!'\n\nBEGIN_PROGRAM:\n    # Save the current state of registers 14 to 12 into a storage area\n    SAVE_REGISTERS(14, 12, memory_location_of_register_13)\n\n    # Load the value from register 15 into register 12\n    COPY_REGISTER(register_15, register_12)\n\n    # Establish addressability for register 12\n    SET_ADDRESSABILITY(base_register=register_12)\n\n    # Allocate a save area in memory and point register 15 to it\n    ALLOCATE_MEMORY(save_area, register_15)\n\n    # Update the save area to link back to the previous save area\n    STORE_VALUE(memory_location_of_register_13, offset=4, register_15)\n\n    # Update the save area to link forward to the current save area\n    STORE_VALUE(register_15, offset=8, memory_location_of_register_13)\n\n    # Update register 13 to point to the current save area\n    COPY_REGISTER(register_15, register_13)\n\n    # Display the message \"Hello, World!\" to the console\n    DISPLAY_MESSAGE(\"Hello, World!\")\n\n    # Restore the previous save area by loading its value into register 13\n    LOAD_VALUE(memory_location_of_register_13, offset=4, register_13)\n\n    # Restore the previously saved registers 14 to 12\n    RESTORE_REGISTERS(14, 12, memory_location_of_register_13)\n\n    # Set register 15 to 0 to indicate successful execution\n    SET_VALUE(register_15, 0)\n\n    # Return control to the calling program using the address in register 14\n    RETURN_TO_CALLER(register_14)\n\n# Define a save area in memory capable of storing 18 fullword values\nDEFINE_MEMORY_AREA(save_area, size=18_fullwords)\n\nEND_PROGRAM",
+  "outputs": [],
+  "input": {
+    "metadata": {
+      "translation_complete": false,
+      "language": "ibmhlasm",
+      "output_tokens": 138,
+      "start_line": 0,
+      "start_char": 0,
+      "start_byte": 0,
+      "end_line": 16,
+      "end_char": 0,
+      "end_byte": 382
+    },
+    "output": "         TITLE 'Hello, World! Program'\nHELLO    CSECT\n         STM   14,12,12(13)\n         LR    12,15\n         USING *,12\n         LA    15,SAVEAREA\n         ST    13,4(,15)\n         ST    15,8(13)\n         LR    13,15\n         WTO   'Hello, World!'\n         L     13,4(,13)\n         LM    14,12,12(13)\n         LA    15,0\n         BR    14\nSAVEAREA DS    18F\n         END   HELLO\n",
+    "outputs": [],
+    "input": "         TITLE 'Hello, World! Program'\nHELLO    CSECT\n         STM   14,12,12(13)\n         LR    12,15\n         USING *,12\n         LA    15,SAVEAREA\n         ST    13,4(,15)\n         ST    15,8(13)\n         LR    13,15\n         WTO   'Hello, World!'\n         L     13,4(,13)\n         LM    14,12,12(13)\n         LA    15,0\n         BR    14\nSAVEAREA DS    18F\n         END   HELLO\n"
+  }
+}
