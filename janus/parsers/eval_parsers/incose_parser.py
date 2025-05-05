@@ -6,7 +6,7 @@ from typing import List
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
-from langchain_core.pydantic_v1 import BaseModel, Field, validator
+from pydantic import BaseModel, Field, RootModel, field_validator
 
 from janus.language.block import CodeBlock
 from janus.parsers.parser import JanusParser
@@ -20,7 +20,7 @@ class Criteria(BaseModel):
     reasoning: str = Field(description="A short explanation for the given assessment")
     score: str = Field("A simple `pass` or `fail`")
 
-    @validator("score")
+    @field_validator("score")
     def score_is_valid(cls, v: str):
         v = v.lower().strip()
         if v not in {"pass", "fail"}:
@@ -42,8 +42,8 @@ class Requirement(BaseModel):
     C9: Criteria
 
 
-class RequirementList(BaseModel):
-    __root__: List[Requirement] = Field(
+class RequirementList(RootModel):
+    root: List[Requirement] = Field(
         description=(
             "A list of requirement evaluations. Each element should include"
             " the requirement's 8-character ID in the `requirement_id` field,"
@@ -99,7 +99,7 @@ class IncoseParser(JanusParser, PydanticOutputParser):
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise OutputParserException(f"Got invalid JSON object. Error: {e}")
 
-        evals: dict[str, dict] = {c.requirement_id: c.dict() for c in out.__root__}
+        evals: dict[str, dict] = {c.requirement_id: c.dict() for c in out.root}
 
         seen_keys = set(evals.keys())
         expected_keys = set(self.requirements.keys())

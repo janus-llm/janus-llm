@@ -1,14 +1,16 @@
 import json
 import os
+from functools import cached_property
 from pathlib import Path
 from typing import Any, Callable, Protocol, TypeVar
 
-from boto3 import client
-from botocore.config import Config
 from dotenv import load_dotenv
 from langchain_community.llms import HuggingFaceTextGenInference
+from langchain_core.messages import HumanMessage
+from langchain_core.prompt_values import StringPromptValue
 from langchain_core.runnables import Runnable
 from langchain_openai import AzureChatOpenAI
+from pydantic import Extra
 
 from janus.llm.model_callbacks import COST_PER_1K_TOKENS, azure_model_reroutes
 from janus.prompts.prompt import (
@@ -33,12 +35,14 @@ model_types = [
 ]
 
 try:
-    from langchain_community.chat_models import BedrockChat
-    from langchain_community.llms.bedrock import Bedrock
+    from boto3 import client
+    from botocore.config import Config
+    from langchain_aws import BedrockLLM, ChatBedrock, ChatBedrockConverse
 
     model_types += [
-        Bedrock,
-        BedrockChat,
+        BedrockLLM,
+        ChatBedrock,
+        ChatBedrockConverse,
     ]
 except ImportError:
     log.warning(
@@ -68,9 +72,9 @@ MODEL_TYPE_CONSTRUCTORS: dict[str, ModelType] = {
 }
 
 try:
-    MODEL_TYPE_CONSTRUCTORS["Bedrock"] = Bedrock
-    MODEL_TYPE_CONSTRUCTORS["BedrockChat"] = BedrockChat
-    MODEL_TYPE_CONSTRUCTORS["Granite"] = BedrockChat
+    MODEL_TYPE_CONSTRUCTORS["Bedrock"] = BedrockLLM
+    MODEL_TYPE_CONSTRUCTORS["BedrockChat"] = ChatBedrock
+    MODEL_TYPE_CONSTRUCTORS["Granite"] = ChatBedrock
 except NameError:
     log.warning(
         "Could not import LangChain's Bedrock Client. If you would like to use Bedrock "
@@ -133,6 +137,9 @@ claude_models = [
     "bedrock-claude-haiku-3.5",
     "bedrock-claude-sonnet-3.7",
 ]
+claude_reasoning_models = [
+    "bedrock-claude-sonnet-3.7-reasoning",
+]
 llama2_models = [
     "bedrock-llama2-70b",
     "bedrock-llama2-70b-chat",
@@ -173,6 +180,7 @@ granite_models = [
 ]
 bedrock_models = [
     *claude_models,
+    *claude_reasoning_models,
     *llama2_models,
     *llama3_models,
     *titan_models,
@@ -186,6 +194,7 @@ MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
     # **{m: ChatGptPromptEngine for m in openai_models},
     **{m: ChatGptPromptEngine for m in azure_models},
     **{m: ClaudePromptEngine for m in claude_models},
+    **{m: ClaudePromptEngine for m in claude_reasoning_models},
     **{m: Llama2PromptEngine for m in llama2_models},
     **{m: Llama3PromptEngine for m in llama3_models},
     **{m: TitanPromptEngine for m in titan_models},
@@ -205,6 +214,7 @@ MODEL_ID_TO_LONG_ID = {
     "bedrock-claude-sonnet-3.5-v2": "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
     "bedrock-claude-haiku-3.5": "us.anthropic.claude-3-5-haiku-20241022-v1:0",
     "bedrock-claude-sonnet-3.7": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+    "bedrock-claude-sonnet-3.7-reasoning": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
     "bedrock-llama2-70b": "meta.llama2-70b-v1",
     "bedrock-llama2-70b-chat": "meta.llama2-70b-chat-v1",
     "bedrock-llama2-13b": "meta.llama2-13b-chat-v1",
@@ -397,6 +407,44 @@ def load_model(model_id: str, model_kwargs: dict[str, Any] | None = None) -> Jan
         model_args.update(provider="anthropic")
 
     if model_id == "bedrock-claude-sonnet-3.7":
+        model_args.update(
+            model_kwargs=dict(
+                max_tokens=128_000,
+            ),
+        )
+
+    if model_id == "bedrock-claude-sonnet-3.7-reasoning":
+        # This is a workaround for the reasoning model, which uses a different endpoint
+        #  than the normal model. 3.7 doesn't work with the regular .invoke method so
+        #  we have to create it.
+        class Claude37Reasoning(ChatBedrockConverse):
+            def invoke(self, prompt: StringPromptValue, **kwargs) -> str:
+                response = self.generate(
+                    [[HumanMessage(prompt.text)]],
+                    **kwargs,
+                )
+                return response.generations[0][0].text
+
+            # This is a workaround to use LCEL with the reasoning model monkey patch
+            @cached_property
+            def _serialized(self) -> dict:
+                return {
+                    "type": "Claude37Reasoning",
+                    "model_id": self.model_id,
+                    "max_tokens": self.max_tokens,
+                    "temperature": self.temperature,
+                    "thinkingConfig": (self.additional_model_request_fields or {}).get(
+                        "thinkingConfig"
+                    ),
+                }
+
+        MODEL_TYPE_CONSTRUCTORS["Claude37"] = Claude37Reasoning
+        model_type_name = "Claude37"
+        reasoning_cfg = {"thinking": {"type": "enabled", "budget_tokens": 4_000}}
+        model_args.update(
+            additional_model_request_fields=reasoning_cfg,
+        )
+        model_args.pop("model_kwargs", None)
         if "model_kwargs" not in model_args:
             model_args.update(model_kwargs=dict(max_tokens=128_000))
         elif "max_tokens" not in model_args["model_kwargs"]:
@@ -427,6 +475,9 @@ def load_model(model_id: str, model_kwargs: dict[str, Any] | None = None) -> Jan
         input_token_cost: float
         output_token_cost: float
         prompt_engine: type[PromptEngine]
+
+        class Config:
+            extra = Extra.allow
 
     model_args.update(
         model_id=MODEL_ID_TO_LONG_ID[model_id],

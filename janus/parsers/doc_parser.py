@@ -5,7 +5,7 @@ from langchain.output_parsers import PydanticOutputParser
 from langchain.output_parsers.json import parse_json_markdown
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 from janus.language.block import CodeBlock
 from janus.parsers.parser import JanusParser, JanusParserException
