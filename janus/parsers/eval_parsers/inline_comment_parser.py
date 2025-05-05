@@ -5,7 +5,7 @@ from typing import Any
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
-from langchain_core.pydantic_v1 import BaseModel, Field, conint
+from pydantic import BaseModel, Field, RootModel, conint
 
 from janus.language.block import CodeBlock
 from janus.parsers.parser import JanusParser
@@ -30,8 +30,8 @@ class Comment(BaseModel):
     usefulness: Criteria = Field(description="The usefulness of the comment")
 
 
-class CommentList(BaseModel):
-    __root__: list[Comment] = Field(
+class CommentList(RootModel):
+    root: list[Comment] = Field(
         description=(
             "A list of inline comment evaluations. Each element should include"
             " the comment's 8-character ID in the `comment_id` field, and four"
@@ -77,7 +77,7 @@ class InlineCommentParser(JanusParser, PydanticOutputParser):
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise OutputParserException(f"Got invalid JSON object. Error: {e}")
 
-        evals: dict[str, Any] = {c.comment_id: c.dict() for c in out.__root__}
+        evals: dict[str, Any] = {c.comment_id: c.dict() for c in out.root}
 
         seen_keys = set(evals.keys())
         expected_keys = set(self.comments.keys())

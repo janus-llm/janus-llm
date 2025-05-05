@@ -6,7 +6,7 @@ from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.messages import BaseMessage
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel
 
 from janus.language.block import CodeBlock
 from janus.parsers.parser import JanusParser, JanusParserException
@@ -25,8 +25,8 @@ class PartitionObject(BaseModel):
     )
 
 
-class PartitionList(BaseModel):
-    __root__: list[PartitionObject] = Field(
+class PartitionList(RootModel):
+    root: list[PartitionObject] = Field(
         description=(
             "A list of appropriate split points, each with a `reasoning` field "
             "that explains a justification for splitting the code at that point, "
@@ -110,7 +110,7 @@ class PartitionParser(JanusParser, PydanticOutputParser):
             raise
 
         # Get partition locations, discard reasoning
-        partition_locations = {partition.location for partition in out.__root__}
+        partition_locations = {partition.location for partition in out.root}
 
         # Ignore IDs from the example input
         partition_locations.difference_update(EXAMPLE_IDS)
