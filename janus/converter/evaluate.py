@@ -1,6 +1,7 @@
 import copy
 import json
 import re
+from typing import Iterator
 
 from langchain_core.runnables import Runnable, RunnableLambda, RunnableParallel
 
@@ -28,7 +29,7 @@ class Evaluator(Converter):
 
     """
 
-    def __init__(self, eval_items_per_request: int | None = None, **kwargs) -> None:
+    def __init__(self, object_name: str, **kwargs) -> None:
         """Initialize the Evaluator class
 
         Arguments:
@@ -39,7 +40,7 @@ class Evaluator(Converter):
         """
         kwargs.update(use_janus_inputs=True)
         super().__init__(**kwargs)
-        self._eval_items_per_request: int | None = eval_items_per_request
+        self._object_name = object_name
         self._combiner = JsonCombiner()
 
     def _filter_inputs(self, inputs: list[JanusOutputObject]) -> str:
@@ -58,8 +59,111 @@ class Evaluator(Converter):
 
         return self._filter_inputs(input["outputs"])
 
+    def _extract_original_code(self, block: TranslatedCodeBlock) -> str:
+        if block.previous_generation is None:
+            raise ValueError("Error: cannot evaluate block, no previous generation found")
 
-class RequirementEvaluator(Evaluator):
+        if isinstance(block.previous_generation["input"], str):
+            input_str = block.previous_generation["input"]
+        elif "output" in block.previous_generation["input"]:
+            input_str = block.previous_generation["input"]["output"]
+        else:
+            input_str = self._filter_inputs(block.previous_generation["input"]["outputs"])
+
+        input_str = input_str.strip()
+        if not input_str:
+            raise ValueError("Error: cannot evaluate block, no previous generation found")
+
+        return input_str
+
+    def _extract_object_to_evaluate(self, block: TranslatedCodeBlock) -> str | None:
+        return block.original.text
+
+    def _preprocess_block(self, block: TranslatedCodeBlock) -> None:
+        input_str = self._extract_original_code(block)
+        object = self._extract_object_to_evaluate(block)
+
+        if not object:
+            log.debug(f"[{block.name}] Skipping empty output")
+            block.translated = True
+            return
+
+        # Collect source input code and requirement outputs together
+        block.original.text = json.dumps(
+            dict(
+                eval_object=object,
+                code=input_str,
+            )
+        )
+
+    def _get_code_from_json(self, json_text: str) -> str:
+        return json.loads(json_text)["code"]
+
+    def _get_object_to_evaluate_from_json(self, json_text: str) -> str:
+        return json.loads(json_text)["eval_object"]
+
+    def _input_runnable(self) -> Runnable:
+        def _get_code(json_text: str) -> str:
+            return json.loads(json_text)["code"]
+
+        def _get_eval_obj(json_text: str) -> str:
+            return json.dumps(json.loads(json_text)["eval_object"])
+
+        kwargs = {
+            "SOURCE_CODE": _get_code,
+            self._object_name: _get_eval_obj,
+            "context": self._retriever,
+        }
+
+        return RunnableLambda(self._parser.parse_input) | RunnableParallel(**kwargs)
+
+    def _add_translation(self, block: TranslatedCodeBlock) -> None:
+        if block.translated:
+            return
+        self._preprocess_block(block)
+        super()._add_translation(block)
+
+
+class MultiObjectEvaluator(Evaluator):
+    def __init__(self, eval_items_per_request: int | None = None, **kwargs) -> None:
+        """Initialize the Evaluator class
+
+        Arguments:
+            model: The LLM to use for translation. If an OpenAI model, the
+                `OPENAI_API_KEY` environment variable must be set.
+            model_arguments: Additional arguments to pass to the LLM constructor.
+            max_prompts: The maximum number of prompts to try before giving up.
+        """
+        super().__init__(**kwargs)
+        self._eval_items_per_request: int | None = eval_items_per_request
+
+    def _get_working_objects(
+        self, block: TranslatedCodeBlock
+    ) -> Iterator[TranslatedCodeBlock]:
+        raise NotImplementedError()
+
+    def _add_translation(self, block: TranslatedCodeBlock) -> None:
+        if block.translated:
+            return
+
+        self._preprocess_block(block)
+
+        # MultiObjectEvaluators may encounter object with no evaluatable objects,
+        #  in which case they will set translated to True
+        if block.translated:
+            return
+
+        translate_obj = {}
+        for obj in self._get_working_objects(block):
+            super(Evaluator, self)._add_translation(obj)
+            translate_obj.update(json.loads(obj.text))
+
+        block.text = json.dumps(translate_obj)
+        block.tokens = self._llm.get_num_tokens(block.text)
+        block.translated = True
+
+
+class RequirementEvaluator(MultiObjectEvaluator):
     """INCOSE Requirement Evaluator
 
     A class that performs an LLM self evaluation on an input target,
@@ -83,100 +187,69 @@ class RequirementEvaluator(Evaluator):
             model_arguments: Additional arguments to pass to the LLM constructor.
             max_prompts: The maximum number of prompts to try before giving up.
         """
-        super().__init__(input_types=input_types, output_type=output_type, **kwargs)
+        super().__init__(
+            object_name="REQUIREMENTS",
+            input_types=input_types,
+            output_type=output_type,
+            **kwargs,
+        )
         self._parser = IncoseParser()
         self._prompt_template_names = ["eval_prompts/incose"]
 
-    def _input_runnable(self) -> Runnable:
-        def _get_code(json_text: str) -> str:
-            return json.loads(json_text)["code"]
-
-        def _get_reqs(json_text: str) -> str:
-            return json.dumps(json.loads(json_text)["requirements"])
-
-        return RunnableLambda(self._parser.parse_input) | RunnableParallel(
-            SOURCE_CODE=_get_code,
-            REQUIREMENTS=_get_reqs,
-            context=self._retriever,
-        )
-
-    def _add_translation(self, block: TranslatedCodeBlock) -> None:
-        if block.translated:
-            return
-
+    def _extract_object_to_evaluate(self, block: TranslatedCodeBlock) -> list[str] | None:
         if block.original.text is None:
-            block.translated = True
-            return
+            return None
 
-        if block.previous_generation is None:
-            raise ValueError("Error: cannot evaluate block, no previous generation found")
-
-        # Get original code from the input to requirements generation
-        if isinstance(block.previous_generation["input"], str):
-            input_str = block.previous_generation["input"]
-        elif "output" in block.previous_generation["input"]:
-            input_str = block.previous_generation["input"]["output"]
-        else:
-            input_str = self._filter_inputs(block.previous_generation["input"]["outputs"])
-
-        requirements = json.loads(block.original.text)
-
-        if not requirements:
-            log.debug(f"[{block.name}] Skipping empty output")
-            return
-
+        object = json.loads(block.original.text)
         # Requirements list can be a list of lists; flatten
-        if isinstance(requirements, list) and isinstance(requirements[0], list):
-            requirements = requirements[0]
+        if isinstance(object, list) and isinstance(object[0], list):
+            object = object[0]
 
-        # Collect source input code and requirement outputs together
-        block.original.text = json.dumps(
-            dict(
-                requirements=requirements,
-                code=input_str,
-            )
-        )
+        return object
 
-        # If there's not too many comments for a single request, simply
-        #  translate as-is
-        if (
-            not self._eval_items_per_request
-            or len(requirements) < self._eval_items_per_request
-        ):
-            return super()._add_translation(block)
+    def _get_object_to_evaluate_from_json(self, json_text: str) -> str:
+        return json.dumps(super()._get_object_to_evaluate_from_json(json_text))
 
-        group_indices = list(range(0, len(requirements), self._eval_items_per_request))
+    def _get_working_objects(
+        self, block: TranslatedCodeBlock
+    ) -> Iterator[TranslatedCodeBlock]:
+        if block.original.text is None:
+            return
+
+        object = json.loads(block.original.text)
+        code = object["code"]
+        objects = object["eval_object"]
+
+        if self._eval_items_per_request is None:
+            yield block
+            return
+
+        if len(objects) <= self._eval_items_per_request:
+            yield block
+            return
+
+        group_indices = list(range(0, len(objects), self._eval_items_per_request))
         log.debug(
             f"[{block.name}]"
             f" Block contains more than {self._eval_items_per_request}"
-            f" requirements, splitting {len(requirements)} requirements into"
+            f" objects, splitting {len(objects)} objects into"
             f" {len(group_indices)} groups"
         )
 
-        translate_obj = {}
         for req_ind in group_indices:
-            working_requirements = requirements[
-                req_ind : req_ind + self._eval_items_per_request
-            ]
+            working_objects = objects[req_ind : req_ind + self._eval_items_per_request]
 
             temp_block = copy.deepcopy(block)
             temp_block.original.text = json.dumps(
                 dict(
-                    requirements=working_requirements,
-                    code=input_str,
+                    requirements=working_objects,
+                    code=code,
                 )
             )
-
-            super()._add_translation(temp_block)
-
-            translate_obj.update(json.loads(temp_block.text))
-
-        block.text = json.dumps(translate_obj)
-        block.tokens = self._llm.get_num_tokens(block.text)
-        block.translated = True
+            yield temp_block
 
 
-class InlineCommentEvaluator(Evaluator):
+class InlineCommentEvaluator(MultiObjectEvaluator):
     """Inline Comment Evaluator
 
     A class that performs an LLM self evaluation on inline comments,
@@ -197,7 +270,12 @@ class InlineCommentEvaluator(Evaluator):
             model_arguments: Additional arguments to pass to the LLM constructor.
             max_prompts: The maximum number of prompts to try before giving up.
         """
-        super().__init__(input_types=input_types, output_type=output_type, **kwargs)
+        super().__init__(
+            object_name=None,
+            input_types=input_types,
+            output_type=output_type,
+            **kwargs,
+        )
         self._parser = InlineCommentParser()
         self._prompt_template_names = ["eval_prompts/inline_comments"]
 
@@ -227,37 +305,29 @@ class InlineCommentEvaluator(Evaluator):
         processed_str = re.sub(r"\s*<JANUS_PARTITION>\s*\n", "\n", input_str)
         return processed_str.strip("\n"), missing_comments
 
-    def _add_translation(self, block: TranslatedCodeBlock) -> None:
-        """Provided block must have a previous_generations list, so that it can
-        access the input text with the placeholders, as well as the output
-        text with the filled comments
-        """
-        if block.translated:
-            return
-
+    def _extract_object_to_evaluate(
+        self, block: TranslatedCodeBlock
+    ) -> dict[str, str] | None:
         if block.original.text is None:
+            return None
+        return json.loads(block.original.text)
+
+    def _preprocess_block(self, block: TranslatedCodeBlock) -> None:
+        input_str = self._extract_original_code(block)
+        object = self._extract_object_to_evaluate(block)
+
+        if not object:
+            log.debug(f"[{block.name}] Skipping empty output")
             block.translated = True
             return
 
-        if block.previous_generation is None:
-            raise ValueError(
-                "Error: cannot evaluate block, no previous generations found"
-            )
-
-        # Get input to comment generation, which includes the original code
-        #  and all the tagged comment placeholders
-        if isinstance(block.previous_generation["input"], str):
-            input_str = block.previous_generation["input"]
-        elif "output" in block.previous_generation["input"]:
-            input_str = block.previous_generation["input"]["output"]
-        else:
-            input_str = self._filter_inputs(block.previous_generation["input"]["outputs"])
-
-        generated_comments = json.loads(block.original.text)
-
+        # Provided block must have a previous_generations list, so that it can
+        #  access the input text with the placeholders, as well as the output
+        #  text with the filled comments
         # Process input to insert the generated comments after the tagged placeholders
         processed_input, missing_comments = self._process_comments(
-            input_str, generated_comments
+            input_str,
+            object,
         )
         if missing_comments:
             log.info(f"[{block.name}] Warning: missing {missing_comments} comments")
@@ -266,17 +336,40 @@ class InlineCommentEvaluator(Evaluator):
         comments = list(re.finditer(comment_pattern, processed_input, flags=re.MULTILINE))
         if not comments:
             log.info(f"[{block.name}] Skipping commentless block")
+            block.translated = True
             return
+
+        comments_start_end_indices = [
+            [comment.start(), comment.end()] for comment in comments
+        ]
+
+        # Collect source processed code and comments together
+        block.original.text = json.dumps(
+            dict(
+                eval_object=comments_start_end_indices,
+                code=processed_input,
+            )
+        )
+
+    def _get_working_objects(
+        self, block: TranslatedCodeBlock
+    ) -> Iterator[TranslatedCodeBlock]:
+        if block.original.text is None:
+            return
+
+        object = json.loads(block.original.text)
+        processed_input = object["code"]
+        comments = object["eval_object"]
 
         block.original.text = processed_input
 
-        # If there's not too many comments for a single request, simply
-        #  translate as-is
-        if (
-            self._eval_items_per_request is None
-            or len(comments) < self._eval_items_per_request
-        ):
-            return super()._add_translation(block)
+        if self._eval_items_per_request is None:
+            yield block
+            return
+
+        if len(comments) <= self._eval_items_per_request:
+            yield block
+            return
 
         group_indices = list(range(0, len(comments), self._eval_items_per_request))
         log.debug(
@@ -286,13 +379,14 @@ class InlineCommentEvaluator(Evaluator):
             f" {len(group_indices)} groups"
         )
 
-        translate_obj = {}
+        comment_pattern = r"<(?:INLINE|BLOCK)_COMMENT \w{8}>.*$"
+
         for comment_ind in group_indices:
             working_comments = comments[
                 comment_ind : comment_ind + self._eval_items_per_request
             ]
-            start_idx = working_comments[0].start()
-            end_idx = working_comments[-1].end()
+            start_idx = working_comments[0][0]
+            end_idx = working_comments[-1][-1]
             prefix = processed_input[:start_idx]
             keeper = processed_input[start_idx:end_idx]
             suffix = processed_input[end_idx:]
@@ -304,13 +398,13 @@ class InlineCommentEvaluator(Evaluator):
             temp_block = copy.deepcopy(block)
             temp_block.original.text = prefix + keeper + suffix
 
-            super()._add_translation(temp_block)
+            yield temp_block
 
-            translate_obj.update(json.loads(temp_block.text))
-
-        block.text = json.dumps(translate_obj)
-        block.tokens = self._llm.get_num_tokens(block.text)
-        block.translated = True
+    def _input_runnable(self) -> Runnable:
+        return RunnableParallel(
+            SOURCE_CODE=self._parser.parse_input,
+            context=self._retriever,
+        )
 
 
 class SummaryEvaluator(Evaluator):
@@ -334,58 +428,14 @@ class SummaryEvaluator(Evaluator):
             model_arguments: Additional arguments to pass to the LLM constructor.
             max_prompts: The maximum number of prompts to try before giving up.
         """
-        super().__init__(input_types=input_types, output_type=output_type, **kwargs)
+        super().__init__(
+            object_name="CODE_SUMMARY",
+            input_types=input_types,
+            output_type=output_type,
+            **kwargs,
+        )
         self._parser = SummaryParser()
         self._prompt_template_names = ["eval_prompts/summary"]
-
-    def _input_runnable(self) -> Runnable:
-        def _get_code(json_text: str) -> str:
-            return json.loads(json_text)["code"]
-
-        def _get_summary(json_text: str) -> str:
-            return json.loads(json_text)["summary"]
-
-        return RunnableLambda(self._parser.parse_input) | RunnableParallel(
-            SOURCE_CODE=_get_code,
-            CODE_SUMMARY=_get_summary,
-            context=self._retriever,
-        )
-
-    def _add_translation(self, block: TranslatedCodeBlock) -> None:
-        if block.translated:
-            return
-
-        if block.original.text is None:
-            block.translated = True
-            return
-
-        if block.previous_generation is None:
-            raise ValueError(
-                "Error: cannot evaluate block, no previous generations found"
-            )
-
-        # Get original code from the input to summary generation
-        if isinstance(block.previous_generation["input"], str):
-            input_str = block.previous_generation["input"]
-        elif "output" in block.previous_generation["input"]:
-            input_str = block.previous_generation["input"]["output"]
-        else:
-            input_str = self._filter_inputs(block.previous_generation["input"]["outputs"])
-
-        summary = block.original.text
-
-        if not summary:
-            log.debug(f"[{block.name}] Skipping empty output")
-            return
-
-        # Collect source input code and summary outputs together
-        block.original.text = json.dumps(
-            dict(
-                summary=summary,
-                code=input_str,
-            )
-        )
-        super()._add_translation(block)
 
 
 class UMLEvaluator(Evaluator):
@@ -409,58 +459,14 @@ class UMLEvaluator(Evaluator):
             model_arguments: Additional arguments to pass to the LLM constructor.
             max_prompts: The maximum number of prompts to try before giving up.
         """
-        super().__init__(input_types=input_types, output_type=output_type, **kwargs)
+        super().__init__(
+            object_name="PLANTUML_DIAGRAM",
+            input_types=input_types,
+            output_type=output_type,
+            **kwargs,
+        )
         self._parser = UMLParser()
         self._prompt_template_names = ["eval_prompts/uml"]
-
-    def _input_runnable(self) -> Runnable:
-        def _get_code(json_text: str) -> str:
-            return json.loads(json_text)["code"]
-
-        def _get_diagrams(json_text: str) -> str:
-            return json.loads(json_text)["diagrams"]
-
-        return RunnableLambda(self._parser.parse_input) | RunnableParallel(
-            SOURCE_CODE=_get_code,
-            PLANTUML_DIAGRAM=_get_diagrams,
-            context=self._retriever,
-        )
-
-    def _add_translation(self, block: TranslatedCodeBlock) -> None:
-        if block.translated:
-            return
-
-        if block.original.text is None:
-            block.translated = True
-            return
-
-        if block.previous_generation is None:
-            raise ValueError(
-                "Error: cannot evaluate block, no previous generations found"
-            )
-
-        # Get original code from the input to requirements generation
-        if isinstance(block.previous_generation["input"], str):
-            input_str = block.previous_generation["input"]
-        elif "output" in block.previous_generation["input"]:
-            input_str = block.previous_generation["input"]["output"]
-        else:
-            input_str = self._filter_inputs(block.previous_generation["input"]["outputs"])
-
-        diagrams = block.original.text
-
-        if not diagrams:
-            log.debug(f"[{block.name}] Skipping empty output")
-            return
-
-        # Collect source code and diagram outputs together
-        block.original.text = json.dumps(
-            dict(
-                diagrams=diagrams,
-                code=input_str,
-            )
-        )
-        super()._add_translation(block)
 
 
 class JavaCategoryEvaluator(Evaluator):
@@ -472,8 +478,7 @@ class JavaCategoryEvaluator(Evaluator):
 
     def __init__(
         self,
-        eval_items_per_request: int | None = None,  # not used
-        input_types: str | set[str] = None,  # disable filtering by type
+        input_types: str | set[str] | None = None,  # disable filtering by type
         output_type: str = "java_category_eval",
         **kwargs,
     ) -> None:
@@ -485,46 +490,26 @@ class JavaCategoryEvaluator(Evaluator):
             model_arguments: Additional arguments to pass to the LLM constructor.
             max_prompts: The maximum number of prompts to try before giving up.
         """
-        super().__init__(input_types=input_types, output_type=output_type, **kwargs)
+        super().__init__(
+            object_name="JAVA_CODE",
+            input_types=input_types,
+            output_type=output_type,
+            **kwargs,
+        )
+        self._use_janus_inputs = False
         self._parser = LabeledJavaListParser()
         self._prompt_template_names = ["eval_prompts/java_category"]
 
-    def _add_translation(self, block: TranslatedCodeBlock) -> None:
-        if block.translated:
-            return
+    def _preprocess_block(self, block: TranslatedCodeBlock) -> None:
+        block.original.text = self._parser.parse_input(block.original)
 
-        if block.original.text is None:
-            block.translated = True
-            return
+    def _input_runnable(self) -> Runnable:
+        def _get_eval_obj(json_text: str) -> str:
+            return json.dumps(json.loads(json_text)["eval_object"])
 
-        if block.previous_generation is None:
-            raise ValueError("Error: cannot evaluate block, no previous generation found")
+        kwargs = {
+            self._object_name: _get_eval_obj,
+            "context": self._retriever,
+        }
 
-        # Get the raw code from the previous generation
-        if isinstance(block.previous_generation["input"], str):
-            raw_code = block.previous_generation["input"]
-        elif "output" in block.previous_generation["input"]:
-            raw_code = block.previous_generation["input"]["output"]
-        else:
-            raw_code = self._filter_inputs(block.previous_generation["input"]["outputs"])
-
-        if not raw_code.strip():
-            log.warning(f"[{block.name}] Warning: empty 'outputs' field, skipping block")
-            return
-
-        log.debug(f"[{block.name}] Code for evals: {len(raw_code.splitlines())} lines")
-
-        evaluation_output = block.original.text
-
-        if not evaluation_output:
-            log.debug(f"[{block.name}] Skipping empty output")
-            return
-
-        # Combine the raw code and evaluation output into the block's original text
-        block.original.text = json.dumps(
-            dict(
-                code=raw_code,
-                evaluation=evaluation_output,
-            )
-        )
-        super()._add_translation(block)
+        return RunnableParallel(**kwargs)
