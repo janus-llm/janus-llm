@@ -9,6 +9,7 @@ from janus.language.block import JanusOutputObject, TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
 from janus.parsers.eval_parsers.inline_comment_parser import InlineCommentParser
+from janus.parsers.eval_parsers.java_category_parser import LabeledJavaListParser
 from janus.parsers.eval_parsers.summary_parser import SummaryParser
 from janus.parsers.eval_parsers.uml_parser import UMLParser
 from janus.utils.logger import create_logger
@@ -459,4 +460,68 @@ class UMLEvaluator(Evaluator):
                 code=input_str,
             )
         )
-        super()._add_translation(block)
+        temp_block = self._split_text(obj_str, input_block.name)
+        translated_block = super().translate_block(temp_block, failure_path)
+        translated_block.original = input_block
+        translated_block.previous_generations = input_block.previous_generations
+        return translated_block
+
+
+class JavaCategoryEvaluator(Evaluator):
+    """Java Category Evaluator
+
+    A class that performs LLM-based labelling/evals of llm generated Java,
+    appends line numbers so the llm can track things in prompts.
+    """
+
+    def __init__(
+        self,
+        eval_items_per_request: int | None = None,  # not used
+        input_types: str | set[str] = None,  # disable filtering by type
+        output_type: str = "java_category_eval",
+        **kwargs,
+    ) -> None:
+        """Initialize the Evaluator class
+
+        Arguments:
+            model: The LLM to use for translation. If an OpenAI model, the
+                `OPENAI_API_KEY` environment variable must be set.
+            model_arguments: Additional arguments to pass to the LLM constructor.
+            max_prompts: The maximum number of prompts to try before giving up.
+        """
+        kwargs.update(input_types=input_types, output_type=output_type)
+        super().__init__(**kwargs)
+        self.set_prompts("eval_prompts/java_category")
+        self._parser = LabeledJavaListParser()
+        self.eval_items_per_request = eval_items_per_request  # not used
+        self._load_parameters()
+
+    def translate_block(self, input_block: CodeBlock, failure_path: Path | None = None):
+        if len(input_block.previous_generations) == 0:
+            raise ValueError("Error: no previous generation available for evaluation")
+
+        last_gen = input_block.previous_generations[-1]
+        raw_code = last_gen["outputs"] if isinstance(last_gen, dict) else last_gen.outputs
+
+        if isinstance(raw_code, list):
+            raw_code = "\n".join(raw_code)
+        if not raw_code.strip():
+            log.warning(
+                f"[{input_block.name}] Warning: empty 'outputs' field, skipping block"
+            )
+            return []
+
+        log.debug(
+            f"[{input_block.name}] Code for evals:" f"{len(raw_code.splitlines())} lines"
+        )
+        temp_block = self._split_text(raw_code, input_block.name)
+        translated_block = super().translate_block(temp_block, failure_path)
+
+        translated_block.original = input_block
+        translated_block.previous_generations = input_block.previous_generations
+        log.debug(
+            f"[{input_block.name}] Evals complete."
+            f"Output tokens: {translated_block.tokens}"
+        )
+
+        return translated_block
