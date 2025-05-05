@@ -407,11 +407,20 @@ def load_model(model_id: str, model_kwargs: dict[str, Any] | None = None) -> Jan
         model_args.update(provider="anthropic")
 
     if model_id == "bedrock-claude-sonnet-3.7":
-        model_args.update(
-            model_kwargs=dict(
-                max_tokens=128_000,
-            ),
-        )
+        if "model_kwargs" not in model_args:
+            model_args.update(model_kwargs=dict(max_tokens=128_000))
+        elif "max_tokens" not in model_args["model_kwargs"]:
+            model_args["model_kwargs"].update(max_tokens=128_000)
+
+    if model_kwargs is not None:
+        if "model_kwargs" not in model_args:
+            model_args.update(model_kwargs={})
+
+        for k, v in model_kwargs.items():
+            if k in model_args:
+                model_args[k] = v
+            else:
+                model_args["model_kwargs"][k] = v
 
     if model_id == "bedrock-claude-sonnet-3.7-reasoning":
         # This is a workaround for the reasoning model, which uses a different endpoint
@@ -445,20 +454,6 @@ def load_model(model_id: str, model_kwargs: dict[str, Any] | None = None) -> Jan
             additional_model_request_fields=reasoning_cfg,
         )
         model_args.pop("model_kwargs", None)
-        if "model_kwargs" not in model_args:
-            model_args.update(model_kwargs=dict(max_tokens=128_000))
-        elif "max_tokens" not in model_args["model_kwargs"]:
-            model_args["model_kwargs"].update(max_tokens=128_000)
-
-    if model_kwargs is not None:
-        if "model_kwargs" not in model_args:
-            model_args.update(model_kwargs={})
-
-        for k, v in model_kwargs.items():
-            if k in model_args:
-                model_args[k] = v
-            else:
-                model_args["model_kwargs"][k] = v
 
     model_type = MODEL_TYPE_CONSTRUCTORS[model_type_name]
     prompt_engine = MODEL_PROMPT_ENGINES[model_id]
