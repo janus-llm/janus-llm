@@ -460,11 +460,7 @@ class UMLEvaluator(Evaluator):
                 code=input_str,
             )
         )
-        temp_block = self._split_text(obj_str, input_block.name)
-        translated_block = super().translate_block(temp_block, failure_path)
-        translated_block.original = input_block
-        translated_block.previous_generations = input_block.previous_generations
-        return translated_block
+        super()._add_translation(block)
 
 
 class JavaCategoryEvaluator(Evaluator):
@@ -489,39 +485,46 @@ class JavaCategoryEvaluator(Evaluator):
             model_arguments: Additional arguments to pass to the LLM constructor.
             max_prompts: The maximum number of prompts to try before giving up.
         """
-        kwargs.update(input_types=input_types, output_type=output_type)
-        super().__init__(**kwargs)
-        self.set_prompts("eval_prompts/java_category")
+        super().__init__(input_types=input_types, output_type=output_type, **kwargs)
         self._parser = LabeledJavaListParser()
-        self.eval_items_per_request = eval_items_per_request  # not used
-        self._load_parameters()
+        self._prompt_template_names = ["eval_prompts/java_category"]
 
-    def translate_block(self, input_block: CodeBlock, failure_path: Path | None = None):
-        if len(input_block.previous_generations) == 0:
-            raise ValueError("Error: no previous generation available for evaluation")
+    def _add_translation(self, block: TranslatedCodeBlock) -> None:
+        if block.translated:
+            return
 
-        last_gen = input_block.previous_generations[-1]
-        raw_code = last_gen["outputs"] if isinstance(last_gen, dict) else last_gen.outputs
+        if block.original.text is None:
+            block.translated = True
+            return
 
-        if isinstance(raw_code, list):
-            raw_code = "\n".join(raw_code)
+        if block.previous_generation is None:
+            raise ValueError("Error: cannot evaluate block, no previous generation found")
+
+        # Get the raw code from the previous generation
+        if isinstance(block.previous_generation["input"], str):
+            raw_code = block.previous_generation["input"]
+        elif "output" in block.previous_generation["input"]:
+            raw_code = block.previous_generation["input"]["output"]
+        else:
+            raw_code = self._filter_inputs(block.previous_generation["input"]["outputs"])
+
         if not raw_code.strip():
-            log.warning(
-                f"[{input_block.name}] Warning: empty 'outputs' field, skipping block"
+            log.warning(f"[{block.name}] Warning: empty 'outputs' field, skipping block")
+            return
+
+        log.debug(f"[{block.name}] Code for evals: {len(raw_code.splitlines())} lines")
+
+        evaluation_output = block.original.text
+
+        if not evaluation_output:
+            log.debug(f"[{block.name}] Skipping empty output")
+            return
+
+        # Combine the raw code and evaluation output into the block's original text
+        block.original.text = json.dumps(
+            dict(
+                code=raw_code,
+                evaluation=evaluation_output,
             )
-            return []
-
-        log.debug(
-            f"[{input_block.name}] Code for evals:" f"{len(raw_code.splitlines())} lines"
         )
-        temp_block = self._split_text(raw_code, input_block.name)
-        translated_block = super().translate_block(temp_block, failure_path)
-
-        translated_block.original = input_block
-        translated_block.previous_generations = input_block.previous_generations
-        log.debug(
-            f"[{input_block.name}] Evals complete."
-            f"Output tokens: {translated_block.tokens}"
-        )
-
-        return translated_block
+        super()._add_translation(block)
