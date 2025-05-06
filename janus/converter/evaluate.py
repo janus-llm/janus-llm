@@ -3,7 +3,8 @@ import json
 import re
 from typing import Iterator
 
-from langchain_core.runnables import Runnable, RunnableLambda, RunnableParallel
+from langchain_core.runnables import Runnable, RunnableParallel
+from langchain_core.runnables.passthrough import RunnablePick
 
 from janus.converter.converter import Converter
 from janus.language.block import JanusOutputObject, TranslatedCodeBlock
@@ -18,6 +19,16 @@ from janus.utils.logger import create_logger
 log = create_logger(__name__)
 
 
+def extract_from_json(key: str):
+    def _extract(json_text: str) -> str:
+        val = json.loads(json_text)[key]
+        if not isinstance(val, str):
+            val = json.dumps(val)
+        return val
+
+    return _extract
+
+
 class Evaluator(Converter):
     """Evaluator
 
@@ -29,7 +40,7 @@ class Evaluator(Converter):
 
     """
 
-    def __init__(self, object_name: str, **kwargs) -> None:
+    def __init__(self, object_key: str, **kwargs) -> None:
         """Initialize the Evaluator class
 
         Arguments:
@@ -40,7 +51,7 @@ class Evaluator(Converter):
         """
         kwargs.update(use_janus_inputs=True)
         super().__init__(**kwargs)
-        self._object_name = object_name
+        self._object_key = object_key
         self._combiner = JsonCombiner()
 
     def _filter_inputs(self, inputs: list[JanusOutputObject]) -> str:
@@ -99,19 +110,15 @@ class Evaluator(Converter):
             )
         )
 
-    def _get_code_from_json(self, json_text: str) -> str:
-        return json.loads(json_text)["code"]
-
-    def _get_object_to_evaluate_from_json(self, json_text: str) -> str:
-        return json.loads(json_text)["eval_object"]
-
     def _input_runnable(self) -> Runnable:
         kwargs = {
-            "SOURCE_CODE": self._get_code_from_json,
-            self._object_name: self._get_object_to_evaluate_from_json,
-            "context": self._retriever,
+            "SOURCE_CODE": RunnablePick("json") | extract_from_json("code"),
+            self._object_key: RunnablePick("json") | extract_from_json("eval_object"),
+            "context": RunnablePick("context"),
         }
-        return RunnableLambda(self._parser.parse_input) | RunnableParallel(**kwargs)
+        return RunnableParallel(
+            json=self._parser.parse_input, context=self._retriever
+        ) | RunnableParallel(**kwargs)
 
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
         if block.translated:
@@ -184,7 +191,7 @@ class RequirementEvaluator(MultiObjectEvaluator):
             max_prompts: The maximum number of prompts to try before giving up.
         """
         super().__init__(
-            object_name="REQUIREMENTS",
+            object_key="REQUIREMENTS",
             input_types=input_types,
             output_type=output_type,
             **kwargs,
@@ -211,9 +218,6 @@ class RequirementEvaluator(MultiObjectEvaluator):
             obj = obj[0]
 
         return obj
-
-    def _get_object_to_evaluate_from_json(self, json_text: str) -> str:
-        return json.dumps(super()._get_object_to_evaluate_from_json(json_text))
 
     def _get_working_objects(
         self, block: TranslatedCodeBlock
@@ -276,7 +280,7 @@ class InlineCommentEvaluator(MultiObjectEvaluator):
             max_prompts: The maximum number of prompts to try before giving up.
         """
         super().__init__(
-            object_name=None,
+            object_key="SOURCE_CODE",
             input_types=input_types,
             output_type=output_type,
             **kwargs,
@@ -434,7 +438,7 @@ class SummaryEvaluator(Evaluator):
             max_prompts: The maximum number of prompts to try before giving up.
         """
         super().__init__(
-            object_name="CODE_SUMMARY",
+            object_key="CODE_SUMMARY",
             input_types=input_types,
             output_type=output_type,
             **kwargs,
@@ -465,7 +469,7 @@ class UMLEvaluator(Evaluator):
             max_prompts: The maximum number of prompts to try before giving up.
         """
         super().__init__(
-            object_name="PLANTUML_DIAGRAM",
+            object_key="PLANTUML_DIAGRAM",
             input_types=input_types,
             output_type=output_type,
             **kwargs,
@@ -496,7 +500,7 @@ class JavaCategoryEvaluator(Evaluator):
             max_prompts: The maximum number of prompts to try before giving up.
         """
         super().__init__(
-            object_name="JAVA_CODE",
+            object_key="JAVA_CODE",
             input_types=input_types,
             output_type=output_type,
             **kwargs,
@@ -506,15 +510,10 @@ class JavaCategoryEvaluator(Evaluator):
         self._prompt_template_names = ["eval_prompts/java_category"]
 
     def _preprocess_block(self, block: TranslatedCodeBlock) -> None:
-        block.original.text = self._parser.parse_input(block.original)
+        pass
 
     def _input_runnable(self) -> Runnable:
-        def _get_eval_obj(json_text: str) -> str:
-            return json.dumps(json.loads(json_text)["eval_object"])
-
-        kwargs = {
-            self._object_name: _get_eval_obj,
-            "context": self._retriever,
-        }
-
-        return RunnableParallel(**kwargs)
+        return RunnableParallel(
+            JAVA_CODE=self._parser.parse_input,
+            context=self._retriever,
+        )
