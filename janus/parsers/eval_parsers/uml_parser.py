@@ -34,7 +34,7 @@ class UMLParser(JanusParser, PydanticOutputParser):
         text = super().parse_input(block)
         inputs = json.loads(text)
         # strong assumption every @startuml has an @enduml, aka valid uml
-        diagram_str = inputs["diagrams"]
+        diagram_str = inputs["eval_object"]
         start_indicies = []
         end_indicies = []
         start = 0
@@ -50,7 +50,7 @@ class UMLParser(JanusParser, PydanticOutputParser):
                 end = end_indicies[-1] - 3 - 6
 
         if len(start_indicies) == 1:
-            inputs["diagrams"] = [diagram_str]
+            inputs["eval_object"] = [diagram_str]
             return json.dumps(inputs)
 
         diagram_list = []
@@ -58,7 +58,7 @@ class UMLParser(JanusParser, PydanticOutputParser):
             end_idx = end_indicies[-1 - i]
             end_idx += 1
             diagram_list.append(diagram_str[idx:end_idx])
-        inputs["diagrams"] = diagram_list
+        inputs["eval_object"] = diagram_list
         return json.dumps(inputs)
 
     def parse(self, text: str | BaseMessage) -> str:

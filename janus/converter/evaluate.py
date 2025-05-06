@@ -60,6 +60,9 @@ class Evaluator(Converter):
         return self._filter_inputs(input["outputs"])
 
     def _extract_original_code(self, block: TranslatedCodeBlock) -> str:
+        """Most evaluators will require the original code to be sent alongside
+        the object(s) being evaluated. It is pulled from the previous_generation member
+        """
         if block.previous_generation is None:
             raise ValueError("Error: cannot evaluate block, no previous generation found")
 
@@ -81,9 +84,9 @@ class Evaluator(Converter):
 
     def _preprocess_block(self, block: TranslatedCodeBlock) -> None:
         input_str = self._extract_original_code(block)
-        object = self._extract_object_to_evaluate(block)
+        obj = self._extract_object_to_evaluate(block)
 
-        if not object:
+        if not obj:
             log.debug(f"[{block.name}] Skipping empty output")
             block.translated = True
             return
@@ -91,7 +94,7 @@ class Evaluator(Converter):
         # Collect source input code and requirement outputs together
         block.original.text = json.dumps(
             dict(
-                eval_object=object,
+                eval_object=obj,
                 code=input_str,
             )
         )
@@ -103,18 +106,11 @@ class Evaluator(Converter):
         return json.loads(json_text)["eval_object"]
 
     def _input_runnable(self) -> Runnable:
-        def _get_code(json_text: str) -> str:
-            return json.loads(json_text)["code"]
-
-        def _get_eval_obj(json_text: str) -> str:
-            return json.dumps(json.loads(json_text)["eval_object"])
-
         kwargs = {
-            "SOURCE_CODE": _get_code,
-            self._object_name: _get_eval_obj,
+            "SOURCE_CODE": self._get_code_from_json,
+            self._object_name: self._get_object_to_evaluate_from_json,
             "context": self._retriever,
         }
-
         return RunnableLambda(self._parser.parse_input) | RunnableParallel(**kwargs)
 
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
@@ -200,12 +196,21 @@ class RequirementEvaluator(MultiObjectEvaluator):
         if block.original.text is None:
             return None
 
-        object = json.loads(block.original.text)
-        # Requirements list can be a list of lists; flatten
-        if isinstance(object, list) and isinstance(object[0], list):
-            object = object[0]
+        obj = json.loads(block.original.text)
 
-        return object
+        if isinstance(obj, dict) and "requirements" in obj:
+            obj = obj["requirements"]
+
+        if not obj:
+            return None
+
+        if isinstance(obj, dict):
+            obj = list(obj.values())
+
+        if isinstance(obj, list) and isinstance(obj[0], list):
+            obj = obj[0]
+
+        return obj
 
     def _get_object_to_evaluate_from_json(self, json_text: str) -> str:
         return json.dumps(super()._get_object_to_evaluate_from_json(json_text))
@@ -216,9 +221,9 @@ class RequirementEvaluator(MultiObjectEvaluator):
         if block.original.text is None:
             return
 
-        object = json.loads(block.original.text)
-        code = object["code"]
-        objects = object["eval_object"]
+        obj = json.loads(block.original.text)
+        code = obj["code"]
+        objects = obj["eval_object"]
 
         if self._eval_items_per_request is None:
             yield block
@@ -242,7 +247,7 @@ class RequirementEvaluator(MultiObjectEvaluator):
             temp_block = copy.deepcopy(block)
             temp_block.original.text = json.dumps(
                 dict(
-                    requirements=working_objects,
+                    eval_object=working_objects,
                     code=code,
                 )
             )
@@ -314,9 +319,9 @@ class InlineCommentEvaluator(MultiObjectEvaluator):
 
     def _preprocess_block(self, block: TranslatedCodeBlock) -> None:
         input_str = self._extract_original_code(block)
-        object = self._extract_object_to_evaluate(block)
+        obj = self._extract_object_to_evaluate(block)
 
-        if not object:
+        if not obj:
             log.debug(f"[{block.name}] Skipping empty output")
             block.translated = True
             return
@@ -327,7 +332,7 @@ class InlineCommentEvaluator(MultiObjectEvaluator):
         # Process input to insert the generated comments after the tagged placeholders
         processed_input, missing_comments = self._process_comments(
             input_str,
-            object,
+            obj,
         )
         if missing_comments:
             log.info(f"[{block.name}] Warning: missing {missing_comments} comments")
@@ -357,9 +362,9 @@ class InlineCommentEvaluator(MultiObjectEvaluator):
         if block.original.text is None:
             return
 
-        object = json.loads(block.original.text)
-        processed_input = object["code"]
-        comments = object["eval_object"]
+        obj = json.loads(block.original.text)
+        processed_input = obj["code"]
+        comments = obj["eval_object"]
 
         block.original.text = processed_input
 
