@@ -162,7 +162,6 @@ def llm_self_eval(
 
     refiner_types = [REFINERS[r] for r in refiner_types]
     kwargs = dict(
-        eval_items_per_request=eval_items_per_request,
         model=llm_name,
         model_kwargs=model_arguments,
         source_language=language,
@@ -174,9 +173,15 @@ def llm_self_eval(
     )
     # Setting parser type here
     if evaluation_type == "incose":
-        evaluator = RequirementEvaluator(**kwargs)
+        evaluator = RequirementEvaluator(
+            eval_items_per_request=eval_items_per_request,
+            **kwargs,
+        )
     elif evaluation_type == "comments":
-        evaluator = InlineCommentEvaluator(**kwargs)
+        evaluator = InlineCommentEvaluator(
+            eval_items_per_request=eval_items_per_request,
+            **kwargs,
+        )
     elif evaluation_type == "uml":
         evaluator = UMLEvaluator(**kwargs)
     elif evaluation_type == "summary":
