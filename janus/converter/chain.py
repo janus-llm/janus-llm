@@ -60,6 +60,8 @@ class ConverterChain(Converter):
 
                 if not b.translation_completed:
                     msg = f"{converter.__class__.__name__} failed on block '{b.name}'"
+                    log.error(msg)
+                    continue
                     raise IncompleteTranslationException(BrokenChainException(msg), b)
 
                 # If the block was translated, convert the translation to an input
@@ -75,6 +77,9 @@ class ConverterChain(Converter):
         self,
         translation: list[TranslatedCodeBlock | CodeBlock] | JanusOutputObject,
     ) -> JanusOutputObject:
+        if not isinstance(translation, list):
+            return super()._get_output_obj(translation)
+
         metadatas = []
         curr_obj = super()._get_output_obj(translation)
         last_obj = curr_obj
