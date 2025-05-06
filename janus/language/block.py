@@ -495,7 +495,7 @@ class TranslatedCodeBlock(CodeBlock):
         self,
         original: CodeBlock | None,
         language: str,
-        converter: str | ForwardRef("Converter"),
+        converter: str | ForwardRef("Converter") | None = None,
         model_name: str | None = None,
         block_type: str | None = None,
         block_label: str | None = None,
@@ -515,8 +515,13 @@ class TranslatedCodeBlock(CodeBlock):
             for `text`, `path`, `complete`, `language`, `tokens`, and `children`
         """
         self.children: list[TranslatedCodeBlock]
+
         if original is None:
             original = CodeBlock.get_empty()
+            previous_generation = None
+        else:
+            previous_generation = original.previous_generation
+
         super().__init__(
             id=original.id,
             name=original.name,
@@ -539,7 +544,7 @@ class TranslatedCodeBlock(CodeBlock):
                 for child in original.children
             ],
             affixes=original.affixes,
-            previous_generation=original.previous_generation,
+            previous_generation=previous_generation,
             block_type=block_type,
             block_label=block_label,
         )
@@ -549,8 +554,8 @@ class TranslatedCodeBlock(CodeBlock):
         self.original = original
         self.converter = converter
 
-        self.model_name: str = model_name or "UNKNOWN"
-        if not isinstance(converter, str):
+        self.model_name: str | None = model_name
+        if converter is not None and not isinstance(converter, str):
             self.model_name = converter._model_name
 
         self.complete = original.complete
@@ -664,10 +669,6 @@ class TranslatedCodeBlock(CodeBlock):
         )
 
     def to_janus_object(self) -> JanusOutputObject:
-        converter = self.converter
-        if not isinstance(converter, str):
-            converter = converter.__class__.__name__
-
         metadata: JanusMetadata = {
             "cost": self.total_cost,
             "processing_time": self.total_processing_time,
@@ -676,7 +677,6 @@ class TranslatedCodeBlock(CodeBlock):
             "output_tokens": self.tokens,
             "request_input_tokens": self.total_request_input_tokens,
             "request_output_tokens": self.total_request_output_tokens,
-            "converter_name": converter,
             "start_line": self.start_point[0],
             "start_char": self.start_point[-1],
             "start_byte": self.start_byte,
@@ -684,16 +684,23 @@ class TranslatedCodeBlock(CodeBlock):
             "end_char": self.end_point[-1],
             "end_byte": self.end_byte,
             "language": self.language,
-            "model_name": self.model_name,
             "translation_complete": self.translation_completed,
         }
+
+        if isinstance(self.converter, str):
+            metadata["converter_name"] = self.converter
+        elif self.converter is not None:
+            metadata["converter_name"] = self.converter.__class__.__name__
+
+        if self.model_name is not None:
+            metadata["model_name"] = self.model_name
         if self.block_type is not None:
             metadata["type"] = self.block_type
         if self.block_label is not None:
             metadata["label"] = self.block_label
 
         janus_object: JanusOutputObject = {
-            "input": self.original.to_janus_object(),
+            "input": self.previous_generation or self.original.text or "",
             "metadata": metadata,
             "outputs": self.descendant_janus_objects() if self.children else [],
         }
@@ -707,14 +714,23 @@ class TranslatedCodeBlock(CodeBlock):
         janus_obj: JanusOutputObject,
     ) -> "TranslatedCodeBlock":
         metadata = janus_obj["metadata"]
+
+        if isinstance(janus_obj["input"], str):
+            original = None
+        else:
+            original = CodeBlock.from_janus_object(janus_obj["input"])
+
         translated_block = TranslatedCodeBlock(
-            original=CodeBlock.extract_input(janus_obj),
+            original=original,
             language=metadata["language"],
-            converter=metadata.get("converter_name", "None"),
+            converter=metadata.get("converter_name", None),
             model_name=metadata.get("model_name", None),
             block_type=metadata.get("type", None),
             block_label=metadata.get("label", None),
         )
+
+        if not isinstance(janus_obj["input"], str):
+            translated_block.previous_generation = janus_obj["input"]
 
         translated_block.translated = metadata["translation_complete"]
         if "output" in janus_obj:
@@ -727,9 +743,21 @@ class TranslatedCodeBlock(CodeBlock):
         translated_block.cost = metadata.get("cost", 0.0)
         translated_block.processing_time = metadata.get("processing_time", 0.0)
         translated_block.num_requests = metadata.get("num_requests", 0)
-        translated_block.tokens = metadata.get("output_tokens", 0)
         translated_block.request_input_tokens = metadata.get("request_input_tokens", 0)
         translated_block.request_output_tokens = metadata.get("request_output_tokens", 0)
+
+        translated_block.tokens = metadata.get("output_tokens", 0)
+
+        translated_block.start_byte = metadata.get("start_byte", 0)
+        translated_block.end_byte = metadata.get("end_byte", -1)
+        translated_block.start_point = (
+            metadata.get("start_line", 0),
+            metadata.get("start_char", 0),
+        )
+        translated_block.end_point = (
+            metadata.get("end_line", -1),
+            metadata.get("end_char", -1),
+        )
 
         return translated_block
 

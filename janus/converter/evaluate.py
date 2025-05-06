@@ -505,15 +505,19 @@ class JavaCategoryEvaluator(Evaluator):
             output_type=output_type,
             **kwargs,
         )
-        self._use_janus_inputs = False
         self._parser = LabeledJavaListParser()
         self._prompt_template_names = ["eval_prompts/java_category"]
 
     def _preprocess_block(self, block: TranslatedCodeBlock) -> None:
-        pass
+        block.original.text = self._parser.parse_input(block.original)
+        if block.previous_generation is not None:
+            block.previous_generation["output"] = block.original.text
 
     def _input_runnable(self) -> Runnable:
+        def _get_code(block) -> str:
+            return block.text
+
         return RunnableParallel(
-            JAVA_CODE=self._parser.parse_input,
+            JAVA_CODE=_get_code,
             context=self._retriever,
         )
