@@ -817,21 +817,23 @@ def combine_janus_objects(janus_objects: list[JanusOutputObject]) -> JanusOutput
     metadata = combine_metadata(obj["metadata"] for obj in janus_objects)
 
     inputs = [obj["input"] for obj in janus_objects]
-    if all(isinstance(x, str) for x in inputs) and len(set(inputs)) == 1:
-        input = inputs[0]
-    else:
-        input_blocks = []
-        for input in inputs:
-            if isinstance(input, str):
-                block = CodeBlock.get_empty()
-                block.text = input
-                input_blocks.append(block)
-            else:
-                input_blocks.append(CodeBlock.from_janus_object(input))
-        if len(set(hash(x) for x in input_blocks)) == 1:
-            input = inputs[0]
+    input_blocks = {}
+    for input in inputs:
+        if not input:
+            continue
+
+        if isinstance(input, str):
+            block = CodeBlock.get_empty()
+            block.text = input
         else:
-            input = codeblocks_to_janus_object(input_blocks)
+            block = CodeBlock.from_janus_object(input)
+
+        input_blocks[hash(block)] = block
+
+    if len(input_blocks) == 1:
+        input = list(input_blocks.values())[0]
+    else:
+        input = "MULTIPLE"
 
     janus_object: JanusOutputObject = {
         "input": input,
