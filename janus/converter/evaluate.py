@@ -57,9 +57,15 @@ class Evaluator(Converter):
     def _filter_inputs(self, inputs: list[JanusOutputObject]) -> str:
         """Get single string input according to block types and labels"""
         if self._input_types is not None:
-            inputs = [b for b in inputs if b["metadata"]["type"] in self._input_types]
+            inputs = [
+                b for b in inputs if b["metadata"].get("type", None) in self._input_types
+            ]
         if self._input_labels is not None:
-            inputs = [b for b in inputs if b["metadata"]["label"] in self._input_labels]
+            inputs = [
+                b
+                for b in inputs
+                if b["metadata"].get("label", None) in self._input_labels
+            ]
 
         if len(inputs) != 1:
             raise ValueError("Error: ambiguous input to evaluation")
