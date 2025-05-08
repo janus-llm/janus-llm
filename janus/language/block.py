@@ -544,8 +544,10 @@ class TranslatedCodeBlock(CodeBlock):
         if original is None:
             original = CodeBlock.get_empty()
             previous_generation = None
-        else:
+        elif original.previous_generation is not None:
             previous_generation = original.previous_generation
+        else:
+            previous_generation = original.to_janus_object()
 
         super().__init__(
             id=original.id,

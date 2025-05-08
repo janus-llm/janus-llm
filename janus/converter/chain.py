@@ -1,7 +1,6 @@
 from janus.converter.converter import Converter, IncompleteTranslationException
 from janus.language.block import (
     CodeBlock,
-    JanusMetadata,
     JanusOutputObject,
     TranslatedCodeBlock,
     combine_metadata,
@@ -52,20 +51,27 @@ class ConverterChain(Converter):
                         translated_blocks.append(block.original)
 
             blocks = []
-            for b in translated_blocks:
+            for translated_block in translated_blocks:
                 # If the converter ignored the block, maintain it in the working list
-                if not isinstance(b, TranslatedCodeBlock):
-                    blocks.append(b)
+                if not isinstance(translated_block, TranslatedCodeBlock):
+                    blocks.append(translated_block)
                     continue
 
-                if not b.translation_completed:
-                    msg = f"{converter.__class__.__name__} failed on block '{b.name}'"
+                if not translated_block.translation_completed:
+                    msg = (
+                        f"{converter.__class__.__name__} failed on"
+                        f" block '{translated_block.name}'"
+                    )
                     log.error(msg)
                     continue
-                    raise IncompleteTranslationException(BrokenChainException(msg), b)
+                    raise IncompleteTranslationException(
+                        BrokenChainException(msg), translated_block
+                    )
 
                 # If the block was translated, convert the translation to an input
-                blocks.append(b.to_codeblock())
+                block = translated_block.to_codeblock()
+                block.mark_root()
+                blocks.append(block)
 
         # Filter the blocks that were maintained only as source
         translated_blocks = [
@@ -77,23 +83,47 @@ class ConverterChain(Converter):
         self,
         translation: list[TranslatedCodeBlock | CodeBlock] | JanusOutputObject,
     ) -> JanusOutputObject:
-        if not isinstance(translation, list):
-            return super()._get_output_obj(translation)
+        if isinstance(translation, list):
+            janus_object = super()._get_output_obj(translation)
+        else:
+            janus_object = translation
 
+        # For each object, recurse through its inputs to get all the metadata
+        #  to aggregate, and identify the original input
+        original_inputs: set[str] = set()
         metadatas = []
-        curr_obj = super()._get_output_obj(translation)
-        last_obj = curr_obj
-        while True:
-            metadatas.append(curr_obj["metadata"])
-            if not isinstance(curr_obj["input"], dict):
-                break
-            curr_obj = curr_obj["input"]
-        first_obj = curr_obj
-        metadata = combine_metadata(metadatas)
+        for obj in janus_object["outputs"]:
+            while not isinstance(input := obj["input"], str):
+                metadatas.append(obj["metadata"])
 
-        metadata: JanusMetadata = combine_metadata(metadatas)
+                # ConverterChain aggregates metadata and inputs
+                if "converter_name" in obj["metadata"]:
+                    if obj["metadata"]["converter_name"] == "ConverterChain":
+                        break
+
+                obj = input
+
+            # Log the original input for this block
+            original_inputs.add(input)
+
+            # If input was chunked, must aggregate metadata
+            if "outputs" in obj:
+                original_metadata = combine_metadata(
+                    chunk["metadata"] for chunk in obj["outputs"]
+                )
+            else:
+                original_metadata = obj["metadata"]
+
+        # If all the original inputs are the same, use that as the input to the chain
+        if len(original_inputs) == 1:
+            [janus_object["input"]] = original_inputs
+        else:
+            janus_object["input"] = "MULTIPLE"
+            original_metadata = {}
+
+        # Aggregate metadata, but use the original input metadata for start/end points
+        metadata = combine_metadata(metadatas)
         input_keys = [
-            "input_tokens",
             "start_line",
             "start_char",
             "start_byte",
@@ -101,27 +131,34 @@ class ConverterChain(Converter):
             "end_char",
             "end_byte",
         ]
-        output_keys = [
-            "output_tokens",
-            "language",
-            "type",
-            "label",
-            "translation_complete",
-        ]
         for k in input_keys:
-            if k in first_obj["metadata"]:
-                metadata[k] = first_obj["metadata"][k]
-        for k in output_keys:
-            if k in last_obj["metadata"]:
-                metadata[k] = last_obj["metadata"][k]
+            if k in original_metadata:
+                metadata[k] = original_metadata[k]
 
-        metadata["converter_name"] = "ConverterChain"
-        janus_object: JanusOutputObject = {
-            "input": first_obj["input"],
-            "metadata": metadata,
-            "outputs": last_obj["outputs"],
-        }
-        if "output" in last_obj:
-            janus_object["output"] = last_obj["output"]
+        # Input tokens to the chain are the output tokens of the original input
+        metadata["input_tokens"] = original_metadata["output_tokens"]
+
+        # Aggregate output tokens of final outputs
+        metadata["output_tokens"] = sum(
+            obj["metadata"]["output_tokens"] for obj in janus_object["outputs"]
+        )
+
+        # Chain output language is JSON
+        metadata["language"] = "json"
+
+        # Chain is complete if every step completed
+        metadata["translation_complete"] = all(
+            obj.get("translation_complete", True) for obj in janus_object["outputs"]
+        )
+
+        # Overwrite type and label if provided (otherwise, omit)
+        metadata.pop("label", None)
+        metadata.pop("type", None)
+        if self._output_label is not None:
+            metadata["label"] = self._output_label
+        if self._output_type is not None:
+            metadata["type"] = self._output_type
+
+        janus_object["metadata"] = metadata
 
         return janus_object
