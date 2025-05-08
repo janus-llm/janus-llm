@@ -43,6 +43,7 @@ class JanusMetadata(TypedDict):
     type: NotRequired[str]
     label: NotRequired[str]
     translation_complete: bool
+    hash: int
 
 
 class JanusOutputObject(TypedDict):
@@ -105,6 +106,7 @@ def combine_metadata(metadatas: Iterable[JanusMetadata]) -> JanusMetadata:
             end_byte=-1,
             language="",
             translation_complete=False,
+            hash=0,
         )
 
     def _get_vals(key: str) -> list:
@@ -152,8 +154,9 @@ def combine_metadata(metadatas: Iterable[JanusMetadata]) -> JanusMetadata:
         "end_line": metadatas[last_line_idx]["end_line"],
         "end_char": metadatas[last_line_idx]["end_char"],
         "end_byte": int(_max_metadata("end_byte") or -1),
-        "language": _merge_metadata("language") or "UNKNOWN",
+        "language": _merge_metadata("language") or "MULTIPLE",
         "translation_complete": _all_metadata("translation_complete") or False,
+        "hash": hash(tuple(_get_vals("hash"))),
     }
 
     optional_metadata = {
@@ -263,8 +266,29 @@ class CodeBlock:
 
     def __hash__(self) -> int:
         if self.previous_generation is not None:
-            return hash((self.text, hash(self.previous_generation["output"])))
-        return hash(self.text)
+            return self.previous_generation["metadata"]["hash"]
+        if self.text is not None:
+            return hash(self.text)
+        return hash(tuple(hash(c) for c in self.children))
+
+    def __repr__(self) -> str:
+        tokens = self.tokens
+        identifier = str(self.id)
+        if self.text is None:
+            identifier = f"({identifier})"
+            tokens = self.total_tokens
+        elif not self.complete:
+            identifier += "*"
+        if self.start_point is not None and self.end_point is not None:
+            start = f"{self.start_point[0]}:{self.start_point[1]}"
+            end = f"{self.end_point[0]}:{self.end_point[1]}"
+            seg = f" [{start}-{end}]"
+        else:
+            seg = ""
+
+        btype = self.block_label or self.block_type or self.language
+
+        return f"{btype}: {identifier}{seg}  ({tokens:,d} tokens)"
 
     def set_children(self, children: list["CodeBlock"]) -> None:
         self.children = children
@@ -461,6 +485,7 @@ class CodeBlock:
             "end_byte": self.end_byte,
             "language": self.language,
             "translation_complete": False,
+            "hash": hash(self),
         }
 
         janus_object: JanusOutputObject = {
@@ -685,6 +710,7 @@ class TranslatedCodeBlock(CodeBlock):
             "end_byte": self.end_byte,
             "language": self.language,
             "translation_complete": self.translation_completed,
+            "hash": hash(self),
         }
 
         if isinstance(self.converter, str):
@@ -816,8 +842,8 @@ def combine_janus_objects(janus_objects: list[JanusOutputObject]) -> JanusOutput
 
     metadata = combine_metadata(obj["metadata"] for obj in janus_objects)
 
-    inputs = [obj["input"] for obj in janus_objects]
-    input_blocks = {}
+    inputs: list[JanusOutputObject | str] = [obj["input"] for obj in janus_objects]
+    input_hash = {}
     for input in inputs:
         if not input:
             continue
@@ -825,13 +851,12 @@ def combine_janus_objects(janus_objects: list[JanusOutputObject]) -> JanusOutput
         if isinstance(input, str):
             block = CodeBlock.get_empty()
             block.text = input
-        else:
-            block = CodeBlock.from_janus_object(input)
+            input = block.to_janus_object()
 
-        input_blocks[hash(block)] = block
+        input_hash[input["metadata"]["hash"]] = input
 
-    if len(input_blocks) == 1:
-        input = list(input_blocks.values())[0]
+    if len(input_hash) == 1:
+        input = list(input_hash.values())[0]
     else:
         input = "MULTIPLE"
 
