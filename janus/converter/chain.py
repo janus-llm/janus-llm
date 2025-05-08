@@ -107,7 +107,7 @@ class ConverterChain(Converter):
             original_inputs.add(input)
 
             # If input was chunked, must aggregate metadata
-            if "outputs" in obj:
+            if obj["outputs"]:
                 original_metadata = combine_metadata(
                     chunk["metadata"] for chunk in obj["outputs"]
                 )
