@@ -127,8 +127,12 @@ class Evaluator(Converter):
         ) | RunnableParallel(**kwargs)
 
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
+        if block.original.text is None:
+            block.translated = True
+
         if block.translated:
             return
+
         self._preprocess_block(block)
         super()._add_translation(block)
 
@@ -152,6 +156,9 @@ class MultiObjectEvaluator(Evaluator):
         raise NotImplementedError()
 
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
+        if block.original.text is None:
+            block.translated = True
+
         if block.translated:
             return
 
