@@ -56,45 +56,59 @@ class Evaluator(Converter):
 
     def _filter_inputs(self, inputs: list[JanusOutputObject]) -> str:
         """Get single string input according to block types and labels"""
+        filtered_inputs = inputs
         if self._input_types is not None:
-            inputs = [
-                b for b in inputs if b["metadata"].get("type", None) in self._input_types
+            filtered_inputs = [
+                b
+                for b in filtered_inputs
+                if "type" not in b["metadata"]
+                or b["metadata"]["type"] in self._input_types
             ]
         if self._input_labels is not None:
-            inputs = [
+            filtered_inputs = [
                 b
-                for b in inputs
-                if b["metadata"].get("label", None) in self._input_labels
+                for b in filtered_inputs
+                if "label" not in b["metadata"]
+                or b["metadata"]["label"] in self._input_labels
             ]
 
-        if len(inputs) != 1:
-            raise ValueError("Error: ambiguous input to evaluation")
+        if not filtered_inputs:
+            raise ValueError("Error: no input to evaluation object")
 
-        input = inputs[0]
-        if "output" in input:
-            return input["output"]
+        unique_inputs = {
+            b["output"] if "output" in b else self._filter_inputs(b["outputs"])
+            for b in filtered_inputs
+            if "output" in b or len(b["outputs"]) > 0
+        }
 
-        return self._filter_inputs(input["outputs"])
+        if len(unique_inputs) > 1:
+            raise ValueError(
+                f"Error: ambiguous input to evaluation ({len(unique_inputs)} versions)"
+            )
+
+        [input] = unique_inputs
+        return input
 
     def _extract_original_code(self, block: TranslatedCodeBlock) -> str:
         """Most evaluators will require the original code to be sent alongside
         the object(s) being evaluated. It is pulled from the previous_generation member
         """
-        if block.previous_generation is None:
-            raise ValueError("Error: cannot evaluate block, no previous generation found")
 
-        if isinstance(block.previous_generation["input"], str):
-            input_str = block.previous_generation["input"]
-        elif "output" in block.previous_generation["input"]:
-            input_str = block.previous_generation["input"]["output"]
-        else:
-            input_str = self._filter_inputs(block.previous_generation["input"]["outputs"])
+        if block.original.previous_generation is not None:
+            if "output" in block.original.previous_generation:
+                return block.original.previous_generation["output"]
+            if block.original.previous_generation["outputs"]:
+                return self._filter_inputs(block.original.previous_generation["outputs"])
 
-        input_str = input_str.strip()
-        if not input_str:
-            raise ValueError("Error: cannot evaluate block, no previous generation found")
+        if block.previous_generation is not None:
+            if isinstance(block.previous_generation["input"], str):
+                return block.previous_generation["input"]
+            if "output" in block.previous_generation["input"]:
+                return block.previous_generation["input"]["output"]
+            if block.previous_generation["outputs"]:
+                return self._filter_inputs(block.previous_generation["input"]["outputs"])
 
-        return input_str
+        raise ValueError("Error: cannot evaluate block, no previous generation found")
 
     def _extract_object_to_evaluate(self, block: TranslatedCodeBlock) -> str | None:
         return block.original.text
@@ -522,15 +536,12 @@ class JavaCategoryEvaluator(Evaluator):
         self._prompt_template_names = ["eval_prompts/java_category"]
 
     def _preprocess_block(self, block: TranslatedCodeBlock) -> None:
-        block.original.text = self._parser.parse_input(block.original)
         if block.previous_generation is not None:
-            block.previous_generation["output"] = block.original.text
+            if "output" not in block.previous_generation:
+                block.previous_generation["output"] = block.original.text
 
     def _input_runnable(self) -> Runnable:
-        def _get_code(block) -> str:
-            return block.text
-
         return RunnableParallel(
-            JAVA_CODE=_get_code,
+            JAVA_CODE=self._parser.parse_input,
             context=self._retriever,
         )
