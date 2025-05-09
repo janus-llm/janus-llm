@@ -136,7 +136,10 @@ class ConverterChain(Converter):
                 metadata[k] = original_metadata[k]
 
         # Input tokens to the chain are the output tokens of the original input
-        metadata["input_tokens"] = original_metadata["output_tokens"]
+        if "output_tokens" in original_metadata:
+            metadata["input_tokens"] = original_metadata["output_tokens"]
+        elif "input_tokens" in original_metadata:
+            metadata["input_tokens"] = original_metadata["input_tokens"]
 
         # Aggregate output tokens of final outputs
         metadata["output_tokens"] = sum(
