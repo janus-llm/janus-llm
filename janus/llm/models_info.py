@@ -3,8 +3,6 @@ import os
 from pathlib import Path
 from typing import Any, Callable, Protocol, TypeVar
 
-from boto3 import client
-from botocore.config import Config
 from dotenv import load_dotenv
 from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_core.runnables import Runnable
@@ -31,6 +29,16 @@ model_types = [
     AzureChatOpenAI,
     HuggingFaceTextGenInference,
 ]
+
+try:
+    from boto3 import client
+    from botocore.config import Config
+except ImportError:
+    log.warning(
+        "Could not import boto packages, which are required for some Bedrock "
+        "models. If you would like to use models like Claude 3.7 Sonnet, please "
+        "install boto3 and botocore by running `pip install boto3 borocore`."
+    )
 
 try:
     from langchain_community.chat_models import BedrockChat
