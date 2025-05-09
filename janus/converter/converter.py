@@ -3,7 +3,7 @@ import time
 from copy import deepcopy
 from operator import itemgetter
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Iterable
 
 from langchain_core.exceptions import OutputParserException
 from langchain_core.prompts import ChatPromptTemplate
@@ -100,8 +100,8 @@ class Converter:
         use_janus_inputs: bool = False,
         target_language: str = "json",
         target_version: str | None = None,
-        input_types: set[str] | str | None = None,
-        input_labels: set[str] | str | None = None,
+        input_types: Iterable[str] | str | None = None,
+        input_labels: Iterable[str] | str | None = None,
         output_type: str | None = None,
         output_label: str | None = None,
     ) -> None:
@@ -180,10 +180,16 @@ class Converter:
         self._output_type: str | None = output_type
         self._output_label: str | None = output_label
 
-        if isinstance(input_types, str):
-            input_types = set([input_types])
-        if isinstance(input_labels, str):
-            input_labels = set([input_labels])
+        if input_types is not None:
+            if not isinstance(input_types, Iterable):
+                input_types = [input_types]
+            input_types = set(input_types)
+
+        if input_labels is not None:
+            if not isinstance(input_labels, Iterable):
+                input_labels = [input_labels]
+            input_labels = set(input_labels)
+
         self._input_types: set[str] | None = input_types
         self._input_labels: set[str] | None = input_labels
 
