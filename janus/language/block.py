@@ -74,6 +74,7 @@ def sort_janus_obj(obj: JanusOutputObject) -> OrderedDict:
         "end_line",
         "end_char",
         "end_byte",
+        "hash",
     ]
     ordered_metadata = OrderedDict()
     for k in metadata_key_order:
