@@ -348,13 +348,10 @@ class TestJavaCategoryEvaluator(unittest.TestCase):
         """Test __init__ method."""
         self.assertEqual(self.evaluator._model_name, "gpt-4o-mini")
         self.assertEqual(self.evaluator._source_language, "java")
-        self.assertEqual(self.evaluator._use_janus_inputs, False)
 
     @patch("janus.converter.Converter._run_chain")
     def test_translate_block(self, mock_run_chain):
         """Test translate_block method"""
-
-        self.evaluator._use_janus_inputs = False
 
         source = CodeBlock(
             id="test",
@@ -380,13 +377,9 @@ class TestJavaCategoryEvaluator(unittest.TestCase):
 
         result = self.evaluator._translate_block(source)
 
-        obj_str = (
-            "1    public static void main string args etc.\n"
-            "2    another line\n"
-            "3    a third line"
-        )
+        obj_str = "public static void main string args etc.\nanother line\na third line"
 
         self.assertIsInstance(result, TranslatedCodeBlock)
         self.assertEqual(result.text, out_str)
         self.assertEqual(result.original.text, obj_str)
-        self.assertEqual(result.previous_generation, source.previous_generation)
+        self.assertEqual(result.previous_generation, source.to_janus_object())
