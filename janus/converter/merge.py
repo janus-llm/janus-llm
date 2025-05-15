@@ -5,9 +5,8 @@ from langchain_core.runnables import Runnable, RunnableParallel
 
 from janus.converter.converter import Converter
 from janus.language.block import CodeBlock, TranslatedCodeBlock
-from janus.utils.logger import create_logger
 from janus.parsers.code_parser import IncompleteCodeParser
-from janus.converter.evaluate import extract_from_json
+from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 
@@ -133,53 +132,43 @@ class OutputMerger(Converter):
 
 
 class OutputMergerTranslator(Converter):
-    """A class that translates inputs from the OutputMerger to code."""
+    """A class that translates outputs from the OutputMerger to code."""
 
     def __init__(
         self,
-        input_labels: set[str] | str | None = None,
+        input_labels: set[str]
+        | str
+        | None = None,  # this should be the output label of the OutputMerger
+        target_language: str = "python",
         **kwargs,
     ) -> None:
-        """Initialize a Translator instance."""
-        super().__init__(
-            **kwargs,
-        )
-        self._parser = IncompleteCodeParser(language=self._target_language)
-        self._input_labels: set[str]
         super().__init__(
             input_labels=input_labels,
+            target_language=target_language,
             **kwargs,
         )
+        self._label_dict = defaultdict(list)
+        self._parser = IncompleteCodeParser(language=self._target_language)
 
-    def _extract_context_dict(self, block: TranslatedCodeBlock) -> dict | None:
-        """
-        Collects the relevant context from the OutputMerger's translated block
-        """
-        context_dict = {}
+    def _get_label_context(self, label):
+        return lambda x: self._label_dict[label]
 
-        return context_dict
-
-    def _preprocess_block(self, block: TranslatedCodeBlock) -> None:
-        context_dict = self._extract_context_dict(block)
-
-        # Collect translation context together
-        block.original.text = json.dumps(context_dict)
+    def _get_context(self, block: CodeBlock) -> None:
+        print(block.text)
+        self._label_dict = json.loads(block.text)
+        self._label_dict["TARGET_LANGUAGE"] = self._target_language
 
     def _input_runnable(self) -> Runnable:
-        kwargs = {
-            "SOURCE_CODE": extract_from_json("code"),
-            self._object_key: extract_from_json("eval_object")
-        }
         return RunnableParallel(
-            json=self._parser.parse_input, context=self._retriever
-        ) | RunnableParallel(**kwargs)
+            {label: self._get_label_context(label) for label in self._label_dict.keys()}
+        )
 
-    def _add_translation(self, block: TranslatedCodeBlock) -> None:
-        if block.original.text is None:
-            block.translated = True
+    def _translate_block(self, block: CodeBlock) -> TranslatedCodeBlock | CodeBlock:
+        if self._input_types is not None and block.block_type not in self._input_types:
+            return block
 
-        if block.translated:
-            return
+        if self._input_labels is not None and block.block_label not in self._input_labels:
+            return block
 
-        self._preprocess_block(block)
-        super()._add_translation(block)
+        self._get_context(block)
+        return self._iterative_translate(block)
