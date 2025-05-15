@@ -18,6 +18,20 @@ log = create_logger(__name__)
 
 class JanusRefiner(JanusParser):
     parser: JanusParser
+    max_retries: int
+
+    def __init__(
+        self,
+        llm: JanusModel,
+        parser: JanusParser,
+        max_retries: int,
+        **kwargs,
+    ):
+        super().__init__(
+            parser=parser,  # type: ignore
+            max_retries=max_retries,  # type: ignore
+            **kwargs,
+        )
 
     def parse_runnable(self, input: dict[str, Any]) -> Any:
         return self.parse_completion(**input)
@@ -30,7 +44,6 @@ class JanusRefiner(JanusParser):
 
 
 class SimpleRetry(JanusRefiner):
-    max_retries: int
     retry_chain: RunnableSerializable
 
     def __init__(
@@ -41,9 +54,10 @@ class SimpleRetry(JanusRefiner):
     ):
         retry_chain = llm | StrOutputParser()
         super().__init__(
-            retry_chain=retry_chain,
+            llm=llm,
             parser=parser,
             max_retries=max_retries,
+            retry_chain=retry_chain,
         )
 
     def parse_completion(
@@ -76,7 +90,6 @@ class FixParserExceptions(JanusRefiner, RetryWithErrorOutputParser):
 
 
 class ReflectionRefiner(JanusRefiner):
-    max_retries: int
     reflection_chain: RunnableSerializable
     revision_chain: RunnableSerializable
     reflection_prompt_name: str
@@ -100,11 +113,12 @@ class ReflectionRefiner(JanusRefiner):
         reflection_chain = reflection_prompt | llm | StrOutputParser()
         revision_chain = revision_prompt | llm | StrOutputParser()
         super().__init__(
+            llm=llm,
+            parser=parser,
+            max_retries=max_retries,
             reflection_prompt_name=prompt_template_name,
             reflection_chain=reflection_chain,
             revision_chain=revision_chain,
-            parser=parser,
-            max_retries=max_retries,
         )
 
     def parse_completion(
@@ -144,7 +158,6 @@ class RequirementsReflectionRefiner(JanusRefiner):
     -> revision loop which de-duplicates requirements.
     """
 
-    max_retries: int
     reflection_chain: RunnableSerializable
     revision_chain: RunnableSerializable
     reflect_duplication_chain: RunnableSerializable
@@ -182,13 +195,14 @@ class RequirementsReflectionRefiner(JanusRefiner):
         reflect_duplication_chain = reflect_duplication_prompt | llm | StrOutputParser()
         revise_duplication_chain = revise_duplication_prompt | llm | StrOutputParser()
         super().__init__(
+            llm=llm,
+            parser=parser,
+            max_retries=max_retries,
             reflection_prompt_name=prompt_template_name,
             reflection_chain=reflection_chain,
             revision_chain=revision_chain,
             reflect_duplication_chain=reflect_duplication_chain,
             revise_duplication_chain=revise_duplication_chain,
-            parser=parser,
-            max_retries=max_retries,
         )
 
     def parse_completion(
@@ -252,7 +266,6 @@ class HallucinationRefiner(ReflectionRefiner):
 
 
 class CodeContinuationRefiner(JanusRefiner):
-    max_retries: int
     continuation_chain: RunnableSerializable
 
     def __init__(
@@ -268,9 +281,10 @@ class CodeContinuationRefiner(JanusRefiner):
         ).prompt
         continuation_chain = continuation_prompt | llm | StrOutputParser()
         super().__init__(
-            continuation_chain=continuation_chain,
+            llm=llm,
             parser=parser,
             max_retries=max_retries,
+            continuation_chain=continuation_chain,
         )
 
     def parse_completion(

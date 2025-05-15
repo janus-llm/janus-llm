@@ -66,35 +66,49 @@ class TestTranslator(unittest.TestCase):
         )
 
     @patch("janus.converter.Converter._run_chain")
-    def test_translate(self, mock_translate):
+    def test_translate(self, mock_run_chain):
         """Test translate method."""
 
-        with open("janus/converter/_tests/test_translate_llm_response.txt", "r") as f:
-            mock_translate.return_value = f.read()
+        with open("janus/converter/_tests/fortran.json", "r") as f:
+            expected = json.load(f)
+            mock_run_chain.return_value = expected["output"].strip("\n")
 
         with tempfile.TemporaryDirectory(dir=self.test_file.parent) as tmpdirname:
             python_file = Path(tmpdirname) / f"{self.test_file.stem}.json"
 
             self.translator.translate(self.test_file.parent, tmpdirname)
 
-            with open("janus/converter/_tests/test_translate_expected.json", "r") as f:
-                expected = json.load(f)
-
             with open(python_file, "r") as f:
                 actual = json.load(f)
 
-            self.assertEqual(expected["outputs"], actual["outputs"])
+            # TODO: Really shouldn't have to delete the input metadata here, not
+            #       clear what the issue is, something to do with a newline getting
+            #       added into the text at some point
+            del expected["metadata"]
+            del actual["metadata"]
+            del expected["input"]["metadata"]
+            del actual["input"]["metadata"]
+            self.assertEqual(expected, actual)
 
     def test_invalid_selections(self) -> None:
         """Tests that settings values for the translator will raise exceptions"""
         self.assertRaises(
-            ValueError, self.translator.set_target_language, "gobbledy", "goobledy"
+            ValueError, self.translator._set_target_language, "fake-lang", "1.0.0"
         )
+        self.assertRaises(ValueError, self.translator._set_source_language, "fake-lang")
+        self.assertRaises(ValueError, self.translator._set_splitter, "fake-splitter")
         self.assertRaises(
-            ValueError, self.translator.set_source_language, "scribbledy-doop"
+            ValueError, self.translator._set_refiner_types, ["fake-refiner"]
         )
-        self.translator.set_prompts(["pish posh"])
+
+        self.translator._prompt_template_names = ["fake-prompt"]
         self.assertRaises(ValueError, self.translator._load_parameters)
+
+        self.translator._initialized = True
+        try:
+            self.translator._load_parameters()
+        except Exception:
+            self.fail("Initialization called after already being initialized")
 
 
 class TestDiagramGenerator(unittest.TestCase):
@@ -107,6 +121,7 @@ class TestDiagramGenerator(unittest.TestCase):
             source_language="fortran",
             diagram_type="Activity",
         )
+        self.diagram_generator._load_parameters()
 
     def test_init(self):
         """Test __init__ method."""
@@ -159,11 +174,13 @@ def test_language_combinations(
     """Tests that translator target language settings are consistent
     with prompt template expectations.
     """
-    translator = Translator(model="gpt-4o")
-    translator.set_model("gpt-4o")
-    translator.set_source_language(source_language)
-    translator.set_target_language(expected_target_language, expected_target_version)
-    translator.set_prompts(prompt_template)
+    translator = Translator(
+        model="gpt-4o",
+        source_language=source_language,
+        target_language=expected_target_language,
+        target_version=expected_target_version,
+        prompt_templates=prompt_template,
+    )
     translator._load_parameters()
     assert translator._target_language == expected_target_language  # nosec
     assert translator._target_version == expected_target_version  # nosec

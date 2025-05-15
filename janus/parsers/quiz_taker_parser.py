@@ -2,6 +2,7 @@ import json
 
 from langchain_core.messages import BaseMessage
 
+from janus.language.block import CodeBlock
 from janus.parsers.parser import JanusParser, JanusParserException
 from janus.utils.logger import create_logger
 
@@ -10,6 +11,27 @@ log = create_logger(__name__)
 
 class QuizTakerParser(JanusParser):
     language: str
+
+    def parse_input(self, block: CodeBlock) -> str:
+        # Get code input from generation step
+        if block.previous_generation is None:
+            # TODO: Define an exception type that can be caught and skipped
+            raise ValueError("Error: Taking quiz without code context")
+
+        prev_gen = block.previous_generation
+        input_str = prev_gen["input"]
+
+        data = json.loads(block.text)  # type: ignore
+        for question in data:
+            if "correct-answer-number" in question:
+                del question["correct-answer-number"]
+
+        return json.dumps(
+            dict(
+                quiz=data,
+                code=input_str,
+            )
+        )
 
     def parse(self, text: str | BaseMessage) -> str:
         if isinstance(text, BaseMessage):

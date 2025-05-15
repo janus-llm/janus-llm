@@ -1,6 +1,19 @@
 [
     {
         "type": "RequirementsDocumenter",
-        "kwargs": {"refiner_types": ["RequirementsFormatRefiner"]}
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "refiner_types": ["RequirementsFormatRefiner"],
+            "output_label": "requirements"
+        }
+    },
+    {
+        "type": "RequirementEvaluator",
+        "kwargs": {
+            "input_labels": ["requirements"],
+            "refiner_types": ["FixParserExceptions"],
+            "eval_items_per_request": 5,
+            "output_label": "requirement_eval"
+        }
     }
 ]

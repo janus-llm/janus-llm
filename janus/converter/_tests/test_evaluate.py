@@ -1,13 +1,15 @@
+import json
 import unittest
-from unittest.mock import call, patch
+from unittest.mock import patch
 
 from janus.converter.evaluate import (
     InlineCommentEvaluator,
+    JavaCategoryEvaluator,
     RequirementEvaluator,
     SummaryEvaluator,
     UMLEvaluator,
 )
-from janus.language.block import CodeBlock, TranslatedCodeBlock
+from janus.language.block import CodeBlock, TranslatedCodeBlock, combine_metadata
 from janus.refiners.refiner import FixParserExceptions
 
 
@@ -17,7 +19,7 @@ class TestUMLEvaluator(unittest.TestCase):
     def setUp(self):
         """Set up the tests"""
         self.evaluator = UMLEvaluator(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             source_language="json",
             refiner_types=[FixParserExceptions],
             use_janus_inputs=True,
@@ -25,13 +27,12 @@ class TestUMLEvaluator(unittest.TestCase):
 
     def test_init(self):
         """Test __init__ method."""
-        self.assertEqual(self.evaluator._model_name, "gpt-4o")
+        self.assertEqual(self.evaluator._model_name, "gpt-4o-mini")
         self.assertEqual(self.evaluator._source_language, "json")
         self.assertEqual(self.evaluator._use_janus_inputs, True)
 
-    @patch("janus.converter.Converter._split_text")
-    @patch("janus.converter.Converter.translate_block")
-    def test_translate_block(self, mock_translate_block, mock_split_text):
+    @patch("janus.converter.Converter._run_chain")
+    def test_translate_block(self, mock_run_chain):
         """Test translate_block method"""
 
         self.evaluator._use_janus_inputs = False
@@ -42,24 +43,30 @@ class TestUMLEvaluator(unittest.TestCase):
             node_type="function",
             language="json",
             text="This is UML",
-            start_point=(0, 0),
-            end_point=(1, 0),
-            start_byte=0,
-            end_byte=1,
-            tokens=5,
-            children=[],
-            previous_generations=[{"input": "test"}],
+            previous_generation={
+                "input": "test",
+                "metadata": combine_metadata([]),
+                "outputs": [],
+            },
         )
+        source.mark_root()
 
-        translated_block = TranslatedCodeBlock(source, source.language, self.evaluator)
-        mock_translate_block.return_value = translated_block
+        mock_run_chain.return_value = "This is evaluated UML"
 
-        actual = self.evaluator.translate_block(source)
-        obj_str = '{"diagrams": "This is UML", "code": "test"}'
-        mock_split_text.assert_called_with(obj_str, source.name)
+        # Incorrect input type, should be skipped
+        result = self.evaluator._translate_block(source)
+        self.assertNotIsInstance(result, TranslatedCodeBlock)
 
-        self.assertEqual(actual.original, source)
-        self.assertEqual(actual.previous_generations, source.previous_generations)
+        # Fix input type
+        source.block_type = "diagram"
+        result = self.evaluator._translate_block(source)
+
+        obj_str = '{"eval_object": "This is UML", "code": "test"}'
+
+        self.assertIsInstance(result, TranslatedCodeBlock)
+        self.assertEqual(result.text, "This is evaluated UML")
+        self.assertEqual(result.original.text, obj_str)
+        self.assertEqual(result.previous_generation, source.previous_generation)
 
 
 class TestRequirementEvaluator(unittest.TestCase):
@@ -67,8 +74,8 @@ class TestRequirementEvaluator(unittest.TestCase):
 
     def setUp(self):
         """Set up the tests"""
-        self.req_evaluator = RequirementEvaluator(
-            model="gpt-4o",
+        self.evaluator = RequirementEvaluator(
+            model="gpt-4o-mini",
             source_language="json",
             refiner_types=[FixParserExceptions],
             use_janus_inputs=True,
@@ -76,16 +83,15 @@ class TestRequirementEvaluator(unittest.TestCase):
 
     def test_init(self):
         """Test __init__ method."""
-        self.assertEqual(self.req_evaluator._model_name, "gpt-4o")
-        self.assertEqual(self.req_evaluator._source_language, "json")
-        self.assertEqual(self.req_evaluator._use_janus_inputs, True)
+        self.assertEqual(self.evaluator._model_name, "gpt-4o-mini")
+        self.assertEqual(self.evaluator._source_language, "json")
+        self.assertEqual(self.evaluator._use_janus_inputs, True)
 
-    @patch("janus.converter.Converter._split_text")
-    @patch("janus.converter.Converter.translate_block")
-    def test_translate_block(self, mock_translate_block, mock_split_text):
+    @patch("janus.converter.Converter._run_chain")
+    def test_translate_block(self, mock_run_chain):
         """Test translate_block method"""
 
-        self.req_evaluator._use_janus_inputs = False
+        self.evaluator._use_janus_inputs = False
 
         source = CodeBlock(
             id="test",
@@ -93,36 +99,45 @@ class TestRequirementEvaluator(unittest.TestCase):
             node_type="function",
             language="json",
             text='[["The program shall return 0"]]',
-            start_point=(0, 0),
-            end_point=(1, 0),
-            start_byte=0,
-            end_byte=1,
-            tokens=5,
-            children=[],
-            previous_generations=[{"input": "test"}],
+            previous_generation={
+                "input": "test",
+                "metadata": combine_metadata([]),
+                "outputs": [],
+            },
         )
+        source.mark_root()
 
-        translated_block = TranslatedCodeBlock(
-            source, source.language, self.req_evaluator
+        out_str = json.dumps(
+            {
+                "c3caa172": dict(
+                    requirement="The program shall return 0", eval="Evaluations"
+                )
+            }
         )
-        mock_translate_block.return_value = translated_block
+        mock_run_chain.return_value = out_str
 
-        actual = self.req_evaluator.translate_block(source)
-        obj_str = '{"requirements": ["The program shall return 0"], "code": "test"}'
-        mock_split_text.assert_called_with(obj_str, source.name)
+        # Incorrect input type, should be skipped
+        result = self.evaluator._translate_block(source)
+        self.assertNotIsInstance(result, TranslatedCodeBlock)
 
-        self.assertEqual(actual.original, source)
-        self.assertEqual(actual.previous_generations, source.previous_generations)
+        # Fix input type
+        source.block_type = "requirements"
+        result = self.evaluator._translate_block(source)
 
-    @patch("janus.converter.Converter._split_text")
-    @patch("janus.converter.Converter.translate_block")
-    def test_translate_block_with_eval_items_per_request(
-        self, mock_translate_block, mock_split_text
-    ):
+        obj_str = '{"eval_object": ["The program shall return 0"], "code": "test"}'
+
+        self.assertIsInstance(result, TranslatedCodeBlock)
+        self.assertEqual(result.text, out_str)
+        self.assertEqual(result.original.text, obj_str)
+        self.assertEqual(result.previous_generation, source.previous_generation)
+
+    @patch("janus.converter.Converter._run_chain")
+    def test_translate_block_with_eval_items_per_request(self, mock_run_chain):
         """Test translate_block method with eval_items_per_request set"""
 
-        self.req_evaluator._use_janus_inputs = False
-        self.req_evaluator.eval_items_per_request = 1
+        self.evaluator._use_janus_inputs = False
+        self.evaluator._eval_items_per_request = 1
+        self.evaluator._initialized = False
 
         source = CodeBlock(
             id="test",
@@ -130,42 +145,27 @@ class TestRequirementEvaluator(unittest.TestCase):
             node_type="function",
             language="json",
             text='[["The program shall return 0", "The program will not crash"]]',
-            start_point=(0, 0),
-            end_point=(1, 0),
-            start_byte=0,
-            end_byte=1,
-            tokens=5,
-            children=[],
-            previous_generations=[{"input": "test"}],
+            block_type="requirements",
+            previous_generation={
+                "input": "test",
+                "metadata": combine_metadata([]),
+                "outputs": [],
+            },
         )
+        source.mark_root()
 
-        translated_block = TranslatedCodeBlock(
-            source, source.language, self.req_evaluator
-        )
-        translated_block.text = '{"a":"b"}'
-        translated_block2 = TranslatedCodeBlock(
-            source, source.language, self.req_evaluator
-        )
-        translated_block2.text = '{"b":"c"}'
+        out_objs = [
+            {"c3caa172": dict(requirement="The program shall return 0", eval="great")},
+            {"fab48ab9": dict(requirement="The program will not crash", eval="terrible")},
+        ]
+        mock_run_chain.side_effect = [json.dumps(s) for s in out_objs]
 
-        mock_translate_block.side_effect = [translated_block, translated_block2]
+        out_obj = {}
+        for obj in out_objs:
+            out_obj.update(obj)
 
-        actual = self.req_evaluator.translate_block(source)
-
-        mock_split_text.assert_has_calls(
-            [
-                call(
-                    '{"requirements": ["The program shall return 0"], "code": "test"}',
-                    source.name,
-                ),
-                call(
-                    '{"requirements": ["The program will not crash"], "code": "test"}',
-                    source.name,
-                ),
-            ]
-        )
-
-        self.assertEqual(actual.text, '{"a": "b", "b": "c"}')
+        result = self.evaluator._translate_block(source)
+        self.assertEqual(result.text, json.dumps(out_obj))
 
 
 class TestSummaryEvaluator(unittest.TestCase):
@@ -174,7 +174,7 @@ class TestSummaryEvaluator(unittest.TestCase):
     def setUp(self):
         """Set up the tests"""
         self.evaluator = SummaryEvaluator(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             source_language="json",
             refiner_types=[FixParserExceptions],
             use_janus_inputs=True,
@@ -182,13 +182,12 @@ class TestSummaryEvaluator(unittest.TestCase):
 
     def test_init(self):
         """Test __init__ method."""
-        self.assertEqual(self.evaluator._model_name, "gpt-4o")
+        self.assertEqual(self.evaluator._model_name, "gpt-4o-mini")
         self.assertEqual(self.evaluator._source_language, "json")
         self.assertEqual(self.evaluator._use_janus_inputs, True)
 
-    @patch("janus.converter.Converter._split_text")
-    @patch("janus.converter.Converter.translate_block")
-    def test_translate_block(self, mock_translate_block, mock_split_text):
+    @patch("janus.converter.Converter._run_chain")
+    def test_translate_block(self, mock_run_chain):
         """Test translate_block method"""
 
         self.evaluator._use_janus_inputs = False
@@ -199,24 +198,30 @@ class TestSummaryEvaluator(unittest.TestCase):
             node_type="function",
             language="json",
             text="This is a summary",
-            start_point=(0, 0),
-            end_point=(1, 0),
-            start_byte=0,
-            end_byte=1,
-            tokens=5,
-            children=[],
-            previous_generations=[{"input": "test"}],
+            previous_generation={
+                "input": "test",
+                "metadata": combine_metadata([]),
+                "outputs": [],
+            },
         )
+        source.mark_root()
 
-        translated_block = TranslatedCodeBlock(source, source.language, self.evaluator)
-        mock_translate_block.return_value = translated_block
+        mock_run_chain.return_value = "Evaluated summary"
 
-        actual = self.evaluator.translate_block(source)
-        obj_str = '{"summary": "This is a summary", "code": "test"}'
-        mock_split_text.assert_called_with(obj_str, source.name)
+        # Incorrect input type, should be skipped
+        result = self.evaluator._translate_block(source)
+        self.assertNotIsInstance(result, TranslatedCodeBlock)
 
-        self.assertEqual(actual.original, source)
-        self.assertEqual(actual.previous_generations, source.previous_generations)
+        # Fix input type
+        source.block_type = "documentation"
+        result = self.evaluator._translate_block(source)
+
+        obj_str = '{"eval_object": "This is a summary", "code": "test"}'
+
+        self.assertIsInstance(result, TranslatedCodeBlock)
+        self.assertEqual(result.text, "Evaluated summary")
+        self.assertEqual(result.original.text, obj_str)
+        self.assertEqual(result.previous_generation, source.previous_generation)
 
 
 class TestInlineCommentEvaluator(unittest.TestCase):
@@ -225,7 +230,7 @@ class TestInlineCommentEvaluator(unittest.TestCase):
     def setUp(self):
         """Set up the tests"""
         self.evaluator = InlineCommentEvaluator(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             source_language="json",
             refiner_types=[FixParserExceptions],
             use_janus_inputs=True,
@@ -233,35 +238,12 @@ class TestInlineCommentEvaluator(unittest.TestCase):
 
     def test_init(self):
         """Test __init__ method."""
-        self.assertEqual(self.evaluator._model_name, "gpt-4o")
+        self.assertEqual(self.evaluator._model_name, "gpt-4o-mini")
         self.assertEqual(self.evaluator._source_language, "json")
         self.assertEqual(self.evaluator._use_janus_inputs, True)
 
-    def test_translate_block_with_no_comments(self):
-        """Test translate_block method"""
-
-        source = CodeBlock(
-            id="test",
-            name="Test Block",
-            node_type="function",
-            language="json",
-            text='{"14b80530": "first line", "dadfa102": "second line"}',
-            start_point=(0, 0),
-            end_point=(1, 0),
-            start_byte=0,
-            end_byte=1,
-            tokens=5,
-            children=[],
-            previous_generations=[{"input": "test"}],
-        )
-
-        actual = self.evaluator.translate_block(source)
-
-        self.assertEqual(actual, [])
-
-    @patch("janus.converter.Converter._split_text")
-    @patch("janus.converter.Converter.translate_block")
-    def test_translate_block(self, mock_translate_block, mock_split_text):
+    @patch("janus.converter.Converter._run_chain")
+    def test_translate_block_with_no_comments(self, mock_run_chain):
         """Test translate_block method"""
 
         self.evaluator._use_janus_inputs = False
@@ -272,38 +254,62 @@ class TestInlineCommentEvaluator(unittest.TestCase):
             node_type="function",
             language="json",
             text='{"14b80530": "first line", "dadfa102": "second line"}',
-            start_point=(0, 0),
-            end_point=(1, 0),
-            start_byte=0,
-            end_byte=1,
-            tokens=5,
-            children=[],
-            previous_generations=[
-                {
-                    "input": "*\n* <BLOCK_COMMENT 14b80530>\nDFHEISTG DSECT<INLINE_COMMENT dadfa102>"  # noqa E501
-                }
-            ],
+            block_type="cloze_comments",
+            previous_generation={
+                "input": "test",
+                "metadata": combine_metadata([]),
+                "outputs": [],
+            },
         )
+        source.mark_root()
 
-        translated_block = TranslatedCodeBlock(source, source.language, self.evaluator)
-        mock_translate_block.return_value = translated_block
+        # No comments in code, should skip
+        result = self.evaluator._translate_block(source)
+        self.assertIsNone(result.text)
 
-        actual = self.evaluator.translate_block(source)
+    @patch("janus.converter.Converter._run_chain")
+    def test_translate_block(self, mock_run_chain):
+        """Test translate_block method"""
+
+        self.evaluator._use_janus_inputs = False
+
+        source = CodeBlock(
+            id="test",
+            name="Test Block",
+            node_type="function",
+            language="json",
+            text='{"14b80530": "first line", "dadfa102": "second line"}',
+            previous_generation={
+                "input": "*\n* <BLOCK_COMMENT 14b80530>\nDFHEISTG DSECT<INLINE_COMMENT dadfa102>",  # noqa E501
+                "metadata": combine_metadata([]),
+                "outputs": [],
+            },
+        )
+        source.mark_root()
+        mock_run_chain.return_value = '{"14b80530": "great", "dadfa102": "terrible"}'
+
+        # Incorrect input type, should be skipped
+        result = self.evaluator._translate_block(source)
+        self.assertNotIsInstance(result, TranslatedCodeBlock)
+
+        # Fix input type
+        source.block_type = "cloze_comments"
+
+        result = self.evaluator._translate_block(source)
+
         obj_str = "*\n* <BLOCK_COMMENT 14b80530> first line\nDFHEISTG DSECT<INLINE_COMMENT dadfa102> second line"  # noqa E501
-        mock_split_text.assert_called_with(obj_str, source.name)
 
-        self.assertEqual(actual.original, source)
-        self.assertEqual(actual.previous_generations, source.previous_generations)
+        self.assertIsInstance(result, TranslatedCodeBlock)
+        self.assertEqual(result.text, '{"14b80530": "great", "dadfa102": "terrible"}')
+        self.assertEqual(result.original.text, obj_str)
+        self.assertEqual(result.previous_generation, source.previous_generation)
 
-    @patch("janus.converter.Converter._split_text")
-    @patch("janus.converter.Converter.translate_block")
-    def test_translate_block_with_eval_items_per_request(
-        self, mock_translate_block, mock_split_text
-    ):
+    @patch("janus.converter.Converter._run_chain")
+    def test_translate_block_with_eval_items_per_request(self, mock_run_chain):
         """Test translate_block method with eval_items_per_request set"""
 
         self.evaluator._use_janus_inputs = False
-        self.evaluator.eval_items_per_request = 1
+        self.evaluator._eval_items_per_request = 1
 
         source = CodeBlock(
             id="test",
@@ -311,39 +317,69 @@ class TestInlineCommentEvaluator(unittest.TestCase):
             node_type="function",
             language="json",
             text='{"14b80530": "first line", "dadfa102": "second line"}',
-            start_point=(0, 0),
-            end_point=(1, 0),
-            start_byte=0,
-            end_byte=1,
-            tokens=5,
-            children=[],
-            previous_generations=[
-                {
-                    "input": "*\n* <BLOCK_COMMENT 14b80530>\nDFHEISTG DSECT<INLINE_COMMENT dadfa102>"  # noqa E501
-                }
-            ],
+            block_type="cloze_comments",
+            previous_generation={
+                "input": "*\n* <BLOCK_COMMENT 14b80530>\nDFHEISTG DSECT<INLINE_COMMENT dadfa102>",  # noqa E501
+                "metadata": combine_metadata([]),
+                "outputs": [],
+            },
+        )
+        source.mark_root()
+
+        mock_run_chain.side_effect = ['{"14b80530": "great"}', '{"dadfa102": "terrible"}']
+
+        result = self.evaluator._translate_block(source)
+        result.previous_generation
+        self.assertEqual(result.text, '{"14b80530": "great", "dadfa102": "terrible"}')
+
+
+class TestJavaCategoryEvaluator(unittest.TestCase):
+    """Tests for the JavaCategoryEvaluator class"""
+
+    def setUp(self):
+        """Set up the tests"""
+        self.evaluator = JavaCategoryEvaluator(
+            model="gpt-4o-mini",
+            source_language="java",
+            refiner_types=[FixParserExceptions],
         )
 
-        translated_block = TranslatedCodeBlock(source, source.language, self.evaluator)
-        translated_block.text = '{"a":"b"}'
-        translated_block2 = TranslatedCodeBlock(source, source.language, self.evaluator)
-        translated_block2.text = '{"b":"c"}'
+    def test_init(self):
+        """Test __init__ method."""
+        self.assertEqual(self.evaluator._model_name, "gpt-4o-mini")
+        self.assertEqual(self.evaluator._source_language, "java")
 
-        mock_translate_block.side_effect = [translated_block, translated_block2]
+    @patch("janus.converter.Converter._run_chain")
+    def test_translate_block(self, mock_run_chain):
+        """Test translate_block method"""
 
-        actual = self.evaluator.translate_block(source)
+        source = CodeBlock(
+            id="test",
+            name="Test Block",
+            node_type="function",
+            language="java",
+            text="public static void main string args etc.\nanother line\na third line",
+        )
+        source.mark_root()
 
-        mock_split_text.assert_has_calls(
+        out_str = json.dumps(
             [
-                call(
-                    "*\n* <BLOCK_COMMENT 14b80530> first line\nDFHEISTG DSECT",
-                    source.name,
-                ),
-                call(
-                    "*\n* \nDFHEISTG DSECT<INLINE_COMMENT dadfa102> second line",
-                    source.name,
-                ),
+                {
+                    "start_line": 1,
+                    "end_line": 1,
+                    "section_reasoning": "Looks like perfect code to me.",
+                    "section_label": "clean_implementation",
+                    "section_quality": 101,
+                }
             ]
         )
+        mock_run_chain.return_value = out_str
 
-        self.assertEqual(actual.text, '{"a": "b", "b": "c"}')
+        result = self.evaluator._translate_block(source)
+
+        obj_str = "public static void main string args etc.\nanother line\na third line"
+
+        self.assertIsInstance(result, TranslatedCodeBlock)
+        self.assertEqual(result.text, out_str)
+        self.assertEqual(result.original.text, obj_str)
+        self.assertEqual(result.previous_generation, source.to_janus_object())

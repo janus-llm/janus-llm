@@ -1,4 +1,4 @@
-from janus.converter.converter import Converter, run_if_changed
+from janus.converter.converter import Converter
 from janus.parsers.code_parser import IncompleteCodeParser
 from janus.utils.logger import create_logger
 
@@ -29,24 +29,9 @@ class Translator(Converter):
             prompt_templates: name of prompt template directories
                 (see janus/prompts/templates) or paths to directories.
         """
-        super().__init__(**kwargs)
-
-        self.set_target_language(
+        super().__init__(
             target_language=target_language,
             target_version=target_version,
+            **kwargs,
         )
-
-        self._load_parameters()
-
-    def _load_parameters(self) -> None:
-        self._load_parser()
-        super()._load_parameters()
-
-    @run_if_changed("_target_language")
-    def _load_parser(self) -> None:
-        """Load the parser according to this instance's attributes.
-
-        If the relevant fields have not been changed since the last time this
-        method was called, nothing happens.
-        """
         self._parser = IncompleteCodeParser(language=self._target_language)

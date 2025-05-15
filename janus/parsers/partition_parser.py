@@ -4,11 +4,11 @@ import uuid
 
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException
-from langchain_core.language_models import BaseLanguageModel
 from langchain_core.messages import BaseMessage
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 from janus.language.block import CodeBlock
+from janus.llm.models_info import JanusModel
 from janus.parsers.parser import JanusParser, JanusParserException
 from janus.utils.logger import create_logger
 
@@ -61,11 +61,14 @@ EXAMPLE_IDS = {
 
 class PartitionParser(JanusParser, PydanticOutputParser):
     token_limit: int
-    model: BaseLanguageModel
+    model: JanusModel
     lines: list[str] = []
     line_id_to_index: dict[str, int] = {}
 
-    def __init__(self, token_limit: int, model: BaseLanguageModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+    def __init__(self, token_limit: int, model: JanusModel):
         PydanticOutputParser.__init__(
             self,
             pydantic_object=PartitionList,

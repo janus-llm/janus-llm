@@ -1,9 +1,9 @@
 import json
 from pathlib import Path
+from typing import Type
 
-import janus.refiners.format
-import janus.refiners.refiner
-import janus.refiners.uml
+from janus.converter.converter import Converter
+from janus.refiners.refiner import JanusRefiner
 
 homedir = Path.home().expanduser()
 
@@ -28,16 +28,12 @@ def get_subclasses(cls):
     )
 
 
-REFINER_TYPES = get_subclasses(janus.refiners.refiner.JanusRefiner).union(
-    {janus.refiners.refiner.JanusRefiner}
-)
+REFINER_TYPES = get_subclasses(JanusRefiner).union({JanusRefiner})
 REFINERS = {r.__name__: r for r in REFINER_TYPES}
 
-CONVERTER_TYPES = get_subclasses(janus.converter.converter.Converter).union(
-    {janus.converter.converter.Converter}
-)
+CONVERTER_TYPES = get_subclasses(Converter).union({Converter})
 
-CONVERTERS = {c.__name__: c for c in CONVERTER_TYPES}
+CONVERTERS: dict[str, Type[Converter]] = {c.__name__: c for c in CONVERTER_TYPES}
 
 
 def get_collections_config():
@@ -47,3 +43,20 @@ def get_collections_config():
     else:
         config = {}
     return config
+
+
+def key_value_arg(value: str) -> tuple[str, str | int | float]:
+    try:
+        key, val = value.split("=", 1)
+    except ValueError:
+        raise ValueError(f"{value!r} is not a valid key=value pair")
+
+    try:
+        val = float(val)
+    except ValueError:
+        pass
+    else:
+        if int(val) == val:
+            val = int(val)
+
+    return key, val

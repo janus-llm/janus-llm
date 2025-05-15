@@ -1,58 +1,90 @@
 import json
 from pathlib import Path
-from typing import Optional
+from typing import Any, NotRequired, Optional, TypedDict
 
 import click
 import typer
 from typing_extensions import Annotated
 
 from janus.cli.constants import CONVERTERS
-from janus.converter.chain import ConverterChain
-from janus.converter.pool import ConverterPool
+from janus.converter.converter import Converter
 from janus.language.naive.registry import CUSTOM_SPLITTERS
 from janus.utils.enums import LANGUAGES
 
 
-def instiantiate(x):
-    if isinstance(x, dict):
-        if "type" in x:
-            if "args" not in x:
-                x["args"] = []
-            x["args"] = [instiantiate(a) for a in x["args"]]
-            if "kwargs" not in x:
-                x["kwargs"] = {}
-            x["kwargs"] = {k: instiantiate(x["kwargs"][k]) for k in x["kwargs"]}
-            if x["type"] not in CONVERTERS:
-                raise ValueError(f"Error: {x['type']} is not a Converter")
-            return CONVERTERS[x["type"]](*x["args"], **x["kwargs"])
-        else:
-            return {k: instiantiate(x[k]) for k in x}
-    elif isinstance(x, list):
-        return [instiantiate(a) for a in x]
-    else:
-        return x
+class ConverterDefinition(TypedDict):
+    type: str
+    converters: NotRequired[list["ConverterDefinition"]]
+    kwargs: NotRequired[dict[str, Any]]
 
 
-def instiantiate_pipeline(
-    pipeline: list[dict],
+PipelineObject = Converter | list["PipelineObject"] | dict[str, "PipelineObject"]
+
+
+def instantiate(
+    pipeline_definition: ConverterDefinition,
+    model: str,
+    source_language: str | None = None,
+    use_janus_inputs: bool | None = None,
+) -> Converter:
+    """Recursively instantiate converters in a pipeline. If source_language is
+    provided, the corresponding argument will be overwritten in the keyword
+    arguments for the input converter; same for use_janus_inputs.
+    The model will always be overridden.
+    """
+    # Check converter type for existence, retrieve type constructor
+    converter_type = pipeline_definition["type"]
+    if converter_type not in CONVERTERS:
+        raise ValueError(f"Error: {converter_type} is not a Converter")
+    ConverterClass = CONVERTERS[converter_type]
+
+    kwargs = pipeline_definition.get("kwargs", {})
+    if "model" not in kwargs:
+        kwargs.update(model=model)
+    if source_language is not None and "source_language" not in kwargs:
+        kwargs.update(source_language=source_language)
+    if use_janus_inputs is not None and "use_janus_inputs" not in kwargs:
+        kwargs.update(use_janus_inputs=use_janus_inputs)
+
+    if converter_type == "ConverterChain":
+        if "converters" not in pipeline_definition:
+            raise ValueError(f"Error: {converter_type} requires a 'converter' entry")
+
+        # For converter chains, recursively instantiate components
+        converters = []
+        for conv_def in pipeline_definition["converters"]:
+            converters.append(
+                instantiate(
+                    pipeline_definition=conv_def,
+                    model=model,
+                    source_language=source_language,
+                    use_janus_inputs=use_janus_inputs,
+                )
+            )
+
+        kwargs["converters"] = converters
+
+    return ConverterClass(**kwargs)
+
+
+def instantiate_pipeline(
+    pipeline: list[ConverterDefinition],
     language: str = "text",
     model: str = "gpt-4o",
     use_janus_inputs: None | bool = None,
     splitter_type: str = "file",
-):
-    if "kwargs" not in pipeline[0]:
-        pipeline[0]["kwargs"] = {}
-    pipeline[0]["kwargs"].update(source_language=language, model=model)
-    if use_janus_inputs is not None:
-        pipeline[0]["kwargs"].update(use_janus_inputs=use_janus_inputs)
-    converters = [instiantiate(pipeline[0])]
-    for p in pipeline[1:]:
-        if not isinstance(converters[-1], ConverterPool) and p["type"] != "ConverterPool":
-            p["kwargs"].update(
-                source_language=converters[-1].target_language, model=model
-            )
-        converters.append(instiantiate(p))
-    return ConverterChain(*converters, splitter_type=splitter_type)
+) -> Converter:
+    conv_def = ConverterDefinition(
+        type="ConverterChain",
+        converters=pipeline,
+        kwargs=dict(splitter_type=splitter_type),
+    )
+    return instantiate(
+        conv_def,
+        source_language=language,
+        model=model,
+        use_janus_inputs=use_janus_inputs,
+    )
 
 
 def pipeline(
@@ -126,7 +158,7 @@ def pipeline(
 ):
     with open(pipeline_file, "r") as f:
         json_obj = json.load(f)
-    pipeline = instiantiate_pipeline(
+    pipeline = instantiate_pipeline(
         json_obj,
         language=language,
         model=llm_name,
