@@ -154,7 +154,6 @@ class OutputMergerTranslator(Converter):
         return lambda x: self._label_dict[label]
 
     def _get_context(self, block: CodeBlock) -> None:
-        print(block.text)
         self._label_dict = json.loads(block.text)
         self._label_dict["TARGET_LANGUAGE"] = self._target_language
 
