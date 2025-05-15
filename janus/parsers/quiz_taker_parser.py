@@ -19,7 +19,7 @@ class QuizTakerParser(JanusParser):
             raise ValueError("Error: Taking quiz without code context")
 
         prev_gen = block.previous_generation
-        input_str = json.loads(prev_gen["input"])
+        input_str = prev_gen["input"]
 
         data = json.loads(block.text)  # type: ignore
         for question in data:
