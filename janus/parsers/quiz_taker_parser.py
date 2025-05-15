@@ -14,11 +14,11 @@ class QuizTakerParser(JanusParser):
 
     def parse_input(self, block: CodeBlock) -> str:
         # Get code input from generation step
-        if len(block.previous_generations) == 0:
+        if block.previous_generation is None:
             # TODO: Define an exception type that can be caught and skipped
             raise ValueError("Error: Taking quiz without code context")
 
-        prev_gen = block.previous_generations[-1]
+        prev_gen = block.previous_generation
         input_str = json.loads(prev_gen["input"])
 
         data = json.loads(block.text)  # type: ignore
