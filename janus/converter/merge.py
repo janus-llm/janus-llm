@@ -1,9 +1,13 @@
 import json
 from collections import defaultdict
 
+from langchain_core.runnables import Runnable, RunnableParallel
+
 from janus.converter.converter import Converter
 from janus.language.block import CodeBlock, TranslatedCodeBlock
 from janus.utils.logger import create_logger
+from janus.parsers.code_parser import IncompleteCodeParser
+from janus.converter.evaluate import extract_from_json
 
 log = create_logger(__name__)
 
@@ -126,3 +130,56 @@ class OutputMerger(Converter):
         )
 
         return translated_block
+
+
+class OutputMergerTranslator(Converter):
+    """A class that translates inputs from the OutputMerger to code."""
+
+    def __init__(
+        self,
+        input_labels: set[str] | str | None = None,
+        **kwargs,
+    ) -> None:
+        """Initialize a Translator instance."""
+        super().__init__(
+            **kwargs,
+        )
+        self._parser = IncompleteCodeParser(language=self._target_language)
+        self._input_labels: set[str]
+        super().__init__(
+            input_labels=input_labels,
+            **kwargs,
+        )
+
+    def _extract_context_dict(self, block: TranslatedCodeBlock) -> dict | None:
+        """
+        Collects the relevant context from the OutputMerger's translated block
+        """
+        context_dict = {}
+
+        return context_dict
+
+    def _preprocess_block(self, block: TranslatedCodeBlock) -> None:
+        context_dict = self._extract_context_dict(block)
+
+        # Collect translation context together
+        block.original.text = json.dumps(context_dict)
+
+    def _input_runnable(self) -> Runnable:
+        kwargs = {
+            "SOURCE_CODE": extract_from_json("code"),
+            self._object_key: extract_from_json("eval_object")
+        }
+        return RunnableParallel(
+            json=self._parser.parse_input, context=self._retriever
+        ) | RunnableParallel(**kwargs)
+
+    def _add_translation(self, block: TranslatedCodeBlock) -> None:
+        if block.original.text is None:
+            block.translated = True
+
+        if block.translated:
+            return
+
+        self._preprocess_block(block)
+        super()._add_translation(block)

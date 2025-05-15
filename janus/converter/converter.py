@@ -802,7 +802,7 @@ class Converter:
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
         """Given an "empty" `TranslatedCodeBlock`, translate the code represented in
         `block.original`, setting the relevant fields in the translated block. The
-        `TranslatedCodeBlock` is updated in-pace, nothing is returned. Note that this
+        `TranslatedCodeBlock` is updated in-place, nothing is returned. Note that this
         translates *only* the code for this block, not its children.
 
         Arguments:
