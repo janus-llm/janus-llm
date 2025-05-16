@@ -11,6 +11,7 @@ from langchain.schema.embeddings import Embeddings
 from langchain.schema.vectorstore import VST, VectorStore
 
 from janus.converter.diagram import DiagramGenerator
+from janus.converter.merge import OutputMerger, OutputMergerTranslator
 from janus.converter.requirements import RequirementsDocumenter
 from janus.converter.translate import Translator
 from janus.language.block import CodeBlock, TranslatedCodeBlock
@@ -149,11 +150,68 @@ class TestDiagramGenerator(unittest.TestCase):
             language="python",
             converter=self.diagram_generator,
         )
-        mock_run_chain.return_value = "@startuml\n\nstart\n\n:Initialize Program;\n\n:Print 'Hello, World!';\n\n:End Program;\n\nstop\n\n@enduml"  # noqa E501
+        mock_run_chain.return_value = "@startuml\n\nstart\n\n:Initialize Program;\n\n\\:Print 'Hello, World!';\n\n:End Program;\n\nstop\n\n@enduml"  # noqa E501
         self.diagram_generator._add_translation(block)
         self.assertTrue(block.translated)
         self.assertIsNotNone(block.text)
         self.assertIsNotNone(block.tokens)
+
+
+class TestOutputMerger(unittest.TestCase):
+    """Tests for the OutputMerger and OutputMergerTranslator class."""
+
+    def setUp(self):
+        """Set up the tests."""
+        self.merged_output = None
+
+        self.output_merger = OutputMerger(
+            input_labels=["SOURCE"],
+            label_key_map={"SOURCE": "SOURCE_CODE"},
+            output_label="merged_outputs",
+        )
+        self.output_merger._load_parameters()
+
+        self.output_merger_translator = OutputMergerTranslator(
+            input_labels=["merged_outputs"],
+            prompt_templates=["output_merge_testing"],
+            target_language="java",
+            refiner_types=["FixParserExceptions"],
+            output_label="java_from_merged_outputs",
+        )
+        self.output_merger_translator._load_parameters()
+
+    @patch("janus.converter.Converter._run_chain")
+    def test_output_merger_translate_blocks(self, mock_run_chain):
+        """Test _translate_blocks method of the OutputMerger"""
+        blocks = [
+            CodeBlock(
+                id="root",
+                name="root",
+                node_type="root",
+                language="python",
+                text='print("Hello World")',
+                block_label="SOURCE",
+                block_type="SOURCE",
+            )
+        ]
+        self.merged_output = self.output_merger._translate_blocks(blocks)
+        self.assertIsNotNone(self.merged_output)
+        output_label_exists = False
+        for block in self.merged_output:
+            if block.block_label == "merged_outputs":
+                output_label_exists = True
+                self.assertIsNotNone(block.text)
+        self.assertTrue(output_label_exists)
+
+        # now for testing the translator
+        mock_run_chain.return_value = (
+            "public class Main {public static void "
+            'main(String[] args) {System.out.println("hello world");'
+        )
+        final_output = self.output_merger_translator._translate_block(
+            self.merged_output[-1]
+        )
+        self.assertIsNotNone(final_output.text)
 
 
 @pytest.mark.parametrize(
