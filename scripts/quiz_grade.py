@@ -9,18 +9,26 @@ def extract_outputs_from_json(file_path):
     with open(file_path, "r", encoding="utf-8") as file:
         data = json.load(file)
 
-    # Extract the "outputs" field
-    main_outputs = data.get("outputs", [])
+    # # Extract the "output" field
+    # main_outputs = data.get("output", [])
 
-    # Extract the "outputs" field from "intermediate_outputs"
-    intermediate_outputs = []
-    if "intermediate_outputs" in data:
-        for item in data["intermediate_outputs"]:
-            intermediate_outputs.extend(item.get("outputs", []))
+    # # Extract the previous input
+    # intermediate_outputs = []
+    # if "input" in data:
+    #     for item in data["input"]:
+    #         intermediate_outputs.append(item)
+
+    # Extract the "output" field from the top level
+    main_outputs = data.get("output", None)
+
+    # Extract the "output" field from the "input" subfield
+    intermediate_outputs = None
+    if "input" in data and isinstance(data["input"], dict):
+        intermediate_outputs = data["input"].get("output", None)
 
     # Convert JSON strings to Python objects
-    main_outputs = [json.loads(output) for output in main_outputs]
-    intermediate_outputs = [json.loads(output) for output in intermediate_outputs]
+    main_outputs = [json.loads(main_outputs)]
+    intermediate_outputs = [json.loads(intermediate_outputs)]
 
     main_outputs = [item for sublist in main_outputs for item in sublist]
     intermediate_outputs = [item for sublist in intermediate_outputs for item in sublist]
