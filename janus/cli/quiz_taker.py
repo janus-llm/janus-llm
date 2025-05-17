@@ -1,11 +1,11 @@
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import click
 import typer
 from typing_extensions import Annotated
 
-from janus.cli.constants import REFINERS
+from janus.cli.constants import REFINERS, key_value_arg
 from janus.language.naive.registry import CUSTOM_SPLITTERS
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
@@ -136,9 +136,29 @@ def quiz_taker(
         typer.Option(
             "-j",
             "--use-janus-inputs",
-            help="Prsent if translator should use janus files as inputs",
+            help="Present if converter should use janus files as inputs",
         ),
     ] = True,
+    separate_outputs: Annotated[
+        bool,
+        typer.Option(
+            "--separate-outputs",
+            help="Present if converter should combine outputs",
+        ),
+    ] = False,
+    model_kwargs: Annotated[
+        list[str],
+        typer.Option(
+            "--kw",
+            help=(
+                "Keyword arguments to pass to model kwargs. Expects key=val pair."
+                " For multiple, supply this argument multiple times. For example,"
+                " `--kw max_tokens=4000 --kw temperature=0.7` (this would set the"
+                " maximum *output* tokens to 4000, not to be confused with the"
+                " --max-tokens/-M argument)"
+            ),
+        ),
+    ] = [],
 ):
     from janus.cli.constants import db_loc, get_collections_config
     from janus.converter.quiz_taker import QuizTaker
@@ -154,11 +174,16 @@ def quiz_taker(
         log.error("Output files would overwrite input! Aborting...")
         raise ValueError
 
-    model_arguments = dict(temperature=temp)
+
+    model_arguments: dict[str, Any] = {}
+    if model_kwargs:
+        kwargs = dict(map(key_value_arg, model_kwargs))
+        model_arguments.update(kwargs)
+
     collections_config = get_collections_config()
     quiz_take = QuizTaker(
         model=llm_name,
-        model_arguments=model_arguments,
+        model_kwargs=model_arguments,
         source_language=source_lang,
         target_language=target_language,
         target_version=target_version,
@@ -171,5 +196,6 @@ def quiz_taker(
         refiner_types=refiner_types,
         retriever_type=retriever_type,
         use_janus_inputs=use_janus_inputs,
+        combine_output=not separate_outputs,
     )
     quiz_take.translate(input_dir, output_dir, failure_dir, overwrite)

@@ -106,7 +106,7 @@ class Splitter(FileManager):
         self._segment_leaves(root)
         if not self.skip_merge:
             self._merge_tree(root)
-
+        root.mark_root()
         return root
 
     def _get_ast(self, code: str) -> CodeBlock:

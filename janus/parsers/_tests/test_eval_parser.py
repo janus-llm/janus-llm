@@ -14,15 +14,10 @@ class TestUMLParser(unittest.TestCase):
             name="Test Block",
             node_type="function",
             language="json",
-            text='{"diagrams":"@startuml test @enduml"}',
-            start_point=(0, 0),
-            end_point=(1, 0),
-            start_byte=0,
-            end_byte=1,
+            text='{"eval_object":"@startuml test @enduml"}',
             tokens=5,
-            children=[],
-            previous_generations=[{"input": "test"}],
         )
+        self.test_codeblock.mark_root()
         self.test_response = (
             '{"completeness": {"reasoning": "The diagram addresses most '
             "of the essential functionality of the provided source code. It covers "
@@ -51,7 +46,7 @@ class TestUMLParser(unittest.TestCase):
     def test_parse_input(self):
         self.assertEqual(
             self.parser.parse_input(self.test_codeblock),
-            '{"diagrams": ["@startuml test @enduml"]}',
+            '{"eval_object": ["@startuml test @enduml"]}',
         )
 
     def test_parse(self):
@@ -66,15 +61,10 @@ class TestSummaryParser(unittest.TestCase):
             name="Test Block",
             node_type="function",
             language="json",
-            text='{"summary":"test code summary"}',
-            start_point=(0, 0),
-            end_point=(1, 0),
-            start_byte=0,
-            end_byte=1,
+            text='{"eval_object": "test code summary"}',
             tokens=5,
-            children=[],
-            previous_generations=[{"input": "test"}],
         )
+        self.test_codeblock.mark_root()
         self.test_response = (
             '{"completeness": {"reasoning": "The summary covers most '
             "of the essential functionality of the provided source code. "
@@ -99,7 +89,7 @@ class TestSummaryParser(unittest.TestCase):
     def test_parse_input(self):
         self.assertEqual(
             self.parser.parse_input(self.test_codeblock),
-            '{"summary": "test code summary"}',
+            '{"eval_object": "test code summary"}',
         )
 
     def test_parse(self):
@@ -110,7 +100,7 @@ class TestIncoseParser(unittest.TestCase):
     def setUp(self):
         self.parser = IncoseParser()
         self.test_input = (
-            '{"requirements":'
+            '{"eval_object":'
             '[["## Software Requirements Specification", '
             '"### 1. Introduction", "This document outlines the software '
             'requirements", "### 2. Scope", "This document specifies the '
@@ -137,14 +127,9 @@ class TestIncoseParser(unittest.TestCase):
             node_type="function",
             language="json",
             text=self.test_input,
-            start_point=(0, 0),
-            end_point=(1, 0),
-            start_byte=0,
-            end_byte=1,
             tokens=5,
-            children=[],
-            previous_generations=[{"input": "test"}],
         )
+        self.test_codeblock.mark_root()
 
     def test_parse_input(self):
         self.assertIsInstance(self.parser.parse_input(self.test_codeblock), str)

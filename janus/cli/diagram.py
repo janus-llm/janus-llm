@@ -1,11 +1,11 @@
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import click
 import typer
 from typing_extensions import Annotated
 
-from janus.cli.constants import REFINERS
+from janus.cli.constants import REFINERS, key_value_arg
 from janus.language.naive.registry import CUSTOM_SPLITTERS
 from janus.utils.enums import LANGUAGES
 
@@ -140,16 +140,33 @@ def diagram(
                   be using janus files as inputs",
         ),
     ] = False,
+    model_kwargs: Annotated[
+        list[str],
+        typer.Option(
+            "--kw",
+            help=(
+                "Keyword arguments to pass to model kwargs. Expects key=val pair."
+                " For multiple, supply this argument multiple times. For example,"
+                " `--kw max_tokens=4000 --kw temperature=0.7` (this would set the"
+                " maximum *output* tokens to 4000, not to be confused with the"
+                " --max-tokens/-M argument)"
+            ),
+        ),
+    ] = [],
 ):
     from janus.cli.constants import db_loc, get_collections_config
     from janus.converter.diagram import DiagramGenerator
 
     refiner_types = [REFINERS[r] for r in refiner_types]
-    model_arguments = dict(temperature=temperature)
+    model_arguments: dict[str, Any] = {}
+    if model_kwargs:
+        kwargs = dict(map(key_value_arg, model_kwargs))
+        model_arguments.update(kwargs)
+
     collections_config = get_collections_config()
     diagram_generator = DiagramGenerator(
         model=llm_name,
-        model_arguments=model_arguments,
+        model_kwargs=model_arguments,
         source_language=language,
         max_prompts=max_prompts,
         db_path=db_loc,
@@ -177,31 +194,72 @@ def render(
 ):
     import json
     import subprocess  # nosec
+    import tempfile
+    from pathlib import Path
 
     from janus.cli.constants import homedir
 
     input_dir = Path(input_dir)
     output_dir = Path(output_dir)
+
     for input_file in input_dir.rglob("*.json"):
         with open(input_file, "r") as f:
             data = json.load(f)
 
         output_file = output_dir / input_file.relative_to(input_dir).with_suffix(".txt")
         if not output_file.parent.exists():
-            output_file.parent.mkdir()
+            output_file.parent.mkdir(parents=True, exist_ok=True)
 
-        def _render(obj, ind=0):
+        def _render(obj):
+            diagram_count = 0
             for o in obj["outputs"]:
                 if isinstance(o, dict):
-                    ind += _render(o, ind)
+                    diagram_count = _render(o)
                 else:
-                    outfile_new = output_file.with_stem(f"{output_file.stem}_{ind}")
-                    text = o.replace("\\n", "\n").strip()
-                    outfile_new.write_text(text)
-                    jar_path = homedir / ".janus/lib/plantuml.jar"
-                    subprocess.run(["java", "-jar", jar_path, outfile_new])  # nosec
-                    outfile_new.unlink()
-                    ind += 1
-            return ind
+                    with tempfile.TemporaryDirectory() as temp_dir:
+                        temp_dir_path = Path(temp_dir)
+
+                        # Write the PlantUML content to temp file in the temp dir
+                        temp_file = temp_dir_path / f"{output_file.stem}.txt"
+                        text = o.replace("\\n", "\n").strip()
+
+                        # Use explicit UTF-8 encoding
+                        with open(temp_file, "w", encoding="utf-8") as f:
+                            f.write(text)
+
+                        # Run plantuml to generate PNG(s) in the temp directory
+                        jar_path = homedir / ".janus/lib/plantuml.jar"
+                        subprocess.run(
+                            ["java", "-jar", str(jar_path), "-tpng", str(temp_file)],
+                            capture_output=True,
+                        )  # nosec
+
+                        png_files = list(temp_dir_path.glob("*.png"))
+                        for i, png_file in enumerate(sorted(png_files)):
+                            # Only add increment if there are multiple diagrams
+                            if len(png_files) > 1:
+                                desired_output = (
+                                    output_file.parent
+                                    / f"{output_file.stem}_{i+1:03d}.png"
+                                )
+                            else:
+                                desired_output = (
+                                    output_file.parent / f"{output_file.stem}.png"
+                                )
+
+                            # Copy the file to the final destination,
+                            # Not sure if we want this is a print vs log
+                            print(f"Moving {png_file} to {desired_output}")
+                            if desired_output.exists():
+                                desired_output.unlink()
+
+                            # Use shutil.copy2 to move files
+                            import shutil
+
+                            shutil.copy2(png_file, desired_output)
+
+                            diagram_count += 1
+
+            return diagram_count
 
         _render(data)

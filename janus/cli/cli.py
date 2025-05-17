@@ -3,7 +3,6 @@ import logging
 import typer
 from rich import print
 
-from janus.cli.aggregate import aggregate
 from janus.cli.database import db
 from janus.cli.diagram import diagram, render
 from janus.cli.document import document
@@ -66,14 +65,6 @@ def common(
     """
     pass
 
-
-aggregate = app.command(
-    help=(
-        "Aggregate intermediate representations together up to higher levels of "
-        "abstraction."
-    ),
-    no_args_is_help=True,
-)(aggregate)
 
 diagram = app.command(
     help="Diagram input code using an LLM.",

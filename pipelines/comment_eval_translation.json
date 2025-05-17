@@ -1,0 +1,24 @@
+[
+    {
+        "type": "ClozeDocumenter",
+        "kwargs": {
+            "output_label": "comments"
+        }
+    },
+    {
+        "type": "Translator",
+        "kwargs": {
+            "input_labels": ["comments"],
+            "output_label": "translation",
+            "prompt_templates": ["summary_to_java"],
+            "target_language": "java"
+        }
+    },
+    {
+        "type": "InlineCommentEvaluator",
+        "kwargs": {
+            "input_labels": ["comments"],
+            "output_label": "comment_eval"
+        }
+    }
+]

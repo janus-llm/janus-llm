@@ -1,62 +1,77 @@
 import unittest
 
-from janus.language.combine import CodeBlock, Combiner, TranslatedCodeBlock
+from janus.language.block import CodeBlock, TranslatedCodeBlock
+from janus.language.combine import Combiner
 
 
 class TestCombiner(unittest.TestCase):
     def setUp(self):
         self.combiner = Combiner()
-        self.block = CodeBlock(
-            id=1,
-            name="test",
-            node_type="test",
-            language="python",
-            text="# test",
-            start_point=(0, 0),
-            end_point=(0, 0),
-            start_byte=0,
-            end_byte=0,
-            tokens=[],
-            children=[
-                CodeBlock(
-                    id=2,
-                    name="child",
-                    node_type="test",
-                    language="python",
-                    text="test",
-                    start_point=(0, 0),
-                    end_point=(0, 0),
-                    start_byte=0,
-                    end_byte=0,
-                    tokens=[],
-                    children=[],
-                )
-            ],
+
+        child_a = CodeBlock(
+            id="child a",
+            name="child a",
+            node_type="child",
+            language="plaintext",
+            children=[],
+            text="first child",
+            affixes=("[prefix a]\n  ", "\n[suffix a]\n  "),
         )
+        child_b = CodeBlock(
+            id="child b",
+            name="child b",
+            node_type="child",
+            language="plaintext",
+            children=[],
+            text="second child",
+            affixes=("\n[prefix b]\n  ", "\n[suffix b]"),
+        )
+        self.block = CodeBlock(
+            id="root",
+            name="root",
+            node_type="root",
+            language="plaintext",
+            children=[child_a, child_b],
+            text=None,
+            affixes=("[prefix]\n", "\n[suffix]"),
+        )
+
+        self.block.mark_root()
+
         self.translated_block = TranslatedCodeBlock(
-            self.block,
+            original=self.block,
             language="python",
-            converter=None,
+            converter="Translator",
         )
 
     def test_combine(self):
-        self.combiner.combine(self.block)
         self.assertFalse(self.block.omit_prefix)
+        self.assertFalse(self.block.children[0].omit_prefix)
+        self.assertFalse(self.block.omit_suffix)
+        self.assertFalse(self.block.children[-1].omit_suffix)
 
-    def test_combine_children(self):
-        self.block.complete = False
-        self.combiner.combine_children(self.block)
-        self.assertTrue(self.block.complete)
+        prefix = "[prefix]\n[prefix a]\n  "
+        central = "first child\n[suffix a]\n  second child"
+        suffix = "\n[suffix b]\n[suffix]"
 
-    def test_combine_children_with_translated_block(self):
-        self.translated_block.complete = False
-        self.combiner.combine_children(self.translated_block)
-        self.assertFalse(self.translated_block.complete)
+        # An untranslated TranslatedBlock is empty, so it will be all affixes
+        self.assertEqual(
+            f"{prefix}\n[suffix a]\n  {suffix}", self.translated_block.complete_text
+        )
 
-    def test_combine_children_with_text_none(self):
-        self.combiner.combine_children(self.block)
-        self.assertEqual(self.block.text, "# test")
-        self.assertTrue(self.block.complete)
+        # CodeBlock.complete_text should give the full string
+        self.assertEqual(f"{prefix}{central}{suffix}", self.block.complete_text)
+
+        # Before combining, self.block.text should be None
+        self.assertEqual(None, self.block.text)
+
+        self.combiner.combine(self.block)
+
+        # After combining, self.block.text should be the contents of its children
+        self.assertEqual(central, self.block.text)
+
+        # CodeBlock.complete_text should not have been changed
+        self.assertEqual(f"{prefix}{central}{suffix}", self.block.complete_text)
 
 
 if __name__ == "__main__":

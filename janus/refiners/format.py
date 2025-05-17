@@ -25,7 +25,10 @@ class FormatRefiner(JanusRefiner):
         ).prompt
         format_chain = format_prompt | llm | StrOutputParser()
         super().__init__(
-            format_chain=format_chain, parser=parser, max_retries=max_retries
+            llm=llm,
+            parser=parser,
+            max_retries=max_retries,
+            format_chain=format_chain,
         )
 
     def parse_completion(
