@@ -768,6 +768,11 @@ class TranslatedCodeBlock(CodeBlock):
         translated_block.children = [
             cls.from_janus_object(obj) for obj in janus_obj["outputs"]
         ]
+        for c in translated_block.children:
+            c.affixes = ("\n", "\n")
+        if translated_block.children:
+            translated_block.children[0].pop_prefix()
+            translated_block.children[-1].pop_suffix()
 
         translated_block.cost = metadata.get("cost", 0.0)
         translated_block.processing_time = metadata.get("processing_time", 0.0)

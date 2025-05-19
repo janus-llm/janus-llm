@@ -637,10 +637,7 @@ class Converter:
 
         log.info(f"Total cost: ${total_cost:,.2f}")
 
-    def translate_file(
-        self,
-        file: Path,
-    ) -> list[TranslatedCodeBlock | CodeBlock]:
+    def translate_file(self, file: Path) -> list[TranslatedCodeBlock | CodeBlock]:
         """Translate a single file.
 
         Arguments:
@@ -652,19 +649,21 @@ class Converter:
             code is not guaranteed to be consolidated. To amend this, run
             `Combiner.combine_children` on the block.
         """
-        self._load_parameters()
-        input_block = self._split_file(file)
-        return self._translate_blocks([input_block])
+        return self.translate_text(file.read_text(), file.name)
 
     def translate_janus_file(self, file: Path) -> list[TranslatedCodeBlock | CodeBlock]:
         self._load_parameters()
         with open(file, "r") as f:
             file_obj: JanusOutputObject = json.load(f)
         code_block = CodeBlock.from_janus_object(file_obj)
+        code_block.name = file.name
+        code_block.mark_root()
         return self._translate_blocks([code_block])
 
     def translate_text(
-        self, text: str, name: str
+        self,
+        text: str,
+        name: str,
     ) -> list[TranslatedCodeBlock | CodeBlock]:
         """
         Translates given text
@@ -731,7 +730,10 @@ class Converter:
         try:
             while queue:
                 translated_block = queue.pop(0)
-                queue.extend(translated_block.children)
+                if translated_block.original.text is None:
+                    translated_block.translated = True
+                    queue[:0] = translated_block.children
+                    continue
 
                 self._add_translation(translated_block)
                 progress = translated_root.translation_completeness
@@ -797,6 +799,7 @@ class Converter:
                     f"  Total cost: ${translated_root.total_cost:,.2f}\n"
                 )
 
+        translated_root.mark_root()
         return translated_root
 
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
@@ -855,17 +858,6 @@ class Converter:
             f"tree of height {root.height}"
         )
         log.info(f"[{name}] Input CodeBlock Structure:\n{root.tree_str()}")
-        return root
-
-    def _split_file(self, file: Path) -> CodeBlock:
-        filename = file.name
-        log.info(f"[{filename}] Splitting file")
-        root = self._splitter.split(file)
-        log.info(
-            f"[{filename}] File split into {root.n_descendents:,} blocks, "
-            f"tree of height {root.height}"
-        )
-        log.info(f"[{filename}] Input CodeBlock Structure:\n{root.tree_str()}")
         return root
 
     def _run_chain(self, block: TranslatedCodeBlock) -> str:
