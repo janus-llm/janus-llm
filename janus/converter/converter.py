@@ -657,7 +657,13 @@ class Converter:
             file_obj: JanusOutputObject = json.load(f)
         code_block = CodeBlock.from_janus_object(file_obj)
         code_block.name = file.name
-        code_block.mark_root()
+        code_block.mark_root(overwrite_bounds=False)
+        log.info(
+            f"[{file.name}] Text split into {code_block.n_descendents:,} blocks,"
+            f"tree of height {code_block.height}"
+        )
+        log.info(f"[{file.name}] Input CodeBlock Structure:\n{code_block.tree_str()}")
+
         return self._translate_blocks([code_block])
 
     def translate_text(
@@ -730,7 +736,8 @@ class Converter:
         try:
             while queue:
                 translated_block = queue.pop(0)
-                if translated_block.original.text is None:
+                if translated_block.children:
+                    translated_block.text = None
                     translated_block.translated = True
                     queue[:0] = translated_block.children
                     continue
