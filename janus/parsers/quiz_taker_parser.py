@@ -41,12 +41,19 @@ class QuizTakerParser(JanusParser):
             raise ValueError("Error: Taking quiz without code context")
 
         prev_gen = block.previous_generation
+        log.info(f"prev_gen:\n{prev_gen}\n")
         input_str = prev_gen["input"]
+        input_str = str(input_str["output"])
+
+        # log.info(f"input_str:\n{input_str}\n")
 
         data = json.loads(block.text)  # type: ignore
+        log.info(f"Data:\n{data}\n")
         for question in data:
             if "correct-answer-number" in question:
                 del question["correct-answer-number"]
+
+        log.info(f"Data:\n{data}\n")
 
         return json.dumps(
             dict(
@@ -60,6 +67,7 @@ class QuizTakerParser(JanusParser):
             text = str(text.content)
         original_text = text
         text = self.extract_json_content(text)
+        log.info(f"Text:\n{text}\n")
         try:
             data = json.loads(text)
         except json.JSONDecodeError as e:

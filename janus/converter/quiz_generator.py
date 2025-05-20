@@ -15,12 +15,14 @@ class QuizGenerator(Converter):
         target_language: str = "json",
         quiz_topic: str = "General",
         quiz_topic_description: str = "Questions about any aspect of the code.",
+        combine_output: bool = False,
         **kwargs,
     ) -> None:
         super().__init__(target_language=target_language, **kwargs)
 
         self._quiz_topic = quiz_topic
         self._quiz_topic_description = quiz_topic_description
+        self._combine_output = False
 
         self._parser = QuizGenParser(
             language=target_language,
