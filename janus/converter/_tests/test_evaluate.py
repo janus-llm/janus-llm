@@ -270,7 +270,7 @@ class TestPseudocodeEvaluator(unittest.TestCase):
         self.assertNotIsInstance(result, TranslatedCodeBlock)
 
         # Fix input type
-        source.block_type = "documentation"
+        source.block_type = "pseudocode"
         result = self.evaluator._translate_block(source)
 
         obj_str = '{"eval_object": "This is a pseudocode", "code": "test"}'
