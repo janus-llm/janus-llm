@@ -56,7 +56,7 @@ def llm_self_eval(
             "-e",
             help="Type of output to evaluate.",
             click_type=click.Choice(
-                ["incose", "comments", "uml", "summary", "java-category"]
+                ["incose", "comments", "uml", "summary", "pseudocode", "java-category"]
             ),
         ),
     ] = "incose",
