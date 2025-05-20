@@ -315,15 +315,13 @@ class CodeBlock:
         if self.children:
             self.children[-1].mark_last()
 
-    def mark_root(self) -> None:
+    def mark_root(self, overwrite_bounds: bool = True) -> None:
         self.mark_first()
         self.mark_last()
-        self.set_start_index(0, 0, 0)
+        if overwrite_bounds:
+            self.set_start_index(0, 0, 0)
 
-    def set_start_index(self, byte: int, line: int, char: int) -> None:
-        self.start_byte = byte
-        self.start_point = (line, char)
-
+    def set_start_index(self, byte: int, line: int, char: int) -> tuple[int, int, int]:
         def _increment_indices(text: str):
             nonlocal byte, line, char
             byte += len(bytes(text, "utf-8"))
@@ -336,18 +334,20 @@ class CodeBlock:
 
         _increment_indices(self.prefix)
 
-        if self.text is not None:
+        self.start_byte = byte
+        self.start_point = (line, char)
+
+        if self.text is not None and not self.children:
             _increment_indices(self.text)
 
         for child in self.children:
-            child.set_start_index(byte=byte, line=line, char=char)
-            byte = child.end_byte
-            line, char = child.end_point
-
-        _increment_indices(self.suffix)
+            byte, line, char = child.set_start_index(byte=byte, line=line, char=char)
 
         self.end_byte = byte
         self.end_point = (line, char)
+
+        _increment_indices(self.suffix)
+        return byte, line, char
 
     @property
     def prefix(self) -> str:
@@ -556,10 +556,6 @@ class TranslatedCodeBlock(CodeBlock):
             node_type=original.node_type,
             language=language,
             text=None,
-            start_point=original.start_point,
-            end_point=original.end_point,
-            start_byte=original.start_byte,
-            end_byte=original.end_byte,
             tokens=0,
             children=[
                 TranslatedCodeBlock(
@@ -765,9 +761,14 @@ class TranslatedCodeBlock(CodeBlock):
         if "output" in janus_obj:
             translated_block.text = janus_obj["output"]
 
-        translated_block.children = [
+        translated_block.children = sorted(
             cls.from_janus_object(obj) for obj in janus_obj["outputs"]
-        ]
+        )
+        for child in translated_block.children:
+            child.affixes = ("\n", "\n")
+        if translated_block.children:
+            translated_block.children[0].pop_prefix()
+            translated_block.children[-1].pop_suffix()
 
         translated_block.cost = metadata.get("cost", 0.0)
         translated_block.processing_time = metadata.get("processing_time", 0.0)
@@ -792,25 +793,16 @@ class TranslatedCodeBlock(CodeBlock):
 
     def to_codeblock(self) -> CodeBlock:
         """Prepare this translated block to feed into a downstream Converter"""
-        # The input to the next Converter is the entirety of this block
-        start_line, start_char, start_byte = 0, 0, 0
-        end_line, end_char, end_byte = -1, -1, -1
-        if self.text is not None:
-            input_lines = self.text.split("\n")
-            end_line = len(input_lines) - 1
-            end_char = len(input_lines[-1]) - 1
-            end_byte = len(bytes(self.text, "utf-8")) - 1
-
         return CodeBlock(
             id=self.id,
             name=self.name,
             node_type=self.node_type,
             language=self.language,
             text=self.text,
-            start_point=(start_line, start_char),
-            start_byte=start_byte,
-            end_point=(end_line, end_char),
-            end_byte=end_byte,
+            start_point=self.start_point,
+            start_byte=self.start_byte,
+            end_point=self.end_point,
+            end_byte=self.end_byte,
             embedding_id=self.embedding_id,
             tokens=self.tokens,
             children=[child.to_codeblock() for child in self.children],

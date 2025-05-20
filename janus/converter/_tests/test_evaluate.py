@@ -362,11 +362,19 @@ class TestJavaCategoryEvaluator(unittest.TestCase):
         )
         source.mark_root()
 
+        preprocessed = self.evaluator._parser.parse_input(source)
+        expected_preprocessed = (
+            "1    public static void main string args etc.\n"
+            "2    another line\n"
+            "3    a third line"
+        )
+        self.assertEqual(expected_preprocessed, preprocessed)
+
         out_str = json.dumps(
             [
                 {
                     "start_line": 1,
-                    "end_line": 1,
+                    "end_line": 3,
                     "section_reasoning": "Looks like perfect code to me.",
                     "section_label": "clean_implementation",
                     "section_quality": 101,
