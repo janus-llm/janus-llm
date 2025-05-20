@@ -276,7 +276,7 @@ class TestPseudocodeEvaluator(unittest.TestCase):
         obj_str = '{"eval_object": "This is a pseudocode", "code": "test"}'
 
         self.assertIsInstance(result, TranslatedCodeBlock)
-        self.assertEqual(result.text, "Evaluated pseudocode")
+        self.assertEqual(result.text, "Evaluated pseudocode snippet")
         self.assertEqual(result.original.text, obj_str)
         self.assertEqual(result.previous_generation, source.previous_generation)
 
