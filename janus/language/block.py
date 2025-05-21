@@ -43,6 +43,7 @@ class JanusMetadata(TypedDict):
     type: NotRequired[str]
     label: NotRequired[str]
     translation_complete: bool
+    hash: int
 
 
 class JanusOutputObject(TypedDict):
@@ -73,6 +74,7 @@ def sort_janus_obj(obj: JanusOutputObject) -> OrderedDict:
         "end_line",
         "end_char",
         "end_byte",
+        "hash",
     ]
     ordered_metadata = OrderedDict()
     for k in metadata_key_order:
@@ -105,6 +107,7 @@ def combine_metadata(metadatas: Iterable[JanusMetadata]) -> JanusMetadata:
             end_byte=-1,
             language="",
             translation_complete=False,
+            hash=0,
         )
 
     def _get_vals(key: str) -> list:
@@ -152,8 +155,9 @@ def combine_metadata(metadatas: Iterable[JanusMetadata]) -> JanusMetadata:
         "end_line": metadatas[last_line_idx]["end_line"],
         "end_char": metadatas[last_line_idx]["end_char"],
         "end_byte": int(_max_metadata("end_byte") or -1),
-        "language": _merge_metadata("language") or "UNKNOWN",
+        "language": _merge_metadata("language") or "MULTIPLE",
         "translation_complete": _all_metadata("translation_complete") or False,
+        "hash": hash(tuple(_get_vals("hash"))),
     }
 
     optional_metadata = {
@@ -263,8 +267,29 @@ class CodeBlock:
 
     def __hash__(self) -> int:
         if self.previous_generation is not None:
-            return hash((self.text, hash(self.previous_generation["output"])))
-        return hash(self.text)
+            return self.previous_generation["metadata"]["hash"]
+        if self.text is not None:
+            return hash(self.text)
+        return hash(tuple(hash(c) for c in self.children))
+
+    def __repr__(self) -> str:
+        tokens = self.tokens
+        identifier = str(self.id)
+        if self.text is None:
+            identifier = f"({identifier})"
+            tokens = self.total_tokens
+        elif not self.complete:
+            identifier += "*"
+        if self.start_point is not None and self.end_point is not None:
+            start = f"{self.start_point[0]}:{self.start_point[1]}"
+            end = f"{self.end_point[0]}:{self.end_point[1]}"
+            seg = f" [{start}-{end}]"
+        else:
+            seg = ""
+
+        btype = self.block_label or self.block_type or self.language
+
+        return f"{btype}: {identifier}{seg}  ({tokens:,d} tokens)"
 
     def set_children(self, children: list["CodeBlock"]) -> None:
         self.children = children
@@ -290,15 +315,13 @@ class CodeBlock:
         if self.children:
             self.children[-1].mark_last()
 
-    def mark_root(self) -> None:
+    def mark_root(self, overwrite_bounds: bool = True) -> None:
         self.mark_first()
         self.mark_last()
-        self.set_start_index(0, 0, 0)
+        if overwrite_bounds:
+            self.set_start_index(0, 0, 0)
 
-    def set_start_index(self, byte: int, line: int, char: int) -> None:
-        self.start_byte = byte
-        self.start_point = (line, char)
-
+    def set_start_index(self, byte: int, line: int, char: int) -> tuple[int, int, int]:
         def _increment_indices(text: str):
             nonlocal byte, line, char
             byte += len(bytes(text, "utf-8"))
@@ -311,18 +334,20 @@ class CodeBlock:
 
         _increment_indices(self.prefix)
 
-        if self.text is not None:
+        self.start_byte = byte
+        self.start_point = (line, char)
+
+        if self.text is not None and not self.children:
             _increment_indices(self.text)
 
         for child in self.children:
-            child.set_start_index(byte=byte, line=line, char=char)
-            byte = child.end_byte
-            line, char = child.end_point
-
-        _increment_indices(self.suffix)
+            byte, line, char = child.set_start_index(byte=byte, line=line, char=char)
 
         self.end_byte = byte
         self.end_point = (line, char)
+
+        _increment_indices(self.suffix)
+        return byte, line, char
 
     @property
     def prefix(self) -> str:
@@ -461,6 +486,7 @@ class CodeBlock:
             "end_byte": self.end_byte,
             "language": self.language,
             "translation_complete": False,
+            "hash": hash(self),
         }
 
         janus_object: JanusOutputObject = {
@@ -495,7 +521,7 @@ class TranslatedCodeBlock(CodeBlock):
         self,
         original: CodeBlock | None,
         language: str,
-        converter: str | ForwardRef("Converter"),
+        converter: str | ForwardRef("Converter") | None = None,
         model_name: str | None = None,
         block_type: str | None = None,
         block_label: str | None = None,
@@ -515,18 +541,21 @@ class TranslatedCodeBlock(CodeBlock):
             for `text`, `path`, `complete`, `language`, `tokens`, and `children`
         """
         self.children: list[TranslatedCodeBlock]
+
         if original is None:
             original = CodeBlock.get_empty()
+            previous_generation = None
+        elif original.previous_generation is not None:
+            previous_generation = original.previous_generation
+        else:
+            previous_generation = original.to_janus_object()
+
         super().__init__(
             id=original.id,
             name=original.name,
             node_type=original.node_type,
             language=language,
             text=None,
-            start_point=original.start_point,
-            end_point=original.end_point,
-            start_byte=original.start_byte,
-            end_byte=original.end_byte,
             tokens=0,
             children=[
                 TranslatedCodeBlock(
@@ -539,7 +568,7 @@ class TranslatedCodeBlock(CodeBlock):
                 for child in original.children
             ],
             affixes=original.affixes,
-            previous_generation=original.previous_generation,
+            previous_generation=previous_generation,
             block_type=block_type,
             block_label=block_label,
         )
@@ -549,8 +578,8 @@ class TranslatedCodeBlock(CodeBlock):
         self.original = original
         self.converter = converter
 
-        self.model_name: str = model_name or "UNKNOWN"
-        if not isinstance(converter, str):
+        self.model_name: str | None = model_name
+        if converter is not None and not isinstance(converter, str):
             self.model_name = converter._model_name
 
         self.complete = original.complete
@@ -664,10 +693,6 @@ class TranslatedCodeBlock(CodeBlock):
         )
 
     def to_janus_object(self) -> JanusOutputObject:
-        converter = self.converter
-        if not isinstance(converter, str):
-            converter = converter.__class__.__name__
-
         metadata: JanusMetadata = {
             "cost": self.total_cost,
             "processing_time": self.total_processing_time,
@@ -676,7 +701,6 @@ class TranslatedCodeBlock(CodeBlock):
             "output_tokens": self.tokens,
             "request_input_tokens": self.total_request_input_tokens,
             "request_output_tokens": self.total_request_output_tokens,
-            "converter_name": converter,
             "start_line": self.start_point[0],
             "start_char": self.start_point[-1],
             "start_byte": self.start_byte,
@@ -684,16 +708,24 @@ class TranslatedCodeBlock(CodeBlock):
             "end_char": self.end_point[-1],
             "end_byte": self.end_byte,
             "language": self.language,
-            "model_name": self.model_name,
             "translation_complete": self.translation_completed,
+            "hash": hash(self),
         }
+
+        if isinstance(self.converter, str):
+            metadata["converter_name"] = self.converter
+        elif self.converter is not None:
+            metadata["converter_name"] = self.converter.__class__.__name__
+
+        if self.model_name is not None:
+            metadata["model_name"] = self.model_name
         if self.block_type is not None:
             metadata["type"] = self.block_type
         if self.block_label is not None:
             metadata["label"] = self.block_label
 
         janus_object: JanusOutputObject = {
-            "input": self.original.to_janus_object(),
+            "input": self.previous_generation or self.original.text or "",
             "metadata": metadata,
             "outputs": self.descendant_janus_objects() if self.children else [],
         }
@@ -707,53 +739,70 @@ class TranslatedCodeBlock(CodeBlock):
         janus_obj: JanusOutputObject,
     ) -> "TranslatedCodeBlock":
         metadata = janus_obj["metadata"]
+
+        if isinstance(janus_obj["input"], str):
+            original = None
+        else:
+            original = CodeBlock.from_janus_object(janus_obj["input"])
+
         translated_block = TranslatedCodeBlock(
-            original=CodeBlock.extract_input(janus_obj),
+            original=original,
             language=metadata["language"],
-            converter=metadata.get("converter_name", "None"),
+            converter=metadata.get("converter_name", None),
             model_name=metadata.get("model_name", None),
             block_type=metadata.get("type", None),
             block_label=metadata.get("label", None),
         )
 
+        if not isinstance(janus_obj["input"], str):
+            translated_block.previous_generation = janus_obj["input"]
+
         translated_block.translated = metadata["translation_complete"]
         if "output" in janus_obj:
             translated_block.text = janus_obj["output"]
 
-        translated_block.children = [
+        translated_block.children = sorted(
             cls.from_janus_object(obj) for obj in janus_obj["outputs"]
-        ]
+        )
+        for child in translated_block.children:
+            child.affixes = ("\n", "\n")
+        if translated_block.children:
+            translated_block.children[0].pop_prefix()
+            translated_block.children[-1].pop_suffix()
 
         translated_block.cost = metadata.get("cost", 0.0)
         translated_block.processing_time = metadata.get("processing_time", 0.0)
         translated_block.num_requests = metadata.get("num_requests", 0)
-        translated_block.tokens = metadata.get("output_tokens", 0)
         translated_block.request_input_tokens = metadata.get("request_input_tokens", 0)
         translated_block.request_output_tokens = metadata.get("request_output_tokens", 0)
+
+        translated_block.tokens = metadata.get("output_tokens", 0)
+
+        translated_block.start_byte = metadata.get("start_byte", 0)
+        translated_block.end_byte = metadata.get("end_byte", -1)
+        translated_block.start_point = (
+            metadata.get("start_line", 0),
+            metadata.get("start_char", 0),
+        )
+        translated_block.end_point = (
+            metadata.get("end_line", -1),
+            metadata.get("end_char", -1),
+        )
 
         return translated_block
 
     def to_codeblock(self) -> CodeBlock:
         """Prepare this translated block to feed into a downstream Converter"""
-        # The input to the next Converter is the entirety of this block
-        start_line, start_char, start_byte = 0, 0, 0
-        end_line, end_char, end_byte = -1, -1, -1
-        if self.text is not None:
-            input_lines = self.text.split("\n")
-            end_line = len(input_lines) - 1
-            end_char = len(input_lines[-1]) - 1
-            end_byte = len(bytes(self.text, "utf-8")) - 1
-
         return CodeBlock(
             id=self.id,
             name=self.name,
             node_type=self.node_type,
             language=self.language,
             text=self.text,
-            start_point=(start_line, start_char),
-            start_byte=start_byte,
-            end_point=(end_line, end_char),
-            end_byte=end_byte,
+            start_point=self.start_point,
+            start_byte=self.start_byte,
+            end_point=self.end_point,
+            end_byte=self.end_byte,
             embedding_id=self.embedding_id,
             tokens=self.tokens,
             children=[child.to_codeblock() for child in self.children],
@@ -788,22 +837,23 @@ def combine_janus_objects(janus_objects: list[JanusOutputObject]) -> JanusOutput
 
     metadata = combine_metadata(obj["metadata"] for obj in janus_objects)
 
-    inputs = [obj["input"] for obj in janus_objects]
-    if all(isinstance(x, str) for x in inputs) and len(set(inputs)) == 1:
-        input = inputs[0]
+    inputs: list[JanusOutputObject | str] = [obj["input"] for obj in janus_objects]
+    input_hash = {}
+    for input in inputs:
+        if not input:
+            continue
+
+        if isinstance(input, str):
+            block = CodeBlock.get_empty()
+            block.text = input
+            input = block.to_janus_object()
+
+        input_hash[input["metadata"]["hash"]] = input
+
+    if len(input_hash) == 1:
+        input = list(input_hash.values())[0]
     else:
-        input_blocks = []
-        for input in inputs:
-            if isinstance(input, str):
-                block = CodeBlock.get_empty()
-                block.text = input
-                input_blocks.append(block)
-            else:
-                input_blocks.append(CodeBlock.from_janus_object(input))
-        if len(set(hash(x) for x in input_blocks)) == 1:
-            input = inputs[0]
-        else:
-            input = codeblocks_to_janus_object(input_blocks)
+        input = "MULTIPLE"
 
     janus_object: JanusOutputObject = {
         "input": input,

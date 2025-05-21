@@ -11,27 +11,27 @@ log = create_logger(__name__)
 
 
 class RequirementsParser(JanusParser):
-    expected_keys: set[str]
-
-    def __init__(self):
-        super().__init__(expected_keys=[])
-
     def parse(self, text: str | BaseMessage) -> str:
         if isinstance(text, BaseMessage):
             text = str(text.content)
         original_text = text
 
-        # TODO: This is an incorrect implementation (lstrip and rstrip take character
-        #       lists and strip any instances of those characters, not the full str)
-        #       Should be replaced with a regex search, see CodeParser
-        text = text.lstrip("```json")
-        text = text.rstrip("```")
+        pattern = r"```[^\S\r\n]*(?:json[^\S\r\n]*)?\n?(.*?)\n*```"
+        match = re.search(pattern, text, re.DOTALL)
+        if match is None:
+            raise JanusParserException(
+                original_text,
+                "Output object not contained between triple backtick delimiters (```)",
+            )
+
+        text = str(match.group(1))
         try:
             obj = parse_json_markdown(text)
         except json.JSONDecodeError as e:
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise JanusParserException(
-                original_text, f"Got invalid JSON object. Error: {e}"
+                original_text,
+                f"Got invalid JSON object. Error: {e}",
             )
 
         if not isinstance(obj, dict):
@@ -39,6 +39,13 @@ class RequirementsParser(JanusParser):
                 original_text,
                 f"Got invalid return object. Expected a dictionary, but got {type(obj)}",
             )
+
+        if "requirements" not in obj or len(obj.keys()) != 1:
+            raise JanusParserException(
+                original_text,
+                "Return object expected to contain a single key, 'requirements'",
+            )
+
         return json.dumps(obj)
 
     def parse_combined_output(self, text: str) -> str:
@@ -54,8 +61,9 @@ class RequirementsParser(JanusParser):
         output_list = list()
         for _, json_string in enumerate(json_strings, 1):
             json_dict = json.loads(json_string)
-            output_list.append(json_dict["requirements"])
-        return json.dumps(output_list)
+            output_list.extend(json_dict["requirements"])
+        obj = {"requirements": output_list}
+        return json.dumps(obj)
 
     def get_format_instructions(self) -> str:
         """Get the format instructions for the parser.
@@ -64,10 +72,10 @@ class RequirementsParser(JanusParser):
             The format instructions for the LLM.
         """
         return (
-            "Output must contain a requirements specification "
-            "in a JSON-formatted string. The only key should be "
-            "'requirements' and its value should be a JSON-formatted list "
-            "containing the requirements."
+            "Output must by formatted as a JSON object. The only key should be"
+            " 'requirements' and its value should be a JSON-formatted list of"
+            " strings, each string specifying a single requirement. Wrap the JSON"
+            " object in annotated triple backticks (```)."
         )
 
     @property

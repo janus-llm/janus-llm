@@ -55,7 +55,9 @@ def llm_self_eval(
             "--evaluation-type",
             "-e",
             help="Type of output to evaluate.",
-            click_type=click.Choice(["incose", "comments", "uml", "summary"]),
+            click_type=click.Choice(
+                ["incose", "comments", "uml", "summary", "java-category"]
+            ),
         ),
     ] = "incose",
     max_prompts: Annotated[
@@ -147,6 +149,7 @@ def llm_self_eval(
 ):
     from janus.converter.evaluate import (
         InlineCommentEvaluator,
+        JavaCategoryEvaluator,
         RequirementEvaluator,
         SummaryEvaluator,
         UMLEvaluator,
@@ -159,7 +162,6 @@ def llm_self_eval(
 
     refiner_types = [REFINERS[r] for r in refiner_types]
     kwargs = dict(
-        eval_items_per_request=eval_items_per_request,
         model=llm_name,
         model_kwargs=model_arguments,
         source_language=language,
@@ -171,12 +173,20 @@ def llm_self_eval(
     )
     # Setting parser type here
     if evaluation_type == "incose":
-        evaluator = RequirementEvaluator(**kwargs)
+        evaluator = RequirementEvaluator(
+            eval_items_per_request=eval_items_per_request,
+            **kwargs,
+        )
     elif evaluation_type == "comments":
-        evaluator = InlineCommentEvaluator(**kwargs)
+        evaluator = InlineCommentEvaluator(
+            eval_items_per_request=eval_items_per_request,
+            **kwargs,
+        )
     elif evaluation_type == "uml":
         evaluator = UMLEvaluator(**kwargs)
     elif evaluation_type == "summary":
         evaluator = SummaryEvaluator(**kwargs)
+    elif evaluation_type == "java-category":
+        evaluator = JavaCategoryEvaluator(**kwargs)
 
     evaluator.translate(input_dir, output_dir, failure_dir, overwrite, collection)

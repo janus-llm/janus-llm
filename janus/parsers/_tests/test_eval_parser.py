@@ -14,7 +14,7 @@ class TestUMLParser(unittest.TestCase):
             name="Test Block",
             node_type="function",
             language="json",
-            text='{"diagrams":"@startuml test @enduml"}',
+            text='{"eval_object":"@startuml test @enduml"}',
             tokens=5,
         )
         self.test_codeblock.mark_root()
@@ -46,7 +46,7 @@ class TestUMLParser(unittest.TestCase):
     def test_parse_input(self):
         self.assertEqual(
             self.parser.parse_input(self.test_codeblock),
-            '{"diagrams": ["@startuml test @enduml"]}',
+            '{"eval_object": ["@startuml test @enduml"]}',
         )
 
     def test_parse(self):
@@ -61,7 +61,7 @@ class TestSummaryParser(unittest.TestCase):
             name="Test Block",
             node_type="function",
             language="json",
-            text='{"summary":"test code summary"}',
+            text='{"eval_object": "test code summary"}',
             tokens=5,
         )
         self.test_codeblock.mark_root()
@@ -89,7 +89,7 @@ class TestSummaryParser(unittest.TestCase):
     def test_parse_input(self):
         self.assertEqual(
             self.parser.parse_input(self.test_codeblock),
-            '{"summary": "test code summary"}',
+            '{"eval_object": "test code summary"}',
         )
 
     def test_parse(self):
@@ -100,7 +100,7 @@ class TestIncoseParser(unittest.TestCase):
     def setUp(self):
         self.parser = IncoseParser()
         self.test_input = (
-            '{"requirements":'
+            '{"eval_object":'
             '[["## Software Requirements Specification", '
             '"### 1. Introduction", "This document outlines the software '
             'requirements", "### 2. Scope", "This document specifies the '

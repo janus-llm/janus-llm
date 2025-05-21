@@ -5,7 +5,6 @@ from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, Field
 
-from janus.language.block import CodeBlock
 from janus.parsers.eval_parsers.inline_comment_parser import Criteria
 from janus.parsers.parser import JanusParser
 from janus.utils.logger import create_logger
@@ -23,12 +22,6 @@ class Summary(BaseModel):
 class SummaryParser(JanusParser, PydanticOutputParser):
     def __init__(self):
         PydanticOutputParser.__init__(self, pydantic_object=Summary)
-
-    def parse_input(self, block: CodeBlock) -> str:
-        text = super().parse_input(block)
-        # summary is a long string
-        obj = json.loads(text)
-        return json.dumps(obj)
 
     def parse(self, text: str | BaseMessage) -> str:
         # parsing the output evaluation object

@@ -1,8 +1,10 @@
+import json
 import unittest
 from unittest.mock import patch
 
 from janus.converter.evaluate import (
     InlineCommentEvaluator,
+    JavaCategoryEvaluator,
     RequirementEvaluator,
     SummaryEvaluator,
     UMLEvaluator,
@@ -59,7 +61,7 @@ class TestUMLEvaluator(unittest.TestCase):
         source.block_type = "diagram"
         result = self.evaluator._translate_block(source)
 
-        obj_str = '{"diagrams": "This is UML", "code": "test"}'
+        obj_str = '{"eval_object": "This is UML", "code": "test"}'
 
         self.assertIsInstance(result, TranslatedCodeBlock)
         self.assertEqual(result.text, "This is evaluated UML")
@@ -105,7 +107,14 @@ class TestRequirementEvaluator(unittest.TestCase):
         )
         source.mark_root()
 
-        mock_run_chain.return_value = "Evaluated requirements"
+        out_str = json.dumps(
+            {
+                "c3caa172": dict(
+                    requirement="The program shall return 0", eval="Evaluations"
+                )
+            }
+        )
+        mock_run_chain.return_value = out_str
 
         # Incorrect input type, should be skipped
         result = self.evaluator._translate_block(source)
@@ -115,10 +124,10 @@ class TestRequirementEvaluator(unittest.TestCase):
         source.block_type = "requirements"
         result = self.evaluator._translate_block(source)
 
-        obj_str = '{"requirements": ["The program shall return 0"], "code": "test"}'
+        obj_str = '{"eval_object": ["The program shall return 0"], "code": "test"}'
 
         self.assertIsInstance(result, TranslatedCodeBlock)
-        self.assertEqual(result.text, "Evaluated requirements")
+        self.assertEqual(result.text, out_str)
         self.assertEqual(result.original.text, obj_str)
         self.assertEqual(result.previous_generation, source.previous_generation)
 
@@ -145,10 +154,18 @@ class TestRequirementEvaluator(unittest.TestCase):
         )
         source.mark_root()
 
-        mock_run_chain.side_effect = ['{"a":"b"}', '{"b":"c"}']
+        out_objs = [
+            {"c3caa172": dict(requirement="The program shall return 0", eval="great")},
+            {"fab48ab9": dict(requirement="The program will not crash", eval="terrible")},
+        ]
+        mock_run_chain.side_effect = [json.dumps(s) for s in out_objs]
+
+        out_obj = {}
+        for obj in out_objs:
+            out_obj.update(obj)
 
         result = self.evaluator._translate_block(source)
-        self.assertEqual(result.text, '{"a": "b", "b": "c"}')
+        self.assertEqual(result.text, json.dumps(out_obj))
 
 
 class TestSummaryEvaluator(unittest.TestCase):
@@ -199,7 +216,7 @@ class TestSummaryEvaluator(unittest.TestCase):
         source.block_type = "documentation"
         result = self.evaluator._translate_block(source)
 
-        obj_str = '{"summary": "This is a summary", "code": "test"}'
+        obj_str = '{"eval_object": "This is a summary", "code": "test"}'
 
         self.assertIsInstance(result, TranslatedCodeBlock)
         self.assertEqual(result.text, "Evaluated summary")
@@ -269,7 +286,7 @@ class TestInlineCommentEvaluator(unittest.TestCase):
             },
         )
         source.mark_root()
-        mock_run_chain.return_value = "Evaluated comments"
+        mock_run_chain.return_value = '{"14b80530": "great", "dadfa102": "terrible"}'
 
         # Incorrect input type, should be skipped
         result = self.evaluator._translate_block(source)
@@ -283,7 +300,7 @@ class TestInlineCommentEvaluator(unittest.TestCase):
         obj_str = "*\n* <BLOCK_COMMENT 14b80530> first line\nDFHEISTG DSECT<INLINE_COMMENT dadfa102> second line"  # noqa E501
 
         self.assertIsInstance(result, TranslatedCodeBlock)
-        self.assertEqual(result.text, "Evaluated comments")
+        self.assertEqual(result.text, '{"14b80530": "great", "dadfa102": "terrible"}')
         self.assertEqual(result.original.text, obj_str)
         self.assertEqual(result.previous_generation, source.previous_generation)
 
@@ -309,8 +326,68 @@ class TestInlineCommentEvaluator(unittest.TestCase):
         )
         source.mark_root()
 
-        mock_run_chain.side_effect = ['{"a":"b"}', '{"b":"c"}']
+        mock_run_chain.side_effect = ['{"14b80530": "great"}', '{"dadfa102": "terrible"}']
 
         result = self.evaluator._translate_block(source)
         result.previous_generation
-        self.assertEqual(result.text, '{"a": "b", "b": "c"}')
+        self.assertEqual(result.text, '{"14b80530": "great", "dadfa102": "terrible"}')
+
+
+class TestJavaCategoryEvaluator(unittest.TestCase):
+    """Tests for the JavaCategoryEvaluator class"""
+
+    def setUp(self):
+        """Set up the tests"""
+        self.evaluator = JavaCategoryEvaluator(
+            model="gpt-4o-mini",
+            source_language="java",
+            refiner_types=[FixParserExceptions],
+        )
+
+    def test_init(self):
+        """Test __init__ method."""
+        self.assertEqual(self.evaluator._model_name, "gpt-4o-mini")
+        self.assertEqual(self.evaluator._source_language, "java")
+
+    @patch("janus.converter.Converter._run_chain")
+    def test_translate_block(self, mock_run_chain):
+        """Test translate_block method"""
+
+        source = CodeBlock(
+            id="test",
+            name="Test Block",
+            node_type="function",
+            language="java",
+            text="public static void main string args etc.\nanother line\na third line",
+        )
+        source.mark_root()
+
+        preprocessed = self.evaluator._parser.parse_input(source)
+        expected_preprocessed = (
+            "1    public static void main string args etc.\n"
+            "2    another line\n"
+            "3    a third line"
+        )
+        self.assertEqual(expected_preprocessed, preprocessed)
+
+        out_str = json.dumps(
+            [
+                {
+                    "start_line": 1,
+                    "end_line": 3,
+                    "section_reasoning": "Looks like perfect code to me.",
+                    "section_label": "clean_implementation",
+                    "section_quality": 101,
+                }
+            ]
+        )
+        mock_run_chain.return_value = out_str
+
+        result = self.evaluator._translate_block(source)
+
+        obj_str = "public static void main string args etc.\nanother line\na third line"
+
+        self.assertIsInstance(result, TranslatedCodeBlock)
+        self.assertEqual(result.text, out_str)
+        self.assertEqual(result.original.text, obj_str)
+        self.assertEqual(result.previous_generation, source.to_janus_object())

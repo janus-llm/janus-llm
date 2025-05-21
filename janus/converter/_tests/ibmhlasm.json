@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "converter_name": "PseudocodeDocumenter",
+    "translation_complete": true,
+    "language": "json",
+    "model_name": "mchat",
+    "type": "pseudocode",
+    "cost": 0.0075525,
+    "processing_time": 4.074753046035767,
+    "request_input_tokens": 266,
+    "request_output_tokens": 437,
+    "num_requests": 1,
+    "input_tokens": 138,
+    "output_tokens": 433,
+    "start_line": 0,
+    "start_char": 0,
+    "start_byte": 0,
+    "end_line": 16,
+    "end_char": 0,
+    "end_byte": 382,
+    "hash": -590071091322471993
+  },
+  "output": "### Pseudocode Representation of the Assembly Code\n\n1. **Define the Program**:\n   - Name the program \"Hello, World!\".\n   - This is the entry point for the code segment labeled `HELLO`.\n\n2. **Save Register State**:\n   - Save the state of registers 14 through 12 into the memory area pointed to by register 13.\n   - This is done to preserve the current state of the program's execution environment.\n\n3. **Set Up Base Register**:\n   - Move the value from register 15 to register 12 (prepare register 12 as the base register).\n   - Indicate that register 12 will be used for addressing.\n\n4. **Initialize Save Area**:\n   - Load the address of a predefined save area into register 15.\n   - Store the value of register 13 (the current save area pointer) at a specific offset in the new save area's memory.\n   - Update the save area pointer (register 13) to point to the new save area.\n\n5. **Print \"Hello, World!\"**:\n   - Use the Write-To-Operator (WTO) instruction to output the message \"Hello, World!\" to the system console or operator.\n\n6. **Restore Register State**:\n   - Retrieve the previous save area pointer from the current save area's memory and load it into register 13.\n   - Restore the values of registers 14 through 12 from the save area.\n\n7. **End Program Execution**:\n   - Set register 15 to 0 (indicating normal termination).\n   - Branch to the address stored in register 14 (returning control to the caller or operating system).\n\n8. **Define Save Area**:\n   - Reserve a block of memory to act as a save area for storing register states. This area consists of 18 fixed-length fields.\n\n9. **Program End**:\n   - End the program definition with the label `HELLO`.\n\n### Summary of Functionality:\n- The program initializes its environment, outputs \"Hello, World!\" to the system console, and then restores its environment to its previous state before terminating.",
+  "outputs": [],
+  "input": {
+    "metadata": {
+      "translation_complete": false,
+      "language": "ibmhlasm",
+      "output_tokens": 138,
+      "start_line": 0,
+      "start_char": 0,
+      "start_byte": 0,
+      "end_line": 16,
+      "end_char": 0,
+      "end_byte": 382,
+      "hash": 9113676181918720104
+    },
+    "output": "         TITLE 'Hello, World! Program'\nHELLO    CSECT\n         STM   14,12,12(13)\n         LR    12,15\n         USING *,12\n         LA    15,SAVEAREA\n         ST    13,4(,15)\n         ST    15,8(13)\n         LR    13,15\n         WTO   'Hello, World!'\n         L     13,4(,13)\n         LM    14,12,12(13)\n         LA    15,0\n         BR    14\nSAVEAREA DS    18F\n         END   HELLO\n",
+    "outputs": [],
+    "input": "         TITLE 'Hello, World! Program'\nHELLO    CSECT\n         STM   14,12,12(13)\n         LR    12,15\n         USING *,12\n         LA    15,SAVEAREA\n         ST    13,4(,15)\n         ST    15,8(13)\n         LR    13,15\n         WTO   'Hello, World!'\n         L     13,4(,13)\n         LM    14,12,12(13)\n         LA    15,0\n         BR    14\nSAVEAREA DS    18F\n         END   HELLO\n"
+  }
+}

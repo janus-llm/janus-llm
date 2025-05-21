@@ -70,7 +70,7 @@ class IncoseParser(JanusParser, PydanticOutputParser):
 
         obj = json.loads(text)
 
-        reqs = obj["requirements"]
+        reqs = obj["eval_object"]
 
         # Generate a unique ID for each requirement (ensure they are unique)
         req_ids = set()
@@ -81,7 +81,7 @@ class IncoseParser(JanusParser, PydanticOutputParser):
         reqs_str = "\n\n".join(
             f"Requirement {rid} : {req}" for rid, req in self.requirements.items()
         )
-        obj["requirements"] = reqs_str
+        obj["eval_object"] = reqs_str
         return json.dumps(obj)
 
     def parse(self, text: str | BaseMessage) -> str:

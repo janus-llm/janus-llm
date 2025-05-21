@@ -47,10 +47,19 @@
         }
     },
     {
+        "type": "JavaCategoryEvaluator",
+        "kwargs": {
+            "input_labels": ["java_from_requirements", "java_from_summaries"],
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "java_eval"
+        }
+    },
+    {
         "type": "RequirementEvaluator",
         "kwargs": {
             "input_labels": ["requirements", "round_trip_requirements"],
             "refiner_types": ["FixParserExceptions"],
+            "eval_items_per_request": 5,
             "output_label": "requirement_eval"
         }
     }

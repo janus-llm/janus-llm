@@ -1,12 +1,20 @@
 import json
 
-from langchain_core.runnables import Runnable, RunnableLambda, RunnableParallel
+from langchain_core.runnables import Runnable, RunnableParallel
+from langchain_core.runnables.passthrough import RunnablePick
 
 from janus.converter.converter import Converter
 from janus.parsers.quiz_taker_parser import QuizTakerParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
+
+
+def extract_from_json(key: str):
+    def _extract(json_text: str) -> str:
+        return json.loads(json_text)[key]
+
+    return _extract
 
 
 class QuizTaker(Converter):
@@ -22,15 +30,10 @@ class QuizTaker(Converter):
         self._parser = QuizTakerParser(language=target_language)
 
     def _input_runnable(self) -> Runnable:
-        def _get_quiz(json_text: str) -> str:
-            return json.loads(json_text)["quiz"]
-
-        def _get_code(json_text: str) -> str:
-            return json.loads(json_text)["code"]
-
-        return RunnableLambda(self._parser.parse_input) | RunnableParallel(
-            QUIZ=_get_quiz,
-            SOURCE_CODE=_get_code,
-            # TODO ADD TOPIC?
-            context=self._retriever,
+        return RunnableParallel(
+            json=self._parser.parse_input, context=self._retriever
+        ) | RunnableParallel(
+            QUIZ=RunnablePick("json") | extract_from_json("quiz"),
+            SOURCE_CODE=RunnablePick("json") | extract_from_json("code"),
+            context=RunnablePick("context"),
         )
