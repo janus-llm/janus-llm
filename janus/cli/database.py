@@ -100,7 +100,7 @@ def db_ls(
         print(f"  Length: {collection.count()}")
         if peek:
             entry = collection.peek(peek)
-            entry["embeddings"] = entry["embeddings"][0][:2] + ["..."]
+            entry["embeddings"] = entry["embeddings"][0][:2].tolist() + ["..."]
             if peek == 1:
                 print("  [bold]Peeking at first entry[/bold]:")
             else:
