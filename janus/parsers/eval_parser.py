@@ -2,7 +2,7 @@ import json
 
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.messages import BaseMessage
-from langchain_core.pydantic_v1 import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from janus.parsers.parser import JanusParser
 from janus.utils.logger import create_logger
@@ -17,7 +17,7 @@ class Eval(BaseModel):
     correctness: float = Field(description="A numeric score (0-4) for code correctness")
 
     # You can add custom validation logic easily with Pydantic.
-    @validator("*")
+    @field_validator("*")
     def score_is_valid(cls, v: float | int):
         try:
             v = float(v)
