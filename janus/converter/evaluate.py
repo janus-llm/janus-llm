@@ -476,7 +476,7 @@ class SummaryEvaluator(Evaluator):
 
 
 class PseudocodeEvaluator(Evaluator):
-    """Summary Evaluator
+    """Pseudocode Evaluator
 
     A class that performs an LLM self evaluation on pseudocode,
     with an associated prompt.
