@@ -48,7 +48,7 @@ class InlineCommentParser(JanusParser, PydanticOutputParser):
         PydanticOutputParser.__init__(
             self,
             pydantic_object=CommentList,
-            comments=[],
+            comments={},
         )
 
     def parse_input(self, block: CodeBlock) -> str:

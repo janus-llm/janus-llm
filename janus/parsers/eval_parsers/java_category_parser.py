@@ -4,8 +4,7 @@ from typing import List
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
-from langchain_core.pydantic_v1 import BaseModel, Field
-from pydantic import ValidationError
+from pydantic import BaseModel, Field, RootModel, ValidationError
 
 from janus.language.block import CodeBlock
 from janus.parsers.parser import JanusParser
@@ -22,7 +21,7 @@ class LabeledJava(BaseModel):
     )
     section_label: str = Field(
         description="Assigned label for the block",
-        regex=(
+        pattern=(
             r"^(non_code_text|lazy_implementation|placeholder_implementation|"
             r"commented_implementation|syntax_error|general_error|clean_implementation)$"
         ),
@@ -30,8 +29,8 @@ class LabeledJava(BaseModel):
     section_quality: int = Field(description="Integer score from 1 to 100")
 
 
-class LabeledJavaList(BaseModel):
-    __root__: List[LabeledJava]
+class LabeledJavaList(RootModel):
+    root: List[LabeledJava]
 
 
 class LabeledJavaListParser(JanusParser, PydanticOutputParser):
