@@ -54,8 +54,7 @@ There's also an LLM Self Evaluation command. The help command has been trimmed f
 ╰───────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-Generally, LLM self evaluation takes in the LLM generated content, and some relevant context, and uses a 
-reburic within the prompt to provide some score for the LLM generated content
+Generally, LLM self evaluation takes in the LLM generated content, and some relevant context, and uses a rubric within the prompt to provide some score for the LLM generated content.
 
 ## Evaluation with an LLM
 
