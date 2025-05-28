@@ -212,53 +212,53 @@ def render(
 
         def _render(obj):
             diagram_count = 0
-            for o in obj["outputs"]:
-                if isinstance(o, dict):
-                    diagram_count = _render(o)
-                else:
-                    with tempfile.TemporaryDirectory() as temp_dir:
-                        temp_dir_path = Path(temp_dir)
+            if "output" in obj and obj["output"] != "":
+                o = obj["output"]
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    temp_dir_path = Path(temp_dir)
 
-                        # Write the PlantUML content to temp file in the temp dir
-                        temp_file = temp_dir_path / f"{output_file.stem}.txt"
-                        text = o.replace("\\n", "\n").strip()
+                    # Write the PlantUML content to temp file in the temp dir
+                    temp_file = temp_dir_path / f"{output_file.stem}.txt"
+                    text = o.replace("\\n", "\n").strip()
 
-                        # Use explicit UTF-8 encoding
-                        with open(temp_file, "w", encoding="utf-8") as f:
-                            f.write(text)
+                    # Use explicit UTF-8 encoding
+                    with open(temp_file, "w", encoding="utf-8") as f:
+                        f.write(text)
 
-                        # Run plantuml to generate PNG(s) in the temp directory
-                        jar_path = homedir / ".janus/lib/plantuml.jar"
-                        subprocess.run(
-                            ["java", "-jar", str(jar_path), "-tpng", str(temp_file)],
-                            capture_output=True,
-                        )  # nosec
+                    # Run plantuml to generate PNG(s) in the temp directory
+                    jar_path = homedir / ".janus/lib/plantuml.jar"
+                    subprocess.run(
+                        ["java", "-jar", str(jar_path), "-tpng", str(temp_file)],
+                        capture_output=True,
+                    )  # nosec
 
-                        png_files = list(temp_dir_path.glob("*.png"))
-                        for i, png_file in enumerate(sorted(png_files)):
-                            # Only add increment if there are multiple diagrams
-                            if len(png_files) > 1:
-                                desired_output = (
-                                    output_file.parent
-                                    / f"{output_file.stem}_{i+1:03d}.png"
-                                )
-                            else:
-                                desired_output = (
-                                    output_file.parent / f"{output_file.stem}.png"
-                                )
+                    png_files = list(temp_dir_path.glob("*.png"))
+                    for i, png_file in enumerate(sorted(png_files)):
+                        # Only add increment if there are multiple diagrams
+                        if len(png_files) > 1:
+                            desired_output = (
+                                output_file.parent / f"{output_file.stem}_{i+1:03d}.png"
+                            )
+                        else:
+                            desired_output = (
+                                output_file.parent / f"{output_file.stem}.png"
+                            )
 
-                            # Copy the file to the final destination,
-                            # Not sure if we want this is a print vs log
-                            print(f"Moving {png_file} to {desired_output}")
-                            if desired_output.exists():
-                                desired_output.unlink()
+                        # Copy the file to the final destination,
+                        # Not sure if we want this is a print vs log
+                        print(f"Moving {png_file} to {desired_output}")
+                        if desired_output.exists():
+                            desired_output.unlink()
 
-                            # Use shutil.copy2 to move files
-                            import shutil
+                        # Use shutil.copy2 to move files
+                        import shutil
 
-                            shutil.copy2(png_file, desired_output)
+                        shutil.copy2(png_file, desired_output)
 
-                            diagram_count += 1
+                        diagram_count += 1
+            else:
+                for o in obj["outputs"]:
+                    diagram_count += _render(o)
 
             return diagram_count
 
