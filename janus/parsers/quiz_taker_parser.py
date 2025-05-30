@@ -53,6 +53,8 @@ class QuizTakerParser(JanusParser):
         for question in data:
             if "correct-answer-number" in question:
                 del question["correct-answer-number"]
+            if "discussion" in question:
+                del question["discussion"]
 
         return json.dumps(
             dict(
