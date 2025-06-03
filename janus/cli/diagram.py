@@ -3,6 +3,7 @@ from typing import Any, Optional
 
 import click
 import typer
+from rich import print
 from typing_extensions import Annotated
 
 from janus.cli.constants import REFINERS, key_value_arg
@@ -246,7 +247,7 @@ def render(
 
                         # Copy the file to the final destination,
                         # Not sure if we want this is a print vs log
-                        print(f"Moving {png_file} to {desired_output}")
+                        print(f"Saving UML diagram to [green]{desired_output}[/green]")
                         if desired_output.exists():
                             desired_output.unlink()
 
