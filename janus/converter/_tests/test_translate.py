@@ -11,7 +11,7 @@ from langchain.schema.embeddings import Embeddings
 from langchain.schema.vectorstore import VST, VectorStore
 
 from janus.converter.diagram import DiagramGenerator
-from janus.converter.merge import OutputMerger, OutputMergerTranslator
+from janus.converter.merge import MergedOutputTranslator, OutputMerger
 from janus.converter.requirements import RequirementsDocumenter
 from janus.converter.translate import Translator
 from janus.language.block import CodeBlock, TranslatedCodeBlock
@@ -158,7 +158,7 @@ class TestDiagramGenerator(unittest.TestCase):
 
 
 class TestOutputMerger(unittest.TestCase):
-    """Tests for the OutputMerger and OutputMergerTranslator class."""
+    """Tests for the OutputMerger and MergedOutputTranslator class."""
 
     def setUp(self):
         """Set up the tests."""
@@ -171,7 +171,7 @@ class TestOutputMerger(unittest.TestCase):
         )
         self.output_merger._load_parameters()
 
-        self.output_merger_translator = OutputMergerTranslator(
+        self.output_merger_translator = MergedOutputTranslator(
             input_labels=["merged_outputs"],
             prompt_templates=["output_merge_testing"],
             target_language="java",

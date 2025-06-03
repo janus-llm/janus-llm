@@ -131,7 +131,7 @@ class OutputMerger(Converter):
         return translated_block
 
 
-class OutputMergerTranslator(Converter):
+class MergedOutputTranslator(Converter):
     """A class that translates outputs from the OutputMerger to code."""
 
     def __init__(
