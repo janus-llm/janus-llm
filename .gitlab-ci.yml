@@ -103,11 +103,23 @@ coverage:
     "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
     "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
   script:
+    # 1) Install Node.js → npm
     - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-    - apt install -y nodejs
+    - apt-get update -y
+    - apt-get install -y nodejs
+
+    # 2) Downgrade tree-sitter-cli to 0.20.8 (ABI 14)
     - npm install -g tree-sitter-cli@0.20.8
+    - tree-sitter --version    # should print “0.20.8”
+
+    # 3) Delete any previously built parser (clear old ABI 15 so)
+    - rm -rf ~/.janus/tree-sitter
+
+    # 4) Continue with normal setup
     - bash scripts/install_plantuml.sh
     - poetry install --with coverage --all-extras
+
+    # 5) Run tests (this will trigger a fresh ABI 14 build)
     - poetry run python -m coverage run -m pytest -v -m translate janus
     - poetry run python -m coverage report -i
     - poetry run python -m coverage xml -i
