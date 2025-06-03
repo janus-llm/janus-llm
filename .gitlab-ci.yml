@@ -215,6 +215,11 @@ test-release:
   stage: Release
   tags:
     - docker
+  variables:
+    GIT_SSL_NO_VERIFY: '1'
+    "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt"
+    "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
+    "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
   script:
     # -- 1) Install Node.js (npm) so we can install tree-sitter-cli@0.20.x
     - apt-get update -y
