@@ -1,5 +1,11 @@
 image: "python:3.12"
 
+variables:
+  GIT_SSL_NO_VERIFY: "1"
+  REQUESTS_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+  SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+  NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/ca-certificates.crt"
+
 before_script:
   - curl -ksSL https://gitlab.mitre.org/mitre-scripts/mitre-pki/raw/master/os_scripts/install_certs.sh | sh
   - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
@@ -99,11 +105,6 @@ coverage:
   stage: Tests
   tags:
     - docker
-  variables:
-    GIT_SSL_NO_VERIFY: "1"
-    REQUESTS_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
-    SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
-    NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/ca-certificates.crt"
   script:
     # — 1) Proceed with your normal setup
     - bash scripts/install_plantuml.sh
@@ -131,11 +132,6 @@ coverage:main:
   stage: Tests
   tags:
     - docker
-  variables:
-    GIT_SSL_NO_VERIFY: '1'
-    "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt"
-    "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
-    "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
   script:
     - bash scripts/install_plantuml.sh
     - poetry install --with coverage --all-extras
@@ -204,11 +200,6 @@ test-release:
   stage: Release
   tags:
     - docker
-  variables:
-    GIT_SSL_NO_VERIFY: "1"
-    REQUESTS_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
-    SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
-    NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/ca-certificates.crt"
   script:
     # -- 1) Now build your package (fresh ABI 14)
     - poetry build
