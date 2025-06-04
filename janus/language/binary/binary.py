@@ -1,16 +1,12 @@
 import os
-import platform
 import subprocess  # nosec
 import tempfile
 from pathlib import Path
-
-import tree_sitter
 
 from janus.language.block import CodeBlock
 from janus.language.combine import Combiner
 from janus.language.treesitter import TreeSitterSplitter
 from janus.llm.models_info import JanusModel
-from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -143,51 +139,3 @@ class BinarySplitter(TreeSitterSplitter):
         self._merge_tree(root)
 
         return root
-
-    def _load_parser(self) -> None:
-        """Load the parser for the given language.
-
-        Sets `self.parser`'s language to the one specified in `self.language`.
-        """
-        # Get the directory to store the file in from environment (or default)
-        build_dir: Path = Path.home() / ".janus/tree-sitter/build-files"
-        if (custom_dir := os.environ.get("TREE_SITTER_BUILD_DIR")) is not None:
-            build_dir = Path(custom_dir)
-
-        # Locate the .so file, generate the file if necessary
-        platform_str = f"{platform.system()}_{platform.processor()}"
-        so_file = build_dir / f"{self.language}_parser_{platform_str}.so"
-        if not so_file.exists():
-            log.warning(
-                f"Could not load {so_file}, building one for {platform.system()} "
-                f"system, with {platform.processor()} processor"
-            )
-            self._create_parser(so_file)
-
-        # string required for Windows, as 'WindowsPath' is not iterable
-        so_file = str(so_file)
-
-        # Load the parser using the generated .so file
-        self.parser: tree_sitter.Parser = tree_sitter.Parser()
-        self.parser.set_language(tree_sitter.Language(so_file, "c"))
-
-    def _create_parser(self, so_file: Path | str) -> None:
-        """Create the parser for the given language.
-
-        Arguments:
-            so_file: The path to the so file for the language.
-        """
-        # Store the library in the `build` directory
-        tree_sitter_dir = Path.home() / ".tree-sitter"
-        tree_sitter_dir.mkdir(exist_ok=True)
-        lang_dir = tree_sitter_dir / "tree-sitter-c"
-
-        if not lang_dir.exists():
-            github_url = LANGUAGES["c"]["url"]
-            if github_url is None:
-                message = "Tree-sitter does not support c yet."
-                log.error(message)
-                raise ValueError(message)
-            self._git_clone(github_url, lang_dir)
-
-        tree_sitter.Language.build_library(str(so_file), [str(lang_dir)])

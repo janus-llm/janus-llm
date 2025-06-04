@@ -34,8 +34,25 @@ Janus (`janus-llm`) uses LLMs to aid in the modernization of legacy IT systems. 
 
 ## Installation
 
+### Prerequisites
+
+You'll need to install the following prerequisites:
+
+- [gcc](https://gcc.gnu.org/install/) (GNU Compiler Collection) - required for compiling the tree-sitter language parsers.
+- [tree-sitter-cli](https://github.com/tree-sitter/tree-sitter/blob/master/cli/README.md) - required for generating the language parsers.
+
+### Installing via pip/poetry/uv
+
 ```shell
 pip install janus-llm
+```
+
+```shell
+poetry add janus-llm
+```
+
+```shell
+uv add janus-llm
 ```
 
 ### Installing from Source

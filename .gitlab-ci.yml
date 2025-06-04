@@ -2,9 +2,11 @@ image: "python:3.12"
 
 before_script:
   - curl -ksSL https://gitlab.mitre.org/mitre-scripts/mitre-pki/raw/master/os_scripts/install_certs.sh | sh
+  - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
   - python --version
   - apt update -y
-  - apt install -y pipx wget default-jre graphviz
+  - apt install -y pipx wget default-jre graphviz build-essential nodejs
+  - npm install -g tree-sitter-cli
   - pipx install poetry
   - pipx ensurepath
   - export PATH=$PATH:$HOME/.local/bin
@@ -98,29 +100,16 @@ coverage:
   tags:
     - docker
   variables:
-    GIT_SSL_NO_VERIFY: '1'
-    "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt"
-    "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
-    "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
+    GIT_SSL_NO_VERIFY: "1"
+    REQUESTS_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+    SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+    NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/ca-certificates.crt"
   script:
-    # — 1) Install Node.js → npm
-    - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-    - apt-get update -y
-    - apt-get install -y nodejs
-
-    # — 2) Install the exact CLI version that emits ABI 14
-    - npm install -g tree-sitter-cli@0.20.8
-    - tree-sitter --version              # should print “0.20.8”
-
-    # — 3) Purge any existing parser binaries
-    - rm -rf ~/.janus/tree-sitter
-    - rm -rf ~/.tree-sitter
-
-    # — 4) Proceed with your normal setup
+    # — 1) Proceed with your normal setup
     - bash scripts/install_plantuml.sh
     - poetry install --with coverage --all-extras
 
-    # — 5) Run tests (fresh ABI 14 build)
+    # — 2) Run tests (fresh ABI 14 build)
     - poetry run python -m coverage run -m pytest -v -m translate janus
     - poetry run python -m coverage report -i
     - poetry run python -m coverage xml -i
@@ -216,37 +205,19 @@ test-release:
   tags:
     - docker
   variables:
-    GIT_SSL_NO_VERIFY: '1'
-    "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt"
-    "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
-    "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
+    GIT_SSL_NO_VERIFY: "1"
+    REQUESTS_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+    SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+    NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/ca-certificates.crt"
   script:
-    # -- 1) Install Node.js (npm) so we can install tree-sitter-cli@0.20.x
-    - apt-get update -y
-    - apt-get install -y curl ca-certificates
-    - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-    - apt-get install -y nodejs
-
-    # -- 2) Force-install exactly the 0.20.8 CLI (ABI 14)
-    - npm install -g tree-sitter-cli@0.20.8
-    - tree-sitter --version    # should output "0.20.8" to confirm ABI 14
-
-    # -- 3) Remove any previously built parser anywhere under $HOME
-    - rm -rf ~/.janus/tree-sitter
-    - rm -rf ~/.tree-sitter
-
-    # -- 4) Now build your package (fresh ABI 14)
+    # -- 1) Now build your package (fresh ABI 14)
     - poetry build
     - poetry run pip install -U dist/*.whl
 
-    # -- 5) Remove local source so tests load the installed wheel
+    # -- 2) Remove local source so tests load the installed wheel
     - rm -rf janus
 
-    # -- 6) (Optional) Re-clear caches in case tests build another parser
-    - rm -rf ~/.janus/tree-sitter
-    - rm -rf ~/.tree-sitter
-
-    # -- 7) Run whatever packaging sanity checks you have
+    # -- 3) Run whatever packaging sanity checks you have
     - poetry run python tests/package.py
   needs: ["flake8", "black", "isort", "bandit"]
   only:
