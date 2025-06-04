@@ -8,11 +8,9 @@ variables:
 
 before_script:
   - curl -ksSL https://gitlab.mitre.org/mitre-scripts/mitre-pki/raw/master/os_scripts/install_certs.sh | sh
-  - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
   - python --version
   - apt update -y
-  - apt install -y pipx wget default-jre graphviz build-essential nodejs
-  - npm install -g tree-sitter-cli
+  - apt install -y pipx wget default-jre graphviz
   - pipx install poetry
   - pipx ensurepath
   - export PATH=$PATH:$HOME/.local/bin
@@ -108,8 +106,10 @@ coverage:
   script:
     # — 1) Proceed with your normal setup
     - bash scripts/install_plantuml.sh
+    - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+    - apt install -y build-essential nodejs
+    - npm install -g tree-sitter-cli
     - poetry install --with coverage --all-extras
-
     # — 2) Run tests (fresh ABI 14 build)
     - poetry run python -m coverage run -m pytest -v -m translate janus
     - poetry run python -m coverage report -i
@@ -134,6 +134,9 @@ coverage:main:
     - docker
   script:
     - bash scripts/install_plantuml.sh
+    - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+    - apt install -y build-essential nodejs
+    - npm install -g tree-sitter-cli
     - poetry install --with coverage --all-extras
     - poetry run python -m coverage run -m pytest -v -m translate janus
     - poetry run python -m coverage report -i
@@ -202,6 +205,9 @@ test-release:
     - docker
   script:
     # -- 1) Now build your package (fresh ABI 14)
+    - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+    - apt install -y build-essential nodejs
+    - npm install -g tree-sitter-cli
     - poetry build
     - poetry run pip install -U dist/*.whl
 
