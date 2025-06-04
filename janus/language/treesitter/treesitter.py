@@ -218,7 +218,7 @@ class TreeSitterSplitter(Splitter):
                 check=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-            )
+            )  # nosec: B603, B607
         except FileNotFoundError:
             raise RuntimeError(
                 "Could not find `tree-sitter` CLI. Please install it and ensure it's on "
@@ -250,7 +250,7 @@ class TreeSitterSplitter(Splitter):
         try:
             subprocess.run(
                 compile_cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            )
+            )  # nosec: B603
         except FileNotFoundError:
             raise RuntimeError(
                 "Could not find a C compiler (`cc`). Please install `gcc` or similar."
