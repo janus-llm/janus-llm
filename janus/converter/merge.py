@@ -150,24 +150,42 @@ class MergedOutputTranslator(Converter):
         self._label_dict = defaultdict(list)
         self._parser = IncompleteCodeParser(language=self._target_language)
 
-    def _get_label_context(self, label):
-        return lambda x: self._label_dict[label]
+    def _load_prompts(self) -> None:
+        super()._load_prompts()
+        self._expected_labels = set(self._prompts[0].input_variables)
 
-    def _get_context(self, block: CodeBlock) -> None:
-        self._label_dict = json.loads(block.text)
-        self._label_dict["TARGET_LANGUAGE"] = self._target_language
+    def _check_label_presence(self, block: CodeBlock) -> None:
+        if block.text is None:
+            return
+
+        input_labels = set(json.loads(block.text).keys())
+        if not self._expected_labels.issuperset(input_labels):
+            raise ValueError(
+                f"Input labels ({input_labels}) not captured in prompt"
+                f" labels ({self._expected_labels}). Your prompt may need to be updated"
+                " for the merged fields coming in."
+            )
 
     def _input_runnable(self) -> Runnable:
+        def extract_from_json(key: str):
+            def _extract(block: CodeBlock) -> str:
+                return json.loads(block.text)[key]
+
+            return _extract
+
         return RunnableParallel(
-            {label: self._get_label_context(label) for label in self._label_dict.keys()}
+            context=self._retriever,
+            **{label: extract_from_json(label) for label in self._expected_labels},
         )
 
     def _translate_block(self, block: CodeBlock) -> TranslatedCodeBlock | CodeBlock:
+        self._load_parameters()
+
         if self._input_types is not None and block.block_type not in self._input_types:
             return block
 
         if self._input_labels is not None and block.block_label not in self._input_labels:
             return block
 
-        self._get_context(block)
+        self._check_label_presence(block)
         return self._iterative_translate(block)
