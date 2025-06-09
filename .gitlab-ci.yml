@@ -108,7 +108,7 @@ coverage:
     - bash scripts/install_plantuml.sh
     - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
     - apt install -y build-essential nodejs
-    - npm install -g tree-sitter-cli
+    - npm install -g tree-sitter-cli@
     - poetry install --with coverage --all-extras
     # — 2) Run tests (fresh ABI 14 build)
     - poetry run python -m coverage run -m pytest -v -m translate janus
@@ -136,7 +136,8 @@ coverage:main:
     - bash scripts/install_plantuml.sh
     - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
     - apt install -y build-essential nodejs
-    - npm install -g tree-sitter-cli
+    - npm install -g tree-sitter-cli@0.24.0
+    - poetry cache clear --all pypi
     - poetry install --with coverage --all-extras
     - poetry run python -m coverage run -m pytest -v -m translate janus
     - poetry run python -m coverage report -i
