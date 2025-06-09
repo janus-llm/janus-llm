@@ -1,5 +1,11 @@
 image: "python:3.12"
 
+variables:
+  GIT_SSL_NO_VERIFY: "1"
+  REQUESTS_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+  SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+  NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/ca-certificates.crt"
+
 before_script:
   - curl -ksSL https://gitlab.mitre.org/mitre-scripts/mitre-pki/raw/master/os_scripts/install_certs.sh | sh
   - python --version
@@ -97,14 +103,14 @@ coverage:
   stage: Tests
   tags:
     - docker
-  variables:
-    GIT_SSL_NO_VERIFY: '1'
-    "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt"
-    "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
-    "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
   script:
+    # — 1) Proceed with your normal setup
     - bash scripts/install_plantuml.sh
+    - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+    - apt install -y build-essential nodejs
+    - npm install -g tree-sitter-cli@0.24.0
     - poetry install --with coverage --all-extras
+    # — 2) Run tests (fresh ABI 14 build)
     - poetry run python -m coverage run -m pytest -v -m translate janus
     - poetry run python -m coverage report -i
     - poetry run python -m coverage xml -i
@@ -126,13 +132,12 @@ coverage:main:
   stage: Tests
   tags:
     - docker
-  variables:
-    GIT_SSL_NO_VERIFY: '1'
-    "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt"
-    "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
-    "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
   script:
     - bash scripts/install_plantuml.sh
+    - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+    - apt install -y build-essential nodejs
+    - npm install -g tree-sitter-cli@0.24.0
+    - poetry cache clear --all pypi
     - poetry install --with coverage --all-extras
     - poetry run python -m coverage run -m pytest -v -m translate janus
     - poetry run python -m coverage report -i
@@ -200,10 +205,17 @@ test-release:
   tags:
     - docker
   script:
+    # -- 1) Now build your package (fresh ABI 14)
+    - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+    - apt install -y build-essential nodejs
+    - npm install -g tree-sitter-cli
     - poetry build
     - poetry run pip install -U dist/*.whl
-    # Remove the directory so that it's not using the directory to run the code and it uses the installed package
+
+    # -- 2) Remove local source so tests load the installed wheel
     - rm -rf janus
+
+    # -- 3) Run whatever packaging sanity checks you have
     - poetry run python tests/package.py
   needs: ["flake8", "black", "isort", "bandit"]
   only:
