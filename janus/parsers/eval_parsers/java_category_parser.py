@@ -4,8 +4,7 @@ from typing import List
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
-from langchain_core.pydantic_v1 import BaseModel, Field
-from pydantic import ValidationError
+from pydantic import BaseModel, Field, RootModel, ValidationError
 
 from janus.language.block import CodeBlock
 from janus.parsers.parser import JanusParser
@@ -22,27 +21,32 @@ class LabeledJava(BaseModel):
     )
     section_label: str = Field(
         description="Assigned label for the block",
-        regex="""^(non_code_text|lazy_implementation|placeholder_implementation|
-        commented_implementation|syntax_error|general_error|clean_implementation)$""",
+        pattern=(
+            r"^(non_code_text|lazy_implementation|placeholder_implementation|"
+            r"commented_implementation|syntax_error|general_error|clean_implementation)$"
+        ),
     )
     section_quality: int = Field(description="Integer score from 1 to 100")
 
 
-class LabeledJavaList(BaseModel):
-    __root__: List[LabeledJava]
+class LabeledJavaList(RootModel):
+    root: List[LabeledJava]
 
 
 class LabeledJavaListParser(JanusParser, PydanticOutputParser):
     def __init__(self):
         PydanticOutputParser.__init__(self, pydantic_object=LabeledJavaList)
 
-    def _add_line_numbers(self, code: str) -> str:
+    @staticmethod
+    def _add_line_numbers(code: str, start_line: int = 0) -> str:
         """Prefix each line of code with its line number."""
-        return "\n".join(f"{i+1}    {line}" for i, line in enumerate(code.splitlines()))
+        return "\n".join(
+            f"{i+start_line+1}    {line}" for i, line in enumerate(code.splitlines())
+        )
 
     def parse_input(self, block: CodeBlock) -> str:
         text = super().parse_input(block)
-        return self._add_line_numbers(text)  # Add line numbers to help llm track evals
+        return self._add_line_numbers(text, block.start_point[0])
 
     def parse(self, text: str | BaseMessage) -> str:
         """Parse the text and return a JSON string representation."""

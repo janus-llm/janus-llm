@@ -12,6 +12,7 @@ from janus.language.combine import JsonCombiner
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
 from janus.parsers.eval_parsers.inline_comment_parser import InlineCommentParser
 from janus.parsers.eval_parsers.java_category_parser import LabeledJavaListParser
+from janus.parsers.eval_parsers.pseudocode_parser import PseudocodeParser
 from janus.parsers.eval_parsers.summary_parser import SummaryParser
 from janus.parsers.eval_parsers.uml_parser import UMLParser
 from janus.utils.logger import create_logger
@@ -475,6 +476,37 @@ class SummaryEvaluator(Evaluator):
             **kwargs,
         )
         self._parser = SummaryParser()
+
+
+class PseudocodeEvaluator(Evaluator):
+    """Pseudocode Evaluator
+
+    A class that performs an LLM self evaluation on pseudocode,
+    with an associated prompt.
+    """
+
+    def __init__(
+        self,
+        input_types: str | set[str] = set(["pseudocode"]),
+        output_type: str = "pseudocode_eval",
+        **kwargs,
+    ) -> None:
+        """Initialize the Evaluator class
+
+        Arguments:
+            model: The LLM to use for translation. If an OpenAI model, the
+                `OPENAI_API_KEY` environment variable must be set.
+            model_arguments: Additional arguments to pass to the LLM constructor.
+            max_prompts: The maximum number of prompts to try before giving up.
+        """
+        super().__init__(
+            object_key="PSEUDOCODE",
+            input_types=input_types,
+            output_type=output_type,
+            **kwargs,
+        )
+        self._parser = PseudocodeParser()
+        self._prompt_template_names = ["eval_prompts/pseudocode"]
 
 
 class UMLEvaluator(Evaluator):

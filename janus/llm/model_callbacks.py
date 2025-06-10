@@ -158,6 +158,9 @@ class TokenUsageCallbackHandler(BaseCallbackHandler):
                 usage_metadata = generation.response_metadata.get("usage", usage_metadata)
             elif hasattr(generation, "message"):
                 if isinstance(generation.message, AIMessage):
+                    model_id = generation.message.response_metadata.get(
+                        "model_name", model_id
+                    )
                     usage_metadata = generation.message.usage_metadata
 
         completion_tokens = 0
