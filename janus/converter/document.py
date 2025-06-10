@@ -21,6 +21,7 @@ class Documenter(Converter):
         drop_comments: bool = True,
         output_type: str = "documentation",
         prune_node_types: tuple[str, ...] = (),
+        prompt_template: str = "document",
         **kwargs,
     ):
         if drop_comments:
@@ -33,15 +34,23 @@ class Documenter(Converter):
             source_language=source_language,
             output_type=output_type,
             prune_node_types=prune_node_types,
+            prompt_template=prompt_template,
             **kwargs,
         )
-        self._prompt_template_names = ["document"]
 
 
 class MultiDocumenter(Documenter):
-    def __init__(self, output_type: str = "multidocumentation", **kwargs):
-        super().__init__(output_type=output_type, **kwargs)
-        self._prompt_template_names = ["multidocument"]
+    def __init__(
+        self,
+        prompt_template: str = "multidocument",
+        output_type: str = "multidocumentation",
+        **kwargs,
+    ):
+        super().__init__(
+            output_type=output_type,
+            prompt_template=prompt_template,
+            **kwargs,
+        )
         self._combiner = JsonCombiner()
         self._parser = MultiDocumentationParser()
 
@@ -49,6 +58,7 @@ class MultiDocumenter(Documenter):
 class ClozeDocumenter(Documenter):
     def __init__(
         self,
+        prompt_template: str = "document_cloze",
         comments_per_request: int | None = None,
         output_type: str = "cloze_comments",
         **kwargs,
@@ -56,9 +66,9 @@ class ClozeDocumenter(Documenter):
         kwargs.update(drop_comments=False)
         super().__init__(
             output_type=output_type,
+            prompt_template=prompt_template,
             **kwargs,
         )
-        self._prompt_template_names = ["document_cloze"]
         self._combiner = JsonCombiner()
         self._parser = ClozeDocumentationParser()
 
@@ -152,8 +162,15 @@ class ClozeDocumenter(Documenter):
 
 
 class PseudocodeDocumenter(Documenter):
-    def __init__(self, output_type: str = "pseudocode", **kwargs):
-        kwargs.update(output_type=output_type)
-        super().__init__(**kwargs)
-        self._prompt_template_names = ["pseudocode"]
+    def __init__(
+        self,
+        prompt_template: str = "pseudocode",
+        output_type: str = "pseudocode",
+        **kwargs,
+    ):
+        super().__init__(
+            prompt_template=prompt_template,
+            output_type=output_type,
+            **kwargs,
+        )
         self._parser = CodeParser(language=self.source_language)

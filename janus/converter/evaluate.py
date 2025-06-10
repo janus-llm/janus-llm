@@ -205,6 +205,7 @@ class RequirementEvaluator(MultiObjectEvaluator):
 
     def __init__(
         self,
+        prompt_template: str = "eval_prompts/incose",
         input_types: str | set[str] = set(["requirements"]),
         output_type: str = "requirements_eval",
         **kwargs,
@@ -221,10 +222,10 @@ class RequirementEvaluator(MultiObjectEvaluator):
             object_key="REQUIREMENTS",
             input_types=input_types,
             output_type=output_type,
+            prompt_template=prompt_template,
             **kwargs,
         )
         self._parser = IncoseParser()
-        self._prompt_template_names = ["eval_prompts/incose"]
 
     def _extract_object_to_evaluate(self, block: TranslatedCodeBlock) -> list[str] | None:
         if block.original.text is None:
@@ -294,6 +295,7 @@ class InlineCommentEvaluator(MultiObjectEvaluator):
 
     def __init__(
         self,
+        prompt_template: str = "eval_prompts/inline_comments",
         input_types: str | set[str] = set(["cloze_comments"]),
         output_type: str = "cloze_comments_eval",
         **kwargs,
@@ -310,10 +312,10 @@ class InlineCommentEvaluator(MultiObjectEvaluator):
             object_key="SOURCE_CODE",
             input_types=input_types,
             output_type=output_type,
+            prompt_template=prompt_template,
             **kwargs,
         )
         self._parser = InlineCommentParser()
-        self._prompt_template_names = ["eval_prompts/inline_comments"]
 
     def _process_comments(
         self, input_str: str, generated_comments: dict[str, str]
@@ -452,6 +454,7 @@ class SummaryEvaluator(Evaluator):
 
     def __init__(
         self,
+        prompt_template: str = "eval_prompts/summary",
         input_types: str | set[str] = set(["documentation"]),
         output_type: str = "summary_eval",
         **kwargs,
@@ -468,10 +471,10 @@ class SummaryEvaluator(Evaluator):
             object_key="CODE_SUMMARY",
             input_types=input_types,
             output_type=output_type,
+            prompt_template=prompt_template,
             **kwargs,
         )
         self._parser = SummaryParser()
-        self._prompt_template_names = ["eval_prompts/summary"]
 
 
 class UMLEvaluator(Evaluator):
@@ -483,6 +486,7 @@ class UMLEvaluator(Evaluator):
 
     def __init__(
         self,
+        prompt_template: str = "eval_prompts/uml",
         input_types: str | set[str] = set(["diagram"]),
         output_type: str = "uml_eval",
         **kwargs,
@@ -499,10 +503,10 @@ class UMLEvaluator(Evaluator):
             object_key="PLANTUML_DIAGRAM",
             input_types=input_types,
             output_type=output_type,
+            prompt_template=prompt_template,
             **kwargs,
         )
         self._parser = UMLParser()
-        self._prompt_template_names = ["eval_prompts/uml"]
 
 
 class JavaCategoryEvaluator(Evaluator):
@@ -514,6 +518,7 @@ class JavaCategoryEvaluator(Evaluator):
 
     def __init__(
         self,
+        prompt_template: str = "eval_prompts/java_category",
         input_types: str | set[str] | None = None,  # disable filtering by type
         output_type: str = "java_category_eval",
         **kwargs,
@@ -530,10 +535,10 @@ class JavaCategoryEvaluator(Evaluator):
             object_key="JAVA_CODE",
             input_types=input_types,
             output_type=output_type,
+            prompt_template=prompt_template,
             **kwargs,
         )
         self._parser = LabeledJavaListParser()
-        self._prompt_template_names = ["eval_prompts/java_category"]
 
     def _preprocess_block(self, block: TranslatedCodeBlock) -> None:
         if block.previous_generation is not None:

@@ -63,7 +63,7 @@ class TestTranslator(unittest.TestCase):
         self.req_translator = RequirementsDocumenter(
             model="gpt-4o-mini",
             source_language="fortran",
-            prompt_templates="requirements",
+            prompt_template="requirements",
         )
 
     @patch("janus.converter.Converter._run_chain")
@@ -102,7 +102,7 @@ class TestTranslator(unittest.TestCase):
             ValueError, self.translator._set_refiner_types, ["fake-refiner"]
         )
 
-        self.translator._prompt_template_names = ["fake-prompt"]
+        self.translator._prompt_template_name = "fake-prompt"
         self.assertRaises(ValueError, self.translator._load_parameters)
 
         self.translator._initialized = True
@@ -173,7 +173,7 @@ class TestOutputMerger(unittest.TestCase):
 
         self.output_merger_translator = MergedOutputTranslator(
             input_labels=["merged_outputs"],
-            prompt_templates=["output_merge_testing"],
+            prompt_template="output_merge_testing",
             target_language="java",
             refiner_types=["FixParserExceptions"],
             output_label="java_from_merged_outputs",
@@ -237,11 +237,11 @@ def test_language_combinations(
         source_language=source_language,
         target_language=expected_target_language,
         target_version=expected_target_version,
-        prompt_templates=prompt_template,
+        prompt_template=prompt_template,
     )
     translator._load_parameters()
     assert translator._target_language == expected_target_language  # nosec
     assert translator._target_version == expected_target_version  # nosec
     assert translator._splitter.language == source_language  # nosec
     assert translator._splitter.model.model_name == "gpt-4o"  # nosec
-    assert translator._prompt_template_names == [prompt_template]  # nosec
+    assert translator._prompt_template_name == prompt_template  # nosec

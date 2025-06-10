@@ -26,7 +26,7 @@ class Translator(Converter):
             max_prompts: The maximum number of prompts to try before giving up.
             max_tokens: The maximum number of tokens the model will take in.
                 If unspecificed, model's default max will be used.
-            prompt_templates: name of prompt template directories
+            prompt_template: name of prompt template directories
                 (see janus/prompts/templates) or paths to directories.
         """
         super().__init__(

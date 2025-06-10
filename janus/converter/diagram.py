@@ -12,9 +12,8 @@ class DiagramGenerator(Documenter):
 
     def __init__(
         self,
+        prompt_template: str = "diagram",
         diagram_type: str = "Activity",
-        add_documentation: bool = False,
-        extract_variables: bool = False,
         output_type: str = "diagram",
         **kwargs,
     ) -> None:
@@ -25,28 +24,16 @@ class DiagramGenerator(Documenter):
             add_documentation: Whether to add a documentation step prior to
                 diagram generation.
         """
-        super().__init__(output_type=output_type, **kwargs)
+        super().__init__(
+            prompt_template=prompt_template,
+            output_type=output_type,
+            **kwargs,
+        )
 
         self._parser = UMLSyntaxParser(language="plantuml")
-
-        prompts = ["extract_variables"] if extract_variables else []
-        prompts += ["diagram_with_documentation" if add_documentation else "diagram"]
-        self._prompt_template_names = prompts
-
         self._diagram_type = diagram_type
-        self._add_documentation = add_documentation
-
-        self._documenter = Documenter(**kwargs)
 
     def _input_runnable(self) -> Runnable:
-        if self._add_documentation:
-            self._documenter._load_parameters()
-            return RunnableParallel(
-                SOURCE_CODE=self._parser.parse_input,
-                DOCUMENTATION=self._documenter._chain,
-                context=self._retriever,
-                DIAGRAM_TYPE=lambda x: self._diagram_type,
-            )
         return RunnableParallel(
             SOURCE_CODE=self._parser.parse_input,
             context=self._retriever,

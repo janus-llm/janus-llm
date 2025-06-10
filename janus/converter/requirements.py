@@ -13,9 +13,17 @@ class RequirementsDocumenter(Documenter):
     """
 
     def __init__(
-        self, combine_output: bool = False, output_type: str = "requirements", **kwargs
+        self,
+        prompt_template: str = "requirements",
+        combine_output: bool = False,
+        output_type: str = "requirements",
+        **kwargs,
     ):
-        super().__init__(output_type=output_type, combine_output=combine_output, **kwargs)
-        self._prompt_template_names = ["requirements"]
+        super().__init__(
+            output_type=output_type,
+            combine_output=combine_output,
+            prompt_template=prompt_template,
+            **kwargs,
+        )
         self._combiner = ChunkCombiner()
         self._parser = RequirementsParser()
