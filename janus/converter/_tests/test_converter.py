@@ -20,7 +20,7 @@ class TestConverter(unittest.TestCase):
 
         converter._load_parameters()
 
-        self.assertEqual(5, len(converter._chain.steps))
+        self.assertEqual(4, len(converter._chain.steps))
 
     @patch("janus.converter.Converter._run_chain")
     def test_iterative_translate(self, mock_run_chain):
