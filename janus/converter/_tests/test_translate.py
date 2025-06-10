@@ -11,9 +11,9 @@ from langchain.schema.embeddings import Embeddings
 from langchain.schema.vectorstore import VST, VectorStore
 
 from janus.converter.diagram import DiagramGenerator
-from janus.converter.merge import MergedOutputTranslator, OutputMerger
+from janus.converter.merge import OutputMerger
 from janus.converter.requirements import RequirementsDocumenter
-from janus.converter.translate import Translator
+from janus.converter.translate import MergedOutputTranslator, Translator
 from janus.language.block import CodeBlock, TranslatedCodeBlock
 from janus.refiners.format import CodeFormatRefiner
 
