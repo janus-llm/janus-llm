@@ -1,4 +1,5 @@
 from janus.converter.converter import Converter
+from janus.converter.merge import MergedOutputConverterMixin
 from janus.parsers.code_parser import IncompleteCodeParser
 from janus.utils.logger import create_logger
 
@@ -35,3 +36,19 @@ class Translator(Converter):
             **kwargs,
         )
         self._parser = IncompleteCodeParser(language=self._target_language)
+
+
+class MergedOutputTranslator(MergedOutputConverterMixin, Translator):
+    """A class that translates outputs from the OutputMerger to code."""
+
+    def __init__(
+        self,
+        input_labels: set[str] | str | None = None,
+        **kwargs,
+    ) -> None:
+        if input_labels is None:
+            raise ValueError("MergedOutputTranslator requires input labels")
+        super().__init__(
+            input_labels=input_labels,
+            **kwargs,
+        )

@@ -1,11 +1,10 @@
 import json
 from collections import defaultdict
 
-from langchain_core.runnables import Runnable, RunnableParallel
+from langchain_core.runnables import Runnable, RunnableLambda
 
 from janus.converter.converter import Converter
 from janus.language.block import CodeBlock, TranslatedCodeBlock
-from janus.parsers.code_parser import IncompleteCodeParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -131,28 +130,12 @@ class OutputMerger(Converter):
         return translated_block
 
 
-class MergedOutputTranslator(Converter):
-    """A class that translates outputs from the OutputMerger to code."""
+class MergedOutputConverterMixin:
+    """A mix-in that enables a Converter to use the result of OutputMerger as its input"""
 
-    def __init__(
-        self,
-        input_labels: set[str]
-        | str
-        | None = None,  # this should be the output label of the OutputMerger
-        target_language: str = "python",
-        **kwargs,
-    ) -> None:
-        super().__init__(
-            input_labels=input_labels,
-            target_language=target_language,
-            **kwargs,
-        )
-        self._label_dict = defaultdict(list)
-        self._parser = IncompleteCodeParser(language=self._target_language)
-
-    def _load_prompts(self) -> None:
-        super()._load_prompts()
-        self._expected_labels = set(self._prompts[0].input_variables)
+    def _load_prompt(self) -> None:
+        super()._load_prompt()
+        self._expected_labels = set(self._prompt.input_variables)
 
     def _check_label_presence(self, block: CodeBlock) -> None:
         if block.text is None:
@@ -167,15 +150,9 @@ class MergedOutputTranslator(Converter):
             )
 
     def _input_runnable(self) -> Runnable:
-        def extract_from_json(key: str):
-            def _extract(block: CodeBlock) -> str:
-                return json.loads(block.text)[key]
-
-            return _extract
-
-        return RunnableParallel(
+        block_to_dict = RunnableLambda(lambda block: json.loads(block.text))
+        return block_to_dict.assign(
             context=self._retriever,
-            **{label: extract_from_json(label) for label in self._expected_labels},
         )
 
     def _translate_block(self, block: CodeBlock) -> TranslatedCodeBlock | CodeBlock:
