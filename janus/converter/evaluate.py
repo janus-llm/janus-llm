@@ -487,6 +487,7 @@ class PseudocodeEvaluator(Evaluator):
 
     def __init__(
         self,
+        prompt_template: str = "eval_prompts/pseudocode",
         input_types: str | set[str] = set(["pseudocode"]),
         output_type: str = "pseudocode_eval",
         **kwargs,
@@ -503,10 +504,10 @@ class PseudocodeEvaluator(Evaluator):
             object_key="PSEUDOCODE",
             input_types=input_types,
             output_type=output_type,
+            prompt_template=prompt_template,
             **kwargs,
         )
         self._parser = PseudocodeParser()
-        self._prompt_template_names = ["eval_prompts/pseudocode"]
 
 
 class UMLEvaluator(Evaluator):
