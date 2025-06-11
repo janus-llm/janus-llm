@@ -68,6 +68,9 @@ class QuizTakerParser(JanusParser):
             text = str(text.content)
         original_text = text
         text = self.extract_json_content(text)
+        # if text is None:  # TODO Replace this with a refiner rather than just capturing the output
+        #     text = [{"error-contents": original_text}]
+        #     text = json.dumps(text)
         try:
             data = json.loads(text)
         except json.JSONDecodeError as e:
