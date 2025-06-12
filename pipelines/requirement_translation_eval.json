@@ -1,0 +1,32 @@
+[
+    {
+        "type": "RequirementsDocumenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "output_label": "requirements"
+        }
+    },
+    {
+        "type": "RequirementEvaluator",
+        "kwargs": {
+            "input_labels": ["requirements"],
+            "output_label": "requirement_eval"
+        }
+    },
+    {
+        "type": "Translator",
+        "kwargs": {
+            "input_labels": ["requirements"],
+            "prompt_template": "requirement_to_java",
+            "target_language": "java",
+            "output_label": "java_code"
+        }
+    },
+    {
+        "type": "JavaCategoryEvaluator",
+        "kwargs": {
+            "input_labels": ["java_code"],
+            "output_label": "java_eval"
+        }
+    }
+]

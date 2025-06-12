@@ -3,7 +3,6 @@
         "type": "RequirementsDocumenter",
         "kwargs": {
             "input_labels": ["SOURCE"],
-            "source_language": "python",
             "refiner_types": ["RequirementsFormatRefiner"],
             "output_label": "requirements"
         }
@@ -12,7 +11,6 @@
         "type": "Documenter",
         "kwargs": {
             "input_labels": ["SOURCE"],
-            "source_language": "python",
             "refiner_types": ["FixParserExceptions"],
             "output_label": "summaries"
         }
@@ -21,7 +19,11 @@
         "type": "OutputMerger",
         "kwargs": {
             "input_labels": ["SOURCE", "requirements", "summaries"],
-            "label_key_map": {"SOURCE": "SOURCE_CODE", "requirements": "REQS", "summaries": "SUMMARY"},
+            "label_key_map": {
+                "SOURCE": "SOURCE_CODE",
+                "requirements": "REQS",
+                "summaries": "SUMMARY"
+            },
             "refiner_types": ["FixParserExceptions"],
             "output_label": "merged_outputs"
         }
