@@ -41,7 +41,11 @@ class ConverterChain(Converter):
             if block.block_label is None:
                 block.block_label = "SOURCE"
 
-        for converter in self._converters:
+        for i, converter in enumerate(self._converters):
+            log.info(
+                f"[bold green]Running Stage {i+1:d}: {converter.__class__.__name__}",
+                extra={"markup": True},
+            )
             translated_blocks = converter._translate_blocks(blocks)
 
             for block in translated_blocks:
