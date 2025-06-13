@@ -7,8 +7,10 @@ from langchain_core.runnables import Runnable, RunnableParallel
 from langchain_core.runnables.passthrough import RunnablePick
 
 from janus.converter.converter import Converter
+from janus.converter.merge import MergedOutputConverterMixin
 from janus.language.block import JanusOutputObject, TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
+from janus.parsers.eval_parsers.generic_parser import GenericEvaluationParser
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
 from janus.parsers.eval_parsers.inline_comment_parser import InlineCommentParser
 from janus.parsers.eval_parsers.java_category_parser import LabeledJavaListParser
@@ -583,3 +585,18 @@ class JavaCategoryEvaluator(Evaluator):
             JAVA_CODE=self._parser.parse_input,
             context=self._retriever,
         )
+
+
+class MergedOutputEvaluator(MergedOutputConverterMixin, Converter):
+    def __init__(
+        self,
+        input_labels: set[str] | str | None = None,
+        **kwargs,
+    ) -> None:
+        if input_labels is None:
+            raise ValueError("MergedOutputEvaluator requires input labels")
+        super().__init__(
+            input_labels=input_labels,
+            **kwargs,
+        )
+        self._parser = GenericEvaluationParser()
