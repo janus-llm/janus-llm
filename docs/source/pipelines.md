@@ -211,7 +211,6 @@ The example pipeline below generates requirements and summary documentation from
                 "requirements": "REQS",
                 "summaries": "SUMMARY"
             },
-            "refiner_types": ["FixParserExceptions"],
             "output_label": "merged_outputs"
         }
     },
