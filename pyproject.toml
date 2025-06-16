@@ -1,58 +1,76 @@
-[tool.poetry]
+[project]
 name = "janus-llm"
-version = "4.5.17"
+version = "4.7.0"
 description = "A transcoding library using LLMs."
-authors = ["Michael Doyle <mdoyle@mitre.org>", "Chris Glasz <cglasz@mitre.org>",
-           "Chris Tohline <ctohline@mitre.org>", "William Macke <wmacke@mitre.org>",
-           "Paul Kirk, <pkirk@mitre.org>", "Lily Wong <lwong@mitre.org>",
-           "Michael Threet <mthreet@mitre.org>", "Colin Diggs <cdiggs@mitre.org>",
-           "Pranay Jain <pranayjain@mitre.org>", "Chris Kempis <ckempis@mitre.org>"]
+authors = [
+    { name = "Michael Doyle", email = "mdoyle@mitre.org" },
+    { name = "Chris Glasz",   email = "cglasz@mitre.org" },
+    { name = "Chris Tohline", email = "ctohline@mitre.org" },
+    { name = "William Macke", email = "wmacke@mitre.org" },
+    { name = "Paul Kirk",     email = "pkirk@mitre.org" },
+    { name = "Lily Wong",     email = "lwong@mitre.org" },
+    { name = "Michael Threet",email = "mthreet@mitre.org" },
+    { name = "Colin Diggs",   email = "cdiggs@mitre.org" },
+    { name = "Pranay Jain",   email = "pranayjain@mitre.org" },
+    { name = "Chris Kempis",  email = "ckempis@mitre.org" },
+]
 license = "Apache 2.0"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+keywords = [
+    "llm",
+    "transcoding",
+    "decompilation",
+    "reverse-engineering",
+    "machine-learning",
+    "natural-language-processing",
+    "modernization",
+]
+dependencies = [
+    "aenum>=3.1.15",
+    "gpt4all>=2.0.2",
+    "gitpython>=3.1.32",
+    "langchain>=0.3.0",
+    "langchain-community>=0.3.0",
+    "langchain-core>=0.3.0",
+    "langchain-openai>=0.3.0",
+    "numpy>=1.24.3",
+    "openai>=1.14.0",
+    "python-dotenv>=1.0.0",
+    "rich>=13.7.1",
+    "sacrebleu>=2.4.1",
+    "text-generation>=0.6.0",
+    "tiktoken>=0.7.0",
+    "transformers>=4.31.0",
+    "tree-sitter>=0.24.0",
+    "typer>=0.9.0",
+    "unstructured>=0.15.9",
+    "unstructured-inference>=0.7.36",
+    "pytesseract>=0.3.13",
+    "tesseract>=0.1.3",
+    "unstructured-pytesseract>=0.3.13",
+    "langchain-unstructured>=0.1.2",
+    "scikit-learn>=1.5.2",
+    "pi-heif>=0.20.0",
+    "pybind11>=2.13.6",
+    "chromadb>=0.5.21",
+    "setuptools>=75.6.0",
+    "textstat>=0.7.5",
+    "rouge-score>=0.1.2",
+]
+
+
+[project.urls]
 repository = "https://github.com/janus-llm/janus-llm"
 documentation = "https://janus-llm.github.io/janus-llm"
-readme = "README.md"
+
+[tool.poetry]
 packages = [
     { include = "janus" }
 ]
 
-[tool.poetry.scripts]
+[project.scripts]
 janus = "janus.cli.cli:app"
-
-[tool.poetry.dependencies]
-python = ">=3.11, <3.13"
-aenum = "^3.1.15"
-gpt4all = "^2.0.2"
-gitpython = "^3.1.32"
-langchain = "^0.2.0"
-langchain-anthropic = "^0.1.15"
-langchain-community = "^0.2.0"
-langchain-core = "^0.2.0"
-numpy = "^1.24.3"
-openai = "^1.14.0"
-python-dotenv = "^1.0.0"
-rich = "^13.7.1"
-sacrebleu = "^2.4.1"
-text-generation = "^0.6.0"
-tiktoken = "^0.7.0"
-transformers = "^4.31.0"
-tree-sitter = "^0.21.0"
-typer = "^0.9.0"
-langchain-openai = "^0.1.8"
-sentence-transformers = { version = "^2.6.1", optional = true }
-boto3 = { version = "^1.34.142", optional = true }
-unstructured = "^0.15.9"
-unstructured-inference = "^0.7.36"
-pytesseract = "^0.3.13"
-tesseract = "^0.1.3"
-unstructured-pytesseract = "^0.3.13"
-langchain-unstructured = "^0.1.2"
-scikit-learn = "^1.5.2"
-pi-heif = "^0.20.0"
-pybind11 = "^2.13.6"
-chromadb = "^0.5.21"
-setuptools = "^75.6.0"
-textstat = "^0.7.5"
-rouge-score = "^0.1.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
@@ -76,10 +94,9 @@ sphinxext-opengraph = "^0.9.1"
 [tool.poetry.group.coverage.dependencies]
 pytest-cov = "^4.1.0"
 
-[tool.poetry.extras]
-bedrock = ["boto3"]
-hf-local = ["sentence-transformers"]
-all = ["boto3", "sentence-transformers"]
+[project.optional-dependencies]
+bedrock = ["langchain-aws>=0.2.22", "boto3>=1.34.142"]
+hf-local = ["sentence-transformers>=2.6.1"]
 
 [tool.black]
 line-length = 90
@@ -93,7 +110,7 @@ match = '(?![test_|__init]).*\.py'
 
 [tool.bandit]
 # We aren't using pseudo-random numbers for cryptographic purposes
-skips = ["B311"]
+skips = ["B311", "B404"]
 
 [tool.pytest.ini_options]
 markers = [

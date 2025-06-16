@@ -12,16 +12,16 @@ from janus.utils.logger import create_logger
 log = create_logger(__name__)
 
 
-class Summary(BaseModel):
-    completeness: Criteria = Field(description="The completeness of the summary")
-    hallucination: Criteria = Field(description="The factualness of the summary")
-    readability: Criteria = Field(description="The readability of the summary")
-    usefulness: Criteria = Field(description="The usefulness of the summary")
+class Pseudocode(BaseModel):
+    completeness: Criteria = Field(description="The completeness of the pseudocode")
+    hallucination: Criteria = Field(description="The factualness of the pseudocode")
+    readability: Criteria = Field(description="The readability of the pseudocode")
+    usefulness: Criteria = Field(description="The usefulness of the pseudocode")
 
 
-class SummaryParser(JanusParser, PydanticOutputParser):
+class PseudocodeParser(JanusParser, PydanticOutputParser):
     def __init__(self):
-        PydanticOutputParser.__init__(self, pydantic_object=Summary)
+        PydanticOutputParser.__init__(self, pydantic_object=Pseudocode)
 
     def parse(self, text: str | BaseMessage) -> str:
         # parsing the output evaluation object
@@ -34,7 +34,7 @@ class SummaryParser(JanusParser, PydanticOutputParser):
         text = text[begin:end]
 
         try:
-            out: Summary = super(SummaryParser, self).parse(text)
+            out: Pseudocode = super(PseudocodeParser, self).parse(text)
         except json.JSONDecodeError as e:
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise OutputParserException(f"Got invalid JSON object. Error: {e}")

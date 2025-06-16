@@ -56,7 +56,7 @@ def llm_self_eval(
             "-e",
             help="Type of output to evaluate.",
             click_type=click.Choice(
-                ["incose", "comments", "uml", "summary", "java-category"]
+                ["incose", "comments", "uml", "summary", "pseudocode", "java-category"]
             ),
         ),
     ] = "incose",
@@ -150,6 +150,7 @@ def llm_self_eval(
     from janus.converter.evaluate import (
         InlineCommentEvaluator,
         JavaCategoryEvaluator,
+        PseudocodeEvaluator,
         RequirementEvaluator,
         SummaryEvaluator,
         UMLEvaluator,
@@ -186,6 +187,8 @@ def llm_self_eval(
         evaluator = UMLEvaluator(**kwargs)
     elif evaluation_type == "summary":
         evaluator = SummaryEvaluator(**kwargs)
+    elif evaluation_type == "pseudocode":
+        evaluator = PseudocodeEvaluator(**kwargs)
     elif evaluation_type == "java-category":
         evaluator = JavaCategoryEvaluator(**kwargs)
 

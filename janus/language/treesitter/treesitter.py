@@ -1,5 +1,6 @@
 import os
 import platform
+import subprocess
 from collections import defaultdict
 from ctypes import c_void_p, cdll
 from pathlib import Path
@@ -81,7 +82,6 @@ class TreeSitterSplitter(Splitter):
         """Convert a tree_sitter Node into a CodeBlock. The original text is
         used to populate the prefix and suffix of the node. This function is
         recursively called for all children of the node.
-
         """
         prefix_start = 0
         if node.prev_sibling is not None:
@@ -134,13 +134,13 @@ class TreeSitterSplitter(Splitter):
             )
             self._create_parser(so_file)
 
-        # string required for Windows, as 'WindowsPath' is not iterable
-        so_file = str(so_file)
+        # Convert to string for ctypes
+        so_file_str = str(so_file)
 
         # Load the parser using the generated .so file
-        self.parser: tree_sitter.Parser = tree_sitter.Parser()
-        pointer = self._so_to_pointer(so_file)
-        self.parser.set_language(tree_sitter.Language(pointer, self.language))
+        pointer = self._so_to_pointer(so_file_str)
+        lang = tree_sitter.Language(pointer)
+        self.parser: tree_sitter.Parser = tree_sitter.Parser(lang)
 
     def _so_to_pointer(self, so_file: str) -> int:
         """Convert the .so file to a pointer.
@@ -148,17 +148,19 @@ class TreeSitterSplitter(Splitter):
         Taken from `treesitter.Language.__init__` to get past deprecated warning.
 
         Arguments:
-            so_file: The path to the so file for the language.
+            so_file: The path to the .so file for the language.
 
         Returns:
             The pointer to the language.
         """
         lib = cdll.LoadLibrary(os.fspath(so_file))
-        # Added this try-except block to handle the case where the language is not
-        # supported in lowercase by the creator of the grammar. Ex: COBOL
-        # https://github.com/yutaro-sakamoto/tree-sitter-cobol/blob/main/grammar.js#L13
+        # Handle case where grammar authors have uppercase vs. lowercase name
         try:
-            language_function = getattr(lib, f"tree_sitter_{self.language}")
+            if self.language == "binary":
+                # Special case for binary, which uses the c parser
+                language_function = getattr(lib, "tree_sitter_c")
+            else:
+                language_function = getattr(lib, f"tree_sitter_{self.language}")
         except AttributeError:
             language = self.language.upper()
             language_function = getattr(lib, f"tree_sitter_{language}")
@@ -168,15 +170,26 @@ class TreeSitterSplitter(Splitter):
         return pointer
 
     def _create_parser(self, so_file: Path | str) -> None:
-        """Create the parser for the given language.
+        """Create the parser for the given language by:
+           1. Cloning the grammar repo (if needed)
+           2. Running `tree-sitter generate` in that repo
+           3. Compiling only the C sources under `src/` into a shared library
 
         Arguments:
-            so_file: The path to the so file for the language.
+            so_file: The path to the .so file to produce.
         """
-        # Store the library in the `build` directory
+        # 1) Ensure the .so directory exists
+        so_file_path = Path(so_file)
+        so_file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # 2) Clone (or update) the grammar repository
         tree_sitter_dir = Path.home() / ".tree-sitter"
         tree_sitter_dir.mkdir(exist_ok=True)
-        lang_dir = tree_sitter_dir / f"tree-sitter-{self.language}"
+        if self.language == "binary":
+            # Special case for binary, which uses the c parser
+            lang_dir = tree_sitter_dir / "tree-sitter-c"
+        else:
+            lang_dir = tree_sitter_dir / f"tree-sitter-{self.language}"
 
         if not lang_dir.exists():
             github_url = LANGUAGES[self.language]["url"]
@@ -184,12 +197,69 @@ class TreeSitterSplitter(Splitter):
                 message = f"Tree-sitter does not support {self.language} yet."
                 log.error(message)
                 raise ValueError(message)
-            if LANGUAGES[self.language].get("branch"):
-                self._git_clone(github_url, lang_dir, LANGUAGES[self.language]["branch"])
-            else:
-                self._git_clone(github_url, lang_dir)
 
-        tree_sitter.Language.build_library(str(so_file), [str(lang_dir)])
+            try:
+                if LANGUAGES[self.language].get("branch"):
+                    self._git_clone(
+                        github_url, lang_dir, LANGUAGES[self.language]["branch"]
+                    )
+                else:
+                    self._git_clone(github_url, lang_dir)
+            except Exception as e:
+                raise RuntimeError(f"Could not clone {github_url}: {e}")
+
+        # 3) Run `tree-sitter generate` inside the grammar directory to produce parser.c,
+        # scanner.c, etc.
+        try:
+            # This assumes `tree-sitter` CLI is on PATH
+            subprocess.run(
+                ["tree-sitter", "generate"],
+                cwd=str(lang_dir),
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )  # nosec: B603, B607
+        except FileNotFoundError:
+            raise RuntimeError(
+                "Could not find `tree-sitter` CLI. Please install it and ensure it's on "
+                "your PATH."
+            )
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(
+                f"Error running `tree-sitter generate` in {lang_dir}:\n"
+                f"{e.stderr.decode().strip()}"
+            )
+
+        # 4) Collect only the .c files under 'src/' (to avoid binding.c or other extras).
+        src_dir = lang_dir / "src"
+        if not src_dir.exists():
+            raise RuntimeError(f"No `src/` directory found in {lang_dir} after generate.")
+        c_files = list(src_dir.rglob("*.c"))
+        if not c_files:
+            raise RuntimeError(f"No C source files found under {src_dir} after generate.")
+
+        # 5) Compile them into a shared object.
+        #
+        #    - We assume a POSIX-like compiler (gcc/cc) that accepts:
+        #       cc -O3 -shared -fPIC -o <so_file> <all .c> -I<src_dir>
+        #
+        include_flags = [f"-I{src_dir}"]
+        compile_cmd = ["cc", "-O3", "-shared", "-fPIC", "-o", str(so_file_path)]
+        compile_cmd += include_flags + [str(c_path) for c_path in c_files]
+
+        try:
+            subprocess.run(
+                compile_cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )  # nosec: B603
+        except FileNotFoundError:
+            raise RuntimeError(
+                "Could not find a C compiler (`cc`). Please install `gcc` or similar."
+            )
+        except subprocess.CalledProcessError as e:
+            stderr = e.stderr.decode().strip()
+            raise RuntimeError(
+                f"Error compiling C sources for {self.language}:\n{stderr}"
+            )
 
     @staticmethod
     def _git_clone(
