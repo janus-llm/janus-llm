@@ -88,7 +88,7 @@ class Converter:
         source_language: str = "fortran",
         max_prompts: int = 10,
         max_tokens: int | None = None,
-        prompt_templates: list[str] | str = ["simple"],
+        prompt_template: str = "simple",
         db_path: str | None = None,
         db_config: dict[str, Any] | None = None,
         protected_node_types: tuple[str, ...] = (),
@@ -116,7 +116,7 @@ class Converter:
             max_prompts: The maximum number of prompts to try before giving up.
             max_tokens: The maximum number of tokens to use in the LLM. If `None`, the
                 converter will use half the model's token limit.
-            prompt_templates: The name of the prompt templates to use.
+            prompt_template: The name of the prompt template to use.
             db_path: The path to the database to use for vectorization.
             db_config: The configuration for the database.
             protected_node_types: A set of non-mergeable node types. These will
@@ -193,11 +193,8 @@ class Converter:
         self._input_types: set[str] | None = input_types
         self._input_labels: set[str] | None = input_labels
 
-        # Set the list of prompt templates. If a single string was passed, make it
-        #  a single-element list for compatibility
-        self._prompt_template_names: list[str] = (
-            prompt_templates if isinstance(prompt_templates, list) else [prompt_templates]
-        )
+        # Set the prompt template.
+        self._prompt_template_name: str = prompt_template
 
         # Make sure protected and pruned node types are unique
         self._protected_node_types: tuple[str, ...] = tuple(set(protected_node_types))
@@ -213,7 +210,7 @@ class Converter:
         self._splitter: Splitter
         self._retriever: JanusRetriever
         self._vectorizer: Vectorizer | None
-        self._prompts: list[ChatPromptTemplate]
+        self._prompt: ChatPromptTemplate
         self._chain: Runnable
 
         self._initialized = False
@@ -226,7 +223,7 @@ class Converter:
         self._load_splitter()
         self._load_retriever()
         self._load_vectorizer()
-        self._load_prompts()
+        self._load_prompt()
         self._load_chain()
 
         self._initialized = True
@@ -379,55 +376,33 @@ class Converter:
             self._db_config,
         )
 
-    def _load_prompts(self) -> None:
+    def _load_prompt(self) -> None:
         """Impacts:
-        _prompts
+        _prompt
 
         Depends on:
-        _prompt_template_names
+        _prompt_template_name
         _llm
         _source_language
         _target_language
         _target_version
         """
-        self._prompts = []
-        for template in self._prompt_template_names:
-            self._prompts.append(
-                MODEL_PROMPT_ENGINES[self._llm.short_model_id](
-                    source_language=self._source_language,
-                    prompt_template=template,
-                    target_language=self._target_language,
-                    target_version=self._target_version,
-                ).prompt
-            )
+        self._prompt = MODEL_PROMPT_ENGINES[self._llm.short_model_id](
+            source_language=self._source_language,
+            prompt_template=self._prompt_template_name,
+            target_language=self._target_language,
+            target_version=self._target_version,
+        ).prompt
 
     def _get_translation_chain(self) -> Runnable:
-        prompt = self._prompts[0]
-        translation_chain = RunnableParallel(
-            prompt_value=lambda x, prompt=prompt: prompt.invoke(x),
+        return RunnableParallel(
+            prompt_value=lambda x, prompt=self._prompt: prompt.invoke(x),
             original_inputs=RunnablePassthrough(),
         ) | RunnableParallel(
             completion=lambda x: self._llm.invoke(x["prompt_value"]),
             original_inputs=itemgetter("original_inputs"),
             prompt_value=itemgetter("prompt_value"),
         )
-        for prompt in self._prompts[1:]:
-            translation_chain = (
-                translation_chain
-                | RunnableParallel(
-                    prompt_value=lambda x, prompt=prompt: prompt.invoke(
-                        dict(completion=x["completion"], **x["original_inputs"])
-                    ),
-                    original_inputs=itemgetter("original_inputs"),
-                )
-                | RunnableParallel(
-                    completion=lambda x: self._llm.invoke(x["prompt_value"]),
-                    original_inputs=itemgetter("original_inputs"),
-                    prompt_value=itemgetter("prompt_value"),
-                )
-            )
-
-        return translation_chain
 
     def _get_refiner_chain(self) -> Runnable:
         if len(self._refiner_types) == 0:
@@ -494,7 +469,7 @@ class Converter:
         Depends on:
         _parser
         _retriever
-        _prompts
+        _prompt
         _llm
         _source_language
         _refiner_types
@@ -812,7 +787,7 @@ class Converter:
     def _add_translation(self, block: TranslatedCodeBlock) -> None:
         """Given an "empty" `TranslatedCodeBlock`, translate the code represented in
         `block.original`, setting the relevant fields in the translated block. The
-        `TranslatedCodeBlock` is updated in-pace, nothing is returned. Note that this
+        `TranslatedCodeBlock` is updated in-place, nothing is returned. Note that this
         translates *only* the code for this block, not its children.
 
         Arguments:

@@ -2,32 +2,63 @@
 
 Janus allows for the configuration and running of pipelines as of version 4.4.0. Pipelines are a series of steps that can be run in sequence. Pipelines are configured in JSON files and can be run with the `janus pipeline` command.
 
+## Overview
+A Janus pipeline is a flexible data transformation system built from a series of modular Converters. It processes labeled objects in sequence, allowing for complex, multi-stage transformations.
+
+### Key Concepts
+- **Block**: A data unit being processed, containing text content as well as metadata. Each block carries a label that identifies its type or purpose. Input blocks to a pipeline always have the `SOURCE` label.
+- **Converter**: A processing unit of a pipeline. Each Converter:
+  - Specifies one or more input labels it is interested in.
+  - Has a single output label that it assigns to any block it produces.
+  - Defines a transformation that takes in a block matching an input label and returns a new block.
+
+Importantly, blocks are not _consumed_ by Converters, they remain in the pipeline and can be taken as input to multiple Converters. All blocks will be included in the output of the pipeline (with the exception of original `SOURCE` blocks).
+
+
 ## Configuring a Pipeline
 
-Every pipeline is configured with a JSON file made up of a list of JSON objects. Each object represents a step in the pipeline and can be any number of `Converter`s or `Refiner`s. The list of these objects can be seen below in the [Available Components](#available-components) section.
+Every pipeline is configured with a JSON file made up of a list of JSON objects. Each object indicates a Converter type, the input label(s) it should accept, the label it should apply to its outputs, and any other keyword arguments. The list of these objects can be seen below in the [Available Components](#available-components) section.
+
+Pipelines can be run using the `janus pipeline` command. The arguments passed to this command control the processing of the original input to the pipeline, including the how it will be split into chunks, so it is important to pass the appropriate `--language`, `--splitter-type`, and `--use-janus-inputs` parameters.
 
 ### Available Components
+As of version 4.7.0, Janus supports the following Converters to be used in pipelines:
 
-#### Converters
-
-- [`Aggregator`](autoapi/janus/converter/aggregator/index): Aggregates multiple products into a single output product.
-- [`Partitioner`](autoapi/janus/converter/partition/index): Partitions source code in different ways (with an LLM, etc.).
-- [`Translator`](autoapi/janus/converter/translate/index): Translates source code from one programming language to another.
-
-#### Evaluators
-
-- [`InlineCommentEvaluator`](autoapi/janus/converter/evaluate/index): Performs an LLM self evaluation on inline comments.
-- [`RequirementEvaluator`](autoapi/janus/converter/evaluate/index): Performs an LLM self evaluation on requirements according to INCOSE standards.
 
 #### Documenters
-
-- [`ClozeDocumenter`](autoapi/janus/converter/document/index): Performs cloze commenting on source code.
+The following Converters take in source code and produce various types of documentation artifacts.
+- [`ClozeDocumenter`](autoapi/janus/converter/document/index): Generates inline comments for source code.
 - [`MultiDocumenter`](autoapi/janus/converter/document/index): Performs multiple documentation tasks on source code.
+- [`PseudocodeDocumenter`](autoapi/janus/converter/document/index): Generates pseudocode from source code.
 - [`RequirementsDocumenter`](autoapi/janus/converter/requirements/index): Generates requirements from source code.
+- [`DiagramGenerator`](autoapi/janus/converter/diagram/index): Generates PLANTUML diagrams from source code.
+- [`MergedOutputDiagramGenerator`](autoapi/janus/converter/translate/index): PLANTUML diagrams from multiple documentation artifacts and/or code.
 
-### Example Single Stage Pipeline
+#### Code Generation
+The following Converters take in code or documentation artifacts and produce target language code.
+- [`Translator`](autoapi/janus/converter/translate/index): Translates source code from one programming language to another. Can also generate source code from documentation artifacts.
+- [`MergedOutputTranslator`](autoapi/janus/converter/translate/index): Generates source code from multiple documentation artifacts and/or code.
 
-Every pipeline must have at least one component. The following is an example of a pipeline that uses the `Translator` component to translate from Python to Javascript. The user can also specify some keyword arguments to the component.
+#### Evaluators
+The following Converters perform LLM self-evaluation of outputs.
+- [`RequirementEvaluator`](autoapi/janus/converter/evaluate/index): Performs an LLM self evaluation on requirements according to INCOSE standards.
+- [`JavaCategoryEvaluator`](autoapi/janus/converter/evaluate/index): Evaluates and categorizes Java code chunks into one of the following categories: `general_error`, `syntax_error`, `lazy_implementation`, `placeholder_implementation`, `commented_implementation`, `non_code_text`, `clean_implementation` (see prompt for details).
+
+The following evaluators each evaluate their respective inputs according to four metrics (*Completeness*, *Hallucination*, *Readability*, and *Usefulness*), with a score between 1 and 4 assigned to each.
+- [`InlineCommentEvaluator`](autoapi/janus/converter/evaluate/index): Performs an LLM self evaluation of the inline comments generated by a `ClozeDocumenter`.
+- [`SummaryEvaluator`](autoapi/janus/converter/evaluate/index): Performs an LLM self evaluation of code summaries.
+- [`PseudocodeEvaluator`](autoapi/janus/converter/evaluate/index): Performs an LLM self evaluation of pseudocode.
+- [`UMLEvaluator`](autoapi/janus/converter/evaluate/index): Performs an LLM self evaluation of PLANTUML diagram(s).
+
+#### Utility
+- [`OutputMerger`](autoapi/janus/converter/merge/index): Aggregates multiple blocks into a single JSON object for later processing by `MergedOutputConverter`s (see below in the [Complex Pipelines Using OutputMerger](#complex-pipelines-using-outputmerger) section).
+
+
+## Example Pipelines
+
+### Single Stage Pipeline
+
+Every pipeline must have at least one component. The following is an example of a pipeline that uses the `Translator` component to translate legacy code (of any lanuage) to Python.
 
 [`translate.json`](https://github.com/janus-llm/janus-llm/tree/public/pipelines/translate.json):
 
@@ -35,7 +66,10 @@ Every pipeline must have at least one component. The following is an example of 
 [
     {
         "type": "Translator",
-        "kwargs": {"source_language": "python", "target_language": "javascript"}
+        "kwargs": {
+            "target_language": "python",
+            "output_label": "python_code"
+        }
     }
 ]
 ```
@@ -43,28 +77,152 @@ Every pipeline must have at least one component. The following is an example of 
 This can then be run with the following command:
 
 ```bash
-janus pipeline --input janus/cli/ --output janus-translation --pipeline pipelines/translate.json --llm my-gpt -l python
+janus pipeline \
+    --input <PATH> \
+    --output ./janus-translation \
+    --pipeline pipelines/translate.json \
+    --llm my-gpt \
+    --language fortran
 ```
 
 This is the equivalent to running the following command:
 
 ```bash
-janus translate --input janus/cli/ --output janus-translation --llm my-gpt --source-language python --target-language javascript
+janus translate \
+    --input <PATH> \
+    --output ./janus-translation \
+    --llm my-gpt \
+    --source-language fortran \
+    --target-language python
 ```
 
-### Example Multi Stage Pipeline
+### Multi-Stage Pipeline
+Below is a more complex pipeline for extracting requirements from legacy code (of any language), using those requirements to generate Java, and evaluating both the generated Java and the intermediate requirements.
 
-[`comment_eval.json`](https://github.com/janus-llm/janus-llm/tree/public/pipelines/comment_eval.json)
+[`requirement_translation_eval.json`](https://github.com/janus-llm/janus-llm/tree/public/pipelines/requirement_translation_eval.json):
+```json
+[
+    {
+        "type": "RequirementsDocumenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "output_label": "requirements"
+        }
+    },
+    {
+        "type": "RequirementEvaluator",
+        "kwargs": {
+            "input_labels": ["requirements"],
+            "output_label": "requirement_eval"
+        }
+    },
+    {
+        "type": "Translator",
+        "kwargs": {
+            "input_labels": ["requirements"],
+            "prompt_template": "requirement_to_java",
+            "target_language": "java",
+            "output_label": "java_code"
+        }
+    },
+    {
+        "type": "JavaCategoryEvaluator",
+        "kwargs": {
+            "input_labels": ["java_code"],
+            "output_label": "java_eval"
+        }
+    },
+]
+```
+
+This can then be run with the following command:
+
+```bash
+janus pipeline \
+    --input <PATH> \
+    --output ./janus-translation \
+    --pipeline pipelines/requirement_translation_eval.json \
+    --llm my-gpt \
+    --language fortran
+```
+
+An input block of FORTRAN code would be processed through the pipeline like so:
+1. The input block is given the `SOURCE` label by default.
+2. The FORTRAN code block is processed by the `RequirementsDocumenter` Converter to produce a block labeled `requirements`.
+3. The `requirements` block is evaluated by the `RequirementEvaluator`, adding a block to the pipeline labeled `requirement_eval`.
+4. The `requirements` block is also used by the `Translator` to generate a block of Java code with the `java_code` label.
+5. Finally, the `java_code` block is processed by the `JavaCategoryEvaluator` Converter, producing a block labeled `java_eval`.
+
+The output of the pipeline will include **four** output blocks for each block of input FORTRAN, labeled `requirements`, `requirement_eval`, `java_code`, and `java_eval`.
+
+This is the equivalent to running the following commands, and then collating the results from four different directories:
+
+```bash
+janus document --doc-mode requirements --input <PATH> --output ./requirements --llm my-gpt --language fortran
+
+janus llm-self-eval --input ./requirements --output ./requirement_evals --llm my-gpt --language json --evaluation-type comments --use-janus-inputs
+
+janus translate --input ./requirements --output ./java_translations --llm my-gpt --source-language json --target-language java --prompt-template requirement_to_java --use-janus-inputs
+
+janus llm-self-eval --input ./java_translations --output ./java_evals --llm my-gpt --language json --evaluation-type java-category --use-janus-inputs
+```
+
+
+### Complex Pipelines Using `OutputMerger`
+
+`OutputMerger`s and `MergedOutputConverter`s allow for complex pipelines where multiple intermediate representations are used as input to single Converters.
+
+An `OutputMerger` definition should list the labels of the blocks it should merge in the `input_labels` argument. Optionally, a dictionary can be supplied to the `label_key_map` argument to specify the placeholder strings that are present in the prompt.
+
+Follow up a `OutputMerger` with a `MergedOutputConverter` like `MergedOutputTranslator` or `MergedOutputDiagramGenerator` (be sure to match the `OutputMerger`'s `output_label` to the `MergedOutputConverter`'s `input_labels`).
+
+Remember, **the prompt used by the `MergedOutputConverter` must have placeholders corresponding to either the values of `OutputMerger`'s `label_key_map` argument, or to the `OutputMerger`'s `input_labels` themselves if no `label_key_map` was passed.**
+
+The example pipeline below generates requirements and summary documentation from legacy code, then generates Java using the original code, requirements, **and** summaries as input.
+
+[`doc_req_src_translation.json`](https://github.com/janus-llm/janus-llm/tree/public/pipelines/doc_req_src_translation.json):
 
 ```json
 [
     {
-        "type": "ClozeDocumenter",
-        "kwargs": {"comments_per_request": 5}
+        "type": "RequirementsDocumenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "source_language": "fortran",
+            "refiner_types": ["RequirementsFormatRefiner"],
+            "output_label": "requirements"
+        }
     },
     {
-        "type": "InlineCommentEvaluator",
-        "kwargs": {}
+        "type": "Documenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "source_language": "fortran",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "summaries"
+        }
+    },
+    {
+        "type": "OutputMerger",
+        "kwargs": {
+            "input_labels": ["SOURCE", "requirements", "summaries"],
+            "label_key_map": {
+                "SOURCE": "SOURCE_CODE",
+                "requirements": "REQS",
+                "summaries": "SUMMARY"
+            },
+            "output_label": "merged_outputs"
+        }
+    },
+    {
+        "type": "MergedOutputTranslator",
+        "kwargs": {
+            "input_labels": ["merged_outputs"],
+            "prompt_template": "output_merge_testing",
+            "target_language": "java",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "java_from_merged_outputs"
+        }
     }
 ]
 ```
@@ -72,184 +230,7 @@ janus translate --input janus/cli/ --output janus-translation --llm my-gpt --sou
 This can then be run with the following command:
 
 ```bash
-janus pipeline --input janus/cli/ --output janus-translation --pipeline pipelines/comment_eval.json --llm my-gpt -l python
+janus pipeline --input <SOURCE> --output janus-translation --pipeline pipelines/doc_req_src_translation.json --llm my-gpt --language fortran
 ```
 
-This is the equivalent to running the following commands:
-
-```bash
-janus document --doc-mode cloze --input janus/cli/ --output janus-translation --llm my-gpt -l python
-```
-
-```bash
-janus llm-self-eval --input janus-translation --output janus-evals --llm my-gpt -l python -e comments
-```
-
-### Using `ConverterPool`s
-
-`ConverterPool`s allow for the parallel execution of multiple `Converter`s.
-
-#### Basic `ConverterPool`
-
-The following is an example of a pipeline that uses a `ConverterPool` to run multiple `Documenter`s in parallel.
-
-```json
-[
-    {
-        "type": "ConverterPool",
-        "args": [
-            {
-                "type": "Documenter",
-                "kwargs": {}
-            },
-            {
-                "type": "ClozeDocumenter",
-                "kwargs": {"comments_per_request": 5}
-            }
-        ]
-    }
-]
-```
-
-This runs the `Documenter` and `ClozeDocumenter` in parallel, producing two outputs in the output JSON.
-
-
-#### `ConverterPool` with Evaluation
-
-The following example runs two `ClozeDocumenter`s in parallel and then runs an `InlineCommentEvaluator` on the output of the `ClozeDocumenter`s.
-
-```json
-[
-    {
-        "type": "ConverterPool",
-        "args": [
-            {
-                "type": "ClozeDocumenter",
-                "kwargs": {}
-            },
-            {
-                "type": "ClozeDocumenter",
-                "kwargs": {"comments_per_request": 5}
-            }
-        ]
-    },
-    {
-        "type": "InlineCommentEvaluator",
-        "kwargs": {"eval_items_per_request": 5}
-    }
-]
-```
-
-#### `ConverterPool` with `ConverterPassthrough`
-
-The `ConverterPassthrough` component allows for the output of one `Converter` to be passed to the next stage of the pipeline without modification.
-
-```json
-[
-    {
-        "type": "ClozeDocumenter",
-        "kwargs": {"comments_per_request": 5}
-    },
-    {
-	"type": "ConverterPool",
-	"args": [
-	    {
-		"type": "InlineCommentEvaluator"
-	    },
-	    {
-		"type": "ConverterPassthrough"
-	    }
-	]
-    }
-]
-```
-
-In this example, the output of the `ClozeDocumenter` is passed to the `InlineCommentEvaluator` and the `ConverterPassthrough`. This produces two outputs in the output JSON: the output of the `InlineCommentEvaluator` and the output of the `ClozeDocumenter`.
-
-
-#### `ConverterPool` with Input and Output Labels
-
-Every `Converter` allows for the specification of input and output labels.
-
-```json
-[
-    {
-        "type": "ConverterPool",
-        "args": [
-            {
-                "type": "ClozeDocumenter",
-                "kwargs": {"output_label": "dtest"}
-            },
-            {
-                "type": "ClozeDocumenter",
-                "kwargs": {}
-            },
-            {
-                "type": "ClozeDocumenter",
-                "kwargs": {"output_label": "dtest"}
-            }
-        ]
-    },
-    {
-        "type": "ConverterPool",
-	    "args": [
-            {
-                "type": "InlineCommentEvaluator",
-                "kwargs": {"input_labels": "dtest"}
-            }
-	    ]
-    }
-]
-```
-
-The labels are used to specify which outputs are passed to which inputs. In this example, the output of the first and third `ClozeDocumenter`s are passed to the `InlineCommentEvaluator`, and the output of the second `ClozeDocumenter` is kept in the intermediate outputs of the resultant JSON file.
-
-
-#### `ConverterPool` with Input Types
-
-Every `Converter` has an associated `output_type` that informs other `Converters` of the type of output it produces. The `input_types` argument allows for the specification of the types of input that a `Converter` can accept.
-
-```json
-[
-    {
-        "type": "ConverterPool",
-        "args": [
-            {
-                "type": "Documenter",
-                "kwargs": {}
-            },
-            {
-                "type": "ClozeDocumenter",
-                "kwargs": {"comments_per_request": 5}
-            }
-        ]
-    },
-    {
-        "type": "ConverterPool",
-        "args": [
-            {
-	            "type": "Translator",
-		        "kwargs": {"input_types": "documentation"}
-            },
-            {
-                "type": "InlineCommentEvaluator"
-            }
-	]
-    }
-]
-```
-
-This example runs a `Documenter` and a `ClozeDocumenter` in parallel, producing two outputs in the output JSON. The outputs are then passed to a `ConverterPool` that runs a `Translator` and an `InlineCommentEvaluator` in parallel. The `Translator` is specified to accept only documentation as input, so it will only accept the output of the `Documenter` and not the `ClozeDocumenter`.
-
-##### Available Output Types
-
-The available output types for each converter are listed here:
-- `DiagramGenerator`: `diagram`
-- `Documenter`: `documentation`
-- `MultiDocumenter`: `multidocumentation`
-- `ClozeDocumenter`: `cloze_comments`
-- `PseudocodeDocumenter`: `pseudocode`
-- `RequirementsDocumenter`: `requirements`
-- `Partitioner`: `partition`
-- `RequirementEvaluator`: `requirements_eval`
-- `InlineCommentEvaluator`: `cloze_comments_eval`
+This complex multi-input behavior cannot be recreated with individual CLI calls.

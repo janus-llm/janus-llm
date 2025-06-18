@@ -1,10 +1,35 @@
 [
     {
         "type": "Documenter",
-        "kwargs": {}
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "prompt_template": "document",
+            "output_label": "documentation"
+        }
     },
     {
-        "type": "DiagramGenerator",
-        "kwargs": {}
+        "type": "Documenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "prompt_template": "extract_variables",
+            "output_label": "variables"
+        }
+    },
+    {
+        "type": "OutputMerger",
+        "kwargs": {
+            "input_labels": ["SOURCE", "documentation", "variables"],
+            "label_key_map": {"SOURCE": "SOURCE_CODE", "documentation": "DOCUMENTATION", "variables": "VARS"},
+            "output_label": "merged_outputs"
+        }
+    },
+    {
+        "type": "MergedOutputDiagramGenerator",
+        "kwargs": {
+            "input_labels": ["merged_outputs"],
+            "diagram_type": "Activity",
+            "refiner_types": ["CodeFormatRefiner", "FixParserExceptions"],
+            "output_label": "diagrams"
+        }
     }
 ]
