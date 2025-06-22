@@ -1,0 +1,134 @@
+[
+    {
+        "type": "Translator",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "source_language": "ibmhlasm",
+            "target_language": "java",
+            "refiner_types": ["CodeContinuationRefiner"],
+            "output_label": "direct_java"
+        }
+    },
+    {
+        "type": "RequirementsDocumenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "source_language": "ibmhlasm",
+            "refiner_types": ["RequirementsFormatRefiner"],
+            "output_label": "requirements"
+        }
+    },
+    {
+        "type": "DiagramGenerator",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "source_language": "ibmhlasm",
+            "refiner_types": ["ReflectionRefiner", "CodeFormatRefiner", "FixParserExceptions"],
+            "output_label": "diagrams"
+        }
+    },
+    {
+        "type": "Documenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "source_language": "ibmhlasm",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "summaries"
+        }
+    },
+    {
+        "type": "PseudocodeDocumenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "source_language": "ibmhlasm",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "pseudocode"
+        }
+    },
+    {
+        "type": "Translator",
+        "kwargs": {
+            "input_labels": ["requirements"],
+            "prompt_template": "requirement_to_java",
+            "target_language": "java",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "java_from_requirements"
+        }
+    },
+    {
+        "type": "Translator",
+        "kwargs": {
+            "input_labels": ["summaries"],
+            "prompt_template": "summary_to_java",
+            "target_language": "java",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "java_from_summaries"
+        }
+    },
+    {
+        "type": "Translator",
+        "kwargs": {
+            "input_labels": ["pseudocode"],
+            "prompt_template": "pseudocode_to_java",
+            "target_language": "java",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "java_from_pseudocode"
+        }
+    },
+    {
+        "type": "Translator",
+        "kwargs": {
+            "input_labels": ["diagrams"],
+            "prompt_template": "uml_to_java",
+            "target_language": "java",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "java_from_diagrams"
+        }
+    },
+    {
+        "type": "RequirementsDocumenter",
+        "kwargs": {
+            "input_labels": ["java_from_requirements"],
+            "source_language": "java",
+            "refiner_types": ["RequirementsFormatRefiner"],
+            "output_label": "roundtrip_requirements"
+        }
+    },
+    {
+        "type": "DiagramGenerator",
+        "kwargs": {
+            "input_labels": ["java_from_diagrams"],
+            "source_language": "java",
+            "refiner_types": ["ReflectionRefiner", "CodeFormatRefiner", "FixParserExceptions"],
+            "output_label": "roundtrip_diagrams"
+        }
+    },
+    {
+        "type": "Documenter",
+        "kwargs": {
+            "input_labels": ["java_from_summaries"],
+            "source_language": "java",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "roundtrip_summaries"
+        }
+    },
+    {
+        "type": "PseudocodeDocumenter",
+        "kwargs": {
+            "input_labels": ["java_from_pseudocode"],
+            "source_language": "java",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "roundtrip_pseudocode"
+        }
+    },
+    {
+        "type": "JavaCategoryEvaluator",
+        "kwargs": {
+            "input_labels": ["java_from_pseudocode", "java_from_summaries",
+            "java_from_diagrams", "java_from_requirements", "direct_java"],
+            "source_language": "java",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "roundtrip_java_labels"
+        }
+    }
+]

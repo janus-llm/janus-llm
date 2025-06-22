@@ -7,11 +7,14 @@ from langchain_core.runnables import Runnable, RunnableParallel
 from langchain_core.runnables.passthrough import RunnablePick
 
 from janus.converter.converter import Converter
+from janus.converter.merge import MergedOutputConverterMixin
 from janus.language.block import JanusOutputObject, TranslatedCodeBlock
 from janus.language.combine import JsonCombiner
+from janus.parsers.eval_parsers.generic_parser import GenericEvaluationParser
 from janus.parsers.eval_parsers.incose_parser import IncoseParser
 from janus.parsers.eval_parsers.inline_comment_parser import InlineCommentParser
 from janus.parsers.eval_parsers.java_category_parser import LabeledJavaListParser
+from janus.parsers.eval_parsers.pseudocode_parser import PseudocodeParser
 from janus.parsers.eval_parsers.summary_parser import SummaryParser
 from janus.parsers.eval_parsers.uml_parser import UMLParser
 from janus.utils.logger import create_logger
@@ -205,6 +208,7 @@ class RequirementEvaluator(MultiObjectEvaluator):
 
     def __init__(
         self,
+        prompt_template: str = "eval_prompts/incose",
         input_types: str | set[str] = set(["requirements"]),
         output_type: str = "requirements_eval",
         **kwargs,
@@ -221,10 +225,10 @@ class RequirementEvaluator(MultiObjectEvaluator):
             object_key="REQUIREMENTS",
             input_types=input_types,
             output_type=output_type,
+            prompt_template=prompt_template,
             **kwargs,
         )
         self._parser = IncoseParser()
-        self._prompt_template_names = ["eval_prompts/incose"]
 
     def _extract_object_to_evaluate(self, block: TranslatedCodeBlock) -> list[str] | None:
         if block.original.text is None:
@@ -294,6 +298,7 @@ class InlineCommentEvaluator(MultiObjectEvaluator):
 
     def __init__(
         self,
+        prompt_template: str = "eval_prompts/inline_comments",
         input_types: str | set[str] = set(["cloze_comments"]),
         output_type: str = "cloze_comments_eval",
         **kwargs,
@@ -310,10 +315,10 @@ class InlineCommentEvaluator(MultiObjectEvaluator):
             object_key="SOURCE_CODE",
             input_types=input_types,
             output_type=output_type,
+            prompt_template=prompt_template,
             **kwargs,
         )
         self._parser = InlineCommentParser()
-        self._prompt_template_names = ["eval_prompts/inline_comments"]
 
     def _process_comments(
         self, input_str: str, generated_comments: dict[str, str]
@@ -452,6 +457,7 @@ class SummaryEvaluator(Evaluator):
 
     def __init__(
         self,
+        prompt_template: str = "eval_prompts/summary",
         input_types: str | set[str] = set(["documentation"]),
         output_type: str = "summary_eval",
         **kwargs,
@@ -468,10 +474,42 @@ class SummaryEvaluator(Evaluator):
             object_key="CODE_SUMMARY",
             input_types=input_types,
             output_type=output_type,
+            prompt_template=prompt_template,
             **kwargs,
         )
         self._parser = SummaryParser()
-        self._prompt_template_names = ["eval_prompts/summary"]
+
+
+class PseudocodeEvaluator(Evaluator):
+    """Pseudocode Evaluator
+
+    A class that performs an LLM self evaluation on pseudocode,
+    with an associated prompt.
+    """
+
+    def __init__(
+        self,
+        prompt_template: str = "eval_prompts/pseudocode",
+        input_types: str | set[str] = set(["pseudocode"]),
+        output_type: str = "pseudocode_eval",
+        **kwargs,
+    ) -> None:
+        """Initialize the Evaluator class
+
+        Arguments:
+            model: The LLM to use for translation. If an OpenAI model, the
+                `OPENAI_API_KEY` environment variable must be set.
+            model_arguments: Additional arguments to pass to the LLM constructor.
+            max_prompts: The maximum number of prompts to try before giving up.
+        """
+        super().__init__(
+            object_key="PSEUDOCODE",
+            input_types=input_types,
+            output_type=output_type,
+            prompt_template=prompt_template,
+            **kwargs,
+        )
+        self._parser = PseudocodeParser()
 
 
 class UMLEvaluator(Evaluator):
@@ -483,6 +521,7 @@ class UMLEvaluator(Evaluator):
 
     def __init__(
         self,
+        prompt_template: str = "eval_prompts/uml",
         input_types: str | set[str] = set(["diagram"]),
         output_type: str = "uml_eval",
         **kwargs,
@@ -499,10 +538,10 @@ class UMLEvaluator(Evaluator):
             object_key="PLANTUML_DIAGRAM",
             input_types=input_types,
             output_type=output_type,
+            prompt_template=prompt_template,
             **kwargs,
         )
         self._parser = UMLParser()
-        self._prompt_template_names = ["eval_prompts/uml"]
 
 
 class JavaCategoryEvaluator(Evaluator):
@@ -514,6 +553,7 @@ class JavaCategoryEvaluator(Evaluator):
 
     def __init__(
         self,
+        prompt_template: str = "eval_prompts/java_category",
         input_types: str | set[str] | None = None,  # disable filtering by type
         output_type: str = "java_category_eval",
         **kwargs,
@@ -530,10 +570,10 @@ class JavaCategoryEvaluator(Evaluator):
             object_key="JAVA_CODE",
             input_types=input_types,
             output_type=output_type,
+            prompt_template=prompt_template,
             **kwargs,
         )
         self._parser = LabeledJavaListParser()
-        self._prompt_template_names = ["eval_prompts/java_category"]
 
     def _preprocess_block(self, block: TranslatedCodeBlock) -> None:
         if block.previous_generation is not None:
@@ -545,3 +585,18 @@ class JavaCategoryEvaluator(Evaluator):
             JAVA_CODE=self._parser.parse_input,
             context=self._retriever,
         )
+
+
+class MergedOutputEvaluator(MergedOutputConverterMixin, Converter):
+    def __init__(
+        self,
+        input_labels: set[str] | str | None = None,
+        **kwargs,
+    ) -> None:
+        if input_labels is None:
+            raise ValueError("MergedOutputEvaluator requires input labels")
+        super().__init__(
+            input_labels=input_labels,
+            **kwargs,
+        )
+        self._parser = GenericEvaluationParser()

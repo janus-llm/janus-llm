@@ -5,6 +5,7 @@ from unittest.mock import patch
 from janus.converter.evaluate import (
     InlineCommentEvaluator,
     JavaCategoryEvaluator,
+    PseudocodeEvaluator,
     RequirementEvaluator,
     SummaryEvaluator,
     UMLEvaluator,
@@ -224,6 +225,62 @@ class TestSummaryEvaluator(unittest.TestCase):
         self.assertEqual(result.previous_generation, source.previous_generation)
 
 
+class TestPseudocodeEvaluator(unittest.TestCase):
+    """Tests for the PseudocodeEvaluator class"""
+
+    def setUp(self):
+        """Set up the tests"""
+        self.evaluator = PseudocodeEvaluator(
+            model="gpt-4o-mini",
+            source_language="json",
+            refiner_types=[FixParserExceptions],
+            use_janus_inputs=True,
+        )
+
+    def test_init(self):
+        """Test __init__ method."""
+        self.assertEqual(self.evaluator._model_name, "gpt-4o-mini")
+        self.assertEqual(self.evaluator._source_language, "json")
+        self.assertEqual(self.evaluator._use_janus_inputs, True)
+
+    @patch("janus.converter.Converter._run_chain")
+    def test_translate_block(self, mock_run_chain):
+        """Test translate_block method"""
+
+        self.evaluator._use_janus_inputs = False
+
+        source = CodeBlock(
+            id="test",
+            name="Test Block",
+            node_type="function",
+            language="json",
+            text="This is a snippet of pseudocode",
+            previous_generation={
+                "input": "test",
+                "metadata": combine_metadata([]),
+                "outputs": [],
+            },
+        )
+        source.mark_root()
+
+        mock_run_chain.return_value = "Evaluated pseudocode snippet"
+
+        # Incorrect input type, should be skipped
+        result = self.evaluator._translate_block(source)
+        self.assertNotIsInstance(result, TranslatedCodeBlock)
+
+        # Fix input type
+        source.block_type = "pseudocode"
+        result = self.evaluator._translate_block(source)
+
+        obj_str = '{"eval_object": "This is a snippet of pseudocode", "code": "test"}'
+
+        self.assertIsInstance(result, TranslatedCodeBlock)
+        self.assertEqual(result.text, "Evaluated pseudocode snippet")
+        self.assertEqual(result.original.text, obj_str)
+        self.assertEqual(result.previous_generation, source.previous_generation)
+
+
 class TestInlineCommentEvaluator(unittest.TestCase):
     """Tests for the InlineCommentEvaluator class"""
 
@@ -362,11 +419,19 @@ class TestJavaCategoryEvaluator(unittest.TestCase):
         )
         source.mark_root()
 
+        preprocessed = self.evaluator._parser.parse_input(source)
+        expected_preprocessed = (
+            "1    public static void main string args etc.\n"
+            "2    another line\n"
+            "3    a third line"
+        )
+        self.assertEqual(expected_preprocessed, preprocessed)
+
         out_str = json.dumps(
             [
                 {
                     "start_line": 1,
-                    "end_line": 1,
+                    "end_line": 3,
                     "section_reasoning": "Looks like perfect code to me.",
                     "section_label": "clean_implementation",
                     "section_quality": 101,

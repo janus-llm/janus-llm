@@ -1,0 +1,67 @@
+[
+    {
+        "type": "RequirementsDocumenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "refiner_types": ["RequirementsFormatRefiner"],
+            "output_label": "requirements"
+        }
+    },
+    {
+        "type": "Documenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "output_label": "summaries"
+        }
+    },
+    {
+        "type": "PseudocodeDocumenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "pseudocode"
+        }
+    },
+    {
+        "type": "RequirementEvaluator",
+        "kwargs": {
+            "input_labels": ["requirements"],
+            "refiner_types": ["FixParserExceptions"],
+            "eval_items_per_request": 5,
+            "output_label": "requirement_eval"
+        }
+    },
+    {
+        "type": "SummaryEvaluator",
+        "kwargs": {
+            "input_labels": ["summaries"],
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "requirement_eval"
+        }
+    },
+    {
+        "type": "PseudocodeEvaluator",
+        "kwargs": {
+            "input_labels": ["pseudocode"],
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "pseudocode_eval"
+        }
+    },
+    {
+        "type": "OutputMerger",
+        "kwargs": {
+            "input_labels": ["SOURCE", "pseudocode"],
+            "label_key_map": {"SOURCE": "SOURCE_CODE", "pseudocode": "PSEUDOCODE"},
+            "output_label": "code+pseudocode"
+        }
+    },
+    {
+        "type": "MergedOutputEvaluator",
+        "kwargs": {
+            "input_labels": ["code+pseudocode"],
+            "prompt_template": "eval_prompts/pseudocode",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "pseudocode_merged_eval"
+        }
+    }
+]

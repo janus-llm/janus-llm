@@ -1,5 +1,4 @@
 from janus.converter.document import Documenter
-from janus.language.combine import ChunkCombiner
 from janus.parsers.reqs_parser import RequirementsParser
 from janus.utils.logger import create_logger
 
@@ -13,9 +12,16 @@ class RequirementsDocumenter(Documenter):
     """
 
     def __init__(
-        self, combine_output: bool = False, output_type: str = "requirements", **kwargs
+        self,
+        prompt_template: str = "requirements",
+        combine_output: bool = False,
+        output_type: str = "requirements",
+        **kwargs,
     ):
-        super().__init__(output_type=output_type, combine_output=combine_output, **kwargs)
-        self._prompt_template_names = ["requirements"]
-        self._combiner = ChunkCombiner()
+        super().__init__(
+            output_type=output_type,
+            combine_output=combine_output,
+            prompt_template=prompt_template,
+            **kwargs,
+        )
         self._parser = RequirementsParser()

@@ -14,13 +14,13 @@ class TestConverter(unittest.TestCase):
             model="gpt-4o",
             source_language="json",
             refiner_types=[FixParserExceptions],
-            prompt_templates=["simple", "pseudocode"],
+            prompt_template="simple",
             use_janus_inputs=True,
         )
 
         converter._load_parameters()
 
-        self.assertEqual(6, len(converter._chain.steps))
+        self.assertEqual(4, len(converter._chain.steps))
 
     @patch("janus.converter.Converter._run_chain")
     def test_iterative_translate(self, mock_run_chain):
