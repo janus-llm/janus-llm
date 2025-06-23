@@ -484,7 +484,7 @@ class Converter:
 
     def translate(
         self,
-        input_directory: str | Path,
+        input_path: str | Path,
         output_directory: str | Path | None = None,
         failure_directory: str | Path | None = None,
         overwrite: bool = False,
@@ -502,8 +502,8 @@ class Converter:
         self._load_parameters()
 
         # Convert paths to pathlib Paths if needed
-        if isinstance(input_directory, str):
-            input_directory = Path(input_directory)
+        if isinstance(input_path, str):
+            input_path = Path(input_path)
         if isinstance(output_directory, str):
             output_directory = Path(output_directory)
         if isinstance(failure_directory, str):
@@ -522,14 +522,15 @@ class Converter:
         else:
             source_language = self._source_language
             source_suffixes = self._source_suffixes
-        if input_directory.is_dir():
+        if input_path.is_dir():
             for ext in source_suffixes:
-                input_paths.extend(input_directory.rglob(f"**/*{ext}"))
+                input_paths.extend(input_path.rglob(f"**/*{ext}"))
+            input_directory = input_path
         else:
-            if input_directory.suffix not in source_suffixes:
+            if input_path.suffix not in source_suffixes:
                 raise ValueError("Error: input file does not match input type")
-            input_paths.append(input_directory)
-            input_directory = input_directory.parent
+            input_paths.append(input_path)
+            input_directory = input_path.parent
 
         log.info(f"Input directory: {input_directory.absolute()}")
         log.info(f"{source_language} {source_suffixes} files: " f"{len(input_paths)}")

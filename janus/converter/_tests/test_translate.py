@@ -92,17 +92,14 @@ class TestTranslator(unittest.TestCase):
             self.assertEqual(expected, actual)
 
             python_file.unlink()
+            # Test if function works for single file
             self.translator.translate(self.test_file, tmpdirname)
 
             with open(python_file, "r") as f:
                 actual = json.load(f)
 
-            # TODO: Really shouldn't have to delete the input metadata here, not
-            #       clear what the issue is, something to do with a newline getting
-            #       added into the text at some point
-            del expected["metadata"]
+            # TODO: Same as above
             del actual["metadata"]
-            del expected["input"]["metadata"]
             del actual["input"]["metadata"]
             self.assertEqual(expected, actual)
 
