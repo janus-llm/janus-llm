@@ -91,6 +91,21 @@ class TestTranslator(unittest.TestCase):
             del actual["input"]["metadata"]
             self.assertEqual(expected, actual)
 
+            python_file.unlink()
+            self.translator.translate(self.test_file, tmpdirname)
+
+            with open(python_file, "r") as f:
+                actual = json.load(f)
+
+            # TODO: Really shouldn't have to delete the input metadata here, not
+            #       clear what the issue is, something to do with a newline getting
+            #       added into the text at some point
+            del expected["metadata"]
+            del actual["metadata"]
+            del expected["input"]["metadata"]
+            del actual["input"]["metadata"]
+            self.assertEqual(expected, actual)
+
     def test_invalid_selections(self) -> None:
         """Tests that settings values for the translator will raise exceptions"""
         self.assertRaises(
