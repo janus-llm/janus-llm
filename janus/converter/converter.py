@@ -522,8 +522,14 @@ class Converter:
         else:
             source_language = self._source_language
             source_suffixes = self._source_suffixes
-        for ext in source_suffixes:
-            input_paths.extend(input_directory.rglob(f"**/*{ext}"))
+        if input_directory.is_dir():
+            for ext in source_suffixes:
+                input_paths.extend(input_directory.rglob(f"**/*{ext}"))
+        else:
+            if input_directory.suffix not in source_suffixes:
+                raise ValueError("Error: input file does not match input type")
+            input_paths.append(input_directory)
+            input_directory = input_directory.parent
 
         log.info(f"Input directory: {input_directory.absolute()}")
         log.info(f"{source_language} {source_suffixes} files: " f"{len(input_paths)}")
