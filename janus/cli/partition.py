@@ -11,12 +11,14 @@ from janus.utils.enums import LANGUAGES
 
 
 def partition(
-    input_dir: Annotated[
+    input_path: Annotated[
         Path,
         typer.Option(
             "--input",
             "-i",
-            help="The directory containing the source code to be partitioned. ",
+            help="The directory containing the source code to be translated"
+            "or the path to a file that should be translated."
+            "If it's a directory then the files should all be in one flat directory.",
         ),
     ],
     language: Annotated[
@@ -149,4 +151,4 @@ def partition(
         use_janus_inputs=use_janus_inputs,
     )
     partitioner = Partitioner(**kwargs)
-    partitioner.translate(input_dir, output_dir, failure_dir, overwrite)
+    partitioner.translate(input_path, output_dir, failure_dir, overwrite)

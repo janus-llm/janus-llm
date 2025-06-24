@@ -11,13 +11,14 @@ from janus.utils.enums import LANGUAGES
 
 
 def document(
-    input_dir: Annotated[
+    input_path: Annotated[
         Path,
         typer.Option(
             "--input",
             "-i",
-            help="The directory containing the source code to be translated. "
-            "The files should all be in one flat directory.",
+            help="The directory containing the source code to be translated"
+            "or the path to a file that should be translated."
+            "If it's a directory then the files should all be in one flat directory.",
         ),
     ],
     language: Annotated[
@@ -214,4 +215,4 @@ def document(
     else:
         documenter = Documenter(drop_comments=drop_comments, **kwargs)
 
-    documenter.translate(input_dir, output_dir, failure_dir, overwrite, collection)
+    documenter.translate(input_path, output_dir, failure_dir, overwrite, collection)

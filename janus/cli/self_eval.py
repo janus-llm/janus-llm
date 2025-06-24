@@ -11,13 +11,14 @@ from janus.utils.enums import LANGUAGES
 
 
 def llm_self_eval(
-    input_dir: Annotated[
+    input_path: Annotated[
         Path,
         typer.Option(
             "--input",
             "-i",
-            help="The directory containing the source code to be evaluated. "
-            "The files should all be in one flat directory.",
+            help="The directory containing the source code to be translated"
+            "or the path to a file that should be translated."
+            "If it's a directory then the files should all be in one flat directory.",
         ),
     ],
     language: Annotated[
@@ -192,4 +193,4 @@ def llm_self_eval(
     elif evaluation_type == "java-category":
         evaluator = JavaCategoryEvaluator(**kwargs)
 
-    evaluator.translate(input_dir, output_dir, failure_dir, overwrite, collection)
+    evaluator.translate(input_path, output_dir, failure_dir, overwrite, collection)

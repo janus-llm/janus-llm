@@ -14,13 +14,14 @@ log = create_logger(__name__)
 
 
 def translate(
-    input_dir: Annotated[
+    input_path: Annotated[
         Path,
         typer.Option(
             "--input",
             "-i",
-            help="The directory containing the source code to be translated. "
-            "The files should all be in one flat directory.",
+            help="The directory containing the source code to be translated"
+            "or the path to a file that should be translated."
+            "If it's a directory then the files should all be in one flat directory.",
         ),
     ],
     source_lang: Annotated[
@@ -180,7 +181,7 @@ def translate(
         target_language = target_lang
         target_version = None
     # make sure not overwriting input
-    if source_lang.lower() == target_language.lower() and input_dir == output_dir:
+    if source_lang.lower() == target_language.lower() and input_path == output_dir:
         log.error("Output files would overwrite input! Aborting...")
         raise ValueError
 
@@ -206,4 +207,4 @@ def translate(
         retriever_type=retriever_type,
         use_janus_inputs=use_janus_inputs,
     )
-    translator.translate(input_dir, output_dir, failure_dir, overwrite, collection)
+    translator.translate(input_path, output_dir, failure_dir, overwrite, collection)

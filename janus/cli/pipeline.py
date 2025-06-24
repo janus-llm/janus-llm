@@ -91,13 +91,14 @@ def pipeline(
     pipeline_file: Annotated[
         Path, typer.Option("-p", "--pipeline", help="Name of pipeline file to use")
     ],
-    input_dir: Annotated[
+    input_path: Annotated[
         Path,
         typer.Option(
             "--input",
             "-i",
-            help="The directory containing the source code to be translated. "
-            "The files should all be in one flat directory.",
+            help="The directory containing the source code to be translated"
+            "or the path to a file that should be translated."
+            "If it's a directory then the files should all be in one flat directory.",
         ),
     ],
     language: Annotated[
@@ -166,7 +167,7 @@ def pipeline(
         splitter_type=splitter_type,
     )
     pipeline.translate(
-        input_directory=input_dir,
+        input_directory=input_path,
         output_directory=output_dir,
         failure_directory=failure_dir,
         overwrite=overwrite,
