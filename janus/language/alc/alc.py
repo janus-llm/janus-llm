@@ -204,16 +204,18 @@ class AlcRegexSplitter(Splitter):
     """
 
     comment_block_pat = r"(?:(?:^[+ ]*(?:\*.*)?\n)*)"
-    label_pat = rf"(?:{comment_block_pat}^[+ ]+([^*\s]*) +)"
-    label_pat_uncap = rf"(?:{comment_block_pat}^[+ ]+[^*\s]* +)"
+    label_pat = rf"(?:{comment_block_pat}^[+ ]*([^*\s]*) +)"
+    label_pat_uncap = rf"(?:{comment_block_pat}^[+ ]*[^*\s]* +)"
     interruption_pat = rf"(?={label_pat_uncap}[CDR]SECT\b|\Z)"
 
     # The result of control_section_pat.findall() is a list of tuples where the first
     #  element of each tuple is the full CSECT definition, and the second and third
     #  element are the candidate labels (at least one will be an empty string)
-    control_section_start_pat = rf"(?:\A(?:{label_pat}START\b)?|{label_pat}[CR]SECT\b)"
+    control_section_start_pat = (
+        rf"(?:\A{label_pat}START\b|\A(?!{interruption_pat})|{label_pat}[CR]SECT\b)"
+    )
     control_section_pat = re.compile(
-        rf"({control_section_start_pat}(?:.*\n)*?){interruption_pat}",
+        rf"({control_section_start_pat}(?:^.*\n)*?){interruption_pat}",
         flags=re.MULTILINE,
     )
 
