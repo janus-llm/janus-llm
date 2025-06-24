@@ -218,7 +218,7 @@ class CodeBlock:
         tokens: int = 0,
         embedding_id: Optional[str] = None,
         affixes: Tuple[str, str] = ("", ""),
-        context_tags: dict[str, str] = {},
+        context_tags: dict[str, str | dict | list] | None = None,
         previous_generation: JanusOutputObject | None = None,
         block_type: str | None = None,
         block_label: str | None = None,
@@ -235,7 +235,7 @@ class CodeBlock:
         self.tokens: int = tokens
         self.embedding_id: Optional[str] = embedding_id
         self.affixes: Tuple[str, str] = affixes
-        self.context_tags: dict[str, str] = context_tags
+        self.context_tags: dict[str, str | dict | list] = context_tags or {}
 
         self.complete = True
         self.omit_prefix = True
