@@ -5,7 +5,7 @@ from typing import Optional
 from janus.language.block import CodeBlock
 from janus.language.combine import Combiner
 from janus.language.node import NodeType
-from janus.language.splitter import Splitter
+from janus.language.splitter import EmptyTreeError, Splitter
 from janus.language.treesitter import TreeSitterSplitter
 from janus.llm.models_info import JanusModel
 from janus.utils.logger import create_logger
@@ -215,7 +215,7 @@ class AlcRegexSplitter(Splitter):
         rf"(?:\A{label_pat}START\b|\A(?!{interruption_pat})|{label_pat}[CR]SECT\b)"
     )
     control_section_pat = re.compile(
-        rf"({control_section_start_pat}(?:^.*\n)*?){interruption_pat}",
+        rf"({control_section_start_pat}(?:.*\n)*?.*){interruption_pat}",
         flags=re.MULTILINE,
     )
 
@@ -224,7 +224,7 @@ class AlcRegexSplitter(Splitter):
     #  is the DSECT label
     dummy_section_start_pat = rf"(?:{label_pat}DSECT)"
     dummy_section_pat = re.compile(
-        rf"({dummy_section_start_pat}(?:.*\n)*?){interruption_pat}",
+        rf"({dummy_section_start_pat}(?:.*\n)*?.*){interruption_pat}",
         flags=re.MULTILINE,
     )
 
@@ -318,11 +318,15 @@ class AlcRegexSplitter(Splitter):
         csect_root = self._get_csect_ast(code)
         dsect_root = self._get_dsect_ast(code)
 
-        # Add DSECTs to CSECT root context tags for later retrieval
-        dsects = self._get_dummy_sections(code)
-        dsects = {name: "\n".join(lst) for name, lst in dsects.items()}
-        csect_root.context_tags["dsects"] = dsects
+        if csect_root is not None:
+            # Add DSECTs to CSECT root context tags for later retrieval
+            dsects = self._get_dummy_sections(code)
+            dsects = {name: "\n".join(lst) for name, lst in dsects.items()}
+            csect_root.context_tags["dsects"] = dsects
 
+        children = [c for c in [csect_root, dsect_root] if c is not None]
+        if not children:
+            raise EmptyTreeError("No sections in source module")
         return CodeBlock(
             text=code,
             name="root",
@@ -333,13 +337,15 @@ class AlcRegexSplitter(Splitter):
             end_byte=len(bytes(code, "utf-8")),
             affixes=("", ""),
             node_type=NodeType("module"),
-            children=[csect_root, dsect_root],
+            children=children,
             language=self.language,
             tokens=self._count_tokens(code),
         )
 
-    def _get_csect_ast(self, code: str) -> CodeBlock:
+    def _get_csect_ast(self, code: str) -> CodeBlock | None:
         csects = self._get_control_sections(code)
+        if not csects:
+            return None
 
         affix = "\n"
         affix_bytes = len(bytes(affix, "utf-8"))
@@ -423,8 +429,10 @@ class AlcRegexSplitter(Splitter):
             tokens=self._count_tokens(code),
         )
 
-    def _get_dsect_ast(self, code: str) -> CodeBlock:
+    def _get_dsect_ast(self, code: str) -> CodeBlock | None:
         dsects = self._get_dummy_sections(code)
+        if not dsects:
+            return None
 
         affix = "\n"
         affix_bytes = len(bytes(affix, "utf-8"))
