@@ -167,7 +167,7 @@ def pipeline(
         splitter_type=splitter_type,
     )
     pipeline.translate(
-        input_directory=input_path,
+        input_path=input_path,
         output_directory=output_dir,
         failure_directory=failure_dir,
         overwrite=overwrite,
