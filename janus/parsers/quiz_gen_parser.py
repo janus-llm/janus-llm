@@ -44,7 +44,7 @@ class QuizGenParser(JanusParser):
             if json_end_index == -1:
                 break
             # Extract the content between the brackets
-            potential_json = text[json_start_index:json_end_index + 1]
+            potential_json = text[json_start_index : json_end_index + 1]
             try:
                 json.loads(potential_json)
                 json_content = potential_json

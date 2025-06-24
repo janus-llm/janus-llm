@@ -1,8 +1,8 @@
-import csv
-import json
 import argparse
-import os
+import csv
 import glob
+import json
+import os
 from pathlib import Path
 
 
@@ -21,7 +21,9 @@ def extract_outputs_from_json_split(input_file_path, split_index):
         main_outputs = f"[{main_outputs}]"
     # Extract the quiz generator output
     if "outputs" in data:
-        intermediate_outputs = data["outputs"][split_index].get("input", None).get("output", None)
+        intermediate_outputs = (
+            data["outputs"][split_index].get("input", None).get("output", None)
+        )
 
     # Convert JSON strings to Python objects
     main_outputs = [json.loads(main_outputs)]
@@ -76,7 +78,7 @@ def combine_outputs(main_outputs, intermediate_outputs, split_index):
             "option-4": entry.get("option-4", ""),
             "correct-answer-number": entry.get("correct-answer-number", ""),
             "topic": entry.get("topic", ""),
-            "selected-answer-number": None,  # Placeholder for selected-answer-number
+            "selected-answer-number": None,  # Placeholder for number
             "grading-result": None,  # Placeholder for grading result
             "reasoning": None,  # Placeholder for reasoning
         }
@@ -101,7 +103,6 @@ def combine_outputs(main_outputs, intermediate_outputs, split_index):
 
 
 def quiz_to_csv(input_file_path: str | Path, output_file_path: str | Path):
-
     # Check how many quizzes are in the file
     split_count = 0
     with open(input_file_path, "r", encoding="utf-8") as file:
@@ -141,15 +142,23 @@ def quiz_to_csv(input_file_path: str | Path, output_file_path: str | Path):
         # Write the header
         writer.writeheader()
 
-        if split_count != 1:  # If the code was split into multiple quizzes, loop through each with the split format
+        if split_count != 1:
+            # If the code was split into multiple quizzes
+            # loop through each with the split format
             for split_index in range(split_count):
-                main_outputs, intermediate_outputs = extract_outputs_from_json_split(input_file_path, split_index)
-                combined_list = combine_outputs(main_outputs, intermediate_outputs, split_index)
+                main_outputs, intermediate_outputs = extract_outputs_from_json_split(
+                    input_file_path, split_index
+                )
+                combined_list = combine_outputs(
+                    main_outputs, intermediate_outputs, split_index
+                )
                 # Write each row
                 for _, entry in combined_list.items():
                     writer.writerow(entry)
         else:  # If code was not split, process the single quiz
-            main_outputs, intermediate_outputs = extract_outputs_from_json_single(input_file_path, 0)
+            main_outputs, intermediate_outputs = extract_outputs_from_json_single(
+                input_file_path, 0
+            )
             combined_list = combine_outputs(main_outputs, intermediate_outputs, 0)
             # Write each row
             for _, entry in combined_list.items():
@@ -158,8 +167,12 @@ def quiz_to_csv(input_file_path: str | Path, output_file_path: str | Path):
 
 # Parse input and output filepath args
 parser = argparse.ArgumentParser(description="Process input and output files.")
-parser.add_argument("-i", "--input", required=True, help="Path to the input file or directory")
-parser.add_argument("-o", "--output", required=True, help="Path to the output file or directory")
+parser.add_argument(
+    "-i", "--input", required=True, help="Path to the input file or directory"
+)
+parser.add_argument(
+    "-o", "--output", required=True, help="Path to the output file or directory"
+)
 args = parser.parse_args()
 input_path = args.input
 output_path = args.output
@@ -177,7 +190,9 @@ elif os.path.isdir(input_path):
         print("No .json files found in the directory.")
     for json_file in json_files:
         # Construct output file path for each input file
-        output_file = os.path.join(output_path, os.path.basename(json_file).replace(".json", ".csv"))
+        output_file = os.path.join(
+            output_path, os.path.basename(json_file).replace(".json", ".csv")
+        )
         quiz_to_csv(json_file, output_file)
 else:
     print("Invalid input path. Please provide a valid file or directory.")

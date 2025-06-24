@@ -19,7 +19,8 @@ def quiz(
         typer.Option(
             "--input",
             "-i",
-            help="The directory containing the source code the quiz will be based on. "
+            help="The directory containing"
+            "the source code the quiz will be based on. "
             "The files should all be in one flat directory.",
         ),
     ],
@@ -38,15 +39,16 @@ def quiz(
             "--output", "-o", help="The directory to store the generated quiz in."
         ),
     ],
-    target_lang: Annotated[ #TODO REMOVE
+    target_lang: Annotated[  # TODO REMOVE
         str,
         typer.Option(
             "--target-language",
             "-t",
-            help="The desired output language to translate the source code to. The "
-            "format can follow a 'language-version' syntax.  Use 'text' to get plaintext"
-            "results as returned by the LLM. Examples: `python-3.10`, `mumps`, `java-10`,"
-            "text.",
+            help="The desired output language to translate"
+            "the source code to. The format can follow a"
+            "'language-version' syntax.  Use 'text' to get plaintext"
+            "results as returned by the LLM. Examples: `python-3.10`,"
+            "`mumps`, `java-10`, text.",
         ),
     ],
     llm_name: Annotated[
@@ -70,8 +72,9 @@ def quiz(
         typer.Option(
             "--max-prompts",
             "-m",
-            help="The maximum number of times to prompt a model on one functional block "
-            "before exiting the application. This is to prevent wasting too much money.",
+            help="The maximum number of times to prompt a model"
+            "on one functional block before exiting the application."
+            "This is to prevent wasting too much money.",
         ),
     ] = 10,
     overwrite: Annotated[
@@ -108,8 +111,8 @@ def quiz(
         typer.Option(
             "-r",
             "--refiner",
-            help="List of refiner types to use. Add -r for each refiner to use in\
-                refinement chain",
+            help="List of refiner types to use."
+            "Add -r for each refiner to use in refinement chain",
             click_type=click.Choice(list(REFINERS.keys())),
         ),
     ] = ["JanusRefiner"],
@@ -151,10 +154,12 @@ def quiz(
         typer.Option(
             "--kw",
             help=(
-                "Keyword arguments to pass to model kwargs. Expects key=val pair."
-                " For multiple, supply this argument multiple times. For example,"
-                " `--kw max_tokens=4000 --kw temperature=0.7` (this would set the"
-                " maximum *output* tokens to 4000, not to be confused with the"
+                "Keyword arguments to pass to model kwargs."
+                "Expects key=val pair. For multiple, supply"
+                "this argument multiple times. For example,"
+                " `--kw max_tokens=4000 --kw temperature=0.7`"
+                "(this would set the maximum *output* tokens"
+                "to 4000, not to be confused with the"
                 " --max-tokens/-M argument)"
             ),
         ),
@@ -163,7 +168,8 @@ def quiz(
         str,
         typer.Option(
             "--topic",
-            help="The topic the quiz should focus on, for example 'algorithms'."
+            help="The topic the quiz should focus on,"
+            "for example 'algorithms'."
             "If unspecified, the quiz will be general in nature.",
         ),
     ] = None,
@@ -172,7 +178,8 @@ def quiz(
         typer.Option(
             "--topic-description",
             "-D",
-            help="Description of what the quiz topic includes, for example 'Logic and flow of algorithms used in the code'.",
+            help="Description of what the quiz topic includes, "
+            "for example 'Logic and flow of algorithms used in the code'.",
         ),
     ] = None,
 ):

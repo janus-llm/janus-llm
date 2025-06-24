@@ -25,7 +25,7 @@ class QuizTakerParser(JanusParser):
             if json_end_index == -1:
                 break
             # Extract the content between the brackets
-            potential_json = text[json_start_index:json_end_index + 1]
+            potential_json = text[json_start_index : json_end_index + 1]
             try:
                 json.loads(potential_json)
                 json_content = potential_json
@@ -33,7 +33,7 @@ class QuizTakerParser(JanusParser):
             except json.JSONDecodeError:
                 start_index = json_end_index + 1
         return json_content
-    
+
     def parse_input(self, block: CodeBlock) -> str:
         # Get code input from generation step
         if block.previous_generation is None:
@@ -47,7 +47,9 @@ class QuizTakerParser(JanusParser):
             if "output" in input_str:
                 input_str = input_str["output"]
             else:
-                log.debug(f"Missing output field in JSON object. Object contents:\n{input_str}")
+                log.debug(
+                    f"Missing output field in JSON object. Object contents:\n{input_str}"
+                )
 
         data = json.loads(block.text)
         for question in data:

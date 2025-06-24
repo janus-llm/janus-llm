@@ -26,7 +26,9 @@ class QuizTaker(Converter):
         target_language: str = "json",
         **kwargs,
     ) -> None:
-        super().__init__(target_language=target_language, prompt_template=prompt_template, **kwargs)
+        super().__init__(
+            target_language=target_language, prompt_template=prompt_template, **kwargs
+        )
 
         self._parser = QuizTakerParser(language=target_language)
 

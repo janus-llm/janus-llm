@@ -10,11 +10,11 @@ from janus.cli.embedding import embedding
 from janus.cli.llm import llm
 from janus.cli.partition import partition
 from janus.cli.pipeline import pipeline
+from janus.cli.quiz import quiz
+from janus.cli.quiz_taker import quiz_taker
 from janus.cli.self_eval import llm_self_eval
 from janus.cli.tokenizer import tokenizer
 from janus.cli.translate import translate
-from janus.cli.quiz import quiz
-from janus.cli.quiz_taker import quiz_taker
 from janus.metrics.cli import evaluate
 from janus.utils.logger import create_logger
 

@@ -38,7 +38,7 @@ def quiz_taker(
             "--output", "-o", help="The directory to store the quiz answers in."
         ),
     ],
-    target_lang: Annotated[ #TODO REMOVE
+    target_lang: Annotated[  # TODO REMOVE
         str,
         typer.Option(
             "--target-language",
@@ -173,7 +173,6 @@ def quiz_taker(
     if source_lang.lower() == target_language.lower() and input_dir == output_dir:
         log.error("Output files would overwrite input! Aborting...")
         raise ValueError
-
 
     model_arguments: dict[str, Any] = {}
     if model_kwargs:

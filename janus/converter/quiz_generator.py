@@ -19,7 +19,9 @@ class QuizGenerator(Converter):
         combine_output: bool = False,
         **kwargs,
     ) -> None:
-        super().__init__(target_language=target_language, prompt_template=prompt_template, **kwargs)
+        super().__init__(
+            target_language=target_language, prompt_template=prompt_template, **kwargs
+        )
 
         self._quiz_topic = quiz_topic
         self._quiz_topic_description = quiz_topic_description
