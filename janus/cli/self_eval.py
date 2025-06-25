@@ -16,8 +16,8 @@ def llm_self_eval(
         typer.Option(
             "--input",
             "-i",
-            help="The directory containing the source code to be translated"
-            "or the path to a file that should be translated."
+            help="The directory containing the source code to be translated "
+            "or the path to a file that should be translated. "
             "If it's a directory then the files should all be in one flat directory.",
         ),
     ],
@@ -30,16 +30,18 @@ def llm_self_eval(
             click_type=click.Choice(sorted(LANGUAGES)),
         ),
     ],
-    output_dir: Annotated[
+    output_path: Annotated[
         Path,
-        typer.Option("--output", "-o", help="The directory to store the evaluations in."),
+        typer.Option(
+            "--output", "-o", help="The directory or file to store the evaluations in."
+        ),
     ],
-    failure_dir: Annotated[
+    failure_path: Annotated[
         Optional[Path],
         typer.Option(
             "--failure-directory",
             "-f",
-            help="The directory to store failure files during translation",
+            help="The directory or file to store failure files during translation",
         ),
     ] = None,
     llm_name: Annotated[
@@ -193,4 +195,4 @@ def llm_self_eval(
     elif evaluation_type == "java-category":
         evaluator = JavaCategoryEvaluator(**kwargs)
 
-    evaluator.translate(input_path, output_dir, failure_dir, overwrite, collection)
+    evaluator.translate(input_path, output_path, failure_path, overwrite, collection)

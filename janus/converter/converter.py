@@ -485,8 +485,8 @@ class Converter:
     def translate(
         self,
         input_path: str | Path,
-        output_directory: str | Path | None = None,
-        failure_directory: str | Path | None = None,
+        output_path: str | Path | None = None,
+        failure_path: str | Path | None = None,
         overwrite: bool = False,
         collection_name: str | None = None,
     ) -> None:
@@ -504,16 +504,22 @@ class Converter:
         # Convert paths to pathlib Paths if needed
         if isinstance(input_path, str):
             input_path = Path(input_path)
-        if isinstance(output_directory, str):
-            output_directory = Path(output_directory)
-        if isinstance(failure_directory, str):
-            failure_directory = Path(failure_directory)
+        if isinstance(output_path, str):
+            output_path = Path(output_path)
+        if isinstance(failure_path, str):
+            failure_path = Path(failure_path)
 
         # Make sure the output directory exists
-        if output_directory is not None and not output_directory.exists():
-            output_directory.mkdir(parents=True)
-        if failure_directory is not None and not failure_directory.exists():
-            failure_directory.mkdir(parents=True)
+        if output_path is not None and not output_path.exists():
+            output_path.mkdir(parents=True)
+        if failure_path is not None and not failure_path.exists():
+            failure_path.mkdir(parents=True)
+
+        if input_path.is_dir():
+            if output_path is not None and not output_path.is_dir():
+                raise ValueError("Cannot specify input directory and single output file")
+            if failure_path is not None and not failure_path.is_dir():
+                raise ValueError("Cannot specify input directory and single failure file")
 
         input_paths = []
         if self._use_janus_inputs:
@@ -538,19 +544,25 @@ class Converter:
             "Other files (skipped): "
             f"{len(list(input_directory.iterdir())) - len(input_paths)}\n"
         )
-        if output_directory is not None:
-            output_paths = [
-                output_directory / p.relative_to(input_directory).with_suffix(".json")
-                for p in input_paths
-            ]
+        if output_path is not None:
+            if output_path.is_dir():
+                output_paths = [
+                    output_path / p.relative_to(input_directory).with_suffix(".json")
+                    for p in input_paths
+                ]
+            else:
+                output_paths = [output_path]
         else:
             output_paths = [None for _ in input_paths]
 
-        if failure_directory is not None:
-            failure_paths = [
-                failure_directory / p.relative_to(input_directory).with_suffix(".json")
-                for p in input_paths
-            ]
+        if failure_path is not None:
+            if failure_path.is_dir():
+                failure_paths = [
+                    failure_path / p.relative_to(input_directory).with_suffix(".json")
+                    for p in input_paths
+                ]
+            else:
+                failure_paths = [failure_path]
         else:
             failure_paths = [None for _ in input_paths]
         in_out_pairs = list(zip(input_paths, output_paths, failure_paths))

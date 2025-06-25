@@ -16,8 +16,8 @@ def document(
         typer.Option(
             "--input",
             "-i",
-            help="The directory containing the source code to be translated"
-            "or the path to a file that should be translated."
+            help="The directory containing the source code to be translated "
+            "or the path to a file that should be translated. "
             "If it's a directory then the files should all be in one flat directory.",
         ),
     ],
@@ -30,10 +30,12 @@ def document(
             click_type=click.Choice(sorted(LANGUAGES)),
         ),
     ],
-    output_dir: Annotated[
+    output_path: Annotated[
         Path,
         typer.Option(
-            "--output", "-o", help="The directory to store the translated code in."
+            "--output",
+            "-o",
+            help="The directory or file to store the translated code in.",
         ),
     ],
     llm_name: Annotated[
@@ -44,12 +46,12 @@ def document(
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ],
-    failure_dir: Annotated[
+    failure_path: Annotated[
         Optional[Path],
         typer.Option(
             "--failure-directory",
             "-f",
-            help="The directory to store failure files during documentation",
+            help="The directory or file to store failure files during documentation",
         ),
     ] = None,
     max_prompts: Annotated[
@@ -215,4 +217,4 @@ def document(
     else:
         documenter = Documenter(drop_comments=drop_comments, **kwargs)
 
-    documenter.translate(input_path, output_dir, failure_dir, overwrite, collection)
+    documenter.translate(input_path, output_path, failure_path, overwrite, collection)

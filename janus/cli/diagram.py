@@ -17,8 +17,8 @@ def diagram(
         typer.Option(
             "--input",
             "-i",
-            help="The directory containing the source code to be translated"
-            "or the path to a file that should be translated."
+            help="The directory containing the source code to be translated "
+            "or the path to a file that should be translated. "
             "If it's a directory then the files should all be in one flat directory.",
         ),
     ],
@@ -31,10 +31,12 @@ def diagram(
             click_type=click.Choice(sorted(LANGUAGES)),
         ),
     ],
-    output_dir: Annotated[
+    output_path: Annotated[
         Path,
         typer.Option(
-            "--output", "-o", help="The directory to store the translated code in."
+            "--output",
+            "-o",
+            help="The directory or file to store the translated code in.",
         ),
     ],
     llm_name: Annotated[
@@ -45,12 +47,12 @@ def diagram(
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ],
-    failure_dir: Annotated[
+    failure_path: Annotated[
         Optional[Path],
         typer.Option(
             "--failure-directory",
             "-f",
-            help="The directory to store failure files during translation",
+            help="The directory or file to store failure files during translation",
         ),
     ] = None,
     max_prompts: Annotated[
@@ -88,14 +90,6 @@ def diagram(
             "--diagram-type", "-dg", help="Diagram type to generate in PLANTUML"
         ),
     ] = "Activity",
-    add_documentation: Annotated[
-        bool,
-        typer.Option(
-            "--add-documentation/--no-documentation",
-            "-ad",
-            help="Whether to use documentation in generation",
-        ),
-    ] = False,
     splitter_type: Annotated[
         str,
         typer.Option(
@@ -124,15 +118,6 @@ def diagram(
             click_type=click.Choice(["active_usings", "language_docs"]),
         ),
     ] = None,
-    extract_variables: Annotated[
-        bool,
-        typer.Option(
-            "-ev",
-            "--extract-variables",
-            help="Present when diagram generator should \
-                extract variables before producing diagram",
-        ),
-    ] = False,
     use_janus_inputs: Annotated[
         bool,
         typer.Option(
@@ -177,12 +162,10 @@ def diagram(
         refiner_types=refiner_types,
         retriever_type=retriever_type,
         diagram_type=diagram_type,
-        add_documentation=add_documentation,
-        extract_variables=extract_variables,
         use_janus_inputs=use_janus_inputs,
     )
     diagram_generator.translate(
-        input_path, output_dir, failure_dir, overwrite, collection
+        input_path, output_path, failure_path, overwrite, collection
     )
 
 
