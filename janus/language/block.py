@@ -209,7 +209,7 @@ class CodeBlock:
         name: Optional[str],
         node_type: NodeType,
         language: str,
-        text: Optional[str],
+        text: str | None = None,
         children: list["CodeBlock"] | None = None,
         start_point: Tuple[int, int] = (0, 0),
         end_point: Tuple[int, int] = (-1, -1),

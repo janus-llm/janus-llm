@@ -50,6 +50,7 @@ class Splitter(FileManager):
         protected_node_types: tuple[str, ...] = (),
         prune_node_types: tuple[str, ...] = (),
         prune_unprotected: bool = False,
+        recalc_border_indices: bool = True,
     ):
         """
         Arguments:
@@ -73,6 +74,7 @@ class Splitter(FileManager):
         self._protected_node_types = set(protected_node_types)
         self._prune_node_types = set(prune_node_types)
         self.prune_unprotected = prune_unprotected
+        self._recalc_border_indices = recalc_border_indices
 
     def split(self, file: Path | str) -> CodeBlock:
         """Split the given file into functional code blocks.
@@ -106,7 +108,8 @@ class Splitter(FileManager):
         self._segment_leaves(root)
         if not self.skip_merge:
             self._merge_tree(root)
-        root.mark_root()
+        if self._recalc_border_indices:
+            root.mark_root()
         return root
 
     def _get_ast(self, code: str) -> CodeBlock:
