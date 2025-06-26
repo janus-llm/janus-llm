@@ -389,7 +389,7 @@ class AlcRegexSplitter(Splitter):
         start_char = sect.start - head.rfind("\n") - 1
         end_byte = start_byte + len(bytes(sect.definition, "utf-8"))
         end_line = start_line + sect.definition.count("\n")
-        end_char = sect.end - sect.definition.rfind("\n") - 1
+        end_char = len(sect.definition) - sect.definition.rfind("\n") - 1
 
         node = CodeBlock(
             text=sect.definition,
