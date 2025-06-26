@@ -64,6 +64,9 @@ class Splitter(FileManager):
                 TODO: Maybe instead support something like a list of node types that
                       shouldnt be merged (e.g. functions, classes)?
             prune_unprotected: Whether to prune unprotected nodes from the tree.
+            recalc_border_indices: Whether to recalculate start/end line numbers and
+                byte locations after splitting. Usually a good idea to keep on, unless
+                the in-order traversal of the AST will not match the source code order
         """
         super().__init__(language=language)
         self.model = model
