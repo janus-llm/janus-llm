@@ -510,9 +510,17 @@ class Converter:
             failure_path = Path(failure_path)
 
         # Make sure the output directory exists
-        if output_path is not None and not output_path.exists():
+        if (
+            output_path is not None
+            and not output_path.exists()
+            and not output_path.suffix
+        ):
             output_path.mkdir(parents=True)
-        if failure_path is not None and not failure_path.exists():
+        if (
+            failure_path is not None
+            and not failure_path.exists()
+            and not failure_path.suffix
+        ):
             failure_path.mkdir(parents=True)
 
         if input_path.is_dir():
