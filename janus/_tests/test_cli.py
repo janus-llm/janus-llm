@@ -140,8 +140,8 @@ class TestCli(unittest.TestCase):
         translate(
             source_lang="matlab",
             target_lang="python",
-            input_dir="janus/",
-            output_dir="janus/",
+            input_path="janus/",
+            output_path="janus/",
             overwrite=True,
             temp=0.7,
             prompt_template="simple",

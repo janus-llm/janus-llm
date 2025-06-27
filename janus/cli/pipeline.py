@@ -91,13 +91,14 @@ def pipeline(
     pipeline_file: Annotated[
         Path, typer.Option("-p", "--pipeline", help="Name of pipeline file to use")
     ],
-    input_dir: Annotated[
+    input_path: Annotated[
         Path,
         typer.Option(
             "--input",
             "-i",
-            help="The directory containing the source code to be translated. "
-            "The files should all be in one flat directory.",
+            help="The directory containing the source code to be translated "
+            "or the path to a file that should be translated. "
+            "If it's a directory then the files should all be in one flat directory.",
         ),
     ],
     language: Annotated[
@@ -109,10 +110,12 @@ def pipeline(
             click_type=click.Choice(sorted(LANGUAGES)),
         ),
     ],
-    output_dir: Annotated[
+    output_path: Annotated[
         Path,
         typer.Option(
-            "--output", "-o", help="The directory to store the translated code in."
+            "--output",
+            "-o",
+            help="The directory or file to store the translated code in.",
         ),
     ],
     llm_name: Annotated[
@@ -123,12 +126,12 @@ def pipeline(
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ],
-    failure_dir: Annotated[
+    failure_path: Annotated[
         Optional[Path],
         typer.Option(
             "--failure-directory",
             "-f",
-            help="The directory to store failure files during documentation",
+            help="The directory or file to store failure files during documentation",
         ),
     ] = None,
     overwrite: Annotated[
@@ -166,8 +169,8 @@ def pipeline(
         splitter_type=splitter_type,
     )
     pipeline.translate(
-        input_directory=input_dir,
-        output_directory=output_dir,
-        failure_directory=failure_dir,
+        input_path=input_path,
+        output_path=output_path,
+        failure_path=failure_path,
         overwrite=overwrite,
     )
