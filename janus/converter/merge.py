@@ -36,12 +36,15 @@ class OutputMerger(Converter):
     ) -> list[TranslatedCodeBlock | CodeBlock]:
         hash_table: dict[int, CodeBlock] = {}
         descendent_dict: dict[int, set[int]] = defaultdict(set)
+        groupless_blocks: set[int] = set()
         for block in blocks:
+            block_hash = hash(block)
+            hash_table[block_hash] = block
+
             if block.block_label not in self._input_labels:
                 continue
 
-            block_hash = hash(block)
-            hash_table[block_hash] = block
+            groupless_blocks.add(block_hash)
 
             # If block has no history, it may be the original source
             if block.previous_generation is None:
@@ -63,7 +66,7 @@ class OutputMerger(Converter):
             descendents = descendent_dict[key]
 
             # Discard descendents that have already been taken
-            descendents.intersection_update(hash_table)
+            descendents.intersection_update(groupless_blocks)
 
             # Check that all input labels are represented
             labels_present = set(hash_table[h].block_label for h in descendents)
@@ -71,10 +74,13 @@ class OutputMerger(Converter):
                 continue
 
             # Remove descendents from the hash table, add them to this group
-            groups.append((ancestor, [hash_table.pop(d) for d in descendents]))
+            groups.append((ancestor, [hash_table[d] for d in descendents]))
+            groupless_blocks.difference_update(descendents)
 
-        if hash_table:
-            raise ValueError(f"Found {len(hash_table)} blocks with no matches in merge")
+        if groupless_blocks:
+            raise ValueError(
+                f"Found {len(groupless_blocks)} blocks with no matches in merge"
+            )
 
         merged_blocks = [
             self._merge_group(group=descendents, ancestor=ancestor)
