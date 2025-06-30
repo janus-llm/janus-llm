@@ -7,7 +7,7 @@ from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, Field, RootModel, ValidationError
 
 from janus.language.block import CodeBlock
-from janus.parsers.parser import JanusParser, JanusParserException, JsonParser
+from janus.parsers.parser import JanusParser, JsonParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -53,19 +53,21 @@ class LabeledJavaListParser(JanusParser, PydanticOutputParser):
         if isinstance(text, BaseMessage):
             text = str(text.content)
 
-        json_parser = JsonParser() # avoids method resolution conflict
+        json_parser = JsonParser()  # avoids method resolution conflict
         text = json_parser.parse(text)
         objs = json.loads(text)
         log.info(f"Found {len(objs)} sections of labeled java code")
-        
+
         # flatten nested lists, if present
         if isinstance(objs, list) and objs and isinstance(objs[0], list):
             objs = [item for sublist in objs for item in sublist]
 
         if not isinstance(objs, list):
-            raise OutputParserException(f"Expected a list of labeled blocks, got {type(objs)}")
-        
-        try:      
+            raise OutputParserException(
+                f"Expected a list of java labels, got {type(objs)}"
+            )
+
+        try:
             # Let pydantic parse the list directly (will wrap it in 'root')
             out = LabeledJavaList(root=objs)
         except json.JSONDecodeError as e:
@@ -74,12 +76,12 @@ class LabeledJavaListParser(JanusParser, PydanticOutputParser):
         except ValidationError as e:
             log.warning(f"Validation error. Output:\n{text}")
             raise OutputParserException(f"Validation error: {e}")
-        
+
         # JSON stringify
         serialized_output = json.dumps([obj.model_dump() for obj in out.root])
         log.debug(f"Serialized output:\n{serialized_output}")
         return serialized_output
 
     def parse_combined_output(self, text: str) -> str:
-        json_parser = JsonParser() # avoids method resolution conflict
+        json_parser = JsonParser()  # avoids method resolution conflict
         return json_parser.parse(text)
