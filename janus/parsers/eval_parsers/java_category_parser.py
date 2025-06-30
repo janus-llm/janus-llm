@@ -55,12 +55,16 @@ class LabeledJavaListParser(JanusParser, PydanticOutputParser):
 
         begin, end = text.find("["), text.rfind("]")
         end += 1 if end != -1 else 0
-        json_text = text[begin:end] # use text in debug later, dont overwrite
+        json_text = text[begin:end]  # use text in debug later, dont overwrite
 
         try:
             parsed_data = json.loads(json_text)
 
-            if isinstance(parsed_data, list) and len(parsed_data) > 0 and isinstance(parsed_data[0], list):
+            if (
+                isinstance(parsed_data, list)
+                and len(parsed_data) > 0
+                and isinstance(parsed_data[0], list)
+            ):
                 parsed_data = [item for sublist in parsed_data for item in sublist]
             if not isinstance(parsed_data, list):
                 raise OutputParserException(f"Expected a list, got {type(parsed_data)}")
@@ -83,10 +87,10 @@ class LabeledJavaListParser(JanusParser, PydanticOutputParser):
         """Combine multiple JSON objects into a single JSON string."""
         if not text.strip():
             return "[]"
-        
+
         lines = [line.strip() for line in text.split("\n") if line.strip()]
         full_text = "[" + ",".join(lines) + "]"
-        
+
         try:
             return self.parse(full_text)
         except OutputParserException as e:
