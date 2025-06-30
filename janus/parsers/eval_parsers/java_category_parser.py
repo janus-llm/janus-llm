@@ -55,14 +55,16 @@ class LabeledJavaListParser(JanusParser, PydanticOutputParser):
 
         begin, end = text.find("["), text.rfind("]")
         end += 1 if end != -1 else 0
-        text = text[begin:end]
+        json_text = text[begin:end] # use text in debug later, dont overwrite
 
         try:
-            parsed_data = json.loads(text)
-            if isinstance(parsed_data, list) and isinstance(parsed_data[0], list):
-                parsed_data = [item for sublist in parsed_data for item in sublist]
+            parsed_data = json.loads(json_text)
 
-            out: LabeledJavaList = super().parse(json.dumps({"__root__": parsed_data}))
+            if not isinstance(parsed_data, list):
+                raise OutputParserException(f"Expected a list, got {type(parsed_data)}")
+
+            # let pydantic parse the list directly (will wrap it in '__root__')
+            out: LabeledJavaList = LabeledJavaList(root=parsed_data)
         except json.JSONDecodeError as e:
             log.debug(f"Invalid JSON array. Output:\n{text}")
             raise OutputParserException(f"Got invalid JSON array. Error: {e}")
@@ -71,7 +73,7 @@ class LabeledJavaListParser(JanusParser, PydanticOutputParser):
             raise OutputParserException(f"Validation error: {e}")
 
         # json stringify
-        serialized_output = json.dumps([obj.dict() for obj in out.__root__])
+        serialized_output = json.dumps([obj.model_dump() for obj in out.root])
         log.debug(f"Serialized output:\n{serialized_output}")
         return serialized_output
 
@@ -79,10 +81,10 @@ class LabeledJavaListParser(JanusParser, PydanticOutputParser):
         """Combine multiple JSON objects into a single JSON string."""
         if not text.strip():
             return "[]"
-
+        
         lines = [line.strip() for line in text.split("\n") if line.strip()]
         full_text = "[" + ",".join(lines) + "]"
-
+        
         try:
             return self.parse(full_text)
         except OutputParserException as e:
