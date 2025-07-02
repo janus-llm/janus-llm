@@ -139,7 +139,7 @@ def translate(
             "-R",
             "--retriever",
             help="Name of custom retriever to use",
-            click_type=click.Choice(["active_usings", "language_docs"]),
+            click_type=click.Choice(["active_usings", "language_docs", "op_codes"]),
         ),
     ] = None,
     max_tokens: Annotated[
