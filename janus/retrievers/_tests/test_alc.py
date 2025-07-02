@@ -15,7 +15,7 @@ class TestOpCodeRetriever(unittest.TestCase):
         test_file = Path("janus/language/treesitter/_tests/languages/ibmhlasm.asm")
         with open(test_file, "r") as f:
             text = f.read()
-        splitter = ChunkSplitter()
-        block = splitter.split_string(text)
+        splitter = ChunkSplitter(language="ibmhlasm")
+        block = splitter.split_string(text, "test")
         context = self._retriever.get_context(block)
-        self.assertEqual(context, "DS: Define Storage")
+        self.assertEqual(context, "DS: Define Storage\n")

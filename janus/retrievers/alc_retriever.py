@@ -29,5 +29,6 @@ class OpCodeRetriever(JanusRetriever):
                 op_code = stripped_line.split()[1]
             if op_code not in self._op_code_dict:
                 log.debug(f"Error: op code {op_code} not found")
+                continue
             context += f"{op_code}: {self._op_code_dict[op_code]}\n"
         return context
