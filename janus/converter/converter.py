@@ -358,7 +358,9 @@ class Converter:
         elif self._retriever_type == "language_docs":
             self._retriever = LanguageDocsRetriever(self._llm, self._source_language)
         elif self._retriever_type == "op_codes":
-            self._retriever = OpCodeRetriever("janus/retrievers/_tests/op_codes.json")
+            self._retriever = OpCodeRetriever(
+                "janus/language/alc/IBM_Assembly_Operations.json"
+            )
         else:
             self._retriever = JanusRetriever()
 
