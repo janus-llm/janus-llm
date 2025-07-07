@@ -303,6 +303,8 @@ class AlcRegexSplitter(Splitter):
         return list(set(self.using_pat.findall(code)))
 
     def _set_identifiers(self, root: CodeBlock, name: str):
+        # Setting the node ID is handled in `_split_on_visual_separators` and 
+        # `_code_block_from_section`.
         return
 
     def _add_usings(self, root: CodeBlock) -> None:
