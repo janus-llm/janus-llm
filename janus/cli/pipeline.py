@@ -25,6 +25,7 @@ def instantiate(
     pipeline_definition: ConverterDefinition,
     model: str,
     source_language: str | None = None,
+    max_tokens: int | None = None,
     use_janus_inputs: bool | None = None,
 ) -> Converter:
     """Recursively instantiate converters in a pipeline. If source_language is
@@ -43,6 +44,8 @@ def instantiate(
         kwargs.update(model=model)
     if source_language is not None and "source_language" not in kwargs:
         kwargs.update(source_language=source_language)
+    if max_tokens is not None and "max_tokens" not in kwargs:
+        kwargs.update(max_tokens=max_tokens)
     if use_janus_inputs is not None and "use_janus_inputs" not in kwargs:
         kwargs.update(use_janus_inputs=use_janus_inputs)
 
@@ -58,6 +61,7 @@ def instantiate(
                     pipeline_definition=conv_def,
                     model=model,
                     source_language=source_language,
+                    max_tokens=max_tokens,
                     use_janus_inputs=use_janus_inputs,
                 )
             )
@@ -73,15 +77,20 @@ def instantiate_pipeline(
     model: str = "gpt-4o",
     use_janus_inputs: None | bool = None,
     splitter_type: str = "file",
+    max_tokens: int | None = None,
 ) -> Converter:
     conv_def = ConverterDefinition(
         type="ConverterChain",
         converters=pipeline,
-        kwargs=dict(splitter_type=splitter_type),
+        kwargs=dict(
+            splitter_type=splitter_type,
+            max_tokens=max_tokens,
+        ),
     )
     return instantiate(
         conv_def,
         source_language=language,
+        max_tokens=max_tokens,
         model=model,
         use_janus_inputs=use_janus_inputs,
     )
@@ -91,13 +100,14 @@ def pipeline(
     pipeline_file: Annotated[
         Path, typer.Option("-p", "--pipeline", help="Name of pipeline file to use")
     ],
-    input_dir: Annotated[
+    input_path: Annotated[
         Path,
         typer.Option(
             "--input",
             "-i",
-            help="The directory containing the source code to be translated. "
-            "The files should all be in one flat directory.",
+            help="The directory containing the source code to be translated "
+            "or the path to a file that should be translated. "
+            "If it's a directory then the files should all be in one flat directory.",
         ),
     ],
     language: Annotated[
@@ -109,10 +119,12 @@ def pipeline(
             click_type=click.Choice(sorted(LANGUAGES)),
         ),
     ],
-    output_dir: Annotated[
+    output_path: Annotated[
         Path,
         typer.Option(
-            "--output", "-o", help="The directory to store the translated code in."
+            "--output",
+            "-o",
+            help="The directory or file to store the translated code in.",
         ),
     ],
     llm_name: Annotated[
@@ -123,12 +135,12 @@ def pipeline(
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ],
-    failure_dir: Annotated[
+    failure_path: Annotated[
         Optional[Path],
         typer.Option(
             "--failure-directory",
             "-f",
-            help="The directory to store failure files during documentation",
+            help="The directory or file to store failure files during documentation",
         ),
     ] = None,
     overwrite: Annotated[
@@ -155,6 +167,15 @@ def pipeline(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    max_tokens: Annotated[
+        int,
+        typer.Option(
+            "--max-tokens",
+            "-M",
+            help="The maximum number of tokens the model will take in. "
+            "If unspecificed, model's default max will be used.",
+        ),
+    ] = None,
 ):
     with open(pipeline_file, "r") as f:
         json_obj = json.load(f)
@@ -164,10 +185,11 @@ def pipeline(
         model=llm_name,
         use_janus_inputs=use_janus_inputs,
         splitter_type=splitter_type,
+        max_tokens=max_tokens,
     )
     pipeline.translate(
-        input_directory=input_dir,
-        output_directory=output_dir,
-        failure_directory=failure_dir,
+        input_path=input_path,
+        output_path=output_path,
+        failure_path=failure_path,
         overwrite=overwrite,
     )

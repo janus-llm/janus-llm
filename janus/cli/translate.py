@@ -14,13 +14,14 @@ log = create_logger(__name__)
 
 
 def translate(
-    input_dir: Annotated[
+    input_path: Annotated[
         Path,
         typer.Option(
             "--input",
             "-i",
-            help="The directory containing the source code to be translated. "
-            "The files should all be in one flat directory.",
+            help="The directory containing the source code to be translated "
+            "or the path to a file that should be translated. "
+            "If it's a directory then the files should all be in one flat directory.",
         ),
     ],
     source_lang: Annotated[
@@ -32,10 +33,12 @@ def translate(
             click_type=click.Choice(sorted(LANGUAGES)),
         ),
     ],
-    output_dir: Annotated[
+    output_path: Annotated[
         Path,
         typer.Option(
-            "--output", "-o", help="The directory to store the translated code in."
+            "--output",
+            "-o",
+            help="The directory or file to store the translated code in.",
         ),
     ],
     target_lang: Annotated[
@@ -57,12 +60,12 @@ def translate(
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ],
-    failure_dir: Annotated[
+    failure_path: Annotated[
         Optional[Path],
         typer.Option(
             "--failure-directory",
             "-f",
-            help="The directory to store failure files during translation",
+            help="The directory or file to store failure files during translation",
         ),
     ] = None,
     max_prompts: Annotated[
@@ -180,7 +183,9 @@ def translate(
         target_language = target_lang
         target_version = None
     # make sure not overwriting input
-    if source_lang.lower() == target_language.lower() and input_dir == output_dir:
+    if source_lang.lower() == target_language.lower() and (
+        input_path == output_path or input_path == failure_path
+    ):
         log.error("Output files would overwrite input! Aborting...")
         raise ValueError
 
@@ -206,4 +211,4 @@ def translate(
         retriever_type=retriever_type,
         use_janus_inputs=use_janus_inputs,
     )
-    translator.translate(input_dir, output_dir, failure_dir, overwrite, collection)
+    translator.translate(input_path, output_path, failure_path, overwrite, collection)

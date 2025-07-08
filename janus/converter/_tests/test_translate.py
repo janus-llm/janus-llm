@@ -91,6 +91,18 @@ class TestTranslator(unittest.TestCase):
             del actual["input"]["metadata"]
             self.assertEqual(expected, actual)
 
+            python_file.unlink()
+            # Test if function works for single file
+            self.translator.translate(self.test_file, tmpdirname)
+
+            with open(python_file, "r") as f:
+                actual = json.load(f)
+
+            # TODO: Same as above
+            del actual["metadata"]
+            del actual["input"]["metadata"]
+            self.assertEqual(expected, actual)
+
     def test_invalid_selections(self) -> None:
         """Tests that settings values for the translator will raise exceptions"""
         self.assertRaises(
