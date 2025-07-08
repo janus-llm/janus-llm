@@ -41,7 +41,7 @@ class AlcSplitter(TreeSitterSplitter):
             max_tokens: The maximum number of tokens supported by the model
         """
         super().__init__(
-            language="ibmhlasm",
+            language="ibmhlasm-ts",
             model=model,
             max_tokens=max_tokens,
             protected_node_types=protected_node_types,
@@ -303,7 +303,7 @@ class AlcRegexSplitter(Splitter):
         return list(set(self.using_pat.findall(code)))
 
     def _set_identifiers(self, root: CodeBlock, name: str):
-        # Setting the node ID is handled in `_split_on_visual_separators` and 
+        # Setting the node ID is handled in `_split_on_visual_separators` and
         # `_code_block_from_section`.
         return
 
