@@ -41,7 +41,7 @@ class AlcSplitter(TreeSitterSplitter):
             max_tokens: The maximum number of tokens supported by the model
         """
         super().__init__(
-            language="ibmhlasm-ts",
+            language="ibmhlasm",
             model=model,
             max_tokens=max_tokens,
             protected_node_types=protected_node_types,

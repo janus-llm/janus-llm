@@ -296,33 +296,9 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
             ", World!</h1>\n</body>\n</html>\n"
         ),
     },
+    # Hacky fix to allow for separating old and new ALC splitters
+    "ibmhlasm-ts": None,
     "ibmhlasm": {
-        "comment": "*",
-        "suffixes": ["asm"],
-        "example": (
-            """
-            +         TITLE 'Hello, World! Program'
-            +HELLO    CSECT
-            +         STM   14,12,12(13)
-            +         LR    12,15
-            +         USING *,12
-            +         LA    15,SAVEAREA
-            +         ST    13,4(,15)
-            +         ST    15,8(13)
-            +         LR    13,15
-            +         WTO   'Hello, World!'
-            +         L     13,4(,13)
-            +         LM    14,12,12(13)
-            +         LA    15,0
-            +         BR    14
-            +SAVEAREA DS    18F
-            +         END   HELLO
-        """
-        ),
-        "functional_node_types": ["csect"],
-        "data_node_types": ["dsect"],
-    },
-    "ibmhlasm-ts": {
         "comment": "*",
         "suffixes": ["asm"],
         "url": "https://github.com/janus-llm/tree-sitter-ibmhlasm.git",
@@ -347,7 +323,8 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
                      END   HELLO
         """
         ),
-        "functional_node_types": ["csect", "dsect"],
+        "functional_node_types": ["csect"],
+        "data_node_types": ["dsect"],
         "branch_node_types": ["branch_instruction"],
         "operation_node_types": ["operation", "branch_operation"],
         "operand_node_types": ["operands"],
