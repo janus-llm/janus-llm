@@ -7,7 +7,7 @@ from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, Field, RootModel, ValidationError
 
 from janus.language.block import CodeBlock
-from janus.parsers.parser import JanusParser, JsonParser
+from janus.parsers.parser import JanusParserException, JsonParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -33,7 +33,7 @@ class LabeledJavaList(RootModel):
     root: List[LabeledJava]
 
 
-class LabeledJavaListParser(JanusParser, PydanticOutputParser):
+class LabeledJavaListParser(JsonParser, PydanticOutputParser):
     def __init__(self):
         PydanticOutputParser.__init__(self, pydantic_object=LabeledJavaList)
 
@@ -53,14 +53,9 @@ class LabeledJavaListParser(JanusParser, PydanticOutputParser):
         if isinstance(text, BaseMessage):
             text = str(text.content)
 
-        json_parser = JsonParser()  # avoids method resolution conflict
-        text = json_parser.parse(text)
+        text = JsonParser.parse(self, text)
         objs = json.loads(text)
         log.info(f"Found {len(objs)} sections of labeled java code")
-
-        # flatten nested lists, if present
-        if isinstance(objs, list) and objs and isinstance(objs[0], list):
-            objs = [item for sublist in objs for item in sublist]
 
         if not isinstance(objs, list):
             raise OutputParserException(
@@ -68,14 +63,16 @@ class LabeledJavaListParser(JanusParser, PydanticOutputParser):
             )
 
         try:
-            # Let pydantic parse the list directly (will wrap it in 'root')
-            out = LabeledJavaList(root=objs)
+            out: LabeledJavaList = PydanticOutputParser.parse(self, text)
         except json.JSONDecodeError as e:
             log.warning(f"Invalid JSON array. Output:\n{text}")
             raise OutputParserException(f"Got invalid JSON array. Error: {e}")
+        except OutputParserException as e:
+            log.warning(f"Pydantic parsing error. Output:\n{text}")
+            raise JanusParserException(text, f"Pydantic parsing error: {e}")
         except ValidationError as e:
             log.warning(f"Validation error. Output:\n{text}")
-            raise OutputParserException(f"Validation error: {e}")
+            raise JanusParserException(text, f"Validation error: {e}")
 
         # JSON stringify
         serialized_output = json.dumps([obj.model_dump() for obj in out.root])
