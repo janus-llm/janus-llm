@@ -296,8 +296,6 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
             ", World!</h1>\n</body>\n</html>\n"
         ),
     },
-    # Hacky fix to allow for separating old and new ALC splitters
-    "ibmhlasm-ts": None,
     "ibmhlasm": {
         "comment": "*",
         "suffixes": ["asm"],
@@ -841,3 +839,6 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
         ),
     },
 }
+
+# Hacky fix to allow for separating old and new ALC splitters
+LANGUAGES["ibmhlasm-ts"] = LANGUAGES["ibmhlasm"]
