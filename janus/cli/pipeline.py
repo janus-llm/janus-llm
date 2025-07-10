@@ -25,6 +25,7 @@ def instantiate(
     pipeline_definition: ConverterDefinition,
     model: str,
     source_language: str | None = None,
+    max_tokens: int | None = None,
     use_janus_inputs: bool | None = None,
 ) -> Converter:
     """Recursively instantiate converters in a pipeline. If source_language is
@@ -43,6 +44,8 @@ def instantiate(
         kwargs.update(model=model)
     if source_language is not None and "source_language" not in kwargs:
         kwargs.update(source_language=source_language)
+    if max_tokens is not None and "max_tokens" not in kwargs:
+        kwargs.update(max_tokens=max_tokens)
     if use_janus_inputs is not None and "use_janus_inputs" not in kwargs:
         kwargs.update(use_janus_inputs=use_janus_inputs)
 
@@ -58,6 +61,7 @@ def instantiate(
                     pipeline_definition=conv_def,
                     model=model,
                     source_language=source_language,
+                    max_tokens=max_tokens,
                     use_janus_inputs=use_janus_inputs,
                 )
             )
@@ -73,15 +77,20 @@ def instantiate_pipeline(
     model: str = "gpt-4o",
     use_janus_inputs: None | bool = None,
     splitter_type: str = "file",
+    max_tokens: int | None = None,
 ) -> Converter:
     conv_def = ConverterDefinition(
         type="ConverterChain",
         converters=pipeline,
-        kwargs=dict(splitter_type=splitter_type),
+        kwargs=dict(
+            splitter_type=splitter_type,
+            max_tokens=max_tokens,
+        ),
     )
     return instantiate(
         conv_def,
         source_language=language,
+        max_tokens=max_tokens,
         model=model,
         use_janus_inputs=use_janus_inputs,
     )
@@ -158,6 +167,15 @@ def pipeline(
             click_type=click.Choice(list(CUSTOM_SPLITTERS.keys())),
         ),
     ] = "file",
+    max_tokens: Annotated[
+        int,
+        typer.Option(
+            "--max-tokens",
+            "-M",
+            help="The maximum number of tokens the model will take in. "
+            "If unspecificed, model's default max will be used.",
+        ),
+    ] = None,
 ):
     with open(pipeline_file, "r") as f:
         json_obj = json.load(f)
@@ -167,6 +185,7 @@ def pipeline(
         model=llm_name,
         use_janus_inputs=use_janus_inputs,
         splitter_type=splitter_type,
+        max_tokens=max_tokens,
     )
     pipeline.translate(
         input_path=input_path,
