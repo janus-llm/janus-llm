@@ -6,7 +6,7 @@ First, you need to [add an LLM](quickstart.md) to your configuration.
 
 ## Translating Files
 
-You'll need to specify at least the source language and the target language as well as the input directory and output directory.
+You'll need to specify at least the source language and the target language as well as the input directory/file and output directory.
 
 ```bash
 janus translate --source-language matlab --target-language python --input janus/language/treesitter/_tests/languages --output python-tests --llm my-gpt
