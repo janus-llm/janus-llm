@@ -75,10 +75,7 @@ class LabeledJavaListParser(JsonParser, PydanticOutputParser):
             raise JanusParserException(text, f"Validation error: {e}")
 
         # JSON stringify
-        serialized_output = json.dumps([obj.model_dump() for obj in out.root])
-        log.debug(f"Serialized output:\n{serialized_output}")
-        return serialized_output
+        return out.model_dump_json()
 
     def parse_combined_output(self, text: str) -> str:
-        json_parser = JsonParser()  # avoids method resolution conflict
-        return json_parser.parse(text)
+        return JsonParser.parse(self, text)
