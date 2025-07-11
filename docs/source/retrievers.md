@@ -27,4 +27,4 @@ This will run the op_codes retriever and insert the result into the context vari
 
 - [`ActiveUsingsRetriever`](autoapi/janus/retrievers/retriever/index): Retriever for getting active usings in alc
 - [`LanguageDocsRetriever`](autoapi/janus/retrievers/retriever/index): Retrieves information from language docs
-- [`OpCodeRetriever`](autoapi/janus/retrievers/alc_retriever/index): Gets op codes and their definitions from predefined json dictionary
+- [`OpCodeRetriever`](autoapi/janus/retrievers/alc_retriever/index): Gets op codes and their definitions from predefined json dictionary. Op Code Dictionary present was extracted from [here](https://bixoft.nl/english/opl_bbbo.htm)
