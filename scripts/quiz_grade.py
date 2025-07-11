@@ -11,7 +11,8 @@ def extract_quiz_attempts(input_file_path):
     Reads the JSON file and extracts quiz attempts based on QuizTaker objects.
     Each QuizTaker object must have an "input" (the quiz answer key from QuizGenerator)
     and an "output" (the quiz taker answers).
-    Returns a list of tuples: (taker_answers, answer_key) where each is a list of question objects.
+    Returns a list of tuples: (taker_answers, answer_key) where each is a list of
+    question objects.
     """
     with open(input_file_path, "r", encoding="utf-8") as file:
         data = json.load(file)
@@ -27,15 +28,23 @@ def extract_quiz_attempts(input_file_path):
                 for attempt in element["outputs"]:
                     meta = attempt.get("metadata", {})
                     if meta.get("converter_name") == "QuizTaker":
-                        # In this structure, the answer key is provided in the QuizTaker's "input" object.
+                        # In this structure, the answer key is provided in the
+                        # QuizTaker's "input" object.
                         input_section = attempt.get("input", {})
-                        if input_section.get("metadata", {}).get("converter_name") == "QuizGenerator":
+                        if (
+                            input_section.get("metadata", {}).get("converter_name")
+                            == "QuizGenerator"
+                        ):
                             try:
                                 # Parse the answer key and taker answers.
                                 answer_key = json.loads(input_section.get("output", "[]"))
                                 taker_answers = json.loads(attempt.get("output", "[]"))
                             except Exception as e:
-                                print(f"Error parsing JSON strings in file '{input_file_path}':", e)
+                                print(
+                                    "Error parsing JSON strings in file "
+                                    f"'{input_file_path}':",
+                                    e,
+                                )
                                 continue
                             quiz_attempts.append((taker_answers, answer_key))
     else:
@@ -84,7 +93,7 @@ def combine_attempt(taker_answers, answer_key):
             "correct-answer-number": question.get("correct-answer-number", ""),
             "selected-answer-number": "",
             "grading-result": "",
-            "reasoning": ""
+            "reasoning": "",
         }
 
     # Next, update with taker answers
@@ -95,11 +104,11 @@ def combine_attempt(taker_answers, answer_key):
             combined[qid]["selected-answer-number"] = selected
             combined[qid]["reasoning"] = answer.get("reasoning", "")
             correct = combined[qid]["correct-answer-number"]
-            combined[qid]["grading-result"] = (correct == selected)
+            combined[qid]["grading-result"] = correct == selected
     return combined
 
 
-def quiz_to_csv(input_file_path: str or Path, output_file_path: str or Path):
+def quiz_to_csv(input_file_path: str | Path, output_file_path: str | Path):
     quiz_attempts = extract_quiz_attempts(input_file_path)
     if not quiz_attempts:
         print(f"No valid QuizTaker attempts found in {input_file_path}.")
@@ -117,7 +126,7 @@ def quiz_to_csv(input_file_path: str or Path, output_file_path: str or Path):
         "correct-answer-number",
         "selected-answer-number",
         "grading-result",
-        "reasoning"
+        "reasoning",
     ]
 
     output_file_path = Path(output_file_path)
@@ -139,8 +148,12 @@ def main():
     parser = argparse.ArgumentParser(
         description="Process QuizTaker JSON file and produce a CSV grading output."
     )
-    parser.add_argument("-i", "--input", required=True, help="Path to the input JSON file or directory")
-    parser.add_argument("-o", "--output", required=True, help="Path to the output CSV file or directory")
+    parser.add_argument(
+        "-i", "--input", required=True, help="Path to the input JSON file or directory"
+    )
+    parser.add_argument(
+        "-o", "--output", required=True, help="Path to the output CSV file or directory"
+    )
     args = parser.parse_args()
 
     input_path = args.input
@@ -153,7 +166,9 @@ def main():
         if not json_files:
             print("No .json files found in the directory.")
         for json_file in json_files:
-            outfile = os.path.join(output_path, os.path.basename(json_file).replace(".json", ".csv"))
+            outfile = os.path.join(
+                output_path, os.path.basename(json_file).replace(".json", ".csv")
+            )
             quiz_to_csv(json_file, outfile)
     else:
         print("Invalid input path. Please provide a valid file or directory.")
