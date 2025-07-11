@@ -48,7 +48,8 @@ def run_decompilation():
     # Load up the binary we're decompiling
     decompiler.openProgram(ghidra_app.currentProgram)
 
-    # binary.py will pass a temporary output directory to this script where we can store its output
+    # binary.py will pass a temporary output directory to this script where we
+    # can store its output
     output_path = ghidra_app.getScriptArgs()[0]
 
     # Do the actual decompilation
