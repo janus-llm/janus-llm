@@ -13,8 +13,7 @@ from janus.utils.logger import create_logger
 log = create_logger(__name__)
 
 openai_model_reroutes = {
-    "gpt-4o": "gpt-4o-2024-05-13",
-    "gpt-4o": "gpt-4o-2024-11-20",    
+    "gpt-4o": "gpt-4o-2024-11-20",
     "gpt-4o-mini": "gpt-4o-mini",
     "gpt-4": "gpt-4-0613",
     "gpt-4-turbo": "gpt-4-turbo-2024-04-09",
@@ -25,8 +24,7 @@ openai_model_reroutes = {
 }
 
 azure_model_reroutes = {
-    "gpt-4o": "gpt-4o-2024-08-06",
-    "gpt-4o": "gpt-4o-2024-11-20",      
+    "gpt-4o": "gpt-4o-2024-11-20",
     "gpt-4o-mini": "gpt-4o-mini",
     "gpt-3.5-turbo-16k": "gpt35-turbo-16k",
 }
