@@ -1,0 +1,40 @@
+[
+    {
+        "type": "RequirementsDocumenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "refiner_types": ["RequirementsFormatRefiner"],
+            "output_label": "requirements"
+        }
+    },
+    {
+        "type": "Documenter",
+        "kwargs": {
+            "input_labels": ["SOURCE"],
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "summaries"
+        }
+    },
+    {
+        "type": "OutputMerger",
+        "kwargs": {
+            "input_labels": ["SOURCE", "requirements", "summaries"],
+            "label_key_map": {
+                "SOURCE": "SOURCE_CODE",
+                "requirements": "REQS",
+                "summaries": "SUMMARY"
+            },
+            "output_label": "merged_outputs"
+        }
+    },
+    {
+        "type": "MergedOutputTranslator",
+        "kwargs": {
+            "input_labels": ["merged_outputs"],
+            "prompt_template": "output_merge_testing",
+            "target_language": "java",
+            "refiner_types": ["FixParserExceptions"],
+            "output_label": "java_from_merged_outputs"
+        }
+    }
+]

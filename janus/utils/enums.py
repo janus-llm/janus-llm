@@ -10,7 +10,7 @@ class EmbeddingType(Enum):
     TARGET = 5  # placeholder embeddings, are these useful for analysis?
 
 
-CUSTOM_SPLITTERS: Set[str] = {"mumps", "binary", "ibmhlasm"}
+CUSTOM_SPLITTERS: Set[str] = {"mumps", "binary", "ibmhlasm", "ibmhlasm-ts"}
 
 # NOTE: When adding a new language, make sure to update the LANGUAGES dict below.
 # - The `comment` key is the single-line comment character used in the language.
@@ -321,7 +321,8 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
                      END   HELLO
         """
         ),
-        "functional_node_types": ["csect", "dsect"],
+        "functional_node_types": ["csect"],
+        "data_node_types": ["dsect"],
         "branch_node_types": ["branch_instruction"],
         "operation_node_types": ["operation", "branch_operation"],
         "operand_node_types": ["operands"],
@@ -838,3 +839,6 @@ LANGUAGES: Dict[str, Dict[str, Any]] = {
         ),
     },
 }
+
+# Hacky fix to allow for separating old and new ALC splitters
+LANGUAGES["ibmhlasm-ts"] = LANGUAGES["ibmhlasm"]

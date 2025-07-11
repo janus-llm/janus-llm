@@ -11,7 +11,11 @@ Janus LLM (`janus-llm`) allows users to parse and chunk over 100 programming lan
 You'll need to install the following prerequisites:
 
 - [gcc](https://gcc.gnu.org/install/) (GNU Compiler Collection) - required for compiling the tree-sitter language parsers.
-- [tree-sitter-cli](https://github.com/tree-sitter/tree-sitter/blob/master/cli/README.md) - required for generating the language parsers.
+- [tree-sitter-cli](https://github.com/tree-sitter/tree-sitter/blob/master/crates/cli/README.md) - required for generating the language parsers.
+
+```shell
+npm install -g tree-sitter-cli@0.24.0
+```
 
 ### Installing via pip/poetry/uv
 

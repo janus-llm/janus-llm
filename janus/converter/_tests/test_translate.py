@@ -11,8 +11,9 @@ from langchain.schema.embeddings import Embeddings
 from langchain.schema.vectorstore import VST, VectorStore
 
 from janus.converter.diagram import DiagramGenerator
+from janus.converter.merge import OutputMerger
 from janus.converter.requirements import RequirementsDocumenter
-from janus.converter.translate import Translator
+from janus.converter.translate import MergedOutputTranslator, Translator
 from janus.language.block import CodeBlock, TranslatedCodeBlock
 from janus.refiners.format import CodeFormatRefiner
 
@@ -62,7 +63,7 @@ class TestTranslator(unittest.TestCase):
         self.req_translator = RequirementsDocumenter(
             model="gpt-4o-mini",
             source_language="fortran",
-            prompt_templates="requirements",
+            prompt_template="requirements",
         )
 
     @patch("janus.converter.Converter._run_chain")
@@ -90,6 +91,18 @@ class TestTranslator(unittest.TestCase):
             del actual["input"]["metadata"]
             self.assertEqual(expected, actual)
 
+            python_file.unlink()
+            # Test if function works for single file
+            self.translator.translate(self.test_file, tmpdirname)
+
+            with open(python_file, "r") as f:
+                actual = json.load(f)
+
+            # TODO: Same as above
+            del actual["metadata"]
+            del actual["input"]["metadata"]
+            self.assertEqual(expected, actual)
+
     def test_invalid_selections(self) -> None:
         """Tests that settings values for the translator will raise exceptions"""
         self.assertRaises(
@@ -101,7 +114,7 @@ class TestTranslator(unittest.TestCase):
             ValueError, self.translator._set_refiner_types, ["fake-refiner"]
         )
 
-        self.translator._prompt_template_names = ["fake-prompt"]
+        self.translator._prompt_template_name = "fake-prompt"
         self.assertRaises(ValueError, self.translator._load_parameters)
 
         self.translator._initialized = True
@@ -149,11 +162,68 @@ class TestDiagramGenerator(unittest.TestCase):
             language="python",
             converter=self.diagram_generator,
         )
-        mock_run_chain.return_value = "@startuml\n\nstart\n\n:Initialize Program;\n\n:Print 'Hello, World!';\n\n:End Program;\n\nstop\n\n@enduml"  # noqa E501
+        mock_run_chain.return_value = "@startuml\n\nstart\n\n:Initialize Program;\n\n\\:Print 'Hello, World!';\n\n:End Program;\n\nstop\n\n@enduml"  # noqa E501
         self.diagram_generator._add_translation(block)
         self.assertTrue(block.translated)
         self.assertIsNotNone(block.text)
         self.assertIsNotNone(block.tokens)
+
+
+class TestOutputMerger(unittest.TestCase):
+    """Tests for the OutputMerger and MergedOutputTranslator class."""
+
+    def setUp(self):
+        """Set up the tests."""
+        self.merged_output = None
+
+        self.output_merger = OutputMerger(
+            input_labels=["SOURCE"],
+            label_key_map={"SOURCE": "SOURCE_CODE"},
+            output_label="merged_outputs",
+        )
+        self.output_merger._load_parameters()
+
+        self.output_merger_translator = MergedOutputTranslator(
+            input_labels=["merged_outputs"],
+            prompt_template="output_merge_testing",
+            target_language="java",
+            refiner_types=["FixParserExceptions"],
+            output_label="java_from_merged_outputs",
+        )
+        self.output_merger_translator._load_parameters()
+
+    @patch("janus.converter.Converter._run_chain")
+    def test_output_merger_translate_blocks(self, mock_run_chain):
+        """Test _translate_blocks method of the OutputMerger"""
+        blocks = [
+            CodeBlock(
+                id="root",
+                name="root",
+                node_type="root",
+                language="python",
+                text='print("Hello World")',
+                block_label="SOURCE",
+                block_type="SOURCE",
+            )
+        ]
+        self.merged_output = self.output_merger._translate_blocks(blocks)
+        self.assertIsNotNone(self.merged_output)
+        output_label_exists = False
+        for block in self.merged_output:
+            if block.block_label == "merged_outputs":
+                output_label_exists = True
+                self.assertIsNotNone(block.text)
+        self.assertTrue(output_label_exists)
+
+        # now for testing the translator
+        mock_run_chain.return_value = (
+            "public class Main {public static void "
+            'main(String[] args) {System.out.println("hello world");'
+        )
+        final_output = self.output_merger_translator._translate_block(
+            self.merged_output[-1]
+        )
+        self.assertIsNotNone(final_output.text)
 
 
 @pytest.mark.parametrize(
@@ -179,11 +249,11 @@ def test_language_combinations(
         source_language=source_language,
         target_language=expected_target_language,
         target_version=expected_target_version,
-        prompt_templates=prompt_template,
+        prompt_template=prompt_template,
     )
     translator._load_parameters()
     assert translator._target_language == expected_target_language  # nosec
     assert translator._target_version == expected_target_version  # nosec
     assert translator._splitter.language == source_language  # nosec
     assert translator._splitter.model.model_name == "gpt-4o"  # nosec
-    assert translator._prompt_template_names == [prompt_template]  # nosec
+    assert translator._prompt_template_name == prompt_template  # nosec

@@ -1,1 +1,1 @@
-from .alc import AlcCombiner, AlcSplitter
+from .alc import AlcCombiner, AlcRegexSplitter, AlcSplitter
