@@ -507,6 +507,11 @@ class CodeBlock:
     def from_janus_object(cls, janus_obj: JanusOutputObject) -> "CodeBlock":
         return TranslatedCodeBlock.from_janus_object(janus_obj).to_codeblock()
 
+    def set_block_label(self, block_label: str) -> None:
+        self.block_label = block_label
+        for c in self.children:
+            c.set_block_label(block_label=block_label)
+
 
 class TranslatedCodeBlock(CodeBlock):
     """A class that represents the translated functional block of code.
