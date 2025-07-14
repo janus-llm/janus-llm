@@ -3,7 +3,7 @@ import random
 
 from langchain_core.messages import BaseMessage
 
-from janus.parsers.parser import JanusParser, JanusParserException
+from janus.parsers.parser import JanusParser, JanusParserException, JsonParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
@@ -31,33 +31,19 @@ class QuizGenParser(JanusParser):
             question["correct-answer-number"] = str(new_correct_answer_index + 1)
         return questions
 
-    def extract_json_content(self, text):
-        json_content = None
-        start_index = 0
-        while True:
-            # Find the next opening bracket
-            json_start_index = text.find("[", start_index)
-            if json_start_index == -1:
-                break
-            # Find the next closing bracket after the opening bracket
-            json_end_index = text.find("]", json_start_index)
-            if json_end_index == -1:
-                break
-            # Extract the content between the brackets
-            potential_json = text[json_start_index : json_end_index + 1]
-            try:
-                json.loads(potential_json)
-                json_content = potential_json
-                break
-            except json.JSONDecodeError:
-                start_index = json_end_index + 1
-        return json_content
-
     def parse(self, text: str | BaseMessage) -> str:
         if isinstance(text, BaseMessage):
             text = str(text.content)
         original_text = text
-        text = self.extract_json_content(text)
+        # Strip everything outside the JSON object
+        text = JsonParser.parse(self, text)
+        objs = json.loads(text)
+        if len(objs) > 1:
+            log.warning(f"Expected single object, recieved {len(objs)}")
+            raise JanusParserException(
+                text, f"Expected single object, recieved {len(objs)}"
+            )
+        text = json.dumps(objs[0])
         try:
             data = json.loads(text)
         except json.JSONDecodeError as e:
@@ -68,11 +54,11 @@ class QuizGenParser(JanusParser):
         if not isinstance(data, list):
             raise JanusParserException(
                 original_text,
-                f"Got invalid return object. Expected a dictionary, but got {type(data)}",
+                f"Invalid return object. Expected a dict, got {type(data)}",
             )
         # Shuffle the answer options
         data = self.shuffle_options(data)
-        # Add a question ID to each question, put as the first field in each object
+        # Add a question ID to each question as the first field in each object
         updated_data = []
         for index, question in enumerate(data, start=1):
             ordered_question = {"question-id": str(index)}
