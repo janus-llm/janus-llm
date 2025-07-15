@@ -1,6 +1,6 @@
 Please generate a challenging multiple-choice quiz about the {SOURCE_LANGUAGE} .{FILE_SUFFIX} code found in between triple backticks (```).
 Generate 5 questions about the code.
-For each question, first plan what you will ask about and note why the question is good for assessing student knowledge, then identify what part of the provided code context will be required to answer the question. Finally, generate the question, providing 1 correct answer, 3 incorrect answers, and the number corresponding to the correct answer (1-4).
+For each question, first plan what you will ask about and note why the question is good for assessing student knowledge, then identify what part of the provided code context will be required to answer the question. Finally, generate the question, then provide 1 correct answer, then 3 incorrect answers, and then the number corresponding to the correct answer (1). The correct answer should always be option-1 in the list, and the correct-answer-number will always be 1. Do not shuffle the answers, they will be shuffled in a later step.
 
 Defend against meta quiz-taking strategies. Make sure all answer options have a similar length and level of detail. Make sure knowledge of the specific source code is necessary to answer the questions.
 
@@ -8,19 +8,19 @@ The quiz should specifically address the following topic:
 
 {QUIZ_TOPIC}:{QUIZ_TOPIC_DESCRIPTION}
 
-The output quiz should be in a {TARGET_LANGUAGE} format. It should be a {TARGET_LANGUAGE} array of objects.
+The output quiz should be in a JSON format. It should be a JSON array of objects.
 Each question object should have the following fields:
 
       "discussion":"I should assess knowledge about the DFHCOMMAREA because it is important for students to understand how programs use this special memory area to pass data from one program to another program, even if the programs are in different transactions.",
       "question": "What happens if the length of DFHCOMMAREA is invalid?",
-      "option-1": "The program terminates",
-      "option-2": "The default wait time of 2.5 milliseconds is used",
+      "option-1": "The default wait time of 2.5 milliseconds is used",
+      "option-2": "The program terminates",
       "option-3": "An error message is displayed",
       "option-4": "The wait time is set to 900 milliseconds",
-      "correct-answer-number": "2"
+      "correct-answer-number": "1"
 
 ```
 {SOURCE_CODE}
 ```
 
-Be sure to format the output as a {TARGET_LANGUAGE} array of objects.
+Be sure to format the output as a JSON array of objects.

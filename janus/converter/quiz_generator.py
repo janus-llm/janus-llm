@@ -19,14 +19,17 @@ class QuizGenerator(Converter):
         combine_output: bool = False,
         **kwargs,
     ) -> None:
+        if combine_output:
+            raise ValueError("`combine_output` not supported")
         super().__init__(
-            target_language=target_language, prompt_template=prompt_template, **kwargs
+            target_language=target_language,
+            prompt_template=prompt_template,
+            combine_output=combine_output,
+            **kwargs
         )
 
         self._quiz_topic = quiz_topic
         self._quiz_topic_description = quiz_topic_description
-        self._combine_output = False
-
         self._parser = QuizGenParser(
             language=target_language,
             topic=quiz_topic,

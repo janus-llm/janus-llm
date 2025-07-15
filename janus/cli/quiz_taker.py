@@ -81,10 +81,6 @@ def quiz_taker(
             help="Whether to overwrite existing files in the output directory",
         ),
     ] = False,
-    temp: Annotated[
-        float,
-        typer.Option("--temperature", "-T", help="Sampling temperature.", min=0, max=2),
-    ] = 0.7,
     prompt_template: Annotated[
         str,
         typer.Option(
