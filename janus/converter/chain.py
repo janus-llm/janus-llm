@@ -39,7 +39,7 @@ class ConverterChain(Converter):
     ) -> list[TranslatedCodeBlock | CodeBlock]:
         for block in blocks:
             if block.block_label is None:
-                block.block_label = "SOURCE"
+                block.set_block_label("SOURCE")
 
         for i, converter in enumerate(self._converters):
             log.info(
