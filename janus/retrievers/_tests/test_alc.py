@@ -15,5 +15,5 @@ class TestOpCodeRetriever(unittest.TestCase):
             text = f.read()
         splitter = ChunkSplitter(language="ibmhlasm")
         block = splitter.split_string(text, "test")
-        context = self._retriever.get_context(block)
+        context = self._retriever.invoke(block)["context"]
         self.assertEqual(context, "DS: Define Storage\n")
