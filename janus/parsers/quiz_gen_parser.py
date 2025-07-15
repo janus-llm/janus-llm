@@ -13,53 +13,85 @@ class QuizGenParser(JsonParser):
     language: str
     topic: str
 
+    n_questions: int = 5
+    n_options: int = 4
+    option_keys: list[str] = [f"option-{i+1}" for i in range(n_options)]
+    expected_keys: set[str] = {
+        "discussion",
+        "question",
+        "correct-answer-number",
+        *option_keys,
+    }
+
     def shuffle_options(self, questions):
         for question in questions:
-            # Extract options and correct answer number
-            options = [question[f"option-{i+1}"] for i in range(4)]
-            correct_answer_index = int(question["correct-answer-number"]) - 1
             # Shuffle options
-            shuffled_options = options[:]
-            random.shuffle(shuffled_options)
-            # Find new correct answer index
-            new_correct_answer_index = shuffled_options.index(
-                options[correct_answer_index]
+            shuffle_idx = random.sample(range(self.n_options), k=self.n_options)
+            question.update(
+                {
+                    self.option_keys[i]: question[self.option_keys[j]]
+                    for i, j in enumerate(shuffle_idx)
+                }
             )
-            # Update question with shuffled options and new correct answer
-            for i in range(4):
-                question[f"option-{i+1}"] = shuffled_options[i]
-            question["correct-answer-number"] = str(new_correct_answer_index + 1)
+
+            # Fix the correct answer after the shuffle
+            correct_idx = int(question["correct-answer-number"]) - 1
+            question["correct-answer-number"] = shuffle_idx.index(correct_idx) + 1
+
         return questions
 
     def parse(self, text: str | BaseMessage) -> str:
         if isinstance(text, BaseMessage):
             text = str(text.content)
         original_text = text
+
         # Strip everything outside the JSON object
         text = JsonParser.parse(self, text)
         try:
-            data = json.loads(text)
+            questions = json.loads(text)
         except json.JSONDecodeError as e:
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise JanusParserException(
                 original_text,
                 f"Got invalid JSON object. Error: {e}",
             )
-        if not isinstance(data, list):
+        if not isinstance(questions, list):
             raise JanusParserException(
                 original_text,
-                f"Invalid return object. Expected a dict, got {type(data)}",
+                f"Invalid return object. Expected a list, got {type(questions)}",
             )
+
+        # Validate number of questions
+        if len(questions) != self.n_questions:
+            raise JanusParserException(
+                original_text,
+                f"Invalid return object. Expected {self.n_questions} questions,"
+                f" got {len(questions)}",
+            )
+
+        # Validate question keys
+        for i, question in enumerate(questions, start=1):
+            if set(question.keys()) != self.expected_keys:
+                raise JanusParserException(
+                    original_text,
+                    f"Question {i} did not match expected format:\n"
+                    f"{json.dumps(question, indent=2)}",
+                )
+
         # Shuffle the answer options
-        data = self.shuffle_options(data)
+        questions = self.shuffle_options(questions)
+
         # Add a question ID to each question as the first field in each object
         updated_data = []
-        for index, question in enumerate(data, start=1):
-            ordered_question = {"question-id": str(index)}
-            ordered_question.update(question)
-            ordered_question["topic"] = self.topic
-            updated_data.append(ordered_question)
-        log.debug(f"VALID JSON object. Output:\n{text}")
+        for index, question in enumerate(questions, start=1):
+            updated_data.append(
+                {
+                    "question-id": str(index),
+                    "topic": self.topic,
+                    **question,
+                }
+            )
+        log.debug(f"VALID JSON object. Output:\n{json.dumps(updated_data, indent=2)}")
         return json.dumps(updated_data)
 
     def get_format_instructions(self) -> str:
