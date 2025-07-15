@@ -19,7 +19,7 @@ class OpCodeRetriever(JanusRetriever):
             stripped_line = line.strip()
             if stripped_line == "":
                 continue
-            if stripped_line[0] == "*":
+            if "*" in stripped_line.split()[0]:
                 continue
             if line[0] == " ":
                 op_code = stripped_line.split()[0]
