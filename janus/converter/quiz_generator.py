@@ -25,7 +25,7 @@ class QuizGenerator(Converter):
             target_language=target_language,
             prompt_template=prompt_template,
             combine_output=combine_output,
-            **kwargs
+            **kwargs,
         )
 
         self._quiz_topic = quiz_topic
