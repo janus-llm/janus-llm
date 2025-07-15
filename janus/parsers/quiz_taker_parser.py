@@ -3,13 +3,13 @@ import json
 from langchain_core.messages import BaseMessage
 
 from janus.language.block import CodeBlock
-from janus.parsers.parser import JanusParser, JanusParserException, JsonParser
+from janus.parsers.parser import JanusParserException, JsonParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 
 
-class QuizTakerParser(JanusParser):
+class QuizTakerParser(JsonParser):
     language: str
 
     def parse_input(self, block: CodeBlock) -> str:
@@ -49,19 +49,13 @@ class QuizTakerParser(JanusParser):
         original_text = text
         # Strip everything outside the JSON object
         text = JsonParser.parse(self, text)
-        objs = json.loads(text)
-        if len(objs) > 1:
-            log.warning(f"Expected single object, recieved {len(objs)}")
-            raise JanusParserException(
-                text, f"Expected single object, recieved {len(objs)}"
-            )
-        text = json.dumps(objs[0])
         try:
             data = json.loads(text)
         except json.JSONDecodeError as e:
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise JanusParserException(
-                original_text, f"Got invalid JSON object. Error: {e}"
+                original_text,
+                f"Got invalid JSON object. Error: {e}",
             )
         if not isinstance(data, list):
             raise JanusParserException(
