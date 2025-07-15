@@ -264,6 +264,7 @@ TOKEN_LIMITS: dict[str, int] = {
     "gpt-4-0125-preview": 128_000,
     "gpt-4o-2024-05-13": 128_000,
     "gpt-4o-2024-08-06": 128_000,
+    "gpt-4o-2024-11-20": 128_00,
     "gpt-4o-mini": 128_000,
     "gpt-3.5-turbo-0125": 16_384,
     "gpt35-turbo-16k": 16_384,
@@ -458,7 +459,7 @@ def load_model(model_id: str, model_kwargs: dict[str, Any] | None = None) -> Jan
     model_type = MODEL_TYPE_CONSTRUCTORS[model_type_name]
     prompt_engine = MODEL_PROMPT_ENGINES[model_id]
 
-    class JanusModel(model_type):
+    class _JanusModel(model_type):
         model_id: str
         # model_name is for LangChain compatibility
         # It searches for `self.model_name` when counting tokens
@@ -474,13 +475,18 @@ def load_model(model_id: str, model_kwargs: dict[str, Any] | None = None) -> Jan
         class Config:
             extra = Extra.allow
 
+    # Locally defining `JanusModel` causes a pydantic type check to fail, since
+    # other imports use the prior definition in this file. It isn't sufficient
+    # to inherit from JanusModel, so we add it directly.
+    _JanusModel.__bases__ = (_JanusModel.__bases__[0], JanusModel)
+
     model_args.update(
         model_id=MODEL_ID_TO_LONG_ID[model_id],
         model_name=model_id,  # This is for LangChain compatibility
         short_model_id=model_id,
     )
 
-    return JanusModel(
+    return _JanusModel(
         model_type_name=model_type_name,
         token_limit=token_limit,
         input_token_cost=input_token_cost,

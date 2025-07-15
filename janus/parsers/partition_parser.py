@@ -171,3 +171,15 @@ class PartitionParser(JanusParser, PydanticOutputParser):
             )
 
         return "\n<JANUS_PARTITION>\n".join(chunks)
+
+    def get_format_instructions(self) -> str:
+        # The current partition prompts don't make use of a {format_string},
+        # but keeping this implemented.
+        return (
+            "You are to output a JSON object containing a subset of these "
+            "IDs, corresponding to the lines that should start a new block. "
+            "Each partition should be paired with an explanation (please "
+            "output the explanation first, before giving the line ID). DO NOT "
+            "include any additional commentary before or after the JSON object."
+            " Your response should be the JSON object ONLY."
+        )

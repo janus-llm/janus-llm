@@ -1,22 +1,26 @@
-Partition the {SOURCE_LANGUAGE} code into logical blocks. Each block should be relatively self-contained and ideally constitute a complete "subroutine", including any associated comments. These breakpoints should usually be inserted between labeled blocks, but perhaps not between *every* labeled block (depending on things like fallthrough).
+Partition the {SOURCE_LANGUAGE} code into logical blocks. Each block should be relatively self-contained and ideally constitute a complete "subroutine", including any associated comments. You should identify appropriate breakpoints between labeled blocks.
 
-INPUT FORMAT:
-Each line of code has been prepended with an 8-character unique ID. a Python example would look like this:
-```
+Each line of input code has been prepended with an 8-character unique ID. An example would look like this:
+```python
 {EXAMPLE_INPUT}
 ```
 
-And your output might look like this:
+And your output should resemble this: 
 ```
 {EXAMPLE_OUTPUT}
 ```
 
-You are to output a JSON object containing a subset of these IDs, corresponding to the lines that should start a new block. Each partition should be paired with an explanation (please output the explanation first, before giving the line ID). DO NOT include any additional commentary before or after the JSON object, your response should be the JSON object ONLY.
+Analyze the given source code and produce a JSON object containing a subset of the line IDs that should start a new block. Each partition should be paired with an explanation. You should consider the following guidelines:
+- Look for natural breakpoints between functions, methods, or logical sections of the code.
+- Include associated comments with their respective blocks, including header comments.
+- Pay attention to language-specific structures and control flow (e.g., fallthrough in switch statements).
+- Aim for blocks that are self-contained and represent complete "subroutines" or logical units.
 
-Format instructions:
-{format_instructions}
-
-Input:
+Here is the source code to be partitioned:
 ```
 {SOURCE_CODE}
 ```
+
+Your output should be a JSON object. Each entry in the JSON should include a "reasoning" key, explaining why that line should start a new block, and a "location" key, containing the line ID. The explanation should be placed before the line ID in the JSON. Do not include any additional commentary before or after the JSON object. 
+
+Your response should consist solely of the JSON object.
