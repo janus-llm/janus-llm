@@ -598,7 +598,9 @@ class TranslatedCodeBlock(CodeBlock):
         self.request_output_tokens = 0
 
     def __hash__(self) -> int:
-        return hash((self.text, hash(self.original)))
+        if self.text is not None:
+            return hash((self.text, hash(self.original)))
+        return hash(tuple(hash(c) for c in self.children))
 
     def __deepcopy__(self, memo) -> "CodeBlock":
         # Prevent the converter from getting duplicated by deepcopy,
