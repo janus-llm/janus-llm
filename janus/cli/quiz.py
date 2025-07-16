@@ -161,7 +161,7 @@ def quiz(
         ),
     ] = [],
     quiz_topic: Annotated[
-        str,
+        Optional[str],
         typer.Option(
             "--topic",
             help="The topic the quiz should focus on,"
@@ -170,7 +170,7 @@ def quiz(
         ),
     ] = None,
     quiz_topic_description: Annotated[
-        str,
+        Optional[str],
         typer.Option(
             "--topic-description",
             "-D",
