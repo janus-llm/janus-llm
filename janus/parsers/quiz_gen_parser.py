@@ -19,7 +19,6 @@ class QuizGenParser(JsonParser):
     expected_keys: set[str] = {
         "discussion",
         "question",
-        "correct-answer-number",
         *option_keys,
     }
 
@@ -35,7 +34,7 @@ class QuizGenParser(JsonParser):
             )
 
             # Fix the correct answer after the shuffle
-            correct_idx = int(question["correct-answer-number"]) - 1
+            correct_idx = 0
             question["correct-answer-number"] = shuffle_idx.index(correct_idx) + 1
 
         return questions
@@ -71,6 +70,9 @@ class QuizGenParser(JsonParser):
 
         # Validate question keys
         for i, question in enumerate(questions, start=1):
+            # Rename option-1-correct to option-1 in output
+            if "option-1-correct" in question:
+                question["option-1"] = question.pop("option-1-correct")
             if set(question.keys()) != self.expected_keys:
                 raise JanusParserException(
                     original_text,
