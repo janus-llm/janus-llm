@@ -193,4 +193,4 @@ def quiz_taker(
         use_janus_inputs=use_janus_inputs,
         combine_output=not separate_outputs,
     )
-    quiz_take.translate(input_dir, output_dir, failure_dir, prompt_template, overwrite)
+    quiz_take.translate(input_dir, output_dir, failure_dir, overwrite)

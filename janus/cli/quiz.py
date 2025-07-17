@@ -218,4 +218,4 @@ def quiz(
         quiz_topic=quiz_topic,
         quiz_topic_description=quiz_topic_description,
     )
-    quiz_gen.translate(input_dir, output_dir, failure_dir, prompt_template, overwrite)
+    quiz_gen.translate(input_dir, output_dir, failure_dir, overwrite)
