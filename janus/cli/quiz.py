@@ -39,7 +39,7 @@ def quiz(
             "--output", "-o", help="The directory to store the generated quiz in."
         ),
     ],
-    target_lang: Annotated[  # TODO REMOVE
+    target_lang: Annotated[
         str,
         typer.Option(
             "--target-language",
@@ -144,7 +144,7 @@ def quiz(
             "--separate-outputs",
             help="Present if converter should combine outputs",
         ),
-    ] = False,
+    ] = True,
     model_kwargs: Annotated[
         list[str],
         typer.Option(
@@ -207,7 +207,7 @@ def quiz(
         target_version=target_version,
         max_prompts=max_prompts,
         max_tokens=max_tokens,
-        prompt_templates=prompt_template,
+        prompt_template=prompt_template,
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
@@ -218,4 +218,4 @@ def quiz(
         quiz_topic=quiz_topic,
         quiz_topic_description=quiz_topic_description,
     )
-    quiz_gen.translate(input_dir, output_dir, failure_dir, overwrite)
+    quiz_gen.translate(input_dir, output_dir, failure_dir, prompt_template, overwrite)

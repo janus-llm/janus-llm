@@ -141,7 +141,7 @@ def quiz_taker(
             "--separate-outputs",
             help="Present if converter should combine outputs",
         ),
-    ] = False,
+    ] = True,
     model_kwargs: Annotated[
         list[str],
         typer.Option(
@@ -184,7 +184,7 @@ def quiz_taker(
         target_version=target_version,
         max_prompts=max_prompts,
         max_tokens=max_tokens,
-        prompt_templates=prompt_template,
+        prompt_template=prompt_template,
         db_path=db_loc,
         db_config=collections_config,
         splitter_type=splitter_type,
@@ -193,4 +193,4 @@ def quiz_taker(
         use_janus_inputs=use_janus_inputs,
         combine_output=not separate_outputs,
     )
-    quiz_take.translate(input_dir, output_dir, failure_dir, overwrite)
+    quiz_take.translate(input_dir, output_dir, failure_dir, prompt_template, overwrite)
