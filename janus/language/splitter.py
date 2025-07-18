@@ -109,8 +109,7 @@ class Splitter(FileManager):
             self._prune_unprotected(root)
         self._set_identifiers(root, name)
         self._segment_leaves(root)
-        if not self.skip_merge:
-            self._merge_tree(root)
+        self._merge_tree(root)
         if self._recalc_border_indices:
             root.mark_root()
         return root
@@ -163,6 +162,16 @@ class Splitter(FileManager):
         the represented code is present in the text of exactly one node in the
         tree.
         """
+        if self.skip_merge:
+            stack = [root]
+            while stack:
+                node = stack.pop()
+                if node.children:
+                    node.text = None
+                    node.complete = False
+                stack.extend(node.children)
+            return
+
         # Simulate recursion with a stack
         stack = [root]
         while stack:
@@ -210,8 +219,8 @@ class Splitter(FileManager):
             node.children = [c for c in node.children if not self._should_prune(c)]
             stack.extend(node.children)
 
-        for node in traversal[::-1]:
-            node.rebuild_text_from_children()
+        root.rebuild_text_from_children()
+        for node in traversal:
             node.tokens = self._count_tokens(node.text)
 
     def _is_protected(self, node: CodeBlock) -> bool:
