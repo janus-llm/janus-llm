@@ -3,13 +3,13 @@ import json
 from langchain_core.messages import BaseMessage
 
 from janus.language.block import CodeBlock
-from janus.parsers.parser import JanusParser, JanusParserException
+from janus.parsers.parser import JanusParserException, JsonParser
 from janus.utils.logger import create_logger
 
 log = create_logger(__name__)
 
 
-class QuizTakerParser(JanusParser):
+class QuizTakerParser(JsonParser):
     language: str
 
     def parse_input(self, block: CodeBlock) -> str:
@@ -21,10 +21,20 @@ class QuizTakerParser(JanusParser):
         prev_gen = block.previous_generation
         input_str = prev_gen["input"]
 
-        data = json.loads(block.text)  # type: ignore
+        if isinstance(input_str, dict):
+            if "output" in input_str:
+                input_str = input_str["output"]
+            else:
+                log.debug(
+                    f"Missing output field in JSON object. Object contents:\n{input_str}"
+                )
+
+        data = json.loads(block.text)
         for question in data:
             if "correct-answer-number" in question:
                 del question["correct-answer-number"]
+            if "discussion" in question:
+                del question["discussion"]
 
         return json.dumps(
             dict(
@@ -37,30 +47,20 @@ class QuizTakerParser(JanusParser):
         if isinstance(text, BaseMessage):
             text = str(text.content)
         original_text = text
-        # strip out anything before or after the json
-        json_start_index = text.find("[")
-        json_end_index = text.rfind("]") + 1
-        # If the opening bracket is found, slice the string from that index
-        if (
-            json_start_index != -1
-            and json_end_index != -1
-            and json_end_index > json_start_index
-        ):
-            json_content = text[json_start_index:json_end_index]
-            text = json_content
-        else:
-            text = None  # Return None if no JSON content is found
+        # Strip everything outside the JSON object
+        text = JsonParser.parse(self, text)
         try:
             data = json.loads(text)
         except json.JSONDecodeError as e:
             log.debug(f"Invalid JSON object. Output:\n{text}")
             raise JanusParserException(
-                original_text, f"Got invalid JSON object. Error: {e}"
+                original_text,
+                f"Got invalid JSON object. Error: {e}",
             )
         if not isinstance(data, list):
             raise JanusParserException(
                 original_text,
-                f"Got invalid return object. Expected a dictionary, but got {type(data)}",
+                f"Invalid return object. Expected a dict, got {type(data)}",
             )
         return json.dumps(data)
 

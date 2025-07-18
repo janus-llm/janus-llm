@@ -10,6 +10,8 @@ from janus.cli.embedding import embedding
 from janus.cli.llm import llm
 from janus.cli.partition import partition
 from janus.cli.pipeline import pipeline
+from janus.cli.quiz import quiz
+from janus.cli.quiz_taker import quiz_taker
 from janus.cli.self_eval import llm_self_eval
 from janus.cli.tokenizer import tokenizer
 from janus.cli.translate import translate
@@ -93,6 +95,16 @@ translate = app.command(
     help="Translate code from one language to another using an LLM.",
     no_args_is_help=True,
 )(translate)
+
+quiz = app.command(
+    help="Generate a quiz about code using an LLM.",
+    no_args_is_help=True,
+)(quiz)
+
+quiz_taker = app.command(
+    help="Take a quiz about code using an LLM.",
+    no_args_is_help=True,
+)(quiz_taker)
 
 pipeline = app.command(
     help="Run a janus pipeline",
