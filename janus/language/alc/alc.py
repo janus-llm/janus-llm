@@ -545,3 +545,9 @@ class AlcRegexSplitter(Splitter):
             # Only increment start index by original rpad, to start at beginning
             #  of next prefix (which may start with newlines)
             start_idx += len(chunk) + rpad
+
+    def _split_into_lines(self, node: CodeBlock):
+        super()._split_into_lines(node)
+        # Because the leaf nodes are not in traversal order, must migrate
+        #  affixes to the leaves so they're not lost
+        node.trickle_down_affixes()

@@ -504,6 +504,16 @@ class CodeBlock:
     def from_janus_object(cls, janus_obj: JanusOutputObject) -> "CodeBlock":
         return TranslatedCodeBlock.from_janus_object(janus_obj).to_codeblock()
 
+    def trickle_down_affixes(self, *, prefix: str = "", suffix: str = "") -> None:
+        """Recursively migrate this node's prefix and suffix to the leaves of the tree"""
+        prefix = prefix + self.pop_prefix()
+        suffix = self.pop_suffix() + suffix
+        if self.children:
+            self.children[0].trickle_down_affixes(prefix=prefix)
+            self.children[-1].trickle_down_affixes(suffix=suffix)
+        else:
+            self.affixes = (prefix, suffix)
+
 
 class TranslatedCodeBlock(CodeBlock):
     """A class that represents the translated functional block of code.
