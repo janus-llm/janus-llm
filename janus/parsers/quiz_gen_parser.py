@@ -83,14 +83,21 @@ class QuizGenParser(JsonParser):
         # Shuffle the answer options
         questions = self.shuffle_options(questions)
 
-        # Add a question ID to each question as the first field in each object
+        # Add a question ID and Topic to each question as the first fields in each object
+        # Put options in numerical order
         updated_data = []
         for index, question in enumerate(questions, start=1):
             updated_data.append(
                 {
                     "question-id": str(index),
                     "topic": self.topic,
-                    **question,
+                    "discussion": question["discussion"],
+                    "question": question["question"],
+                    "option-1": question["option-1"],
+                    "option-2": question["option-2"],
+                    "option-3": question["option-3"],
+                    "option-4": question["option-4"],
+                    "correct-answer-number": question["correct-answer-number"],
                 }
             )
         log.debug(f"VALID JSON object. Output:\n{json.dumps(updated_data, indent=2)}")
