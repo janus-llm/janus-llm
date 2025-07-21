@@ -242,7 +242,7 @@ class AlcRegexSplitter(Splitter):
 
     # Define a "separator comment block" as any block comment that includes a
     #  visual separator (i.e. a line with nothing but comment characters and whitespace)
-    viz_sep_pat = r"(?:^[+ ]*\*[*=\-# ]*\n)"
+    viz_sep_pat = r"(?:^[+ ]*\*[*=\-# ]*$\n?)"
     viz_sep_block_pat = re.compile(
         rf"({comment_block_pat}{viz_sep_pat}{comment_block_pat})",
         flags=re.MULTILINE,
