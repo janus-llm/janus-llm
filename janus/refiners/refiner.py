@@ -293,7 +293,7 @@ class CodeContinuationRefiner(JanusRefiner):
         if isinstance(completion, BaseMessage):
             completion = str(completion.content)
 
-        log.info(f"Completion:\n{completion}")
+        log.debug(f"Completion:\n{completion}")
 
         for retry_number in range(self.max_retries):
             continuation = self.continuation_chain.invoke(
@@ -303,17 +303,17 @@ class CodeContinuationRefiner(JanusRefiner):
                 )
             )
             if re.search(r"\bLGTM\b", continuation) is not None:
-                log.info(f"Got LGTM:\n{continuation}")
+                log.debug(f"Got LGTM:\n{continuation}")
                 continuation = re.sub(r"\s*LGTM.*", "", continuation, flags=re.DOTALL)
                 completion += continuation
                 break
 
-            log.info(f"Continuation:\n{continuation}")
+            log.debug(f"Continuation:\n{continuation}")
             completion = self.parser.strip_tail(completion)
             continuation = self.parser.strip_head(continuation)
             completion += continuation
 
         parsed = self.parser.strip_tail(completion)
         parsed = self.parser.strip_head(parsed)
-        log.info(f"Final:\n{parsed}")
+        log.debug(f"Final:\n{parsed}")
         return parsed
