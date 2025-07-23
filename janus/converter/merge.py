@@ -38,7 +38,7 @@ class OutputMerger(Converter):
         descendent_dict: dict[int, set[int]] = defaultdict(set)
         groupless_blocks: set[int] = set()
         for block in blocks:
-            block_hash = hash(block)
+            block_hash = block.get_hash()
             hash_table[block_hash] = block
 
             if block.block_label not in self._input_labels:

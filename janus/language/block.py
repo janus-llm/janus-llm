@@ -2,6 +2,7 @@ import random
 from collections import OrderedDict
 from copy import deepcopy
 from functools import total_ordering
+from hashlib import sha256
 from typing import (
     TYPE_CHECKING,
     ForwardRef,
@@ -21,6 +22,10 @@ if TYPE_CHECKING:
 
 log = create_logger(__name__)
 RNG = random.Random()
+
+
+def custom_hash(inp) -> int:
+    return int(sha256(str(inp).encode("utf-8")).hexdigest(), 16)
 
 
 class JanusMetadata(TypedDict):
@@ -157,7 +162,7 @@ def combine_metadata(metadatas: Iterable[JanusMetadata]) -> JanusMetadata:
         "end_byte": int(_max_metadata("end_byte") or -1),
         "language": _merge_metadata("language") or "MULTIPLE",
         "translation_complete": _all_metadata("translation_complete") or False,
-        "hash": hash(tuple(_get_vals("hash"))),
+        "hash": custom_hash(tuple(sorted(_get_vals("hash")))),
     }
 
     optional_metadata = {
@@ -265,12 +270,12 @@ class CodeBlock:
     def __eq__(self, other: "CodeBlock") -> bool:
         return (self.start_byte, self.end_byte) == (other.start_byte, other.end_byte)
 
-    def __hash__(self) -> int:
+    def get_hash(self) -> int:
         if self.previous_generation is not None:
             return self.previous_generation["metadata"]["hash"]
         if self.text is not None:
-            return hash(self.text)
-        return hash(tuple(hash(c) for c in self.children))
+            return custom_hash(self.complete_text)
+        return custom_hash(tuple(sorted(c.get_hash() for c in self.children)))
 
     def __repr__(self) -> str:
         tokens = self.tokens
@@ -486,7 +491,7 @@ class CodeBlock:
             "end_byte": self.end_byte,
             "language": self.language,
             "translation_complete": False,
-            "hash": hash(self),
+            "hash": self.get_hash(),
         }
 
         janus_object: JanusOutputObject = {
@@ -597,10 +602,12 @@ class TranslatedCodeBlock(CodeBlock):
         self.request_input_tokens = 0
         self.request_output_tokens = 0
 
-    def __hash__(self) -> int:
-        if self.text is not None:
-            return hash((self.text, hash(self.original)))
-        return hash(tuple(hash(c) for c in self.children))
+    def get_hash(self) -> int:
+        if self.translated:
+            if self.text is not None:
+                return custom_hash(self.complete_text)
+            return custom_hash(tuple(sorted(c.get_hash() for c in self.children)))
+        return self.original.get_hash()
 
     def __deepcopy__(self, memo) -> "CodeBlock":
         # Prevent the converter from getting duplicated by deepcopy,
@@ -716,7 +723,7 @@ class TranslatedCodeBlock(CodeBlock):
             "end_byte": self.end_byte,
             "language": self.language,
             "translation_complete": self.translation_completed,
-            "hash": hash(self),
+            "hash": self.get_hash(),
         }
 
         if isinstance(self.converter, str):
