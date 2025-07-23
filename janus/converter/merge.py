@@ -56,14 +56,20 @@ class OutputMerger(Converter):
                 descendent_dict[prev_gen["metadata"]["hash"]].add(block_hash)
                 prev_gen = prev_gen["input"]
 
-        ancestor_keys = sorted(descendent_dict, key=lambda k: len(descendent_dict[k]))
-        ancestors: list[CodeBlock] = [hash_table[k] for k in ancestor_keys]
-
         # Work from smallest to largest group of "families", as a heuristic for
         #  searching from last common ancestor to first
+        ancestor_keys = sorted(descendent_dict, key=lambda k: len(descendent_dict[k]))
         groups: list[tuple[CodeBlock, list[CodeBlock]]] = []
-        for ancestor, key in zip(ancestors, ancestor_keys):
-            descendents = descendent_dict[key]
+        for ancestor_key in ancestor_keys:
+            # Not all "ancestors" are CodeBlocks; e.g., a parent block to multiple
+            #  components has a "manufactured" input which was never itself a
+            #  CodeBlock, but instead simply gathers together constituent inputs.
+            # Skip these "ancestors" when finding common descendents.
+            if ancestor_key not in hash_table:
+                continue
+
+            ancestor = hash_table[ancestor_key]
+            descendents = descendent_dict[ancestor_key]
 
             # Discard descendents that have already been taken
             descendents.intersection_update(groupless_blocks)
