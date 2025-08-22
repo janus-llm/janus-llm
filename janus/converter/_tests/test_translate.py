@@ -72,7 +72,7 @@ class TestTranslator(unittest.TestCase):
 
         with open("janus/converter/_tests/fortran.json", "r") as f:
             expected = json.load(f)
-            mock_run_chain.return_value = expected["output"].strip("\n")
+            mock_run_chain.return_value = expected["output"]
 
         with tempfile.TemporaryDirectory(dir=self.test_file.parent) as tmpdirname:
             python_file = Path(tmpdirname) / f"{self.test_file.stem}.json"

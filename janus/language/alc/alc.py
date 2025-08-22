@@ -31,6 +31,7 @@ class AlcSplitter(TreeSitterSplitter):
         self,
         model: JanusModel | None = None,
         max_tokens: int = 4096,
+        skip_merge: bool = False,
         protected_node_types: tuple[str, ...] = (),
         prune_node_types: tuple[str, ...] = (),
         prune_unprotected: bool = False,
@@ -44,6 +45,7 @@ class AlcSplitter(TreeSitterSplitter):
             language="ibmhlasm",
             model=model,
             max_tokens=max_tokens,
+            skip_merge=skip_merge,
             protected_node_types=protected_node_types,
             prune_node_types=prune_node_types,
             prune_unprotected=prune_unprotected,
@@ -240,9 +242,9 @@ class AlcRegexSplitter(Splitter):
 
     # Define a "separator comment block" as any block comment that includes a
     #  visual separator (i.e. a line with nothing but comment characters and whitespace)
-    viz_sep_pat = r"(?:^[+ ]*\*[*=\-# ]*$)"
+    viz_sep_pat = r"(?:^[+ ]*\*[*=\-# ]*$\n?)"
     viz_sep_block_pat = re.compile(
-        rf"({comment_block_pat}?{viz_sep_pat}\n{comment_block_pat})",
+        rf"({comment_block_pat}{viz_sep_pat}{comment_block_pat})",
         flags=re.MULTILINE,
     )
 
@@ -382,8 +384,8 @@ class AlcRegexSplitter(Splitter):
         head = code[: sect.start]
         sect.definition = code[sect.start : sect.end]
         tail = code[sect.end :]
-        lpad = len(head) - len(head.lstrip("\n"))
-        rpad = len(tail) - len(tail.rstrip("\n"))
+        lpad = len(head) - len(head.rstrip("\n"))
+        rpad = len(tail) - len(tail.lstrip("\n"))
 
         # Get boundary location data
         start_byte = len(bytes(head, "utf-8"))
@@ -407,7 +409,7 @@ class AlcRegexSplitter(Splitter):
             language=self.language,
             tokens=self._count_tokens(sect.definition),
         )
-        self._split_on_visual_separators(node)
+        self._split_on_visual_separators(node, code)
         return node
 
     def _get_sect_ast(self, code: str, type: str) -> CodeBlock | None:
@@ -466,7 +468,7 @@ class AlcRegexSplitter(Splitter):
             tokens=self._count_tokens(code),
         )
 
-    def _split_on_visual_separators(self, node: CodeBlock):
+    def _split_on_visual_separators(self, node: CodeBlock, code: str):
         if node.text is None:
             return
 
@@ -481,9 +483,6 @@ class AlcRegexSplitter(Splitter):
             return
         elif len(split_text) <= 3 and not (split_text[0] and split_text[-1]):
             return
-
-        start_byte = node.start_byte
-        start_line, start_char = node.start_point
 
         # If there's an empty string at the head of the list, the code starts
         #  with a separator comment block. Remove the head to start with the
@@ -500,24 +499,33 @@ class AlcRegexSplitter(Splitter):
         if not split_text[-1]:
             split_text[-3:] = ["".join(split_text[-3:])]
 
-        newline_bytes = len(bytes("\n", "utf-8"))
-
         chunks = zip(split_text[::2], split_text[1::2])
+        start_idx = len(bytes(code, "utf-8")[: node.start_byte].decode("utf-8"))
         for i, (prefix, block) in enumerate(chunks):
             chunk = prefix + block
 
             # Trim leading and trailing newlines, update boundary indices to match
             lpad = len(chunk) - len(chunk.lstrip("\n"))
             rpad = len(chunk) - len(chunk.rstrip("\n"))
-            start_line += lpad
-            start_byte += lpad
-            if lpad:
-                start_char = 0
             chunk = chunk.strip("\n")
+            start_idx += lpad
+            end_idx = start_idx + len(chunk)
 
+            # Also count the newlines before and after the match
+            head = code[:start_idx]
+            chunk = code[start_idx:end_idx]
+            tail = code[end_idx:]
+            full_lpad = len(head) - len(head.rstrip("\n"))
+            full_rpad = len(tail) - len(tail.lstrip("\n"))
+
+            # Get boundary location data
+            start_byte = len(bytes(head, "utf-8"))
+            start_line = head.count("\n")
+            start_char = start_idx - head.rfind("\n") - 1
             end_byte = start_byte + len(bytes(chunk, "utf-8"))
             end_line = start_line + chunk.count("\n")
             end_char = len(chunk) - chunk.rfind("\n") - 1
+
             node.children.append(
                 CodeBlock(
                     text=chunk,
@@ -527,12 +535,19 @@ class AlcRegexSplitter(Splitter):
                     start_point=(start_line, start_char),
                     end_byte=end_byte,
                     end_point=(end_line, end_char),
-                    affixes=("\n" * lpad, "\n" * rpad),
+                    affixes=("\n" * full_lpad, "\n" * full_rpad),
                     node_type=NodeType(f"{node.node_type}-chunk"),
                     language=self.language,
                     tokens=self._count_tokens(chunk),
                 )
             )
-            start_line = end_line + rpad
-            start_byte = end_byte * rpad * newline_bytes
-            start_char = 0 if rpad else end_char
+
+            # Only increment start index by original rpad, to start at beginning
+            #  of next prefix (which may start with newlines)
+            start_idx += len(chunk) + rpad
+
+    def _split_into_lines(self, node: CodeBlock):
+        super()._split_into_lines(node)
+        # Because the leaf nodes are not in traversal order, must migrate
+        #  affixes to the leaves so they're not lost
+        node.trickle_down_affixes()

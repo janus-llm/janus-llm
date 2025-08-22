@@ -71,3 +71,24 @@ class PartitionCombiner(Combiner):
             root.prefix,
             re.sub(r"(?:\n<JANUS_PARTITION>\n)+$", "", root.suffix),
         )
+
+
+class UnorderedTreeCombiner(Combiner):
+    @staticmethod
+    def combine(root: CodeBlock) -> None:
+        leaves = []
+        queue = [root]
+        while queue:
+            node = queue.pop(0)
+            if node.children:
+                queue[:0] = node.children
+            elif node.text is not None:
+                leaves.append(node)
+
+        sorted_nodes = list(sorted(leaves, key=lambda n: n.start_byte))
+        chunks = [
+            sorted_nodes[0].affixes[0],
+            *(node.text + node.affixes[1] for node in sorted_nodes),
+        ]
+        root.text = "".join(chunks)
+        root.complete = True
