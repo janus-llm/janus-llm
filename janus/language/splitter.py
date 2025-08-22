@@ -109,8 +109,7 @@ class Splitter(FileManager):
             self._prune_unprotected(root)
         self._set_identifiers(root, name)
         self._segment_leaves(root)
-        if not self.skip_merge:
-            self._merge_tree(root)
+        self._merge_tree(root)
         if self._recalc_border_indices:
             root.mark_root()
         return root
@@ -163,6 +162,16 @@ class Splitter(FileManager):
         the represented code is present in the text of exactly one node in the
         tree.
         """
+        if self.skip_merge:
+            stack = [root]
+            while stack:
+                node = stack.pop()
+                if node.children:
+                    node.text = None
+                    node.complete = False
+                stack.extend(node.children)
+            return
+
         # Simulate recursion with a stack
         stack = [root]
         while stack:
@@ -210,8 +219,8 @@ class Splitter(FileManager):
             node.children = [c for c in node.children if not self._should_prune(c)]
             stack.extend(node.children)
 
-        for node in traversal[::-1]:
-            node.rebuild_text_from_children()
+        root.rebuild_text_from_children()
+        for node in traversal:
             node.tokens = self._count_tokens(node.text)
 
     def _is_protected(self, node: CodeBlock) -> bool:
@@ -417,14 +426,35 @@ class Splitter(FileManager):
         self._split_into_lines(node)
 
     def _split_into_lines(self, node: CodeBlock):
+        if node.text is None:
+            return
+
         split_text = list(re.split(r"(\n+)", node.text))
 
-        # If the string didn't start/end with newlines, make sure to include
-        #  empty strings for the prefix/suffixes
-        if not re.match(r"^\n+$", split_text[0]):
-            split_text = [""] + split_text
-        if not re.match(r"^\n+$", split_text[-1]):
+        # If the string has no separator, or just one at the beginning/end, do not split
+        if len(split_text) == 1:
+            return
+        elif len(split_text) <= 3 and not (split_text[0] and split_text[-1]):
+            return
+
+        # If there's an empty string at the head of the list, the code starts
+        #  with a separator. Remove the head to start with the first separator.
+        # If the list *doesn't* start with an empty string, then the first
+        #  chunk doesn't have a separator in front of it; add one
+        if not split_text[0]:
+            split_text.pop(0)
+        else:
+            split_text.insert(0, "")
+
+        # If there's an empty string at the end of the list, the code ends with
+        #  a separator. Remove the tail to end with that separator.
+        # If the list *doesn't* end with an empty string, then the last chunk
+        #  doesn't have a separator after it; add one
+        if not split_text[-1]:
+            split_text.pop()
+        else:
             split_text.append("")
+
         betweens = split_text[::2]
         lines = split_text[1::2]
 

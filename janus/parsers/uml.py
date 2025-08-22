@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess  # nosec
 from pathlib import Path
@@ -18,9 +19,12 @@ class UMLSyntaxParser(CodeParser):
         # Leading newlines can break the parser, remove them
         text = text.replace("\\n", "\n").strip()
 
-        # Write the text to a temporary file (automatically deleted)
-        file = NamedTemporaryFile()
+        # Write the text to a temporary file
+        # delete=False + manual cleanup to avoid permission denied issues on Windows
+        file = NamedTemporaryFile(delete=False)
         fname = file.name
+        file.close()
+
         with open(fname, "w") as fin:
             fin.write(text)
 
@@ -43,6 +47,9 @@ class UMLSyntaxParser(CodeParser):
             )
             log.error(err_txt)
             raise Exception(err_txt)
+        finally:
+            # Manually delete temp file
+            os.unlink(fname)
 
         # Check for bad outputs, raise JanusParserExceptions if so
         if "Error" in stderr or "Error" in stdout:

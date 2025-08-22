@@ -13,15 +13,14 @@ from janus.utils.logger import create_logger
 log = create_logger(__name__)
 
 
-def translate(
-    input_path: Annotated[
+def quiz_taker(
+    input_dir: Annotated[
         Path,
         typer.Option(
             "--input",
             "-i",
-            help="The directory containing the source code to be translated "
-            "or the path to a file that should be translated. "
-            "If it's a directory then the files should all be in one flat directory.",
+            help="The directory containing the quizzes to be taken. "
+            "The files should all be in one flat directory.",
         ),
     ],
     source_lang: Annotated[
@@ -33,15 +32,13 @@ def translate(
             click_type=click.Choice(sorted(LANGUAGES)),
         ),
     ],
-    output_path: Annotated[
+    output_dir: Annotated[
         Path,
         typer.Option(
-            "--output",
-            "-o",
-            help="The directory or file to store the translated code in.",
+            "--output", "-o", help="The directory to store the quiz answers in."
         ),
     ],
-    target_lang: Annotated[
+    target_lang: Annotated[  # TODO REMOVE
         str,
         typer.Option(
             "--target-language",
@@ -60,12 +57,12 @@ def translate(
             help="The custom name of the model set with 'janus llm add'.",
         ),
     ],
-    failure_path: Annotated[
+    failure_dir: Annotated[
         Optional[Path],
         typer.Option(
             "--failure-directory",
             "-f",
-            help="The directory or file to store failure files during translation",
+            help="The directory to store failure files during translation",
         ),
     ] = None,
     max_prompts: Annotated[
@@ -84,18 +81,6 @@ def translate(
             help="Whether to overwrite existing files in the output directory",
         ),
     ] = False,
-    skip_context: Annotated[
-        bool,
-        typer.Option(
-            "--skip-context",
-            help="Prompts will include any context information associated with source"
-            " code blocks, unless this option is specified",
-        ),
-    ] = False,
-    temp: Annotated[
-        float,
-        typer.Option("--temperature", "-T", help="Sampling temperature.", min=0, max=2),
-    ] = 0.7,
     prompt_template: Annotated[
         str,
         typer.Option(
@@ -104,16 +89,7 @@ def translate(
             help="Name of the Janus prompt template directory or "
             "path to a directory containing those template files.",
         ),
-    ] = "simple",
-    collection: Annotated[
-        str,
-        typer.Option(
-            "--collection",
-            "-c",
-            help="If set, will put the translated result into a Chroma DB "
-            "collection with the name provided.",
-        ),
-    ] = None,
+    ] = "quiz/quiz_taker",
     splitter_type: Annotated[
         str,
         typer.Option(
@@ -139,7 +115,7 @@ def translate(
             "-R",
             "--retriever",
             help="Name of custom retriever to use",
-            click_type=click.Choice(["active_usings", "language_docs", "op_codes"]),
+            click_type=click.Choice(["active_usings", "language_docs"]),
         ),
     ] = None,
     max_tokens: Annotated[
@@ -156,9 +132,16 @@ def translate(
         typer.Option(
             "-j",
             "--use-janus-inputs",
-            help="Prsent if translator should use janus files as inputs",
+            help="Present if converter should use janus files as inputs",
         ),
-    ] = False,
+    ] = True,
+    separate_outputs: Annotated[
+        bool,
+        typer.Option(
+            "--separate-outputs",
+            help="Present if converter should combine outputs",
+        ),
+    ] = True,
     model_kwargs: Annotated[
         list[str],
         typer.Option(
@@ -174,7 +157,7 @@ def translate(
     ] = [],
 ):
     from janus.cli.constants import db_loc, get_collections_config
-    from janus.converter.translate import Translator
+    from janus.converter.quiz_taker import QuizTaker
 
     refiner_types = [REFINERS[r] for r in refiner_types]
     try:
@@ -183,9 +166,7 @@ def translate(
         target_language = target_lang
         target_version = None
     # make sure not overwriting input
-    if source_lang.lower() == target_language.lower() and (
-        input_path == output_path or input_path == failure_path
-    ):
+    if source_lang.lower() == target_language.lower() and input_dir == output_dir:
         log.error("Output files would overwrite input! Aborting...")
         raise ValueError
 
@@ -195,7 +176,7 @@ def translate(
         model_arguments.update(kwargs)
 
     collections_config = get_collections_config()
-    translator = Translator(
+    quiz_take = QuizTaker(
         model=llm_name,
         model_kwargs=model_arguments,
         source_language=source_lang,
@@ -210,5 +191,6 @@ def translate(
         refiner_types=refiner_types,
         retriever_type=retriever_type,
         use_janus_inputs=use_janus_inputs,
+        combine_output=not separate_outputs,
     )
-    translator.translate(input_path, output_path, failure_path, overwrite, collection)
+    quiz_take.translate(input_dir, output_dir, failure_dir, overwrite)

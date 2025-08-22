@@ -426,10 +426,7 @@ class CodeBlock:
         if self.children:
             for child in self.children:
                 child.rebuild_text_from_children()
-            prefix = self.affixes[0] + self.children[0].pop_prefix()
-            suffix = self.children[-1].pop_suffix() + self.affixes[1]
             self.text = "".join(c.complete_text for c in self.children)
-            self.affixes = (prefix, suffix)
             self.tokens = sum(c.tokens for c in self.children)
 
     def tree_str(self, depth: int = 0) -> str:
@@ -516,6 +513,16 @@ class CodeBlock:
         self.block_label = block_label
         for c in self.children:
             c.set_block_label(block_label=block_label)
+
+    def trickle_down_affixes(self, *, prefix: str = "", suffix: str = "") -> None:
+        """Recursively migrate this node's prefix and suffix to the leaves of the tree"""
+        prefix = prefix + self.pop_prefix()
+        suffix = self.pop_suffix() + suffix
+        if self.children:
+            self.children[0].trickle_down_affixes(prefix=prefix)
+            self.children[-1].trickle_down_affixes(suffix=suffix)
+        else:
+            self.affixes = (prefix, suffix)
 
 
 class TranslatedCodeBlock(CodeBlock):

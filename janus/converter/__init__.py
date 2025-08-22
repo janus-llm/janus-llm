@@ -5,5 +5,7 @@ from janus.converter.document import ClozeDocumenter, Documenter, MultiDocumente
 from janus.converter.evaluate import Evaluator, MergedOutputEvaluator
 from janus.converter.merge import OutputMerger
 from janus.converter.partition import Partitioner
+from janus.converter.quiz_generator import QuizGenerator
+from janus.converter.quiz_taker import QuizTaker
 from janus.converter.requirements import RequirementsDocumenter
 from janus.converter.translate import MergedOutputTranslator, Translator

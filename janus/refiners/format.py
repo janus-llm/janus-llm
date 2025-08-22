@@ -50,3 +50,35 @@ class RequirementsFormatRefiner(FormatRefiner):
         super().__init__(
             llm, parser, max_retries, "refinement/format/requirements_format"
         )
+
+
+class QuizGeneratorFormatRefiner(FormatRefiner):
+    def __init__(self, llm: JanusModel, parser: JanusParser, max_retries: int):
+        super().__init__(llm, parser, max_retries, "refinement/format/quiz_gen_format")
+
+    def parse_completion(
+        self, completion: str, prompt_value: PromptValue, **kwargs
+    ) -> Any:
+        try:
+            self.parser.parse(completion)
+        except Exception:
+            completion = self.format_chain.invoke(
+                dict(completion=completion, prompt=prompt_value.to_string())
+            )
+        return self.parser.parse(completion)
+
+
+class QuizTakerFormatRefiner(FormatRefiner):
+    def __init__(self, llm: JanusModel, parser: JanusParser, max_retries: int):
+        super().__init__(llm, parser, max_retries, "refinement/format/quiz_taker_format")
+
+    def parse_completion(
+        self, completion: str, prompt_value: PromptValue, **kwargs
+    ) -> Any:
+        try:
+            self.parser.parse(completion)
+        except Exception:
+            completion = self.format_chain.invoke(
+                dict(completion=completion, prompt=prompt_value.to_string())
+            )
+        return self.parser.parse(completion)

@@ -36,6 +36,7 @@ from janus.llm.model_callbacks import get_model_callback
 from janus.llm.models_info import MODEL_PROMPT_ENGINES, JanusModel, load_model
 from janus.parsers.parser import GenericParser, JanusParser, JanusParserException
 from janus.refiners import JanusRefiner
+from janus.retrievers.alc_retriever import OpCodeRetriever
 from janus.retrievers.retriever import (
     ActiveUsingsRetriever,
     JanusRetriever,
@@ -356,6 +357,10 @@ class Converter:
             self._retriever = ActiveUsingsRetriever()
         elif self._retriever_type == "language_docs":
             self._retriever = LanguageDocsRetriever(self._llm, self._source_language)
+        elif self._retriever_type == "op_codes":
+            self._retriever = OpCodeRetriever(
+                "janus/language/alc/IBM_Assembly_Operations.json"
+            )
         else:
             self._retriever = JanusRetriever()
 

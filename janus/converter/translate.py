@@ -35,7 +35,9 @@ class Translator(Converter):
             target_version=target_version,
             **kwargs,
         )
-        self._parser = IncompleteCodeParser(language=self._target_language)
+
+        if target_language != "text":
+            self._parser = IncompleteCodeParser(language=self._target_language)
 
 
 class MergedOutputTranslator(MergedOutputConverterMixin, Translator):
