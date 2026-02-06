@@ -310,14 +310,25 @@ class Converter:
         """
         # Load the model
         self._llm = load_model(self._model_name, self._model_kwargs)
+        try:
+            token_limit = self._llm.token_limit
+            self.short_model_id = self._llm.short_model_id
+        except AttributeError:
+            # For some LangChain classes, it puts the token limit in the model kwargs
+            #  instead of the model itself (e.g.: vLLM)
+            token_limit = self._llm.model_kwargs.get("token_limit")
+            self.short_model_id = self._llm.model_kwargs.get("short_model_id")
 
         # Set the max_tokens to less than half the model's limit to allow for enough
         # tokens at output
         # Only modify max_tokens if it is not specified by user
         if not self._override_token_limit:
-            self._max_tokens = int(
-                self._llm.token_limit * self._llm.input_token_proportion
-            )
+            try:
+                self._max_tokens = int(token_limit * self._llm.input_token_proportion)
+            except AttributeError:
+                self._max_tokens = int(
+                    token_limit * self._llm.model_kwargs["input_token_proportion"]
+                )
 
     def _load_splitter(self) -> None:
         """Impacts:
@@ -392,7 +403,7 @@ class Converter:
         _target_language
         _target_version
         """
-        self._prompt = MODEL_PROMPT_ENGINES[self._llm.short_model_id](
+        self._prompt = MODEL_PROMPT_ENGINES[self.short_model_id](
             source_language=self._source_language,
             prompt_template=self._prompt_template_name,
             target_language=self._target_language,
