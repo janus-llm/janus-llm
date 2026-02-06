@@ -406,7 +406,11 @@ def load_model(model_id: str, model_kwargs: dict[str, Any] | None = None) -> Jan
         # Give enough time for the user to read the warnings and cancel
         # time.sleep(10)
         raise DeprecationWarning("OpenAI models are no longer supported.")
-
+    elif model_type_name == "AIP":
+        model_args.update(
+            openai_api_base=os.getenv("MITRE_AIP_ENDPOINT"),
+            api_key=os.getenv("MITRE_AIP_API_KEY"),
+        )
     elif model_type_name == "Azure":
         model_args.update(
             api_key=os.getenv("AZURE_OPENAI_API_KEY"),
