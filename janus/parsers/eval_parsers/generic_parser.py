@@ -1,8 +1,8 @@
 import json
 
-from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
+from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field, conint
 
 from janus.parsers.parser import JanusParserException, JsonParser

@@ -1,9 +1,9 @@
 import json
 from typing import List
 
-from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
+from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field, RootModel, ValidationError
 
 from janus.language.block import CodeBlock
