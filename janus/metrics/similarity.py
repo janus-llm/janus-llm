@@ -1,6 +1,6 @@
 import click
 import typer
-from langchain.evaluation import EmbeddingDistance, load_evaluator
+from langchain_classic.evaluation import EmbeddingDistance, load_evaluator
 from typing_extensions import Annotated
 
 from janus.embedding.embedding_models_info import load_embedding_model

@@ -1,7 +1,7 @@
 import re
 from typing import Any
 
-from langchain.output_parsers import RetryWithErrorOutputParser
+from langchain_classic.output_parsers import RetryWithErrorOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
 from langchain_core.output_parsers import StrOutputParser
