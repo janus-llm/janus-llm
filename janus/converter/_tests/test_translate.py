@@ -6,9 +6,9 @@ from typing import Any, Iterable, List, Optional, Type
 from unittest.mock import patch
 
 import pytest
-from langchain.schema import Document
-from langchain.schema.embeddings import Embeddings
-from langchain.schema.vectorstore import VST, VectorStore
+from langchain_core.documents.base import Document
+from langchain_core.embeddings.embeddings import Embeddings
+from langchain_core.vectorstores.base import VST, VectorStore
 
 from janus.converter.diagram import DiagramGenerator
 from janus.converter.merge import OutputMerger

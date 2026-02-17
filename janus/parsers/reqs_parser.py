@@ -1,8 +1,8 @@
 import json
 import re
 
-from langchain.output_parsers.json import parse_json_markdown
 from langchain_core.messages import BaseMessage
+from langchain_core.utils.json import parse_json_markdown
 
 from janus.parsers.parser import JanusParser, JanusParserException
 from janus.utils.logger import create_logger
