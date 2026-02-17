@@ -1,9 +1,9 @@
 import json
 
-from langchain.schema.output_parser import BaseOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.output_parsers.base import BaseOutputParser
 
 from janus.language.block import CodeBlock
 from janus.language.splitter import EmptyTreeError

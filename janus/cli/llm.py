@@ -35,6 +35,7 @@ def llm_add(
         MODEL_CONFIG_DIR,
         MODEL_ID_TO_LONG_ID,
         TOKEN_LIMITS,
+        aip_models,
         azure_models,
         bedrock_models,
         granite_models,
@@ -68,6 +69,47 @@ def llm_add(
             "model_type": model_type,
             "model_id": "gpt-4o",  # This is a placeholder to use the Azure PromptEngine
             "model_long_id": MODEL_ID_TO_LONG_ID["gpt-4o"],
+            "model_args": params,
+            "token_limit": max_tokens,
+            "model_cost": {"input": in_cost, "output": out_cost},
+            "input_token_proportion": 0.4,
+        }
+    elif model_type == "AIP":
+        url = typer.prompt("Enter the model's URL")
+        model_id = typer.prompt(
+            "Enter the model ID",
+            default=aip_models[0],
+            type=click.Choice(aip_models),
+            show_choices=True,
+        )
+        in_cost = typer.prompt(
+            "Enter the cost per input token",
+            default=0.00015,
+            type=float,
+        )
+        out_cost = typer.prompt(
+            "Enter the cost per output token",
+            default=0.0006,
+            type=float,
+        )
+
+        # Make sure to add this or the URL won't work
+        if not url.endswith("/v1"):
+            url = url.rstrip("/")
+            url += "/v1"
+
+        max_tokens = TOKEN_LIMITS[model_id]
+
+        params = dict(
+            openai_api_base=url,
+            max_tokens=max_tokens,
+            temperature=0.7,
+            n=1,
+        )
+        cfg = {
+            "model_type": model_type,
+            "model_id": model_id,
+            "model_long_id": model_id,
             "model_args": params,
             "token_limit": max_tokens,
             "model_cost": {"input": in_cost, "output": out_cost},

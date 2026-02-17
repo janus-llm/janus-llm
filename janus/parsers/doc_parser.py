@@ -1,10 +1,10 @@
 import json
 import re
 
-from langchain.output_parsers import PydanticOutputParser
-from langchain.output_parsers.json import parse_json_markdown
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage
+from langchain_core.output_parsers import PydanticOutputParser
+from langchain_core.utils.json import parse_json_markdown
 from pydantic import BaseModel, Field
 
 from janus.language.block import CodeBlock

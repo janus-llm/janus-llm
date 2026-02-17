@@ -1,6 +1,7 @@
 import click
+import numpy as np
 import typer
-from langchain.evaluation import EmbeddingDistance, load_evaluator
+from langchain_classic.evaluation import EmbeddingDistance, load_evaluator
 from typing_extensions import Annotated
 
 from janus.embedding.embedding_models_info import load_embedding_model
@@ -48,6 +49,36 @@ def similarity_score(
         embeddings=embedding_model,
         distance_metric=distance_metric,
     )
-    return evaluator.evaluate_string_pairs(prediction=target, prediction_b=reference)[
-        "score"
-    ]
+    try:
+        result = evaluator.evaluate_string_pairs(
+            prediction=target, prediction_b=reference
+        )
+        return float(result["score"])
+    except AttributeError:
+        # Workaround for langchain_classic bug where _compute_score calls .item()
+        # on scipy distance results that return plain floats (e.g. euclidean)
+        vec_a = np.array(embedding_model.embed_query(target))
+        vec_b = np.array(embedding_model.embed_query(reference))
+        metric_enum = EmbeddingDistance(distance_metric)
+        if metric_enum == EmbeddingDistance.EUCLIDEAN:
+            from scipy.spatial.distance import euclidean
+
+            return float(euclidean(vec_a, vec_b))
+        elif metric_enum == EmbeddingDistance.MANHATTAN:
+            from scipy.spatial.distance import cityblock
+
+            return float(cityblock(vec_a, vec_b))
+        elif metric_enum == EmbeddingDistance.CHEBYSHEV:
+            from scipy.spatial.distance import chebyshev
+
+            return float(chebyshev(vec_a, vec_b))
+        elif metric_enum == EmbeddingDistance.HAMMING:
+            from scipy.spatial.distance import hamming
+
+            return float(hamming(vec_a, vec_b))
+        else:
+            from sklearn.metrics.pairwise import cosine_distances
+
+            return float(
+                cosine_distances(vec_a.reshape(1, -1), vec_b.reshape(1, -1))[0][0]
+            )

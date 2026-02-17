@@ -246,7 +246,15 @@ class TreeSitterSplitter(Splitter):
         #       cc -O3 -shared -fPIC -o <so_file> <all .c> -I<src_dir>
         #
         include_flags = [f"-I{src_dir}"]
-        compile_cmd = ["cc", "-O3", "-shared", "-fPIC", "-o", str(so_file_path)]
+        compile_cmd = [
+            "cc",
+            "-O3",
+            "-shared",
+            "-fPIC",
+            "-Wno-error=implicit-function-declaration",
+            "-o",
+            str(so_file_path),
+        ]
         compile_cmd += include_flags + [str(c_path) for c_path in c_files]
 
         try:

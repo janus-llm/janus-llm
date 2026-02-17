@@ -2,12 +2,12 @@ import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from langchain.prompts import ChatPromptTemplate
-from langchain.prompts.chat import (
+from langchain_core.prompts import (
+    ChatPromptTemplate,
     HumanMessagePromptTemplate,
+    PromptTemplate,
     SystemMessagePromptTemplate,
 )
-from langchain_core.prompts import PromptTemplate
 
 from janus.utils.enums import LANGUAGES
 from janus.utils.logger import create_logger

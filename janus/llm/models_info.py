@@ -9,7 +9,7 @@ from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_core.messages import HumanMessage
 from langchain_core.prompt_values import StringPromptValue
 from langchain_core.runnables import Runnable
-from langchain_openai import AzureChatOpenAI
+from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from pydantic import Extra
 
 from janus.llm.model_callbacks import COST_PER_1K_TOKENS, azure_model_reroutes
@@ -32,6 +32,7 @@ model_types = [
     "ModelType",
     AzureChatOpenAI,
     HuggingFaceTextGenInference,
+    ChatOpenAI,
 ]
 
 try:
@@ -69,6 +70,7 @@ MODEL_TYPE_CONSTRUCTORS: dict[str, ModelType] = {
     # "OpenAI": ChatOpenAI,
     "HuggingFace": HuggingFaceTextGenInference,
     "Azure": AzureChatOpenAI,
+    "AIP": ChatOpenAI,
 }
 
 try:
@@ -121,6 +123,14 @@ openai_models = [
     "gpt-4-turbo-preview",
     "gpt-3.5-turbo",
     "gpt-3.5-turbo-16k",
+]
+aip_models = [
+    "openai/gpt-oss-120b",
+    "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+    "mistralai/Codestral-22B-v0.1",
+    "mistralai/Mistral-Small-24B-Instruct-2501",
+    "nvidia/Llama-3_3-Nemotron-Super-49B-v1",
+    "Qwen/Qwen3-32B",
 ]
 azure_models = [
     "gpt-4o",
@@ -192,6 +202,7 @@ all_models = [*azure_models, *bedrock_models, *granite_models]
 
 MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
     # **{m: ChatGptPromptEngine for m in openai_models},
+    **{m: ChatGptPromptEngine for m in aip_models},
     **{m: ChatGptPromptEngine for m in azure_models},
     **{m: ClaudePromptEngine for m in claude_models},
     **{m: ClaudePromptEngine for m in claude_reasoning_models},
@@ -206,6 +217,16 @@ MODEL_PROMPT_ENGINES: dict[str, Callable[..., PromptEngine]] = {
 MODEL_ID_TO_LONG_ID = {
     # **{m: mr for m, mr in openai_model_reroutes.items()},
     **{m: mr for m, mr in azure_model_reroutes.items()},
+    "openai/gpt-oss-120b": "openai/gpt-oss-120b",
+    "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8": (
+        "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
+    ),
+    "mistralai/Codestral-22B-v0.1": "mistralai/Codestral-22B-v0.1",
+    "mistralai/Mistral-Small-24B-Instruct-2501": (
+        "mistralai/Mistral-Small-24B-Instruct-2501"
+    ),
+    "nvidia/Llama-3_3-Nemotron-Super-49B-v1": "nvidia/Llama-3_3-Nemotron-Super-49B-v1",
+    "Qwen/Qwen3-32B": "Qwen/Qwen3-32B",
     "bedrock-claude-v2": "anthropic.claude-v2",
     "bedrock-claude-instant-v1": "anthropic.claude-instant-v1",
     "bedrock-claude-haiku": "anthropic.claude-3-haiku-20240307-v1:0",
@@ -252,6 +273,7 @@ MODEL_CONFIG_DIR = Path.home().expanduser() / ".janus" / "llm"
 
 MODEL_TYPES: dict[str, PromptEngine] = {
     # **{m: "OpenAI" for m in openai_models},
+    **{m: "AIP" for m in aip_models},
     **{m: "Azure" for m in azure_models},
     **{m: "BedrockChat" for m in bedrock_models},
     **{m: "Granite" for m in granite_models},
@@ -300,6 +322,12 @@ TOKEN_LIMITS: dict[str, int] = {
     "mistral.mistral-large-2402-v1:0": 32_000,
     "mistral.mistral-large-2407-v1:0": 131_000,
     "arn:aws:bedrock:us-east-1:851725275899:imported-model/shp03b13vje5": 128_000,
+    "openai/gpt-oss-120b": 128_000,
+    "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8": 128_000,
+    "mistralai/Codestral-22B-v0.1": 32_768,
+    "mistralai/Mistral-Small-24B-Instruct-2501": 32_768,
+    "nvidia/Llama-3_3-Nemotron-Super-49B-v1": 128_000,
+    "Qwen/Qwen3-32B": 128_000,
 }
 
 
@@ -364,7 +392,10 @@ def load_model(model_id: str, model_kwargs: dict[str, Any] | None = None) -> Jan
             model_kwargs=model_args,
         )
         model_args.update(pipeline=model.pipeline)
-
+    elif model_type_name == "vLLM":
+        model_args.update(
+            openai_api_key=str(os.getenv("OPENAI_API_KEY")),
+        )
     elif model_type_name == "OpenAI":
         model_args.update(
             openai_api_key=str(os.getenv("OPENAI_API_KEY")),
@@ -375,7 +406,11 @@ def load_model(model_id: str, model_kwargs: dict[str, Any] | None = None) -> Jan
         # Give enough time for the user to read the warnings and cancel
         # time.sleep(10)
         raise DeprecationWarning("OpenAI models are no longer supported.")
-
+    elif model_type_name == "AIP":
+        model_args.update(
+            openai_api_base=os.getenv("MITRE_AIP_ENDPOINT"),
+            api_key=os.getenv("MITRE_AIP_API_KEY"),
+        )
     elif model_type_name == "Azure":
         model_args.update(
             api_key=os.getenv("AZURE_OPENAI_API_KEY"),
