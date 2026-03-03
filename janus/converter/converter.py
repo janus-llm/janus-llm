@@ -971,3 +971,6 @@ class Converter:
                     raise ValueError("Error: format of reference doesn't match target")
                 results.append(metric_func(o, r, *args, **kwargs))
         return results
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self._input_labels}) -> {self._output_label}"
